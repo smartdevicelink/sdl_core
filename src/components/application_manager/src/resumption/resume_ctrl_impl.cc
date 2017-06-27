@@ -264,29 +264,25 @@ bool ResumeCtrlImpl::RemoveApplicationFromSaved(
 
 void ResumeCtrlImpl::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
-  StopSavePersistentDataTimer();
-  SaveAllApplications();
-  resumption_storage_->Persist();
+  is_suspended_ = true;
+  FinalPersistData();
 }
 
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
   resumption_storage_->IncrementIgnOffCount();
-  OnSuspend();
+  FinalPersistData();
 }
 
 void ResumeCtrlImpl::OnAwake() {
   LOG4CXX_AUTO_TRACE(logger_);
+  is_suspended_ = false;
   ResetLaunchTime();
   StartSavePersistentDataTimer();
 }
 
 bool ResumeCtrlImpl::is_suspended() const {
   return is_suspended_;
-}
-
-void ResumeCtrlImpl::set_is_suspended(const bool suspended_flag) {
-  is_suspended_ = suspended_flag;
 }
 
 void ResumeCtrlImpl::StartSavePersistentDataTimer() {
@@ -445,6 +441,13 @@ void ResumeCtrlImpl::SaveDataOnTimer() {
       resumption_storage_->Persist();
     }
   }
+}
+
+void ResumeCtrlImpl::FinalPersistData() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  StopSavePersistentDataTimer();
+  SaveAllApplications();
+  resumption_storage_->Persist();
 }
 
 bool ResumeCtrlImpl::IsDeviceMacAddressEqual(

@@ -139,22 +139,13 @@ class ResumeCtrlImpl : public ResumeCtrl,
   void OnAwake() OVERRIDE;
 
   /**
-   * @brief Retrieves value of is_suspended_
+   * @brief Checks if SDL has already received OnExitAllApplication notification
+   * with "SUSPEND" reason
    *
    * @return Returns TRUE if SDL has received OnExitAllApplication notification
    * with reason "SUSPEND" otherwise returns FALSE
    */
   bool is_suspended() const OVERRIDE;
-
-  /**
-   * @brief Sets value of is_suspended_
-   *
-   * @param contains TRUE if method is called when SDL has received
-   * OnExitAllApplication notification with reason "SUSPEND"
-   * contains FALSE if method is called when SDL has received
-   * OnAwakeSDL notification.
-   */
-  void set_is_suspended(const bool suspended_flag) OVERRIDE;
 
   /**
    * @brief Method stops timer "RsmCtrlPercist" when SDL
@@ -322,6 +313,12 @@ class ResumeCtrlImpl : public ResumeCtrl,
    *  N gets from property
    */
   void SaveDataOnTimer();
+
+  /**
+   * @brief FinalPersistData persists ResumptionData last time and stops
+   * persistent data timer to avoid further persisting
+   */
+  void FinalPersistData();
 
   /**
    * @brief AddFiles allows to add files for the application
