@@ -37,16 +37,6 @@ namespace functional_modules {
 
 enum MobileFunctionID {
   // Reverse SDL functions ids
-  /*  GRANT_ACCESS = 100001,
-    START_SCAN = 100003,
-    STOP_SCAN = 100004,
-    TUNE_RADIO = 100005,
-    TUNE_UP = 100006,
-    TUNE_DOWN = 100007,
-    ON_RADIO_DETAILS = 100009,
-    ON_PRESETS_CHANGED = 100010,
-    CLIMATE_CONTROL_ON = 100011,
-    GET_SEAT_CONTROL = 100012,*/
   BUTTON_PRESS = 100015,
   GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
   GET_INTERIOR_VEHICLE_DATA = 100017,
@@ -63,24 +53,12 @@ const char on_interior_vehicle_data[] = "RC.OnInteriorVehicleData";
 const char button_press[] = "Buttons.ButtonPress";
 
 const char get_user_consent[] = "RC.GetInteriorVehicleDataConsent";
-const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
 const char on_app_deactivated[] = "BasicCommunication.OnAppDeactivated";
 const char sdl_activate_app[] = "SDL.ActivateApp";
-const char on_device_rank_changed[] = "RC.OnDeviceRankChanged";
-const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
+// Disabled
+// const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
+// const char on_device_rank_changed[] = "RC.OnDeviceRankChanged";
 }
-
-/*namespace can_api {
-  const char start_scan[]         = "CAN.StartScan";
-  const char stop_scan[]          = "CAN.StopScan";
-  const char tune_radion[]        = "CAN.TuneRadio";
-  const char tune_up[]            = "CAN.TuneUp";
-  const char tune_down[]          = "CAN.TuneDown";
-  const char on_radio_details[]   = "CAN.OnRadioDetails";
-  const char on_preset_changed[]  = "CAN.OnPresetsChanged";
-  const char climate_control_on[] = "CAN.ClimateControlOn";
-  const char get_seat_control[]   = "CAN.GetSeatControl";
-}*/
 
 }  //  namespace functional_modules
 
