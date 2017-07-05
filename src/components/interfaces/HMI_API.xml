@@ -1352,45 +1352,297 @@
 <!-- End of Policies -->
 
 <!-- Remote Control -->
-<struct name="InteriorZone">
-  <description>Describes the origin and span of a zone in the vehicle. Vehicle zones can be overlapping</description>
-  <param name="col" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-  <param name="row" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-  <param name="level" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-  <param name="colspan" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-  <param name="rowspan" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-  <param name="levelspan" type="Integer" minvalue="0" maxvalue="100">
-  </param>
-</struct>
-
 <enum name="ModuleType">
-  <element name="CLIMATE"/>
-  <element name="RADIO"/>
-</enum>
+   <element name="CLIMATE"/>
+   <element name="RADIO"/>
+ </enum>
 
-<struct name="ModuleDescription">
-  <param name="moduleZone" type="Common.InteriorZone">
-  </param>
-  <param name="moduleType" type="Common.ModuleType">
-  </param>
-</struct>
+ <struct name="ModuleDescription">
+   <param name="moduleName" type="String">
+       <description>The short name or a short description of the remote control module, which is returned in the capabilities.</description>
+   </param>
+   <param name="moduleType" type="Common.ModuleType">
+   </param>
+ </struct>
 
-<enum name="RadioBand">
-  <element name="AM"/>
-  <element name="FM"/>
-  <element name="XM"/>
-</enum>
 
-<enum name="TemperatureUnit">
-  <element name="KELVIN"/>
-  <element name="FAHRENHEIT"/>
-  <element name="CELSIUS"/>
-</enum>
+ <enum name="RadioBand">
+   <element name="AM"/>
+   <element name="FM"/>
+   <element name="XM"/>
+ </enum>
+
+ <struct name="RdsData">
+   <param name="PS" type="String" minlength="0" maxlength="8">
+     <description>Program Service Name</description>
+   </param>
+   <param name="RT" type="String" minlength="0" maxlength="64">
+     <description>Radio Text</description>
+   </param>
+   <param name="CT" type="String" minlength="24" maxlength="24">
+     <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+   </param>
+   <param name="PI" type="String" minlength="0" maxlength="6">
+     <description>Program Identification - the call sign for the radio station</description>
+   </param>
+   <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
+     <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+   </param>
+   <param name="TP" type="Boolean">
+     <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+   </param>
+   <param name="TA" type="Boolean">
+     <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+   </param>
+   <param name="REG" type="String">
+     <description>Region</description>
+   </param>
+ </struct>
+
+ <enum name="RadioState">
+   <element name="ACQUIRING"/>
+   <element name="ACQUIRED"/>
+   <element name="MULTICAST"/>
+   <element name="NOT_FOUND"/>
+ </enum>
+
+ <struct name="RadioControlData">
+   <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+     <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+   </param>
+   <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+     <description>The fractional part of the frequency for 101.7 is 7</description>
+   </param>
+   <param name="band" type="Common.RadioBand" mandatory="false">
+   </param>
+   <param name="rdsData" type="Common.RdsData" mandatory="false">
+   </param>
+   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+     <description>number of HD sub-channels if available</description>
+   </param>
+   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+     <description>Current HD sub-channel if available</description>
+   </param>
+   <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+   </param>
+   <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+     <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+   </param>
+   <param name="radioEnable" type="Boolean" mandatory="false">
+     <description> True if the radio is on, false is the radio is off</description>
+   </param>
+   <param name="state" type="Common.RadioState" mandatory="false">
+   </param>
+ </struct>
+
+ <struct name="RadioControlCapabilities">
+   <description>Contains information about a radio control module's capabilities.</description>
+   <param name="name" type="String" maxlength="50">
+     <description>The short name or a short description of the radio control module.</description>
+   </param>
+   <param name="radioEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable radio.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="radioBandAvailable" type="Boolean">
+     <description>
+       Availability of the control of radio band.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="radioFrequencyAvailable" type="Boolean">
+     <description>
+       Availability of the control of radio frequency.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="hdChannelAvailable" type="Boolean">
+     <description>
+       Availability of the control of HD radio channel.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="rdsDataAvailable" type="Boolean">
+     <description>
+       Availability of the getting Radio Data System (RDS) data.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="availableHDsAvailable" type="Boolean">
+     <description>
+       Availability of the getting the number of available HD channels.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="stateAvailable" type="Boolean">
+     <description>
+       Availability of the getting the Radio state.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="signalStrengthAvailable" type="Boolean">
+     <description>
+       Availability of the getting the signal strength.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="signalChangeThresholdAvailable" type="Boolean">
+     <description>
+       Availability of the getting the signal Change Threshold.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+ </struct>
+
+ <enum name="DefrostZone">
+   <element name="FRONT"/>
+   <element name="REAR"/>
+   <element name="ALL"/>
+   <element name="NONE"/>
+ </enum>
+
+ <enum name="VentilationMode">
+   <element name="UPPER"/>
+   <element name="LOWER"/>
+   <element name="BOTH"/>
+   <element name="NONE"/>
+ </enum>
+
+ <enum name="TemperatureUnit">
+   <element name="FAHRENHEIT"/>
+   <element name="CELSIUS"/>
+ </enum>
+
+ <struct name="Temperature">
+   <param name="unit" type="TemperatureUnit">
+     <description>Temperature Unit</description>
+   </param>
+   <param name="valueC" type="Float" minvalue="14.0" maxvalue="30.0" mandatory="false">
+     <description>Temperature Value in Celsius, the value range is for setter only</description>
+   </param>
+   <param name="valueF" type="Float" minvalue="60.0" maxvalue="90.0" mandatory="false">
+     <description>Temperature Value in Fahrenheit, the value range is for setter only</description>
+   </param>
+ </struct>
+
+ <struct name="ClimateControlData">
+   <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+   </param>
+   <param name="currentTemperature" type="Common.Temperature" mandatory="false">
+   </param>
+   <param name="desiredTemperature" type="Common.Temperature" mandatory="false">
+   </param>
+   <param name="acEnable" type="Boolean" mandatory="false">
+   </param>
+   <param name="circulateAirEnable" type="Boolean" mandatory="false">
+   </param>
+   <param name="autoModeEnable" type="Boolean" mandatory="false">
+   </param>
+   <param name="defrostZone" type="DefrostZone" mandatory="false">
+   </param>
+   <param name="dualModeEnable" type="Boolean" mandatory="false">
+   </param>
+   <param name="acMaxEnable" type="Boolean" mandatory="false">
+   </param>
+   <param name="ventilationMode" type="Common.VentilationMode" mandatory="false">
+   </param>
+ </struct>
+
+   <struct name="ClimateControlCapabilities">
+   <description>Contains information about a climate control module's capabilities.</description>
+   <param name="name" type="String" maxlength="50">
+     <description>The short name or a short description of the climate control module.</description>
+   </param>
+   <param name="fanSpeedAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of fan speed.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="desiredTemperatureAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of desired temperature.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="acEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of turn on/off AC.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="acMaxEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable air conditioning is ON on the maximum level.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="circulateAirEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable circulate Air mode.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="autoModeEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable auto mode.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="dualModeEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable dual mode.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="defrostZoneAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of defrost zones.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="defrostZone" type="Common.DefrostZone" minsize="1" maxsize="100" array="true" mandatory="false">
+     <description>
+       A set of all defrost zones that are controllable.
+     </description>
+   </param>
+   <param name="ventilationModeAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of air ventilation mode.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="ventilationMode" type="Common.VentilationMode" minsize="1" maxsize="100" array="true" mandatory="false">
+     <description>
+       A set of all ventilation modes that are controllable.
+     </description>
+   </param>
+ </struct>
+
+ <struct name="ModuleData">
+   <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+   <param name="moduleType" type="Common.ModuleType">
+   </param>
+   <param name="moduleName" type="String">
+   </param>
+   <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
+   </param>
+   <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
+   </param>
+ </struct>
+
+
+ <struct name="RemoteControlCapabilities">
+   <param name="climateControlCapabilities" type="Common.ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+     <description>If included, the platform supports RC climate controls.</description >
+   </param>
+
+   <param name="radioControlCapabilities" type="Common.RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+     <description>If included, the platform supports RC radio controls.</description >
+   </param>
+ </struct>
 
 <enum name="DeviceRank">
   <element name="DRIVER">
@@ -1400,108 +1652,6 @@
     <description>The device is ranked as passenger's</description>
   </element>
 </enum>
-
-<struct name="RdsData">
-  <param name="PS" type="String" minlength="0" maxlength="8">
-    <description>Program Service Name</description>
-  </param>
-  <param name="RT" type="String" minlength="0" maxlength="64">
-    <description>Radio Text</description>
-  </param>
-  <param name="CT" type="String" minlength="24" maxlength="24">
-    <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
-  </param>
-  <param name="PI" type="String" minlength="0" maxlength="6">
-    <description>Program Identification - the call sign for the radio station</description>
-  </param>
-  <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
-    <description>The program type - The region should be used to differentiate between EU and North America program types</description>
-  </param>
-  <param name="TP" type="Boolean">
-    <description>Traffic Program Identification - Identifies a station that offers traffic</description>
-  </param>
-  <param name="TA" type="Boolean">
-    <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
-  </param>
-  <param name="REG" type="String">
-    <description>Region</description>
-  </param>
-</struct>
-
-<enum name="RadioState">
-  <element name="ACQUIRING"/>
-  <element name="ACQUIRED"/>
-  <element name="MULTICAST"/>
-  <element name="NOT_FOUND"/>
-</enum>
-
-<struct name="RadioControlData">
-  <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
-    <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
-  </param>
-  <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
-    <description>The fractional part of the frequency for 101.7 is 7</description>
-  </param>
-  <param name="band" type="Common.RadioBand" mandatory="false">
-  </param>
-  <param name="rdsData" type="Common.RdsData" mandatory="false">
-  </param>
-  <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
-    <description>number of HD sub-channels if available</description>
-  </param>
-  <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
-    <description>Current HD sub-channel if available</description>
-  </param>
-  <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-  </param>
-  <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-    <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
-  </param>
-  <param name="radioEnable" type="Boolean" mandatory="false">
-    <description> True if the radio is on, false is the radio is off</description>
-  </param>
-  <param name="state" type="Common.RadioState" mandatory="false">
-  </param>
-</struct>
-
-<enum name="DefrostZone">
-  <element name="FRONT"/>
-  <element name="REAR"/>
-  <element name="ALL"/>
-</enum>
-
-<struct name="ClimateControlData">
-  <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-  </param>
-  <param name="currentTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-  </param>
-  <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-  </param>
-  <param name="temperatureUnit" type="Common.TemperatureUnit" mandatory="false">
-  </param>
-  <param name="acEnable" type="Boolean" mandatory="false">
-  </param>
-  <param name="circulateAirEnable" type="Boolean" mandatory="false">
-  </param>
-  <param name="autoModeEnable" type="Boolean" mandatory="false">
-  </param>
-  <param name="defrostZone" type="Common.DefrostZone" mandatory="false">
-  </param>
-  <param name="dualModeEnable" type="Boolean" mandatory="false">
-  </param>
-</struct>
-
-<struct name="ModuleData">
-  <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
-  <param name="moduleType" type="Common.ModuleType">
-  </param>
-  <param name="moduleZone" type="Common.InteriorZone">
-  </param>
-  <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
-  </param>
-  <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
-  </param>
-</struct>
 
 <!-- End Remote Control -->
 <struct name="TextField">
@@ -2335,8 +2485,8 @@
 
     <function name="ButtonPress" messagetype="request">
       <description>Method is invoked when the application tries to press a button</description>
-      <param name="zone" type="Common.InteriorZone">
-        <description>The zone where the button press should occur.</description>
+      <param name="moduleName" type="String">
+          <description>The zone where the button press should occur.</description>
       </param>
       <param name="moduleType" type="Common.ModuleType">
         <description>The module where the button should be pressed</description>
@@ -4562,4 +4712,19 @@
       <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
 </interface>
+
+<interface name="RC" version="1.0" date="2015-10-13">
+ <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
+   <description>Called to retrieve the available zones and supported control types</description>
+   <param name="moduleTypes" type="Common.ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
+       <description>If included, only the corresponding type of modules a will be sent back. If not included, all module types will be returned.</description>
+   </param>
+ </function>
+
+ <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
+   <param name="interiorVehicleDataCapabilities" type="Common.RemoteControlCapabilities">
+   </param>
+ </function>
+</interface>
+
 </interfaces>
