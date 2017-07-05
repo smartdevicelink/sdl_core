@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_VALIDATOR_H_
 
 #include "can_cooperation/validators/validator.h"
-#include "utils/singleton.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
@@ -45,16 +45,19 @@ namespace validators {
  */
 class GetInteriorVehicleDataCapabilitiesRequestValidator : public Validator {
  public:
+  /**
+   * @brief GetInteriorVehicleDataCapabilitiesRequestValidator constructor
+   */
   GetInteriorVehicleDataCapabilitiesRequestValidator();
 
   /**
- * @brief Validate json with message params
- *
- * @param json_string string with message params(fake params will be cut off)
- * @param outgoing_json outgoing json
- *
- * @return validation result
- */
+   * @brief Validate json with message params
+   *
+   * @param json_string string with message params(fake params will be cut off)
+   * @param outgoing_json outgoing json
+   *
+   * @return validation result
+   */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 

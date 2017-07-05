@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_BUTTON_PRESS_REQUEST_VALIDATOR_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_BUTTON_PRESS_REQUEST_VALIDATOR_H_
-
-#include "can_cooperation/validators/validator.h"
-#include "utils/macro.h"
+#include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
+#include "can_cooperation/can_module_constants.h"
+#include "utils/logger.h"
 
 namespace can_cooperation {
 
 namespace validators {
 
-/**
- * @brief ButtonPressRequestValidator class
- */
-class ButtonPressRequestValidator : public Validator {
- public:
-  ButtonPressRequestValidator();
-  /**
- * @brief Validate json with message params
- *
- * @param json_string string with message params(fake params will be cut off)
- * @param outgoing_json outgoing json
- *
- * @return validation result
- */
-  ValidationResult Validate(const Json::Value& json,
-                            Json::Value& outgoing_json);
+CREATE_LOGGERPTR_GLOBAL(logger_,
+                        "GetInteriorVehicleDataCapabilitiesRequestValidator")
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonPressRequestValidator);
+GetInteriorVehicleDataCapabilitiesRequestValidator::
+    GetInteriorVehicleDataCapabilitiesRequestValidator() {
+  using namespace message_params;
+  // name="moduleType"
+  module_type_[ValidationParams::TYPE] = ValueType::ENUM;
+  module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
+  module_type_[ValidationParams::ARRAY] = 1;
+  module_type_[ValidationParams::MANDATORY] = 0;
+  module_type_[ValidationParams::MIN_SIZE] = 1;
+  module_type_[ValidationParams::MAX_SIZE] = 1000;
 
-  ValidationScope module_type_;
-  ValidationScope button_name_;
-  ValidationScope button_press_mode_;
+  validation_scope_map_[kModuleTypes] = &module_type_;
 };
+
+ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace message_params;
+
+  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
+
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
+
+  return result;
+}
 
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_BUTTON_PRESS_REQUEST_VALIDATOR_H_

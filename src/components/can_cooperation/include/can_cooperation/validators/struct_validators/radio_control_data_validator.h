@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_STRUCT_VALIDATORS_RADIO_CONTROL_DATA_VALIDATOR_H_
 
 #include "can_cooperation/validators/validator.h"
-#include "utils/singleton.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 

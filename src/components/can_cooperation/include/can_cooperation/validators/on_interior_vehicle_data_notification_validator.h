@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
 
 #include "can_cooperation/validators/validator.h"
-#include "utils/singleton.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
