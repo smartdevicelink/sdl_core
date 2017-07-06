@@ -115,7 +115,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
     validators::ValidationResult validation_result = validators::SUCCESS;
 
-    if (success) {
+     if (success) {
       validators::GetInteriorVehicleDataCapabilitiesResponseValidator validator;
       if (IsMember(value[kResult], kInteriorVehicleDataCapabilities)) {
         validator.Validate(value[kResult][kInteriorVehicleDataCapabilities],
