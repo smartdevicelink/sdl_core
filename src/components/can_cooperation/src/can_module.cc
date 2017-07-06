@@ -410,6 +410,7 @@ bool CANModule::IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
     CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
     app->AddExtension(can_app_extension);
     service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
+    service()->SetPrimaryDevice(app->device());
     PolicyHelper::SetIsAppOnPrimaryDevice(app, *this);
     return true;
   }
