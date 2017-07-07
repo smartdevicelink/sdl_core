@@ -1,0 +1,6 @@
+{
+  "interiorVehicleDataCapabilities": [
+      {"moduleType": "CLIMATE"},
+      {"moduleType": "RADIO"}
+  ]
+}
