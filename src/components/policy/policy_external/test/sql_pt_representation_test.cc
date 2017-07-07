@@ -85,7 +85,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
+    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
@@ -407,7 +407,7 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  const int policy_tables_number = 35;
+  const int policy_tables_number = 34;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -1607,6 +1607,10 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_config"]["preloaded_pt"] = Json::Value(false);
+  table["policy_table"]["module_config"]["country_consent_passengersRC"] =
+      Json::Value(false);
+  table["policy_table"]["module_config"]["user_consent_passengersRC"] =
+      Json::Value(false);
   policy_table::Table expected(&table);
   Json::StyledWriter writer;
   // Checks

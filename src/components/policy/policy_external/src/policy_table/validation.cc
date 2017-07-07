@@ -135,6 +135,39 @@ bool ApplicationPoliciesSection::Validate() const {
 
   return true;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+bool ApplicationParams::ValidateModuleTypes() const {
+  // moduleType is optional so see Optional<T>::is_valid()
+  bool is_initialized = moduleType->is_initialized();
+  if (!is_initialized) {
+    // valid if not initialized
+    return true;
+  }
+  bool is_valid = moduleType->is_valid();
+  if (is_valid) {
+    return true;
+  }
+
+  struct IsInvalid {
+    bool operator()(Enum<ModuleType> item) const {
+      return !item.is_valid();
+    }
+  };
+  // cut invalid items
+  moduleType->erase(
+      std::remove_if(moduleType->begin(), moduleType->end(), IsInvalid()),
+      moduleType->end());
+  bool empty = moduleType->empty();
+  if (empty) {
+    // set non initialized value
+    ModuleTypes non_initialized;
+    moduleType = Optional<ModuleTypes>(non_initialized);
+  }
+  return true;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 bool ApplicationParams::Validate() const {
   if (is_initialized()) {
     if (preconsented_groups.is_initialized()) {
@@ -145,8 +178,13 @@ bool ApplicationParams::Validate() const {
       }
     }
   }
+#ifdef SDL_REMOTE_CONTROL
+  return ValidateModuleTypes();
+#else   // SDL_REMOTE_CONTROL
   return true;
+#endif  // SDL_REMOTE_CONTROL
 }
+
 bool RpcParameters::Validate() const {
   return true;
 }

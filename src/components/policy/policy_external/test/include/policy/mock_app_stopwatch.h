@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2016, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +29,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
-#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_APP_STOPWATCH_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_APP_STOPWATCH_H_
 
-#include "policy/usage_statistics/statistics_manager.h"
+#include "gmock/gmock.h"
+#include "policy/usage_statistics/app_stopwatch.h"
 
-namespace usage_statistics {
+namespace test {
+namespace components {
+namespace usage_statistics_test {
 
-class AppStopwatch {
+class MockAppStopwatch : public usage_statistics::AppStopwatch {
  public:
-  virtual ~AppStopwatch() {}
-  virtual void Start(AppStopwatchId stopwatch_type) = 0;
-  virtual void Switch(AppStopwatchId stopwatch_type) = 0;
-  virtual void WriteTime() = 0;
+  MOCK_METHOD1(Start, void(usage_statistics::AppStopwatchId stopwatch_type));
+  MOCK_METHOD1(Switch, void(usage_statistics::AppStopwatchId stopwatch_type));
+  MOCK_METHOD0(WriteTime, void());
 };
 
-}  //  namespace usage_statistics
+}  // namespace usage_statistics_test
+}  // namespace components
+}  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_APP_STOPWATCH_H_

@@ -92,6 +92,21 @@ class MockPolicyListener : public ::policy::PolicyListener {
                     const std::string& hmi_level));
   MOCK_CONST_METHOD1(GetRegisteredLinks,
                      void(std::map<std::string, std::string>&));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD3(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_METHOD4(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level,
+                    const std::string& device_rank));
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace policy_test
