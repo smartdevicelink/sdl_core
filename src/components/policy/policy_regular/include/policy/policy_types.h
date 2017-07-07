@@ -56,6 +56,7 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
  */
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
+const std::string kPreConsentPassengersRC = "pre_consent_passengersRC";
 const std::string kDeviceId = "device";
 
 /*

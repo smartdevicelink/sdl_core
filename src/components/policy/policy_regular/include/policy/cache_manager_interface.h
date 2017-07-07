@@ -323,6 +323,14 @@ class CacheManagerInterface {
                              std::string& default_hmi) const = 0;
 
   /**
+    * Gets HMI types from specific policy
+    * @param app_id ID application
+    * @return list of HMI types
+    */
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
+
+  /**
    * @brief Reset user consent for device data and applications permissions
    * @return
    */
@@ -626,15 +634,13 @@ class CacheManagerInterface {
    */
   virtual std::string GetCertificate() const = 0;
 
-#ifdef BUILD_TESTS
   /**
-   * @brief GetPT allows to obtain SharedPtr to PT.
+   * @brief pt allows to obtain SharedPtr to PT.
    * Used ONLY in Unit tests
    * @return SharedPTR to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
-#endif
+  virtual utils::SharedPtr<policy_table::Table> pt() const = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

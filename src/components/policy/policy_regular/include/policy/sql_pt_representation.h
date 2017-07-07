@@ -97,6 +97,31 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   }
 #endif  // BUILD_TESTS
  protected:
+#ifdef SDL_REMOTE_CONTROL
+  enum TypeAccess { kAllowed, kManual };
+  bool GatherAppGroupPrimary(const std::string& app_id,
+                             policy_table::Strings* app_groups) const;
+  bool GatherAppGroupNonPrimary(const std::string& app_id,
+                                policy_table::Strings* app_groups) const;
+  bool GatherModuleType(const std::string& app_id,
+                        policy_table::ModuleTypes* module_types) const;
+  bool GatherRemoteControlDenied(const std::string& app_id, bool* denied) const;
+  bool GatherAccessModule(TypeAccess access,
+                          policy_table::AccessModules* modules) const;
+  bool GatherRemoteRpc(int module_id, policy_table::RemoteRpcs* rpcs) const;
+  bool SaveAppGroupPrimary(const std::string& app_id,
+                           const policy_table::Strings& app_groups);
+  bool SaveAppGroupNonPrimary(const std::string& app_id,
+                              const policy_table::Strings& app_groups);
+  bool SaveModuleType(const std::string& app_id,
+                      const policy_table::ModuleTypes& types);
+  bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
+
+  bool SaveAccessModule(TypeAccess access,
+                        const policy_table::AccessModules& modules);
+  bool SaveRemoteRpc(int module_id, const policy_table::RemoteRpcs& rpcs);
+#endif  // SDL_REMOTE_CONTROL
+
   virtual void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
   virtual void GatherModuleConfig(policy_table::ModuleConfig* config) const;
   virtual bool GatherUsageAndErrorCounts(
