@@ -70,15 +70,8 @@ size_t file_system::DirectorySize(const std::string& path) {
   size_t size = 0;
   int32_t return_code = 0;
   DIR* directory = NULL;
-
-#ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
   struct stat file_info = {0};
   directory = opendir(path.c_str());
@@ -100,9 +93,6 @@ size_t file_system::DirectorySize(const std::string& path) {
     }
   }
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
   return size;
 }
 
@@ -232,15 +222,8 @@ bool file_system::DeleteFile(const std::string& name) {
 void file_system::remove_directory_content(const std::string& directory_name) {
   int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
@@ -267,9 +250,6 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   }
 
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 }
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
@@ -305,15 +285,8 @@ std::vector<std::string> file_system::ListFiles(
 
   int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
@@ -332,10 +305,6 @@ std::vector<std::string> file_system::ListFiles(
 
     closedir(directory);
   }
-
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 
   return listFiles;
 }
@@ -412,11 +381,7 @@ bool file_system::CreateFile(const std::string& path) {
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
   stat(path.c_str(), &info);
-#ifndef __QNXNTO__
   return static_cast<uint64_t>(info.st_mtim.tv_nsec);
-#else
-  return static_cast<uint64_t>(info.st_mtime);
-#endif
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {
