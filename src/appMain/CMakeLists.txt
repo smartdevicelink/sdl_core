@@ -44,6 +44,7 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/can_cooperation/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -56,9 +57,10 @@ include_directories(
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/functional_module/include
+  ${POLICY_PATH}/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
-  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
@@ -114,6 +116,12 @@ set(LIBRARIES
   ConfigProfile
   Resumption
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -206,6 +214,18 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+if (REMOTE_CONTROL)
+  install(
+    FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    RENAME sdl_preloaded_pt.json
+  )
+else ()
+  install(
+    FILES sdl_preloaded_pt.json
+    DESTINATION bin
+  )
+endif ()
 
 if (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

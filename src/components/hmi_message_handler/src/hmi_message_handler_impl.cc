@@ -94,6 +94,7 @@ void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
     LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
     return;
   }
+  sync_primitives::AutoLock lock(message_adapters_locker_);
   message_adapters_.insert(adapter);
 }
 
@@ -104,6 +105,7 @@ void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
     return;
   }
+  sync_primitives::AutoLock lock(message_adapters_locker_);
   message_adapters_.erase(adapter);
 }
 
@@ -123,11 +125,23 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
+  sync_primitives::AutoLock lock(message_adapters_locker_);
   for (std::set<HMIMessageAdapter*>::iterator it = message_adapters_.begin();
        it != message_adapters_.end();
        ++it) {
     (*it)->SendMessageToHMI(message);
   }
 }
+#ifdef SDL_REMOTE_CONTROL
+void HMIMessageHandlerImpl::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  sync_primitives::AutoLock lock(message_adapters_locker_);
+  for (std::set<HMIMessageAdapter*>::iterator it = message_adapters_.begin();
+       it != message_adapters_.end();
+       ++it) {
+    (*it)->SubscribeToHMINotification(hmi_notification);
+  }
+}
+#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace hmi_message_handler
