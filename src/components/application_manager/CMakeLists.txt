@@ -38,6 +38,7 @@ set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 include_directories (
   include/
   ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -386,6 +387,11 @@ set(PATHS
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
+if (NOT REMOTE_CONTROL)
+    list(REMOVE_ITEM SOURCES
+        ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
+endif()
+
 set(LIBRARIES
   HMI_API
   MOBILE_API
@@ -398,6 +404,13 @@ set(LIBRARIES
   dbms
   Utils
 )
+
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)

@@ -129,6 +129,17 @@ class MessageHelper {
   static hmi_apis::Common_Result::eType HMIResultFromString(
       const std::string& hmi_result);
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Converts string to device rank, if possible
+   * @param device_rank Stringified device rank
+   * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
+   * is not possible
+   */
+  static mobile_api::DeviceRank::eType StringToDeviceRank(
+      const std::string& device_rank);
+#endif  // SDL_REMOTE_CONTROL
+
   /**
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value
@@ -689,6 +700,24 @@ class MessageHelper {
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   *
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager);
+
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
+#endif  // SDL_REMOTE_CONTROL
 
  private:
   /**
