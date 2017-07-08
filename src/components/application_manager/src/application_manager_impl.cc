@@ -2091,6 +2091,11 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
+bool ApplicationManagerImpl::ValidateMessageBySchema(const Message& message) {
+  smart_objects::SmartObject so;
+  return ConvertMessageToSO(message, so);
+}
+
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
     const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);

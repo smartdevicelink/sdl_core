@@ -283,6 +283,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
+  MOCK_METHOD1(ValidateMessageBySchema,
+               bool(const application_manager::Message& message));
 };
 
 }  // namespace application_manager_test

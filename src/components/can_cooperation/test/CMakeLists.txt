@@ -2,6 +2,7 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/functional_module/include/
+  ${CMAKE_SOURCE_DIR}/src/components/functional_module/test/include/
   ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/include/
   ${CMAKE_SOURCE_DIR}/src/components/include/
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/include/

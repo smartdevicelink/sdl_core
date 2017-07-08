@@ -61,11 +61,6 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
   virtual void Execute();
 
   /**
-   * @brief executes specific message validation
-   */
-  virtual bool Validate();
-
-  /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
