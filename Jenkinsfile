@@ -23,7 +23,7 @@ stages {
 			}
 		}
 
-		stage ('Build')
+		stage ('Build && Unit Testing')
 		{
 			steps
 			{
@@ -34,16 +34,7 @@ stages {
 			export THIRD_PARTY_INSTALL_PREFIX_ARCH=${THIRD_PARTY_INSTALL_PREFIX}/x86
 			export LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX_ARCH/lib
 			cmake ${WORKSPACE} -DCMAKE_BUILD_TYPE="Debug" -DBUILD_TESTS=ON -DENABLE_GCOV=ON -DREMOTE_CONTROL=ON
-			make install'''	
-			}
-		}
-
-		stage ('Unit Testing')
-		{
-			steps
-			{
-			sh '''#!/bin/bash
-			cd build
+			make install
 			make test | tee ut.log || true; result=${PIPESTATUS[0]};
 			if [ $result -ne 0 ]; then
 			COREFILE=$(find /tmp/corefiles -type f -name "core*");
@@ -57,10 +48,11 @@ stages {
 			echo "Started gdb!";
 			echo thread apply all bt | gdb $test_file $COREFILE;
 			exit 1;
-			fi'''
+			fi'''	
 			}
-		}	
-		stage ('Parallel')
+		}
+	
+		stage ('Packaging')
 		{
 			steps
 			{
@@ -80,14 +72,9 @@ stages {
 			}
 		}
 }
-		post {
-				// Always runs. And it runs before any of the other post conditions.
-				always {
-					// Let's wipe out the workspace before we finish!
-					deleteDir()
-				}
-				
+		post {				
 				success {
+					build job: 'RC_PULL_REQUEST/ATF_RC_SMOKE', parameters: [string(name: 'SDL_BUILD', value: '${BUILD_NUMBER}'), string(name: 'POLICY', value: 'BASE'), string(name: 'PULL_ID', value: '0'), string(name: 'TEST_SET', value: 'smoke_tests.txt'), string(name: 'BRANCH', value: 'feature/sdl_remote_control_baseline'), string(name: 'ATF_REPOSITORY', value: 'https://github.com/smartdevicelink/sdl_atf_test_scripts'), string(name: 'SDL_FOLDER', value: '${GIT_BRANCH}'), string(name: 'RC', value: '')], wait: false
 					emailext attachLog: true, body: '', recipientProviders: [[$class: 'DevelopersRecipientProvider']], replyTo: 'mailer@lc-jenkinsdockerhost.luxoft.com', subject: '', to: 'AKutsan@luxoft.com, MGhiumiusliu@luxoft.com, IIKovalenko@luxoft.com, OVVasyliev@luxoft.com'
 				}
 
