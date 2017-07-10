@@ -315,6 +315,7 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
 }
 
 bool AccessRemoteImpl::IsAppReverse(const Subject& who) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(),
                    hmi_types.end(),
