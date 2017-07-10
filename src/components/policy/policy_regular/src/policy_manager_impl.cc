@@ -1066,6 +1066,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
     return utils::MakeShared<utils::CallNothing>();
   }
 }
+
 void PolicyManagerImpl::RemoveAppConsentForGroup(
     const std::string& app_id, const std::string& group_name) {
   cache_->RemoveAppConsentForGroup(app_id, group_name);
