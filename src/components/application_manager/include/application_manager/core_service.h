@@ -221,6 +221,8 @@ class CoreService : public Service {
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const FINAL;
 
+  bool ValidateMessageBySchema(const Message& message) OVERRIDE;
+
  private:
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);

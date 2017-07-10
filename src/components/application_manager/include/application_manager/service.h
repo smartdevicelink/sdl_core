@@ -212,6 +212,13 @@ class Service {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
+
+  /**
+   * @brief ValidateMessageBySchema validates message by xml schema
+   * @param message message for validation
+   * @return true if message is valid according to schema, otherwise false
+   */
+  virtual bool ValidateMessageBySchema(const Message& message) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

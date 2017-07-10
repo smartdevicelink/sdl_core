@@ -192,30 +192,6 @@ void GetInteriorVehicleDataCapabiliesRequest::CreateCapabilities(
   }
 }
 
-bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  Json::Value json;
-  if (!this->ParseJsonString(&json)) {
-    return false;
-  }
-  Json::Value outgoing_json;
-
-  validators::GetInteriorVehicleDataCapabilitiesRequestValidator validator;
-  if (validators::ValidationResult::SUCCESS !=
-      validator.Validate(json, outgoing_json)) {
-    LOG4CXX_INFO(logger_,
-                 "GetInteriorVehicleDataCapabiliesRequest validation failed!");
-    SendResponse(
-        false, result_codes::kInvalidData, "Mobile request validation failed!");
-    return false;
-  } else {
-    message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
-  }
-
-  return true;
-}
-
 application_manager::TypeAccess
 GetInteriorVehicleDataCapabiliesRequest::CheckAccess(
     const Json::Value& message) {

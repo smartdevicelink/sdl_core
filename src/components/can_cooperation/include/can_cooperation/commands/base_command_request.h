@@ -148,9 +148,9 @@ class BaseCommandRequest
   void virtual Execute() = 0;
 
   /**
-   * @brief executes specific message validation logic of children classes
+   * @brief Validat requrest by xml schema
    */
-  virtual bool Validate() = 0;
+  bool Validate();
 
   /*
    * @brief Parses incoming string into Json
