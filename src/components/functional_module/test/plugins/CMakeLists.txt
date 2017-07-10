@@ -14,3 +14,4 @@ set(SOURCES
 
 add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target})
+add_dependencies(${target} MOBILE_API HMI_API)
