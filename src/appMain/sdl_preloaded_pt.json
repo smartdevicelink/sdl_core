@@ -1,6 +1,9 @@
 {
     "policy_table": {
         "module_config": {
+            "equipment": {
+             },
+            "country_consent_passengersRC": true,
             "preloaded_pt": true,
             "exchange_after_x_ignition_cycles": 100,
             "exchange_after_x_kilometers": 1800,
@@ -298,6 +301,44 @@
                 "rpcs": {
                     "Alert": {
                         "hmi_levels": ["BACKGROUND"]
+                    }
+                }
+            },
+            "Notifications-RC": {
+                "rpcs": {
+                    "OnPermissionsChange": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnHMIStatus": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+	        "OnSystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    }
+                }
+            },
+            "pre_BaseRC-1": {
+                "rpcs": {
+                    "OnPermissionsChange": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnHMIStatus": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             },
@@ -936,6 +977,45 @@
                     },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["BACKGROUND"]
+                    }
+                }
+            },
+          "RemoteControl": {
+                "rpcs": {
+                    "ButtonPress": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "GetInteriorVehicleDataCapabilities": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+		    "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             }
@@ -2270,7 +2350,17 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "moduleType": ["RADIO", "CLIMATE"],
+                "groups": ["Base-4"],
+                "groups_primaryRC": ["Base-4", "RemoteControl"],
+                "groups_nonPrimaryRC": ["Notifications-RC", "RemoteControl"]
+            },
+            "pre_consent_passengersRC": {
+                "keep_context": false,
+                "steal_focus": false,
+                "priority": "NONE",
+                "default_hmi":"NONE",
+                "groups": ["pre_BaseRC-1"]
             },
             "device": {
                 "keep_context": false,
