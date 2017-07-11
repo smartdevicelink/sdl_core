@@ -78,7 +78,7 @@ class ModuleTimer {
   }
   TimeUnit period() const {
     return period_;
-  }  
+  }
   void AddObserver(TimerObserver<Trackable>* observer);
   void RemoveObserver(TimerObserver<Trackable>* observer);
 

@@ -60,8 +60,8 @@ void RequestController::AddRequest(const uint32_t mobile_correlation_id,
                                    MobileRequestPtr request) {
   // TODO(VS) Research and fix be problem with overlap correlation ids from two
   // different apllications(on two different mobile devices)
-  LOG4CXX_DEBUG(logger_, "Add request with correlation_id: "
-                << mobile_correlation_id);
+  LOG4CXX_DEBUG(logger_,
+                "Add request with correlation_id: " << mobile_correlation_id);
   mobile_request_list_[mobile_correlation_id] = request;
   // TODO(VS): add app id
   timer_.AddTrackable(TrackableMessage(0, mobile_correlation_id));
@@ -69,8 +69,8 @@ void RequestController::AddRequest(const uint32_t mobile_correlation_id,
 }
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
-  LOG4CXX_DEBUG(logger_, "Delete request with correlation_id: "
-                << mobile_correlation_id);
+  LOG4CXX_DEBUG(
+      logger_, "Delete request with correlation_id: " << mobile_correlation_id);
   mobile_request_list_.erase(mobile_correlation_id);
   // TODO(VS): add app id
   timer_.RemoveTrackable(TrackableMessage(0, mobile_correlation_id));

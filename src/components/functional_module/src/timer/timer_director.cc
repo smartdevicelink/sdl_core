@@ -129,7 +129,7 @@ template <class T>
 void TimerDirector::ResetTimer(ModuleTimer<T>& timer) {
   const std::string type_name = typeid(timer).name();
   std::map<std::string, threads::Thread*>::iterator it =
-     timer_threads_.find(type_name);
+      timer_threads_.find(type_name);
   if (timer_threads_.end() == it) {
     return;
   }
