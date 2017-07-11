@@ -63,7 +63,7 @@
     <element name="USER_DISALLOWED" value="23"/>
     <element name="TRUNCATED_DATA" value="24"/>
     <element name="SAVED" value="25"/>
-    <element name="READ_ONLY " value="26"/>
+    <element name="READ_ONLY" value="26"/>
 </enum>
 
 <enum name="TransportType">
@@ -1285,21 +1285,21 @@
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
-  
+
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
-  
+
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
-  
+
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-  
+
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1312,7 +1312,7 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
-  
+
   <struct name="PermissionItem">
     <param name="name" type="String" mandatory="true">
       <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
@@ -1323,7 +1323,7 @@
     <param name="allowed" type="Boolean" mandatory="false">
       <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
     </param>
-  </struct>  
+  </struct>
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -3177,7 +3177,7 @@
 
 <interface name="UI" version="1.1.0" date="2017-04-27">
   <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
-   <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description> 
+   <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description>
    <param name="seekTime" type="Common.TimeFormat" mandatory="true">
     <description>See StartTime.</description>
    </param>
@@ -3705,7 +3705,7 @@
 
 </interface>
 
-<interface name="Navigation" version="1.4.0" date="2017-04-27"> 
+<interface name="Navigation" version="1.4.0" date="2017-04-27">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>

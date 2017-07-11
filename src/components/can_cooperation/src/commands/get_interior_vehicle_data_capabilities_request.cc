@@ -35,8 +35,6 @@
 #include <string>
 #include <vector>
 
-#include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
-#include "can_cooperation/validators/get_interior_vehicle_data_capabilities_response_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/vehicle_capabilities.h"
@@ -107,24 +105,15 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     std::string result_code;
     std::string info;
 
-    Json::Value value;
-    Json::Reader reader;
-    reader.parse(event.event_message()->json_message(), value);
-
+    application_manager::Message& hmi_response = *(event.event_message());
+    bool validate_result = service()->ValidateMessageBySchema(hmi_response);
+    Json::Value value =
+        MessageHelper::StringToValue(hmi_response.json_message());
     bool success = ParseResultCode(value, result_code, info);
 
-    validators::ValidationResult validation_result = validators::SUCCESS;
-
     if (success) {
-      validators::GetInteriorVehicleDataCapabilitiesResponseValidator validator;
-      if (IsMember(value[kResult], kInteriorVehicleDataCapabilities)) {
-        validator.Validate(value[kResult][kInteriorVehicleDataCapabilities],
-                           response_params_[kInteriorVehicleDataCapabilities]);
-      } else {
-        validation_result = validators::INVALID_DATA;
-      }
-
-      if (validators::SUCCESS != validation_result) {
+      if (!validate_result) {
+        LOG4CXX_WARN(logger_, "Response validation failed");
         success = false;
         info = "Invalid response from the vehicle.";
         result_code = result_codes::kGenericError;
@@ -132,7 +121,6 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     }
 
     if (!success) {
-      //  Try to read capabilities from file.
       if (ReadCapabilitiesFromFile()) {
         success = true;
         result_code = result_codes::kSuccess;
