@@ -75,7 +75,9 @@ void BaseCommandRequest::SendResponse(bool success,
   }
 
   msg_params[kSuccess] = success;
-  msg_params[kResultCode] = result_code;
+  const bool is_timeout = (0 == strcmp(result_code, result_codes::kTimedOut));
+  msg_params[kResultCode] =
+      is_timeout ? result_codes::kGenericError : result_code;
   if (!info.empty()) {
     msg_params[kInfo] = info;
   }
@@ -83,7 +85,7 @@ void BaseCommandRequest::SendResponse(bool success,
   Json::FastWriter writer;
   std::string params = writer.write(msg_params);
   message_->set_json_message(params);
-  if (0 == strcmp(result_code, result_codes::kTimedOut)) {
+  if (is_timeout) {
     can_module_.SendTimeoutResponseToMobile(message_);
   } else {
     can_module_.SendResponseToMobile(message_);
