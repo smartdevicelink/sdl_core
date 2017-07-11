@@ -81,9 +81,9 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
  private:
   void UpdateModules(Json::Value* params);
   application_manager::TypeAccess CheckModuleTypes(const Json::Value& message);
-  bool ReadCapabilitiesFromFile();
-  void CreateCapabilities(const Json::Value& zone_capabilities,
-                          const Json::Value& modules);
+  bool ReadCapabilitiesFromFile(
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event);
   inline bool IsDriverDevice();
   application_manager::TypeAccess GetModuleTypes();
   application_manager::TypeAccess ProcessRequestedModuleTypes(

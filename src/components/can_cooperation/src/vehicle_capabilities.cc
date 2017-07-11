@@ -66,10 +66,15 @@ VehicleCapabilities::VehicleCapabilities()
 }
 
 Json::Value VehicleCapabilities::capabilities() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (capabilities_.type() == Json::ValueType::objectValue) {
     return capabilities_[kInteriorVehicleDataCapabilities];
   }
   return capabilities_;
+}
+
+std::string VehicleCapabilities::default_capabilities_path() {
+  return kDefaultPath_;
 }
 
 }  // namespace can_cooperation

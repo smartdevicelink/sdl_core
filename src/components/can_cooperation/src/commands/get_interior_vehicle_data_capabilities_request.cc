@@ -99,85 +99,72 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(
+      functional_modules::hmi_api::get_interior_vehicle_data_capabilities ==
+      event.id());
 
-  if (functional_modules::hmi_api::get_interior_vehicle_data_capabilities ==
-      event.id()) {
-    std::string result_code;
-    std::string info;
+  const bool is_message_valid =
+      service()->ValidateMessageBySchema(*(event.event_message()));
+  LOG4CXX_DEBUG(logger_, "Response from HMI is valid: " << is_message_valid);
 
-    application_manager::Message& hmi_response = *(event.event_message());
-    bool validate_result = service()->ValidateMessageBySchema(hmi_response);
-    Json::Value value =
-        MessageHelper::StringToValue(hmi_response.json_message());
-    bool success = ParseResultCode(value, result_code, info);
-
-    if (success) {
-      if (!validate_result) {
-        LOG4CXX_WARN(logger_, "Response validation failed");
-        success = false;
-        info = "Invalid response from the vehicle.";
-        result_code = result_codes::kGenericError;
-      }
-    }
-
-    if (!success) {
-      if (ReadCapabilitiesFromFile()) {
-        success = true;
-        result_code = result_codes::kSuccess;
-        info = "";
-      }
-    }
-
-    SendResponse(success, result_code.c_str(), info);
-  } else {
-    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-  }
-}
-
-bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
-  LOG4CXX_INFO(logger_,
-               "Failed to get correct response from HMI; \
-      trying to read from file");
-  Json::Value request;
+  Json::Value value;
   Json::Reader reader;
-  if (!reader.parse(message_->json_message(), request)) {
-    LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
-    return false;
-  }
+  reader.parse(event.event_message()->json_message(), value);
 
-  VehicleCapabilities file_caps;
-  Json::Value zone_capabilities;
-  zone_capabilities = file_caps.capabilities();
+  std::string info;
+  std::string result_code;
+  bool success = is_message_valid && ParseResultCode(value, result_code, info);
 
-  if (!zone_capabilities.isArray()) {
-    // Failed to read capabilities from file.
-    LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
-    return false;
-  }
-  LOG4CXX_DEBUG(logger_,
-                "Read vehicle capabilities from file " << zone_capabilities);
-  const Json::Value& modules =
-      IsDriverDevice() ? allowed_modules_ : request[kModuleTypes];
-  DCHECK(modules.isArray());
-  CreateCapabilities(zone_capabilities, modules);
-  return !response_params_[kInteriorVehicleDataCapabilities].empty();
-}
-
-void GetInteriorVehicleDataCapabiliesRequest::CreateCapabilities(
-    const Json::Value& capabilities, const Json::Value& modules) {
-  response_params_[kInteriorVehicleDataCapabilities] =
-      Json::Value(Json::ValueType::arrayValue);
-  for (Json::ValueConstIterator i = capabilities.begin();
-       i != capabilities.end();
-       ++i) {
-    for (Json::ValueConstIterator j = modules.begin(); j != modules.end();
-         ++j) {
-      const Json::Value& row = *i;
-      if (row[kModuleType] == *j) {
-        response_params_[kInteriorVehicleDataCapabilities].append(row);
-      }
+  if (!success) {
+    LOG4CXX_INFO(logger_, "Failed to get correct response from HMI!");
+    if (ReadCapabilitiesFromFile(event)) {
+      success = true;
+      result_code = result_codes::kSuccess;
+      info = "";
+    } else {
+      success = false;
+      result_code = result_codes::kGenericError;
+      info = "Invalid response from the vehicle.";
     }
   }
+  SendResponse(success, result_code.c_str(), info);
+}
+
+bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile(
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  VehicleCapabilities file_caps;
+  LOG4CXX_DEBUG(logger_,
+                "Read vehicle capabilities from file: "
+                    << file_caps.default_capabilities_path());
+  Json::Value interior_vehicle_data_caps_content = file_caps.capabilities();
+  Json::Value interior_vehicle_data_caps =
+      Json::Value(Json::ValueType::objectValue);
+  interior_vehicle_data_caps[kInteriorVehicleDataCapabilities] =
+      interior_vehicle_data_caps_content;
+
+  Json::Value stringified_hmi_response;
+  Json::Reader reader;
+  if (!reader.parse(event.event_message()->json_message(),
+                    stringified_hmi_response)) {
+    LOG4CXX_ERROR(logger_, "Failed to read capabilities from hmi response");
+    return false;
+  }
+
+  stringified_hmi_response[kResult][kInteriorVehicleDataCapabilities] =
+      interior_vehicle_data_caps_content;
+  event.event_message()->set_json_message(
+      stringified_hmi_response.toStyledString());
+
+  const bool is_file_contents_valid =
+      service()->ValidateMessageBySchema(*(event.event_message()));
+  if (!is_file_contents_valid) {
+    LOG4CXX_ERROR(logger_, "Contents of default capabilities file is invalid");
+    return false;
+  }
+  response_params_ = interior_vehicle_data_caps;
+  return !response_params_[kInteriorVehicleDataCapabilities].empty();
 }
 
 application_manager::TypeAccess
