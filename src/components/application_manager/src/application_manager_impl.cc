@@ -2093,7 +2093,14 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
 bool ApplicationManagerImpl::ValidateMessageBySchema(const Message& message) {
   smart_objects::SmartObject so;
-  return ConvertMessageToSO(message, so);
+  const bool conversion_result = ConvertMessageToSO(message, so);
+  if (conversion_result) {
+    if (so[strings::params].keyExists(hmi_response::code)) {
+      return hmi_apis::Common_Result::INVALID_DATA !=
+             so[strings::params][hmi_response::code].asInt();
+    }
+  }
+  return conversion_result;
 }
 
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
