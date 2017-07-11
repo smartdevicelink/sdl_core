@@ -30,43 +30,56 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
-#include "can_cooperation/validators/validator.h"
-#include "utils/macro.h"
+#include "can_cooperation/commands/base_command_request.h"
+#include "can_cooperation/event_engine/event.h"
 
 namespace can_cooperation {
 
-namespace validators {
+namespace commands {
 
 /**
- * @brief GetInteriorVehicleDataResponseValidator class
+ * @brief GetInteriorVehicleDataRequest command class
  */
-class GetInteriorVehicleDataResponseValidator : public Validator {
+class GetInteriorVehicleDataRequest : public BaseCommandRequest {
  public:
-  GetInteriorVehicleDataResponseValidator();
-  ~GetInteriorVehicleDataResponseValidator() {}
+  /**
+   * @brief GetInteriorVehicleDataRequest class constructor
+   *
+   * @param message Message from mobile
+   **/
+  explicit GetInteriorVehicleDataRequest(
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
- * @brief Validate json with message params
- *
- * @param json_string string with message params(fake params will be cut off)
- * @param outgoing_json outgoing json
- *
- * @return validation result
- */
-  ValidationResult Validate(const Json::Value& json,
-                            Json::Value& outgoing_json);
+   * @brief Execute command
+   */
+  virtual void Execute();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void OnEvent(const can_event_engine::Event<application_manager::MessagePtr,
+                                             std::string>& event);
+
+ protected:
+  virtual std::string ModuleType(const Json::Value& message);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataResponseValidator);
-
-  ValidationScope is_subscribed_;
+  /**
+    * @brief Handle subscription to vehicle data
+    *
+    */
+  void ProccessSubscription(Json::Value& hmi_response);
 };
 
-}  // namespace valdiators
+}  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_

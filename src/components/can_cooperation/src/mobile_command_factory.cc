@@ -37,7 +37,7 @@
 #include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
 
 // Disabled
-//#include "can_cooperation/commands/get_interior_vehicle_data_request.h"
+#include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 //#include "can_cooperation/commands/set_interior_vehicle_data_request.h"
 //#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
@@ -54,11 +54,11 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
           commands::GetInteriorVehicleDataCapabiliesRequest>(msg, can_module);
       break;
     }
-    //    case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
-    //      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(
-    //          msg, can_module);
-    //      break;
-    //    }
+    case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
+      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(
+          msg, can_module);
+      break;
+    }
     //    case MobileFunctionID::SET_INTERIOR_VEHICLE_DATA: {
     //      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(
     //          msg, can_module);
