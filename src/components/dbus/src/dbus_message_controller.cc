@@ -31,7 +31,7 @@
  */
 
 #include "dbus/dbus_message_controller.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 

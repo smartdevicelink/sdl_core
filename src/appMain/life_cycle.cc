@@ -54,10 +54,12 @@ namespace main_namespace {
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
+#ifndef DBUS_HMIADAPTER
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(thread.GetId(), name);
 }
+#endif
 
 void StopThread(System::Thread* thread) {
   if (thread) {
@@ -272,7 +274,7 @@ bool LifeCycle::InitMessageSystem() {
 bool LifeCycle::InitMessageSystem() {
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
 
-  hmi_handler_.AddHMIMessageAdapter(dbus_adapter_);
+  hmi_handler_->AddHMIMessageAdapter(dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
@@ -407,7 +409,7 @@ void LifeCycle::StopComponents() {
   if (dbus_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
     hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    dbus_adapter_->exitReceivingThread();
+//    dbus_adapter_->exitReceivingThread(); //FIXME - there is no exitReceivingThread() in dbus_adapter
     StopThread(dbus_adapter_thread_);
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
