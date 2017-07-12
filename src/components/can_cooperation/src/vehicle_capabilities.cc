@@ -42,8 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleCapabilities")
 using message_params::kInteriorVehicleDataCapabilities;
 
 VehicleCapabilities::VehicleCapabilities()
-    : kDefaultPath_(
-          "./plugins/Remote_Control/InteriorVehicleDataCapabilities.json") {
+    : kDefaultPath_("./plugins/InteriorVehicleDataCapabilities.json") {
   std::string path_to_file;
   functional_modules::Settings settings;
   if (!settings.ReadParameter(

@@ -144,19 +144,22 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile(
   interior_vehicle_data_caps[kInteriorVehicleDataCapabilities] =
       interior_vehicle_data_caps_content;
 
-  Json::Value stringified_hmi_response;
-  Json::Reader reader;
-  if (!reader.parse(event.event_message()->json_message(),
-                    stringified_hmi_response)) {
-    LOG4CXX_ERROR(logger_, "Failed to read capabilities from hmi response");
-    return false;
-  }
-
-  stringified_hmi_response[kResult][kInteriorVehicleDataCapabilities] =
+  Json::Value generated_response_to_mobile =
+      Json::Value(Json::ValueType::objectValue);
+  // Generate response to mobile from default vehicle caps file
+  generated_response_to_mobile[kResult] =
+      Json::Value(Json::ValueType::objectValue);
+  generated_response_to_mobile[kResult][kCode] = Json::Value(0);
+  generated_response_to_mobile[kResult][kInteriorVehicleDataCapabilities] =
       interior_vehicle_data_caps_content;
-  event.event_message()->set_json_message(
-      stringified_hmi_response.toStyledString());
+  generated_response_to_mobile[kId] = event.event_message()->correlation_id();
+  generated_response_to_mobile[kResult][kMethod] =
+      functional_modules::hmi_api::get_interior_vehicle_data_capabilities;
+  generated_response_to_mobile[kJsonrpc] = Json::Value("2.0");
 
+  event.event_message()->set_json_message(
+      generated_response_to_mobile.toStyledString());
+  // Check new generated response according schhema
   const bool is_file_contents_valid =
       service()->ValidateMessageBySchema(*(event.event_message()));
   if (!is_file_contents_valid) {
