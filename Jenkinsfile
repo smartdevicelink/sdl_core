@@ -74,11 +74,13 @@ stages {
 }
 		post {				
 				success {
+					junit allowEmptyResults: true, testResults: '${WORKSPACE}/build/test_results/*.xml'
 					build job: 'RC_PULL_REQUEST/ATF_RC_SMOKE', parameters: [string(name: 'SDL_BUILD', value: '${BUILD_NUMBER}'), string(name: 'POLICY', value: 'BASE'), string(name: 'PULL_ID', value: '0'), string(name: 'TEST_SET', value: 'smoke_tests.txt'), string(name: 'BRANCH', value: 'feature/sdl_remote_control_baseline'), string(name: 'ATF_REPOSITORY', value: 'https://github.com/smartdevicelink/sdl_atf_test_scripts'), string(name: 'SDL_FOLDER', value: '${GIT_BRANCH}'), string(name: 'RC', value: '')], wait: false
 					emailext attachLog: true, body: '', recipientProviders: [[$class: 'DevelopersRecipientProvider']], replyTo: 'mailer@lc-jenkinsdockerhost.luxoft.com', subject: '', to: 'AKutsan@luxoft.com, MGhiumiusliu@luxoft.com, IIKovalenko@luxoft.com, OVVasyliev@luxoft.com'
 				}
 
 				failure {
+					junit allowEmptyResults: true, testResults: '${WORKSPACE}/build/test_results/*.xml'
 					emailext attachLog: true, body: '', recipientProviders: [[$class: 'DevelopersRecipientProvider']], replyTo: 'mailer@lc-jenkinsdockerhost.luxoft.com', subject: '', to: 'AKutsan@luxoft.com, MGhiumiusliu@luxoft.com, IIKovalenko@luxoft.com, OVVasyliev@luxoft.com'
 				}
 			}
