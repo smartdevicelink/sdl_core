@@ -507,7 +507,7 @@ TEST(SharedPtrTest, ValidMethodTest_ExpectCorrectValidation) {
   ASSERT_FALSE(p2.valid());
 }
 
-TEST(SharedPtrTest, StressTest) {
+TEST(SharedPtrTest, DISABLED_StressTest) {
   // Arrange
   const size_t kNumIterations = 1024U * 1024U;
 
