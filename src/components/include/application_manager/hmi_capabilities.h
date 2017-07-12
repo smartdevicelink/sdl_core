@@ -409,6 +409,14 @@ class HMICapabilities {
    */
   virtual bool phone_call_supported() const = 0;
 
+  virtual void set_navigation_capability(const smart_objects::SmartObject& navigation_capability) = 0;
+
+  virtual const smart_objects::SmartObject* navigation_capability() const = 0;
+
+  virtual void set_phone_capability(const smart_objects::SmartObject& phone_capability) = 0;
+
+  virtual const smart_objects::SmartObject* phone_capability() const = 0;
+
   virtual void Init(resumption::LastState* last_state) = 0;
 
   /**

@@ -407,6 +407,14 @@ class HMICapabilitiesImpl : public HMICapabilities {
    */
   bool phone_call_supported() const OVERRIDE;
 
+  void set_navigation_capability(const smart_objects::SmartObject& navigation_capability) OVERRIDE;
+
+  const smart_objects::SmartObject* navigation_capability() const OVERRIDE;
+
+  void set_phone_capability(const smart_objects::SmartObject& phone_capability) OVERRIDE;
+
+  const smart_objects::SmartObject* phone_capability() const OVERRIDE;
+
   void Init(resumption::LastState* last_state) OVERRIDE;
 
   /*
@@ -484,6 +492,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_navigation_supported_;
   bool is_phone_call_supported_;
   std::string ccpu_version_;
+  smart_objects::SmartObject* navigation_capability_;
+  smart_objects::SmartObject* phone_capability_;
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
