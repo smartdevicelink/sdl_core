@@ -1358,9 +1358,6 @@
  </enum>
 
  <struct name="ModuleDescription">
-   <param name="moduleName" type="String">
-       <description>The short name or a short description of the remote control module, which is returned in the capabilities.</description>
-   </param>
    <param name="moduleType" type="Common.ModuleType">
    </param>
  </struct>
@@ -1536,6 +1533,7 @@
    </param>
    <param name="acEnable" type="Boolean" mandatory="false">
    </param>
+
    <param name="circulateAirEnable" type="Boolean" mandatory="false">
    </param>
    <param name="autoModeEnable" type="Boolean" mandatory="false">
@@ -1624,8 +1622,6 @@
  <struct name="ModuleData">
    <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
    <param name="moduleType" type="Common.ModuleType">
-   </param>
-   <param name="moduleName" type="String">
    </param>
    <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
    </param>
@@ -2485,9 +2481,6 @@
 
     <function name="ButtonPress" messagetype="request">
       <description>Method is invoked when the application tries to press a button</description>
-      <param name="moduleName" type="String">
-          <description>The zone where the button press should occur.</description>
-      </param>
       <param name="moduleType" type="Common.ModuleType">
         <description>The module where the button should be pressed</description>
       </param>
