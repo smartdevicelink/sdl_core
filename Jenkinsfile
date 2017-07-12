@@ -49,6 +49,7 @@ stages {
 			echo thread apply all bt | gdb $test_file $COREFILE;
 			exit 1;
 			fi'''	
+			junit allowEmptyResults: true, testResults: '${WORKSPACE}/build/test_results/*.xml'
 			}
 		}
 	
