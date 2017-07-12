@@ -47,6 +47,11 @@ class TimerThreadDelegate : public threads::ThreadDelegate {
   void threadMain();
   void exitThreadMain();
 
+  /**
+   * @brief Reset awaiting timer by notifying cond var
+   */
+  void ResetTimer();
+
  private:
   ModuleTimer<T>& timer_;
   volatile bool keep_running_;
@@ -70,6 +75,12 @@ class TimerDirector {
   template <class T>
   void UnregisterTimer(const ModuleTimer<T>& timer);
   void UnregisterAllTimers();
+  /**
+   * @brief Reset awaiting timeout for specified module timer
+   * @param timer timer to reset awaiting timeout
+   */
+  template <class T>
+  void ResetTimer(ModuleTimer<T>& timer);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TimerDirector);

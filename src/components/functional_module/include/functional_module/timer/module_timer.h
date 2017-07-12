@@ -83,6 +83,12 @@ class ModuleTimer {
   void RemoveObserver(TimerObserver<Trackable>* observer);
 
   void CheckTimeout();
+  /**
+   * @brief Gets time in seconds when the nearest request timeout will be
+   * triggered
+   * @return time in seconds when the nearest request timeout will be triggered
+   */
+  TimeUnit GetSecondsToNearestTimeout();
 
   /*
    * @brief Adds object to be tracked by timer.
@@ -158,6 +164,26 @@ void ModuleTimer<Trackable>::CheckTimeout() {
       it = trackables_.erase(it);
     }
   }
+}
+
+template <class Trackable>
+TimeUnit ModuleTimer<Trackable>::GetSecondsToNearestTimeout() {
+  sync_primitives::AutoLock trackables_lock(trackables_lock_);
+  TimeUnit result = period_;
+  for (typename std::list<Trackable>::iterator it = trackables_.begin();
+       trackables_.end() != it;
+       ++it) {
+    TimeUnit period = it->custom_interval();
+    if (!period) {
+      period = period_;
+    }
+    const TimeUnit current_secs_to_timeout =
+        period - (CurrentTime() - it->start_time());
+    if (result > current_secs_to_timeout) {
+      result = current_secs_to_timeout;
+    }
+  }
+  return result;
 }
 
 template <class Trackable>

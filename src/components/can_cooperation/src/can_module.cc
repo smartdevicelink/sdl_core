@@ -367,6 +367,9 @@ void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
 
 void CANModule::SendTimeoutResponseToMobile(
     application_manager::MessagePtr msg) {
+  LOG4CXX_DEBUG(
+      logger_,
+      "Timeout is expired. Response to mobile: " << msg->json_message());
   service()->SendMessageToMobile(msg);
 }
 

@@ -51,9 +51,9 @@ void TimerThreadDelegate<T>::threadMain() {
   }
   sync_primitives::AutoLock run_lock(keep_running_lock_);
   while (keep_running_) {
-    const size_t kMilisecsC = 1000;
+    const TimeUnit msecs_to_wait = timer_.GetSecondsToNearestTimeout() * 1000;
     sync_primitives::ConditionalVariable::WaitStatus wait_status =
-        keep_running_cond_.WaitFor(run_lock, timer_.period() * kMilisecsC);
+        keep_running_cond_.WaitFor(run_lock, msecs_to_wait);
     if (sync_primitives::ConditionalVariable::kTimeout == wait_status &&
         keep_running_) {
       timer_.CheckTimeout();
@@ -66,6 +66,14 @@ void TimerThreadDelegate<T>::exitThreadMain() {
   if (keep_running_) {
     sync_primitives::AutoLock run_lock(keep_running_lock_);
     keep_running_ = false;
+    keep_running_cond_.NotifyOne();
+  }
+}
+
+template <class T>
+void TimerThreadDelegate<T>::ResetTimer() {
+  if (keep_running_) {
+    sync_primitives::AutoLock run_lock(keep_running_lock_);
     keep_running_cond_.NotifyOne();
   }
 }
@@ -116,6 +124,22 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
 
 template void TimerDirector::UnregisterTimer<can_cooperation::TrackableMessage>(
     const ModuleTimer<can_cooperation::TrackableMessage>& timer);
+
+template <class T>
+void TimerDirector::ResetTimer(ModuleTimer<T>& timer) {
+  const std::string type_name = typeid(timer).name();
+  std::map<std::string, threads::Thread*>::iterator it =
+      timer_threads_.find(type_name);
+  if (timer_threads_.end() == it) {
+    return;
+  }
+  TimerThreadDelegate<T>* delegate =
+      static_cast<TimerThreadDelegate<T>*>(it->second->delegate());
+  delegate->ResetTimer();
+}
+
+template void TimerDirector::ResetTimer<can_cooperation::TrackableMessage>(
+    ModuleTimer<can_cooperation::TrackableMessage>& timer);
 
 void TimerDirector::UnregisterAllTimers() {
   for (std::map<std::string, threads::Thread*>::iterator it =
