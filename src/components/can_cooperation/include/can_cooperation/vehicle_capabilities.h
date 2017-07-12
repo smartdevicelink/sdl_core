@@ -61,6 +61,8 @@ class VehicleCapabilities {
    */
   Json::Value capabilities() const;
 
+  std::string default_capabilities_path();
+
  private:
   Json::Value capabilities_;
   const std::string kDefaultPath_;
