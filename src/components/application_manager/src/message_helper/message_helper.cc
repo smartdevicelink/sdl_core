@@ -672,7 +672,7 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
     if (true == msg_params.keyExists(sr.str) &&
         true == msg_params[sr.str].asBool()) {
       smart_objects::SmartObjectSPtr request =
-          MessageHelper::CreateModuleInfoSO(sr.func_id);
+          MessageHelper::CreateModuleInfoSO(sr.func_id, app_mngr);
       (*request)[strings::msg_params] = msg_params;
       hmi_requests.push_back(request);
     }

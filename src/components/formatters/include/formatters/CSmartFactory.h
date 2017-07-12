@@ -1,5 +1,5 @@
 /**
- * @file CSmartFactory.hpp
+ * @file CSmartFactory.h
  * @brief CSmartFactory header file.
  */
 // Copyright (c) 2013, Ford Motor Company

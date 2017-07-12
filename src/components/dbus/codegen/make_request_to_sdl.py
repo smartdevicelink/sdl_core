@@ -213,7 +213,7 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
 arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
-arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.1.0")
+arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.5.1")
 arg_parser.add_argument('--outdir', required=True, help="path to directory where output files request_to_sdl.h, request_to_sdl.cc will be saved")
 args = arg_parser.parse_args()
 
@@ -221,7 +221,7 @@ args = arg_parser.parse_args()
 if args.version == "4.8.5":
     prefix_class_item = 'Script'
     invoke_type_connection = 'Direct'
-elif args.version == "5.1.0":
+elif args.version == "5.5.1":
     prefix_class_item = 'JS'
     invoke_type_connection = 'BlockingQueued'
 else:
@@ -282,7 +282,7 @@ header_out.write("#include <QtCore/QStringList>\n\n")
 header_out.write('#include "qml_dbus.h"\n\n')
 if args.version == "4.8.5":
     header_out.write("#include <QtScript/QScriptValue>\n")
-elif args.version == "5.1.0":
+elif args.version == "5.5.1":
     header_out.write("#include <QtQml/QJSValue>\n")
 
 impl.make_header_file(header_out)

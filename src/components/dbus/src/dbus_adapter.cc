@@ -33,7 +33,7 @@
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
 #include <sstream>
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "utils/logger.h"
 
 using ford_message_descriptions::ParameterDescription;

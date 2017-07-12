@@ -49,7 +49,8 @@ set (SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
 )
 
-set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
+#set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
+set (LIBRARIES dbus-1)
 
 
 add_custom_command(

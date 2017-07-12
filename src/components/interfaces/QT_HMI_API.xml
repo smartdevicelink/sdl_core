@@ -57,6 +57,7 @@
       <element name="GENERIC_ERROR" value="22"/>
       <element name="USER_DISALLOWED" value="23"/>
       <element name="TRUNCATED_DATA" value="24"/>
+      <element name="SAVED" value="25"/>
     </enum>
     <enum name="TransportType">
       <description>
@@ -223,6 +224,19 @@
       <element name="TESTING"/>
       <element name="SYSTEM"/>
     </enum>
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
+  <struct name="Coordinate">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
+      <description>Latitude of the location.</description>
+    </param>
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
+      <description>Longitude of the location.</description>
+    </param>
+  </struct>
     <enum name="LayoutMode">
       <description>For touchscreen interactions, the mode of how the choices are presented.</description>
       <element name="ICON_ONLY"/>
@@ -380,6 +394,9 @@
         <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
       </element>
       <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
+        <description>By getting this value, SDL unregisters the named application</description>
+      </element>
+      <element name="UNSUPPORTED_HMI_RESOURCE">
         <description>By getting this value, SDL unregisters the named application</description>
       </element>
     </enum>
@@ -1110,6 +1127,24 @@
   <element name="BACKGROUND"/>
   <element name="NONE"/>
 </enum>
+<enum name="EventTypes">
+  <description>Reflects the current active event</description>
+  <element name="AUDIO_SOURCE">
+    <description>Navigated to audio(radio, etc)</description>
+  </element>
+  <element name="EMBEDDED_NAVI">
+    <description>Navigated to navigation screen</description>
+  </element>
+  <element name="PHONE_CALL">
+    <description>Phone call is active</description>
+  </element>
+  <element name="EMERGENCY_EVENT">
+    <description>Active emergency event, active parking event</description>
+  </element>
+  <element name="DEACTIVATE_HMI">
+    <description> GAL/DIO is active </description>
+  </element>
+</enum>
 
     <!-- Policies -->
     <enum name="UpdateResult">
@@ -1132,20 +1167,6 @@
       <element name="UNKNOWN"/>
       <element name="UNPAIRED"/>
     </enum>
-     <struct name="DeviceInfo">
-      <param name="name" type="String" mandatory="true">
-        <description>The name of the device connected.</description>
-      </param>
-      <param name="id" type="String" mandatory="true">
-        <description>The ID of the device connected</description>
-      </param>
-      <param name="transportType" type="Common.TransportType" mandatory="false">
-        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
-      </param>
-      <param name="isSDLAllowed" type="Boolean" mandatory="false">
-        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
-      </param>
-    </struct>
     <struct name="UserFriendlyMessage" scope="internal">
     <param name="messageCode" type="String" mandatory="true"/>
       <param name="ttsString" type="String" mandatory="false"/>
@@ -1858,6 +1879,58 @@
       </param>
     </struct>
     <!--end of IVI part-->
+<struct name="OASISAddress">
+  <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Name of the country (localized)</description>
+  </param>
+  <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+    <description>Name of country (ISO 3166-2)</description>
+  </param>
+  <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+    <description>(PLZ, ZIP, PIN, CAP etc.)</description>
+  </param>
+  <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of country (e.g. state)</description>
+  </param>
+  <param name="subAdministrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of e.g. state (e.g. county)</description>
+  </param>
+  <param name="locality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. city/village</description>
+  </param>
+  <param name="subLocality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. district</description>
+  </param>
+  <param name="thoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for street, road etc.</description>
+  </param>
+  <param name="subThoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of thoroughfare e.g. house number</description>
+  </param>
+</struct>
+  <struct name="LocationDetails">
+    <param name="coordinate" type="Coordinate" mandatory="false">
+      <description>Latitude/Longitude of the location.</description>
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>Name of location.</description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>Location address for display purposes only</description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>Description intended location / establishment (if applicable)</description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>Phone number of location / establishment.</description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>Image / icon of intended location.</description>
+    </param>
+    <param name="searchAddress" type="OASISAddress" mandatory="false">
+      <description>Address to be used by navigation engines for search</description>
+    </param>
+  </struct>
   </interface>
   <interface name="Buttons" version="1.0" date="2013-04-12">
     <function name="GetCapabilities" messagetype="request" provider="hmi">
@@ -2108,6 +2181,17 @@
         <description>Defines the name of app's request that initiates playing a tone</description>
       </param>
     </function>
+    <function name="DialNumber" messagetype="request">
+      <description>Request from SDL to call a specific number.</description>
+      <param name="number" type="String" maxlength="40">
+        <description>The number to dial. Only the character + and numbers are allowed.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that concerns this RPC.</description>
+      </param>
+    </function>
+    <function name="DialNumber" messagetype="response">
+    </function>
     <!-- Policies -->
     <!-- SyncP RPC-->
     <function name="OnSystemRequest" messagetype="notification" provider="hmi">
@@ -2238,6 +2322,25 @@
       <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
     </function>
     <!-- End of Policies -->
+   <function name="OnDeactivateHMI" messagetype="notification">
+        <description>
+          Sender: HMI->SDL. When: in case GAL/DIO is active or disabling
+        </description>
+     <param name="isDeactivated" type="Boolean" mandatory="true">
+        <description>
+          Must be 'true' - GAL/DIO is active. Must be 'false' when GAL/DIO is disabling
+        </description>
+     </param>
+   </function>
+   <function name="OnEventChanged" messagetype="notification">
+     <description>Sender: HMI->SDL. When event is become active</description>
+     <param name="eventName" type="Common.EventTypes" mandatory="true">
+        <description>Specifies the types of active events.</description>
+     </param>
+     <param name="isActive" type="Boolean" mandatory="true">
+        <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
+     </param>
+   </function>
   </interface>
   <interface name="VR" version="1.0" date="2013-04-17">
     <function name="IsReady" messagetype="request" provider="hmi">
@@ -3035,6 +3138,19 @@
     </function>
     <function name="SendLocation" messagetype="response" >
     </function>
+    <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+        <description>To subscribe in getting changes for Waypoints/destinations</description>
+    </function>
+
+      <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+      </function>
+
+      <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+        <description>Request to unsubscribe from WayPoints and Destination</description>
+      </function>
+
+      <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
+      </function>
 
     <function name="DialNumber" functionID="DialNumberID" messagetype="request">
       <description>Dials a phone number and switches to phone application.</description>
@@ -3048,7 +3164,7 @@
       <description>true, if successful</description>
       <description>false, if failed</description>
       </param>
-      <param name="resultCode" type="Result" platform="documentation">
+      <param name="resultCode" type="Common.Result" platform="documentation">
         <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3178,6 +3294,29 @@
     <description>Sender: SDL->HMI. Purpose: notify about raw video data presence over the URL provided via StartStream SDL's request.</description>
     <param name="available" type="Boolean" mandatory="true">
       <description>If "true" - video data started. If "false" - video data stopped.</description>
+    </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="Common.WayPointType" mandatory="true">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true"> 
+      <description>ID of the application.</description> 
+    </param> 
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
     </param>
   </function>
 
@@ -3643,6 +3782,555 @@
     </function>
     <!--end Qt HMI version of OnVehicleData-->
     <!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <function name="SubscribeVehicleData" messagetype="request">
+    <description>
+        Subscribes for specific published data items.
+        The data will be only sent if it has changed.
+        The application will be notified by the onVehicleData notification whenever new data is available.
+        To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
+    </description>
+    <param name="gps" type="Boolean" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Boolean" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Boolean" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Boolean" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Boolean" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="prndl" type="Boolean" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Boolean" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Boolean" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Boolean" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Boolean" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Boolean" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Boolean" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Boolean" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Boolean" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Boolean" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="SubscribeVehicleData" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Common.VehicleDataResult" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
+      <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModes" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="UnsubscribeVehicleData" messagetype="request">
+    <description>
+      This function is used to unsubscribe the notifications from the subscribeVehicleData function.
+    </description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+    <param name="gps" type="Boolean" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Boolean" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Boolean" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Boolean" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Boolean" mandatory="false">
+      <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="prndl" type="Boolean" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Boolean" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Boolean" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Boolean" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Boolean" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Boolean" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Boolean" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Boolean" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Boolean" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Boolean" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="UnsubscribeVehicleData" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Common.VehicleDataResult" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+        <!-- Ford Specific Data Items -->
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModes" type="Common.VehicleDataResult" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+        <!-- / Ford Specific Data Items -->
+  </function>
+  <function name="GetVehicleData" messagetype="request">
+    <description>Non periodic vehicle data read request.</description>
+    <param name="gps" type="Boolean" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Boolean" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Boolean" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Boolean" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Boolean" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Boolean" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Boolean" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="vin" type="Boolean" mandatory="false">
+      <description>Vehicle identification number</description>
+    </param>
+    <param name="prndl" type="Boolean" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Boolean" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Boolean" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Boolean" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Boolean" mandatory="false">
+      <description>The body information including ignition status and internal temp</description>
+    </param>
+    <param name="deviceStatus" type="Boolean" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Boolean" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="eCallInfo" type="Boolean" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Boolean" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Boolean" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+  </function>
+  <function name="GetVehicleData" messagetype="response">
+    <param name="gps" type="Common.GPSData" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="vin" type="String" maxlength="17" mandatory="false">
+      <description>Vehicle identification number</description>
+    </param>
+    <param name="prndl" type="Common.PRNDL" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.TireStatus" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.MyKey" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+  </function>
+  <function name="OnVehicleData" messagetype="notification">
+    <description>Callback for the periodic and non periodic vehicle data read function.</description>
+    <param name="gps" type="Common.GPSData" mandatory="false">
+      <description>See GPSData</description>
+    </param>
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
+      <description>The fuel level state</description>
+    </param>
+    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="vin" type="String" maxlength="17" mandatory="false">
+      <description>Vehicle identification number.</description>
+    </param>
+    <param name="prndl" type="Common.PRNDL" mandatory="false">
+      <description>See PRNDL</description>
+    </param>
+    <param name="tirePressure" type="Common.TireStatus" mandatory="false">
+      <description>See TireStatus</description>
+    </param>
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
+      <description>Odometer in km</description>
+    </param>
+    <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
+      <description>The status of the seat belts</description>
+    </param>
+    <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
+      <description>The body information including power modes</description>
+    </param>
+    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="false">
+      <description>The device status including signal and battery strength</description>
+    </param>
+    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
+      <description>The status of the brake pedal</description>
+    </param>
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+      <description>The status of the wipers</description>
+    </param>
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+      <description>Status of the head lamps</description>
+    </param>
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
+    <param name="myKey" type="Common.MyKey" mandatory="false">
+      <description>Information related to the MyKey feature</description>
+    </param>
+  </function>
     <function name="SubscribeGps" messagetype="request" provider="hmi">
     </function>
     <function name="SubscribeGps" messagetype="response">

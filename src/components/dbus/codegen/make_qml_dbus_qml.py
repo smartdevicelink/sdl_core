@@ -174,14 +174,14 @@ def write_header(out):
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus QML part")
 arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
-arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.1.0")
+arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.5.1")
 arg_parser.add_argument('--outdir', required=True, help="path to directory where output files with pattern name <intarface name>Proxy.qml will be saved, e.g. BasicCommunicationProxy.qml, ButtonsProxy.qml VRProxy.qml")
 args = arg_parser.parse_args()
 
 if args.version == "4.8.5":
     qt_quick_version = "1.1"
     type_variant_name = "variant"
-elif args.version == "5.1.0":
+elif args.version == "5.5.1":
     qt_quick_version = "2.0"
     type_variant_name = "var"
 
