@@ -75,7 +75,7 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
     * @brief Handle subscription to vehicle data
     *
     */
-  void ProccessSubscription(Json::Value& hmi_response);
+  void ProccessSubscription(const Json::Value& hmi_response);
 };
 
 }  // namespace commands
