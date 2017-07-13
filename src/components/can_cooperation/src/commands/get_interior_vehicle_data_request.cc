@@ -69,7 +69,8 @@ void GetInteriorVehicleDataRequest::OnEvent(
 
   application_manager::Message& hmi_response = *(event.event_message());
   const bool validate_result = service()->ValidateMessageBySchema(hmi_response);
-  Json::Value value = MessageHelper::StringToValue(hmi_response.json_message());
+  const Json::Value value =
+      MessageHelper::StringToValue(hmi_response.json_message());
   std::string result_code;
   const bool success =
       validate_result && ParseResultCode(value, result_code, info);
@@ -81,39 +82,47 @@ void GetInteriorVehicleDataRequest::OnEvent(
 }
 
 void GetInteriorVehicleDataRequest::ProccessSubscription(
-    Json::Value& hmi_response) {
+    const Json::Value& hmi_response) {
   LOG4CXX_AUTO_TRACE(logger_);
   Json::Value request_params;
   Json::Reader reader;
   reader.parse(message_->json_message(), request_params);
 
-  bool subscribe = false;
-  if (IsMember(request_params, kSubscribe)) {
-    subscribe = request_params[kSubscribe].asBool();
+  const bool is_subscribe_present_in_request =
+      IsMember(request_params, kSubscribe);
+  const bool isSubscribed_present_in_response =
+      IsMember(hmi_response[kResult], kIsSubscribed);
+
+  if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
+    return;
   }
-  if (subscribe && !hmi_response.isMember(kIsSubscribed)) {
+
+  if (is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "conditional mandatory parameter "
                      << kIsSubscribed << " missed in hmi response");
     return;
   }
 
-  if (!subscribe && hmi_response.isMember(kIsSubscribed)) {
+  if (!is_subscribe_present_in_request && isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "Parameter " << kIsSubscribed << " is ignored due to absence '"
                               << kSubscribe << "' parameter in request");
     return;
   }
 
-  bool is_subscribed = response_params_[kIsSubscribed].asBool();
-  response_params_[kIsSubscribed] = is_subscribed;
-  CANAppExtensionPtr extension = GetAppExtension(app());
-  if (is_subscribed) {
-    extension->SubscribeToInteriorVehicleData(
-        request_params[kModuleDescription]);
-  } else {
-    extension->UnsubscribeFromInteriorVehicleData(
-        request_params[kModuleDescription]);
+  const bool request_subscribe = request_params[kSubscribe].asBool();
+  const bool response_subscribe = hmi_response[kResult][kIsSubscribed].asBool();
+  response_params_[kIsSubscribed] = response_subscribe;
+  if (request_subscribe == response_subscribe) {
+    CANAppExtensionPtr extension = GetAppExtension(app());
+    if (response_subscribe) {
+      extension->SubscribeToInteriorVehicleData(
+          request_params[kModuleDescription]);
+    } else {
+      extension->UnsubscribeFromInteriorVehicleData(
+          request_params[kModuleDescription]);
+    }
   }
 }
 
