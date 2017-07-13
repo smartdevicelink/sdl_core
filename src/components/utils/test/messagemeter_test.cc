@@ -126,7 +126,8 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   }
 }
 
-TEST_P(MessageMeterTest, DISABLED_TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
+TEST_P(MessageMeterTest,
+       DISABLED_TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
   size_t messages = 0;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   // Add messages for less range period
@@ -184,7 +185,8 @@ TEST_P(MessageMeterTest,
   }
 }
 
-TEST_P(MessageMeterTest, DISABLED_Frequency_CountingOverPeriod_CorrectCountOfMessages) {
+TEST_P(MessageMeterTest,
+       DISABLED_Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   const size_t one_message = 1;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   EXPECT_EQ(one_message, meter.TrackMessage(id1));
