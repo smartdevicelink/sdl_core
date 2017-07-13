@@ -79,6 +79,15 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
   }
+
+  if(msg_params.keyExists(strings::system_capabilities)) {
+    if(msg_params[strings::system_capabilities].keyExists(strings::navigation_capability)) {
+      hmi_capabilities.set_navigation_capability(msg_params[strings::system_capabilities][strings::navigation_capability]);
+    }
+    if(msg_params[strings::system_capabilities].keyExists(strings::phone_capability)) {
+      hmi_capabilities.set_phone_capability(msg_params[strings::system_capabilities][strings::phone_capability]);
+    }
+  }
 }
 
 }  // namespace commands

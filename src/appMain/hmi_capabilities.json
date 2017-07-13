@@ -292,7 +292,16 @@
             "longPressAvailable": true,
             "upDownAvailable": true,
             "imageSupported": true
-        }]
+        }],
+        "systemCapabilities": {
+            "navigationCapability": {
+                "sendLocationEnabled": true,
+                "getWayPointsEnabled": true
+            },
+            "phoneCapability": {
+                "dialNumberEnabled": true
+            }
+        }
     },
     "VR": {
         "capabilities": ["TEXT"],
@@ -415,14 +424,5 @@
     "SyncMessageVersion": {
         "majorVersion": 3,
         "minorVersion": 0
-    },
-    "SystemCapabilities": {
-        "NavigationCapability": {
-            "sendLocationEnabled": true,
-            "getWayPointsEnabled": true
-        },
-        "PhoneCapability": {
-            "dialNumberEnabled": true
-        }
     }
 }

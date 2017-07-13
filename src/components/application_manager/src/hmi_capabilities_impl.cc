@@ -988,6 +988,21 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             soft_button_capabilities, soft_button_capabilities_so);
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
+      if(check_existing_json_member(ui, "systemCapabilities")) {
+        Json::Value system_capabilities = ui.get("systemCapabilities", "");
+        if (check_existing_json_member(system_capabilities, "navigationCapability")) {
+          Json::Value navigation_capability = system_capabilities.get("navigationCapability","");
+          smart_objects::SmartObject navigation_capability_so;
+          Formatters::CFormatterJsonBase::jsonValueToObj(navigation_capability, navigation_capability_so);
+          set_navigation_capability(navigation_capability_so);
+        }
+        if (check_existing_json_member(system_capabilities, "phoneCapability")) {
+          Json::Value phone_capability = system_capabilities.get("phoneCapability","");
+          smart_objects::SmartObject phone_capability_so;
+          Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability, phone_capability_so);
+          set_phone_capability(phone_capability_so);
+        }
+      }
     }  // UI end
 
     // VR
@@ -1093,21 +1108,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
                                                      vehicle_type_so);
       set_vehicle_type(vehicle_type_so);
     }  // VehicleType end
-    if(check_existing_json_member(root_json, "SystemCapabilities")) {
-      Json::Value system_capabilities = root_json.get("SystemCapabilities", "");
-      if (check_existing_json_member(system_capabilities, "NavigationCapability")) {
-        Json::Value navigation_capability = system_capabilities.get("NavigationCapability","");
-        smart_objects::SmartObject navigation_capability_so;
-        Formatters::CFormatterJsonBase::jsonValueToObj(navigation_capability, navigation_capability_so);
-        set_navigation_capability(navigation_capability_so);
-      }
-      if (check_existing_json_member(system_capabilities, "PhoneCapability")) {
-        Json::Value phone_capability = system_capabilities.get("PhoneCapability","");
-        smart_objects::SmartObject phone_capability_so;
-        Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability, phone_capability_so);
-        set_phone_capability(phone_capability_so);
-      }
-    }
   } catch (...) {
     return false;
   }

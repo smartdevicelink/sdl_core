@@ -2086,6 +2086,30 @@
     </param>
   </struct>
 
+  <struct name="NavigationCapability">
+    <description>Extended capabilities for an onboard navigation system</description>
+    <param name="sendLocationEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to add locations to the onboard nav</description>
+    </param>
+    <param name="getWayPointsEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to return way points from onboard nav</description>
+    </param>
+  </struct>
+
+  <struct name="PhoneCapability">
+    <description>Extended capabilities of the module's phone feature</description>
+    <param name="dialNumberEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the abiulity to perform dial number</description>
+    </param>
+  </struct>
+
+  <struct name="SystemCapabilities">
+      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+      </param>
+      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      </param>
+  </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.2.0" date="2017-04-27">
@@ -2953,7 +2977,7 @@
       <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
-      <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
+      <description>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
     </param>
     <param name="keyboardProperties" type="Common.KeyboardProperties" mandatory="false">
       <description>On-screen keybaord configuration (if available).</description>
@@ -2999,6 +3023,9 @@
     </param>
     <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
       <description>Specifies the HMI’s capabilities. See HMICapabilities.</description>
+    </param>
+    <param name="systemCapabilities" type="Common.SystemCapabilities" mandatory="false">
+      <description>Specifies system capabilities. See SystemCapabilities</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="request">

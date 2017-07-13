@@ -169,6 +169,9 @@ extern const char* audio_pass_thru_icon;
 extern const char* way_points;
 extern const char* system_capability;
 extern const char* system_capability_type;
+extern const char* system_capabilities;
+extern const char* navigation_capability;
+extern const char* phone_capability;
 
 // PutFile
 extern const char* sync_file_name;

@@ -2407,7 +2407,7 @@
     </param>
   </struct>
 
-   <struct name="SystemCapability">
+  <struct name="SystemCapability">
       <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
       <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
       </param>

@@ -136,6 +136,9 @@ const char* audio_pass_thru_icon = "audioPassThruIcon";
 const char* way_points = "wayPoints";
 const char* system_capability = "systemCapability";
 const char* system_capability_type = "systemCapabilityType";
+const char* system_capabilities = "systemCapabilities";
+const char* navigation_capability = "navigationCapability";
+const char* phone_capability = "phoneCapability";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
