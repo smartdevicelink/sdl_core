@@ -293,6 +293,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   event.set_smart_object(*msg_);
 
+  ON_CALL(*mock_message_helper_, HMIToMobileResult(result_code))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
@@ -390,7 +392,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
   command_->Run();
 
   event.set_smart_object(*msg_);
-
+  ON_CALL(*mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),

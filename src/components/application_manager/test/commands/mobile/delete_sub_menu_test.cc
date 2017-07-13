@@ -241,9 +241,11 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_UnknownEventId_UNSUCCESS) {
 TEST_F(DeleteSubMenuRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
   (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
+      hmi_apis::Common_Result::eType::SUCCESS;
   event.set_smart_object(*message_);
-
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
   EXPECT_CALL(*app_, RemoveSubMenu(_)).Times(0);
@@ -310,6 +312,10 @@ TEST_F(DeleteSubMenuRequestTest,
 
   commands_map_.insert(
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
+
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
