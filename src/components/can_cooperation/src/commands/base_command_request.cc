@@ -285,6 +285,7 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
 bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
                                          std::string& result_code,
                                          std::string& info) {
+  LOG4CXX_AUTO_TRACE(logger_);
   result_code = result_codes::kInvalidData;
   info = "";
 

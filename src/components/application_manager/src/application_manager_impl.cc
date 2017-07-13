@@ -1919,24 +1919,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       if (output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
-
-        if (application_manager::MessageType::kNotification ==
-            output[strings::params][strings::message_type].asInt()) {
-          LOG4CXX_ERROR(logger_, "Ignore wrong HMI notification");
-          return false;
-        }
-
-        if (application_manager::MessageType::kRequest ==
-            output[strings::params][strings::message_type].asInt()) {
-          LOG4CXX_ERROR(logger_, "Ignore wrong HMI request");
-          return false;
-        }
-
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] =
-            std::string("Received invalid data on HMI response");
+        return false;
       }
       break;
     }
@@ -2093,14 +2076,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
 bool ApplicationManagerImpl::ValidateMessageBySchema(const Message& message) {
   smart_objects::SmartObject so;
-  const bool conversion_result = ConvertMessageToSO(message, so);
-  if (conversion_result) {
-    if (so[strings::params].keyExists(hmi_response::code)) {
-      return hmi_apis::Common_Result::INVALID_DATA !=
-             so[strings::params][hmi_response::code].asInt();
-    }
-  }
-  return conversion_result;
+  return ConvertMessageToSO(message, so);
+  ;
 }
 
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
@@ -2178,8 +2155,17 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
   *smart_object = message->smart_object();
 #else
   if (!ConvertMessageToSO(*message, *smart_object)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
+    if (application_manager::MessageType::kResponse ==
+        (*smart_object)[strings::params][strings::message_type].asInt()) {
+      (*smart_object).erase(strings::msg_params);
+      (*smart_object)[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::INVALID_DATA;
+      (*smart_object)[strings::msg_params][strings::info] =
+          std::string("Received invalid data on HMI response");
+    } else {
+      LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+      return;
+    }
   }
 #endif  // HMI_DBUS_API
 
