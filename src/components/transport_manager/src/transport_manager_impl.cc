@@ -919,7 +919,6 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                    id,
                    *static_cast<CommunicationError*>(event.event_error.get()));
         RemoveConnection(id, connection->transport_adapter);
-        std::cout << "ON_UNEXPECTED_DISCONNECT conn_id = " << id << " app_id = " << event.application_id << "\n";
       } else {
         connections_lock_.Release();
         LOG4CXX_ERROR(logger_,
