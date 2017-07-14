@@ -30,6 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <map>
+
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
@@ -41,6 +43,7 @@ namespace can_cooperation {
 
 namespace commands {
 
+using namespace enums_value;
 using namespace json_keys;
 using namespace message_params;
 
@@ -65,16 +68,18 @@ void GetInteriorVehicleDataRequest::OnEvent(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(
       (functional_modules::hmi_api::get_interior_vehicle_data == event.id()));
-  std::string info;
 
   application_manager::Message& hmi_response = *(event.event_message());
   const bool validate_result = service()->ValidateMessageBySchema(hmi_response);
   const Json::Value value =
       MessageHelper::StringToValue(hmi_response.json_message());
   std::string result_code;
+  std::string info;
   bool success = validate_result && ParseResultCode(value, result_code, info);
 
-  if (!validate_result) {
+  const bool is_generic_error =
+      (!validate_result) || (success && false == CheckForRequestedData(value));
+  if (is_generic_error) {
     success = false;
     result_code = result_codes::kGenericError;
     info = "Invalid message received from vehicle";
@@ -130,6 +135,31 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
           request_params[kModuleDescription]);
     }
   }
+}
+
+bool GetInteriorVehicleDataRequest::CheckForRequestedData(
+    const Json::Value& hmi_response) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value request_params;
+  Json::Reader reader;
+  reader.parse(message_->json_message(), request_params);
+
+  std::map<std::string, std::string> all_data;
+  all_data[kClimate] = kClimateControlData;
+  all_data[kRadio] = kRadioControlData;
+
+  const std::string module_type = ModuleType(request_params);
+  const std::string module_control_data = all_data[module_type];
+  const bool is_requested_data_present =
+      IsMember(hmi_response[kResult][kModuleData], module_control_data);
+
+  if (!is_requested_data_present) {
+    LOG4CXX_ERROR(logger_,
+                  "Requested control data for module "
+                      << module_type << " is not present in HMI response");
+  }
+  return is_requested_data_present;
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleType(
