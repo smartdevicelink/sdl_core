@@ -126,7 +126,8 @@ class GetWayPointsRequestOnEventTest
     }
 
     event.set_smart_object(*event_msg);
-
+    ON_CALL(message_helper_mock_, HMIToMobileResult(_))
+        .WillByDefault(Return(ResultCode));
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
     EXPECT_EQ(

@@ -760,12 +760,17 @@ TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
 TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
+      hmi_apis::Common_Result::eType::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);

@@ -33,6 +33,8 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 
@@ -264,7 +266,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
 }
 
 MockMessageHelper* MockMessageHelper::message_helper_mock() {
-  static MockMessageHelper message_helper_mock;
+  static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
 void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
