@@ -108,10 +108,14 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
     return;
   }
 
+  CANAppExtensionPtr extension = GetAppExtension(app());
   if (is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "conditional mandatory parameter "
                      << kIsSubscribed << " missed in hmi response");
+    response_params_[kIsSubscribed] =
+        extension->IsSubscibedToInteriorVehicleData(
+            request_params[kModuleDescription]);
     return;
   }
 
@@ -126,7 +130,6 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   const bool response_subscribe = hmi_response[kResult][kIsSubscribed].asBool();
   response_params_[kIsSubscribed] = response_subscribe;
   if (request_subscribe == response_subscribe) {
-    CANAppExtensionPtr extension = GetAppExtension(app());
     if (response_subscribe) {
       extension->SubscribeToInteriorVehicleData(
           request_params[kModuleDescription]);
