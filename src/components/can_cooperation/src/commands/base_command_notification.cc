@@ -81,13 +81,6 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 
 void BaseCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!service_->ValidateMessageBySchema(*message())) {
-    LOG4CXX_ERROR(logger_, "Message validation failed");
-    return;
-  }
-
-  LOG4CXX_INFO(logger_, "Notification message validated successfully!");
-
   Execute();
 }
 
@@ -125,8 +118,8 @@ bool BaseCommandNotification::CheckPolicy(
 
   if (!app) {
     LOG4CXX_WARN(logger_,
-                 "Application doesn't " << message->connection_key()
-                                        << " registered");
+                 "Application " << message->connection_key()
+                                << "isn't registered");
     return false;
   }
 

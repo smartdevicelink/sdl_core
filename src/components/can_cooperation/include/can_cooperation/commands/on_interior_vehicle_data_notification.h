@@ -30,52 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
-#include "can_cooperation/rc_command_factory.h"
-#include "functional_module/function_ids.h"
-#include "can_cooperation/commands/get_interior_vehicle_data_request.h"
-#include "can_cooperation/commands/set_interior_vehicle_data_request.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
-#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
+#include "utils/macro.h"
+#include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
+namespace commands {
 
-using functional_modules::MobileFunctionID;
+/**
+ * @brief OnInteriorVehicleDataNotification command class
+ */
+class OnInteriorVehicleDataNotification : public BaseCommandNotification {
+ public:
+  /**
+   * @brief OnInteriorVehicleDataNotification class constructor
+   *
+   * @param message Message with notification
+   **/
+  OnInteriorVehicleDataNotification(
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
-utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
-    const application_manager::MessagePtr& msg,
-    CANModuleInterface& can_module) {
-  switch (msg->function_id()) {
-    case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(
-          msg, can_module);
-      break;
-    }
-    case MobileFunctionID::SET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(
-          msg, can_module);
-      break;
-    }
-    //    case MobileFunctionID::BUTTON_PRESS: {
-    //      return utils::MakeShared<commands::ButtonPressRequest>(msg,
-    //      can_module);
-    //      break;
-    //    }
-    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
-          msg, can_module);
-      break;
-    }
-    default: {
-      utils::SharedPtr<commands::Command> invalid_command;
-      LOG4CXX_DEBUG(logger_,
-                    "RSDL unable to proces function " << msg->function_id());
-      return invalid_command;
-    }
+  /**
+   * @brief Execute command
+   */
+  void Execute() FINAL;
+
+  /**
+   * @brief OnInteriorVehicleDataNotification class destructor
+   */
+  virtual ~OnInteriorVehicleDataNotification();
+
+ protected:
+  std::string ModuleType(const Json::Value& message) FINAL;
+  std::vector<std::string> ControlData(const Json::Value& message) FINAL;
+
+  bool Validate() OVERRIDE {
+    return true;
   }
-}
+};
+
+}  // namespace commands
 
 }  // namespace can_cooperation
+
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_

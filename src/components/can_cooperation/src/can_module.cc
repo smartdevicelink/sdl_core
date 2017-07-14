@@ -110,7 +110,6 @@ const std::string ExtractFunctionAndAddMetadata(
   }
 
   if (value.isMember(json_keys::kResult)) {
-    // value[json_keys::kResult].isMember(json_keys::kMethod)
     const Json::Value& result = value.get(json_keys::kResult, Json::Value());
     const std::string& function_name =
         result.get(json_keys::kMethod, "").asCString();
@@ -127,7 +126,7 @@ const std::string ExtractFunctionAndAddMetadata(
     const Json::Value& error = value.get(json_keys::kError, Json::Value());
     const Json::Value& data = error.get(json_keys::kData, Json::Value());
     const std::string& function_name =
-        error.get(json_keys::kMethod, "").asCString();
+        data.get(json_keys::kMethod, "").asCString();
 
     // Existence of method name must be guaranteed by plugin manager
     DCHECK_OR_RETURN(!function_name.empty(), "");
@@ -174,20 +173,27 @@ ProcessResult CANModule::ProcessHMIMessage(
   // Existence of method name must be guaranteed by plugin manager
   DCHECK_OR_RETURN(!function_name.empty(), ProcessResult::FAILED);
 
+  LOG4CXX_DEBUG(logger_, "Process " << function_name);
+
   switch (msg->type()) {
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
       event_dispatcher_.raise_event(event);
-      break;
+      return ProcessResult::PROCESSED;
     }
     case application_manager::MessageType::kRequest:
     case application_manager::MessageType::kNotification: {
-      const bool is_valid = service()->ValidateMessageBySchema(*msg);
+      if (hmi_api::on_interior_vehicle_data == function_name) {
+        msg->set_function_id(functional_modules::ON_INTERIOR_VEHICLE_DATA);
+      }
+      const application_manager::MessageValidationResult validation_result =
+          service()->ValidateMessageBySchema(*msg);
       utils::SharedPtr<commands::Command> command =
           RCCommandFactory::CreateCommand(msg, *this);
-      if (is_valid && command) {
+      if ((validation_result == application_manager::SUCCESS) && command) {
         command->Run();
+        return ProcessResult::PROCESSED;
       }
     }
     default: { LOG4CXX_DEBUG(logger_, "Unknown message type"); }
