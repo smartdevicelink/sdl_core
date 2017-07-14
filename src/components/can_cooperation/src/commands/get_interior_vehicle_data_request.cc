@@ -72,8 +72,14 @@ void GetInteriorVehicleDataRequest::OnEvent(
   const Json::Value value =
       MessageHelper::StringToValue(hmi_response.json_message());
   std::string result_code;
-  const bool success =
-      validate_result && ParseResultCode(value, result_code, info);
+  bool success = validate_result && ParseResultCode(value, result_code, info);
+
+  if (!validate_result) {
+    success = false;
+    result_code = result_codes::kGenericError;
+    info = "Invalid message received from vehicle";
+  }
+
   if (success) {
     ProccessSubscription(value);
     response_params_[kModuleData] = value[kResult][kModuleData];
