@@ -67,6 +67,7 @@ AudioStreamSenderThread::AudioStreamSenderThread(
     application_manager::ApplicationManager& app_mngr)
     : session_key_(session_key)
     , fileName_(fileName)
+    , offset_(0)
     , shouldBeStoped_(false)
     , shouldBeStoped_lock_()
     , shouldBeStoped_cv_()

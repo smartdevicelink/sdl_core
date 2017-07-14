@@ -312,8 +312,7 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
       HmiInterfaces::STATE_AVAILABLE == tts_interface_state) {
     result = true;
     out_result_code = mobile_apis::Result::WARNINGS;
-    out_response_info =
-        std::string("Unsupported phoneme type sent in a prompt").c_str();
+    out_response_info = "Unsupported phoneme type sent in a prompt";
   } else {
     result =
         PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);

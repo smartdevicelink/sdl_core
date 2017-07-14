@@ -2775,9 +2775,10 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
     return;
   }
 
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  if (command->Init()) {
+    command->Run();
+    command->CleanUp();
+  }
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(

@@ -47,13 +47,11 @@ using ::testing::Return;
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
   utils::SharedPtr<UpdateStatusManager> manager_;
-  const uint32_t k_timeout_;
   utils::SharedPtr<MockPolicyListener> listener_;
 
  public:
   UpdateStatusManagerTest()
       : manager_(utils::MakeShared<UpdateStatusManager>())
-      , k_timeout_(1000)
       , listener_(utils::MakeShared<MockPolicyListener>()) {}
 
   void SetUp() OVERRIDE {
@@ -73,7 +71,7 @@ TEST_F(UpdateStatusManagerTest,
   manager_->OnPolicyInit(true);
   // Check
   EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut(k_timeout_);
+  manager_->OnUpdateSentOut();
   // Check
   EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
 }
