@@ -42,8 +42,6 @@ struct DBusMessageIter;
 
 namespace dbus {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 /**
  * \brief class for work with DBus
  */

@@ -36,6 +36,7 @@ const char* success = "success";
 const char* sync_msg_version = "syncMsgVersion";
 const char* major_version = "majorVersion";
 const char* minor_version = "minorVersion";
+const char* patch_version = "patchVersion";
 const char* app_name = "appName";
 const char* ngn_media_screen_app_name = "ngnMediaScreenAppName";
 const char* vr_synonyms = "vrSynonyms";
@@ -131,6 +132,9 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
@@ -273,6 +277,22 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
+
+const char* audio_streaming_indicator = "audioStreamingIndicator";
+
+const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
+const char* const language_supported = "languageSupported";
+const char* const keyboard_layout_supported = "keyboardLayoutSupported";
+const char* const keypress_mode_supported = "keypressModeSupported";
+const char* const limited_characters_list_supported =
+    "limitedCharactersListSupported";
+const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const entity_type = "entityType";
+const char* const entity_id = "entityID";
+const char* const status = "status";
+const char* const external_consent_status = "externalConsentStatus";
+const char* const consented_functions = "consentedFunctions";
+const char* const source = "source";
 }  // namespace strings
 
 namespace json {
@@ -346,6 +366,7 @@ const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
 const char* file = "file";
+const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
 }  // namespace hmi_request

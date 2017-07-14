@@ -73,7 +73,7 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
+  utils::SharedPtr<NiceMock<application_manager_test::MockApplication> >
       app_mock;
 
   profile::Profile profile_;

@@ -41,7 +41,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 class ConditionalVariableTest : public ::testing::Test {
  public:
@@ -127,6 +127,6 @@ TEST_F(
   EXPECT_EQ(sync_primitives::ConditionalVariable::kTimeout, wait_st);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

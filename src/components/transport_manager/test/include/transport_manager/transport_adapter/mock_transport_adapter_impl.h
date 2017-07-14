@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_TRANSPORT_ADAPTER_IMPL_H_
 
 #include "gmock/gmock.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_manager_settings.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterImpl;
 using ::transport_manager::transport_adapter::DeviceScanner;
@@ -71,7 +71,7 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
   virtual ~MockTransportAdapterImpl(){};
 
   virtual DeviceType GetDeviceType() const {
-    return UNKNOWN;
+    return DeviceType::UNKNOWN;
   }
 
   MOCK_CONST_METHOD0(Store, void());

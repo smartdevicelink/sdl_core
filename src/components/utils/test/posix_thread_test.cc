@@ -32,11 +32,11 @@
 
 #include "gtest/gtest.h"
 #include "utils/lock.h"
-#include "threads/thread.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace sync_primitives;
 using namespace threads;
@@ -324,6 +324,6 @@ TEST(PosixThreadTest,
   EXPECT_EQ(NULL, thread->delegate());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

@@ -175,7 +175,7 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_navi_app(app_id_)) {
+  if (is_navi_app(app_id_) || is_voice_communication_app(app_id_)) {
     return HMILevel::HMI_LIMITED;
   }
   return HMILevel::HMI_BACKGROUND;

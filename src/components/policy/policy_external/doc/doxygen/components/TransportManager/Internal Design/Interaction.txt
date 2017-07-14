@@ -1,0 +1,7 @@
+/*! \page components_transportmanager_internal_design_interaction Sub-Components Interaction
+
+Internally Transport Manager is a root component for Device Adapters. After running Transport Manager creates Device Adapters and runs them too.
+
+During system life cycle all messages from Device Adapter are translated via Transport Manager to the clients. In other direction – all requests from clients are re-directed to respective Device Adapters by the Transport Manager.
+
+*/

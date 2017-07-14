@@ -37,13 +37,13 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace resumption_test {
 
 namespace app_mngr = application_manager;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockResumptionData : public ::resumption::ResumptionData {
  public:

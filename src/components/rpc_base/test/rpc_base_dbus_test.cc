@@ -35,6 +35,9 @@
 #include "rpc_base/rpc_base_dbus_inl.h"
 
 namespace test {
+namespace components {
+namespace rpc_base_test {
+
 using namespace rpc;
 using namespace dbus;
 
@@ -169,7 +172,7 @@ TEST_F(DbusDeserialization, DeserializeArray) {
   {
     dbus::MessageWriter writer(msgref);
     std::string array_signature;
-    rpc::DbusSignature<Integer<int32_t, 1, 50>>(&array_signature);
+    rpc::DbusSignature<Integer<int32_t, 1, 50> >(&array_signature);
     dbus::MessageWriter array_writer(
         &writer, dbus::kArray, array_signature.c_str());
     array_writer.PutInt32(5);
@@ -192,13 +195,13 @@ TEST_F(DbusDeserialization, DeserializeArrayOfArrays) {
   {
     dbus::MessageWriter writer(msgref);
     std::string array_signature;
-    rpc::DbusSignature<Array<Integer<int32_t, 1, 50>, 1, 5>>(&array_signature);
+    rpc::DbusSignature<Array<Integer<int32_t, 1, 50>, 1, 5> >(&array_signature);
     dbus::MessageWriter array_writer(
         &writer, dbus::kArray, array_signature.c_str());
     int val = 5;
     for (int i = 0; i < 2; ++i) {
       std::string subarray_signature;
-      rpc::DbusSignature<Integer<int32_t, 1, 50>>(&subarray_signature);
+      rpc::DbusSignature<Integer<int32_t, 1, 50> >(&subarray_signature);
       dbus::MessageWriter subarray_wirter(
           &array_writer, dbus::kArray, subarray_signature.c_str());
 
@@ -275,7 +278,7 @@ TEST_F(DbusDeserialization, DeserializeOptionalString) {
   }
   {
     dbus::MessageReader reader(msgref);
-    Optional<String<1, 100>> readback(&reader);
+    Optional<String<1, 100> > readback(&reader);
     ASSERT_TRUE(readback.is_initialized());
     ASSERT_TRUE(readback.is_valid());
     ASSERT_EQ(std::string(*readback), "Hello dear");
@@ -293,7 +296,7 @@ TEST_F(DbusDeserialization, DeserializeOptionalInt) {
   }
   {
     dbus::MessageReader reader(msgref);
-    Optional<Integer<int32_t, 1, 90>> readback(&reader);
+    Optional<Integer<int32_t, 1, 90> > readback(&reader);
     ASSERT_FALSE(readback.is_initialized());
     ASSERT_TRUE(readback.is_valid());
     ASSERT_FALSE(reader.has_failed());
@@ -494,61 +497,61 @@ TEST(ValidatedTypes, TestBooleanDbusSignature) {
 
 TEST(ValidatedTypes, TestIntDbusSignature) {
   std::string sign;
-  DbusSignature<Integer<int32_t, 1, 2>>(&sign);
+  DbusSignature<Integer<int32_t, 1, 2> >(&sign);
   ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestFloatDbusSignature) {
   std::string sign;
-  DbusSignature<Float<1, 2>>(&sign);
+  DbusSignature<Float<1, 2> >(&sign);
   ASSERT_EQ(sign, "d");
 }
 
 TEST(ValidatedTypes, TestStringDbusSignature) {
   std::string sign;
-  DbusSignature<String<1, 2>>(&sign);
+  DbusSignature<String<1, 2> >(&sign);
   ASSERT_EQ(sign, "s");
 }
 
 TEST(ValidatedTypes, TestEnumDbusSignature) {
   std::string sign;
-  DbusSignature<Enum<TestEnum>>(&sign);
+  DbusSignature<Enum<TestEnum> >(&sign);
   ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestIntArrayDbusSignature) {
   std::string sign;
-  DbusSignature<Array<Integer<int32_t, 1, 2>, 1, 3>>(&sign);
+  DbusSignature<Array<Integer<int32_t, 1, 2>, 1, 3> >(&sign);
   ASSERT_EQ(sign, "ai");
 }
 
 TEST(ValidatedTypes, TestIntArrayArrayDbusSignature) {
   std::string sign;
-  DbusSignature<Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5>>(&sign);
+  DbusSignature<Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5> >(&sign);
   ASSERT_EQ(sign, "aai");
 }
 
 TEST(ValidatedTypes, TestMapDbusSignature) {
   std::string sign;
-  DbusSignature<Map<Integer<int32_t, 1, 2>, 3, 4>>(&sign);
+  DbusSignature<Map<Integer<int32_t, 1, 2>, 3, 4> >(&sign);
   ASSERT_EQ(sign, "a{si}");
 }
 
 TEST(ValidatedTypes, TestMandatoryEnumDbusSignature) {
   std::string sign;
-  DbusSignature<Enum<TestEnum>>(&sign);
+  DbusSignature<Enum<TestEnum> >(&sign);
   ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestOptionalEnumDbusSignature) {
   std::string sign;
-  DbusSignature<Optional<Enum<TestEnum>>>(&sign);
+  DbusSignature<Optional<Enum<TestEnum> > >(&sign);
   ASSERT_EQ(sign, "(bi)");
 }
 
 TEST(ValidatedTypes, TestOptionalFloatArrayDbusSignature) {
   std::string sign;
-  DbusSignature<Optional<Array<Float<1, 2>, 3, 4>>>(&sign);
+  DbusSignature<Optional<Array<Float<1, 2>, 3, 4> > >(&sign);
   ASSERT_EQ(sign, "(bad)");
 }
 
@@ -674,4 +677,6 @@ TEST_F(DbusFailuresTest, DbusNonExistentArrayReadTest) {
   ASSERT_EQ(val, 0);
 }
 
+}  // namespace rpc_base_test
+}  // namespace components
 }  // namespace test

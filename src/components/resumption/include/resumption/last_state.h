@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include <string>
 
-#include "utils/macro.h"
 #include "json/json.h"
 
 namespace resumption {
@@ -43,36 +42,19 @@ namespace resumption {
 class LastState {
  public:
   /**
-   * @brief Constructor
-   */
-  LastState(const std::string& app_storage_folder,
-            const std::string& app_info_storage);
-
-  /**
    * @brief Destructor
    */
-  ~LastState();
+  virtual ~LastState() {}
 
   /**
    * @brief Saving dictionary to filesystem
    */
-  void SaveToFileSystem();
+  virtual void SaveStateToFileSystem() = 0;
 
   /**
-   * @brief public dictionary
+   * @brief Get reference to dictionary
    */
-  Json::Value dictionary;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  /**
-   * @brief Load dictionary from filesystem
-   */
-  void LoadFromFileSystem();
-
-  std::string app_storage_folder_;
-  std::string app_info_storage_;
+  virtual Json::Value& get_dictionary() = 0;
 };
 
 }  // namespace resumption

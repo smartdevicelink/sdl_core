@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,62 +28,77 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-set(UTILS_INCLUDE_DIR ${COMPONENTS_DIR}/utils/include)
-set(UTILS_SRC_DIR ${COMPONENTS_DIR}/utils/src)
+find_package(Sqlite3 REQUIRED)
 
 include_directories (
-  ${UTILS_INCLUDE_DIR}
+  ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-    ${UTILS_SRC_DIR}/bitstream.cc
-    ${UTILS_SRC_DIR}/conditional_variable_posix.cc
-    ${UTILS_SRC_DIR}/file_system.cc
-    ${UTILS_SRC_DIR}/threads/posix_thread.cc   
-    ${UTILS_SRC_DIR}/threads/thread_delegate.cc
-    ${UTILS_SRC_DIR}/threads/thread_validator.cc
-    ${UTILS_SRC_DIR}/threads/async_runner.cc
-    ${UTILS_SRC_DIR}/lock_posix.cc
-    ${UTILS_SRC_DIR}/rwlock_posix.cc
-    ${UTILS_SRC_DIR}/date_time.cc
-    ${UTILS_SRC_DIR}/signals_linux.cc
-    ${UTILS_SRC_DIR}/system.cc
-    ${UTILS_SRC_DIR}/resource_usage.cc
-    ${UTILS_SRC_DIR}/appenders_loader.cc
-    ${UTILS_SRC_DIR}/gen_hash.cc
-    ${UTILS_SRC_DIR}/convert_utils.cc
-    ${UTILS_SRC_DIR}/custom_string.cc
-    ${UTILS_SRC_DIR}/timer.cc
+# dbms
+set(DBMS_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/utils/sqlite_wrapper
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/sqlite_wrapper
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/utils/qdb_wrapper
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/qdb_wrapper
 )
 
-if(ENABLE_LOG)
-  list(APPEND SOURCES
-    ${UTILS_SRC_DIR}/push_log.cc
-    ${UTILS_SRC_DIR}/log_message_loop_thread.cc
-    ${UTILS_SRC_DIR}/logger_status.cc
-    ${UTILS_SRC_DIR}/auto_trace.cc
-    ${UTILS_SRC_DIR}/logger.cc
+set(EXCLUDE_PATHS
+  thread_manager.cc
+  pulse_thread_delegate.cc
+  ${DBMS_PATHS}
+)
+
+set(LIBRARIES)
+
+if(NOT BUILD_BACKTRACE_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    back_trace.cc
   )
 endif()
 
-if (BUILD_BACKTRACE_SUPPORT)
-    list(APPEND SOURCES
-    ${UTILS_SRC_DIR}/back_trace.cc
+if(ENABLE_LOG)
+  list(APPEND LIBRARIES
+	log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
+    apr-1 -L${APR_LIBS_DIRECTORY}
+    aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
+	ConfigProfile
+  )
+else()
+  list(APPEND EXCLUDE_PATHS
+    push_log.cc
+    log_message_loop_thread.cc
+    logger_status.cc
+    auto_trace.cc
+    logger.cc
+  )
+endif()
+
+if(NOT BUILD_BT_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/utils/bluetooth
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth
+  )
+endif()
+
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    list(APPEND EXCLUDE_PATHS
+      pulse_thread_delegate.cc
     )
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    list(APPEND SOURCES
-    ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
-    )
-endif()
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
-add_library("Utils" ${SOURCES})
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     # --- QDB Wrapper 
@@ -94,25 +109,15 @@ else ()
 endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
- list(APPEND LIBRARIES dl) 
+ list(APPEND LIBRARIES dl pthread ${RTLIB}) 
 endif()
 
-
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES ConfigProfile)
-
-  ADD_DEPENDENCIES(Utils install-3rd_party_logger)
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_libraries("Utils" pthread ${RTLIB})
-endif()
-
+add_library("Utils" ${SOURCES})
 target_link_libraries("Utils" ${LIBRARIES})
 
+if(ENABLE_LOG)
+  add_dependencies("Utils" install-3rd_party_logger)
+endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)

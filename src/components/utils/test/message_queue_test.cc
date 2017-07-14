@@ -36,7 +36,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::MessageQueue;
 
@@ -171,6 +171,6 @@ TEST_F(MessageQueueTest,
   ASSERT_TRUE(check_value);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

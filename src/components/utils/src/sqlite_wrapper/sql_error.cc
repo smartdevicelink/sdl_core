@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sqlite_wrapper/sql_error.h"
+#include "utils/sqlite_wrapper/sql_error.h"
 
 namespace utils {
 namespace dbms {

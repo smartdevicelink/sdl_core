@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "utils/file_system.h"
 
 namespace test {
@@ -69,17 +69,17 @@ class LastStateTest : public ::testing::Test {
   const std::string empty_dictionary_;
   const std::string app_info_dat_file_;
 
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
 };
 
 TEST_F(LastStateTest, Basic) {
-  const Value& dictionary = last_state_.dictionary;
+  const Value& dictionary = last_state_.get_dictionary();
   EXPECT_EQ(empty_dictionary_, dictionary.toStyledString());
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    const Value& dictionary = last_state_.dictionary;
+    Value& dictionary = last_state_.get_dictionary();
     const Value& bluetooth_info =
         dictionary["TransportManager"]["BluetoothAdapter"];
     EXPECT_EQ(empty_dictionary_, bluetooth_info.toStyledString());
@@ -98,14 +98,14 @@ TEST_F(LastStateTest, SetGetData) {
     Value test_value;
     test_value["name"] = "test_device";
 
-    last_state_.dictionary["TransportManager"]["TcpAdapter"]["devices"] =
-        test_value;
-    last_state_.dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
+    dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
+
+    dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
-    last_state_.SaveToFileSystem();
+    last_state_.SaveStateToFileSystem();
   }
 
-  const Value& dictionary = last_state_.dictionary;
+  const Value& dictionary = last_state_.get_dictionary();
 
   const Value& bluetooth_info =
       dictionary["TransportManager"]["BluetoothAdapter"];

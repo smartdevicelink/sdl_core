@@ -86,4 +86,4 @@ class ServerConnectionFactory {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* SERVER_CONNECTION_FACTORY_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_SERVER_CONNECTION_FACTORY_H_

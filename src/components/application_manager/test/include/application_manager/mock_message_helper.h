@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #include "gmock/gmock.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
@@ -39,10 +39,10 @@
 #include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockMessageHelper {
  public:
   MOCK_METHOD1(GetHashUpdateNotification,
@@ -65,9 +65,11 @@ class MockMessageHelper {
                    const mobile_api::Result::eType mobile_result));
   MOCK_METHOD1(StringToHMILevel,
                mobile_api::HMILevel::eType(const std::string& hmi_level));
-  MOCK_METHOD1(CreateDeviceListSO,
+  MOCK_METHOD3(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
-                   const connection_handler::DeviceMap& devices));
+                   const connection_handler::DeviceMap& devices,
+                   const policy::PolicyHandlerInterface& policy_handler,
+                   ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStartStream,
                void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStopStream,
@@ -110,14 +112,26 @@ class MockMessageHelper {
 
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
-                    int timeout,
+                    const uint32_t timeout,
                     const std::vector<int>& retries,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendDecryptCertificateToHMI,
+               void(const std::string& file_name,
+                    ApplicationManager& app_mngr));
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD4(
+      SendGetListOfPermissionsResponse,
+      void(const std::vector<policy::FunctionalGroupPermission>& permissions,
+           const policy::ExternalConsentStatus& external_consent_status,
+           uint32_t correlation_id,
+           ApplicationManager& app_mngr));
+#else
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
            uint32_t correlation_id,
            ApplicationManager& app_mngr));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions,
@@ -240,9 +254,12 @@ class MockMessageHelper {
                     ApplicationManager& application_manager));
   MOCK_METHOD1(StringifiedHMILevel,
                std::string(const mobile_apis::HMILevel::eType hmi_level));
+  MOCK_METHOD2(GetDeviceMacAddressForHandle,
+               std::string(const uint32_t device_handle,
+                           const ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };
 
 }  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_

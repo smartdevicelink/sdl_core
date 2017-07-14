@@ -1,0 +1,9 @@
+/*! \page components_transportmanager_internal_design_multithreading Multi-Threading in Component
+
+Internally Transport Manager uses different threads for different operations. This design solution was used to provide efficient asynchronous communication with clients and underlying Device Adapters.
+
+Transport Manager uses one thread to operate with all device-related callbacks. In other word all callbacks declared in NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener will be called from that thread.
+
+For every active connection one service thread will be created. This thread will be used for all connection-related callbacks. Therefore every implementation of NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener will be called in separated thread that allows client to support multiple connection simultaneously.
+
+*/

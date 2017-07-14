@@ -54,6 +54,6 @@ TEST(TransportManagerObserverTest, MessageProcess) {
   delete ptr;
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

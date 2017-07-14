@@ -104,7 +104,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * processing deleting sent commands if error from HMI received
    */
   struct VRCommandInfo {
-    VRCommandInfo() {}
+    VRCommandInfo() : cmd_id_(0), succesful_response_received_(false) {}
     VRCommandInfo(uint32_t cmd_id)
         : cmd_id_(cmd_id), succesful_response_received_(false) {}
     uint32_t cmd_id_;

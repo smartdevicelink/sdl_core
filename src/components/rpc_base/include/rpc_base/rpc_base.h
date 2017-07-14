@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VALIDATED_TYPES_H_
-#define VALIDATED_TYPES_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_H_
 
 #include <stdint.h>
 #include <map>
@@ -58,7 +58,7 @@ enum PolicyTableType {
   PT_UPDATE,
   PT_SNAPSHOT
 };
-const std::string ommited_validation_info = "should be ommited in ";
+const std::string omitted_validation_info = "should be omitted in ";
 const std::string required_validation_info = "is required in ";
 
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);
@@ -300,7 +300,7 @@ class Array : public std::vector<T>, public CompositeType {
   Json::Value ToJsonValue() const;
   void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  bool is_valid() const;
+  virtual bool is_valid() const;
   bool is_initialized() const;
   void ReportErrors(ValidationReport* report) const;
   virtual void SetPolicyTableType(
@@ -439,4 +439,4 @@ class Optional {
 #include "rpc_base_inl.h"
 #include "rpc_base_json_inl.h"
 
-#endif /* VALIDATED_TYPES_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_H_

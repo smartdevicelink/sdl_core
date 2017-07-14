@@ -42,8 +42,8 @@
 #include <set>
 #include "gtest/gtest.h"
 #include "formatters/CSmartFactory.h"
-#include "HMI_API_schema.h"
-#include "MOBILE_API_schema.h"
+#include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API_schema.h"
 
 namespace test {
 namespace components {

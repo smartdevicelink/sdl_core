@@ -493,60 +493,60 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
-  ApplicationSetConstIt it_app_list = accessor.begin();
-  ApplicationSetConstIt it_app_list_end = accessor.end();
-  for (; it_app_list != it_app_list_end; ++it_app_list) {
-    if (connection_key() == (*it_app_list).get()->app_id()) {
-      RPCParams params;
+  const ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+  if (!app) {
+    LOG4CXX_ERROR(logger_,
+                  "There is no registered application with "
+                  "connection key '"
+                      << connection_key() << "'");
+    return false;
+  }
 
-      const smart_objects::SmartObject& s_map =
-          (*message_)[strings::msg_params];
-      if (smart_objects::SmartType_Map == s_map.getType()) {
-        smart_objects::SmartMap::iterator iter = s_map.map_begin();
-        smart_objects::SmartMap::iterator iter_end = s_map.map_end();
+  RPCParams params;
 
-        for (; iter != iter_end; ++iter) {
-          if (true == iter->second.asBool()) {
-            LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-            params.push_back(iter->first);
-          }
-        }
-      }
+  const smart_objects::SmartObject& s_map = (*message_)[strings::msg_params];
+  smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
+  smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
-      mobile_apis::Result::eType check_result =
-          application_manager_.CheckPolicyPermissions(
-              (*it_app_list).get()->policy_app_id(),
-              (*it_app_list).get()->hmi_level(),
-              static_cast<mobile_api::FunctionID::eType>(function_id()),
-              params,
-              &parameters_permissions_);
-
-      // Check, if RPC is allowed by policy
-      if (mobile_apis::Result::SUCCESS != check_result) {
-        smart_objects::SmartObjectSPtr response =
-            MessageHelper::CreateBlockedByPoliciesResponse(
-                static_cast<mobile_api::FunctionID::eType>(function_id()),
-                check_result,
-                correlation_id(),
-                (*it_app_list)->app_id());
-
-        application_manager_.SendMessageToMobile(response);
-        return false;
-      }
-
-      // If no parameters specified in policy table, no restriction will be
-      // applied for parameters
-      if (parameters_permissions_.allowed_params.empty() &&
-          parameters_permissions_.disallowed_params.empty() &&
-          parameters_permissions_.undefined_params.empty()) {
-        return true;
-      }
-
-      RemoveDisallowedParameters();
+  for (; iter != iter_end; ++iter) {
+    if (iter->second.asBool()) {
+      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+      params.insert(iter->first);
     }
   }
+
+  mobile_apis::Result::eType check_result =
+      application_manager_.CheckPolicyPermissions(
+          app,
+          MessageHelper::StringifiedFunctionID(
+              static_cast<mobile_api::FunctionID::eType>(function_id())),
+          params,
+          &parameters_permissions_);
+
+  // Check, if RPC is allowed by policy
+  if (mobile_apis::Result::SUCCESS != check_result) {
+    smart_objects::SmartObjectSPtr response =
+        MessageHelper::CreateBlockedByPoliciesResponse(
+            static_cast<mobile_api::FunctionID::eType>(function_id()),
+            check_result,
+            correlation_id(),
+            app->app_id());
+
+    application_manager_.SendMessageToMobile(response);
+    return false;
+  }
+
+  // If no parameters specified in policy table, no restriction will be
+  // applied for parameters
+  if (parameters_permissions_.allowed_params.empty() &&
+      parameters_permissions_.disallowed_params.empty() &&
+      parameters_permissions_.undefined_params.empty()) {
+    return true;
+  }
+
+  RemoveDisallowedParameters();
+
   return true;
 }
 
@@ -556,33 +556,32 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
   // Remove from request all disallowed parameters
-  std::vector<std::string>::const_iterator it_disallowed =
+  RPCParams::const_iterator it_disallowed =
       parameters_permissions_.disallowed_params.begin();
-  std::vector<std::string>::const_iterator it_disallowed_end =
+  RPCParams::const_iterator it_disallowed_end =
       parameters_permissions_.disallowed_params.end();
   for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
     if (params.keyExists(*it_disallowed)) {
-      params.erase(*it_disallowed);
-      removed_parameters_permissions_.disallowed_params.push_back(
-          *it_disallowed);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by user: " << *it_disallowed);
+      const std::string key = *it_disallowed;
+      params.erase(key);
+      removed_parameters_permissions_.disallowed_params.insert(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by user: " << key);
     }
   }
 
   // Remove from request all undefined yet parameters
-  std::vector<std::string>::const_iterator it_undefined =
+  RPCParams::const_iterator it_undefined =
       parameters_permissions_.undefined_params.begin();
-  std::vector<std::string>::const_iterator it_undefined_end =
+  RPCParams::const_iterator it_undefined_end =
       parameters_permissions_.undefined_params.end();
   for (; it_undefined != it_undefined_end; ++it_undefined) {
     if (params.keyExists(*it_undefined)) {
-      params.erase(*it_undefined);
-      removed_parameters_permissions_.undefined_params.push_back(*it_undefined);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by policy: " << *it_undefined);
+      const std::string key = *it_undefined;
+      params.erase(key);
+      removed_parameters_permissions_.undefined_params.insert(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by policy: " << key);
     }
   }
 
@@ -600,7 +599,7 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
                       parameters_permissions_.allowed_params.end(),
                       key)) {
       params.erase(key);
-      removed_parameters_permissions_.undefined_params.push_back(key);
+      removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
                        << key << "' and will be treated as disallowed.");
@@ -622,7 +621,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
     smart_objects::SmartObject& response) const {
   std::string info;
 
-  std::vector<std::string>::const_iterator it =
+  RPCParams::const_iterator it =
       removed_parameters_permissions_.disallowed_params.begin();
   for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
     AddDissalowedParameterToInfoString(info, (*it));

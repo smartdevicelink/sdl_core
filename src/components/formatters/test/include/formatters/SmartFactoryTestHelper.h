@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
-#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
+#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_
+#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_
 
 #include <map>
 #include <set>
 
 #include "formatters/CSmartFactory.h"
-#include "HMI_API_schema.h"
+#include "interfaces/HMI_API_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/array_schema_item.h"
@@ -157,4 +157,4 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_SMARTFACTORYTESTHELPER_H_
+#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_SMARTFACTORYTESTHELPER_H_

@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_hmi_status_notification_from_mobile {
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -272,6 +273,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
             (*msg)[strings::params][strings::message_type].asInt());
 }
 
+}  // namespace on_hmi_status_notification_from_mobile
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

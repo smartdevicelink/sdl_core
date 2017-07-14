@@ -2237,6 +2237,15 @@
     <function name="OnIgnitionCycleOver" messagetype="notification" provider="hmi">
       <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
     </function>
+    <function name="DecryptCertificate" messagetype="request">
+       <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+           <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
+       </param>
+     </function>
+     <function name="DecryptCertificate" messagetype="response">
+           <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+     </function>
     <!-- End of Policies -->
   </interface>
   <interface name="VR" version="1.0" date="2013-04-17">
