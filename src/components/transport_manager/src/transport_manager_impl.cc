@@ -637,13 +637,19 @@ void TransportManagerImpl::RemoveConnection(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Id: " << id);
   sync_primitives::AutoWriteLock lock(connections_lock_);
-  const std::vector<ConnectionInternal>::iterator it = std::find_if(
-      connections_.begin(), connections_.end(), ConnectionFinder(id));
-  if (connections_.end() != it) {
-    if (transport_adapter) {
-      transport_adapter->RemoveFinalizedConnection(it->device, it->application);
+  std::vector<ConnectionInternal>::iterator it = connections_.begin();
+  while (it != connections_.end()){
+    if (it->id == id) {
+      if (transport_adapter) {
+        transport_adapter->RemoveFinalizedConnection(it->device,
+                                                     it->application);
+      }
+      connections_.erase(it++);
+      break;
     }
-    connections_.erase(it);
+    else{
+      ++it;
+    }
   }
 }
 
@@ -913,6 +919,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                    id,
                    *static_cast<CommunicationError*>(event.event_error.get()));
         RemoveConnection(id, connection->transport_adapter);
+        std::cout << "ON_UNEXPECTED_DISCONNECT conn_id = " << id << " app_id = " << event.application_id << "\n";
       } else {
         connections_lock_.Release();
         LOG4CXX_ERROR(logger_,
