@@ -113,8 +113,11 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     return ProcessResult::FAILED;
   }
 
-  msg->set_function_name(MessageHelper::GetMobileAPIName(
-      static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
+  const std::string& function_name = MessageHelper::GetMobileAPIName(
+      static_cast<functional_modules::MobileFunctionID>(msg->function_id()));
+
+  LOG4CXX_DEBUG(logger_, "Function name to set : " << function_name);
+  msg->set_function_name(function_name);
 
   LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 

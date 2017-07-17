@@ -1513,16 +1513,13 @@
  </enum>
 
  <struct name="Temperature">
-   <param name="unit" type="TemperatureUnit">
-     <description>Temperature Unit</description>
-   </param>
-   <param name="valueC" type="Float" minvalue="14.0" maxvalue="30.0" mandatory="false">
-     <description>Temperature Value in Celsius, the value range is for setter only</description>
-   </param>
-   <param name="valueF" type="Float" minvalue="60.0" maxvalue="90.0" mandatory="false">
-     <description>Temperature Value in Fahrenheit, the value range is for setter only</description>
-   </param>
- </struct>
+    <param name="unit" type="TemperatureUnit">
+      <description>Temperature Unit</description>
+    </param>
+    <param name="value" type="Float">
+      <description>Temperature Value in TemperatureUnit specified unit. Range depends on OEM and is not checked by SDL.</description>
+    </param>
+  </struct>
 
  <struct name="ClimateControlData">
    <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -4718,6 +4715,21 @@
    <param name="interiorVehicleDataCapabilities" type="Common.RemoteControlCapabilities">
    </param>
  </function>
+
+ <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The module type and data to set</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Internal SDL-assigned ID of the related application</description>
+    </param>
+  </function>
+
+  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response">
+    <description>Used to set the values of one zone and one data type within that zone</description>
+    <param name="moduleData" type="Common.ModuleData">
+    </param>
+  </function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
     <param name="moduleDescription" type="Common.ModuleDescription">
