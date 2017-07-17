@@ -45,28 +45,6 @@ namespace can_cooperation {
  **/
 class ModuleHelper {
  public:
-  /*
-   * @brief Checks if deactivated app was of R-SDL type
-   * and process correspondingly. Otherwise returns
-   * CANNOT_PROCESS.
-   * @param value Json notification from HMI
-   */
-  static functional_modules::ProcessResult ProcessOnAppDeactivation(
-      const Json::Value& value, CANModuleInterface& can_module);
-
-  /*
-   * @brief Check if activated/other apps are of R-SDL type;
-   * process correspondingly.
-   * If no R-SDL app is involved returns CANNOT_PROCESS.
-   * @param value Json request from HMI
-   */
-  static functional_modules::ProcessResult ProcessSDLActivateApp(
-      const Json::Value& value, CANModuleInterface& can_module);
-
-  static void ProccessDeviceRankChanged(const uint32_t device_handle,
-                                        const std::string& rank,
-                                        CANModuleInterface& can_module);
-
   static void ProccessOnReverseAppsDisallowed(CANModuleInterface& can_module);
 
  private:

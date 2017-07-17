@@ -32,7 +32,7 @@
 
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
-#include "can_cooperation/mobile_command_factory.h"
+#include "can_cooperation/rc_command_factory.h"
 #include "functional_module/function_ids.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
@@ -46,7 +46,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
 using functional_modules::MobileFunctionID;
 
-utils::SharedPtr<commands::Command> ReverceAPICommandFactory::CreateCommand(
+utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg,
     CANModuleInterface& can_module) {
   switch (msg->function_id()) {

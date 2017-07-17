@@ -31,7 +31,7 @@
  */
 
 #include "can_cooperation/can_module.h"
-#include "can_cooperation/mobile_command_factory.h"
+#include "can_cooperation/rc_command_factory.h"
 #include "can_cooperation/can_module_event.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/can_app_extension.h"
@@ -77,10 +77,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::set_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::button_press);
-
   plugin_info_.hmi_function_list.push_back(hmi_api::get_user_consent);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);
-  plugin_info_.hmi_function_list.push_back(hmi_api::sdl_activate_app);
   // Disabled
   // plugin_info_.hmi_function_list.push_back(hmi_api::on_device_rank_changed);
   // plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
@@ -97,7 +94,8 @@ functional_modules::PluginInfo CANModule::GetPluginInfo() const {
 const std::string ExtractFunctionAndAddMetadata(
     const Json::Value& value, application_manager::Message& out_msg) {
   if (value.isMember(json_keys::kMethod)) {
-    std::string function_name = value.get(json_keys::kMethod, "").asCString();
+    const std::string& function_name =
+        value.get(json_keys::kMethod, "").asCString();
 
     // Existence of method name must be guaranteed by plugin manager
     DCHECK_OR_RETURN(!function_name.empty(), "");
@@ -114,7 +112,8 @@ const std::string ExtractFunctionAndAddMetadata(
   if (value.isMember(json_keys::kResult)) {
     // value[json_keys::kResult].isMember(json_keys::kMethod)
     const Json::Value& result = value.get(json_keys::kResult, Json::Value());
-    std::string function_name = result.get(json_keys::kMethod, "").asCString();
+    const std::string& function_name =
+        result.get(json_keys::kMethod, "").asCString();
     out_msg.set_correlation_id(value.get(json_keys::kId, "").asInt());
 
     // Existence of method name must be guaranteed by plugin manager
@@ -127,7 +126,8 @@ const std::string ExtractFunctionAndAddMetadata(
   if (value.isMember(json_keys::kError)) {
     const Json::Value& error = value.get(json_keys::kError, Json::Value());
     const Json::Value& data = error.get(json_keys::kData, Json::Value());
-    std::string function_name = error.get(json_keys::kMethod, "").asCString();
+    const std::string& function_name =
+        error.get(json_keys::kMethod, "").asCString();
 
     // Existence of method name must be guaranteed by plugin manager
     DCHECK_OR_RETURN(!function_name.empty(), "");
@@ -150,7 +150,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 
   request_controller::MobileRequestPtr command(
-      ReverceAPICommandFactory::CreateCommand(msg, *this));
+      RCCommandFactory::CreateCommand(msg, *this));
   if (command) {
     request_controller_.AddRequest(msg->correlation_id(), command);
     command->Run();
@@ -169,7 +169,7 @@ ProcessResult CANModule::ProcessHMIMessage(
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
 
-  std::string function_name = ExtractFunctionAndAddMetadata(value, *msg);
+  const std::string& function_name = ExtractFunctionAndAddMetadata(value, *msg);
 
   // Existence of method name must be guaranteed by plugin manager
   DCHECK_OR_RETURN(!function_name.empty(), ProcessResult::FAILED);
@@ -183,9 +183,9 @@ ProcessResult CANModule::ProcessHMIMessage(
     }
     case application_manager::MessageType::kRequest:
     case application_manager::MessageType::kNotification: {
-      bool is_valid = service()->ValidateMessageBySchema(*msg);
+      const bool is_valid = service()->ValidateMessageBySchema(*msg);
       utils::SharedPtr<commands::Command> command =
-          ReverceAPICommandFactory::CreateCommand(msg, *this);
+          RCCommandFactory::CreateCommand(msg, *this);
       if (is_valid && command) {
         command->Run();
       }
@@ -235,7 +235,7 @@ void CANModule::SendHmiStatusNotification(
 void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller::MobileRequestPtr command =
-      ReverceAPICommandFactory::CreateCommand(message, *this);
+      RCCommandFactory::CreateCommand(message, *this);
   if (command) {
     command->Run();
   }

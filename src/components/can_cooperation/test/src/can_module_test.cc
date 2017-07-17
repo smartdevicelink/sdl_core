@@ -451,46 +451,6 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
 //  ASSERT_FALSE(can_app_extention_->is_on_driver_device());
 //}
 
-TEST_F(CanModuleTest, DISABLED_DeactivateApp) {
-  std::string reasons[] = {"AUDIO",
-                           "PHONECALL",
-                           "NAVIGATIONMAP",
-                           "PHONEMENU",
-                           "SYNCSETTINGS",
-                           "GENERAL"};
-
-  message_->set_function_name(functional_modules::hmi_api::on_app_deactivated);
-  message_->set_message_type(MessageType::kNotification);
-
-  apps_.push_back(app0_);
-
-  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
-  obj[0] = 10;
-
-  can_app_extention_->set_is_on_driver_device(true);
-
-  EXPECT_CALL(*app0_, hmi_app_id()).WillRepeatedly(Return(11));
-  EXPECT_CALL(*app0_, IsFullscreen()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
-      .WillRepeatedly(Return(apps_));
-  EXPECT_CALL(*mock_service_,
-              ChangeNotifyHMILevel(
-                  _, mobile_apis::HMILevel::eType::HMI_LIMITED)).Times(6);
-
-  for (size_t i = 0; i < 6; ++i) {
-    Json::Value value(Json::ValueType::objectValue);
-    value[json_keys::kMethod] = functional_modules::hmi_api::on_app_deactivated;
-    value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
-    value[json_keys::kParams][message_params::kHMIAppID] = 11;
-    value[json_keys::kParams]["reason"] = reasons[i];
-    Json::FastWriter writer;
-    std::string json_str = writer.write(value);
-    message_->set_json_message(json_str);
-
-    CanModuleTest::HandleMessage();
-  }
-}
-
 TEST_F(CanModuleTest, CanAppChangeHMILevelPrimary) {
   apps_.push_back(app0_);
 

@@ -199,7 +199,7 @@ ProcessResult PluginManager::ProcessHMIMessage(
   reader.parse(msg->json_message(), value);
 
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
-    std::string msg_method = ExtractMethodName(value);
+    const std::string& msg_method = ExtractMethodName(value);
     if (msg_method.empty()) {
       return ProcessResult::CANNOT_PROCESS;
     }
