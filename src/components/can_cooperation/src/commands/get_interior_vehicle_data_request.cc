@@ -56,9 +56,11 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
 
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const Json::Value request_params =
+      MessageHelper::StringToValue(message_->json_message());
 
   SendRequest(functional_modules::hmi_api::get_interior_vehicle_data,
-              MessageHelper::StringToValue(message_->json_message()),
+              request_params,
               true);
 }
 
@@ -70,16 +72,17 @@ void GetInteriorVehicleDataRequest::OnEvent(
       (functional_modules::hmi_api::get_interior_vehicle_data == event.id()));
 
   application_manager::Message& hmi_response = *(event.event_message());
-  const bool validate_result = service()->ValidateMessageBySchema(hmi_response);
+  const bool validate_result = application_manager::SUCCESS ==
+                               service()->ValidateMessageBySchema(hmi_response);
+  LOG4CXX_DEBUG(logger_,
+                "HMI response validation result is " << validate_result);
   const Json::Value value =
       MessageHelper::StringToValue(hmi_response.json_message());
   std::string result_code;
   std::string info;
   bool success = validate_result && ParseResultCode(value, result_code, info);
 
-  const bool is_generic_error =
-      (!validate_result) || (success && false == CheckForRequestedData(value));
-  if (is_generic_error) {
+  if (!validate_result) {
     success = false;
     result_code = result_codes::kGenericError;
     info = "Invalid message received from vehicle";
@@ -138,31 +141,6 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
           request_params[kModuleDescription]);
     }
   }
-}
-
-bool GetInteriorVehicleDataRequest::CheckForRequestedData(
-    const Json::Value& hmi_response) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  Json::Value request_params;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), request_params);
-
-  std::map<std::string, std::string> all_data;
-  all_data[kClimate] = kClimateControlData;
-  all_data[kRadio] = kRadioControlData;
-
-  const std::string module_type = ModuleType(request_params);
-  const std::string module_control_data = all_data[module_type];
-  const bool is_requested_data_present =
-      IsMember(hmi_response[kResult][kModuleData], module_control_data);
-
-  if (!is_requested_data_present) {
-    LOG4CXX_ERROR(logger_,
-                  "Requested control data for module "
-                      << module_type << " is not present in HMI response");
-  }
-  return is_requested_data_present;
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleType(

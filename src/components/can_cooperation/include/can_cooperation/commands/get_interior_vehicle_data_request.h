@@ -76,13 +76,6 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
     * @param hmi_response json message with response from HMI
     */
   void ProccessSubscription(const Json::Value& hmi_response);
-
-  /**
-   * @brief Check is all requested IV data present in response
-   * @param hmi_response json message with response from HMI
-   * @return true if all requested IV data is present in reponse false otherwise
-   */
-  bool CheckForRequestedData(const Json::Value& hmi_response);
 };
 
 }  // namespace commands
