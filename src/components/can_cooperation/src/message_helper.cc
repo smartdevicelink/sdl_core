@@ -42,9 +42,6 @@ std::map<MobileFunctionID, std::string> GenerateAPINames() {
   result.insert(std::make_pair<MobileFunctionID, std::string>(
       MobileFunctionID::BUTTON_PRESS, "ButtonPress"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(
-      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES,
-      "GetInteriorVehicleDataCapabilities"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(
       MobileFunctionID::GET_INTERIOR_VEHICLE_DATA, "GetInteriorVehicleData"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(
       MobileFunctionID::SET_INTERIOR_VEHICLE_DATA, "SetInteriorVehicleData"));
