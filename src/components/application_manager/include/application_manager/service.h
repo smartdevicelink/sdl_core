@@ -43,6 +43,14 @@ namespace application_manager {
 
 enum TypeAccess { kNone, kDisallowed, kAllowed, kManual };
 
+enum MessageValidationResult {
+  SUCCESS,
+  INVALID_JSON,
+  INVALID_METADATA,
+  SCHEMA_MISMATCH,
+  UNSUPPORTED_PROTOCOL
+};
+
 typedef std::string PluginFunctionID;
 
 /**
@@ -218,7 +226,8 @@ class Service {
    * @param message message for validation
    * @return true if message is valid according to schema, otherwise false
    */
-  virtual bool ValidateMessageBySchema(const Message& message) = 0;
+  virtual MessageValidationResult ValidateMessageBySchema(
+      const Message& message) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

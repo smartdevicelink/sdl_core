@@ -301,7 +301,8 @@ class ApplicationManager {
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;
 
-  virtual bool ValidateMessageBySchema(const Message& message) = 0;
+  virtual MessageValidationResult ValidateMessageBySchema(
+      const Message& message) = 0;
 
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;

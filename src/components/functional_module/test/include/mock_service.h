@@ -81,7 +81,8 @@ class MockService : public Service {
                      bool(const std::string& application_id,
                           std::vector<std::string>* modules));
   MOCK_METHOD1(ValidateMessageBySchema,
-               bool(const application_manager::Message& message));
+               application_manager::MessageValidationResult(
+                   const application_manager::Message& message));
 };
 }
 // namespace application_manager
