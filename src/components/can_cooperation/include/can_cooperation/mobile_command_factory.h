@@ -44,7 +44,7 @@ namespace can_cooperation {
 /**
  * @brief Factory class for command creation
  **/
-class MobileCommandFactory {
+class ReverceAPICommandFactory {
  public:
   /**
    * @brief Create command object and return pointer to it
@@ -57,8 +57,8 @@ class MobileCommandFactory {
       CANModuleInterface& can_module);
 
  private:
-  MobileCommandFactory();
-  DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
+  ReverceAPICommandFactory();
+  DISALLOW_COPY_AND_ASSIGN(ReverceAPICommandFactory);
 };
 
 }  // namespace can_cooperaion

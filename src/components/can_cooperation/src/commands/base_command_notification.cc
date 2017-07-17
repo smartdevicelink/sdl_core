@@ -81,7 +81,8 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 
 void BaseCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!Validate()) {
+  if (!service_->ValidateMessageBySchema(*message())) {
+    LOG4CXX_ERROR(logger_, "Message validation failed");
     return;
   }
 

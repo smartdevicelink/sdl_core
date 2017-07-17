@@ -42,9 +42,11 @@
 
 namespace can_cooperation {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
+
 using functional_modules::MobileFunctionID;
 
-utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
+utils::SharedPtr<commands::Command> ReverceAPICommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg,
     CANModuleInterface& can_module) {
   switch (msg->function_id()) {
@@ -71,6 +73,8 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
     //    }
     default: {
       utils::SharedPtr<commands::Command> invalid_command;
+      LOG4CXX_DEBUG(logger_,
+                    "RSDL unable to proces function " << msg->function_id());
       return invalid_command;
     }
   }

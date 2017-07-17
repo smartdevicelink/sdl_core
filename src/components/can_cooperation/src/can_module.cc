@@ -35,8 +35,6 @@
 #include "can_cooperation/can_module_event.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/can_app_extension.h"
-
-#include "can_cooperation/can_tcp_connection.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/policy_helper.h"
 #include "can_cooperation/module_helper.h"
@@ -60,12 +58,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
 
 EXPORT_FUNCTION_IMPL(can_cooperation::CANModule);
 
-CANModule::CANModule()
-    : can_connection_(new CANTCPConnection)
-    , from_can_("FromCan To Mobile", this)
-    , from_mobile_("FromMobile To Can", this)
-    , is_scan_started_(false) {
-  can_connection_->set_observer(this);
+CANModule::CANModule() : is_scan_started_(false) {
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
   SubscribeOnFunctions();
@@ -101,13 +94,52 @@ functional_modules::PluginInfo CANModule::GetPluginInfo() const {
   return plugin_info_;
 }
 
-ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
-  DCHECK(msg);
+const std::string ExtractFunctionAndAddMetadata(
+    const Json::Value& value, application_manager::Message& out_msg) {
+  if (value.isMember(json_keys::kMethod)) {
+    std::string function_name = value.get(json_keys::kMethod, "").asCString();
 
-  if (!msg) {
-    LOG4CXX_ERROR(logger_, "Null pointer message received.");
-    return ProcessResult::FAILED;
+    // Existence of method name must be guaranteed by plugin manager
+    DCHECK_OR_RETURN(!function_name.empty(), "");
+
+    if (value.isMember(json_keys::kId)) {
+      out_msg.set_correlation_id(value.get(json_keys::kId, "").asInt());
+      out_msg.set_message_type(application_manager::MessageType::kRequest);
+    } else {
+      out_msg.set_message_type(application_manager::MessageType::kNotification);
+    }
+    return function_name;
   }
+
+  if (value.isMember(json_keys::kResult)) {
+    // value[json_keys::kResult].isMember(json_keys::kMethod)
+    const Json::Value& result = value.get(json_keys::kResult, Json::Value());
+    std::string function_name = result.get(json_keys::kMethod, "").asCString();
+    out_msg.set_correlation_id(value.get(json_keys::kId, "").asInt());
+
+    // Existence of method name must be guaranteed by plugin manager
+    DCHECK_OR_RETURN(!function_name.empty(), "");
+
+    out_msg.set_message_type(application_manager::MessageType::kResponse);
+    return function_name;
+  }
+
+  if (value.isMember(json_keys::kError)) {
+    const Json::Value& error = value.get(json_keys::kError, Json::Value());
+    const Json::Value& data = error.get(json_keys::kData, Json::Value());
+    std::string function_name = error.get(json_keys::kMethod, "").asCString();
+
+    // Existence of method name must be guaranteed by plugin manager
+    DCHECK_OR_RETURN(!function_name.empty(), "");
+
+    out_msg.set_message_type(application_manager::MessageType::kErrorResponse);
+    return function_name;
+  }
+  return std::string();
+}
+
+ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
+  DCHECK_OR_RETURN(msg, ProcessResult::FAILED);
 
   const std::string& function_name = MessageHelper::GetMobileAPIName(
       static_cast<functional_modules::MobileFunctionID>(msg->function_id()));
@@ -118,7 +150,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 
   request_controller::MobileRequestPtr command(
-      MobileCommandFactory::CreateCommand(msg, *this));
+      ReverceAPICommandFactory::CreateCommand(msg, *this));
   if (command) {
     request_controller_.AddRequest(msg->correlation_id(), command);
     command->Run();
@@ -129,94 +161,18 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   return ProcessResult::PROCESSED;
 }
 
-void CANModule::SendMessageToCan(const MessageFromMobile& msg) {
-  LOG4CXX_INFO(logger_, "Message to Can: " << msg);
-  from_mobile_.PostMessage(msg);
-}
-
 ProcessResult CANModule::ProcessHMIMessage(
     application_manager::MessagePtr msg) {
-  LOG4CXX_DEBUG(logger_, "HMI message: " << msg->json_message());
-  return HandleMessage(msg);
-}
-
-void CANModule::OnCANMessageReceived(const CANMessage& message) {
-  from_can_.PostMessage(MessageFromCAN(message));
-}
-
-void CANModule::OnCANConnectionError(ConnectionState state,
-                                     const std::string& info) {
-  if (ConnectionState::INVALID == state) {
-    this->NotifyObservers(
-        functional_modules::ModuleObserver::CAN_CONNECTION_FAILURE);
-  }
-  // TODO(PV): remove pending requests to CAN with error response.
-}
-
-void CANModule::Handle(const MessageFromMobile message) {
-  if (ConnectionState::OPENED != can_connection_->SendMessage(message)) {
-    LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
-  }
-}
-
-void CANModule::Handle(const MessageFromCAN can_msg) {
-  application_manager::MessagePtr msg(new application_manager::Message(
-      protocol_handler::MessagePriority::kDefault));
-
-  Json::FastWriter writer;
-  msg->set_json_message(writer.write(can_msg));
-
-  LOG4CXX_INFO(logger_, "Can message: " << can_msg);
-
-  if (HandleMessage(msg) != ProcessResult::PROCESSED) {
-    LOG4CXX_ERROR(logger_, "Failed process CAN message!");
-  }
-}
-
-functional_modules::ProcessResult CANModule::HandleMessage(
-    application_manager::MessagePtr msg) {
-  LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   Json::Value value;
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
 
-  std::string function_name;
+  std::string function_name = ExtractFunctionAndAddMetadata(value, *msg);
 
-  // Request or notification
-  if (value.isMember(json_keys::kMethod)) {
-    function_name = value[json_keys::kMethod].asCString();
-
-    if (value.isMember(json_keys::kId)) {
-      msg->set_message_type(application_manager::MessageType::kRequest);
-    } else {
-      msg->set_message_type(application_manager::MessageType::kNotification);
-    }
-    // Response
-  } else if (value.isMember(json_keys::kResult) &&
-             value[json_keys::kResult].isMember(json_keys::kMethod)) {
-    function_name = value[json_keys::kResult][json_keys::kMethod].asCString();
-    msg->set_message_type(application_manager::MessageType::kResponse);
-    // Error response
-  } else if (value.isMember(json_keys::kError) &&
-             value[json_keys::kError].isMember(json_keys::kData) &&
-             value[json_keys::kError][json_keys::kData].isMember(
-                 json_keys::kMethod)) {
-    function_name =
-        value[json_keys::kError][json_keys::kData][json_keys::kMethod]
-            .asCString();
-    msg->set_message_type(application_manager::MessageType::kErrorResponse);
-  } else {
-    DCHECK(false);
-    return ProcessResult::FAILED;
-  }
-
-  if (value.isMember(json_keys::kId)) {
-    msg->set_correlation_id(value[json_keys::kId].asInt());
-  } else if (application_manager::MessageType::kNotification != msg->type()) {
-    DCHECK(false);
-    return ProcessResult::FAILED;
-  }
+  // Existence of method name must be guaranteed by plugin manager
+  DCHECK_OR_RETURN(!function_name.empty(), ProcessResult::FAILED);
 
   switch (msg->type()) {
     case application_manager::MessageType::kResponse:
@@ -225,91 +181,18 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       event_dispatcher_.raise_event(event);
       break;
     }
-    // Disabled
-
+    case application_manager::MessageType::kRequest:
     case application_manager::MessageType::kNotification: {
-      //      if (functional_modules::hmi_api::on_interior_vehicle_data ==
-      //          function_name) {
-      //        msg->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
-      //      } else if (functional_modules::hmi_api::on_reverse_apps_allowing
-      //      ==
-      //                 function_name) {
-      //        if (value.isMember(json_keys::kParams)) {
-      //          // TODO(VS): Create commands for notifications
-      //          // TODO(VS): move validation to separate class
-      //          if
-      //          (value[json_keys::kParams].isMember(message_params::kAllowed)
-      //          &&
-      //              value[json_keys::kParams][message_params::kAllowed].isBool())
-      //              {
-      //            if ((!value[json_keys::kParams][message_params::kAllowed]
-      //                      .asBool()) &&
-      //                this->service()->IsRemoteControlAllowed()) {
-      //              msg->set_protocol_version(
-      //                  application_manager::ProtocolVersion::kV3);
-      //              ModuleHelper::ProccessOnReverseAppsDisallowed(*this);
-      //            }
-      //            PolicyHelper::OnRSDLFunctionalityAllowing(
-      //                value[json_keys::kParams][message_params::kAllowed].asBool(),
-      //                *this);
-      //          } else {
-      //            LOG4CXX_ERROR(logger_,
-      //                          "Invalid OnReverseAppsAllowing notification");
-      //          }
-      //        }
-      //        break;
-      //      } else if (functional_modules::hmi_api::on_device_rank_changed ==
-      //                 function_name) {
-      //        if (value.isMember(json_keys::kParams)) {
-      //          Json::Value& params = value[json_keys::kParams];
-      //          bool valid =
-      //              MessageHelper::ValidateDeviceInfo(params.get(
-      //                  message_params::kDevice,
-      //                  Json::Value(Json::nullValue)))
-      //                  &&
-      //              params.isMember(message_params::kRank) &&
-      //              params[message_params::kRank].isString();
-      //          if (valid) {
-      //            const std::string device_id =
-      //                params[message_params::kDevice][json_keys::kId].asString();
-      //            const uint32_t device_handle =
-      //                service()->GetDeviceHandlerById(device_id);
-      //            std::string rank = params[message_params::kRank].asString();
-      //            PolicyHelper::ChangeDeviceRank(device_handle, rank, *this);
-      //            ModuleHelper::ProccessDeviceRankChanged(device_handle, rank,
-      //            *this);
-      //          } else {
-      //            LOG4CXX_ERROR(logger_,
-      //                          "Invalid RC.OnDeviceRankChanged
-      //                          notification");
-      //          }
-      //        }
-      //        return ProcessResult::PROCESSED;
-      //      }
-      if (functional_modules::hmi_api::on_app_deactivated == function_name) {
-        return ModuleHelper::ProcessOnAppDeactivation(value, *this);
+      bool is_valid = service()->ValidateMessageBySchema(*msg);
+      utils::SharedPtr<commands::Command> command =
+          ReverceAPICommandFactory::CreateCommand(msg, *this);
+      if (is_valid && command) {
+        command->Run();
       }
-
-      int32_t func_id = msg->function_id();
-      std::string func_name = MessageHelper::GetMobileAPIName(
-          static_cast<functional_modules::MobileFunctionID>(func_id));
-      msg->set_function_name(func_name);
-      msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
-      NotifyMobiles(msg);
-      break;
     }
-
-    case application_manager::MessageType::kRequest: {
-      if (function_name == functional_modules::hmi_api::sdl_activate_app) {
-        msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-        return ModuleHelper::ProcessSDLActivateApp(value, *this);
-      }
-      return ProcessResult::CANNOT_PROCESS;
-    }
-    default: { return ProcessResult::FAILED; }
+    default: { LOG4CXX_DEBUG(logger_, "Unknown message type"); }
   }
-
-  return ProcessResult::PROCESSED;
+  return ProcessResult::CANNOT_PROCESS;
 }
 
 void CANModule::SendHmiStatusNotification(
@@ -352,7 +235,7 @@ void CANModule::SendHmiStatusNotification(
 void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller::MobileRequestPtr command =
-      MobileCommandFactory::CreateCommand(message, *this);
+      ReverceAPICommandFactory::CreateCommand(message, *this);
   if (command) {
     command->Run();
   }
@@ -459,15 +342,6 @@ void CANModule::OnDeviceRemoved(
     service()->ResetPrimaryDevice();
   }
 }
-
-CANConnectionSPtr CANModule::can_connection() {
-  return can_connection_;
-}
-
-void CANModule::set_can_connection(const CANConnectionSPtr can_connection) {
-  can_connection_ = can_connection;
-}
-
 can_event_engine::EventDispatcher<application_manager::MessagePtr, std::string>&
 CANModule::event_dispatcher() {
   return event_dispatcher_;

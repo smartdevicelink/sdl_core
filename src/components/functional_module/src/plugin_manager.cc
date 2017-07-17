@@ -154,10 +154,36 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
       if (subscribed_plugin_itr->second->ProcessMessage(msg) !=
           ProcessResult::PROCESSED) {
-        LOG4CXX_ERROR(logger_, "Failed process HMI message!");
+        LOG4CXX_ERROR(logger_, "Failed process message!");
       }
     }
   }
+}
+
+const std::string ExtractMethodName(const Json::Value& value) {
+  const char* kMethod = "method";
+  const char* kResult = "result";
+  const char* kError = "error";
+  const char* kData = "data";
+
+  if (value.isMember(kMethod)) {
+    return value.get(kMethod, "").asCString();
+    // Response from HMI
+  }
+  if (value.isMember(kResult)) {
+    const Json::Value& result = value.get(kResult, Json::Value());
+    return result.get(kMethod, "").asCString();
+  }
+  if (value.isMember(kError)) {
+    const Json::Value& error = value.get(kError, Json::Value());
+    const Json::Value& data = error.get(kData, Json::Value());
+    return data.get(kMethod, "").asCString();
+  }
+  LOG4CXX_WARN(logger_,
+               "Message with HMI protocol version can not be handled by "
+               "plugin manager, because required 'method' field was not "
+               "found, or was containing an invalid string.");
+  return std::string();
 }
 
 ProcessResult PluginManager::ProcessHMIMessage(
@@ -173,27 +199,10 @@ ProcessResult PluginManager::ProcessHMIMessage(
   reader.parse(msg->json_message(), value);
 
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
-    std::string msg_method;
-    // Request or notification from HMI
-    if (value.isMember("method") && value["method"].isString()) {
-      msg_method = value["method"].asCString();
-      // Response from HMI
-    } else if (value.isMember("result") && value["result"].isMember("method") &&
-               value["result"]["method"].isString()) {
-      msg_method = value["result"]["method"].asCString();
-      // Error response from HMI
-    } else if (value.isMember("error") && value["error"].isMember("data") &&
-               value["error"]["data"].isMember("method") &&
-               value["error"]["data"]["method"].isString()) {
-      msg_method = value["error"]["data"]["method"].asCString();
-    } else {
-      LOG4CXX_WARN(logger_,
-                   "Message with HMI protocol version can not be handled by "
-                   "plugin manager, because required 'method' field was not "
-                   "found, or was containing an invalid string.");
+    std::string msg_method = ExtractMethodName(value);
+    if (msg_method.empty()) {
       return ProcessResult::CANNOT_PROCESS;
     }
-
     PluginHMIFunctionsIterator subscribed_plugin_itr =
         hmi_subscribers_.find(msg_method);
     if (hmi_subscribers_.end() != subscribed_plugin_itr) {
