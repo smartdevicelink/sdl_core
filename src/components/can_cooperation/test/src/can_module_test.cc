@@ -451,7 +451,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
 //  ASSERT_FALSE(can_app_extention_->is_on_driver_device());
 //}
 
-TEST_F(CanModuleTest, DeactivateApp) {
+TEST_F(CanModuleTest, DISABLED_DeactivateApp) {
   std::string reasons[] = {"AUDIO",
                            "PHONECALL",
                            "NAVIGATIONMAP",
