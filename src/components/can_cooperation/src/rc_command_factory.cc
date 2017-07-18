@@ -36,6 +36,7 @@
 #include "functional_module/function_ids.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
+#include "can_cooperation/commands/button_press_request.h"
 
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
@@ -59,11 +60,10 @@ utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
           msg, can_module);
       break;
     }
-    //    case MobileFunctionID::BUTTON_PRESS: {
-    //      return utils::MakeShared<commands::ButtonPressRequest>(msg,
-    //      can_module);
-    //      break;
-    //    }
+    case MobileFunctionID::BUTTON_PRESS: {
+      return utils::MakeShared<commands::ButtonPressRequest>(msg, can_module);
+      break;
+    }
     case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
       return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
           msg, can_module);

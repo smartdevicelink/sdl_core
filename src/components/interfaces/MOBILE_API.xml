@@ -2617,6 +2617,7 @@
     <element name="GetInteriorVehicleDataID" value="100017" hexvalue="186B1" />
     <element name="SetInteriorVehicleDataID" value="100018" hexvalue="186B2" />
     <element name="OnInteriorVehicleDataID" value="100019" hexvalue="186B3" />
+    <element name="ButtonPressID" value="100015" hexvalue="186AF" />
 
   </enum>
 
@@ -5744,6 +5745,39 @@
       <description>See StartTime.</description>
      </param>
   </function>
+
+<function name="ButtonPress" functionID="ButtonPressID" messagetype="request">
+  <param name="moduleType" type="ModuleType">
+    <description>The module where the button should be pressed</description>
+  </param>
+  <param name="buttonName" type="ButtonName">
+    <description>The name of supported RC climate or radio button.</description>
+  </param>
+  <param name="buttonPressMode" type="ButtonPressMode">
+    <description>Indicates whether this is a LONG or SHORT button press event.</description>
+  </param>
+</function>
+
+<function name="ButtonPress" functionID="ButtonPressID" messagetype="response">
+  <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="IN_USE"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation">
+    <description> true if successful; false, if failed </description>
+  </param>
+</function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
         <param name="moduleDescription" type="ModuleDescription">
