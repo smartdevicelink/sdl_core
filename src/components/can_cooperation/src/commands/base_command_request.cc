@@ -129,8 +129,6 @@ void BaseCommandRequest::SendRequest(const char* function_id,
 
     LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
     service_->SendMessageToHMI(message_to_send);
-  } else {
-    can_module_.SendMessageToCan(msg);
   }
 }
 

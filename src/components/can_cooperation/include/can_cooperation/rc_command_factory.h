@@ -30,41 +30,37 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/validators/struct_validators/module_description_validator.h"
-#include "can_cooperation/message_helper.h"
-#include "can_cooperation/can_module_constants.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MOBILE_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MOBILE_COMMAND_FACTORY_H_
+
+#include "utils/shared_ptr.h"
+#include "can_cooperation/commands/command.h"
+#include "can_cooperation/can_module.h"
+#include "application_manager/message.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
-namespace validators {
+/**
+ * @brief Factory class for command creation
+ **/
+class RCCommandFactory {
+ public:
+  /**
+   * @brief Create command object and return pointer to it
+   *
+   * @param  message Message shared pointer.
+   * @return Pointer to created command object.
+   **/
+  static utils::SharedPtr<commands::Command> CreateCommand(
+      const application_manager::MessagePtr& msg,
+      CANModuleInterface& can_module);
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ModuleDescriptionValidator")
+ private:
+  RCCommandFactory();
+  DISALLOW_COPY_AND_ASSIGN(RCCommandFactory);
+};
 
-using namespace message_params;
+}  // namespace can_cooperaion
 
-ModuleDescriptionValidator::ModuleDescriptionValidator() {
-  // name="moduleType"
-  module_type_[ValidationParams::TYPE] = ValueType::ENUM;
-  module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
-  module_type_[ValidationParams::ARRAY] = 0;
-  module_type_[ValidationParams::MANDATORY] = 1;
-
-  validation_scope_map_[kModuleType] = &module_type_;
-}
-
-ValidationResult ModuleDescriptionValidator::Validate(
-    const Json::Value& json, Json::Value& outgoing_json) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
-
-  if (result != ValidationResult::SUCCESS) {
-    return result;
-  }
-
-  return result;
-}
-
-}  // namespace valdiators
-
-}  // namespace can_cooperation
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_

@@ -36,7 +36,6 @@
 #include <queue>
 #include <string>
 #include "functional_module/generic_module.h"
-#include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "utils/threads/message_loop_thread.h"
@@ -47,19 +46,7 @@ namespace can_cooperation {
 class CANAppExtension;
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 
-struct MessageFromCAN : public Json::Value {
-  explicit MessageFromCAN() {}
-  explicit MessageFromCAN(const Json::Value& other) : Json::Value(other) {}
-};
-
-typedef Json::Value MessageFromMobile;
-
-class CANModuleInterface
-    : public functional_modules::GenericModule,
-      public CANConnectionObserver,
-      public threads::MessageLoopThread<std::queue<MessageFromCAN> >::Handler,
-      public threads::MessageLoopThread<
-          std::queue<MessageFromMobile> >::Handler {
+class CANModuleInterface : public functional_modules::GenericModule {
  public:
   CANModuleInterface() : GenericModule(kCANModuleID) {}
   virtual ~CANModuleInterface() {}
@@ -68,11 +55,6 @@ class CANModuleInterface
       application_manager::MessagePtr msg) = 0;
   virtual functional_modules::ProcessResult ProcessHMIMessage(
       application_manager::MessagePtr msg) = 0;
-  virtual void OnCANMessageReceived(const CANMessage& message) = 0;
-  virtual void OnCANConnectionError(ConnectionState state,
-                                    const std::string& info) = 0;
-  virtual void Handle(const MessageFromMobile message) = 0;
-  virtual void Handle(const MessageFromCAN message) = 0;
 
   /**
    * @brief Sends response to mobile application
@@ -86,12 +68,6 @@ class CANModuleInterface
    */
   virtual void SendTimeoutResponseToMobile(
       application_manager::MessagePtr msg) = 0;
-
-  /**
-   * @brief Post message to can to queue
-   * @param msg response mesage
-   */
-  virtual void SendMessageToCan(const MessageFromMobile& msg) = 0;
 
   /**
    * @brief Checks if radio scan started

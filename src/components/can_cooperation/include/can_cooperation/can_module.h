@@ -38,7 +38,6 @@
 
 #include "can_cooperation/can_module_interface.h"
 #include "functional_module/generic_module.h"
-#include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
@@ -55,10 +54,6 @@ class CANModule : public CANModuleInterface {
       application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(
       application_manager::MessagePtr msg);
-  void OnCANMessageReceived(const CANMessage& message);
-  void OnCANConnectionError(ConnectionState state, const std::string& info);
-  void Handle(const MessageFromMobile message);
-  void Handle(const MessageFromCAN message);
 
   /**
    * @brief Sends response to mobile application
@@ -71,12 +66,6 @@ class CANModule : public CANModuleInterface {
    * @param msg response mesage
    */
   void SendTimeoutResponseToMobile(application_manager::MessagePtr msg);
-
-  /**
-   * @brief Post message to can to queue
-   * @param msg response mesage
-   */
-  void SendMessageToCan(const MessageFromMobile& msg);
 
   /**
    * @brief Checks if radio scan started
@@ -128,10 +117,6 @@ class CANModule : public CANModuleInterface {
 
   void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app);
 
-  CANConnectionSPtr can_connection();
-
-  void set_can_connection(const CANConnectionSPtr can_connection);
-
   can_event_engine::EventDispatcher<application_manager::MessagePtr,
                                     std::string>&
   event_dispatcher();
@@ -148,10 +133,7 @@ class CANModule : public CANModuleInterface {
 
   functional_modules::ProcessResult HandleMessage(
       application_manager::MessagePtr msg);
-  CANConnectionSPtr can_connection_;
   functional_modules::PluginInfo plugin_info_;
-  threads::MessageLoopThread<std::queue<MessageFromCAN> > from_can_;
-  threads::MessageLoopThread<std::queue<MessageFromMobile> > from_mobile_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
   can_event_engine::EventDispatcher<application_manager::MessagePtr,

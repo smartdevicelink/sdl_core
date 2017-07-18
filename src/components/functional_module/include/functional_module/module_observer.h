@@ -39,7 +39,7 @@ typedef int ModuleID;
 
 class ModuleObserver {
  public:
-  enum Errors { NONE = -1, OUT_OF_MEMORY, CAN_CONNECTION_FAILURE, FS_FAILURE };
+  enum Errors { NONE = -1, OUT_OF_MEMORY, FS_FAILURE };
   virtual ~ModuleObserver() {}
   virtual void OnError(Errors error, ModuleID module_id) = 0;
 };

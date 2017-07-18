@@ -32,7 +32,7 @@
 
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
-#include "can_cooperation/mobile_command_factory.h"
+#include "can_cooperation/rc_command_factory.h"
 #include "functional_module/function_ids.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
@@ -42,9 +42,11 @@
 
 namespace can_cooperation {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
+
 using functional_modules::MobileFunctionID;
 
-utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
+utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg,
     CANModuleInterface& can_module) {
   switch (msg->function_id()) {
@@ -71,6 +73,8 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
     //    }
     default: {
       utils::SharedPtr<commands::Command> invalid_command;
+      LOG4CXX_DEBUG(logger_,
+                    "RSDL unable to proces function " << msg->function_id());
       return invalid_command;
     }
   }
