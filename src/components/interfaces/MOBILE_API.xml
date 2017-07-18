@@ -2616,6 +2616,7 @@
 -->
     <element name="GetInteriorVehicleDataID" value="100017" hexvalue="186B1" />
     <element name="SetInteriorVehicleDataID" value="100018" hexvalue="186B2" />
+    <element name="OnInteriorVehicleDataID" value="100019" hexvalue="186B3" />
 
   </enum>
 
@@ -5808,6 +5809,13 @@
         <description> true if successful; false, if failed </description>
     </param>
   </function>
+
+
+  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+    <param name="moduleData" type="ModuleData" mandatory="true">
+    </param>
+  </function>
+
 <!-- Deprecating - covered by OnSystemRequest
   <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification" >
     <description>
