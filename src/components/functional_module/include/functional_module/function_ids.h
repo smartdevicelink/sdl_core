@@ -38,15 +38,12 @@ namespace functional_modules {
 enum MobileFunctionID {
   // Reverse SDL functions ids
   BUTTON_PRESS = 100015,
-  GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
   GET_INTERIOR_VEHICLE_DATA = 100017,
   SET_INTERIOR_VEHICLE_DATA = 100018,
   ON_INTERIOR_VEHICLE_DATA = 100019,
 };
 
 namespace hmi_api {
-const char get_interior_vehicle_data_capabilities[] =
-    "RC.GetInteriorVehicleDataCapabilities";
 const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
 const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
 const char on_interior_vehicle_data[] = "RC.OnInteriorVehicleData";

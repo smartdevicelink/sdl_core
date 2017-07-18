@@ -1626,17 +1626,6 @@
    </param>
  </struct>
 
-
- <struct name="RemoteControlCapabilities">
-   <param name="climateControlCapabilities" type="Common.ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-     <description>If included, the platform supports RC climate controls.</description >
-   </param>
-
-   <param name="radioControlCapabilities" type="Common.RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-     <description>If included, the platform supports RC radio controls.</description >
-   </param>
- </struct>
-
 <enum name="DeviceRank">
   <element name="DRIVER">
     <description>The device is ranked as driver's</description>
@@ -4704,17 +4693,6 @@
 </interface>
 
 <interface name="RC" version="1.0" date="2015-10-13">
- <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
-   <description>Called to retrieve the available zones and supported control types</description>
-   <param name="moduleTypes" type="Common.ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
-       <description>If included, only the corresponding type of modules a will be sent back. If not included, all module types will be returned.</description>
-   </param>
- </function>
-
- <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
-   <param name="interiorVehicleDataCapabilities" type="Common.RemoteControlCapabilities">
-   </param>
- </function>
 
  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
     <param name="moduleData" type="Common.ModuleData">

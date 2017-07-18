@@ -1632,17 +1632,6 @@
     </param>
   </struct>
 
-
-  <struct name="RemoteControlCapabilities">
-    <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-      <description>If included, the platform supports RC climate controls.</description >
-    </param>
-
-    <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
-      <description>If included, the platform supports RC radio controls.</description >
-    </param>
-  </struct>
-
   <enum name="DeviceRank">
    <element name="DRIVER">
     <description>The device is ranked as driver's</description>
@@ -2625,7 +2614,6 @@
 <!--
   Reverse SDL specific ids, hardcoded in functional module
 -->
-    <element name="GetInteriorVehicleDataCapabilitiesID" value="100016" hexvalue="186B0" />
     <element name="GetInteriorVehicleDataID" value="100017" hexvalue="186B1" />
     <element name="SetInteriorVehicleDataID" value="100018" hexvalue="186B2" />
 
@@ -5754,37 +5742,6 @@
      <param name="seekTime" type="StartTime" mandatory="true">
       <description>See StartTime.</description>
      </param>
-  </function>
-
- <function name="GetInteriorVehicleDataCapabilities" functionID="GetInteriorVehicleDataCapabilitiesID" messagetype="request">
-    <description>Called to retrieve the available supported control types</description>
-    <param name="moduleTypes" type="ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
-        <description>If included, only the corresponding type of modules a will be sent back. If not included, all module types will be returned.</description>
-    </param>
-  </function>
-
-  <function name="GetInteriorVehicleDataCapabilities" functionID="GetInteriorVehicleDataCapabilitiesID" messagetype="response">
-    <param name="interiorVehicleDataCapabilities" type="RemoteControlCapabilities">
-    </param>
-
-    <param name="resultCode" type="Result" platform="documentation">
-        <description>See Result</description>
-        <element name="SUCCESS"/>
-        <element name="OUT_OF_MEMORY"/>
-        <element name="TOO_MANY_PENDING_REQUESTS"/>
-        <element name="APPLICATION_NOT_REGISTERED"/>
-        <element name="GENERIC_ERROR"/>
-        <element name="REJECTED"/>
-        <element name="IGNORED"/>
-        <element name="DISALLOWED"/>
-        <element name="USER_DISALLOWED"/>
-        <element name="UNSUPPORTED_RESOURCE"/>
-    </param>
-    <param name="info" type="String" maxlength="1000" mandatory="false">
-    </param>
-    <param name="success" type="Boolean" platform="documentation">
-        <description> true if successful; false, if failed </description>
-    </param>
   </function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">

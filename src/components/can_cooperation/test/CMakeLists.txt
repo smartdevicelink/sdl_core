@@ -19,7 +19,6 @@ set (SOURCES
   src/can_app_extension_test.cc
   src/can_tcp_connection_test.cc
   #src/can_library_test.cc
-  src/vehicle_capabilities_test.cc
   src/vehicle_data_subscription_test.cc
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/test/mock_message_helper.cc
 )

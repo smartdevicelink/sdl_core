@@ -146,15 +146,6 @@ const char kActionCode[] = "actionCode";
 // WebActivity struct
 */
 
-// GetInteriorVehicleDataCapabilities request
-const char kModuleTypes[] = "moduleTypes";
-// GetInteriorVehicleDataCapabilities request
-
-// GetInteriorVehicleDataCapabilities response
-const char kInteriorVehicleDataCapabilities[] =
-    "interiorVehicleDataCapabilities";
-// GetInteriorVehicleDataCapabilities response
-
 // SetInteriorVehicleData request
 const char kModuleData[] = "moduleData";
 // SetInteriorVehicleData request
