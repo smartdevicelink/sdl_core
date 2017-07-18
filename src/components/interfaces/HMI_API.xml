@@ -4730,6 +4730,14 @@
       if "false" - the "moduleDescription" from request is either unsubscribed or failed to subscribe.</description>
     </param>
 </function>
+
+
+<function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+  <param name="moduleData" type="Common.ModuleData">
+  </param>
+</function>
+
+
 </interface>
 
 </interfaces>

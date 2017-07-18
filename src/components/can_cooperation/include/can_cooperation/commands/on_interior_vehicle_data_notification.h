@@ -30,38 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
-#include "can_cooperation/validators/validator.h"
 #include "utils/macro.h"
+#include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
 
-namespace validators {
+namespace commands {
 
 /**
- * @brief OnInteriorVehicleDataNotificationValidator class
+ * @brief OnInteriorVehicleDataNotification command class
  */
-class OnInteriorVehicleDataNotificationValidator : public Validator {
+class OnInteriorVehicleDataNotification : public BaseCommandNotification {
  public:
-  OnInteriorVehicleDataNotificationValidator();
+  /**
+   * @brief OnInteriorVehicleDataNotification class constructor
+   *
+   * @param message Message with notification
+   **/
+  OnInteriorVehicleDataNotification(
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
- * @brief Validate json with message params
- *
- * @param json_string string with message params(fake params will be cut off)
- *
- * @return validation result
- */
-  ValidationResult Validate(std::string& json_string);
+   * @brief Execute command
+   */
+  void Execute() FINAL;
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
+  /**
+   * @brief OnInteriorVehicleDataNotification class destructor
+   */
+  virtual ~OnInteriorVehicleDataNotification();
+
+ protected:
+  std::string ModuleType(const Json::Value& message) FINAL;
+  std::vector<std::string> ControlData(const Json::Value& message) FINAL;
+
+  bool Validate() OVERRIDE {
+    return true;
+  }
 };
 
-}  // namespace valdiators
+}  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_

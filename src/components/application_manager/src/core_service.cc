@@ -292,7 +292,10 @@ bool CoreService::GetModuleTypes(const std::string& policy_app_id,
 
 MessageValidationResult CoreService::ValidateMessageBySchema(
     const Message& message) {
-  return application_manager_.ValidateMessageBySchema(message);
+  const MessageValidationResult result =
+      application_manager_.ValidateMessageBySchema(message);
+  LOG4CXX_DEBUG(logger_, "Validation result : " << result);
+  return result;
 }
 
 }  // namespace application_manager

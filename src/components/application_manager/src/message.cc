@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,16 @@ Message::Message(protocol_handler::MessagePriority priority)
     , payload_size_(0)
     , version_(kUnknownProtocol) {}
 
-Message::Message(const Message& message) : priority_(message.priority_) {
+Message::Message(const Message& message)
+    : function_id_(0)
+    , correlation_id_(0)
+    , type_(kUnknownType)
+    , priority_(message.priority_)
+    , connection_key_(0)
+    , binary_data_(NULL)
+    , data_size_(0)
+    , payload_size_(0)
+    , version_(kUnknownProtocol) {
   *this = message;
 }
 

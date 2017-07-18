@@ -37,8 +37,7 @@
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
 
-// Disabled
-//#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
+#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
 namespace can_cooperation {
 
@@ -65,12 +64,11 @@ utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
     //      can_module);
     //      break;
     //    }
-    //    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-    //      return
-    //      utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
-    //          msg, can_module);
-    //      break;
-    //    }
+    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
+      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
+          msg, can_module);
+      break;
+    }
     default: {
       utils::SharedPtr<commands::Command> invalid_command;
       LOG4CXX_DEBUG(logger_,
