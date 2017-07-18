@@ -2074,9 +2074,54 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
-bool ApplicationManagerImpl::ValidateMessageBySchema(const Message& message) {
+MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
+    const Message& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject so;
-  return ConvertMessageToSO(message, so);
+  switch (message.protocol_version()) {
+    case ProtocolVersion::kV4:
+    case ProtocolVersion::kV3:
+    case ProtocolVersion::kV2: {
+      const bool conversion_result =
+          formatters::CFormatterJsonSDLRPCv2::fromString(
+              message.json_message(),
+              so,
+              message.function_id(),
+              message.type(),
+              message.correlation_id());
+      if (!conversion_result) {
+        return INVALID_JSON;
+      }
+
+      if (!mobile_so_factory().attachSchema(so, true)) {
+        return INVALID_METADATA;
+      }
+
+      if (so.validate() != smart_objects::Errors::OK) {
+        return SCHEMA_MISMATCH;
+      }
+      break;
+    }
+    case ProtocolVersion::kHMI: {
+      const int32_t conversion_result = formatters::FormatterJsonRpc::
+          FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+              message.json_message(), so);
+      if (0 != conversion_result) {
+        return INVALID_JSON;
+      }
+
+      if (!hmi_so_factory().attachSchema(so, true)) {
+        return INVALID_METADATA;
+      }
+
+      if (so.validate() != smart_objects::Errors::OK) {
+        return SCHEMA_MISMATCH;
+      }
+      break;
+    }
+    default: { return UNSUPPORTED_PROTOCOL; }
+  }
+  return SUCCESS;
 }
 
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(

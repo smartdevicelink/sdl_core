@@ -135,7 +135,8 @@ void BaseCommandRequest::SendRequest(const char* function_id,
 }
 
 bool BaseCommandRequest::Validate() {
-  return service()->ValidateMessageBySchema(*message_);
+  return application_manager::SUCCESS ==
+         service()->ValidateMessageBySchema(*message_);
 }
 
 bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
@@ -318,6 +319,8 @@ void BaseCommandRequest::Run() {
     if (CheckPolicyPermissions() && CheckDriverConsent()) {
       Execute();  // run child's logic
     }
+  } else {
+    SendResponse(false, result_codes::kInvalidData, "");
   }
 }
 

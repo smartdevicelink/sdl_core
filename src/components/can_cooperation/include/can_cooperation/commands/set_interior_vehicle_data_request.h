@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,34 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief GetInteriorVehicleDataRequest command class
+ * @brief SetInteriorVehicleDataRequest command class
  */
-class GetInteriorVehicleDataRequest : public BaseCommandRequest {
+class SetInteriorVehicleDataRequest : public BaseCommandRequest {
  public:
   /**
-   * @brief GetInteriorVehicleDataRequest class constructor
+   * @brief SetInteriorVehicleDataRequest class constructor
    *
    * @param message Message from mobile
+   * @param can_module Module used for handling RC functionality
    **/
-  explicit GetInteriorVehicleDataRequest(
-      const application_manager::MessagePtr& message,
-      CANModuleInterface& can_module);
+  SetInteriorVehicleDataRequest(const application_manager::MessagePtr& message,
+                                CANModuleInterface& can_module);
 
   /**
    * @brief Execute command
    */
-  virtual void Execute();
+  void Execute() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
@@ -67,19 +68,19 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
   void OnEvent(const can_event_engine::Event<application_manager::MessagePtr,
                                              std::string>& event);
 
- protected:
-  virtual std::string ModuleType(const Json::Value& message);
-
- private:
   /**
-    * @brief Handle subscription to vehicle data
-    * @param hmi_response json message with response from HMI
-    */
-  void ProccessSubscription(const Json::Value& hmi_response);
+   * @brief SetInteriorVehicleDataRequest class destructor
+   */
+  virtual ~SetInteriorVehicleDataRequest();
+
+ protected:
+  virtual std::string ModuleType(const Json::Value& message) FINAL;
+  virtual std::vector<std::string> ControlData(
+      const Json::Value& message) FINAL;
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_

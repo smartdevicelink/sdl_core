@@ -1258,7 +1258,8 @@ class ApplicationManagerImpl
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
 
-  bool ValidateMessageBySchema(const Message& message) OVERRIDE;
+  MessageValidationResult ValidateMessageBySchema(
+      const Message& message) OVERRIDE;
 
   utils::SharedPtr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);

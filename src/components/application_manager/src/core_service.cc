@@ -290,7 +290,8 @@ bool CoreService::GetModuleTypes(const std::string& policy_app_id,
   return false;
 }
 
-bool CoreService::ValidateMessageBySchema(const Message& message) {
+MessageValidationResult CoreService::ValidateMessageBySchema(
+    const Message& message) {
   return application_manager_.ValidateMessageBySchema(message);
 }
 
