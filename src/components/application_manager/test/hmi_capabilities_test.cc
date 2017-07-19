@@ -351,12 +351,28 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   // Check vehicle type
   const smart_objects::SmartObject vehicle_type_so =
       *(hmi_capabilities_test->vehicle_type());
-  EXPECT_TRUE(preset_bank_so["onScreenPresetsAvailable"].asBool());
 
   EXPECT_EQ("Ford", vehicle_type_so["make"].asString());
   EXPECT_EQ("Fiesta", vehicle_type_so["model"].asString());
   EXPECT_EQ("2013", vehicle_type_so["modelYear"].asString());
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
+
+  //Check system capabilities
+  smart_objects::SmartObject navigation_capability_so =
+      *(hmi_capabilities_test->navigation_capability());
+
+  EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
+  EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
+  EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
+  EXPECT_TRUE(navigation_capability_so["getWayPointsEnabled"].asBool());
+
+  const smart_objects::SmartObject phone_capability_so =
+      *(hmi_capabilities_test->phone_capability());
+      
+  EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
+  EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+
+
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
