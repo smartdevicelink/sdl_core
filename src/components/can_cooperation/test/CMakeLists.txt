@@ -2,10 +2,11 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/functional_module/include/
-  ${CMAKE_SOURCE_DIR}/src/components/functional_module/test/include/
+  ${CMAKE_SOURCE_DIR}/src/components/functional_module/test/
   ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/include/
+  ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/test/include/
   ${CMAKE_SOURCE_DIR}/src/components/include/
-  ${CMAKE_SOURCE_DIR}/src/components/application_manager/include/
+  ${CMAKE_SOURCE_DIR}/src/components/application_manager/test/include/
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
@@ -69,3 +70,4 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
 
 create_test("can_cooperation_test" "${SOURCES}" "${LIBRARIES}")
+add_subdirectory(commands)

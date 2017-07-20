@@ -134,7 +134,7 @@ void BaseCommandRequest::SendRequest(const char* function_id,
 
 bool BaseCommandRequest::Validate() {
   return application_manager::MessageValidationResult::SUCCESS ==
-         service()->ValidateMessageBySchema(*message_);
+         service_->ValidateMessageBySchema(*message_);
 }
 
 bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
