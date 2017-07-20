@@ -61,12 +61,14 @@ BaseCommandRequest::~BaseCommandRequest() {
 }
 
 void BaseCommandRequest::OnTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
   SendResponse(false, result_codes::kTimedOut, "Request timeout expired.");
 }
 
 void BaseCommandRequest::SendResponse(bool success,
                                       const char* result_code,
                                       const std::string& info) {
+  LOG4CXX_AUTO_TRACE(logger_);
   message_->set_message_type(application_manager::MessageType::kResponse);
   Json::Value msg_params;
 
@@ -95,6 +97,7 @@ void BaseCommandRequest::SendResponse(bool success,
 void BaseCommandRequest::SendRequest(const char* function_id,
                                      const Json::Value& message_params,
                                      bool is_hmi_request) {
+  LOG4CXX_AUTO_TRACE(logger_);
   Json::Value msg;
 
   if (is_hmi_request) {
@@ -138,6 +141,7 @@ bool BaseCommandRequest::Validate() {
 }
 
 bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(parsed_msg);
   if (!parsed_msg)
     return false;
@@ -155,6 +159,7 @@ bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
 
 const char* BaseCommandRequest::GetMobileResultCode(
     const hmi_apis::Common_Result::eType& hmi_code) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   switch (hmi_code) {
     case hmi_apis::Common_Result::SUCCESS: {
       return result_codes::kSuccess;
@@ -262,6 +267,7 @@ const char* BaseCommandRequest::GetMobileResultCode(
 
 CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     application_manager::ApplicationSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!app) {
     return NULL;
   }
@@ -271,6 +277,7 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
   if (!app_extension) {
+    LOG4CXX_DEBUG(logger_, "New app extension will be created");
     app_extension = new CANAppExtension(id);
     app->AddExtension(app_extension);
   }
@@ -409,6 +416,7 @@ void BaseCommandRequest::SendDisallowed(
 }
 
 void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(app_);
   Json::Value params;
   params[json_keys::kAppId] = app_->hmi_app_id();
@@ -442,6 +450,7 @@ void BaseCommandRequest::on_event(
 void BaseCommandRequest::UpdateHMILevel(
     const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
     return;
@@ -502,6 +511,7 @@ void BaseCommandRequest::ProcessAccessResponse(
 
 void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
                                        bool user_consented) {
+  LOG4CXX_AUTO_TRACE(logger_);
   switch (access) {
     case application_manager::kAllowed:
       if (user_consented) {

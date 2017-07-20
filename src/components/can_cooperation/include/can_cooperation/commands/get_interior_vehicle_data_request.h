@@ -35,6 +35,7 @@
 
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
@@ -57,7 +58,7 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
   /**
    * @brief Execute command
    */
-  virtual void Execute();
+  void Execute() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
