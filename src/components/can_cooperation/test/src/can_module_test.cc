@@ -134,13 +134,13 @@ TEST_F(CanModuleTest, ProcessMessageEmptyapps_List) {
         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
         \"climateControlData\": {\"fanSpeed\": 100} }}}";
   message_->set_json_message(json);
-  // TODO(ILytvynenko): Uncomment after RC.OnInteriorVehicleData RPC
-  // implementation
-  // EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
-  //   .WillOnce(Return(apps_));
+
+  EXPECT_CALL(*mock_service_, ValidateMessageBySchema(_))
+      .WillOnce(Return(application_manager::SCHEMA_MISMATCH));
   EXPECT_CALL(*mock_service_, SendMessageToMobile(_)).Times(0);
+
   // EXPECT_EQ(ProcessResult::PROCESSED, module_.ProcessMessage(message_));
-  EXPECT_EQ(ProcessResult::CANNOT_PROCESS, module_.ProcessMessage(message_));
+  EXPECT_EQ(ProcessResult::CANNOT_PROCESS, module_.ProcessHMIMessage(message_));
 }
 
 TEST_F(CanModuleTest, ProcessMessagePass) {
@@ -168,23 +168,20 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
 
   apps_.push_back(app0_);
   can_app_extention_->SubscribeToInteriorVehicleData(moduleDescription);
-  //  TODO(ILytvynenko): Uncomment after RC.OnInteriorVehicleData RPC
-  //  implementation
-  //  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-  //      .WillOnce(Return(can_app_extention_));
-  //  EXPECT_CALL(*app0_, app_id()).WillRepeatedly(Return(1));
-  //  EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
-  //      .WillOnce(Return(apps_));
-  //  EXPECT_CALL(*mock_service_, GetApplication(1)).WillOnce(Return(app0_));
-  //  EXPECT_CALL(*mock_service_, CheckPolicyPermissions(_))
-  //      .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
-  //  EXPECT_CALL(*mock_service_, CheckModule(1,
-  //  "CLIMATE")).WillOnce(Return(true));
-  //  EXPECT_CALL(*mock_service_, SendMessageToMobile(_));
+  EXPECT_CALL(*mock_service_, ValidateMessageBySchema(_))
+      .WillOnce(Return(application_manager::SUCCESS));
+  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
+      .WillOnce(Return(can_app_extention_));
+  EXPECT_CALL(*app0_, app_id()).WillRepeatedly(Return(1));
+  EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
+      .WillOnce(Return(apps_));
+  EXPECT_CALL(*mock_service_, GetApplication(1)).WillOnce(Return(app0_));
+  EXPECT_CALL(*mock_service_, CheckPolicyPermissions(_))
+      .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
+  EXPECT_CALL(*mock_service_, CheckModule(1, "CLIMATE")).WillOnce(Return(true));
+  EXPECT_CALL(*mock_service_, SendMessageToMobile(_));
 
-  //  EXPECT_EQ(ProcessResult::PROCESSED, module_.ProcessMessage(message_));
-  EXPECT_EQ(ProcessResult::CANNOT_PROCESS, module_.ProcessMessage(message_));
-  std::cout << " !! " << std::endl;
+  EXPECT_EQ(ProcessResult::PROCESSED, module_.ProcessHMIMessage(message_));
 }
 
 TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
