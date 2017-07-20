@@ -11,7 +11,7 @@ pipeline {
 		 timestamps()
 	}
 
-agent { node { label 'atf_slave' } } 
+agent { node { label 'atf_slave3' } } 
 
 stages {
 		stage ("Code Style Check")
@@ -34,7 +34,7 @@ stages {
 			export THIRD_PARTY_INSTALL_PREFIX_ARCH=${THIRD_PARTY_INSTALL_PREFIX}/x86
 			export LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX_ARCH/lib
 			cmake ${WORKSPACE} -DCMAKE_BUILD_TYPE="Debug" -DBUILD_TESTS=ON -DENABLE_GCOV=ON -DREMOTE_CONTROL=ON
-			make install
+			make -j6 install
 			make test | tee ut.log || true; result=${PIPESTATUS[0]};
 			if [ $result -ne 0 ]; then
 			COREFILE=$(find /tmp/corefiles -type f -name "core*");
