@@ -4731,12 +4731,10 @@
     </param>
 </function>
 
-
 <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
   <param name="moduleData" type="Common.ModuleData">
   </param>
 </function>
-
 
 </interface>
 
