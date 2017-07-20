@@ -44,7 +44,7 @@ namespace application_manager {
 enum TypeAccess { kNone, kDisallowed, kAllowed, kManual };
 
 enum MessageValidationResult {
-  SUCCESS,
+  SUCCESS = 0,
   INVALID_JSON,
   INVALID_METADATA,
   SCHEMA_MISMATCH,

@@ -193,7 +193,9 @@ ProcessResult CANModule::ProcessHMIMessage(
           service()->ValidateMessageBySchema(*msg);
       utils::SharedPtr<commands::Command> command =
           RCCommandFactory::CreateCommand(msg, *this);
-      if ((validation_result == application_manager::SUCCESS) && command) {
+      if ((validation_result ==
+           application_manager::MessageValidationResult::SUCCESS) &&
+          command) {
         command->Run();
         return ProcessResult::PROCESSED;
       }

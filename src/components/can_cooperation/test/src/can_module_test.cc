@@ -136,7 +136,8 @@ TEST_F(CanModuleTest, ProcessMessageEmptyapps_List) {
   message_->set_json_message(json);
 
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(_))
-      .WillOnce(Return(application_manager::SCHEMA_MISMATCH));
+      .WillOnce(Return(
+          application_manager::MessageValidationResult::SCHEMA_MISMATCH));
   EXPECT_CALL(*mock_service_, SendMessageToMobile(_)).Times(0);
 
   // EXPECT_EQ(ProcessResult::PROCESSED, module_.ProcessMessage(message_));
@@ -169,7 +170,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   apps_.push_back(app0_);
   can_app_extention_->SubscribeToInteriorVehicleData(moduleDescription);
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(_))
-      .WillOnce(Return(application_manager::SUCCESS));
+      .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
       .WillOnce(Return(can_app_extention_));
   EXPECT_CALL(*app0_, app_id()).WillRepeatedly(Return(1));
