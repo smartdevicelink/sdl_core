@@ -288,28 +288,6 @@
     <description>This mode causes the interaction to immediately display a keyboard entry through the HMI.</description>
 </enum>
 
-<enum name="DeactivateReason">
-  <description>Specifies the functionality the User has switched to.</description>
-  <element name="AUDIO">
-      <description>Navigated to audio(radio, etc)</description>
-  </element>
-  <element name="PHONECALL">
-      <description>Navigated to make a call.</description>
-  </element>
-  <element name="NAVIGATIONMAP">
-      <description>Navigated to navigation screen.</description>
-  </element>
-  <element name="PHONEMENU">
-      <description>Navigated to phone menu.</description>
-  </element>
-  <element name="SYNCSETTINGS">
-      <description>Navigated to settings menu.</description>
-  </element>
-  <element name="GENERAL">
-      <description>Other screens navigation apart from other mobile app.</description>
-  </element>
-</enum>
-
 <enum name="ClockUpdateMode">
   <description>Describes how the media clock timer should behave on the platform</description>
   <element name="COUNTUP" />
@@ -2623,9 +2601,6 @@
       <description>Must be sent by HU system when the user switches to any functionality which is not other mobile application.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of deactivated application.</description>
-      </param>
-      <param name="reason" type="Common.DeactivateReason" mandatory="true">
-        <description>Specifies the functionality the user has switched to.</description>
       </param>
     </function>
     <function name="OnAppRegistered" messagetype="notification">
