@@ -132,6 +132,7 @@ const std::string ExtractFunctionAndAddMetadata(
     DCHECK_OR_RETURN(!function_name.empty(), "");
 
     out_msg.set_message_type(application_manager::MessageType::kErrorResponse);
+    out_msg.set_correlation_id(value.get(json_keys::kId, "").asInt());
     return function_name;
   }
   return std::string();
@@ -167,7 +168,7 @@ ProcessResult CANModule::ProcessHMIMessage(
   Json::Value value;
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
-
+  LOG4CXX_TRACE(logger_, "Process " << msg->json_message());
   const std::string& function_name = ExtractFunctionAndAddMetadata(value, *msg);
 
   // Existence of method name must be guaranteed by plugin manager
@@ -179,6 +180,7 @@ ProcessResult CANModule::ProcessHMIMessage(
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
+      LOG4CXX_DEBUG(logger_, "Response received");
       event_dispatcher_.raise_event(event);
       return ProcessResult::PROCESSED;
     }
@@ -191,10 +193,14 @@ ProcessResult CANModule::ProcessHMIMessage(
           service()->ValidateMessageBySchema(*msg);
       utils::SharedPtr<commands::Command> command =
           RCCommandFactory::CreateCommand(msg, *this);
-      if ((validation_result == application_manager::SUCCESS) && command) {
+      if ((validation_result ==
+           application_manager::MessageValidationResult::SUCCESS) &&
+          command) {
         command->Run();
         return ProcessResult::PROCESSED;
       }
+      LOG4CXX_DEBUG(logger_, "Message validation failed");
+      break;
     }
     default: { LOG4CXX_DEBUG(logger_, "Unknown message type"); }
   }

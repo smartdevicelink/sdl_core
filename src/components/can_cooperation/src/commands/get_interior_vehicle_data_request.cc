@@ -72,8 +72,9 @@ void GetInteriorVehicleDataRequest::OnEvent(
       (functional_modules::hmi_api::get_interior_vehicle_data == event.id()));
 
   application_manager::Message& hmi_response = *(event.event_message());
-  const bool validate_result = application_manager::SUCCESS ==
-                               service()->ValidateMessageBySchema(hmi_response);
+  const bool validate_result =
+      application_manager::MessageValidationResult::SUCCESS ==
+      service()->ValidateMessageBySchema(hmi_response);
   LOG4CXX_DEBUG(logger_,
                 "HMI response validation result is " << validate_result);
   const Json::Value value =

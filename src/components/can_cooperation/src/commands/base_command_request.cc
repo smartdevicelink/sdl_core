@@ -133,7 +133,7 @@ void BaseCommandRequest::SendRequest(const char* function_id,
 }
 
 bool BaseCommandRequest::Validate() {
-  return application_manager::SUCCESS ==
+  return application_manager::MessageValidationResult::SUCCESS ==
          service()->ValidateMessageBySchema(*message_);
 }
 
