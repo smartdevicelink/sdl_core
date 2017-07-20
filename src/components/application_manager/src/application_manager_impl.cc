@@ -2107,6 +2107,8 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
           FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
               message.json_message(), so);
       if (0 != conversion_result) {
+        LOG4CXX_WARN(logger_,
+                     "Failed to parse json from HMI: " << conversion_result);
         return INVALID_JSON;
       }
 
