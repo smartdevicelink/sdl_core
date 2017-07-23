@@ -56,15 +56,13 @@ OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  Json::Value moduleDescription(Json::ValueType::objectValue);
   Json::Value json;
 
   application_manager::MessagePtr msg = message();
 
   json = MessageHelper::StringToValue(msg->json_message());
 
-  moduleDescription[message_params::kModuleType] =
-      json[message_params::kModuleData][message_params::kModuleType];
+  Json::Value module_type = json[message_params::kModuleType];
 
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = service_->GetApplications(can_module_.GetModuleID());
@@ -77,7 +75,7 @@ void OnInteriorVehicleDataNotification::Execute() {
         application_manager::AppExtensionPtr::static_pointer_cast<
             CANAppExtension>(app.QueryInterface(can_module_.GetModuleID()));
     DCHECK(extension);
-    if (extension->IsSubscibedToInteriorVehicleData(moduleDescription)) {
+    if (extension->IsSubscibedToInteriorVehicleData(module_type)) {
       application_manager::MessagePtr message =
           utils::MakeShared<application_manager::Message>(*msg);
       message->set_message_type(
@@ -94,12 +92,9 @@ void OnInteriorVehicleDataNotification::Execute() {
 
 std::string OnInteriorVehicleDataNotification::ModuleType(
     const Json::Value& message) {
-  const Json::Value module_data =
+  const Json::Value& module_data =
       message.get(message_params::kModuleData, Json::Value(Json::objectValue));
-  const Json::Value module_type =
-      module_data.get(message_params::kModuleType, Json::Value(""));
-
-  return module_type.asString();
+  return module_data.get(message_params::kModuleType, "").asString();
 }
 
 std::vector<std::string> OnInteriorVehicleDataNotification::ControlData(

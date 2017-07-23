@@ -71,19 +71,19 @@ class CANAppExtension : public application_manager::AppExtension {
    * @brief Subscribe to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void SubscribeToInteriorVehicleData(const Json::Value& moduleDescription);
+  void SubscribeToInteriorVehicleData(const Json::Value& module_type);
 
   /**
    * @brief Unsubscribe from OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void UnsubscribeFromInteriorVehicleData(const Json::Value& moduleDescription);
+  void UnsubscribeFromInteriorVehicleData(const Json::Value& module_type);
 
   /**
    * @brief Check if application subscribed to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  bool IsSubscibedToInteriorVehicleData(const Json::Value& moduleDescription);
+  bool IsSubscibedToInteriorVehicleData(const Json::Value& module_type);
 
  private:
   bool is_control_given_;

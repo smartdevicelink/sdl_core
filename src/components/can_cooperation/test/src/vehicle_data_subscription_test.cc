@@ -113,10 +113,9 @@ TEST(VehicleDataSubscription, CompareDifferentNesting) {
   ASSERT_TRUE(json2 < json1);
 }
 
-TEST(VehicleDataSubscription, CompareModuleDesciption) {
+TEST(VehicleDataSubscription, CompareModuleTypes) {
   Json::Value json1;
-  json1["moduleDescription"] = Json::Value(Json::ValueType::objectValue);
-  json1["moduleDescription"]["moduleType"] = "RADIO";
+  json1["moduleType"] = "RADIO";
 
   Json::Value json2;
   json2["moduleData"] = Json::Value(Json::ValueType::objectValue);
@@ -124,15 +123,15 @@ TEST(VehicleDataSubscription, CompareModuleDesciption) {
       Json::Value(Json::ValueType::objectValue);
   json2["moduleData"]["moduleType"] = "RADIO";
 
-  ASSERT_FALSE(json1["moduleDescription"] == json2["moduleData"]);
+  ASSERT_FALSE(json1["moduleType"] == json2["moduleData"]);
 
   Json::Value json3;
   json3["moduleType"] = json2["moduleData"]["moduleType"];
 
-  ASSERT_TRUE(json1["moduleDescription"] == json3);
+  ASSERT_TRUE(json1["moduleType"] == json3);
 
   std::set<Json::Value> subscribed;
-  subscribed.insert(json1["moduleDescription"]);
+  subscribed.insert(json1["moduleType"]);
   Json::Value null_val(Json::ValueType::nullValue);
   subscribed.insert(null_val);
   ASSERT_FALSE(subscribed.end() == subscribed.find(json3));
