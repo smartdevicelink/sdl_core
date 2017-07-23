@@ -167,9 +167,6 @@ class ApplicationManager {
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) = 0;
 
-  virtual AppSharedPtrs applications_by_interior_vehicle_data(
-      smart_objects::SmartObject moduleDescription) = 0;
-
   virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
 
   /**

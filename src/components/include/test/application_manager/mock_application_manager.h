@@ -83,9 +83,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          const std::string& policy_app_id));
   MOCK_METHOD1(SubscribeToHMINotification,
                void(const std::string& hmi_notification));
-  MOCK_METHOD1(applications_by_interior_vehicle_data,
-               application_manager::AppSharedPtrs(
-                   smart_objects::SmartObject moduleDescription));
   MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
