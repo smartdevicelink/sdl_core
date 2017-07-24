@@ -37,10 +37,10 @@ namespace functional_modules {
 
 enum MobileFunctionID {
   // Reverse SDL functions ids
-  BUTTON_PRESS = 100015,
-  GET_INTERIOR_VEHICLE_DATA = 100017,
-  SET_INTERIOR_VEHICLE_DATA = 100018,
-  ON_INTERIOR_VEHICLE_DATA = 100019,
+  BUTTON_PRESS = 41,
+  GET_INTERIOR_VEHICLE_DATA = 43,
+  SET_INTERIOR_VEHICLE_DATA = 44,
+  ON_INTERIOR_VEHICLE_DATA = 32783,
 };
 
 namespace hmi_api {
@@ -52,9 +52,6 @@ const char button_press[] = "Buttons.ButtonPress";
 const char get_user_consent[] = "RC.GetInteriorVehicleDataConsent";
 const char on_app_deactivated[] = "BasicCommunication.OnAppDeactivated";
 const char sdl_activate_app[] = "SDL.ActivateApp";
-// Disabled
-// const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
-// const char on_device_rank_changed[] = "RC.OnDeviceRankChanged";
 }
 
 }  //  namespace functional_modules
