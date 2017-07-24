@@ -157,6 +157,12 @@ class CoreService : public Service {
   bool IsRemoteControlApplication(ApplicationSharedPtr app) const FINAL;
 
   /**
+   * Removes fake parameters from request to HMI
+   * @param message message to handle
+   */
+  void RemoveHMIFakeParameters(application_manager::MessagePtr& message) FINAL;
+
+  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application

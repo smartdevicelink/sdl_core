@@ -193,6 +193,11 @@ bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
   return false;
 }
 
+void CoreService::RemoveHMIFakeParameters(
+    application_manager::MessagePtr& message) {
+  application_manager_.RemoveHMIFakeParameters(message);
+}
+
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return application_manager_.application(app_id);
 }

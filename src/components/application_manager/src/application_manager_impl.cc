@@ -1660,6 +1660,25 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   return false;
 }
 
+void ApplicationManagerImpl::RemoveHMIFakeParameters(
+    application_manager::MessagePtr& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace NsSmartDeviceLink::NsJSONHandler;
+  SmartObject so;
+
+  Formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
+                                           hmi_apis::messageType::eType>(
+      message->json_message(), so);
+
+  std::string formatted_message;
+  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  hmi_apis::HMI_API factory;
+  factory.attachSchema(so, true);
+  Formatters::FormatterJsonRpc::ToString(so, formatted_message);
+  message->set_json_message(formatted_message);
+}
+
 void ApplicationManagerImpl::SendMessageToHMI(
     const commands::MessageSharedPtr message) {
   LOG4CXX_AUTO_TRACE(logger_);

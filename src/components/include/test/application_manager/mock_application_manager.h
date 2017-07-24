@@ -129,6 +129,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(
       SendMessageToHMI,
       void(const application_manager::commands::MessageSharedPtr message));
+  MOCK_METHOD1(RemoveHMIFakeParameters,
+               void(application_manager::MessagePtr& message));
   MOCK_METHOD1(
       ManageHMICommand,
       bool(const application_manager::commands::MessageSharedPtr message));

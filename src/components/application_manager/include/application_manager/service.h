@@ -155,6 +155,12 @@ class Service {
   virtual ApplicationSharedPtr GetApplication(ApplicationId app_id) = 0;
 
   /**
+   * Removes fake parameters from request to HMI
+   * @param message message to handle
+   */
+  virtual void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) = 0;
+  /**
    * @brief Send message to HMI
    * @param message Message to HMI
    */
