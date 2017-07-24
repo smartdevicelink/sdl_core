@@ -78,6 +78,15 @@ class BaseCommandRequest
   void on_event(const can_event_engine::Event<application_manager::MessagePtr,
                                               std::string>& event);
 
+  /**
+   * @brief Generates correct request to HMI
+   * @param function_id request ID
+   * @param msg_params json with message params
+   * @return generated request shared ptr
+   */
+  application_manager::MessagePtr CreateHmiRequest(
+      const char* function_id, const Json::Value& message_params);
+
  protected:
   application_manager::MessagePtr message_;
   Json::Value response_params_;
@@ -132,9 +141,7 @@ class BaseCommandRequest
    * @param function_id request ID
    * @param msg_params json with message params
    */
-  void SendRequest(const char* function_id,
-                   const Json::Value& message_params,
-                   bool is_hmi_request = false);
+  void SendRequest(const char* function_id, const Json::Value& message_params);
 
   application_manager::ApplicationSharedPtr app() {
     DCHECK(app_);
@@ -148,7 +155,7 @@ class BaseCommandRequest
   void virtual Execute() = 0;
 
   /**
-   * @brief Validat requrest by xml schema
+   * @brief Validates request by xml schema
    */
   bool Validate();
 

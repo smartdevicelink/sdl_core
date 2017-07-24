@@ -95,16 +95,18 @@ void BaseCommandRequest::SendResponse(bool success,
 }
 
 void BaseCommandRequest::SendRequest(const char* function_id,
-                                     const Json::Value& message_params,
-                                     bool is_hmi_request) {
+                                     const Json::Value& message_params) {
   LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::MessagePtr message_to_send =
+      CreateHmiRequest(function_id, message_params);
+  service_->SendMessageToHMI(message_to_send);
+}
+
+application_manager::MessagePtr BaseCommandRequest::CreateHmiRequest(
+    const char* function_id, const Json::Value& message_params) {
   Json::Value msg;
 
-  if (is_hmi_request) {
-    msg[kId] = service_->GetNextCorrelationID();
-  } else {
-    msg[kId] = MessageHelper::GetNextCANCorrelationID();
-  }
+  msg[kId] = service_->GetNextCorrelationID();
 
   can_module_.event_dispatcher().add_observer(
       function_id, msg[kId].asInt(), this);
@@ -118,21 +120,19 @@ void BaseCommandRequest::SendRequest(const char* function_id,
   msg[kParams][json_keys::kAppId] = app_->hmi_app_id();
 
   Json::FastWriter writer;
-  if (is_hmi_request) {
-    application_manager::MessagePtr message_to_send(
-        new application_manager::Message(
-            protocol_handler::MessagePriority::kDefault));
-    message_to_send->set_protocol_version(
-        application_manager::ProtocolVersion::kHMI);
-    message_to_send->set_correlation_id(msg[kId].asInt());
-    std::string json_msg = writer.write(msg);
-    message_to_send->set_json_message(json_msg);
-    message_to_send->set_message_type(
-        application_manager::MessageType::kRequest);
+  application_manager::MessagePtr message_to_send(
+      new application_manager::Message(
+          protocol_handler::MessagePriority::kDefault));
+  message_to_send->set_protocol_version(
+      application_manager::ProtocolVersion::kHMI);
+  message_to_send->set_correlation_id(msg[kId].asInt());
+  std::string json_msg = writer.write(msg);
+  message_to_send->set_json_message(json_msg);
+  message_to_send->set_message_type(application_manager::MessageType::kRequest);
 
-    LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
-    service_->SendMessageToHMI(message_to_send);
-  }
+  LOG4CXX_DEBUG(logger_, "\nRequest to HMI: \n" << json_msg);
+
+  return message_to_send;
 }
 
 bool BaseCommandRequest::Validate() {
@@ -421,7 +421,7 @@ void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
   Json::Value params;
   params[json_keys::kAppId] = app_->hmi_app_id();
   params[message_params::kModuleType] = ModuleType(value);
-  SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
+  SendRequest(functional_modules::hmi_api::get_user_consent, params);
 }
 
 std::string BaseCommandRequest::ModuleType(const Json::Value& message) {

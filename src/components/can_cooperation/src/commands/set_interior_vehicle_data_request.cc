@@ -72,8 +72,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   if (module_type_and_data_match) {
     SendRequest(functional_modules::hmi_api::set_interior_vehicle_data,
-                request_params,
-                true);
+                request_params);
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
     SendResponse(false,
