@@ -45,6 +45,7 @@ file(GLOB SOURCES
 #  ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
   ${RC_COMMANDS_TEST_DIR}/*
   ${COMPONENTS_DIR}/can_cooperation/test/commands/get_interior_vehicle_data_request_test.cc
+  ${COMPONENTS_DIR}/can_cooperation/test/commands/on_interior_vehicle_data_notification_test.cc
 )
 
 set(LIBRARIES
