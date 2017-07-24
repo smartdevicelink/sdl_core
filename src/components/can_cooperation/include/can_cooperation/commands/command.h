@@ -35,6 +35,7 @@
 
 #include "utils/shared_ptr.h"
 #include "can_cooperation/can_module_interface.h"
+#include "can_cooperation/event_engine/event.h"
 
 namespace can_cooperation {
 
@@ -61,6 +62,14 @@ class Command {
    * \brief Command on timeout reaction
    */
   virtual void OnTimeout() = 0;
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  virtual void on_event(
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event) {}
 
  protected:
   Command(CANModuleInterface& can_module) : can_module_(can_module) {}

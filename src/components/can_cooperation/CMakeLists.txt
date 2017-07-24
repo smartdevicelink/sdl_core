@@ -39,6 +39,7 @@ include_directories (
 )
 
 set (CAN_SOURCE_DIR ${COMPONENTS_DIR}/can_cooperation/src)
+set (CAN_TEST_DIR ${CAN_SOURCE_DIR}/test)
 set (CAN_COMMANDS_DIR ${CAN_SOURCE_DIR}/commands)
 
 collect_sources(CAN_SOURCES "${CAN_SOURCE_DIR}")

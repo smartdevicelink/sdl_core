@@ -123,9 +123,11 @@ class CANModuleInterface : public functional_modules::GenericModule {
   virtual void SendHmiStatusNotification(
       application_manager::ApplicationSharedPtr app) = 0;
 
-  virtual can_event_engine::EventDispatcher<application_manager::MessagePtr,
-                                            std::string>&
-  event_dispatcher() = 0;
+  typedef can_event_engine::EventDispatcher<application_manager::MessagePtr,
+                                            std::string>
+      CanModuleEventDispatcher;
+
+  virtual CanModuleEventDispatcher& event_dispatcher() = 0;
 
  protected:
   /**

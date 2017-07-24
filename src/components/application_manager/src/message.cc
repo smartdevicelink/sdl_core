@@ -96,7 +96,7 @@ Message& Message::operator=(const Message& message) {
   return *this;
 }
 
-bool Message::operator==(const Message& message) {
+bool Message::operator==(const Message& message) const {
   bool function_id = function_id_ == message.function_id_;
   bool correlation_id = correlation_id_ == message.correlation_id_;
   bool connection_key = connection_key_ == message.connection_key_;
@@ -105,11 +105,13 @@ bool Message::operator==(const Message& message) {
   bool version = version_ == message.version_;
   bool data_size = data_size_ == message.data_size_;
   bool payload_size = payload_size_ == message.payload_size_;
-
-  bool binary_data = std::equal(binary_data_->begin(),
-                                binary_data_->end(),
-                                message.binary_data_->begin(),
-                                BinaryDataPredicate);
+  bool binary_data = true;
+  if (binary_data_) {
+    binary_data = std::equal(binary_data_->begin(),
+                             binary_data_->end(),
+                             message.binary_data_->begin(),
+                             BinaryDataPredicate);
+  }
 
   return function_id && correlation_id && connection_key && type &&
          binary_data && json_message && version && data_size && payload_size;
