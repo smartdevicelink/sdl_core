@@ -161,8 +161,9 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   message_->set_binary_data(data);
 
   Json::Value json_value = MessageHelper::StringToValue(json);
-  Json::Value module_type = json_value[message_params::kModuleType];
-
+  Json::Value module_type =
+      json_value[json_keys::kParams][message_params::kModuleData]
+                [message_params::kModuleType];
   apps_.push_back(app0_);
   can_app_extention_->SubscribeToInteriorVehicleData(module_type);
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(_))
