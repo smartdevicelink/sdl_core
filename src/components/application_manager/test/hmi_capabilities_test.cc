@@ -104,7 +104,8 @@ const char* const cstring_values_[] = {
     "EN_US", "ES_MX", "FR_CA", "DE_DE", "ES_ES", "EN_GB", "RU_RU", "TR_TR",
     "PL_PL", "FR_FR", "IT_IT", "SV_SE", "PT_PT", "NL_NL", "EN_AU", "ZH_CN",
     "ZH_TW", "JA_JP", "AR_SA", "KO_KR", "PT_BR", "CS_CZ", "DA_DK", "NO_NO",
-    "NL_BE", "EL_GR", "HU_HU", "FI_FI", "SK_SK"};
+    "NL_BE", "EL_GR", "HU_HU", "FI_FI", "SK_SK", "EN_IN", "TH_TH", "EN_SA",
+    "HE_IL", "RO_RO", "UK_UA", "ID_ID", "VI_VN", "MS_MY", "HI_IN"};
 
 const hmi_apis::Common_Language::eType enum_values_[] = {
     hmi_apis::Common_Language::EN_US, hmi_apis::Common_Language::ES_MX,
@@ -121,7 +122,12 @@ const hmi_apis::Common_Language::eType enum_values_[] = {
     hmi_apis::Common_Language::DA_DK, hmi_apis::Common_Language::NO_NO,
     hmi_apis::Common_Language::NL_BE, hmi_apis::Common_Language::EL_GR,
     hmi_apis::Common_Language::HU_HU, hmi_apis::Common_Language::FI_FI,
-    hmi_apis::Common_Language::SK_SK};
+    hmi_apis::Common_Language::SK_SK, hmi_apis::Common_Language::EN_IN,
+	hmi_apis::Common_Language::TH_TH, hmi_apis::Common_Language::EN_SA,
+	hmi_apis::Common_Language::HE_IL, hmi_apis::Common_Language::RO_RO,
+	hmi_apis::Common_Language::UK_UA, hmi_apis::Common_Language::ID_ID,
+	hmi_apis::Common_Language::VI_VN, hmi_apis::Common_Language::MS_MY,
+	hmi_apis::Common_Language::HI_IN};
 
 struct CStringComparator {
   bool operator()(const char* a, const char* b) {

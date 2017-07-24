@@ -448,7 +448,9 @@ class MessageHelperTest : public ::testing::Test {
                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
+                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK", "EN-IN",
+						 "TH-TH", "EN-SA", "HE-IL", "RO-RO", "UK-UA", "ID-ID",
+						 "VI-VN", "MS-MY", "HI-IN"}
       , hmi_result_strings{"SUCCESS",
                            "UNSUPPORTED_REQUEST",
                            "UNSUPPORTED_RESOURCE",
