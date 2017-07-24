@@ -133,10 +133,20 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   const bool request_subscribe = request_params[kSubscribe].asBool();
   const bool response_subscribe = hmi_response[kResult][kIsSubscribed].asBool();
   response_params_[kIsSubscribed] = response_subscribe;
+  LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
+  LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
     if (response_subscribe) {
+      LOG4CXX_DEBUG(logger_,
+                    "SubscribeToInteriorVehicleData "
+                        << app()->app_id() << " "
+                        << request_params[kModuleType].asString());
       extension->SubscribeToInteriorVehicleData(request_params[kModuleType]);
     } else {
+      LOG4CXX_DEBUG(logger_,
+                    "UnsubscribeFromInteriorVehicleData "
+                        << app()->app_id() << " "
+                        << request_params[kModuleType].asString());
       extension->UnsubscribeFromInteriorVehicleData(
           request_params[kModuleType]);
     }

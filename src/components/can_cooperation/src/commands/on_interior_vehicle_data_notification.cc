@@ -62,10 +62,11 @@ void OnInteriorVehicleDataNotification::Execute() {
 
   json = MessageHelper::StringToValue(msg->json_message());
 
-  Json::Value module_type = json[message_params::kModuleType];
+  Json::Value module_type = ModuleType(json);
 
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = service_->GetApplications(can_module_.GetModuleID());
+  LOG4CXX_TRACE(logger_, "Process notification for " << module_type.asString());
 
   for (AppPtrs::iterator it = apps.begin(); it != apps.end(); ++it) {
     DCHECK(*it);
@@ -75,6 +76,7 @@ void OnInteriorVehicleDataNotification::Execute() {
         application_manager::AppExtensionPtr::static_pointer_cast<
             CANAppExtension>(app.QueryInterface(can_module_.GetModuleID()));
     DCHECK(extension);
+    LOG4CXX_TRACE(logger_, "Check subscription for " << app.app_id());
     if (extension->IsSubscibedToInteriorVehicleData(module_type)) {
       application_manager::MessagePtr message =
           utils::MakeShared<application_manager::Message>(*msg);
