@@ -76,22 +76,21 @@ void ListFilesRequest::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int32_t>(application->GetAvailableDiskSpace());
+  // Enumarating through File system
   uint32_t i = 0;
-  const AppFilesMap& app_files = application->getAppFiles();
-  for (AppFilesMap::const_iterator it = app_files.begin();
-       it != app_files.end();
-       ++it) {
-    std::string filename = it->first.substr(it->first.find_last_of('/') + 1);
-    // In AppFile to application stored full path to file. In message required
-    // to write only name file.
-    // Plus one required for move to next letter after '/'.
+  std::string directory_name =
+      application_manager_.get_settings().app_storage_folder();
+  directory_name += "/" + application->folder_name();
+  std::vector<std::string> persistent_files =
+      file_system::ListFiles(directory_name);
+  std::vector<std::string>::const_iterator it = persistent_files.begin();
+  for (; it != persistent_files.end(); ++it) {
     if (i < application_manager_.get_settings().list_files_response_size()) {
-      LOG4CXX_DEBUG(logger_,
-                    "File " + filename + " added to ListFiles response");
-      (*message_)[strings::msg_params][strings::filenames][i++] = filename;
+      LOG4CXX_DEBUG(logger_, "File " + *it + " added to ListFiles response");
+      (*message_)[strings::msg_params][strings::filenames][i++] = *it;
     } else {
       LOG4CXX_DEBUG(logger_,
-                    "File " + filename + " not added to ListFiles response");
+                    "File " + *it + " not added to ListFiles response");
     }
   }
   (*message_)[strings::params][strings::message_type] =
