@@ -5773,6 +5773,14 @@
     <param name="success" type="Boolean" platform="documentation">
         <description> true if successful; false, if failed </description>
     </param>
+    <param name="isSubscribed" type="Boolean" mandatory="false" >
+      <description>
+       It is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
+       if "true" - the "moduleType" from request is successfully subscribed and the head unit will send onInteriorVehicleData notifications for the moduleType.
+       if "false" - the "moduleType" from request is either unsubscribed or failed to subscribe.
+     </description>
+   </param>
+
   </function>
 
   <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
