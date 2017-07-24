@@ -3700,18 +3700,6 @@ struct TakeDeviceHandle {
   const ApplicationManager& app_mngr_;
 };
 
-struct SubscribedToInteriorVehicleDataPredicate {
-  smart_objects::SmartObject interior_module_data_ =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  SubscribedToInteriorVehicleDataPredicate(
-      smart_objects::SmartObject interior_module_data)
-      : interior_module_data_(interior_module_data) {}
-  bool operator()(const ApplicationSharedPtr app) const {
-    return app ? app->IsSubscribedToInteriorVehicleData(interior_module_data_)
-               : false;
-  }
-};
-
 ApplicationSharedPtr ApplicationManagerImpl::application(
     const std::string& device_id, const std::string& policy_app_id) const {
   connection_handler::DeviceHandle device_handle;
@@ -3736,15 +3724,6 @@ std::vector<std::string> ApplicationManagerImpl::devices(
                  std::back_inserter(devices),
                  TakeDeviceHandle(*this));
   return devices;
-}
-
-std::vector<ApplicationSharedPtr>
-ApplicationManagerImpl::applications_by_interior_vehicle_data(
-    smart_objects::SmartObject moduleDescription) {
-  SubscribedToInteriorVehicleDataPredicate finder(moduleDescription);
-  AppSharedPtrs apps = FindAllApps(applications(), finder);
-  LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
-  return apps;
 }
 
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(

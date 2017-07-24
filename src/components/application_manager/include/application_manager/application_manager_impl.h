@@ -265,9 +265,6 @@ class ApplicationManagerImpl
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
 
-  AppSharedPtrs applications_by_interior_vehicle_data(
-      smart_objects::SmartObject moduleDescription) OVERRIDE;
-
   uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
   /**
    * @brief ChangeAppsHMILevel the function that will change application's

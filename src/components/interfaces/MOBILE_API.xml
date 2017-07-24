@@ -1364,12 +1364,6 @@
     <element name="RADIO"/>
   </enum>
 
-  <struct name="ModuleDescription">
-    <param name="moduleType" type="ModuleType">
-    </param>
-  </struct>
-
-
   <enum name="RadioBand">
     <element name="AM"/>
     <element name="FM"/>
@@ -5780,8 +5774,11 @@
 </function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
-        <param name="moduleDescription" type="ModuleDescription">
-                <description>The name and module data to retrieve from the vehicle for that name</description>
+        <param name="moduleType" type="ModuleType">
+              <description>
+                The type of a RC module to retrieve module data from the vehicle.
+                In the future, this should be the Identification of a module.
+              </description>
         </param>
         <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
                 <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the moduleDescription</description>
@@ -5810,6 +5807,14 @@
     <param name="success" type="Boolean" platform="documentation">
         <description> true if successful; false, if failed </description>
     </param>
+    <param name="isSubscribed" type="Boolean" mandatory="false" >
+      <description>
+       It is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
+       if "true" - the "moduleType" from request is successfully subscribed and the head unit will send onInteriorVehicleData notifications for the moduleType.
+       if "false" - the "moduleType" from request is either unsubscribed or failed to subscribe.
+     </description>
+   </param>
+
   </function>
 
   <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">

@@ -119,7 +119,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                      << kIsSubscribed << " missed in hmi response");
     response_params_[kIsSubscribed] =
         extension->IsSubscibedToInteriorVehicleData(
-            request_params[kModuleDescription]);
+            request_params[kModuleType]);
     return;
   }
 
@@ -135,21 +135,17 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   response_params_[kIsSubscribed] = response_subscribe;
   if (request_subscribe == response_subscribe) {
     if (response_subscribe) {
-      extension->SubscribeToInteriorVehicleData(
-          request_params[kModuleDescription]);
+      extension->SubscribeToInteriorVehicleData(request_params[kModuleType]);
     } else {
       extension->UnsubscribeFromInteriorVehicleData(
-          request_params[kModuleDescription]);
+          request_params[kModuleType]);
     }
   }
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleType(
     const Json::Value& message) {
-  return message.get(message_params::kModuleDescription,
-                     Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value(""))
-      .asString();
+  return message.get(message_params::kModuleType, "").asString();
 }
 
 }  // namespace commands

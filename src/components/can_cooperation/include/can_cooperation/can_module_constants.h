@@ -155,7 +155,6 @@ const char kModuleData[] = "moduleData";
 // SetInteriorVehicleData response
 
 // GetInteriorVehicleData request
-const char kModuleDescription[] = "moduleDescription";
 const char kSubscribe[] = "subscribe";
 // GetInteriorVehicleData request
 

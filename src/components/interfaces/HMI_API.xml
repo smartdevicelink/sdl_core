@@ -1335,12 +1335,6 @@
    <element name="RADIO"/>
  </enum>
 
- <struct name="ModuleDescription">
-   <param name="moduleType" type="Common.ModuleType">
-   </param>
- </struct>
-
-
  <enum name="RadioBand">
    <element name="AM"/>
    <element name="FM"/>
@@ -4685,25 +4679,25 @@
   </function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
-    <param name="moduleDescription" type="Common.ModuleDescription">
-      <description>The name and module data to retrieve from the vehicle for that name</description>
-    </param>
-    <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
-      <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the moduleDescription</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Internal SDL-assigned ID of the related application</description>
-    </param>
+  <param name="moduleType" type="Common.ModuleType">
+    <description>The module data to retrieve from the vehicle for that type</description>
+  </param>
+  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+    <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
+  </param>
+  <param name="appID" type="Integer" mandatory="true">
+    <description>Internal SDL-assigned ID of the related application</description>
+  </param>
 </function>
 
 <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response">
-    <param name="moduleData" type="Common.ModuleData">
-    </param>
-    <param name="isSubscribed" type="Boolean" mandatory="false" >
-      <description>Is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
-      if "true" - the "moduleDescription" from request is successfully subscribed and  the head unit will send onInteriorVehicleData notifications for the moduleDescription.
-      if "false" - the "moduleDescription" from request is either unsubscribed or failed to subscribe.</description>
-    </param>
+  <param name="moduleData" type="Common.ModuleData">
+  </param>
+  <param name="isSubscribed" type="Boolean" mandatory="false" >
+    <description>Is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
+    if "true" - the "moduleType" from request is successfully subscribed and  the head unit will send onInteriorVehicleData notifications for the moduleDescription.
+    if "false" - the "moduleType" from request is either unsubscribed or failed to subscribe.</description>
+  </param>
 </function>
 
 <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
