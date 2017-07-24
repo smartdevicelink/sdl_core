@@ -47,19 +47,19 @@ void CANAppExtension::GiveControl(bool is_control_given) {
 }
 
 void CANAppExtension::SubscribeToInteriorVehicleData(
-    const Json::Value& moduleDescription) {
-  subscribed_interior_vehicle_data_.insert(moduleDescription);
+    const Json::Value& module_type) {
+  subscribed_interior_vehicle_data_.insert(module_type);
 }
 
 void CANAppExtension::UnsubscribeFromInteriorVehicleData(
-    const Json::Value& moduleDescription) {
-  subscribed_interior_vehicle_data_.erase(moduleDescription);
+    const Json::Value& module_type) {
+  subscribed_interior_vehicle_data_.erase(module_type);
 }
 
 bool CANAppExtension::IsSubscibedToInteriorVehicleData(
-    const Json::Value& moduleDescription) {
+    const Json::Value& module_type) {
   std::set<Json::Value>::iterator it =
-      subscribed_interior_vehicle_data_.find(moduleDescription);
+      subscribed_interior_vehicle_data_.find(module_type);
 
   return (it != subscribed_interior_vehicle_data_.end());
 }

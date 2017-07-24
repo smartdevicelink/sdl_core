@@ -111,10 +111,7 @@ void SetInteriorVehicleDataRequest::OnEvent(
 
 std::string SetInteriorVehicleDataRequest::ModuleType(
     const Json::Value& message) {
-  return message.get(message_params::kModuleData,
-                     Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value(""))
-      .asString();
+  return message.get(message_params::kModuleType, "").asString();
 }
 
 std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
