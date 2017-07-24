@@ -73,6 +73,7 @@ class PutFileRequest : public CommandRequestImpl {
   bool is_persistent_file_;
 
   void SendOnPutFileNotification();
+  uint32_t CalculateCRC(std::vector<uint8_t> data);
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);
 };
 

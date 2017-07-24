@@ -183,6 +183,7 @@ extern const char* type;
 extern const char* system_file;
 extern const char* offset;
 extern const char* length;
+extern const char* crc;
 extern const char* secondary_image;
 extern const char* filenames;
 
