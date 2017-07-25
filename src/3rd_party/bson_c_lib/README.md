@@ -6,34 +6,14 @@ Library for converting to and from BSON
 make
 ```
 
-## Build and run sample program ##
+## Install library ##
 ```bash
-make sample
-LD_LIBRARY_PATH=. ./sample
+sudo make install
 ```
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+## Build and run sample program ##
+```bash
+cd examples
+gcc -o sample sample.c -lbson -lemhashmap
+./sample
+```
