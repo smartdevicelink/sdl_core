@@ -88,7 +88,7 @@ add_subdirectory(./media_manager)
 
 if(REMOTE_CONTROL)
   # --- CAN Module
-  add_subdirectory(./can_cooperation)
+  add_subdirectory(./remote_control)
   # --- Functional module
   add_subdirectory(./functional_module)
 endif()

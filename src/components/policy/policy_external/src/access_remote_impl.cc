@@ -297,7 +297,7 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 
 const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (IsAppReverse(who)) {
+  if (IsAppRemoteControl(who)) {
     if (IsPrimaryDevice(who.dev_id)) {
       return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
                   .groups_primaryRC;
@@ -311,7 +311,7 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   return cache_->GetGroups(who.app_id);
 }
 
-bool AccessRemoteImpl::IsAppReverse(const Subject& who) {
+bool AccessRemoteImpl::IsAppRemoteControl(const Subject& who) {
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(),
                    hmi_types.end(),
