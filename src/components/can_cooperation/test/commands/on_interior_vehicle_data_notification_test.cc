@@ -66,11 +66,11 @@ using namespace can_cooperation;
 
 namespace {
 const int kModuleId = 153;
-
-const std::string json =
+const std::string kJson =
     "{ \"jsonrpc\": \"2.0\",\"method\": \"RC.OnInteriorVehicleData\",\
          \"params\":{\"moduleData\":{\
          \"moduleType\": \"CLIMATE\",\"climateControlData\": {\"fanSpeed\": 100}}}}";
+const uint32_t kAppId_ = 11u;
 }
 
 namespace test {
@@ -100,7 +100,7 @@ class OnInteriorVehicleDataNotificationTest : public ::testing::Test {
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
     message->set_function_name("OnInteriorVehicleData");
-    message->set_json_message(json);
+    message->set_json_message(kJson);
     return message;
   }
 
@@ -110,13 +110,13 @@ class OnInteriorVehicleDataNotificationTest : public ::testing::Test {
   utils::SharedPtr<can_cooperation::CANAppExtension> can_app_extention_;
   can_cooperation_test::MockCANModuleInterface mock_module_;
   std::vector<ApplicationSharedPtr> apps_;
-  const uint32_t app_id_ = 11u;
 };
 
-TEST_F(OnInteriorVehicleDataNotificationTest, Execute_AppIsSubscribed) {
+TEST_F(OnInteriorVehicleDataNotificationTest,
+       Execute_SendMessageToMobile_IfAppIsSubscribed) {
   // Arrange
   application_manager::MessagePtr message = CreateBasicMessage();
-  Json::Value json_value = MessageHelper::StringToValue(json);
+  Json::Value json_value = MessageHelper::StringToValue(kJson);
   Json::Value module_type =
       json_value[json_keys::kParams][message_params::kModuleData]
                 [message_params::kModuleType];
@@ -126,16 +126,16 @@ TEST_F(OnInteriorVehicleDataNotificationTest, Execute_AppIsSubscribed) {
   EXPECT_CALL(mock_module_, service()).WillOnce(Return(mock_service_));
   EXPECT_CALL(*mock_service_, GetApplications(kModuleId))
       .WillOnce(Return(apps_));
-  application_manager::MessagePtr result_msg;
   EXPECT_CALL(*mock_app_, QueryInterface(kModuleId))
       .WillOnce(Return(can_app_extention_));
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(app_id_));
-  EXPECT_CALL(*mock_service_, GetApplication(app_id_))
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId_));
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId_))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(_))
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
-  EXPECT_CALL(*mock_service_, CheckModule(app_id_, "CLIMATE"))
+  EXPECT_CALL(*mock_service_, CheckModule(kAppId_, enums_value::kClimate))
       .WillOnce(Return(true));
+  application_manager::MessagePtr result_msg;
   EXPECT_CALL(*mock_service_, SendMessageToMobile(_))
       .WillOnce(SaveArg<0>(&result_msg));
   // Act
@@ -154,7 +154,8 @@ TEST_F(OnInteriorVehicleDataNotificationTest, Execute_AppIsSubscribed) {
             result_msg->function_name());
 }
 
-TEST_F(OnInteriorVehicleDataNotificationTest, Execute_AppIsUnsubscribed) {
+TEST_F(OnInteriorVehicleDataNotificationTest,
+       Execute_NotSendMessageToMobile_IfAppUnsubscribed) {
   // Arrange
   application_manager::MessagePtr message = CreateBasicMessage();
   apps_.push_back(mock_app_);

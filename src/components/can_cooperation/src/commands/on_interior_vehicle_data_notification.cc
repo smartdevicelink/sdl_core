@@ -99,7 +99,6 @@ std::string OnInteriorVehicleDataNotification::ModuleType(
   return module_data.get(message_params::kModuleType, "").asString();
 }
 
-
 }  // namespace commands
 
 }  // namespace can_cooperation
