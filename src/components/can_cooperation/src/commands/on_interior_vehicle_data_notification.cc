@@ -99,22 +99,6 @@ std::string OnInteriorVehicleDataNotification::ModuleType(
   return module_data.get(message_params::kModuleType, "").asString();
 }
 
-std::vector<std::string> OnInteriorVehicleDataNotification::ControlData(
-    const Json::Value& message) {
-  const Json::Value data =
-      message.get(message_params::kModuleData, Json::Value(Json::objectValue));
-  const std::string& module = ModuleType(message);
-  const char* name_control_data;
-  if (module == enums_value::kRadio) {
-    name_control_data = message_params::kRadioControlData;
-  }
-  if (module == enums_value::kClimate) {
-    name_control_data = message_params::kClimateControlData;
-  }
-  const Json::Value params =
-      data.get(name_control_data, Json::Value(Json::objectValue));
-  return params.getMemberNames();
-}
 
 }  // namespace commands
 
