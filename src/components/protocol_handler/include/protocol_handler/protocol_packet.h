@@ -63,6 +63,50 @@ class ProtocolPacket {
     uint32_t totalDataBytes;
   };
 
+  class ProtocolVersion {
+   public:
+    ProtocolVersion();
+    ProtocolVersion(uint8_t majorVersion,
+                    uint8_t minorVersion,
+                    uint8_t patchVersion);
+    ProtocolVersion(ProtocolVersion& other);
+    ProtocolVersion(std::string versionString);
+    uint8_t majorVersion;
+    uint8_t minorVersion;
+    uint8_t patchVersion;
+    static inline uint8_t cmp(const ProtocolVersion& version1,
+                              const ProtocolVersion& version2) {
+      uint8_t diff = version1.majorVersion - version2.majorVersion;
+      if (diff == 0) {
+        diff = version1.minorVersion - version2.minorVersion;
+        if (diff == 0) {
+          diff = version1.minorVersion - version2.minorVersion;
+        }
+      }
+      return diff;
+    }
+    inline bool operator==(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) == 0;
+    }
+    inline bool operator<(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) < 0;
+    }
+    bool operator>(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) > 0;
+    }
+    inline bool operator<=(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) <= 0;
+    }
+    bool operator>=(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) >= 0;
+    }
+    static inline ProtocolVersion* min(ProtocolVersion& version1,
+                                       ProtocolVersion& version2) {
+      return (version1 < version2) ? &version1 : &version2;
+    }
+    std::string to_string();
+  };
+
   /**
    * \class ProtocolHeader
    * \brief Used for storing protocol header of a message.

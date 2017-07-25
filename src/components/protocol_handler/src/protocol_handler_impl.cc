@@ -33,6 +33,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
 #include <algorithm>  // std::find
+#include <bson_object.h>
 
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
@@ -56,6 +57,8 @@ std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
 const size_t kStackSize = 32768;
+
+ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 0, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -184,17 +187,38 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
 
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
-                                              uint8_t,
+                                              uint8_t protocol_version,
                                               uint32_t hash_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
+  ProtocolPacket::ProtocolVersion* fullVersion =
+      new ProtocolPacket::ProtocolVersion();
+  SendStartSessionAck(connection_id,
+                      session_id,
+                      protocol_version,
+                      hash_id,
+                      service_type,
+                      protection,
+                      *fullVersion);
+  delete fullVersion;
+}
 
-  uint8_t protocolVersion = SupportedSDLProtocolVersion();
+void ProtocolHandlerImpl::SendStartSessionAck(
+    ConnectionID connection_id,
+    uint8_t session_id,
+    uint8_t protocol_version,
+    uint32_t hash_id,
+    uint8_t service_type,
+    bool protection,
+    ProtocolPacket::ProtocolVersion& full_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
-                                           protocolVersion,
+                                           maxProtocolVersion,
                                            protection,
                                            FRAME_TYPE_CONTROL,
                                            service_type,
@@ -203,7 +227,38 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                            0u,
                                            message_counters_[session_id]++));
 
-  set_hash_id(hash_id, *ptr);
+  // Cannot include a constructed payload if either side doesn't support it
+  if (maxProtocolVersion >= PROTOCOL_VERSION_5) {
+    ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
+
+    BsonObject payloadObj;
+    bson_object_initialize_default(&payloadObj);
+    bson_object_put_int32(&payloadObj, "hashId", static_cast<int32_t>(hash_id));
+    bson_object_put_int64(
+        &payloadObj,
+        "mtu",
+        static_cast<int64_t>(
+            protocol_header_validator_.max_payload_size_by_service_type(
+                serviceTypeValue)));
+    if (serviceTypeValue == kRpc) {
+      // Minimum protocol version supported by both
+      ProtocolPacket::ProtocolVersion* minVersion =
+          (full_version.majorVersion < PROTOCOL_VERSION_5)
+              ? &defaultProtocolVersion
+              : ProtocolPacket::ProtocolVersion::min(full_version,
+                                                     defaultProtocolVersion);
+      char protocolVersionString[255];
+      strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
+      bson_object_put_string(
+          &payloadObj, "protocolVersion", protocolVersionString);
+    }
+    uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
+    ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
+    free(payloadBytes);
+    bson_object_deinitialize(&payloadObj);
+  } else {
+    set_hash_id(hash_id, *ptr);
+  }
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -243,6 +298,52 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                     << static_cast<int32_t>(session_id));
 }
 
+void ProtocolHandlerImpl::SendStartSessionNAck(
+    ConnectionID connection_id,
+    uint8_t session_id,
+    uint8_t protocol_version,
+    uint8_t service_type,
+    std::vector<std::string>& rejectedParams) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ProtocolFramePtr ptr(
+      new protocol_handler::ProtocolPacket(connection_id,
+                                           protocol_version,
+                                           PROTECTION_OFF,
+                                           FRAME_TYPE_CONTROL,
+                                           service_type,
+                                           FRAME_DATA_START_SERVICE_NACK,
+                                           session_id,
+                                           0u,
+                                           message_counters_[session_id]++));
+
+  if (rejectedParams.size() > 0) {
+    BsonObject payloadObj;
+    bson_object_initialize_default(&payloadObj);
+    BsonArray rejectedParamsArr;
+    bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
+    for (std::string param : rejectedParams) {
+      char paramPtr[255];
+      strncpy(paramPtr, param.c_str(), 255);
+      bson_array_add_string(&rejectedParamsArr, paramPtr);
+    }
+    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
+    ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
+    free(payloadBytes);
+    bson_object_deinitialize(&payloadObj);
+  }
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+  LOG4CXX_DEBUG(logger_,
+                "SendStartSessionNAck() for connection "
+                    << connection_id << " for service_type "
+                    << static_cast<int32_t>(service_type) << " session_id "
+                    << static_cast<int32_t>(session_id));
+}
+
 void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
                                              uint8_t protocol_version,
@@ -259,6 +360,51 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                            session_id,
                                            0u,
                                            message_counters_[session_id]++));
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+  LOG4CXX_DEBUG(logger_,
+                "SendEndSessionNAck() for connection "
+                    << connection_id << " for service_type "
+                    << static_cast<int32_t>(service_type) << " session_id "
+                    << static_cast<int32_t>(session_id));
+}
+
+void ProtocolHandlerImpl::SendEndSessionNAck(
+    ConnectionID connection_id,
+    uint32_t session_id,
+    uint8_t protocol_version,
+    uint8_t service_type,
+    std::vector<std::string>& rejectedParams) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ProtocolFramePtr ptr(
+      new protocol_handler::ProtocolPacket(connection_id,
+                                           protocol_version,
+                                           PROTECTION_OFF,
+                                           FRAME_TYPE_CONTROL,
+                                           service_type,
+                                           FRAME_DATA_END_SERVICE_NACK,
+                                           session_id,
+                                           0u,
+                                           message_counters_[session_id]++));
+  if (rejectedParams.size() > 0) {
+    BsonObject payloadObj;
+    bson_object_initialize_default(&payloadObj);
+    BsonArray rejectedParamsArr;
+    bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
+    for (std::string param : rejectedParams) {
+      char paramPtr[255];
+      strncpy(paramPtr, param.c_str(), 255);
+      bson_array_add_string(&rejectedParamsArr, paramPtr);
+    }
+    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
+    ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
+    free(payloadBytes);
+    bson_object_deinitialize(&payloadObj);
+  }
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -421,7 +567,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     metric_observer_->StartMessageProcess(message_id, start_time);
   }
 #endif  // TELEMETRY_MONITOR
-  const size_t max_frame_size = get_settings().maximum_payload_size();
+  size_t max_frame_size = get_settings().maximum_payload_size();
   size_t frame_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   switch (message->protocol_version()) {
     case PROTOCOL_VERSION_3:
@@ -430,6 +576,13 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                        ? max_frame_size
                        : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
+    case PROTOCOL_VERSION_5:
+      max_frame_size =
+          protocol_header_validator_.max_payload_size_by_service_type(
+              ServiceTypeFromByte(message->service_type()));
+      frame_size = max_frame_size > MAXIMUM_FRAME_DATA_V2_SIZE
+                       ? max_frame_size
+                       : MAXIMUM_FRAME_DATA_V2_SIZE;
     default:
       break;
   }
@@ -932,10 +1085,18 @@ uint32_t get_hash_id(const ProtocolPacket& packet) {
     LOG4CXX_WARN(logger_, "Packet without hash data (data size less 4)");
     return HASH_ID_WRONG;
   }
-  const uint32_t hash_be = *(reinterpret_cast<uint32_t*>(packet.data()));
-  const uint32_t hash_le = BE_TO_LE32(hash_be);
-  // null hash is wrong hash value
-  return hash_le == HASH_ID_NOT_SUPPORTED ? HASH_ID_WRONG : hash_le;
+  if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
+    BsonObject obj = bson_object_from_bytes(packet.data());
+    const uint32_t hash_id = (uint32_t)bson_object_get_int32(&obj, "hashId");
+    bson_object_deinitialize(&obj);
+    return hash_id;
+  } else {
+    const uint32_t hash_be = *(reinterpret_cast<uint32_t*>(packet.data()));
+    const uint32_t hash_le = BE_TO_LE32(hash_be);
+
+    // null hash is wrong hash value
+    return hash_le == HASH_ID_NOT_SUPPORTED ? HASH_ID_WRONG : hash_le;
+  }
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
@@ -943,12 +1104,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const uint8_t current_session_id = packet.session_id();
-  const uint32_t hash_id = get_hash_id(packet);
+  uint32_t hash_id;
+
+  hash_id = get_hash_id(packet);
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   const ConnectionID connection_id = packet.connection_id();
   const uint32_t session_key = session_observer_.OnSessionEndedCallback(
-      connection_id, current_session_id, hash_id, service_type);
+      connection_id, current_session_id, &hash_id, service_type);
 
   // TODO(EZamakhov): add clean up output queue (for removed service)
   if (session_key != 0) {
@@ -961,10 +1124,22 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     LOG4CXX_WARN(logger_,
                  "Refused to end session " << static_cast<int>(service_type)
                                            << " type.");
-    SendEndSessionNAck(connection_id,
-                       current_session_id,
-                       packet.protocol_version(),
-                       service_type);
+    if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
+      std::vector<std::string> rejectedParams(0, std::string(""));
+      if (hash_id == protocol_handler::HASH_ID_WRONG) {
+        rejectedParams.push_back(std::string("hashId"));
+      }
+      SendEndSessionNAck(connection_id,
+                         current_session_id,
+                         packet.protocol_version(),
+                         service_type,
+                         rejectedParams);
+    } else {
+      SendEndSessionNAck(connection_id,
+                         current_session_id,
+                         packet.protocol_version(),
+                         service_type);
+    }
   }
   return RESULT_OK;
 }
@@ -1014,7 +1189,28 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       , protocol_version_(protocol_version)
       , hash_id_(hash_id)
       , service_type_(service_type)
-      , force_protected_service_(force_protected_service) {}
+      , force_protected_service_(force_protected_service)
+      , full_version_() {}
+  StartSessionHandler(uint32_t connection_key,
+                      ProtocolHandlerImpl* protocol_handler,
+                      SessionObserver& session_observer,
+                      ConnectionID connection_id,
+                      int32_t session_id,
+                      uint8_t protocol_version,
+                      uint32_t hash_id,
+                      ServiceType service_type,
+                      const std::vector<int>& force_protected_service,
+                      ProtocolPacket::ProtocolVersion& full_version)
+      : connection_key_(connection_key)
+      , protocol_handler_(protocol_handler)
+      , session_observer_(session_observer)
+      , connection_id_(connection_id)
+      , session_id_(session_id)
+      , protocol_version_(protocol_version)
+      , hash_id_(hash_id)
+      , service_type_(service_type)
+      , force_protected_service_(force_protected_service)
+      , full_version_(full_version) {}
 
   bool OnHandshakeDone(
       const uint32_t connection_key,
@@ -1067,6 +1263,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   const uint32_t hash_id_;
   const ServiceType service_type_;
   const std::vector<int> force_protected_service_;
+  const ProtocolPacket::ProtocolVersion full_version_;
 };
 }  // namespace
 #endif  // ENABLE_SECURITY
@@ -1129,7 +1326,26 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           PROTECTION_OFF);
       return RESULT_OK;
     }
-    if (ssl_context->IsInitCompleted()) {
+    ProtocolPacket::ProtocolVersion* fullVersion;
+    std::vector<std::string> rejectedParams(0, std::string(""));
+    if (packet.data_size() != 0) {
+      BsonObject obj = bson_object_from_bytes(packet.data());
+      fullVersion = new ProtocolPacket::ProtocolVersion(
+          std::string(bson_object_get_string(&obj, "protocolVersion")));
+      bson_object_deinitialize(&obj);
+      if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+        rejectedParams.push_back(std::string("protocolVersion"));
+      }
+    } else {
+      fullVersion = new ProtocolPacket::ProtocolVersion();
+    }
+    if (!rejectedParams.empty()) {
+      SendStartSessionNAck(connection_id,
+                           packet.session_id(),
+                           protocol_version,
+                           packet.service_type(),
+                           rejectedParams);
+    } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
@@ -1138,7 +1354,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           packet.protocol_version(),
                           hash_id,
                           packet.service_type(),
-                          PROTECTION_ON);
+                          PROTECTION_ON,
+                          *fullVersion);
     } else {
       security_manager_->AddListener(
           new StartSessionHandler(connection_key,
@@ -1149,25 +1366,54 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                   packet.protocol_version(),
                                   hash_id,
                                   service_type,
-                                  get_settings().force_protected_service()));
+                                  get_settings().force_protected_service(),
+                                  *fullVersion));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
       }
     }
+    delete fullVersion;
     LOG4CXX_DEBUG(logger_,
                   "Protection establishing for connection "
                       << connection_key << " is in progress");
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
-  // Start service without protection
-  SendStartSessionAck(connection_id,
-                      session_id,
-                      packet.protocol_version(),
-                      hash_id,
-                      packet.service_type(),
-                      PROTECTION_OFF);
+  if (packet.data_size() != 0) {
+    BsonObject obj = bson_object_from_bytes(packet.data());
+    ProtocolPacket::ProtocolVersion fullVersion(
+        bson_object_get_string(&obj, "protocolVersion"));
+    bson_object_deinitialize(&obj);
+
+    if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
+      // Start service without protection
+      SendStartSessionAck(connection_id,
+                          session_id,
+                          packet.protocol_version(),
+                          hash_id,
+                          packet.service_type(),
+                          PROTECTION_OFF,
+                          fullVersion);
+    } else {
+      std::vector<std::string> rejectedParams(1,
+                                              std::string("protocolVersion"));
+      SendStartSessionNAck(connection_id,
+                           packet.session_id(),
+                           protocol_version,
+                           packet.service_type(),
+                           rejectedParams);
+    }
+
+  } else {
+    // Start service without protection
+    SendStartSessionAck(connection_id,
+                        session_id,
+                        packet.protocol_version(),
+                        hash_id,
+                        packet.service_type(),
+                        PROTECTION_OFF);
+  }
   return RESULT_OK;
 }
 
