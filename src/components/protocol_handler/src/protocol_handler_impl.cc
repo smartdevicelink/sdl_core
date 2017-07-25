@@ -85,6 +85,14 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_header_validator_.set_max_payload_size(
       get_settings().maximum_payload_size());
+  protocol_header_validator_.set_max_control_payload_size(
+      get_settings().maximum_control_payload_size());
+  protocol_header_validator_.set_max_rpc_payload_size(
+      get_settings().maximum_rpc_payload_size());
+  protocol_header_validator_.set_max_audio_payload_size(
+      get_settings().maximum_audio_payload_size());
+  protocol_header_validator_.set_max_video_payload_size(
+      get_settings().maximum_video_payload_size());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
 
   const size_t& message_frequency_count =
@@ -1173,8 +1181,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
-    if (PROTOCOL_VERSION_3 == protocol_version ||
-        PROTOCOL_VERSION_4 == protocol_version) {
+    if (protocol_version >= PROTOCOL_VERSION_3) {
       return SendHeartBeatAck(
           connection_id, packet.session_id(), packet.message_id());
     } else {
@@ -1508,7 +1515,11 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   bool heart_beat_support = (0 != get_settings().heart_beat_timeout());
 
   bool sdl4_support = get_settings().enable_protocol_4();
+  bool sdl5_support = get_settings().enable_protocol_5();
 
+  if (sdl5_support) {
+    return PROTOCOL_VERSION_5;
+  }
   if (sdl4_support) {
     return PROTOCOL_VERSION_4;
   }

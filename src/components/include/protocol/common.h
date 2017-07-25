@@ -85,6 +85,12 @@ enum {
    */
   PROTOCOL_VERSION_4 = 0x04,
   /**
+   *@brief Constant: number of protocol version (5).
+   * Supports constructed payloads for protocol packets
+   * SDL4.4 feature.
+   */
+  PROTOCOL_VERSION_5 = 0x05,
+  /**
    *\brief Maximum value of packet version field (size 4-bit) specified AppLink
    *Protocol v.7
    */

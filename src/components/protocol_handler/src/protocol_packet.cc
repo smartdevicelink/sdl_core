@@ -114,7 +114,8 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
   switch (version) {
     case PROTOCOL_VERSION_2:
     case PROTOCOL_VERSION_3:
-    case PROTOCOL_VERSION_4: {
+    case PROTOCOL_VERSION_4:
+    case PROTOCOL_VERSION_5: {
       if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
         LOG4CXX_DEBUG(logger_,
                       "Message size less " << PROTOCOL_HEADER_V2_SIZE
@@ -131,7 +132,11 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
 }
 
 ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
-    : max_payload_size_(std::numeric_limits<size_t>::max()) {}
+    : max_payload_size_(std::numeric_limits<size_t>::max())
+    , max_control_payload_size_(0)
+    , max_rpc_payload_size_(0)
+    , max_audio_payload_size_(0)
+    , max_video_payload_size_(0) {}
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
@@ -139,15 +144,92 @@ void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
   max_payload_size_ = max_payload_size;
 }
 
+void ProtocolPacket::ProtocolHeaderValidator::set_max_control_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum RPC payload size is " << max_payload_size);
+  max_control_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_rpc_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum RPC payload size is " << max_payload_size);
+  max_rpc_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_audio_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum audio payload size is " << max_payload_size);
+  max_audio_payload_size_ = max_payload_size;
+}
+
+void ProtocolPacket::ProtocolHeaderValidator::set_max_video_payload_size(
+    const size_t max_payload_size) {
+  LOG4CXX_DEBUG(logger_,
+                "New maximum video payload size is " << max_payload_size);
+  max_video_payload_size_ = max_payload_size;
+}
+
 size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
   return max_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_control_payload_size()
+    const {
+  return max_control_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_rpc_payload_size() const {
+  return max_rpc_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_audio_payload_size() const {
+  return max_audio_payload_size_;
+}
+
+size_t ProtocolPacket::ProtocolHeaderValidator::max_video_payload_size() const {
+  return max_video_payload_size_;
+}
+
+size_t
+ProtocolPacket::ProtocolHeaderValidator::max_payload_size_by_service_type(
+    const ServiceType type) const {
+  size_t payload_size = 0;
+  switch (type) {
+    case kControl:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_control_payload_size_ == 0 ? max_payload_size_
+                                                    : max_control_payload_size_;
+      break;
+    case kBulk:
+    case kRpc:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_rpc_payload_size_ == 0 ? max_payload_size_
+                                                : max_rpc_payload_size_;
+      break;
+    case kAudio:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_audio_payload_size_ == 0 ? max_payload_size_
+                                                  : max_audio_payload_size_;
+      break;
+    case kMobileNav:
+      // Default to the generic MTU if specific MTU is not set
+      payload_size = max_video_payload_size_ == 0 ? max_payload_size_
+                                                  : max_video_payload_size_;
+      break;
+    case kInvalidServiceType:
+      LOG4CXX_WARN(logger_, "Invalid service type" << static_cast<int>(type));
+  }
+  return payload_size;
 }
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
   LOG4CXX_DEBUG(logger_, "Validating header - " << header);
   // expected payload size will be calculated depending
-  // on used protocol version
+  // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   // Protocol version shall be from 1 to 4
   switch (header.version) {
@@ -159,6 +241,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE
                          ? max_payload_size_
                          : MAXIMUM_FRAME_DATA_V2_SIZE;
+      break;
+    case PROTOCOL_VERSION_5:
+      payload_size = max_payload_size_by_service_type(
+          ServiceTypeFromByte(header.serviceType));
       break;
     default:
       LOG4CXX_WARN(logger_,

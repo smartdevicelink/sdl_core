@@ -99,7 +99,19 @@ class ProtocolPacket {
      * \brief Setter/getter maximum payload size of packets
      */
     void set_max_payload_size(const size_t max_payload_size);
+    void set_max_control_payload_size(const size_t max_payload_size);
+    void set_max_rpc_payload_size(const size_t max_payload_size);
+    void set_max_audio_payload_size(const size_t max_payload_size);
+    void set_max_video_payload_size(const size_t max_payload_size);
+
     size_t max_payload_size() const;
+    size_t max_control_payload_size() const;
+    size_t max_rpc_payload_size() const;
+    size_t max_audio_payload_size() const;
+    size_t max_video_payload_size() const;
+
+    size_t max_payload_size_by_service_type(const ServiceType type) const;
+
     /**
      * \brief Check ProtocolHeader according to protocol requiements
      */
@@ -107,6 +119,10 @@ class ProtocolPacket {
 
    private:
     size_t max_payload_size_;
+    size_t max_control_payload_size_;
+    size_t max_rpc_payload_size_;
+    size_t max_audio_payload_size_;
+    size_t max_video_payload_size_;
   };
 
   /**
