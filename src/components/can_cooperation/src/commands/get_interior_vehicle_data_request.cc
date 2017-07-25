@@ -82,7 +82,8 @@ void GetInteriorVehicleDataRequest::OnEvent(
   std::string info;
   bool success = validate_result && ParseResultCode(value, result_code, info);
 
-  if (!validate_result) {
+  if (!validate_result ||
+      can_cooperation::result_codes::kReadOnly == result_code) {
     success = false;
     result_code = result_codes::kGenericError;
     info = "Invalid message received from vehicle";

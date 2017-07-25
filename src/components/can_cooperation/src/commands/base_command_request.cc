@@ -257,6 +257,10 @@ const char* BaseCommandRequest::GetMobileResultCode(
       return result_codes::kUserDisallowed;
       break;
     }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      return result_codes::kReadOnly;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       return result_codes::kGenericError;
