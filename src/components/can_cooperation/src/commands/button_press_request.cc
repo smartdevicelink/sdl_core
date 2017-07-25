@@ -115,8 +115,12 @@ void ButtonPressRequest::OnEvent(
   std::string result_code;
   std::string info;
 
-  const bool is_response_successful = ParseResultCode(value, result_code, info);
+  bool is_response_successful = ParseResultCode(value, result_code, info);
 
+  if (can_cooperation::result_codes::kReadOnly == result_code) {
+    is_response_successful = false;
+    result_code = result_codes::kGenericError;
+  }
   SendResponse(is_response_successful, result_code.c_str(), info);
 }
 
