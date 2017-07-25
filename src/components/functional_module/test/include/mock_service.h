@@ -73,6 +73,8 @@ class MockService : public Service {
   MOCK_METHOD0(ResetPrimaryDevice, void());
   MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
+  MOCK_METHOD1(RemoveHMIFakeParameters,
+               void(application_manager::MessagePtr& message));
   MOCK_CONST_METHOD0(IsRemoteControlAllowed, bool());
 
   MOCK_CONST_METHOD1(IsRemoteControlApplication,

@@ -824,6 +824,9 @@ class ApplicationManagerImpl
 
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
+  void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) OVERRIDE;
+
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandOrigin origin) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;

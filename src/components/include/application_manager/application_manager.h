@@ -294,6 +294,9 @@ class ApplicationManager {
 
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
 
+  virtual void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) = 0;
+
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;

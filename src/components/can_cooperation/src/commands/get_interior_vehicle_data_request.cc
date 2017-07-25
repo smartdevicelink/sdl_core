@@ -60,8 +60,7 @@ void GetInteriorVehicleDataRequest::Execute() {
       MessageHelper::StringToValue(message_->json_message());
 
   SendRequest(functional_modules::hmi_api::get_interior_vehicle_data,
-              request_params,
-              true);
+              request_params);
 }
 
 void GetInteriorVehicleDataRequest::OnEvent(

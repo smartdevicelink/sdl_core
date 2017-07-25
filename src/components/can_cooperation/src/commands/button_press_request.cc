@@ -92,8 +92,7 @@ void ButtonPressRequest::Execute() {
       CheckButtonName(module_type, button_name);
 
   if (button_name_matches_module_type) {
-    SendRequest(
-        functional_modules::hmi_api::button_press, request_params, true);
+    SendRequest(functional_modules::hmi_api::button_press, request_params);
   } else {
     LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
     SendResponse(false,
