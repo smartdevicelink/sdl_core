@@ -276,8 +276,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_FALSE(response_params[json_keys::kSuccess].asBool());
   EXPECT_EQ(result_codes::kGenericError,
             response_params[json_keys::kResultCode].asString());
-  const std::string expected_info = "Invalid message received from vehicle";
-  EXPECT_EQ(expected_info, response_params[json_keys::kInfo].asString());
+  const Json::Value hmi_response =
+      MessageHelper::StringToValue(hmi_message->json_message());
+  EXPECT_EQ(hmi_response[json_keys::kInfo].asString(),
+            response_params[json_keys::kInfo].asString());
 }
 
 }  // namespace get_interior_vehicle_data_request_test

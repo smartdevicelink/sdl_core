@@ -86,7 +86,6 @@ void GetInteriorVehicleDataRequest::OnEvent(
       remote_control::result_codes::kReadOnly == result_code) {
     success = false;
     result_code = result_codes::kGenericError;
-    info = "Invalid message received from vehicle";
   }
 
   if (success) {
