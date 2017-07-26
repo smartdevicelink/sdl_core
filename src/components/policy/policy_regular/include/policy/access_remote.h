@@ -212,11 +212,11 @@ class AccessRemote {
                                     FunctionalIdType& group_types) = 0;
 
   /**
-   * Checks if application has reverse functionality
+   * Checks if application has remote functionality
    * @param who subject
    * @return true if application uses remote control
    */
-  virtual bool IsAppReverse(const Subject& who) = 0;
+  virtual bool IsAppRemoteControl(const Subject& who) = 0;
 
   /**
    * Gets all allowed module types

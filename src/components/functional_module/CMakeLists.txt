@@ -20,7 +20,7 @@ set(GCOV gcov)
 
 include_directories (
   ${COMPONENTS_DIR}/functional_module/include/
-  ${COMPONENTS_DIR}/can_cooperation/include/
+  ${COMPONENTS_DIR}/remote_control/include/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/connection_handler/include/

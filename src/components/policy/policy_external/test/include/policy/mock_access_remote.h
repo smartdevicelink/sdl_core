@@ -83,7 +83,7 @@ class MockAccessRemote : public policy::AccessRemote {
   MOCK_CONST_METHOD2(CheckModuleType,
                      bool(const policy::PTString& app_id,
                           policy_table::ModuleType module));
-  MOCK_METHOD1(IsAppReverse, bool(const policy::Subject& who));
+  MOCK_METHOD1(IsAppRemoteControl, bool(const policy::Subject& who));
   MOCK_METHOD0(Reset, void());
   MOCK_METHOD2(GetModuleTypes,
                bool(const std::string& application_id,

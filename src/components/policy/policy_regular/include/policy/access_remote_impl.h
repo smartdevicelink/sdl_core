@@ -75,7 +75,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual bool GetPermissionsForApp(const std::string& device_id,
                                     const std::string& app_id,
                                     FunctionalIdType& group_types);
-  virtual bool IsAppReverse(const Subject& who);
+  virtual bool IsAppRemoteControl(const Subject& who);
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules);
 

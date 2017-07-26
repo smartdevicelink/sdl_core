@@ -457,7 +457,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
-  if (access_remote_->IsAppReverse(who)) {
+  if (access_remote_->IsAppRemoteControl(who)) {
     const std::string rank =
         access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
     UpdateDeviceRank(who, rank);
@@ -1323,8 +1323,8 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
     const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppReverse(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't reverse");
+  if (!access_remote_->IsAppRemoteControl(who)) {
+    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
     return;
   }
 
@@ -1338,8 +1338,8 @@ void PolicyManagerImpl::OnChangedRemoteControl(
     const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppReverse(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't reverse");
+  if (!access_remote_->IsAppRemoteControl(who)) {
+    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
     return;
   }
 
@@ -1470,7 +1470,7 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
        i != devices.end();
        ++i) {
     const Subject who = {*i, application_id};
-    if (access_remote_->IsAppReverse(who) &&
+    if (access_remote_->IsAppRemoteControl(who) &&
         access_remote_->IsPrimaryDevice(who.dev_id)) {
       SendAppPermissionsChanged(who.dev_id, who.app_id);
     }
@@ -1485,7 +1485,7 @@ void PolicyManagerImpl::OnNonPrimaryGroupsChanged(
        i != devices.end();
        ++i) {
     const Subject who = {*i, application_id};
-    if (access_remote_->IsAppReverse(who) &&
+    if (access_remote_->IsAppRemoteControl(who) &&
         !access_remote_->IsPrimaryDevice(who.dev_id) &&
         access_remote_->IsEnabled()) {
       SendAppPermissionsChanged(who.dev_id, who.app_id);
