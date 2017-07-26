@@ -66,7 +66,6 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
 
  protected:
   std::string ModuleType(const Json::Value& message) FINAL;
-  std::vector<std::string> ControlData(const Json::Value& message) FINAL;
 
   bool Validate() OVERRIDE {
     return true;
