@@ -63,8 +63,14 @@ const std::string kCreateSchema =
     "  `idsubMenu` INTEGER PRIMARY KEY NOT NULL, "
     "  `menuID` INTEGER, "
     "  `menuName` TEXT, "
-    "  `position` INTEGER "
+    "  `position` INTEGER, "
+    "  `idimage` INTEGER, "
+    "  CONSTRAINT `fk_image` "
+    "    FOREIGN KEY(`idimage`) "
+    "    REFERENCES `image`(`idimage`) "
     "  ); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`subMenu.fk_image_idx` ON `subMenu`(`idimage`); "
     "CREATE TABLE IF NOT EXISTS `TTSChunk`( "
     "  `idTTSChunk` INTEGER PRIMARY KEY NOT NULL, "
     "  `type` INTEGER, "
@@ -493,6 +499,16 @@ const std::string kDeleteImageFromCommands =
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?)))";
 
+const std::string kDeleteImageFromSubMenu =
+    "DELETE FROM `image` "
+    "WHERE `idimage` IN (SELECT `idimage` "
+    "FROM `subMenu` "
+    "WHERE `idsubMenu` IN (SELECT `idsubMenu` "
+    "FROM `applicationSubMenuArray` "
+    "WHERE `idApplication` = (SELECT `idApplication` "
+    "FROM `application` "
+    "WHERE `appID` = ? AND `deviceID` = ?)))";
+
 const std::string kDeleteVrCommands =
     "DELETE FROM `vrCommandsArray` "
     "WHERE `idcommand` IN (SELECT `idcommand` "
@@ -684,9 +700,9 @@ const std::string kInsertToApplicationFilesArray =
 
 const std::string kInsertToSubMenu =
     "INSERT INTO `subMenu` "
-    "(`menuID`, `menuName`, `position`) "
+    "(`menuID`, `menuName`, `position`, `idimage`) "
     "VALUES "
-    "(?, ?, ?);";
+    "(?, ?, ?, ?);";
 
 const std::string kInsertToApplicationSubMenuArray =
     "INSERT INTO `applicationSubMenuArray` "
@@ -821,8 +837,9 @@ const std::string kSelectCountSubMenu =
     "WHERE `appID` = ? AND `deviceID` = ?);";
 
 const std::string kSelectSubMenu =
-    "SELECT `menuID`, `menuName`, `position` "
-    "FROM `subMenu` "
+    "SELECT `menuID`, `menuName`, `position`, `value`, `imageType`"
+    "FROM `subMenu` LEFT OUTER JOIN `image` ON "
+    "`subMenu`.`idimage` = `image`.`idimage` "
     "WHERE `idsubMenu` IN (SELECT `idsubMenu` "
     "FROM `applicationSubMenuArray` "
     "WHERE `idApplication` = (SELECT `idApplication` "

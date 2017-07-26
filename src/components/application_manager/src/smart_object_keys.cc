@@ -71,6 +71,7 @@ const char* cmd_id = "cmdID";
 const char* menu_params = "menuParams";
 const char* menu_title = "menuTitle";
 const char* menu_icon = "menuIcon";
+const char* sub_menu_icon = "subMenuIcon";
 const char* keyboard_properties = "keyboardProperties";
 const char* vr_commands = "vrCommands";
 const char* position = "position";

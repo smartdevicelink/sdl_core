@@ -79,6 +79,31 @@ class AddSubMenuRequest : public CommandRequestImpl {
    */
   bool CheckSubMenuName();
 
+  /*
+   * @brief Check if submenu icon is valid
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckSubMenuIcon();
+
+  /*
+   * @brief Check if submenu icon is existed in storage folder
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckMenuIconExistedInStorage();
+
+  /*
+   * @brief Return image full path for dynamic image
+   *
+   * @param file_name image file name
+   *
+   * @param app current application
+   */
+  static std::string ImageFullPath(const std::string& file_name,
+                                   ApplicationConstSharedPtr app,
+                                   ApplicationManager& app_mngr);
+
   DISALLOW_COPY_AND_ASSIGN(AddSubMenuRequest);
 };
 
