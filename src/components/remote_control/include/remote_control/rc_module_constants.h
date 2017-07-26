@@ -209,14 +209,16 @@ const char kState[] = "state";
 
 // ClimateControlData struct
 const char kFanSpeed[] = "fanSpeed";
-const char kCurrentTemp[] = "currentTemp";
-const char kDesiredTemp[] = "desiredTemp";
+const char kCurrentTemperature[] = "currentTemperature";
+const char kDesiredTemperature[] = "desiredTemperature";
 const char kTemperatureUnit[] = "temperatureUnit";
 const char kACEnable[] = "acEnable";
 const char kCirculateAirEnable[] = "circulateAirEnable";
 const char kAutoModeEnable[] = "autoModeEnable";
 const char kDefrostZone[] = "defrostZone";
 const char kDualModeEnable[] = "dualModeEnable";
+const char kACMaxEnable[] = "acMaxEnable";
+const char kVentilationMode[] = "ventilationMode";
 // ClimateControlData struct
 
 // ModuleData struct
@@ -261,7 +263,6 @@ const char kAll[] = "ALL";
 // DefrostZone enum
 
 // TemperatureUnit enum
-const char kKelvin[] = "KELVIN";
 const char kFahrenheit[] = "FAHRENHEIT";
 const char kCelsius[] = "CELSIUS";
 // TemperatureUnit enum

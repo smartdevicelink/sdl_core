@@ -69,6 +69,26 @@ class SetInteriorVehicleDataRequest : public BaseCommandRequest {
                                             std::string>& event);
 
   /**
+   * @brief Method that check if READ_ONLY parameters present
+   * @param request_params params from received message
+   * @return true if present , false - otherwise
+   */
+  bool AreReadOnlyParamsPresent(const Json::Value& request_params);
+
+  /**
+   * @brief Method that check if all request parameters are READ_ONLY
+   * @param request_params params from received message
+   * @return true if all are read only , false - otherwise
+   */
+  bool AreAllParamsReadOnly(const Json::Value& request_params);
+
+  /**
+   * @brief Method that cuts-off READ_ONLY parameters
+   * @param request_params params to handle
+   */
+  void CutOffReadOnlyParams(Json::Value& request_params);
+
+  /**
    * @brief SetInteriorVehicleDataRequest class destructor
    */
   virtual ~SetInteriorVehicleDataRequest();
