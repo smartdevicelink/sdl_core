@@ -36,6 +36,7 @@
 #include "remote_control/message_helper.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
+#include "utils/helpers.h"
 
 namespace remote_control {
 
@@ -43,6 +44,25 @@ namespace commands {
 
 using namespace json_keys;
 using namespace message_params;
+
+namespace {
+std::vector<std::string> GetModuleReadOnlyParams(
+    const std::string& module_type) {
+  std::vector<std::string> module_ro_params;
+  if (enums_value::kClimate == module_type) {
+    module_ro_params.push_back(kCurrentTemperature);
+  } else if (enums_value::kRadio == module_type) {
+    module_ro_params.push_back(kRdsData);
+    module_ro_params.push_back(kAvailableHDs);
+    module_ro_params.push_back(kSignalStrength);
+    module_ro_params.push_back(kSignalChangeThreshold);
+    module_ro_params.push_back(kState);
+    module_ro_params.push_back(kRadioEnable);
+  }
+  return module_ro_params;
+}
+
+}  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
 
@@ -56,7 +76,7 @@ SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const Json::Value request_params =
+  Json::Value request_params =
       MessageHelper::StringToValue(message_->json_message());
   const Json::Value module_data = request_params[kModuleData];
   const std::string module_type = module_data[kModuleType].asString();
@@ -71,6 +91,18 @@ void SetInteriorVehicleDataRequest::Execute() {
   }
 
   if (module_type_and_data_match) {
+    if (AreAllParamsReadOnly(request_params)) {
+      LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");
+      SendResponse(false,
+                   result_codes::kReadOnly,
+                   "All request params in module type are READ ONLY!");
+      return;
+    }
+    if (AreReadOnlyParamsPresent(request_params)) {
+      LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
+      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameters... ");
+      CutOffReadOnlyParams(request_params);
+    }
     application_manager::MessagePtr hmi_request = CreateHmiRequest(
         functional_modules::hmi_api::set_interior_vehicle_data, request_params);
     service()->RemoveHMIFakeParameters(hmi_request);
@@ -81,6 +113,58 @@ void SetInteriorVehicleDataRequest::Execute() {
                  result_codes::kInvalidData,
                  "Request module type & data mismatch!");
   }
+}
+
+bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
+    const Json::Value& request_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> module_type_params = ControlData(request_params);
+  std::vector<std::string>::iterator it = module_type_params.begin();
+  std::vector<std::string> ro_params =
+      GetModuleReadOnlyParams(ModuleType(request_params));
+  for (; it != module_type_params.end(); ++it) {
+    if (helpers::in_range(ro_params, *it)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
+    Json::Value& request_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> module_type_params = ControlData(request_params);
+  std::vector<std::string>::iterator it = module_type_params.begin();
+  const std::string module_type = ModuleType(request_params);
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  for (; it != module_type_params.end(); ++it) {
+    if (helpers::in_range(ro_params, *it)) {
+      if (enums_value::kClimate == module_type) {
+        request_params[message_params::kModuleData]
+                      [message_params::kClimateControlData].removeMember(*it);
+        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << *it);
+      } else if (enums_value::kRadio == module_type) {
+        request_params[message_params::kModuleData]
+                      [message_params::kRadioControlData].removeMember(*it);
+        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << *it);
+      }
+    }
+  }
+}
+
+bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
+    const Json::Value& request_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::vector<std::string> module_type_params = ControlData(request_params);
+  std::vector<std::string>::iterator it = module_type_params.begin();
+  std::vector<std::string> ro_params =
+      GetModuleReadOnlyParams(ModuleType(request_params));
+  for (; it != module_type_params.end(); ++it) {
+    if (!helpers::in_range(ro_params, *it)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void SetInteriorVehicleDataRequest::OnEvent(
@@ -116,6 +200,7 @@ std::string SetInteriorVehicleDataRequest::ModuleType(
       message.get(message_params::kModuleData, Json::Value(Json::objectValue));
   return module_data.get(message_params::kModuleType, "").asString();
 }
+
 std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
     const Json::Value& message) {
   Json::Value data =
