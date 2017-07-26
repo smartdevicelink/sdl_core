@@ -42,10 +42,7 @@ set(RC_COMMANDS_TEST_DIR ${RC_TEST_DIR}/commands)
 
 file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-# ${RC_COMMANDS_TEST_DIR}/application_manager/src/smart_object_keys.cc
   ${RC_COMMANDS_TEST_DIR}/*
-  ${RC_COMMANDS_TEST_DIR}/remote_control/test/commands/get_interior_vehicle_data_request_test.cc
-  ${RC_COMMANDS_TEST_DIR}/remote_control/test/commands/on_interior_vehicle_data_notification_test.cc
 )
 
 set(LIBRARIES

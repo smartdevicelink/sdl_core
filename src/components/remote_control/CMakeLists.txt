@@ -39,7 +39,7 @@ include_directories (
 )
 
 set (RC_SOURCE_DIR ${COMPONENTS_DIR}/remote_control/src)
-set (RC_TEST_DIR ${RC_SOURCE_DIR}/test)
+set (RC_TEST_DIR ${COMPONENTS_DIR}/remote_control/test)
 set (RC_COMMANDS_DIR ${RC_SOURCE_DIR}/commands)
 
 collect_sources(RC_SOURCES "${RC_SOURCE_DIR}")
