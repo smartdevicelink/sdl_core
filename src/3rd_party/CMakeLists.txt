@@ -292,6 +292,8 @@ set(EMHASHMAP_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 include(ExternalProject)
 ExternalProject_Add(libbson
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bson_c_lib
+    GIT_REPOSITORY https://github.com/smartdevicelink/bson_c_lib.git
+    GIT TAG master
     CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bson_c_lib/configure
     BUILD_COMMAND make
     INSTALL_COMMAND sudo make install)
