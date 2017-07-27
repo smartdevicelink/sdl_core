@@ -371,6 +371,33 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+
+  const smart_objects::SmartObject vs_capability_so =
+      *(hmi_capabilities_test->video_streaming_capability());
+
+  EXPECT_TRUE(vs_capability_so.keyExists("preferredResolution"));
+  EXPECT_TRUE(
+      vs_capability_so["preferredResolution"].keyExists("resolutionWidth"));
+  EXPECT_TRUE(
+      vs_capability_so["preferredResolution"].keyExists("resolutionHeight"));
+  EXPECT_EQ(800,
+            vs_capability_so["preferredResolution"]["resolutionWidth"].asInt());
+  EXPECT_EQ(
+      350, vs_capability_so["preferredResolution"]["resolutionHeight"].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists("maxBitrate"));
+  EXPECT_EQ(10000, vs_capability_so["maxBitrate"].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists("supportedFormats"));
+  const uint32_t supported_formats_len =
+      vs_capability_so["supportedFormats"].length();
+  EXPECT_EQ(2u, supported_formats_len);
+  EXPECT_TRUE(vs_capability_so["supportedFormats"][0].keyExists("protocol"));
+  EXPECT_TRUE(vs_capability_so["supportedFormats"][0].keyExists("codec"));
+  EXPECT_EQ(0, vs_capability_so["supportedFormats"][0]["protocol"].asInt());
+  EXPECT_EQ(0, vs_capability_so["supportedFormats"][0]["codec"].asInt());
+  EXPECT_TRUE(vs_capability_so["supportedFormats"][1].keyExists("protocol"));
+  EXPECT_TRUE(vs_capability_so["supportedFormats"][1].keyExists("codec"));
+  EXPECT_EQ(1, vs_capability_so["supportedFormats"][1]["protocol"].asInt());
+  EXPECT_EQ(2, vs_capability_so["supportedFormats"][1]["codec"].asInt());
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

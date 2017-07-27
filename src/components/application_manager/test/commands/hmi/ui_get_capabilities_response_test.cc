@@ -216,6 +216,28 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreaming_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
+                [strings::video_streaming] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_video_streaming_supported(
+                  hmi_capabilities_so[strings::video_streaming].asBool()));
+
+  command->Run();
+}
+
 TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::system_capabilities] =
@@ -263,6 +285,62 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhonenCapability_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_phone_capability(phone_capability_so));
+
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["preferredResolution"] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["preferredResolution"]
+                ["resolutionWidth"] = 800;
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["preferredResolution"]
+                ["resolutionWidth"] = 350;
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["maxBitrate"] = 10000;
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["supportedFormats"] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["supportedFormats"][0] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["supportedFormats"][0]
+                ["protocol"] = hmi_apis::Common_VideoStreamingProtocol::RAW;
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::video_streaming_capability]["supportedFormats"][0]
+                ["codec"] = hmi_apis::Common_VideoStreamingCodec::H264;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject vs_capability_so =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::video_streaming_capability];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_video_streaming_capability(vs_capability_so));
 
   command->Run();
 }
