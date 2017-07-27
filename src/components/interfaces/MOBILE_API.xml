@@ -1377,7 +1377,7 @@
     <param name="RT" type="String" minlength="0" maxlength="64">
       <description>Radio Text</description>
     </param>
-    <param name="CT" type="String" minlength="24" maxlength="24">
+    <param name="CT" type="String" minlength="22" maxlength="28" mandatory="false">
       <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
     </param>
     <param name="PI" type="String" minlength="0" maxlength="6">
