@@ -1700,6 +1700,7 @@
     <element name="BEGIN"/>
     <element name="MOVE"/>
     <element name="END"/>
+    <element name="CANCEL"/>
   </enum>
 
   <struct name="TouchEvent">
