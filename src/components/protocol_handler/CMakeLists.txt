@@ -58,7 +58,7 @@ endforeach()
 
 
 add_library(ProtocolHandler ${SOURCES})
-add_dependencies(ProtocolHandler install-bson_c_lib)
+add_dependencies(ProtocolHandler libbson)
 target_link_libraries(ProtocolHandler ${LIBRARIES})
 
 if(BUILD_TESTS)
