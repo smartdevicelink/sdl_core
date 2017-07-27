@@ -68,6 +68,15 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
   void OnEvent(const rc_event_engine::Event<application_manager::MessagePtr,
                                             std::string>& event);
 
+  /**
+   * @brief Check if app wants to proceed with already setup subscription
+   * @param request_params request parameters to check
+   * @return true if app already subscribed(unsubsribed) for module type but
+   * wants to subscribe(unsubscribe) for the same module again
+   * otherwise - false
+   */
+  bool HasRequestExcessiveSubscription(const Json::Value& request_params);
+
  protected:
   virtual std::string ModuleType(const Json::Value& message);
 
@@ -77,6 +86,12 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
     * @param hmi_response json message with response from HMI
     */
   void ProccessSubscription(const Json::Value& hmi_response);
+
+  /**
+   * @brief Cuts off subscribe parameter
+   * @param request_params request parameters to handle
+   */
+  void RemoveExcessiveSubscription(Json::Value& request_params);
 };
 
 }  // namespace commands
