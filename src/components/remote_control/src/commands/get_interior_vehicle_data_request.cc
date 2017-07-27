@@ -56,8 +56,12 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
 
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const Json::Value request_params =
+  Json::Value request_params =
       MessageHelper::StringToValue(message_->json_message());
+
+  if (HasRequestExcessiveSubscription(request_params)) {
+    RemoveExcessiveSubscription(request_params);
+  }
 
   SendRequest(functional_modules::hmi_api::get_interior_vehicle_data,
               request_params);
@@ -150,6 +154,31 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
           request_params[kModuleType]);
     }
   }
+}
+
+bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription(
+    const Json::Value& request_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const bool is_subscribe_present_in_request =
+      IsMember(request_params, kSubscribe);
+  if (is_subscribe_present_in_request) {
+    RCAppExtensionPtr extension = GetAppExtension(app());
+    const bool is_app_already_subscribed =
+        extension->IsSubscibedToInteriorVehicleData(
+            request_params[kModuleType]);
+    const bool app_wants_to_subscribe = request_params[kSubscribe].asBool();
+    if (!app_wants_to_subscribe && !is_app_already_subscribed) {
+      return true;
+    }
+    return app_wants_to_subscribe && is_app_already_subscribed;
+  }
+  return false;
+}
+
+void GetInteriorVehicleDataRequest::RemoveExcessiveSubscription(
+    Json::Value& request_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  request_params.removeMember(kSubscribe);
 }
 
 std::string GetInteriorVehicleDataRequest::ModuleType(
