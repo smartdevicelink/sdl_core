@@ -2051,6 +2051,7 @@
     <element name="BACKGROUND_PROCESS" />
     <element name="TESTING" />
     <element name="SYSTEM" />
+    <element name="PROJECTION" />
   </enum>
 
   <enum name="PredefinedLayout" platform="documentation">

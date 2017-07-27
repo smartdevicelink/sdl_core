@@ -196,6 +196,8 @@ class HmiState {
    */
   bool is_voice_communication_app(const uint32_t app_id) const;
 
+  bool is_mobile_projection_app(const uint32_t app_id) const;
+
  private:
   void operator=(const HmiState&);
 };

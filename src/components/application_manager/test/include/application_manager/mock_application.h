@@ -59,6 +59,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(ChangeSupportingAppHMIType, void());
   MOCK_CONST_METHOD0(is_navi, bool());
   MOCK_METHOD1(set_is_navi, void(bool allow));
+  MOCK_CONST_METHOD0(MobileProjectionEnabled, bool());
+  MOCK_METHOD1(SetMobileProjectionEnabled, void(bool allow));
   MOCK_CONST_METHOD0(video_streaming_approved, bool());
   MOCK_METHOD1(set_video_streaming_approved, void(bool state));
   MOCK_CONST_METHOD0(audio_streaming_approved, bool());

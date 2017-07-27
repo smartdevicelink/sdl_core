@@ -85,11 +85,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       std::vector<application_manager::ApplicationSharedPtr>(uint32_t button));
   MOCK_METHOD0(applications_with_navi,
                std::vector<application_manager::ApplicationSharedPtr>());
+  MOCK_METHOD0(applications_with_mobile_projection,
+               std::vector<application_manager::ApplicationSharedPtr>());
   MOCK_CONST_METHOD0(get_limited_media_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application,
+                     application_manager::ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_limited_mobile_projection_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_METHOD1(application_id, uint32_t(const int32_t correlation_id));
   MOCK_METHOD2(set_application_id,

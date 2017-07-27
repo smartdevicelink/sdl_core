@@ -96,6 +96,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   }
   void set_is_navi(bool allow);
 
+  void SetMobileProjectionEnabled(bool option);
+
+  bool MobileProjectionEnabled() const;
+
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);
   bool audio_streaming_approved() const;
@@ -338,6 +342,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;

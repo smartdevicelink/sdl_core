@@ -157,6 +157,7 @@ class ApplicationManager {
       uint32_t button) = 0;
   virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
 
+  virtual std::vector<ApplicationSharedPtr> applications_with_mobile_projection() = 0;
   /**
    * @brief Returns media application with LIMITED HMI Level if exists
    *
@@ -181,6 +182,8 @@ class ApplicationManager {
    * exist returns empty shared pointer
    */
   virtual ApplicationSharedPtr get_limited_voice_application() const = 0;
+
+  virtual ApplicationSharedPtr get_limited_mobile_projection_application() const = 0;
 
   /**
    * @brief Retrieves application id associated with correlation id

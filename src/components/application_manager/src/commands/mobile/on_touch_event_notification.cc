@@ -53,11 +53,26 @@ void OnTouchEventNotification::Run() {
   const std::vector<ApplicationSharedPtr>& applications =
       application_manager_.applications_with_navi();
 
-  std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
+  const std::vector<ApplicationSharedPtr>& projection_applications =
+     application_manager_.applications_with_mobile_projection();      
+
+  std::vector<ApplicationSharedPtr>::const_iterator nav_it = applications.begin();
+  
+  for (; applications.end() != nav_it; ++nav_it) {
+    ApplicationSharedPtr app = *nav_it;
     if (app->IsFullscreen()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
+      SendNotification();
+    }
+  }
+
+  std::vector<ApplicationSharedPtr>::const_iterator projection_it = 
+    projection_applications.begin();
+
+  for (; projection_applications.end() != projection_it; ++projection_it) {
+    ApplicationSharedPtr projection_app = *projection_it;
+    if (projection_app->IsFullscreen()) {
+      (*message_)[strings::params][strings::connection_key] = projection_app->app_id();
       SendNotification();
     }
   }
