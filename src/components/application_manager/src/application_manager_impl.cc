@@ -1802,6 +1802,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                     << message.json_message());
 
   switch (message.protocol_version()) {
+    case ProtocolVersion::kV5:
     case ProtocolVersion::kV4:
     case ProtocolVersion::kV3:
     case ProtocolVersion::kV2: {
@@ -3458,7 +3459,13 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool heart_beat_support = get_settings().heart_beat_timeout();
   bool sdl4_support = protocol_handler_->get_settings().enable_protocol_4();
+  bool sdl5_support = protocol_handler_->get_settings().enable_protocol_5();
 
+  if (sdl5_support) {
+    LOG4CXX_DEBUG(logger_,
+                  "SDL Supported protocol version " << ProtocolVersion::kV5);
+    return ProtocolVersion::kV5;
+  }
   if (sdl4_support) {
     LOG4CXX_DEBUG(logger_,
                   "SDL Supported protocol version " << ProtocolVersion::kV4);
