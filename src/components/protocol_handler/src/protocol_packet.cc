@@ -189,7 +189,7 @@ void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
 void ProtocolPacket::ProtocolHeaderValidator::set_max_control_payload_size(
     const size_t max_payload_size) {
   LOG4CXX_DEBUG(logger_,
-                "New maximum RPC payload size is " << max_payload_size);
+                "New maximum Control payload size is " << max_payload_size);
   max_control_payload_size_ = max_payload_size;
 }
 
@@ -262,7 +262,7 @@ ProtocolPacket::ProtocolHeaderValidator::max_payload_size_by_service_type(
                                                   : max_video_payload_size_;
       break;
     case kInvalidServiceType:
-      LOG4CXX_WARN(logger_, "Invalid service type" << static_cast<int>(type));
+      LOG4CXX_WARN(logger_, "Invalid service type: " << static_cast<int>(type));
   }
   return payload_size;
 }
