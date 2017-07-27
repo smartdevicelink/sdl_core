@@ -1100,7 +1100,7 @@ void Profile::UpdateValues() {
   LOG_UPDATED_BOOL_VALUE(enable_protocol_5_, kEnableProtocol5Key, kSDL5Section);
 
   ReadUIntValue(&maximum_control_payload_size_,
-                kDefaultMaximumPayloadSize,
+                kDefaultMaximumControlPayloadSize,
                 kSDL5Section,
                 kMaximumControlPayloadSizeKey);
 
@@ -1109,7 +1109,7 @@ void Profile::UpdateValues() {
                     kSDL5Section);
 
   ReadUIntValue(&maximum_rpc_payload_size_,
-                kDefaultMaximumPayloadSize,
+                kDefaultMaximumRpcPayloadSize,
                 kSDL5Section,
                 kMaximumRpcPayloadSizeKey);
 
@@ -1117,7 +1117,7 @@ void Profile::UpdateValues() {
       maximum_rpc_payload_size_, kMaximumRpcPayloadSizeKey, kSDL5Section);
 
   ReadUIntValue(&maximum_audio_payload_size_,
-                kDefaultMaximumPayloadSize,
+                kDefaultMaximumAudioPayloadSize,
                 kSDL5Section,
                 kMaximumAudioPayloadSizeKey);
 
@@ -1125,7 +1125,7 @@ void Profile::UpdateValues() {
       maximum_audio_payload_size_, kMaximumAudioPayloadSizeKey, kSDL5Section);
 
   ReadUIntValue(&maximum_video_payload_size_,
-                kDefaultMaximumPayloadSize,
+                kDefaultMaximumVideoPayloadSize,
                 kSDL5Section,
                 kMaximumVideoPayloadSizeKey);
 
