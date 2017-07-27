@@ -408,6 +408,20 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool phone_call_supported() const OVERRIDE;
 
   /*
+   * @brief Interface to store whether HMI supports video streaming
+   *
+   * @param supported Indicates whether video streaming is supported by HMI
+   */
+  void set_video_streaming_supported(const bool supported) OVERRIDE;
+
+  /*
+   * @brief Retrieves whether HMI supports video streaming
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  bool video_streaming_supported() const OVERRIDE;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *
@@ -441,6 +455,21 @@ class HMICapabilitiesImpl : public HMICapabilities {
    */
 
   const smart_objects::SmartObject* phone_capability() const OVERRIDE;
+
+  /*
+   * @brief Sets HMI's video streaming related capability information
+   *
+   * @param video_streaming_capability the video streaming related capabilities
+   */
+  void set_video_streaming_capability(
+      const smart_objects::SmartObject& video_streaming_capability) OVERRIDE;
+
+  /*
+   * @brief Retrieves HMI's video streaming related capabilities
+   *
+   * @return HMI's video streaming related capability information
+   */
+  const smart_objects::SmartObject* video_streaming_capability() const OVERRIDE;
 
   void Init(resumption::LastState* last_state) OVERRIDE;
 
@@ -518,9 +547,11 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* prerecorded_speech_;
   bool is_navigation_supported_;
   bool is_phone_call_supported_;
+  bool is_video_streaming_supported_;
   std::string ccpu_version_;
   smart_objects::SmartObject* navigation_capability_;
   smart_objects::SmartObject* phone_capability_;
+  smart_objects::SmartObject* video_streaming_capability_;
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;

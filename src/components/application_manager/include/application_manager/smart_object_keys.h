@@ -172,6 +172,7 @@ extern const char* system_capability_type;
 extern const char* system_capabilities;
 extern const char* navigation_capability;
 extern const char* phone_capability;
+extern const char* video_streaming_capability;
 
 // PutFile
 extern const char* sync_file_name;
@@ -263,6 +264,7 @@ extern const char* supported_diag_modes;
 extern const char* hmi_capabilities;
 extern const char* navigation;
 extern const char* phone_call;
+extern const char* video_streaming;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;

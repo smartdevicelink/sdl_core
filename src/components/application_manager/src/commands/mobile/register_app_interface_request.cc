@@ -485,6 +485,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::hmi_capabilities][strings::video_streaming] =
+      hmi_capabilities.video_streaming_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {

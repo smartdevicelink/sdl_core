@@ -300,6 +300,12 @@
             },
             "phoneCapability": {
                 "dialNumberEnabled": true
+            },
+            "videoStreamingCapability": {
+                "supportedFormats": [{
+                    "protocol": "RAW",
+                    "codec": "H264"
+                }]
             }
         }
     },

@@ -139,6 +139,7 @@ const char* system_capability_type = "systemCapabilityType";
 const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
+const char* video_streaming_capability = "videoStreamingCapability";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -230,6 +231,7 @@ const char* supported_diag_modes = "supportedDiagModes";
 const char* hmi_capabilities = "hmiCapabilities";
 const char* navigation = "navigation";
 const char* phone_call = "phoneCall";
+const char* video_streaming = "videoStreaming";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
