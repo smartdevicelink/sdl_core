@@ -166,6 +166,7 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_OnTBTClientState] =
       HmiInterfaces::HMI_INTERFACE_Navigation;
+  convert_map[Navigation_SetVideoConfig] = HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_StartStream] = HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_StopStream] = HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_StartAudioStream] =

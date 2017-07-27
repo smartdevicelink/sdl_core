@@ -381,6 +381,18 @@ class MessageHelper {
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /*
+   * @brief Sends SetVideoConfig request to HMI to negotiate video parameters
+   *
+   * @param app_id       the application which will start video streaming
+   * @param app_mngr     reference of application manager
+   * @param video_params parameters of video streaming, notified by mobile
+   */
+  static void SendNaviSetVideoConfig(
+      int32_t app_id,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& video_params);
+
+  /*
    * @brief Sends notification to HMI to start video streaming
    *
    * @param connection_key  Application connection key

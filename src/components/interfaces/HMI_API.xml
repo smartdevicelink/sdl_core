@@ -1661,6 +1661,22 @@
   </param>
 </struct>
 
+<struct name="VideoConfig">
+  <description>Configuration of a video stream.</description>
+  <param name="protocol" type="Common.VideoStreamingProtocol" mandatory="false">
+    <description>The video protocol configuration</description>
+  </param>
+  <param name="codec" type="Common.VideoStreamingCodec" mandatory="false">
+    <description>The video codec configuration</description>
+  </param>
+  <param name="width" type="Integer" mandatory="false">
+    <description>Width of the video stream, in pixels.</description>
+  </param>
+  <param name="height" type="Integer" mandatory="false">
+    <description>Height of the video stream, in pixels.</description>
+  </param>
+</struct>
+
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
   <param name="displayType" type="Common.DisplayType" mandatory="true">
@@ -3505,6 +3521,27 @@
     <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
     <param name="state" type="Common.TBTState" mandatory="true">
       <description>Current State of TBT client</description>
+    </param>
+  </function>
+  <function name="SetVideoConfig" messagetype="request">
+    <description>Request from SDL to HMI to ask whether HMI accepts a video stream with given configuration.</description>
+    <param name="config" type="Common.VideoConfig" mandatory="true">
+      <description>Configuration of a video stream.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="SetVideoConfig" messagetype="response">
+    <description>
+      Response from HMI to SDL whether the configuration is accepted.
+      In a negative response, a list of rejected parameters are supplied.
+    </description>
+    <param name="rejectedParams" type="String" array="true" minsize="1" maxsize="1000" mandatory="false">
+      <description>
+        List of params of VideoConfig struct which are not accepted by HMI, e.g. "protocol" and "codec".
+        This param exists only when the response is negative.
+      </description>
     </param>
   </function>
   <function name="StartStream" messagetype="request">

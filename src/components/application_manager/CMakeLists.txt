@@ -306,6 +306,8 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_stop_stream_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_request_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_put_file_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_resume_audio_source_notification.cc

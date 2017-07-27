@@ -1745,6 +1745,26 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return utils::MakeShared<smart_objects::SmartObject>(response_data);
 }
 
+void MessageHelper::SendNaviSetVideoConfig(
+    int32_t app_id,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& video_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr request =
+      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  if (!request) {
+    return;
+  }
+
+  (*request)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::Navigation_SetVideoConfig;
+
+  (*request)[strings::msg_params][strings::app_id] = app_id;
+  (*request)[strings::msg_params]["config"] = video_params;
+
+  app_mngr.ManageHMICommand(request);
+}
+
 void MessageHelper::SendNaviStartStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
