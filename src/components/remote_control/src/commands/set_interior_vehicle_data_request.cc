@@ -57,7 +57,6 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kSignalStrength);
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
-    module_ro_params.push_back(kRadioEnable);
   }
   return module_ro_params;
 }
