@@ -57,6 +57,7 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -399,6 +400,8 @@ set(LIBRARIES
   formatters
   dbms
   Utils
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -437,6 +440,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+add_dependencies("ApplicationManager" libbson)
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)

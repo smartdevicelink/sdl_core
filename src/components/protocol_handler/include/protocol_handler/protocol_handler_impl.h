@@ -349,6 +349,23 @@ class ProtocolHandlerImpl
 
   SessionObserver& get_session_observer() OVERRIDE;
 
+  /**
+   * \brief Called by connection handler to notify the result of
+   * OnSessionStartedCallback().
+   * \param session_id Generated session ID, will be 0 if session is not
+   * started
+   * \param hash_id Generated Hash ID
+   * \param protection whether the service will be protected
+   * \param rejected_params list of parameters' name that are rejected.
+   * Only valid when session_id is 0. Note, even if session_id is 0, the
+   * list may be empty.
+   */
+  void NotifySessionStartedResult(
+      uint8_t session_id,
+      uint32_t hash_id,
+      bool protection,
+      std::vector<std::string>& rejected_params) OVERRIDE;
+
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
     return raw_ford_messages_from_mobile_;
@@ -505,7 +522,7 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket& packet);
+  RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
@@ -617,6 +634,9 @@ class ProtocolHandlerImpl
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
 
   sync_primitives::Lock protocol_observers_lock_;
+
+  // we need thread-safe queue
+  utils::MessageQueue<ProtocolFramePtr> start_session_frame_queue_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

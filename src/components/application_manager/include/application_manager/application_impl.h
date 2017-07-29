@@ -110,6 +110,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
+  bool SetVideoConfig(protocol_handler::ServiceType service_type,
+                      const smart_objects::SmartObject& params);
+  void OnNaviSetVideoConfigDone(bool result,
+                                std::vector<std::string>& rejected_params);
   void StartStreaming(protocol_handler::ServiceType service_type);
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);

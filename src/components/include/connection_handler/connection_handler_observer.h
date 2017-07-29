@@ -42,6 +42,8 @@
 #include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
+struct BsonObject;
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
@@ -83,15 +85,18 @@ class ConnectionHandlerObserver {
   /**
    * \brief Callback function used by connection_handler
    * when Mobile Application initiates start of new service.
+   * Result must be notified through NotifyServiceStartedResult().
    * \param deviceHandle Device identifier within which session has to be
    * started.
    * \param sessionKey Key of started session.
    * \param type Established service type
+   * \param params Configuration parameters for this service
    */
-  virtual bool OnServiceStartedCallback(
+  virtual void OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
+      const protocol_handler::ServiceType& type,
+      const BsonObject* params) = 0;
 
   /**
    * \brief Callback function used by connection_handler

@@ -198,6 +198,18 @@ class ConnectionHandler {
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
 
+  /**
+   * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param result true if observer accepts starting service, false otherwise
+   * \param rejected_params list of rejected parameters' name. Only valid when
+   * result is false. Note that even if result is false, this may be empty.
+   *
+   * \note This is invoked only once but can be invoked by multiple threads.
+   * Also it can be invoked before OnServiceStartedCallback() returns.
+   **/
+  virtual void NotifyServiceStartedResult(
+      bool result, std::vector<std::string>& rejected_params) = 0;
+
  protected:
   /**
    * \brief Destructor

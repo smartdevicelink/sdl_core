@@ -81,6 +81,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
         "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
+    , start_session_frame_queue_()
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -1029,7 +1030,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   switch (packet->frame_data()) {
     case FRAME_DATA_START_SERVICE: {
       LOG4CXX_TRACE(logger_, "FrameData: StartService");
-      return HandleControlMessageStartSession(*packet);
+      return HandleControlMessageStartSession(packet);
     }
     case FRAME_DATA_END_SERVICE: {
       LOG4CXX_TRACE(logger_, "FrameData: StopService");
@@ -1253,37 +1254,63 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 #endif  // ENABLE_SECURITY
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
-    const ProtocolPacket& packet) {
+    const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(
       logger_,
-      "Protocol version:" << static_cast<int>(packet.protocol_version()));
-  const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
-  const uint8_t protocol_version = packet.protocol_version();
+      "Protocol version:" << static_cast<int>(packet->protocol_version()));
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
+  const uint8_t protocol_version = packet->protocol_version();
+  BsonObject bson_obj = bson_object_from_bytes(packet->data());
 
 #ifdef ENABLE_SECURITY
   const bool protection =
       // Protocolo version 1 is not support protection
-      (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
+      (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
                                               : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  uint32_t hash_id;
-  const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
-      connection_id, packet.session_id(), service_type, protection, &hash_id);
+  const ConnectionID connection_id = packet->connection_id();
+
+  start_session_frame_queue_.push(packet);
+
+  session_observer_.OnSessionStartedCallback(
+      connection_id, packet->session_id(), service_type, protection, &bson_obj);
+  bson_object_deinitialize(&bson_obj);
+
+  return RESULT_OK;
+}
+
+void ProtocolHandlerImpl::NotifySessionStartedResult(
+    uint8_t session_id,
+    uint32_t hash_id,
+    bool protection,
+    std::vector<std::string>& rejected_params) {
+
+  ProtocolFramePtr packet;
+  bool available = start_session_frame_queue_.pop(packet);
+  if (!available) {
+    LOG4CXX_ERROR(logger_,
+                 "Cannot find Session Started packet");
+    return;
+  }
+
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
+  const uint8_t protocol_version = packet->protocol_version();
+  const ConnectionID connection_id = packet->connection_id();
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
                      << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id,
-                         packet.session_id(),
+                         session_id,
                          protocol_version,
-                         packet.service_type());
-    return RESULT_OK;
+                         packet->service_type(),
+                         rejected_params);
+    return;
   }
 
 #ifdef ENABLE_SECURITY
@@ -1304,19 +1331,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       // Start service without protection
       SendStartSessionAck(connection_id,
                           session_id,
-                          packet.protocol_version(),
+                          packet->protocol_version(),
                           hash_id,
-                          packet.service_type(),
+                          packet->service_type(),
                           PROTECTION_OFF);
-      return RESULT_OK;
+      return;
     }
     ProtocolPacket::ProtocolVersion* fullVersion;
     std::vector<std::string> rejectedParams;
     // Can't check protocol_version because the first packet is v1, but there
     // could still be a payload, in which case we can get the real protocol
     // version
-    if (packet.service_type() == kRpc && packet.data_size() != 0) {
-      BsonObject obj = bson_object_from_bytes(packet.data());
+    if (packet->service_type() == kRpc && packet->data_size() != 0) {
+      BsonObject obj = bson_object_from_bytes(packet->data());
       fullVersion = new ProtocolPacket::ProtocolVersion(
           std::string(bson_object_get_string(&obj, strings::protocol_version)));
       bson_object_deinitialize(&obj);
@@ -1329,9 +1356,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     }
     if (!rejectedParams.empty()) {
       SendStartSessionNAck(connection_id,
-                           packet.session_id(),
+                           packet->session_id(),
                            protocol_version,
-                           packet.service_type(),
+                           packet->service_type(),
                            rejectedParams);
     } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
@@ -1339,9 +1366,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       // Start service as protected with current SSLContext
       SendStartSessionAck(connection_id,
                           session_id,
-                          packet.protocol_version(),
+                          packet->protocol_version(),
                           hash_id,
-                          packet.service_type(),
+                          packet->service_type(),
                           PROTECTION_ON,
                           *fullVersion);
     } else {
@@ -1351,7 +1378,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                   session_observer_,
                                   connection_id,
                                   session_id,
-                                  packet.protocol_version(),
+                                  packet->protocol_version(),
                                   hash_id,
                                   service_type,
                                   get_settings().force_protected_service(),
@@ -1365,11 +1392,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     LOG4CXX_DEBUG(logger_,
                   "Protection establishing for connection "
                       << connection_key << " is in progress");
-    return RESULT_OK;
+    return;
   }
 #endif  // ENABLE_SECURITY
-  if (packet.service_type() == kRpc && packet.data_size() != 0) {
-    BsonObject obj = bson_object_from_bytes(packet.data());
+  if (packet->service_type() == kRpc && packet->data_size() != 0) {
+    BsonObject obj = bson_object_from_bytes(packet->data());
     ProtocolPacket::ProtocolVersion fullVersion(
         bson_object_get_string(&obj, strings::protocol_version));
     bson_object_deinitialize(&obj);
@@ -1378,18 +1405,18 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       // Start service without protection
       SendStartSessionAck(connection_id,
                           session_id,
-                          packet.protocol_version(),
+                          packet->protocol_version(),
                           hash_id,
-                          packet.service_type(),
+                          packet->service_type(),
                           PROTECTION_OFF,
                           fullVersion);
     } else {
       std::vector<std::string> rejectedParams(
           1, std::string(strings::protocol_version));
       SendStartSessionNAck(connection_id,
-                           packet.session_id(),
+                           packet->session_id(),
                            protocol_version,
-                           packet.service_type(),
+                           packet->service_type(),
                            rejectedParams);
     }
 
@@ -1397,12 +1424,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     // Start service without protection
     SendStartSessionAck(connection_id,
                         session_id,
-                        packet.protocol_version(),
+                        packet->protocol_version(),
                         hash_id,
-                        packet.service_type(),
+                        packet->service_type(),
                         PROTECTION_OFF);
   }
-  return RESULT_OK;
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(

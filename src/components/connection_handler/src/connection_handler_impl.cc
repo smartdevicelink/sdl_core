@@ -69,7 +69,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , protocol_handler_(NULL)
     , connection_list_lock_()
     , connection_handler_observer_lock_()
-    , connection_list_deleter_(&connection_list_) {}
+    , connection_list_deleter_(&connection_list_)
+    , start_service_context_queue_() {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -279,40 +280,42 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
 }
 #endif  // ENABLE_SECURITY
 
-uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+void ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type,
     const bool is_protected,
-    uint32_t* hash_id) {
+    const BsonObject* params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hash_id) {
-    *hash_id = protocol_handler::HASH_ID_WRONG;
-  }
+  uint32_t new_session_id = 0;
+  uint32_t hash_id = protocol_handler::HASH_ID_WRONG;
+
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
-    return 0;
+    std::vector<std::string> empty;
+    protocol_handler_->NotifySessionStartedResult(
+        new_session_id, hash_id, is_protected, empty);
+    return;
   }
 #endif  // ENABLE_SECURITY
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return 0;
+    NotifySessionStartedFailure(is_protected);
+    return;
   }
-  uint32_t new_session_id = 0;
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     new_session_id = connection->AddNewSession();
     if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
-      return 0;
+      NotifySessionStartedFailure(is_protected);
+      return;
     }
-    if (hash_id) {
-      *hash_id = KeyFromPair(connection_handle, new_session_id);
-    }
+    hash_id = KeyFromPair(connection_handle, new_session_id);
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_,
@@ -322,30 +325,87 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 #endif  // ENABLE_SECURITY
                         << " service " << static_cast<int>(service_type)
                         << " for session " << static_cast<int>(session_id));
-      return 0;
+      NotifySessionStartedFailure(is_protected);
+      return;
     }
     new_session_id = session_id;
-    if (hash_id) {
-      *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
-    }
+    hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-    const bool success = connection_handler_observer_->OnServiceStartedCallback(
-        connection->connection_device_handle(), session_key, service_type);
-    if (!success) {
-      LOG4CXX_WARN(logger_,
-                   "Service starting forbidden by connection_handler_observer");
-      if (protocol_handler::kRpc == service_type) {
-        connection->RemoveSession(new_session_id);
-      } else {
-        connection->RemoveService(session_id, service_type);
-      }
-      return 0;
+
+    ServiceStartedContext context(connection_handle,
+                                  session_id,
+                                  new_session_id,
+                                  service_type,
+                                  hash_id,
+                                  is_protected);
+    start_service_context_queue_.push(context);
+
+    connection_handler_observer_->OnServiceStartedCallback(
+        connection->connection_device_handle(),
+        session_key,
+        service_type,
+        params);
+  } else {
+    if (protocol_handler_) {
+      std::vector<std::string> empty;
+      protocol_handler_->NotifySessionStartedResult(
+          new_session_id, hash_id, is_protected, empty);
     }
   }
-  return new_session_id;
+}
+
+void ConnectionHandlerImpl::NotifyServiceStartedResult(
+    bool result, std::vector<std::string>& rejected_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ServiceStartedContext context;
+  bool available = start_service_context_queue_.pop(context);
+  if (!available) {
+    LOG4CXX_ERROR(logger_, "context for start service not found!");
+    return;
+  }
+
+  Connection* connection = NULL;
+  {
+    sync_primitives::AutoReadLock lock(connection_list_lock_);
+    ConnectionList::iterator it =
+        connection_list_.find(context.connection_handle_);
+    if (connection_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "connection not found");
+      return;
+    }
+    connection = it->second;
+  }
+
+  if (!result) {
+    LOG4CXX_WARN(logger_,
+                 "Service starting forbidden by connection_handler_observer");
+    if (protocol_handler::kRpc == context.service_type_) {
+      connection->RemoveSession(context.new_session_id_);
+    } else {
+      connection->RemoveService(context.session_id_, context.service_type_);
+    }
+    context.new_session_id_ = 0;
+  }
+
+  if (protocol_handler_ != NULL) {
+    protocol_handler_->NotifySessionStartedResult(context.new_session_id_,
+                                                  context.hash_id_,
+                                                  context.is_protected_,
+                                                  rejected_params);
+  }
+}
+
+void ConnectionHandlerImpl::NotifySessionStartedFailure(bool is_protected) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (protocol_handler_) {
+    std::vector<std::string> empty;
+    protocol_handler_->NotifySessionStartedResult(
+        0, protocol_handler::HASH_ID_WRONG, is_protected, empty);
+  }
 }
 
 void ConnectionHandlerImpl::OnApplicationFloodCallBack(

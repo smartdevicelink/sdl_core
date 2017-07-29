@@ -48,10 +48,11 @@ class MockConnectionHandlerObserver
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
   MOCK_METHOD1(RemoveDevice,
                void(const connection_handler::DeviceHandle& device_handle));
-  MOCK_METHOD3(OnServiceStartedCallback,
-               bool(const connection_handler::DeviceHandle& device_handle,
+  MOCK_METHOD4(OnServiceStartedCallback,
+               void(const connection_handler::DeviceHandle& device_handle,
                     const int32_t& session_key,
-                    const protocol_handler::ServiceType& type));
+                    const protocol_handler::ServiceType& type,
+                    const BsonObject* params));
   MOCK_METHOD3(
       OnServiceEndedCallback,
       void(const int32_t& session_key,

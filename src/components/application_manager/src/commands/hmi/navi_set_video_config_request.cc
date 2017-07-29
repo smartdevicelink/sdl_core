@@ -110,7 +110,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
           }
         }
       }
-//      app->OnNaviSetVideoConfigDone(result, rejected_params);
+      app->OnNaviSetVideoConfigDone(result, rejected_params);
       break;
     }
     default:
@@ -129,8 +129,8 @@ void NaviSetVideoConfigRequest::onTimeOut() {
     return;
   }
 
-//  std::vector<std::string> empty;
-//  app->OnNaviSetVideoConfigDone(false, empty);
+  std::vector<std::string> empty;
+  app->OnNaviSetVideoConfigDone(false, empty);
 
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());

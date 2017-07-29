@@ -36,6 +36,7 @@
 #include <string>
 #include <fstream>
 #include <utility>
+#include <bson_object.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
@@ -1138,7 +1139,9 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
 }
 
 bool ApplicationManagerImpl::StartNaviService(
-    uint32_t app_id, protocol_handler::ServiceType service_type) {
+    uint32_t app_id,
+    protocol_handler::ServiceType service_type,
+    const BsonObject* params) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1155,6 +1158,56 @@ bool ApplicationManagerImpl::StartNaviService(
       }
       it = res.first;
     }
+
+    if (service_type == ServiceType::kMobileNav) {
+      smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
+      ConvertVideoParamsToSO(converted_params, params);
+
+      if (!converted_params.empty()) {
+        LOG4CXX_INFO(logger_, "Sending video configuration params");
+#ifdef DEBUG
+        MessageHelper::PrintSmartObject(converted_params);
+#endif
+        bool request_sent =
+            application(app_id)->SetVideoConfig(service_type, converted_params);
+        if (request_sent) {
+          return true;
+        }
+      }
+    }
+    // no configuration is needed, or SetVideoConfig is not sent
+    std::vector<std::string> empty;
+    OnStreamingConfigured(app_id, service_type, true, empty);
+    return true;
+
+  } else {
+    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
+  }
+  return false;
+}
+
+void ApplicationManagerImpl::OnStreamingConfigured(
+    uint32_t app_id,
+    protocol_handler::ServiceType service_type,
+    bool result,
+    std::vector<std::string>& rejected_params) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::vector<std::string> empty;
+
+  LOG4CXX_INFO(logger_,
+               "OnStreamingConfigured called for service "
+                   << service_type << ", result=" << result);
+
+  if (result) {
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      LOG4CXX_WARN(logger_, "Application not found in navi status map");
+      connection_handler().NotifyServiceStartedResult(false, empty);
+      return;
+    }
+
     // Fill NaviServices map. Set true to first value of pair if
     // we've started video service or to second value if we've
     // started audio service
@@ -1162,11 +1215,12 @@ bool ApplicationManagerImpl::StartNaviService(
                                             : it->second.second = true;
 
     application(app_id)->StartStreaming(service_type);
-    return true;
+    connection_handler().NotifyServiceStartedResult(true, empty);
   } else {
-    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
+    std::vector<std::string> converted_params =
+        ConvertRejectedParamList(rejected_params);
+    connection_handler().NotifyServiceStartedResult(false, converted_params);
   }
-  return false;
 }
 
 void ApplicationManagerImpl::StopNaviService(
@@ -1194,40 +1248,47 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
-bool ApplicationManagerImpl::OnServiceStartedCallback(
+void ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
-    const protocol_handler::ServiceType& type) {
+    const protocol_handler::ServiceType& type,
+    const BsonObject* params) {
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "ServiceType = " << type << ". Session = " << std::hex
                                  << session_key);
+  std::vector<std::string> empty;
 
   if (type == kRpc) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
-    return true;
+    connection_handler().NotifyServiceStartedResult(true, empty);
+    return;
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
     LOG4CXX_WARN(logger_,
                  "The application with id:" << session_key
                                             << " doesn't exists.");
-    return false;
+    connection_handler().NotifyServiceStartedResult(false, empty);
+    return;
   }
 
   if (Compare<ServiceType, EQ, ONE>(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     if (app->is_navi() || app->mobile_projection_enabled()) {
-      return StartNaviService(session_key, type);
+      if (!StartNaviService(session_key, type, params)) {
+        connection_handler().NotifyServiceStartedResult(false, empty);
+      }
+      return;
     } else {
       LOG4CXX_WARN(logger_, "Refuse not navi/projection application");
     }
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
-  return false;
+  connection_handler().NotifyServiceStartedResult(false, empty);
 }
 
 void ApplicationManagerImpl::OnServiceEndedCallback(
@@ -3604,6 +3665,92 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
+}
+
+static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(
+    const char* str) {
+  if (strcmp(str, "RAW") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RAW;
+  } else if (strcmp(str, "RTP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTP;
+  } else if (strcmp(str, "RTSP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTSP;
+  } else if (strcmp(str, "RTMP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTMP;
+  } else if (strcmp(str, "WEBM") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::WEBM;
+  }
+  return hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM;
+}
+
+static hmi_apis::Common_VideoStreamingCodec::eType ConvertVideoCodec(
+    const char* str) {
+  if (strcmp(str, "H264") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::H264;
+  } else if (strcmp(str, "H265") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::H265;
+  } else if (strcmp(str, "Theora") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::Theora;
+  } else if (strcmp(str, "VP8") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::VP8;
+  } else if (strcmp(str, "VP9") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::VP9;
+  }
+  return hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM;
+}
+
+// static
+void ApplicationManagerImpl::ConvertVideoParamsToSO(
+    smart_objects::SmartObject& output, const BsonObject* input) {
+  if (input == NULL) {
+    return;
+  }
+  BsonObject* obj = const_cast<BsonObject*>(input);
+
+  const char* protocol = bson_object_get_string(obj, "videoProtocol");
+  if (protocol != NULL) {
+    hmi_apis::Common_VideoStreamingProtocol::eType protocol_enum =
+        ConvertVideoProtocol(protocol);
+    if (protocol_enum !=
+        hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM) {
+      output["protocol"] = protocol_enum;
+    }
+  }
+  const char* codec = bson_object_get_string(obj, "videoCodec");
+  if (codec != NULL) {
+    hmi_apis::Common_VideoStreamingCodec::eType codec_enum =
+        ConvertVideoCodec(codec);
+    if (codec_enum != hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM) {
+      output["codec"] = codec_enum;
+    }
+  }
+  BsonElement* element = bson_object_get(obj, "desiredHeight");
+  if (element != NULL && element->type == TYPE_INT32) {
+    output["height"] = bson_object_get_int32(obj, "desiredHeight");
+  }
+  element = bson_object_get(obj, "desiredWidth");
+  if (element != NULL && element->type == TYPE_INT32) {
+    output["width"] = bson_object_get_int32(obj, "desiredWidth");
+  }
+}
+
+// static
+std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
+    const std::vector<std::string>& input) {
+  std::vector<std::string> output;
+  for (unsigned int i = 0; i < input.size(); i++) {
+    if (input[i] == "protocol") {
+      output.push_back("videoProtocol");
+    } else if (input[i] == "codec") {
+      output.push_back("videoCodec");
+    } else if (input[i] == "height") {
+      output.push_back("desiredHeight");
+    } else if (input[i] == "width") {
+      output.push_back("desiredWidth");
+    }
+    // ignore unknown parameters
+  }
+  return output;
 }
 
 }  // namespace application_manager

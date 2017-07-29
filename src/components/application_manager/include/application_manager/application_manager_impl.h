@@ -93,6 +93,8 @@
 #include "utils/timer.h"
 #include "smart_objects/smart_object.h"
 
+struct BsonObject;
+
 namespace threads {
 class Thread;
 }
@@ -792,10 +794,11 @@ class ApplicationManagerImpl
   void OnFindNewApplicationsRequest() OVERRIDE;
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
-  bool OnServiceStartedCallback(
+  void OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
-      const protocol_handler::ServiceType& type) OVERRIDE;
+      const protocol_handler::ServiceType& type,
+      const BsonObject* params) OVERRIDE;
   void OnServiceEndedCallback(
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
@@ -884,6 +887,19 @@ class ApplicationManagerImpl
    * @param app_id the application's id which should stop streaming.
    */
   void ForbidStreaming(uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Called when application completes streaming configuration
+   * @param app_id Streaming application id
+   * @param service_type Streaming service type
+   * @param result true if configuration is successful, false otherwise
+   * @param rejected_params list of rejected parameters' name. Valid
+   *                        only when result is false.
+   */
+  void OnStreamingConfigured(uint32_t app_id,
+                             protocol_handler::ServiceType service_type,
+                             bool result,
+                             std::vector<std::string>& rejected_params);
 
   /**
    * @brief Callback calls when application starts/stops data streaming
@@ -1325,10 +1341,13 @@ class ApplicationManagerImpl
    * @brief Starts specified navi service for application
    * @param app_id Application to proceed
    * @param service_type Type of service to start
-   * @return True on success, false on fail
+   * @param params configuration parameters specified by mobile
+   * @return True if service is immediately started or configuration
+   * parameters are sent to HMI, false on other cases
    */
   bool StartNaviService(uint32_t app_id,
-                        protocol_handler::ServiceType service_type);
+                        protocol_handler::ServiceType service_type,
+                        const BsonObject* params);
 
   /**
    * @brief Stops specified navi service for application
@@ -1398,6 +1417,24 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle);
 
   void ClearTTSGlobalPropertiesList();
+
+  /**
+   * @brief Converts BSON object containing video parameters to
+   * smart object's map object
+   * @param output the smart object to add video parameters
+   * @param input BSON object to read parameters from
+   */
+  static void ConvertVideoParamsToSO(smart_objects::SmartObject& output,
+                                     const BsonObject* input);
+
+  /**
+   * @brief Converts rejected parameters' names acquired from HMI to
+   * SDL protocol's parameter names
+   * @param list of rejected parameters' names
+   * @return converted parameters' names
+   */
+  static std::vector<std::string> ConvertRejectedParamList(
+      const std::vector<std::string>& input);
 
  private:
   const ApplicationManagerSettings& settings_;

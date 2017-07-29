@@ -98,6 +98,7 @@ using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnNull;
 using ::testing::An;
 using ::testing::AnyOf;
+using ::testing::ByRef;
 using ::testing::DoAll;
 using ::testing::_;
 using ::testing::Invoke;
@@ -105,6 +106,11 @@ using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 
 typedef std::vector<uint8_t> UCharDataVector;
+
+// custom action to call a member function with 4 arguments
+ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
+  (ptr->*memberFunc)(a, b, c, d);
+}
 
 namespace {
 const uint32_t kAsyncExpectationsTimeout = 10000u;
@@ -179,6 +185,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   void AddSession(const ::utils::SharedPtr<TestAsyncWaiter>& waiter,
                   uint32_t& times) {
+    using namespace protocol_handler;
     ASSERT_TRUE(NULL != waiter.get());
 
     AddConnection();
@@ -192,6 +199,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     // use protection OFF
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
+    std::vector<std::string> empty;
 
     // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
@@ -202,7 +210,14 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                          _))
         .
         // Return sessions start success
-        WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(session_id)));
+        WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
+                       InvokeMemberFuncWithArg4(
+                           protocol_handler_impl.get(),
+                           &ProtocolHandler::NotifySessionStartedResult,
+                           session_id,
+                           HASH_ID_WRONG,
+                           callback_protection_flag,
+                           ByRef(empty))));
     times++;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -342,11 +357,13 @@ TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConnection) {
  */
 TEST_F(ProtocolHandlerImplTest,
        StartSession_Unprotected_SessionObserverReject) {
+  using namespace protocol_handler;
   const int call_times = 5;
   AddConnection();
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -358,8 +375,14 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(SESSION_START_REJECT)));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   SESSION_START_REJECT,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(empty))));
   times += call_times;
 
   // Expect send NAck
@@ -390,6 +413,7 @@ TEST_F(ProtocolHandlerImplTest,
  * OFF
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
+  using namespace protocol_handler;
   const int call_times = 5;
   AddConnection();
 #ifdef ENABLE_SECURITY
@@ -403,6 +427,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -414,8 +439,14 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(SESSION_START_REJECT)));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   SESSION_START_REJECT,
+                                   HASH_ID_WRONG,
+                                   callback_protection_flag,
+                                   ByRef(empty))));
   times += call_times;
 
   // Expect send NAck with encryption OFF
@@ -445,11 +476,13 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
  */
 TEST_F(ProtocolHandlerImplTest,
        StartSession_Unprotected_SessionObserverAccept) {
+  using namespace protocol_handler;
   AddConnection();
   const ServiceType start_service = kRpc;
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -457,7 +490,14 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(empty))));
   times++;
 
   SetProtocolVersion2();
@@ -567,6 +607,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
  * Check session_observer with PROTECTION_OFF and Ack with PROTECTION_OFF
  */
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
+  using namespace protocol_handler;
   ::utils::SharedPtr<TestAsyncWaiter> waiter =
       utils::MakeShared<TestAsyncWaiter>();
   uint32_t times = 0;
@@ -576,6 +617,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -583,7 +625,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(empty))));
   times++;
 
   SetProtocolVersion2();
@@ -612,6 +661,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
  * PROTECTION_OFF
  */
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
+  using namespace protocol_handler;
   AddConnection();
   // Add security manager
   AddSecurityManager();
@@ -619,6 +669,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -626,7 +677,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(empty))));
   times++;
 
   SetProtocolVersion2();
@@ -646,12 +704,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
  * ProtocolHandler shall send Ack with PROTECTION_OFF on fail SLL creation
  */
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -659,7 +719,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   SetProtocolVersion2();
@@ -688,12 +755,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
  */
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_SSLInitialized) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -701,7 +770,14 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   SetProtocolVersion2();
@@ -743,12 +819,14 @@ TEST_F(ProtocolHandlerImplTest,
  */
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_HandshakeFail) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -756,7 +834,14 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   std::vector<int> services;
@@ -818,6 +903,7 @@ TEST_F(ProtocolHandlerImplTest,
  */
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_HandshakeSuccess) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -829,6 +915,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -836,7 +923,14 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   // call new SSLContext creation
@@ -904,6 +998,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(
     ProtocolHandlerImplTest,
     SecurityEnable_StartSessionProtected_HandshakeSuccess_ServiceProtectedBefore) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -914,6 +1009,7 @@ TEST_F(
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -921,7 +1017,14 @@ TEST_F(
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   // call new SSLContext creation
@@ -987,6 +1090,7 @@ TEST_F(
  */
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_HandshakeSuccess_SSLIsNotPending) {
+  using namespace protocol_handler;
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -997,6 +1101,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -1004,7 +1109,14 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   session_id,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_ON,
+                                   ByRef(empty))));
   times++;
 
   // call new SSLContext creation

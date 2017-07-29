@@ -37,6 +37,7 @@
 #include <map>
 #include <set>
 #include <list>
+#include <vector>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
@@ -439,6 +440,25 @@ class Application : public virtual InitialApplicationData,
   virtual void set_video_streaming_allowed(bool state) = 0;
   virtual bool audio_streaming_allowed() const = 0;
   virtual void set_audio_streaming_allowed(bool state) = 0;
+
+  /**
+   * @brief Sends SetVideoConfig request to HMI to configure streaming
+   * @param service_type Type of streaming service, should be kMobileNav
+   * @param params parameters of video streaming in key-value format
+   * @return true if SetVideoConfig is sent, false otherwise
+   */
+  virtual bool SetVideoConfig(protocol_handler::ServiceType service_type,
+                              const smart_objects::SmartObject& params) = 0;
+
+  /**
+   * @brief Callback when SetVideoConfig response is received
+   * @param result true if HMI accepts video streaming parameters,
+   *        false otherwise
+   * @param rejected_params list of rejected parameters' names. Only
+   *        valid when result is false
+   */
+  virtual void OnNaviSetVideoConfigDone(
+      bool result, std::vector<std::string>& rejected_params) = 0;
 
   /**
    * @brief Starts streaming service for application

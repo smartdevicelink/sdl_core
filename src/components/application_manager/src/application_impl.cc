@@ -416,6 +416,33 @@ bool ApplicationImpl::audio_streaming_allowed() const {
   return audio_streaming_allowed_;
 }
 
+bool ApplicationImpl::SetVideoConfig(protocol_handler::ServiceType service_type,
+                                     const smart_objects::SmartObject& params) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    // See StartStreaming(). We issue SetVideoConfig and StartStream
+    // only when streaming is not approved yet
+    if (!video_streaming_approved()) {
+      LOG4CXX_TRACE(logger_, "Video streaming not approved");
+      MessageHelper::SendNaviSetVideoConfig(
+          app_id(), application_manager_, params);
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::OnNaviSetVideoConfigDone(
+    bool result, std::vector<std::string>& rejected_params) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  application_manager_.OnStreamingConfigured(
+      app_id(), ServiceType::kMobileNav, result, rejected_params);
+}
+
 void ApplicationImpl::StartStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
