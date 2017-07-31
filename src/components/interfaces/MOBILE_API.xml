@@ -5061,8 +5061,8 @@
           <element name="IGNORED"/>
           <element name="DISALLOWED"/>
           <element name="USER_DISALLOWED"/>
-          <element name="UNSUPPORTED_RESOURCE"><description>The capability does not exist on the module</description></element>
-          <element name="DATA_NOT_AVAILABLE"><description>The capability should exist on the module but there was an error retrieving the data.</description></element>
+          <element name="UNSUPPORTED_RESOURCE"/><description>The capability does not exist on the module</description>
+          <element name="DATA_NOT_AVAILABLE"/><description>The capability should exist on the module but there was an error retrieving the data.</description>
     </param>
     <param name="info" type="String" maxlength="1000" mandatory="false">
     </param>
