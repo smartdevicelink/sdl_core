@@ -455,11 +455,11 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::GetSystemCapabilityID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::GetSystemCapabilityResponse>(
-            message, application_manager);
+        command.reset(new commands::GetSystemCapabilityResponse(
+            message, application_manager));
       } else {
-        command = utils::MakeShared<commands::GetSystemCapabilityRequest>(
-            message, application_manager);
+        command.reset(new commands::GetSystemCapabilityRequest(
+            message, application_manager));
       }
       break;
     }
