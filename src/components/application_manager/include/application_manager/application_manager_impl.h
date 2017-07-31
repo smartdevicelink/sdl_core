@@ -1542,6 +1542,12 @@ class ApplicationManagerImpl
 
   volatile bool is_stopping_;
 
+#ifdef BUILD_TESTS
+  // Methods for test usage
+ public:
+  void AddMockApplication(ApplicationSharedPtr mock_app);
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 

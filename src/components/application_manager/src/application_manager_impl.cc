@@ -3753,4 +3753,13 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
   return output;
 }
 
+#ifdef BUILD_TESTS
+void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
+  applications_list_lock_.Acquire();
+  applications_.insert(mock_app);
+  apps_size_ = applications_.size();
+  applications_list_lock_.Release();
+}
+#endif  // BUILD_TESTS
+
 }  // namespace application_manager
