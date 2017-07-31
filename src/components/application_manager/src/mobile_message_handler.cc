@@ -124,8 +124,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
   if (message->protocol_version() == application_manager::kV1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
-  if ((message->protocol_version() >= application_manager::kV2) &&
-      (message->protocol_version() <= application_manager::kV5)) {
+  if (Message::is_sufficient_version(ProtocolVersion::kV4,
+                                     message->protocol_version())) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   }
   return NULL;

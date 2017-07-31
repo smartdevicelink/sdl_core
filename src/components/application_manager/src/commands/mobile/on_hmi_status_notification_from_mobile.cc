@@ -75,8 +75,9 @@ void OnHMIStatusNotificationFromMobile::Run() {
                     << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
-      ProtocolVersion::kV4 <= app->protocol_version() &&
-      ProtocolVersion::kV5 >= app->protocol_version() && app->is_foreground()) {
+      Message::is_sufficient_version(ProtocolVersion::kV4,
+                                     app->protocol_version()) &&
+      app->is_foreground()) {
     // In case this notification will be received from mobile side with
     // foreground level for app on mobile, this should trigger remote
     // apps list query for SDL 4.0+ app
@@ -90,8 +91,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
                   " for handle: "
                       << handle);
 
-    if (ProtocolVersion::kV4 <= app->protocol_version() &&
-        ProtocolVersion::kV5 >= app->protocol_version()) {
+    if (Message::is_sufficient_version(ProtocolVersion::kV4,
+                                       app->protocol_version())) {
       const ApplicationSet& accessor =
           application_manager_.applications().GetData();
 
@@ -99,8 +100,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
       ApplicationSetConstIt it = accessor.begin();
       for (; accessor.end() != it; ++it) {
         if (connection_key() != (*it)->app_id() &&
-            ProtocolVersion::kV4 <= (*it)->protocol_version() &&
-            ProtocolVersion::kV5 >= (*it)->protocol_version() &&
+            Message::is_sufficient_version(ProtocolVersion::kV4,
+                                           (*it)->protocol_version()) &&
             (*it)->is_foreground()) {
           is_another_foreground_sdl4_app = true;
           break;

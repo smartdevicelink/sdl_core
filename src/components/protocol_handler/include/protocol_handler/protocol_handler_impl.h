@@ -250,6 +250,21 @@ class ProtocolHandlerImpl
                            uint8_t service_type,
                            bool protection);
 
+  /**
+   * \brief Sends acknowledgement of starting session to mobile application
+   * with session number and hash code for second version of protocol
+   * was started
+   * \param connection_id Identifier of connection within which session
+   * \param session_id ID of session to be sent to mobile application
+   * \param protocol_version Version of protocol used for communication
+   * \param hash_code For second version of protocol: identifier of session
+   * to be sent to
+   * mobile app for using when ending session
+   * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param protection Protection flag
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *                     mobile proxy
+   */
   void SendStartSessionAck(ConnectionID connection_id,
                            uint8_t session_id,
                            uint8_t protocol_version,
@@ -274,6 +289,14 @@ class ProtocolHandlerImpl
                             uint8_t protocol_version,
                             uint8_t service_type);
 
+  /**
+   * \brief Sends fail of starting session to mobile application
+   * \param connection_id Identifier of connection within which session
+   * \param session_id ID of session to be sent to mobile application
+   * \param protocol_version Version of protocol used for communication
+   * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param rejected_params List of rejected params to send in payload
+   */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,

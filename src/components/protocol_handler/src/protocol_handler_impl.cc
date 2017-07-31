@@ -317,7 +317,9 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
                                            0u,
                                            message_counters_[session_id]++));
 
-  if (rejectedParams.size() > 0) {
+  uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
+
+  if (maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
     BsonArray rejectedParamsArr;
@@ -389,7 +391,10 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
                                            session_id,
                                            0u,
                                            message_counters_[session_id]++));
-  if (rejectedParams.size() > 0) {
+
+  uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
+
+  if (maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
     BsonArray rejectedParamsArr;
@@ -1104,9 +1109,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const uint8_t current_session_id = packet.session_id();
-  uint32_t hash_id;
-
-  hash_id = get_hash_id(packet);
+  uint32_t hash_id = get_hash_id(packet);
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   const ConnectionID connection_id = packet.connection_id();
@@ -1328,11 +1331,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     }
     ProtocolPacket::ProtocolVersion* fullVersion;
     std::vector<std::string> rejectedParams(0, std::string(""));
+    // Can't check protocol_version because the first packet is v1, but there
+    // could still
+    // be a payload, in which case we can get the real protocol version
     if (packet.data_size() != 0) {
       BsonObject obj = bson_object_from_bytes(packet.data());
       fullVersion = new ProtocolPacket::ProtocolVersion(
           std::string(bson_object_get_string(&obj, "protocolVersion")));
       bson_object_deinitialize(&obj);
+      // Constructed payloads added in Protocol v5
       if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
         rejectedParams.push_back(std::string("protocolVersion"));
       }
@@ -1427,7 +1434,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
-    if (protocol_version >= PROTOCOL_VERSION_3) {
+    if (protocol_version >= PROTOCOL_VERSION_3 &&
+        protocol_version <= PROTOCOL_VERSION_5) {
       return SendHeartBeatAck(
           connection_id, packet.session_id(), packet.message_id());
     } else {

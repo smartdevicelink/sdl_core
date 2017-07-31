@@ -1088,7 +1088,7 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(
       app_icons_amount_to_remove_, kAppIconsAmountToRemoveKey, kSDL4Section);
 
-  // Enable protocol ver.4 parameter
+  // Enable protocol ver.5 parameter
   std::string enable_protocol_5_value;
   if (ReadValue(&enable_protocol_5_value, kSDL5Section, kEnableProtocol5Key) &&
       0 == strcmp("true", enable_protocol_5_value.c_str())) {

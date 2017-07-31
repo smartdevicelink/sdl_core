@@ -63,6 +63,11 @@ class ProtocolPacket {
     uint32_t totalDataBytes;
   };
 
+  /**
+   * \class ProtocolVersion
+   * \brief Used for storing the full protocol version of a service
+   *        (major.minor.patch).
+   */
   class ProtocolVersion {
    public:
     ProtocolVersion();

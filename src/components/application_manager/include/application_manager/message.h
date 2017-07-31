@@ -102,6 +102,9 @@ class Message {
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
 
+  static bool is_sufficient_version(ProtocolVersion minVersion,
+                                    ProtocolVersion version);
+
   protocol_handler::MessagePriority Priority() const {
     return priority_;
   }

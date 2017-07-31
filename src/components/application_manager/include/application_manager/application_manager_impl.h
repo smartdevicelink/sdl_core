@@ -1082,8 +1082,8 @@ class ApplicationManagerImpl
     bool operator()(const ApplicationSharedPtr app) const {
       return app
                  ? handle_ == app->device() &&
-                       ProtocolVersion::kV4 <= app->protocol_version() &&
-                       ProtocolVersion::kV5 >= app->protocol_version()
+                       Message::is_sufficient_version(ProtocolVersion::kV4,
+                                                      app->protocol_version())
                  : false;
     }
   };
