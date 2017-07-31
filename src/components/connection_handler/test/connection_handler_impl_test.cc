@@ -1065,6 +1065,29 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
   connection_handler_->set_protocol_handler(NULL);
 }
 
+TEST_F(ConnectionHandlerTest, StartService_withServices_withParams) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  uint32_t start_video = 0;
+  // create a dummy pointer
+  int dummy = 0;
+  std::vector<std::string> empty;
+  BsonObject* dummy_param = reinterpret_cast<BsonObject*>(&dummy);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, empty))
+      .WillOnce(DoAll(SaveArg<0>(&start_video), SaveArg<1>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_param);
+  EXPECT_EQ(start_session_id_, start_video);
+  CheckServiceExists(uid_, start_session_id_, kMobileNav, true);
+  EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
+
+  connection_handler_->set_protocol_handler(NULL);
+}
+
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
   AddTestDeviceConnection();
   uint32_t dummy_hash = 0u;
@@ -1185,6 +1208,78 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
       uid_, 0, kRpc, PROTECTION_OFF, NULL);
 
   EXPECT_NE(0u, new_session_id);
+}
+
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key =
+      connection_handler_->KeyFromPair(uid_, start_session_id_);
+  std::vector<std::string> empty;
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key, kMobileNav, dummy_params))
+      .WillOnce(InvokeMemberFuncWithArg2(
+          connection_handler_,
+          &ConnectionHandler::NotifyServiceStartedResult,
+          true,
+          ByRef(empty)));
+
+  // confirm that NotifySessionStartedResult() is called
+  uint32_t new_session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, false, empty))
+      .WillOnce(DoAll(SaveArg<0>(&new_session_id), SaveArg<1>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_NE(0u, new_session_id);
+}
+
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key =
+      connection_handler_->KeyFromPair(uid_, start_session_id_);
+  std::vector<std::string> empty;
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key, kMobileNav, dummy_params))
+      .WillOnce(InvokeMemberFuncWithArg2(
+          connection_handler_,
+          &ConnectionHandler::NotifyServiceStartedResult,
+          false,
+          ByRef(empty)));
+
+  // confirm that NotifySessionStartedResult() is called
+  uint32_t new_session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, false, empty))
+      .WillOnce(DoAll(SaveArg<0>(&new_session_id), SaveArg<1>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_EQ(0u, new_session_id);
 }
 
 TEST_F(ConnectionHandlerTest,
