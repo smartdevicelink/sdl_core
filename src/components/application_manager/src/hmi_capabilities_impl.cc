@@ -614,7 +614,8 @@ void HMICapabilitiesImpl::set_navigation_capability(
   if (navigation_capability_) {
     delete navigation_capability_;
   }
-  navigation_capability_ = new smart_objects::SmartObject(navigation_capability);
+  navigation_capability_ =
+      new smart_objects::SmartObject(navigation_capability);
 }
 
 void HMICapabilitiesImpl::set_phone_capability(
@@ -736,11 +737,13 @@ bool HMICapabilitiesImpl::phone_call_supported() const {
   return is_phone_call_supported_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability() const {
+const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
+    const {
   return navigation_capability_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability() const {
+const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability()
+    const {
   return phone_capability_;
 }
 
@@ -988,18 +991,24 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             soft_button_capabilities, soft_button_capabilities_so);
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
-      if(check_existing_json_member(ui, "systemCapabilities")) {
+      if (check_existing_json_member(ui, "systemCapabilities")) {
         Json::Value system_capabilities = ui.get("systemCapabilities", "");
-        if (check_existing_json_member(system_capabilities, "navigationCapability")) {
-          Json::Value navigation_capability = system_capabilities.get("navigationCapability","");
+        if (check_existing_json_member(system_capabilities,
+                                       "navigationCapability")) {
+          Json::Value navigation_capability =
+              system_capabilities.get("navigationCapability", "");
           smart_objects::SmartObject navigation_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(navigation_capability, navigation_capability_so);
+          Formatters::CFormatterJsonBase::jsonValueToObj(
+              navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
         }
-        if (check_existing_json_member(system_capabilities, "phoneCapability")) {
-          Json::Value phone_capability = system_capabilities.get("phoneCapability","");
+        if (check_existing_json_member(system_capabilities,
+                                       "phoneCapability")) {
+          Json::Value phone_capability =
+              system_capabilities.get("phoneCapability", "");
           smart_objects::SmartObject phone_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability, phone_capability_so);
+          Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
+                                                         phone_capability_so);
           set_phone_capability(phone_capability_so);
         }
       }

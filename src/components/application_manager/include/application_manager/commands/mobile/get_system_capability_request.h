@@ -41,9 +41,9 @@ namespace application_manager {
 namespace commands {
 
 class GetSystemCapabilityRequest : public CommandRequestImpl {
-public: 
+ public:
   GetSystemCapabilityRequest(const MessageSharedPtr& message,
-                      ApplicationManager& application_manager);
+                             ApplicationManager& application_manager);
 
   virtual ~GetSystemCapabilityRequest();
 
@@ -51,13 +51,11 @@ public:
 
   virtual void on_event(const event_engine::Event& event);
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(GetSystemCapabilityRequest);
 
+};  // GetSystemCapabilityRequest
+}  // commands
+}  // application_manager
 
-
-};//GetSystemCapabilityRequest
-}//commands
-}//application_manager
-
-#endif //SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_REQUEST_H_

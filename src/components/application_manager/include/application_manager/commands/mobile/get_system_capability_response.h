@@ -36,27 +36,25 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
- 
+
 namespace application_manager {
 
 namespace commands {
 
 class GetSystemCapabilityResponse : public CommandResponseImpl {
-public: 
+ public:
   GetSystemCapabilityResponse(const MessageSharedPtr& message,
-                      ApplicationManager& application_manager);
+                              ApplicationManager& application_manager);
 
   virtual ~GetSystemCapabilityResponse();
 
   virtual void Run() OVERRIDE;
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(GetSystemCapabilityResponse);
 
+};  // GetSystemCapabilityResponse
+}  // commands
+}  // application_manager
 
-
-};//GetSystemCapabilityResponse
-}//commands
-}//application_manager
-
-#endif //SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_
