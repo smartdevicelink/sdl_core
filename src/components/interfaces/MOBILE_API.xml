@@ -132,6 +132,9 @@
     <element name="RESUME_FAILED">
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
+    <element name="DATA_NOT_AVAILABLE">
+      <description>The requested data is not available on this vehicle or is not published for the connected app </description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -2229,6 +2232,7 @@
     <element name="GetWayPointsID" value="45" hexvalue="2D" />
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
+    <element name="GetSystemCapabilityID" value="48" hexvalue="30"/>
 
 <!--
 	Base Notifications
@@ -2378,6 +2382,41 @@
       <description>Address to be used by navigation engines for search</description>
     </param>
   </struct>
+
+  <enum name="SystemCapabilityType">
+    <element name="NAVIGATION"/>
+    <element name="PHONE_CALL"/>
+    <element name="VIDEO_STREAMING"/>
+    <element name="AUDIO_STREAMING"/>
+  </enum>
+
+  <struct name="NavigationCapability">
+    <description>Extended capabilities for an onboard navigation system</description>
+    <param name="sendLocationEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to add locations to the onboard nav</description>
+    </param>
+    <param name="getWayPointsEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to return way points from onboard nav</description>
+    </param>
+  </struct>
+
+  <struct name="PhoneCapability">
+    <description>Extended capabilities of the module's phone feature</description>
+    <param name="dialNumberEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the abiulity to perform dial number</description>
+    </param>
+  </struct>
+
+  <struct name="SystemCapability">
+      <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+      <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+      </param>
+      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+      </param>
+      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      </param>
+  </struct>
+
   <!-- Requests/Responses -->
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -5000,6 +5039,38 @@
       <description>See LocationDetails</description>
     </param>
   </function>
+
+  <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="request">
+    <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+      <description>The type of system capability to get more information on</description>
+    </param>
+  </function>
+
+  <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="response">
+      <param name="systemCapability" type="SystemCapability" mandatory="true">    
+      </param>
+      <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+          <description>See Result</description>
+          <element name="SUCCESS"/>
+          <element name="INVALID_DATA"/>
+          <element name="OUT_OF_MEMORY"/>
+          <element name="TOO_MANY_PENDING_REQUESTS"/>
+          <element name="APPLICATION_NOT_REGISTERED"/>
+          <element name="GENERIC_ERROR"/>
+          <element name="REJECTED"/>
+          <element name="IGNORED"/>
+          <element name="DISALLOWED"/>
+          <element name="USER_DISALLOWED"/>
+          <element name="UNSUPPORTED_RESOURCE"/><description>The capability does not exist on the module</description>
+          <element name="DATA_NOT_AVAILABLE"/><description>The capability should exist on the module but there was an error retrieving the data.</description>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
+        <description> true if successful; false, if failed </description>
+    </param>
+  </function>
+
 
   <!-- Notifications -->
 

@@ -409,6 +409,40 @@ class HMICapabilities {
    */
   virtual bool phone_call_supported() const = 0;
 
+  /*
+   * @brief Interface used to store information regarding
+   * the navigation "System Capability"
+   *
+   * @param navigation_capability contains information related
+   * to the navigation system capability.
+   */
+  virtual void set_navigation_capability(
+      const smart_objects::SmartObject& navigation_capability) = 0;
+
+  /*
+   * @brief Retrieves information regarding the navigation system capability
+   *
+   * @return NAVIGATION system capability
+   */
+  virtual const smart_objects::SmartObject* navigation_capability() const = 0;
+
+  /*
+   * @brief Interface used to store information regarding
+   * the phone "System Capability"
+   *
+   * @param phone_capability contains information related
+   * to the phone system capability.
+   */
+  virtual void set_phone_capability(
+      const smart_objects::SmartObject& phone_capability) = 0;
+
+  /*
+   * @brief Retrieves information regarding the phone call system capability
+   *
+   * @return PHONE_CALL system capability
+   */
+  virtual const smart_objects::SmartObject* phone_capability() const = 0;
+
   virtual void Init(resumption::LastState* last_state) = 0;
 
   /**
