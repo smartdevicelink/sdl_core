@@ -233,7 +233,6 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
-    bson_object_put_int32(&payloadObj, "hashId", static_cast<int32_t>(hash_id));
     bson_object_put_int64(
         &payloadObj,
         "mtu",
@@ -241,6 +240,9 @@ void ProtocolHandlerImpl::SendStartSessionAck(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
     if (serviceTypeValue == kRpc) {
+      // Hash ID is only used in RPC case
+      bson_object_put_int32(
+          &payloadObj, "hashId", static_cast<int32_t>(hash_id));
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
@@ -275,27 +277,12 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
                                                uint8_t service_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  ProtocolFramePtr ptr(
-      new protocol_handler::ProtocolPacket(connection_id,
-                                           protocol_version,
-                                           PROTECTION_OFF,
-                                           FRAME_TYPE_CONTROL,
-                                           service_type,
-                                           FRAME_DATA_START_SERVICE_NACK,
-                                           session_id,
-                                           0u,
-                                           message_counters_[session_id]++));
-
-  raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
-
-  LOG4CXX_DEBUG(logger_,
-                "SendStartSessionNAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id));
+  std::vector<std::string> rejectedParams(0, std::string(""));
+  SendStartSessionNAck(connection_id,
+                       session_id,
+                       protocol_version,
+                       service_type,
+                       rejectedParams);
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
@@ -319,7 +306,8 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
-  if (maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
+  if (protocol_version >= PROTOCOL_VERSION_5 &&
+      maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
     BsonArray rejectedParamsArr;
@@ -350,27 +338,12 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
                                              uint8_t protocol_version,
                                              uint8_t service_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  ProtocolFramePtr ptr(
-      new protocol_handler::ProtocolPacket(connection_id,
-                                           protocol_version,
-                                           PROTECTION_OFF,
-                                           FRAME_TYPE_CONTROL,
-                                           service_type,
-                                           FRAME_DATA_END_SERVICE_NACK,
-                                           session_id,
-                                           0u,
-                                           message_counters_[session_id]++));
-
-  raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
-
-  LOG4CXX_DEBUG(logger_,
-                "SendEndSessionNAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id));
+  std::vector<std::string> rejectedParams(0, std::string(""));
+  SendStartSessionNAck(connection_id,
+                       session_id,
+                       protocol_version,
+                       service_type,
+                       rejectedParams);
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
@@ -394,7 +367,8 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
-  if (maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
+  if (protocol_version >= PROTOCOL_VERSION_5 &&
+      maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
     BsonArray rejectedParamsArr;
@@ -1332,9 +1306,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ProtocolPacket::ProtocolVersion* fullVersion;
     std::vector<std::string> rejectedParams(0, std::string(""));
     // Can't check protocol_version because the first packet is v1, but there
-    // could still
-    // be a payload, in which case we can get the real protocol version
-    if (packet.data_size() != 0) {
+    // could still be a payload, in which case we can get the real protocol
+    // version
+    if (packet.service_type() == kRpc && packet.data_size() != 0) {
       BsonObject obj = bson_object_from_bytes(packet.data());
       fullVersion = new ProtocolPacket::ProtocolVersion(
           std::string(bson_object_get_string(&obj, "protocolVersion")));
@@ -1387,7 +1361,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
-  if (packet.data_size() != 0) {
+  if (packet.service_type() == kRpc && packet.data_size() != 0) {
     BsonObject obj = bson_object_from_bytes(packet.data());
     ProtocolPacket::ProtocolVersion fullVersion(
         bson_object_get_string(&obj, "protocolVersion"));
