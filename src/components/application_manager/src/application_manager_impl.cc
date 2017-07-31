@@ -1146,17 +1146,21 @@ bool ApplicationManagerImpl::StartNaviService(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (HMILevelAllowsStreaming(app_id, service_type)) {
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it) {
-      std::pair<NaviServiceStatusMap::iterator, bool> res =
-          navi_service_status_.insert(
-              std::pair<uint32_t, std::pair<bool, bool> >(
-                  app_id, std::make_pair(false, false)));
-      if (!res.second) {
-        LOG4CXX_WARN(logger_, "Navi service refused");
-        return false;
+    {
+      sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+      if (navi_service_status_.end() == it) {
+        std::pair<NaviServiceStatusMap::iterator, bool> res =
+            navi_service_status_.insert(
+                std::pair<uint32_t, std::pair<bool, bool> >(
+                    app_id, std::make_pair(false, false)));
+        if (!res.second) {
+          LOG4CXX_WARN(logger_, "Navi service refused");
+          return false;
+        }
+        it = res.first;
       }
-      it = res.first;
     }
 
     if (service_type == ServiceType::kMobileNav) {
@@ -1201,18 +1205,22 @@ void ApplicationManagerImpl::OnStreamingConfigured(
                    << service_type << ", result=" << result);
 
   if (result) {
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it) {
-      LOG4CXX_WARN(logger_, "Application not found in navi status map");
-      connection_handler().NotifyServiceStartedResult(false, empty);
-      return;
-    }
+    {
+      sync_primitives::AutoLock lock(navi_service_status_lock_);
 
-    // Fill NaviServices map. Set true to first value of pair if
-    // we've started video service or to second value if we've
-    // started audio service
-    service_type == ServiceType::kMobileNav ? it->second.first = true
-                                            : it->second.second = true;
+      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+      if (navi_service_status_.end() == it) {
+        LOG4CXX_WARN(logger_, "Application not found in navi status map");
+        connection_handler().NotifyServiceStartedResult(false, empty);
+        return;
+      }
+
+      // Fill NaviServices map. Set true to first value of pair if
+      // we've started video service or to second value if we've
+      // started audio service
+      service_type == ServiceType::kMobileNav ? it->second.first = true
+                                              : it->second.second = true;
+    }
 
     application(app_id)->StartStreaming(service_type);
     connection_handler().NotifyServiceStartedResult(true, empty);
@@ -1228,15 +1236,19 @@ void ApplicationManagerImpl::StopNaviService(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it) {
-    LOG4CXX_WARN(logger_, "No Information about navi service " << service_type);
-  } else {
-    // Fill NaviServices map. Set false to first value of pair if
-    // we've stopped video service or to second value if we've
-    // stopped audio service
-    service_type == ServiceType::kMobileNav ? it->second.first = false
-                                            : it->second.second = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      LOG4CXX_WARN(logger_, "No Information about navi service " << service_type);
+    } else {
+      // Fill NaviServices map. Set false to first value of pair if
+      // we've stopped video service or to second value if we've
+      // stopped audio service
+      service_type == ServiceType::kMobileNav ? it->second.first = false
+                                              : it->second.second = false;
+    }
   }
 
   ApplicationSharedPtr app = application(app_id);
@@ -2678,9 +2690,13 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    navi_service_status_.erase(it);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      navi_service_status_.erase(it);
+    }
   }
 
   // remove appID from tts_global_properties_app_list_
@@ -3021,9 +3037,17 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it ||
-      (!it->second.first && !it->second.second)) {
+  bool unregister = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it ||
+        (!it->second.first && !it->second.second)) {
+      unregister = true;
+    }
+  }
+  if (unregister) {
     ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app_id, PROTOCOL_VIOLATION),
@@ -3069,19 +3093,27 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it) {
-    LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
-    return;
+  bool end_video = false;
+  bool end_audio = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
+      return;
+    }
+    end_video = it->second.first;
+    end_audio = it->second.second;
   }
 
   if (connection_handler_) {
-    if (it->second.first) {
+    if (end_video) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler().SendEndService(app_id, ServiceType::kMobileNav);
       app->StopStreamingForce(ServiceType::kMobileNav);
     }
-    if (it->second.second) {
+    if (end_audio) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
@@ -3203,17 +3235,25 @@ void ApplicationManagerImpl::CloseNaviApp() {
   uint32_t app_id = navi_app_to_stop_.front();
   navi_app_to_stop_.pop_front();
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first || it->second.second) {
-      LOG4CXX_INFO(logger_,
-                   "App haven't answered for EndService. Unregister it.");
-      ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app_id, PROTOCOL_VIOLATION),
-          commands::Command::ORIGIN_SDL);
-      UnregisterApplication(app_id, ABORTED);
+  bool unregister = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first || it->second.second) {
+        unregister = true;
+      }
     }
+  }
+  if (unregister) {
+    LOG4CXX_INFO(logger_,
+                 "App haven't answered for EndService. Unregister it.");
+    ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app_id, PROTOCOL_VIOLATION),
+        commands::Command::ORIGIN_SDL);
+    UnregisterApplication(app_id, ABORTED);
   }
 }
 
@@ -3243,13 +3283,17 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first) {
-      app->set_video_streaming_allowed(false);
-    }
-    if (it->second.second) {
-      app->set_audio_streaming_allowed(false);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first) {
+        app->set_video_streaming_allowed(false);
+      }
+      if (it->second.second) {
+        app->set_audio_streaming_allowed(false);
+      }
     }
   }
 }
@@ -3264,13 +3308,17 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first) {
-      app->set_video_streaming_allowed(true);
-    }
-    if (it->second.second) {
-      app->set_audio_streaming_allowed(true);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first) {
+        app->set_video_streaming_allowed(true);
+      }
+      if (it->second.second) {
+        app->set_audio_streaming_allowed(true);
+      }
     }
   }
 }
