@@ -85,6 +85,7 @@ const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
 const char* kProtocolHandlerSection = "ProtocolHandler";
 const char* kSDL4Section = "SDL4";
+const char* kSDL5Section = "SDL5";
 const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
 
@@ -104,6 +105,11 @@ const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
+const char* kEnableProtocol5Key = "EnableProtocol5";
+const char* kMaximumControlPayloadSizeKey = "MaximumControlPayloadSize";
+const char* kMaximumRpcPayloadSizeKey = "MaximumRpcPayloadSize";
+const char* kMaximumAudioPayloadSizeKey = "MaximumAudioPayloadSize";
+const char* kMaximumVideoPayloadSizeKey = "MaximumVideoPayloadSize";
 const char* kLaunchHMIKey = "LaunchHMI";
 const char* kDefaultSDLVersion = "";
 #ifdef WEB_HMI
@@ -286,6 +292,10 @@ const uint16_t kDefaultOpenAttemptTimeoutMs = 500;
 const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
+const size_t kDefaultMaximumControlPayloadSize = 0;
+const size_t kDefaultMaximumRpcPayloadSize = 0;
+const size_t kDefaultMaximumAudioPayloadSize = 0;
+const size_t kDefaultMaximumVideoPayloadSize = 0;
 const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
 const uint16_t kDefaultAppLaunchWaitTime = 5000;
 const uint16_t kDefaultAppLaunchMaxRetryAttempt = 3;
@@ -317,6 +327,11 @@ Profile::Profile()
     , app_icons_folder_()
     , app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize)
     , app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove)
+    , enable_protocol_5_(false)
+    , maximum_control_payload_size_(kDefaultMaximumControlPayloadSize)
+    , maximum_rpc_payload_size_(kDefaultMaximumRpcPayloadSize)
+    , maximum_audio_payload_size_(kDefaultMaximumAudioPayloadSize)
+    , maximum_video_payload_size_(kDefaultMaximumVideoPayloadSize)
     , config_file_name_(kDefaultConfigFileName)
     , server_address_(kDefaultServerAddress)
     , server_port_(kDefaultServerPort)
@@ -452,6 +467,26 @@ const uint32_t& Profile::app_icons_folder_max_size() const {
 
 const uint32_t& Profile::app_icons_amount_to_remove() const {
   return app_icons_amount_to_remove_;
+}
+
+bool Profile::enable_protocol_5() const {
+  return enable_protocol_5_;
+}
+
+size_t Profile::maximum_control_payload_size() const {
+  return maximum_control_payload_size_;
+}
+
+size_t Profile::maximum_rpc_payload_size() const {
+  return maximum_rpc_payload_size_;
+}
+
+size_t Profile::maximum_audio_payload_size() const {
+  return maximum_audio_payload_size_;
+}
+
+size_t Profile::maximum_video_payload_size() const {
+  return maximum_video_payload_size_;
 }
 
 const std::string& Profile::hmi_capabilities_file_name() const {
@@ -1052,6 +1087,50 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(
       app_icons_amount_to_remove_, kAppIconsAmountToRemoveKey, kSDL4Section);
+
+  // Enable protocol ver.5 parameter
+  std::string enable_protocol_5_value;
+  if (ReadValue(&enable_protocol_5_value, kSDL5Section, kEnableProtocol5Key) &&
+      0 == strcmp("true", enable_protocol_5_value.c_str())) {
+    enable_protocol_5_ = true;
+  } else {
+    enable_protocol_5_ = false;
+  }
+
+  LOG_UPDATED_BOOL_VALUE(enable_protocol_5_, kEnableProtocol5Key, kSDL5Section);
+
+  ReadUIntValue(&maximum_control_payload_size_,
+                kDefaultMaximumControlPayloadSize,
+                kSDL5Section,
+                kMaximumControlPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(maximum_control_payload_size_,
+                    kMaximumControlPayloadSizeKey,
+                    kSDL5Section);
+
+  ReadUIntValue(&maximum_rpc_payload_size_,
+                kDefaultMaximumRpcPayloadSize,
+                kSDL5Section,
+                kMaximumRpcPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_rpc_payload_size_, kMaximumRpcPayloadSizeKey, kSDL5Section);
+
+  ReadUIntValue(&maximum_audio_payload_size_,
+                kDefaultMaximumAudioPayloadSize,
+                kSDL5Section,
+                kMaximumAudioPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_audio_payload_size_, kMaximumAudioPayloadSizeKey, kSDL5Section);
+
+  ReadUIntValue(&maximum_video_payload_size_,
+                kDefaultMaximumVideoPayloadSize,
+                kSDL5Section,
+                kMaximumVideoPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_video_payload_size_, kMaximumVideoPayloadSizeKey, kSDL5Section);
 
   // Application info file name
   ReadStringValue(&app_info_storage_,

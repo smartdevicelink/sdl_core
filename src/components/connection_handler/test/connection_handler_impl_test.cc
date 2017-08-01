@@ -1030,9 +1030,10 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
 
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
   AddTestDeviceConnection();
-
+  uint32_t dummy_hash = 0u;
   const uint32_t end_session_result =
-      connection_handler_->OnSessionEndedCallback(uid_, 0u, 0u, kAudio);
+      connection_handler_->OnSessionEndedCallback(
+          uid_, 0u, &dummy_hash, kAudio);
   EXPECT_EQ(0u, end_session_result);
   CheckSessionExists(uid_, 0);
 }
@@ -1040,9 +1041,10 @@ TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistService) {
   AddTestDeviceConnection();
   AddTestSession();
+  uint32_t dummy_hash = 0u;
   const uint32_t end_session_result =
       connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, 0u, kAudio);
+          uid_, start_session_id_, &dummy_hash, kAudio);
   EXPECT_EQ(0u, end_session_result);
   CheckServiceExists(uid_, start_session_id_, kAudio, false);
 }
@@ -1060,7 +1062,7 @@ TEST_F(ConnectionHandlerTest, ServiceStop) {
 
     const uint32_t end_session_result =
         connection_handler_->OnSessionEndedCallback(
-            uid_, start_session_id_, some_hash_id, kAudio);
+            uid_, start_session_id_, &some_hash_id, kAudio);
     EXPECT_EQ(connection_key_, end_session_result);
     CheckServiceExists(uid_, start_session_id_, kAudio, false);
   }
@@ -1072,12 +1074,13 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckHash) {
     AddTestSession();
 
     const uint32_t hash = connection_key_;
-    const uint32_t wrong_hash = hash + 1;
+    uint32_t wrong_hash = hash + 1;
 
     const uint32_t end_audio_wrong_hash =
         connection_handler_->OnSessionEndedCallback(
-            uid_, start_session_id_, wrong_hash, kRpc);
+            uid_, start_session_id_, &wrong_hash, kRpc);
     EXPECT_EQ(0u, end_audio_wrong_hash);
+    EXPECT_EQ(protocol_handler::HASH_ID_WRONG, wrong_hash);
     CheckSessionExists(uid_, start_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(
@@ -1092,13 +1095,14 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
   for (uint32_t session = 0; session < 0xFF; ++session) {
     AddTestSession();
 
-    const uint32_t wrong_hash = protocol_handler::HASH_ID_WRONG;
+    uint32_t wrong_hash = protocol_handler::HASH_ID_WRONG;
     const uint32_t hash = protocol_handler::HASH_ID_NOT_SUPPORTED;
 
     const uint32_t end_audio_wrong_hash =
         connection_handler_->OnSessionEndedCallback(
             uid_, start_session_id_, wrong_hash, kRpc);
     EXPECT_EQ(0u, end_audio_wrong_hash);
+    EXPECT_EQ(protocol_handler::HASH_ID_WRONG, wrong_hash);
     CheckSessionExists(uid_, start_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(

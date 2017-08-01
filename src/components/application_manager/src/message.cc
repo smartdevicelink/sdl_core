@@ -205,4 +205,9 @@ void Message::set_data_size(size_t data_size) {
 void Message::set_payload_size(size_t payload_size) {
   payload_size_ = payload_size;
 }
+
+bool Message::is_sufficient_version(ProtocolVersion minVersion,
+                                    ProtocolVersion version) {
+  return version >= minVersion && version <= ProtocolVersion::kV5;
+}
 }  // namespace application_manager

@@ -80,6 +80,13 @@ class SessionObserver {
       const bool is_protected,
       uint32_t* hash_id) = 0;
 
+  // DEPRECATED
+  virtual uint32_t OnSessionEndedCallback(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t sessionId,
+      const uint32_t& hashCode,
+      const protocol_handler::ServiceType& service_type) = 0;
+
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
@@ -94,7 +101,7 @@ class SessionObserver {
   virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t sessionId,
-      const uint32_t& hashCode,
+      uint32_t* hashCode,
       const protocol_handler::ServiceType& service_type) = 0;
 
   /**

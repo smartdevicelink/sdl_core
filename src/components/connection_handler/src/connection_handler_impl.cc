@@ -378,10 +378,21 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   CloseConnection(connection_handle);
 }
 
+// DEPRECATED
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
     const uint32_t& hashCode,
+    const protocol_handler::ServiceType& service_type) {
+  uint32_t hashValue = hashCode;
+  return OnSessionEndedCallback(
+      connection_handle, session_id, &hashValue, service_type);
+}
+
+uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
+    const transport_manager::ConnectionUID connection_handle,
+    const uint8_t session_id,
+    uint32_t* hashCode,
     const protocol_handler::ServiceType& service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -402,12 +413,13 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
                  "Session " << static_cast<uint32_t>(session_id)
                             << " to be removed");
     // old version of protocol doesn't support hash
-    if (protocol_handler::HASH_ID_NOT_SUPPORTED != hashCode) {
-      if (protocol_handler::HASH_ID_WRONG == hashCode ||
-          session_key != hashCode) {
+    if (protocol_handler::HASH_ID_NOT_SUPPORTED != *hashCode) {
+      if (protocol_handler::HASH_ID_WRONG == *hashCode ||
+          session_key != *hashCode) {
         LOG4CXX_WARN(logger_,
                      "Wrong hash_id for session "
                          << static_cast<uint32_t>(session_id));
+        *hashCode = protocol_handler::HASH_ID_WRONG;
         return 0;
       }
     }
