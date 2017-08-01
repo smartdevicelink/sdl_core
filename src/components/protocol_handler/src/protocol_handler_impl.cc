@@ -339,7 +339,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint8_t protocol_version,
                                              uint8_t service_type) {
   std::vector<std::string> rejectedParams(0, std::string(""));
-  SendStartSessionNAck(connection_id,
+  SendEndSessionNAck(connection_id,
                        session_id,
                        protocol_version,
                        service_type,
