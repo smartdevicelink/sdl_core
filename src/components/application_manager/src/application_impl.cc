@@ -88,6 +88,7 @@ ApplicationImpl::ApplicationImpl(
     , active_message_(NULL)
     , is_media_(false)
     , is_navi_(false)
+    , mobile_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
     , video_streaming_allowed_(false)
@@ -179,6 +180,7 @@ bool ApplicationImpl::is_audio() const {
 void ApplicationImpl::ChangeSupportingAppHMIType() {
   is_navi_ = false;
   is_voice_communication_application_ = false;
+  mobile_projection_enabled_ = false;
   const smart_objects::SmartObject& array_app_types = *app_types_;
   uint32_t lenght_app_types = array_app_types.length();
 
@@ -192,6 +194,11 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
         static_cast<mobile_apis::AppHMIType::eType>(
             array_app_types[i].asUInt())) {
       is_voice_communication_application_ = true;
+    }
+    if (mobile_apis::AppHMIType::PROJECTION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      mobile_projection_enabled_ = true;
     }
   }
 }
@@ -226,6 +233,15 @@ void ApplicationImpl::RemovePostponedState() {
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   state_.AddState(state);
+}
+
+void ApplicationImpl::set_mobile_projection_enabled(bool option) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  mobile_projection_enabled_ = option;
+}
+
+bool ApplicationImpl::mobile_projection_enabled() const {
+  return mobile_projection_enabled_;
 }
 
 struct StateIDComparator {

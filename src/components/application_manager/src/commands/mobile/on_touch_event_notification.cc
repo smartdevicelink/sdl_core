@@ -50,14 +50,31 @@ OnTouchEventNotification::~OnTouchEventNotification() {}
 void OnTouchEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const std::vector<ApplicationSharedPtr>& applications =
+  const std::vector<ApplicationSharedPtr>& applications_with_navi =
       application_manager_.applications_with_navi();
 
-  std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
+  const std::vector<ApplicationSharedPtr>& projection_applications =
+      application_manager_.applications_with_mobile_projection();
+
+  std::vector<ApplicationSharedPtr>::const_iterator nav_it =
+      applications_with_navi.begin();
+
+  for (; applications_with_navi.end() != nav_it; ++nav_it) {
+    ApplicationSharedPtr app = *nav_it;
     if (app->IsFullscreen()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
+      SendNotification();
+    }
+  }
+
+  std::vector<ApplicationSharedPtr>::const_iterator projection_it =
+      projection_applications.begin();
+
+  for (; projection_applications.end() != projection_it; ++projection_it) {
+    ApplicationSharedPtr projection_app = *projection_it;
+    if (projection_app->IsFullscreen()) {
+      (*message_)[strings::params][strings::connection_key] =
+          projection_app->app_id();
       SendNotification();
     }
   }
