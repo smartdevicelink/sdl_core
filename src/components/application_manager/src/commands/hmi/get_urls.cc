@@ -34,6 +34,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 namespace commands {
@@ -194,32 +195,25 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
   SmartObject& urls = object[msg_params][hmi_response::urls];
   const std::string mobile_app_id = app->policy_app_id();
-  std::string default_url = "URL is not found";
 
-  // Will use only one URL for particular application if it will be found
-  // Otherwise URL from default section will used
-  SmartObject service_info = SmartObject(SmartType_Map);
+  size_t index = 0;
+  for (size_t i = 0; i < endpoints.size(); ++i) {
+    using namespace helpers;
 
-  for (size_t e = 0; e < endpoints.size(); ++e) {
-    if (mobile_app_id == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        service_info[url] = endpoints[e].url[0];
-        SendResponseToHMI(Common_Result::SUCCESS);
-        return;
-      }
-    }
-    if (policy::kDefaultId == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        default_url = endpoints[e].url[0];
+    const bool to_add = Compare<std::string, EQ, ONE>(
+        endpoints[i].app_id, mobile_app_id, policy::kDefaultId);
+    const bool is_default = policy::kDefaultId == endpoints[i].app_id;
+
+    if (to_add) {
+      for (size_t k = 0; k < endpoints[i].url.size(); ++k) {
+        if (!is_default) {
+          urls[index][strings::app_id] = app_id_to_send_to;
+        }
+        urls[index][strings::url] = endpoints[i].url[k];
+        ++index;
       }
     }
   }
-
-  service_info[strings::app_id] = app->app_id();
-  service_info[strings::url] = default_url;
-  urls[0] = service_info;
-  // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
-  // Possibly related to smart schema
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
