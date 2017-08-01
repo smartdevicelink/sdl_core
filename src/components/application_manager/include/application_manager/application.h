@@ -427,8 +427,8 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
-  virtual void SetMobileProjectionEnabled(bool option) = 0;
-  virtual bool MobileProjectionEnabled() const = 0;
+  virtual void set_mobile_projection_enabled(bool option) = 0;
+  virtual bool mobile_projection_enabled() const = 0;
 
   virtual bool video_streaming_approved() const = 0;
   virtual void set_video_streaming_approved(bool state) = 0;

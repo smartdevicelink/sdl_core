@@ -325,7 +325,7 @@ void RegisterAppInterfaceRequest::Run() {
       if (mobile_apis::AppHMIType::PROJECTION ==
           static_cast<mobile_apis::AppHMIType::eType>(
               app_type.getElement(i).asUInt())) {
-        application->SetMobileProjectionEnabled(true);
+        application->set_mobile_projection_enabled(true);
       }
     }
   }

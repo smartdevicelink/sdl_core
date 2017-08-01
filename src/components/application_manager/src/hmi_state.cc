@@ -77,7 +77,7 @@ bool HmiState::is_voice_communication_app(const uint32_t app_id) const {
 
 bool HmiState::is_mobile_projection_app(const uint32_t app_id) const {
   const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  return app ? app->MobileProjectionEnabled() : false; 
+  return app ? app->mobile_projection_enabled() : false;
 }
 
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()

@@ -569,14 +569,14 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_media);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
@@ -585,14 +585,14 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_comm);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
@@ -601,14 +601,14 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(type_navi);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
@@ -619,17 +619,18 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 }
 
-TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoiceAndProjection) {
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeIsNaviAndVoiceAndProjection) {
   smart_objects::SmartObject app_types;
   app_types[0] = AppHMIType::NAVIGATION;
   app_types[1] = AppHMIType::COMMUNICATION;
@@ -638,14 +639,14 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoiceAndProj
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
-  EXPECT_FALSE(app_impl->MobileProjectionEnabled());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
 
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
-  EXPECT_TRUE(app_impl->MobileProjectionEnabled());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {

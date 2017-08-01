@@ -235,12 +235,12 @@ void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   state_.AddState(state);
 }
 
-void ApplicationImpl::SetMobileProjectionEnabled(bool option) {
+void ApplicationImpl::set_mobile_projection_enabled(bool option) {
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_projection_enabled_ = option;
 }
 
-bool ApplicationImpl::MobileProjectionEnabled() const {
+bool ApplicationImpl::mobile_projection_enabled() const {
   return mobile_projection_enabled_;
 }
 
@@ -505,7 +505,7 @@ void ApplicationImpl::WakeUpStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  
+
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {

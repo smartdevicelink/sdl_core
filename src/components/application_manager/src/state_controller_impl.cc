@@ -363,7 +363,7 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
   }
 
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
-      (app->is_navi() || app->MobileProjectionEnabled())) {
+      (app->is_navi() || app->mobile_projection_enabled())) {
     LOG4CXX_DEBUG(logger_,
                   "Resumption for navi app is not allowed. "
                       << "EMBEDDED_NAVI event is active");
@@ -560,13 +560,13 @@ bool StateControllerImpl::IsSameAppType(ApplicationConstSharedPtr app1,
   const bool both_navi = app1->is_navi() && app2->is_navi();
 
   const bool both_vc = app1->is_voice_communication_supported() &&
-      app2->is_voice_communication_supported();
+                       app2->is_voice_communication_supported();
 
   const bool both_simple =
       !app1->IsAudioApplication() && !app2->IsAudioApplication();
 
-  const bool both_projection = app1->MobileProjectionEnabled() && 
-      app2->MobileProjectionEnabled();
+  const bool both_projection =
+      app1->mobile_projection_enabled() && app2->mobile_projection_enabled();
 
   return both_simple || both_media || both_navi || both_vc || both_projection;
 }

@@ -96,9 +96,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   }
   void set_is_navi(bool allow);
 
-  void SetMobileProjectionEnabled(bool option);
+  void set_mobile_projection_enabled(bool option);
 
-  bool MobileProjectionEnabled() const;
+  bool mobile_projection_enabled() const;
 
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);

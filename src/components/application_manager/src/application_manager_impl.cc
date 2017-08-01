@@ -292,19 +292,20 @@ ApplicationManagerImpl::applications_with_navi() {
   return FindAllApps(accessor, NaviAppPredicate);
 }
 
-bool LimitedMobileProjectionPredicate( const ApplicationSharedPtr app) {
-  return app ? (app->MobileProjectionEnabled() && 
-    app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) : false;
+bool LimitedMobileProjectionPredicate(const ApplicationSharedPtr app) {
+  return app ? (app->mobile_projection_enabled() &&
+                app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)
+             : false;
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::get_limited_mobile_projection_application()
-    const {
+ApplicationSharedPtr
+ApplicationManagerImpl::get_limited_mobile_projection_application() const {
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, LimitedMobileProjectionPredicate);
 }
 
 bool MobileProjectionPredicate(const ApplicationSharedPtr app) {
-  return app ? app->MobileProjectionEnabled() : false;
+  return app ? app->mobile_projection_enabled() : false;
 }
 
 std::vector<ApplicationSharedPtr>
@@ -375,7 +376,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
-  bool mobile_projection_state = app->MobileProjectionEnabled();
+  bool mobile_projection_state = app->mobile_projection_enabled();
   ApplicationSharedPtr active_app = active_application();
   // Check app in FULL level
   if (active_app.valid()) {
@@ -398,7 +399,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
       return true;
     }
 
-    if (mobile_projection_state && active_app->MobileProjectionEnabled()) {
+    if (mobile_projection_state && active_app->mobile_projection_enabled()) {
       return true;
     }
   }
@@ -427,8 +428,10 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
 
   if (mobile_projection_state) {
     if (get_limited_mobile_projection_application().valid() &&
-      (get_limited_mobile_projection_application()->app_id() != app->app_id())) 
+        (get_limited_mobile_projection_application()->app_id() !=
+         app->app_id())) {
       return true;
+    }
   }
 
   return false;
@@ -1213,7 +1216,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 
   if (Compare<ServiceType, EQ, ONE>(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    if (app->is_navi() || app->MobileProjectionEnabled()) {
+    if (app->is_navi() || app->mobile_projection_enabled()) {
       return StartNaviService(session_key, type);
     } else {
       LOG4CXX_WARN(logger_, "Refuse not navi application");
@@ -2933,7 +2936,7 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
     return;
   }
@@ -2967,7 +2970,7 @@ void ApplicationManagerImpl::OnAppStreaming(
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_DEBUG(logger_, " There is no navi application with id: " << app_id);
     return;
   }
@@ -2987,7 +2990,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
     return;
   }
@@ -3038,7 +3041,7 @@ void ApplicationManagerImpl::OnHMILevelChanged(
   }
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_ERROR(logger_, "Navi application not found");
     return;
   }
@@ -3161,7 +3164,7 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_ERROR(logger_, "Navi application not found");
     return;
   }
@@ -3182,7 +3185,7 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->MobileProjectionEnabled())) {
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
     LOG4CXX_ERROR(logger_, "Navi application not found");
     return;
   }

@@ -324,6 +324,8 @@ bool IsValidEnum(AppHMIType val) {
       return true;
     case AHT_SYSTEM:
       return true;
+    case AHT_PROJECTION:
+      return true;
     default:
       return false;
   }
@@ -350,6 +352,8 @@ const char* EnumToJsonString(AppHMIType val) {
       return "TESTING";
     case AHT_SYSTEM:
       return "SYSTEM";
+    case AHT_PROJECTION:
+      return "PROJECTION";
     default:
       return "";
   }
@@ -384,6 +388,9 @@ bool EnumFromJsonString(const std::string& literal, AppHMIType* result) {
     return true;
   } else if ("SYSTEM" == literal) {
     *result = AHT_SYSTEM;
+    return true;
+  } else if ("PROJECTION" == literal) {
+    *result = AHT_PROJECTION;
     return true;
   } else {
     return false;
