@@ -365,7 +365,7 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
       (app->is_navi() || app->mobile_projection_enabled())) {
     LOG4CXX_DEBUG(logger_,
-                  "Resumption for navi app is not allowed. "
+                  "Resumption for navi or projection app is not allowed. "
                       << "EMBEDDED_NAVI event is active");
     return false;
   }

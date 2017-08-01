@@ -1219,7 +1219,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     if (app->is_navi() || app->mobile_projection_enabled()) {
       return StartNaviService(session_key, type);
     } else {
-      LOG4CXX_WARN(logger_, "Refuse not navi application");
+      LOG4CXX_WARN(logger_, "Refuse not navi/projection application");
     }
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
@@ -2937,7 +2937,9 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "There is no navi or projection application with id: " << app_id);
     return;
   }
 
@@ -2971,7 +2973,9 @@ void ApplicationManagerImpl::OnAppStreaming(
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_DEBUG(logger_, " There is no navi application with id: " << app_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        " There is no navi or projection application with id: " << app_id);
     return;
   }
   DCHECK_OR_RETURN_VOID(media_manager_);
@@ -2991,7 +2995,9 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "There is no navi or projection application with id: " << app_id);
     return;
   }
 
@@ -3042,7 +3048,7 @@ void ApplicationManagerImpl::OnHMILevelChanged(
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
@@ -3165,7 +3171,7 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
@@ -3186,7 +3192,7 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
