@@ -2527,6 +2527,8 @@
       </param>
       <param name="phoneCapability" type="PhoneCapability" mandatory="false">
       </param>
+      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      </param>
   </struct>
 
   <!-- Requests/Responses -->
