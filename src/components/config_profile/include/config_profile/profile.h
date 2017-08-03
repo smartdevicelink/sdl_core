@@ -130,6 +130,31 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint32_t& app_icons_amount_to_remove() const OVERRIDE;
 
   /**
+   * @brief Returns true if SDL protocol v5 is enabled
+   */
+  bool enable_protocol_5() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for control services
+   */
+  size_t maximum_control_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for RPC services
+   */
+  size_t maximum_rpc_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for audio services
+   */
+  size_t maximum_audio_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for video services
+   */
+  size_t maximum_video_payload_size() const OVERRIDE;
+
+  /**
    * @brief Returns the path to the config file
    */
   const std::string& config_file_name() const;
@@ -763,6 +788,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string app_icons_folder_;
   uint32_t app_icons_folder_max_size_;
   uint32_t app_icons_amount_to_remove_;
+  bool enable_protocol_5_;
+  size_t maximum_control_payload_size_;
+  size_t maximum_rpc_payload_size_;
+  size_t maximum_audio_payload_size_;
+  size_t maximum_video_payload_size_;
   std::string config_file_name_;
   std::string server_address_;
   uint16_t server_port_;

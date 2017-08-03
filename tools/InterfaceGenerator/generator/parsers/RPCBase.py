@@ -548,8 +548,12 @@ class Parser(object):
         """
         params, subelements, attrib = self._parse_base_item(element, "")
 
-        params["is_mandatory"] = self._extract_optional_bool_attrib(
-            attrib, "mandatory", True)
+        is_mandatory = self._extract_attrib(attrib, "mandatory")
+        if is_mandatory is None:
+            raise ParseError("'mandatory' is not specified for parameter '" +
+                             params["name"] + "'")
+        
+        params["is_mandatory"] = self._get_bool_from_string(is_mandatory)
 
         scope = self._extract_attrib(attrib, "scope")
         if scope is not None:

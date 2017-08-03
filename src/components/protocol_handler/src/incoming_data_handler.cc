@@ -126,6 +126,7 @@ uint32_t IncomingDataHandler::GetPacketSize(
     case PROTOCOL_VERSION_2:
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
+    case PROTOCOL_VERSION_5:
       return header.dataSize + PROTOCOL_HEADER_V2_SIZE;
     default:
       LOG4CXX_WARN(logger_,

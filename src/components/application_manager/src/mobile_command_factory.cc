@@ -56,6 +56,8 @@
 #include "application_manager/commands/mobile/generic_response.h"
 #include "application_manager/commands/mobile/get_dtcs_request.h"
 #include "application_manager/commands/mobile/get_dtcs_response.h"
+#include "application_manager/commands/mobile/get_system_capability_request.h"
+#include "application_manager/commands/mobile/get_system_capability_response.h"
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
 #include "application_manager/commands/mobile/get_way_points_request.h"
@@ -447,6 +449,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       } else {
         command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(
             message, application_manager);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::GetSystemCapabilityID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::GetSystemCapabilityResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::GetSystemCapabilityRequest(
+            message, application_manager));
       }
       break;
     }

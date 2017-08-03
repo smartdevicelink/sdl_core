@@ -189,20 +189,26 @@ class ConnectionHandlerImpl
       const bool is_protected,
       uint32_t* hash_id);
 
+  // DEPRECATED
+  uint32_t OnSessionEndedCallback(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t session_id,
+      const uint32_t& hashCode,
+      const protocol_handler::ServiceType& service_type) OVERRIDE;
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
    * \param connection_handle Connection identifier within which session exists
    * \param sessionId Identifier of the session to be ended
    * \param hashCode Hash used only in second version of SmartDeviceLink
-   * protocol.
+   * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
    * \return uint32_t 0 if operation fails, session key otherwise
    */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
-      const uint32_t& hashCode,
+      uint32_t* hashCode,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
 
   /**

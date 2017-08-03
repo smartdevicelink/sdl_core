@@ -216,6 +216,57 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::navigation_capability]["sendLocationEnabled"] = true;
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::navigation_capability]["getWayPointsEnabled"] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject navigation_capability_so =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::navigation_capability];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_navigation_capability(navigation_capability_so));
+
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetPhonenCapability_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::phone_capability]["dialNumberEnabled"] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject phone_capability_so =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::phone_capability];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_phone_capability(phone_capability_so));
+
+  command->Run();
+}
+
 }  // namespace ui_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

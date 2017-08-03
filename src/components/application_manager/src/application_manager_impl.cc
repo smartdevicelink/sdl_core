@@ -291,6 +291,29 @@ ApplicationManagerImpl::applications_with_navi() {
   DataAccessor<ApplicationSet> accessor = applications();
   return FindAllApps(accessor, NaviAppPredicate);
 }
+
+bool LimitedMobileProjectionPredicate(const ApplicationSharedPtr app) {
+  return app ? (app->mobile_projection_enabled() &&
+                app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)
+             : false;
+}
+
+ApplicationSharedPtr
+ApplicationManagerImpl::get_limited_mobile_projection_application() const {
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, LimitedMobileProjectionPredicate);
+}
+
+bool MobileProjectionPredicate(const ApplicationSharedPtr app) {
+  return app ? app->mobile_projection_enabled() : false;
+}
+
+std::vector<ApplicationSharedPtr>
+ApplicationManagerImpl::applications_with_mobile_projection() {
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindAllApps(accessor, MobileProjectionPredicate);
+}
+
 std::vector<ApplicationSharedPtr>
 ApplicationManagerImpl::applications_by_button(uint32_t button) {
   SubscribedToButtonPredicate finder(
@@ -353,6 +376,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
+  bool mobile_projection_state = app->mobile_projection_enabled();
   ApplicationSharedPtr active_app = active_application();
   // Check app in FULL level
   if (active_app.valid()) {
@@ -372,6 +396,10 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     }
 
     if (navi_state && active_app->is_navi()) {
+      return true;
+    }
+
+    if (mobile_projection_state && active_app->mobile_projection_enabled()) {
       return true;
     }
   }
@@ -394,6 +422,14 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
   if (navi_state) {
     if (get_limited_navi_application().valid() &&
         (get_limited_navi_application()->app_id() != app->app_id())) {
+      return true;
+    }
+  }
+
+  if (mobile_projection_state) {
+    if (get_limited_mobile_projection_application().valid() &&
+        (get_limited_mobile_projection_application()->app_id() !=
+         app->app_id())) {
       return true;
     }
   }
@@ -1180,10 +1216,10 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 
   if (Compare<ServiceType, EQ, ONE>(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    if (app->is_navi()) {
+    if (app->is_navi() || app->mobile_projection_enabled()) {
       return StartNaviService(session_key, type);
     } else {
-      LOG4CXX_WARN(logger_, "Refuse not navi application");
+      LOG4CXX_WARN(logger_, "Refuse not navi/projection application");
     }
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
@@ -1802,6 +1838,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                     << message.json_message());
 
   switch (message.protocol_version()) {
+    case ProtocolVersion::kV5:
     case ProtocolVersion::kV4:
     case ProtocolVersion::kV3:
     case ProtocolVersion::kV2: {
@@ -2900,8 +2937,10 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "There is no navi or projection application with id: " << app_id);
     return;
   }
 
@@ -2934,8 +2973,10 @@ void ApplicationManagerImpl::OnAppStreaming(
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_DEBUG(logger_, " There is no navi application with id: " << app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_DEBUG(
+        logger_,
+        " There is no navi or projection application with id: " << app_id);
     return;
   }
   DCHECK_OR_RETURN_VOID(media_manager_);
@@ -2954,8 +2995,10 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_DEBUG(logger_, "There is no navi application with id: " << app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "There is no navi or projection application with id: " << app_id);
     return;
   }
 
@@ -3005,8 +3048,8 @@ void ApplicationManagerImpl::OnHMILevelChanged(
   }
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
@@ -3128,8 +3171,8 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
@@ -3149,8 +3192,8 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
-  if (!app || !app->is_navi()) {
-    LOG4CXX_ERROR(logger_, "Navi application not found");
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
     return;
   }
 
@@ -3458,7 +3501,13 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool heart_beat_support = get_settings().heart_beat_timeout();
   bool sdl4_support = protocol_handler_->get_settings().enable_protocol_4();
+  bool sdl5_support = protocol_handler_->get_settings().enable_protocol_5();
 
+  if (sdl5_support) {
+    LOG4CXX_DEBUG(logger_,
+                  "SDL Supported protocol version " << ProtocolVersion::kV5);
+    return ProtocolVersion::kV5;
+  }
   if (sdl4_support) {
     LOG4CXX_DEBUG(logger_,
                   "SDL Supported protocol version " << ProtocolVersion::kV4);

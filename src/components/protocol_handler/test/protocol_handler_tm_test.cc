@@ -96,6 +96,7 @@ using connection_handler::DeviceHandle;
 using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnNull;
+using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::DoAll;
 using ::testing::_;
@@ -500,12 +501,12 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
   uint32_t times = 0;
 
   AddSession(waiter, times);
-
   const ServiceType service = kRpc;
 
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(connection_id, session_id, _, service))
+              OnSessionEndedCallback(
+                  connection_id, session_id, An<uint32_t*>(), service))
       .
       // reject session start
       WillOnce(
@@ -539,7 +540,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(connection_id, session_id, _, service))
+              OnSessionEndedCallback(
+                  connection_id, session_id, An<uint32_t*>(), service))
       .
       // return sessions start success
       WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(connection_key)));

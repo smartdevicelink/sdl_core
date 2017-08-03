@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
@@ -74,6 +75,11 @@ bool HmiState::is_voice_communication_app(const uint32_t app_id) const {
   return app ? app->is_voice_communication_supported() : false;
 }
 
+bool HmiState::is_mobile_projection_app(const uint32_t app_id) const {
+  const ApplicationSharedPtr app = app_mngr_.application(app_id);
+  return app ? app->mobile_projection_enabled() : false;
+}
+
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
     const {
   using namespace mobile_apis;
@@ -133,7 +139,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_navi_app(app_id_)) {
+  if (is_navi_app(app_id_) || is_mobile_projection_app(app_id_)) {
     return HMILevel::HMI_LIMITED;
   }
   if (!is_media_app(app_id_)) {

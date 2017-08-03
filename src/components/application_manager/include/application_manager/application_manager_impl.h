@@ -243,10 +243,14 @@ class ApplicationManagerImpl
   std::vector<ApplicationSharedPtr> applications_by_button(
       uint32_t button) OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_with_navi() OVERRIDE;
+  std::vector<ApplicationSharedPtr> applications_with_mobile_projection()
+      OVERRIDE;
 
   ApplicationSharedPtr get_limited_media_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_navi_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_voice_application() const OVERRIDE;
+  ApplicationSharedPtr get_limited_mobile_projection_application()
+      const OVERRIDE;
 
   uint32_t application_id(const int32_t correlation_id) OVERRIDE;
   void set_application_id(const int32_t correlation_id,
@@ -1082,7 +1086,8 @@ class ApplicationManagerImpl
     bool operator()(const ApplicationSharedPtr app) const {
       return app
                  ? handle_ == app->device() &&
-                       ProtocolVersion::kV4 == app->protocol_version()
+                       Message::is_sufficient_version(ProtocolVersion::kV4,
+                                                      app->protocol_version())
                  : false;
     }
   };

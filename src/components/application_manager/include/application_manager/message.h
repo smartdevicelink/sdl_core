@@ -63,7 +63,8 @@ enum ProtocolVersion {
   kV1 = 1,
   kV2 = 2,
   kV3 = 3,
-  kV4 = 4
+  kV4 = 4,
+  kV5 = 5
 };
 
 class Message {
@@ -100,6 +101,9 @@ class Message {
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
+
+  static bool is_sufficient_version(ProtocolVersion minVersion,
+                                    ProtocolVersion version);
 
   protocol_handler::MessagePriority Priority() const {
     return priority_;

@@ -31,57 +31,30 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/on_touch_event_notification.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_
 
-#include "application_manager/application_impl.h"
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace mobile {
+class GetSystemCapabilityResponse : public CommandResponseImpl {
+ public:
+  GetSystemCapabilityResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
-OnTouchEventNotification::OnTouchEventNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandNotificationImpl(message, application_manager) {}
+  virtual ~GetSystemCapabilityResponse();
 
-OnTouchEventNotification::~OnTouchEventNotification() {}
+  virtual void Run() OVERRIDE;
 
-void OnTouchEventNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetSystemCapabilityResponse);
 
-  const std::vector<ApplicationSharedPtr>& applications_with_navi =
-      application_manager_.applications_with_navi();
+};  // GetSystemCapabilityResponse
+}  // commands
+}  // application_manager
 
-  const std::vector<ApplicationSharedPtr>& projection_applications =
-      application_manager_.applications_with_mobile_projection();
-
-  std::vector<ApplicationSharedPtr>::const_iterator nav_it =
-      applications_with_navi.begin();
-
-  for (; applications_with_navi.end() != nav_it; ++nav_it) {
-    ApplicationSharedPtr app = *nav_it;
-    if (app->IsFullscreen()) {
-      (*message_)[strings::params][strings::connection_key] = app->app_id();
-      SendNotification();
-    }
-  }
-
-  std::vector<ApplicationSharedPtr>::const_iterator projection_it =
-      projection_applications.begin();
-
-  for (; projection_applications.end() != projection_it; ++projection_it) {
-    ApplicationSharedPtr projection_app = *projection_it;
-    if (projection_app->IsFullscreen()) {
-      (*message_)[strings::params][strings::connection_key] =
-          projection_app->app_id();
-      SendNotification();
-    }
-  }
-}
-
-}  // namespace mobile
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_
