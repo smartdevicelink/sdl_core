@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
-#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
 
 #include <string>
 
@@ -95,7 +95,6 @@ class TelemetryMonitor {
  private:
   std::string server_address_;
   int16_t port_;
-  bool is_ready_;
   threads::Thread* thread_;
   Streamer* streamer_;
   ApplicationManagerObserver app_observer;
@@ -105,4 +104,4 @@ class TelemetryMonitor {
   DISALLOW_COPY_AND_ASSIGN(TelemetryMonitor);
 };
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_

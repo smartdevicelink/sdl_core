@@ -29,26 +29,27 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(target dbms)
+set(QDB_SRC_DIR ${COMPONENTS_DIR}/utils/src/qdb_wrapper)
 
-include_directories(${COMPONENTS_DIR}/utils/include/utils)
+include_directories(${COMPONENTS_DIR}/utils/include/)
 
 set(SOURCES
-  ./sql_database.cc
-  ./sql_query.cc
-  ./sql_error.cc
+  ${QDB_SRC_DIR}/sql_database.cc
+  ${QDB_SRC_DIR}/sql_query.cc
+  ${QDB_SRC_DIR}/sql_error.cc
 )
 
 add_library(${target} ${SOURCES})
 target_link_libraries(${target} qdb Utils)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy.ini DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/qdbserver.sh DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
+  file(COPY ${QDB_SRC_DIR}/policy.ini DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
+  file(COPY ${QDB_SRC_DIR}/qdbserver.sh DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
 endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  install(FILES policy.ini DESTINATION bin)
-  install(FILES qdbserver.sh DESTINATION bin
+  install(FILES ${QDB_SRC_DIR}/policy.ini DESTINATION bin)
+  install(FILES ${QDB_SRC_DIR}/qdbserver.sh DESTINATION bin
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif ()

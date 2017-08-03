@@ -91,13 +91,7 @@
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/timer.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+#include "smart_objects/smart_object.h"
 
 namespace threads {
 class Thread;
@@ -193,7 +187,6 @@ typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-typedef std::vector<std::string> RPCParams;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
@@ -515,6 +508,67 @@ class ApplicationManagerImpl
   }
 
   /**
+   * @brief Checks, if given RPC is allowed at current HMI level for specific
+   * application in policy table
+   * @param app Application
+   * @param hmi_level Current HMI level of application
+   * @param function_id FunctionID of RPC
+   * @param params_permissions Permissions for RPC parameters (e.g.
+   * SubscribeVehicleData) defined in policy table
+   * @return SUCCESS, if allowed, otherwise result code of check
+   */
+  mobile_apis::Result::eType CheckPolicyPermissions(
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
+      const RPCParams& rpc_params,
+      CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
+
+  /**
+   * @brief IsApplicationForbidden allows to distinguish if application is
+   * not allowed to register, becuase of spaming.
+   *
+   * @param connection_key the conection key ofthe required application
+   *
+   * @param mobile_app_id application's mobile(policy) identifier.
+   *
+   * @return true in case application is allowed to register, false otherwise.
+   */
+  bool IsApplicationForbidden(uint32_t connection_key,
+                              const std::string& mobile_app_id);
+
+  struct ApplicationsAppIdSorter {
+    bool operator()(const ApplicationSharedPtr lhs,
+                    const ApplicationSharedPtr rhs) {
+      return lhs->app_id() < rhs->app_id();
+    }
+  };
+
+  struct ApplicationsMobileAppIdSorter {
+    bool operator()(const ApplicationSharedPtr lhs,
+                    const ApplicationSharedPtr rhs) {
+      if (lhs->policy_app_id() == rhs->policy_app_id()) {
+        return lhs->device() < rhs->device();
+      }
+      return lhs->policy_app_id() < rhs->policy_app_id();
+    }
+  };
+
+  // typedef for Applications list
+  typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
+
+  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
+      AppsWaitRegistrationSet;
+
+  // typedef for Applications list iterator
+  typedef ApplictionSet::iterator ApplictionSetIt;
+
+  // typedef for Applications list const iterator
+  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
+
+  DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
+  ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
+
+  /**
    * @brief SetState Change regular audio state
    * @param app appication to setup regular State
    * @param audio_state of new regular state
@@ -747,12 +801,12 @@ class ApplicationManagerImpl
   // Overriden SecurityManagerListener method
   bool OnHandshakeDone(
       uint32_t connection_key,
-      security_manager::SSLContext::HandshakeResult result) OVERRIDE FINAL;
+      security_manager::SSLContext::HandshakeResult result) OVERRIDE;
 
-  void OnCertificateUpdateRequired() OVERRIDE FINAL;
+  void OnCertificateUpdateRequired() OVERRIDE;
 
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
-      uint32_t key) const OVERRIDE FINAL;
+      uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
@@ -950,24 +1004,14 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-    return policy_handler_;
+    return *policy_handler_;
   }
-  /**
-   * @brief Checks, if given RPC is allowed at current HMI level for specific
-   * application in policy table
-   * @param policy_app_id Application id
-   * @param hmi_level Current HMI level of application
-   * @param function_id FunctionID of RPC
-   * @param params_permissions Permissions for RPC parameters (e.g.
-   * SubscribeVehicleData) defined in policy table
-   * @return SUCCESS, if allowed, otherwise result code of check
-   */
-  mobile_apis::Result::eType CheckPolicyPermissions(
-      const std::string& policy_app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::FunctionID::eType function_id,
-      const RPCParams& rpc_params,
-      CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
+
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler()
+      const OVERRIDE {
+    return *policy_handler_;
+  }
+
   /*
    * @brief Function Should be called when Low Voltage is occured
    */
@@ -993,13 +1037,6 @@ class ApplicationManagerImpl
 
   policy::DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
-
-  struct ApplicationsAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      return lhs->app_id() < rhs->app_id();
-    }
-  };
 
   // typedef for Applications list
   typedef std::set<std::string> ForbiddenApps;
@@ -1398,7 +1435,7 @@ class ApplicationManagerImpl
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  policy::PolicyHandler policy_handler_;
+  std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
 
@@ -1456,6 +1493,8 @@ class ApplicationManagerImpl
   Timer tts_global_properties_timer_;
 
   bool is_low_voltage_;
+
+  uint32_t apps_size_;
 
   volatile bool is_stopping_;
 

@@ -30,11 +30,15 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
-#define TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
 
 #include <pthread.h>
 #include "hmi_message_handler/dbus_message_controller.h"
+
+namespace test {
+namespace components {
+namespace hmi_message_handler_test {
 
 class MockDBusMessageController
     : public ::hmi_message_handler::DBusMessageController {
@@ -65,4 +69,8 @@ class MockDBusMessageController
   }
 };
 
-#endif  // TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+}  // namespace hmi_message_handler_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TEST_MOCK_TELEMETRY_OBSERVER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TEST_MOCK_TELEMETRY_OBSERVER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TELEMETRY_OBSERVER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TELEMETRY_OBSERVER_H_
 
 #include "gmock/gmock.h"
 #include "transport_manager/telemetry_observer.h"
@@ -40,14 +40,14 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class MockTMTelemetryObserver
-    : public ::transport_manager::TMTelemetryObserver {
+class MockTMTelemetryObserver : public transport_manager::TMTelemetryObserver {
  public:
   MOCK_METHOD1(StartRawMsg, void(const protocol_handler::RawMessage* ptr));
   MOCK_METHOD1(StopRawMsg, void(const protocol_handler::RawMessage* ptr));
 };
 
-}  // transport_manager_test
-}  // components
-}  // test
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TEST_MOCK_TELEMETRY_OBSERVER_H_
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TELEMETRY_OBSERVER_H_

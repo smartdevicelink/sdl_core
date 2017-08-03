@@ -127,9 +127,9 @@ int32_t main(int32_t argc, char** argv) {
   profile::Profile profile_instance;
   main_namespace::LifeCycle life_cycle(profile_instance);
   if ((argc > 1) && (0 != argv)) {
-    profile_instance.config_file_name(argv[1]);
+    profile_instance.set_config_file_name(argv[1]);
   } else {
-    profile_instance.config_file_name("smartDeviceLink.ini");
+    profile_instance.set_config_file_name("smartDeviceLink.ini");
   }
 
   // --------------------------------------------------------------------------
@@ -145,6 +145,15 @@ int32_t main(int32_t argc, char** argv) {
 
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
+
+  // Check if no error values were read from config file
+  if (profile_instance.ErrorOccured()) {
+    const std::string& error = profile_instance.ErrorDescription();
+    LOG4CXX_FATAL(logger_, error);
+    FLUSH_LOGGER();
+    DEINIT_LOGGER();
+    exit(EXIT_FAILURE);
+  }
 
   // --------------------------------------------------------------------------
   // Components initialization

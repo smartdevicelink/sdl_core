@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_GENERATED_CODE_WITH_SQLITE_TEST_H_
-#define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_GENERATED_CODE_WITH_SQLITE_TEST_H_
+#ifndef SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_GENERATED_CODE_WITH_SQLITE_TEST_H_
+#define SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_GENERATED_CODE_WITH_SQLITE_TEST_H_
 
 #include <string>
 #include "policy/policy_table/types.h"
@@ -38,11 +38,12 @@
 #include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 
+namespace test {
+namespace components {
+namespace rpc_test {
+
 namespace policy_table = rpc::policy_table_interface_base;
 namespace dbms = utils::dbms;
-
-namespace rpc {
-namespace policy_table_interface_base {
 
 bool FindSection(dbms::SQLDatabase* db, policy_table::ServiceEndpoints& ep) {
   /*
@@ -401,7 +402,8 @@ bool UpdateSection(dbms::SQLDatabase* db,
   return true;
 }
 
-}  // namespace policy_table_interface_base
-}  // namespace rpc
+}  // namespace rpc_test
+}  // namespace components
+}  // namespace test
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_GENERATED_CODE_WITH_SQLITE_TEST_H_
+#endif  // SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_GENERATED_CODE_WITH_SQLITE_TEST_H_

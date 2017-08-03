@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.5" date="2017-03-29">
+<interface name="Common" version="1.6.0" date="2017-04-27">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -1207,22 +1207,26 @@
 </enum>
 
 <!-- Policies -->
-<enum name="UpdateResult">
+  <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
+  
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
+  
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
+  
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
+  
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1235,23 +1239,41 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
+  
   <struct name="PermissionItem">
-  <param name="name" type="String" mandatory="true">
-    <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
-  </param>
-  <param name="id" type="Integer" mandatory="true">
-    <description>Id of corresponding functional group, needed by SDL.</description>
-  </param>
-  <param name="allowed" type="Boolean" mandatory="false">
-    <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
-  </param>
-  </struct>
+    <param name="name" type="String" mandatory="true">
+      <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
+    </param>
+    <param name="id" type="Integer" mandatory="true">
+      <description>Id of corresponding functional group, needed by SDL.</description>
+    </param>
+    <param name="allowed" type="Boolean" mandatory="false">
+      <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
+    </param>
+  </struct>  
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
+    </param>
+  </struct>
+
+  <enum name="EntityStatus">
+    <element name="ON"/>
+    <element name="OFF"/>
+  </enum>
+
+  <struct name="ExternalConsentStatus">
+    <param name="entityType" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The entityType which status is informed by "status" param.</description>
+    </param>
+    <param name="entityID" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The corresponding ID of entityType which status is informed by "status" param</description>
+    </param>
+    <param name="status" type="Common.EntityStatus" mandatory="true">
+      <description>Status of the ExternalConsentStatus entity: "ON" or "OFF". </description>
     </param>
   </struct>
 <!-- End of Policies -->
@@ -2066,7 +2088,7 @@
 
 </interface>
 
-<interface name="Buttons" version="1.1" date="2016-08-18">
+<interface name="Buttons" version="1.2.0" date="2017-04-27">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
     </function>
@@ -2133,7 +2155,7 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="1.0" date="2013-04-12">
+<interface name="BasicCommunication" version="1.2.0" date="2017-04-27">
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2142,21 +2164,6 @@
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
-    </function>
-    <function name="OnPhoneCall" messagetype="notification">
-        <description>Sender: HMI->SDL. When: upon phone-call event started or ended</description>
-        <param name="isActive" type="Boolean" mandatory="true">
-            <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
-        </param>
-    </function>
-    <function name="OnEmergencyEvent" messagetype="notification">
-        <description>
-            "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
-            or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
-            NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
-        </description>
-        <param name="enabled" type="Boolean" mandatory="true">
-        </param>
     </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
@@ -2359,8 +2366,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>Internal ID of the application that requested this RPC.</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="response">
@@ -2458,17 +2465,16 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
-  <!-- End of Policies -->
-   <function name="OnDeactivateHMI" messagetype="notification">
-        <description>
-          Sender: HMI->SDL. When: in case GAL/DIO is active or disabling
-        </description>
-     <param name="isDeactivated" type="Boolean" mandatory="true">
-        <description>
-          Must be 'true' - GAL/DIO is active. Must be 'false' when GAL/DIO is disabling
-        </description>
+  <function name="DecryptCertificate" messagetype="request">
+     <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+     <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+         <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
      </param>
    </function>
+   <function name="DecryptCertificate" messagetype="response">
+         <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+   </function>
+  <!-- End of Policies -->
    <function name="OnEventChanged" messagetype="notification">
      <description>Sender: HMI->SDL. When event is become active</description>
      <param name="eventName" type="Common.EventTypes" mandatory="true">
@@ -2480,7 +2486,7 @@
    </function>
 </interface>
 
-<interface name="VR" version="1.0" date="2013-04-17">
+<interface name="VR" version="1.1.0" date="2017-04-27">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
@@ -2629,7 +2635,7 @@
   </function>
 </interface>
 
-<interface name="TTS" version="1.0" date="2013-04-18">
+<interface name="TTS" version="1.1.0" date="2017-04-27">
   <description>RPCs for communication between TTS and SDL.</description>
   <function name="GetCapabilities" messagetype="request">
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
@@ -2755,7 +2761,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.0" date="2013-04-16">
+<interface name="UI" version="1.1.0" date="2017-04-27">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -3248,7 +3254,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.3" date="2017-03-29">
+<interface name="Navigation" version="1.4.0" date="2017-04-27"> 
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -3418,9 +3424,9 @@
     <param name="wayPointType" type="Common.WayPointType" mandatory="true">
       <description>To request for either the destination only or for all waypoints including destination</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true"> 
-      <description>ID of the application.</description> 
-    </param> 
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
   </function>
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
     <param name="appID" type="Integer" mandatory="true">
@@ -3453,7 +3459,7 @@
 
 </interface>
 
-<interface name="VehicleInfo" version="1.0" date="2013-04-21">
+<interface name="VehicleInfo" version="1.1.0" date="2017-04-27">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
   </function>
@@ -4085,7 +4091,7 @@
 </interface>
 
  <!-- Policies -->
-<interface name="SDL" version="1.0" date="2014-03-12">
+<interface name="SDL" version="1.1.0" date="2017-04-27">
 <function name="ActivateApp" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
     </param>
@@ -4161,19 +4167,22 @@
       <param name="allowedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="0" maxsize="100">
         <description>If no permissions were specified for application the array will come empty.</description>
       </param>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="true" array="true" minsize="0" maxsize="100">
+        <description>External User Consent Settings (defined by entityType and entityID) status: enabled/disabled. If empty array is returned, SDL does not have any stored status.</description>
+      </param>
     </function>
 
     <function name="OnAppPermissionConsent" messagetype="notification">
       <description>Initiated by HMI for specifying the allowance for the application to perform some functionality. Duplicates functionality of the request, needed if HMI has specific ways to allow/disallow functionality (i.e.Setting Menu)</description>
       <param name="appID" type="Integer" mandatory="false">
-          <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
+        <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
       </param>
-      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="1" maxsize="100">
-      </param>
+      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="false" array="true" minsize="1" maxsize="100"/>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
      </function>
 
-     <function name="OnAppPermissionChanged" messagetype="notification">
+    <function name="OnAppPermissionChanged" messagetype="notification">
       <description>Notification from SDL to HMI. Occurs when app permissions were reduced. If no permission specified means that app was dissallowed and has to be unregitstered.</description>
       <param name="appID" type="Integer" mandatory="true"/>
       <param name="isAppPermissionsRevoked" type="Boolean" mandatory="false"/>

@@ -42,7 +42,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 FromMicRecorderListener::FromMicRecorderListener(
     const std::string& file_name,
     application_manager::ApplicationManager& app_mngr)
-    : reader_(NULL), file_name_(file_name), application_manager_(app_mngr) {}
+    : reader_(NULL)
+    , file_name_(file_name)
+    , current_application_(0)
+    , application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {
   LOG4CXX_AUTO_TRACE(logger_);

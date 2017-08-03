@@ -43,6 +43,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_hash_change_notification {
 
 namespace strings = application_manager::strings;
 
@@ -120,6 +121,7 @@ TEST_F(OnHashChangeNotificationTest, Run_InvalidApp_NoNotification) {
             (*msg)[strings::params][strings::message_type].asInt());
 }
 
+}  // namespace on_hash_change_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

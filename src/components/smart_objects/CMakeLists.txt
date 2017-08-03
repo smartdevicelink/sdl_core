@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-set(SMART_OBJECTS_SRC_DIR ${COMPONENTS_DIR}/smart_objects/src)
-
-include_directories (
-  include
-  ${COMPONENTS_DIR}/utils/include/
+include_directories(
+  ${COMPONENTS_DIR}/include
+  ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/utils/include
 )
 
-set (SOURCES
-    ${SMART_OBJECTS_SRC_DIR}/smart_object.cc
-    ${SMART_OBJECTS_SRC_DIR}/smart_schema.cc
-    ${SMART_OBJECTS_SRC_DIR}/schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/always_false_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/always_true_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/default_shema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/bool_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/number_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/enum_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/string_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/object_schema_item.cc
-    ${SMART_OBJECTS_SRC_DIR}/array_schema_item.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+collect_sources(SOURCES "${PATHS}")
 
 add_library("SmartObjects" ${SOURCES})
+target_link_libraries("SmartObjects" Utils)
 
 if(ENABLE_LOG)
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
@@ -60,4 +52,3 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
-

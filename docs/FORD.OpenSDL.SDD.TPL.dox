@@ -1,0 +1,355 @@
+/**
+\cond FALSE
+------ Design document template explanation -------
+This is a SW Detailed Design template for each SDl component update.
+The original QCA template with more detail description is available at Luxoft portal
+https://adc.luxoft.com/confluence/display/PORTAL/Software+Detailed+Design+Template
+
+---------------------- HOWTO -----------------------
+For adding new component documentation please follow this steps:
+1. Copy this document to the 'doc' subdirectory in the Component working directory with a new name
+  - Example:
+      + src/components/transport_manager/docs/FORD.OpenSDL.SDD.TM.dox
+      + src/components/utils/docs/FORD.OpenSDL.SDD.Utils.dox
+  - https://adc.luxoft.com/confluence/display/PORTAL/Documentation+Control+Guideline#DocumentationControlGuideline-DocumentNaming
+2. Replace <!Component Name> with a correct naming according to SAD naming
+  - Name examples:
+      Application Manager, Connection Handler
+	- Replace examples:
+      ~ sed -i 's/<!Component Name>/Utils/g' FORD.OpenSDL.SDD.Utils.dox
+3. Replace <!Component_Id> with a shot unique name
+	- Something like app_manage, connection_handler, policy
+	- It shall be one word without spaces and special symbols except '_'
+  - Replace examples:
+      ~ sed -i 's/<!Component_Id>/connection_handler/g' FORD.OpenSDL.SDD.Utils.dox
+  Note: After that step all Doxygen tags becomes working well and IDE could be used
+4. Add reference in mainpage.dox Table of Content using <!Component_Id> used in p.3
+5. Replace blocks marked as following with a content according to instructions in these blocks
+	- Each block starts as <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+	- Each block ends   as <!!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!!>
+	- If chapter content is not applicable for a Component update it with "Not applicable, since/because of <Reason>."
+6. Update source code doxygen comments for mentioning entities in the following SDD chapter:
+	- Public and private interfaces from chapter 3
+	- Data types from chapter 4.2
+7. Update project Doxygen file with path to new images
+  * IMAGE_PATH parameter
+8.  Remove this template explanation from cond to endcond tags
+
+General notes/reminders:
+- Commit both: images and them source to the git repository
+- SDD file extension shall be 'dox' 
+- the preferable path for SDD is src/components/COMPONENT/docs
+- the preferable path for SDD images is src/components/COMPONENT/docs/assets
+
+For more information, please follow:
+- Doxygen documentation
+    http://www.stack.nl/~dimitri/doxygen/manual/index.html
+- Markdown support by doxygen
+    http://www.stack.nl/~dimitri/doxygen/manual/markdown.html
+- Text-base UML tool
+    http://plantuml.com/
+- Article "Providing design documentation with code changes"
+    https://github.com/smartdevicelink/sdl_core/wiki/Providing-design-documentation-with-code-changes
+
+---------------------------------------------
+\endcond
+\page <!Component_Id> <!Component Name> Detailed Design
+## Table of contents
+- \subpage <!Component_Id>_intoduction
+	+ \ref <!Component_Id>_rationale                "1.1 Rationale"
+	+ \ref <!Component_Id>_scope                    "1.2 Scope"
+	+ \ref <!Component_Id>_abbreviations            "1.3 Abbreviations"
+- \subpage <!Component_Id>_detail_design
+	+ \ref <!Component_Id>_design_solutions         "2.1 Design solutions"
+	+ \ref <!Component_Id>_class_structure          "2.2 Class Structure"
+	+ \ref <!Component_Id>_sequence_diagram         "2.3 Sequence diagram"
+	+ \ref <!Component_Id>_state_chart              "2.4 State chart diagram"
+- \subpage <!Component_Id>_interfaces
+	+ \ref <!Component_Id>_public_interfaces        "3.1 Public interfaces description"
+	+ \ref <!Component_Id>_internal_interfaces      "3.2 Internal interfaces description"
+	+ \ref <!Component_Id>_derived_interfaces       "3.3 Derived interfaces and dependencies"
+- \subpage <!Component_Id>_data_structure_resources
+	+ \ref <!Component_Id>_data_structure           "4.1 Element Data Structure"
+	+ \ref <!Component_Id>_resources                "4.2 Resource usage"
+- \subpage <!Component_Id>_references_and_history
+	+ \ref <!Component_Id>_references               "5.1 References"
+	+ \ref <!Component_Id>_history                  "5.2 Document history change and approve"
+*/
+//-----------------------------------------------------------
+/**
+\page <!Component_Id>_intoduction 1. Introduction
+The document is intended to support software developers,
+maintenance and integration engineers with sufficient,
+detailed information concerning the design, development and
+deployment concepts, to accomplish their respective tasks without reliance on the authors.
+
+\anchor <!Component_Id>_rationale
+## 1.1 Rationale
+<!Component Name> implements SDL Architectural Solution according to:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be a link SAD Components View and Requirements if applicable)
+Example:
+  https://smartdevicelink.com/en/guides/core/software-architecture-document/components-view/#hmi-message-handler
+<!!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_scope
+## 1.2 Scope
+<!Component Name> extracted as a separate component for
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a reason and short description of the components functionality
+Example:
+  Security Manager component extracted as a separate module for
+  Ford channel data protection.
+  This components is used to :
+  - Provide security communications
+  - Protect income and outcome business layer data from interception
+  - Verify the relation between a mobile application certificate and its owner
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_abbreviations
+## 1.3 Abbreviations
+Abbreviations used in this document please find in the table below.
+| Abbreviation     | Expansion                        |
+|------------------|----------------------------------|
+|                  |                                  |
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added all component-specific terms, as
+| TA               | Transport Adapter                |
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+Definitions used in this document are in the table below.
+
+| Definition       | Description                       |
+|------------------|-----------------------------------|
+|                  |                                   |
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added all component-specific terms, as
+| WebSocket        | a protocol providing full-duplex communication channels over a single TCP connection |
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+*/
+//-----------------------------------------------------------
+/**
+\page <!Component_Id>_detail_design 2. Component detail design
+\anchor <!Component_Id>_design_solutions
+### 2.1 Design solutions
+The following design approaches and pattern was used for <!Component Name>:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added GoF (or other) SW design patterns,
+technologies and approaches with short description
+Example:
+  - Command design pattern is used to treat requests as an object that provides
+      possibility to add new request without existing code modification
+  - Factory method pattern design used for SSLContext objects creation
+      + It also guaranty correctness of SSLContext destruction by the
+      same Compiled SecurityManger object
+  - All database reading are cached by CacheManager class, which
+      guaranty meeting timing contrariness
+  - SQLite database was chosen as a lightweight, embedded, transactional SQL database engine
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_class_structure
+### 2.2 Class Structure
+The following UML class digram shows the component classes structure.
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added class diagram
+Example:
+     ![Security Manager class diagram](sm_class_digram.png)
+For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
+As a tool for image preparing could be used Gliffy digram
+https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
+OR plantuml diagram
+http://plantuml.com/classes.html
+Note: Source files of diagram and output images need to be also committed to git.
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+For more information about class digram follow:
+- http://www.uml-diagrams.org/class-diagrams-overview.html
+- https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
+
+\anchor <!Component_Id>_sequence_diagram
+### 2.3 Sequence diagram
+The following UML sequence digram shows how objects operate with one another and in what order.
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added sequence diagram
+Example:
+	    Short description
+     ![Connection](connection.png)
+     ![job](job.png)
+     ![disconnection](disconnection.png)
+For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
+As a tool for image preparing could be used Gliffy digram
+https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
+OR plantuml diagram
+http://plantuml.com/sequence.html
+Note: Source files of diagram and output images need to be also committed to git.
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+For more information about sequence digram follow:
+- http://www.uml-diagrams.org/sequence-diagrams.html
+- https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
+
+\anchor <!Component_Id>_state_chart
+### 2.4 State chart diagram
+The following UML state digram shows the component life cycle states.
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added state diagram
+Example:
+     ![StateControllerImpl state](state_contoroller_states.png)
+For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
+As a tool for image preparing could be used Gliffy digram
+https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
+OR plantuml diagram
+http://plantuml.com/state.html
+Note: Source files of diagram and output images need to be also committed to git.
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+For more information about class digram follow:
+- http://www.uml-diagrams.org/state-machine-diagrams.html
+*/
+//-----------------------------------------------------------
+/**
+\page <!Component_Id>_interfaces 3. Component Interfaces
+\anchor <!Component_Id>_public_interfaces
+### 3.1 Public interfaces description
+<!Component Name> provides functionality with following interfaces:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of external interfaces
+Example:
+  - security_manager::SecurityManager
+  - security_manager::SecurityManagerListener
+  - security_manager::SSLContext
+(!) All link will be auto-added by doxygen
+For more auto-linking follow - https://www.stack.nl/~dimitri/doxygen/manual/autolink.html#linkclass
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_internal_interfaces
+### 3.2 Internal interfaces description
+The following interfaces are provided by component for internal usage only:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of internal interfaces
+Example:
+  - security_manager::CryptoManager
+  - security_manager::CryptoManagerSettings
+  - security_manager::SecurityQuery
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_derived_interfaces
+### 3.3 Derived interfaces and dependencies
+<!Component Name> required following 3d-party libraries:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of libraries
+Example:
+  -  OpenSSL library v 1.0.1g and higher to meet TLS cipher restricts
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+The following interfaces are required by component:
+- \ref src/components/include/utils Utils
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of external interfaces
+Example:
+  - protocol_handler::ProtocolObserver for getting Protocol notifications
+  - implements protocol_handler::SessionObserver for providing SSLContext object managing
+  - [OpenSSL API](https://www.openssl.org/docs/manmaster/ssl/) :
+     + SSL_library_init() - registers the available SSL/TLS ciphers and digests.
+All link will be auto-added by doxygen
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+*/
+//-----------------------------------------------------------
+/**
+\page <!Component_Id>_data_structure_resources 4. Component data and resources
+\anchor <!Component_Id>_data_structure
+### 4.1 Element Data Structure
+The following data types are used by the Component:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of component data types
+Example:
+  - security_manager::SecurityQuery
+  - protocol_handler::ProtocolPacket
+All link will be auto-added by doxygen
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+The format of processing/saving/loading data is:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of formats
+Example:
+  - Json data according to APPLINK-19421
+  - Binary data array according to Ford Protocol Specification
+         + https://github.com/smartdevicelink/protocol_spec
+  - PEM certificates according to APPLINK-21512
+All link will be auto-added by doxygen
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_resources
+### 4.2 Resource usage
+The following system resources are used by the Component:
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added all resource-related information
+All file, database or network reading
+An amount of processing by component data
+Example:
+     Resumption uses QBD/JSON database with configurable limitation 10 Mb
+     Request Controller Handle a configured amount of RPCs:
+       - A XXX count of messages from application in NONE level
+              + <LINK_TO_REQURMENT_XXX>
+       - A YYY count of messages per second for each application
+              + <LINK_TO_REQURMENT_YYY>
+ (!) In case of no such restrict it need to be clarified  (!)
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+*/
+//-----------------------------------------------------------
+/**
+\page <!Component_Id>_references_and_history 5. References and history
+\anchor <!Component_Id>_references
+### 5.1 References
+- [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Here need to be added a list of all related to component functionality
+references, including 3d-party libraries, documentation, requirements 
+Example:
+  -  [OpenSSL API](https://www.openssl.org/docs/manmaster/ssl/)
+  -  [SQLite Documents](https://www.sqlite.org/docs.html)
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+\anchor <!Component_Id>_history
+### 5.2 Document history
+Document change history
+
+| Version     | Data       | Author/Editor               | Change description  |
+|-------------|------------|-----------------------------|---------------------|
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Example:
+| 0.1         | MM/DD/YYYY | [Name](Github account link) | Initially created   |
+For more details follow 
+https://adc.luxoft.com/confluence/display/PORTAL/Documentation+Control+Guideline#DocumentationControlGuideline-DocumentVersion
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+Document approve history
+
+| Version     | Data       | Author/Editor               | Change description  |
+|-------------|------------|-----------------------------|---------------------|
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Example:
+| 0.1         | MM/DD/YYYY | [Name](Github account link) | Initially created   |
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+
+For more precise document change history follow github history -
+<!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
+Example for this template:
+- https://github.com/smartdevicelink/sdl_core/commits/master/docs/software_detailed_design_template.dox
+- https://github.com/smartdevicelink/sdl_core/commits/develop/docs/software_detailed_design_template.dox
+<!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
+*/

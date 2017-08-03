@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace end_audio_pass_thru_request {
 
 namespace am = ::application_manager;
 using ::testing::_;
@@ -126,6 +127,7 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+}  // namespace end_audio_pass_thru_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

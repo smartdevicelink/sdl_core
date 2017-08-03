@@ -60,8 +60,11 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 int64_t file_system::FileSize(const std::string& path) {
   if (file_system::FileExists(path)) {
     struct stat file_info = {0};
-    stat(path.c_str(), &file_info);
-    return file_info.st_size;
+    if (0 != stat(path.c_str(), &file_info)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
+    } else {
+      return file_info.st_size;
+    }
   }
   return 0;
 }
@@ -94,8 +97,12 @@ size_t file_system::DirectorySize(const std::string& path) {
       if (file_system::IsDirectory(full_element_path)) {
         size += DirectorySize(full_element_path);
       } else {
-        stat(full_element_path.c_str(), &file_info);
-        size += file_info.st_size;
+        if (0 != stat(full_element_path.c_str(), &file_info)) {
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Could not get file info: " << full_element_path);
+        } else {
+          size += file_info.st_size;
+        }
       }
     }
   }
@@ -108,7 +115,9 @@ size_t file_system::DirectorySize(const std::string& path) {
 
 std::string file_system::CreateDirectory(const std::string& name) {
   if (!DirectoryExists(name)) {
-    mkdir(name.c_str(), S_IRWXU);
+    if (0 != mkdir(name.c_str(), S_IRWXU)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+    }
   }
 
   return name;
@@ -261,7 +270,10 @@ void file_system::remove_directory_content(const std::string& directory_name) {
         remove_directory_content(full_element_path);
         rmdir(full_element_path.c_str());
       } else {
-        remove(full_element_path.c_str());
+        if (0 != remove(full_element_path.c_str())) {
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Unable to remove file: " << full_element_path);
+        }
       }
     }
   }
@@ -411,7 +423,9 @@ bool file_system::CreateFile(const std::string& path) {
 
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
-  stat(path.c_str(), &info);
+  if (0 != stat(path.c_str(), &info)) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file mod time: " << path);
+  }
 #ifndef __QNXNTO__
   return static_cast<uint64_t>(info.st_mtim.tv_nsec);
 #else

@@ -46,9 +46,9 @@ namespace application_manager {
  * table
  */
 struct CommandParametersPermissions {
-  std::vector<std::string> allowed_params;
-  std::vector<std::string> disallowed_params;
-  std::vector<std::string> undefined_params;
+  RPCParams allowed_params;
+  RPCParams disallowed_params;
+  RPCParams undefined_params;
 };
 
 namespace commands {

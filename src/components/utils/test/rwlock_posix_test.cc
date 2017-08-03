@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using sync_primitives::RWLock;
 
@@ -142,6 +142,6 @@ TEST_F(RWlockTest, AcquireForWriting_ExpectNoMoreAccessForWriting) {
   EXPECT_TRUE(test_rwlock.Release());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

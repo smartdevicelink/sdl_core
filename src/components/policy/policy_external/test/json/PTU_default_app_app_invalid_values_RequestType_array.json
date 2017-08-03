@@ -1,0 +1,317 @@
+{
+   "policy_table" : {
+      "app_policies" : {
+         "1766825573" : {
+            "AppHMIType" : [ "MEDIA" ],
+            "certificate" : "akdjfhaliuygrglurng",
+            "default_hmi" : "BACKGROUND",
+            "groups" : [
+               "Notifications",
+               "Location-1",
+               "PropriataryData-1",
+               "Navigation-1",
+               "Base-4",
+               "VehicleInfo-3",
+               "DrivingCharacteristics-3",
+               "Emergency-1"
+            ],
+            "keep_context" : true,
+            "memory_kb" : 1000,
+            "nicknames" : [ "SyncProxyTester", "tester" ],
+            "priority" : "EMERGENCY",
+            "steal_focus" : true,
+            "heart_beat_timeout_ms": 5000,
+            "RequestType" : [ "HTTP",
+                    "LAUNCH_APP",
+                    "PROPRIETARY" ]
+         },
+         "default" : {
+            "default_hmi" : "NONE",
+            "groups" : [ "Base-4" ],
+            "keep_context" : false,
+            "memory_kb" : 1000,
+            "priority" : "NONE",
+            "steal_focus" : false,
+            "RequestType": [
+              "IVSU",
+              "BREAK_STUFF"
+            ]
+         },
+         "device" : {
+            "default_hmi" : "NONE",
+            "groups" : [ "Base-4" ],
+            "memory_kb" : 1000,
+            "heart_beat_timeout_ms" : 20000,
+            "keep_context" : false,
+            "priority" : "NONE",
+            "steal_focus" : false
+         },
+         "pre_DataConsent" : {
+            "default_hmi" : "NONE",
+            "groups" : [ "pre_Base-1" ],
+            "keep_context" : false,
+            "memory_kb" : 1000,
+            "priority" : "NONE",
+            "steal_focus" : false,
+            "RequestType": [
+              "FILE_RESUME",
+              "AUTH_REQUEST",
+              "AUTH_CHALLENGE",
+              "AUTH_ACK"
+            ]
+         }
+      },
+      "functional_groupings" : {
+         "Base-4" : {
+            "rpcs" : {
+               "AddCommand" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "AddSubMenu" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "Alert" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "ChangeRegistration" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "CreateInteractionChoiceSet" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteCommand" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteFile" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "DeleteInteractionChoiceSet" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteSubMenu" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "EncodedSyncPData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "EndAudioPassThru" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "GenericResponse" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ListFiles" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnAppInterfaceUnregistered" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnAudioPassThru" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "OnButtonEvent" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnButtonPress" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnCommand" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnDriverDistraction" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "OnEncodedSyncPData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnHMIStatus" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnLanguageChange" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnPermissionsChange" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnSyncPData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnTBTClientState" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "PerformAudioPassThru" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "PerformInteraction" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "PutFile" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "RegisterAppInterface" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "ResetGlobalProperties" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ScrollableMessage" : {
+                  "hmi_levels" : [ "FULL" ]
+               },
+               "SetAppIcon" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetDisplayLayout" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetGlobalProperties" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SetMediaClockTimer" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "Show" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "Slider" : {
+                  "hmi_levels" : [ "FULL" ]
+               },
+               "Speak" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "SubscribeButton" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SyncPData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "UnregisterAppInterface" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "UnsubscribeButton" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               }
+            }
+         },
+         "Emergency-1" : {
+            "rpcs" : {
+               "GetVehicleData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
+                  "parameters" : [
+                     "airbagStatus",
+                     "bodyInformation",
+                     "clusterModeStatus",
+                     "deviceStatus",
+                     "eCallInfo",
+                     "emergencyEvent"
+                  ]
+               },
+               "OnVehicleData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
+                  "parameters" : [
+                     "airbagStatus",
+                     "bodyInformation",
+                     "clusterModeStatus",
+                     "deviceStatus",
+                     "eCallInfo",
+                     "emergencyEvent"
+                  ]
+               },
+               "SubscribeVehicleData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
+                  "parameters" : [
+                     "airbagStatus",
+                     "bodyInformation",
+                     "clusterModeStatus",
+                     "deviceStatus",
+                     "eCallInfo",
+                     "emergencyEvent"
+                  ]
+               },
+               "UnsubscribeVehicleData" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
+                  "parameters" : [
+                     "airbagStatus",
+                     "bodyInformation",
+                     "clusterModeStatus",
+                     "deviceStatus",
+                     "eCallInfo",
+                     "emergencyEvent"
+                  ]
+               }
+            }
+         },
+         "pre_Base-1" : {
+            "rpcs" : {
+               "ChangeRegistration" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "DeleteFile" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "GenericResponse" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ListFiles" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnAppInterfaceUnregistered" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnLanguageChange" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnPermissionsChange" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "PutFile" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "RegisterAppInterface" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "ResetGlobalProperties" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SetAppIcon" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetDisplayLayout" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetGlobalProperties" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "UnregisterAppInterface" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               }
+            }
+         }
+      },
+      "module_config" : {
+         "device_certificates" : {
+            "HUU40DAS7F970UEI17A73JH32L41K32JH4L1K234H3K4" : "aldhfkahfgkafrblgjr"
+         },
+         "endpoints" : {
+            "0x07" : {
+               "default" : [ "http://policies.telematics.ford.com/api/policies" ]
+            }
+         },
+         "exchange_after_x_days" : 30,
+         "exchange_after_x_ignition_cycles" : 100,
+         "exchange_after_x_kilometers" : 1800,
+         "notifications_per_minute_by_priority" : {
+            "COMMUNICATION" : 6,
+            "EMERGENCY" : 60,
+            "NAVIGATION" : 15,
+            "NONE" : 0,
+            "NORMAL" : 4,
+            "VOICECOMM" : 10
+         },
+         "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
+         "timeout_after_x_seconds" : 60,
+         "vehicle_make" : "Stark Industries",
+         "vehicle_model" : "E-Tron",
+         "vehicle_year" : "1992"
+      }
+   }
+}

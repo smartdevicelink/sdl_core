@@ -418,12 +418,6 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
-  // Asynchronously verifies all expectations of all registered mock objects
-  // and clears there default actions and expectations.  Returns true if the
-  // verification was successful.
-  static bool AsyncVerifyAndClearExpectations(int timeout)
-      GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
-
  private:
   friend class internal::UntypedFunctionMockerBase;
 
@@ -471,12 +465,6 @@ class GTEST_API_ Mock {
   // satisfied.  Reports one or more Google Test non-fatal failures
   // and returns false if not.
   static bool VerifyAndClearExpectationsLocked(void* mock_obj)
-      GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
-
-  // Asynchronously verifies that all expectations of all registered
-  // mock objects have been satisfied.  Reports one or more Google
-  // Test non-fatal failures and returns false if not.
-  static bool AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
 
   // Clears all ON_CALL()s set on the given mock object.

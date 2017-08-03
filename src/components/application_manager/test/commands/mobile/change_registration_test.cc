@@ -51,10 +51,12 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace change_registration_request {
 
 namespace am = application_manager;
@@ -69,7 +71,9 @@ using ::testing::Mock;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgPointee;
 using am::commands::ChangeRegistrationRequest;
+using policy_test::MockPolicyHandlerInterface;
 using ::test::components::application_manager_test::MockApplication;
 
 namespace custom_str = utils::custom_string;
@@ -88,7 +92,8 @@ class ChangeRegistrationRequestTest
  public:
   ChangeRegistrationRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp())
+      , supported_languages_(CreateMessage(smart_objects::SmartType_Array)) {}
 
   MessageSharedPtr CreateMsgFromMobile() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -103,15 +108,14 @@ class ChangeRegistrationRequestTest
   void PrepareExpectationBeforeRun() {
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(hmi_capabilities_));
-    smart_objects::SmartObject supported_languages(
-        smart_objects::SmartType_Array);
-    supported_languages[0] = static_cast<int32_t>(mobile_apis::Language::EN_US);
+    (*supported_languages_)[0] =
+        static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
     EXPECT_CALL(hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
     EXPECT_CALL(hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillRepeatedly(ReturnRef(hmi_interfaces_));
@@ -287,6 +291,8 @@ class ChangeRegistrationRequestTest
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
+  MessageSharedPtr supported_languages_;
+  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -294,9 +300,9 @@ typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-
   utils::SharedPtr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
+
   am::ApplicationSet application_set;
   const utils::custom_string::CustomString name("name");
   MockAppPtr app = CreateMockApp();
@@ -534,6 +540,7 @@ TEST_F(ChangeRegistrationRequestTest,
 }
 
 }  // namespace change_registration_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

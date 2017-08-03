@@ -49,9 +49,11 @@ namespace commands {
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
+    , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
     , error_from_hmi_(false)
+    , is_timed_out_(false)
     , vr_commands_lock_(true) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
@@ -129,22 +131,31 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
   const SmartArray* choice_set =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
 
-  SmartArray::const_iterator choice_set_it = choice_set->begin();
+  SmartArray::const_iterator current_choice_set_it = choice_set->begin();
+  SmartArray::const_iterator next_choice_set_it;
 
-  for (; choice_set->end() != choice_set_it; ++choice_set_it) {
+  for (; choice_set->end() != current_choice_set_it; ++current_choice_set_it) {
     std::pair<std::set<uint32_t>::iterator, bool> ins_res =
-        choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
+        choice_id_set.insert(
+            (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
                     "Choise with ID "
-                        << (*choice_set_it)[strings::choice_id].asInt()
+                        << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
-    if (IsWhiteSpaceExist(*choice_set_it)) {
+    if (IsWhiteSpaceExist(*current_choice_set_it)) {
       LOG4CXX_ERROR(logger_, "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
+    }
+    for (next_choice_set_it = current_choice_set_it + 1;
+         choice_set->end() != next_choice_set_it;
+         ++next_choice_set_it) {
+      if (compareSynonyms(*current_choice_set_it, *next_choice_set_it)) {
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
     }
   }
   return mobile_apis::Result::SUCCESS;

@@ -49,7 +49,7 @@ Once SDL Core is compiled and installed you can start it from the executable in 
 
 ```
 %cd bin/
-%LD_LIBRARY_PATH=. ./smartDeviceLinkCore
+%./start.sh
 ```
 
 ## Start WEB HMI
@@ -72,6 +72,11 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
+
+#### Sample Policy Manager
+The included sample policy manager (for use with `EXTERNAL_PROPRIETARY` policy mode) requires the following packages:
+  - python-pip
+  - python-dev
 
 ### Known Dependency Issues
   * log4cxx - We know that the version of log4cxx on a linux machine can conflict with the one used, which is why it is provided in the repository. To avoid the conflict, we recommend removing liblog4cxx*.

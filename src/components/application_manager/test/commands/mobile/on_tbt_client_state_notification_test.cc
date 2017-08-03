@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_tbt_client_state_notification {
 
 namespace am = ::application_manager;
 
@@ -132,6 +133,7 @@ TEST_F(OnTBTClientStateNotificationTest,
   command_->Run();
 }
 
+}  // namespace on_tbt_client_state_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

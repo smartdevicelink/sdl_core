@@ -40,6 +40,10 @@ typedef std::string Key;
 typedef std::vector<std::string> Value;
 typedef std::map<Key, Value> Map;
 
+namespace test {
+namespace components {
+namespace smart_object_test {
+
 namespace {
 void MakeMapObject(Map& obj, const int size) {
   char i_key[8], j_key[8];
@@ -73,3 +77,7 @@ TEST(SmartObjectPerformanceTest, SmartObjectMapPerformance) {
     }
   }
 }
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test

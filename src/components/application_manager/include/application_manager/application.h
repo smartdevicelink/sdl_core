@@ -45,20 +45,11 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace custom_str = utils::custom_string;
 
 typedef int32_t ErrorCode;
@@ -87,7 +78,10 @@ struct Version {
 
 struct AppFile {
   // need to use in std::map;
-  AppFile() {}
+  AppFile()
+      : is_persistent(false)
+      , is_download_complete(false)
+      , file_type(mobile_apis::FileType::INVALID_ENUM) {}
   AppFile(const std::string& name,
           bool persistent,
           bool download_complete,
@@ -218,9 +212,16 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
-  /*
-   * @brief Adds a command to the in application menu
+  /**
+   * @brief Checks if application is media, voice communication or navigation
+   * @return true if application is media, voice communication or navigation,
+   * false otherwise
    */
+  virtual bool is_audio() const = 0;
+
+  /*
+ * @brief Adds a command to the in application menu
+ */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 

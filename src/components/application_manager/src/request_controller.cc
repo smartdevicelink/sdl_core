@@ -49,6 +49,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 RequestController::RequestController(const RequestControlerSettings& settings)
     : pool_state_(UNDEFINED)
     , pool_size_(settings.thread_pool_size())
+    , request_tracker_(settings)
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::TimeoutThread))
@@ -101,42 +102,26 @@ void RequestController::DestroyThreadpool() {
 }
 
 RequestController::TResult RequestController::CheckPosibilitytoAdd(
-    const RequestPtr request) {
+    const RequestPtr request, const mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const uint32_t& app_hmi_level_none_time_scale =
-      settings_.app_hmi_level_none_time_scale();
-
-  // app_hmi_level_none_max_request_per_time_scale
-  const uint32_t& hmi_level_none_count =
-      settings_.app_hmi_level_none_time_scale_max_requests();
-
-  const uint32_t& app_time_scale = settings_.app_time_scale();
-
-  const uint32_t& max_request_per_time_scale =
-      settings_.app_time_scale_max_requests();
-
-  const uint32_t& pending_requests_amount = settings_.pending_requests_amount();
-
-  if (!CheckPendingRequestsAmount(pending_requests_amount)) {
+  if (!CheckPendingRequestsAmount(settings_.pending_requests_amount())) {
     LOG4CXX_ERROR(logger_, "Too many pending request");
     return RequestController::TOO_MANY_PENDING_REQUESTS;
   }
 
-  if (!waiting_for_response_.CheckHMILevelTimeScaleMaxRequest(
-          mobile_apis::HMILevel::HMI_NONE,
-          request->connection_key(),
-          app_hmi_level_none_time_scale,
-          hmi_level_none_count)) {
+  const TrackResult track_result =
+      request_tracker_.Track(request->connection_key(), level);
+
+  if (TrackResult::kNoneLevelMaxRequestsExceeded == track_result) {
     LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
     return RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
   }
-  if (!waiting_for_response_.CheckTimeScaleMaxRequest(
-          request->connection_key(),
-          app_time_scale,
-          max_request_per_time_scale)) {
+
+  if (TrackResult::kMaxRequestsExceeded == track_result) {
     LOG4CXX_ERROR(logger_, "Too many application requests");
     return RequestController::TOO_MANY_REQUESTS;
   }
+
   return SUCCESS;
 }
 
@@ -171,7 +156,7 @@ RequestController::TResult RequestController::addMobileRequest(
       logger_,
       "correlation_id : " << request->correlation_id()
                           << "connection_key : " << request->connection_key());
-  RequestController::TResult result = CheckPosibilitytoAdd(request);
+  RequestController::TResult result = CheckPosibilitytoAdd(request, hmi_level);
   if (SUCCESS == result) {
     AutoLock auto_lock_list(mobile_request_list_lock_);
     mobile_request_list_.push_back(request);
@@ -224,12 +209,12 @@ void RequestController::removeNotification(
     if (it->get() == notification) {
       notification_list_.erase(it++);
       LOG4CXX_DEBUG(logger_, "Notification removed");
-      break;
+      return;
     } else {
       ++it;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Cant find notification");
+  LOG4CXX_DEBUG(logger_, "Cannot find notification");
 }
 
 void RequestController::TerminateRequest(const uint32_t correlation_id,

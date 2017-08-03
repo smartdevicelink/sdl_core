@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -189,6 +189,10 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
     return NOT_SUPPORTED;
   }
   if (!server_connection_factory_->IsInitialised()) {
+    LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
+    return BAD_STATE;
+  }
+  if (!initialised_) {
     LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
     return BAD_STATE;
   }
