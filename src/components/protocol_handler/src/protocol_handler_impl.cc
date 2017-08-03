@@ -192,16 +192,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ProtocolPacket::ProtocolVersion* fullVersion =
-      new ProtocolPacket::ProtocolVersion();
+  ProtocolPacket::ProtocolVersion fullVersion;
   SendStartSessionAck(connection_id,
                       session_id,
                       protocol_version,
                       hash_id,
                       service_type,
                       protection,
-                      *fullVersion);
-  delete fullVersion;
+                      fullVersion);
 }
 
 void ProtocolHandlerImpl::SendStartSessionAck(
@@ -227,8 +225,13 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                            0u,
                                            message_counters_[session_id]++));
 
+  const bool proxy_supports_v5_protocol =
+      protocol_version >= PROTOCOL_VERSION_5 ||
+      (ServiceTypeFromByte(service_type) == kRpc &&
+       full_version.majorVersion >= PROTOCOL_VERSION_5);
+
   // Cannot include a constructed payload if either side doesn't support it
-  if (maxProtocolVersion >= PROTOCOL_VERSION_5) {
+  if (proxy_supports_v5_protocol && maxProtocolVersion >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
     BsonObject payloadObj;
@@ -277,7 +280,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
                                                uint8_t service_type) {
-  std::vector<std::string> rejectedParams(0, std::string(""));
+  std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
                        protocol_version,
@@ -338,12 +341,12 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
                                              uint8_t protocol_version,
                                              uint8_t service_type) {
-  std::vector<std::string> rejectedParams(0, std::string(""));
+  std::vector<std::string> rejectedParams;
   SendEndSessionNAck(connection_id,
-                       session_id,
-                       protocol_version,
-                       service_type,
-                       rejectedParams);
+                     session_id,
+                     protocol_version,
+                     service_type,
+                     rejectedParams);
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
@@ -1102,7 +1105,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                  "Refused to end session " << static_cast<int>(service_type)
                                            << " type.");
     if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
-      std::vector<std::string> rejectedParams(0, std::string(""));
+      std::vector<std::string> rejectedParams;
       if (hash_id == protocol_handler::HASH_ID_WRONG) {
         rejectedParams.push_back(std::string("hashId"));
       }
@@ -1304,7 +1307,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       return RESULT_OK;
     }
     ProtocolPacket::ProtocolVersion* fullVersion;
-    std::vector<std::string> rejectedParams(0, std::string(""));
+    std::vector<std::string> rejectedParams;
     // Can't check protocol_version because the first packet is v1, but there
     // could still be a payload, in which case we can get the real protocol
     // version
