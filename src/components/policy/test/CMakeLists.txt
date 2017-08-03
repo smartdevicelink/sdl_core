@@ -38,7 +38,6 @@ include_directories(
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/policy/test/include/
-  ${SQLITE3_INCLUDE_DIRS}
 )
 
 set(testLibraries
@@ -55,8 +54,6 @@ set(testSources
   policy_manager_impl_test.cc
   update_status_manager_test.cc
 )
-
-list (APPEND testLibraries sqlite3 -L${SQLITE3_LIBRARY_DIR} -Wl,-rpath,/opt/i386/lib)
 
 list (APPEND testSources
   sql_pt_representation_test.cc

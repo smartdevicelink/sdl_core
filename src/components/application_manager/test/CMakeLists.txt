@@ -85,13 +85,8 @@ set(testLibraries
   MediaManager
   Resumption
   ProtocolHandler
+  SecurityManager
 )
-
-if(ENABLE_SECURITY)
-  list(APPEND testLibraries SecurityManager)
-endif()
-
-list (APPEND testLibraries sqlite3 -L${SQLITE3_LIBRARY_DIR} -Wl,-rpath,/opt/i386/lib)
 
 set(test_exec_libraries
   HMI_API
@@ -132,13 +127,8 @@ endif()
     MediaManager
     Resumption
     ProtocolHandler
+    SecurityManager
   )
-
-  if(ENABLE_SECURITY)
-    list(APPEND testLibraries SecurityManager)
-  endif()
-  
-  list (APPEND testLibraries sqlite3 -L${SQLITE3_LIBRARY_DIR} -Wl,-rpath,/opt/i386/lib)
 
   if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
     list(REMOVE_ITEM test_exec_libraries dl)

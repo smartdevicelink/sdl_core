@@ -187,9 +187,7 @@ int32_t main(int32_t argc, char** argv) {
   life_cycle.StopComponents();
   LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
 
-  FLUSH_LOGGER();
   DEINIT_LOGGER();
-  DESTROY_LOGGERPTR_GLOBAL(logger_);
 
   return EXIT_SUCCESS;
 }
