@@ -57,7 +57,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-const size_t kStackSize = 32768;
+const size_t kStackSize = 65536;
 
 ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 0, 0);
 
