@@ -434,15 +434,6 @@ bool ApplicationImpl::SetVideoConfig(protocol_handler::ServiceType service_type,
   return false;
 }
 
-void ApplicationImpl::OnNaviSetVideoConfigDone(
-    bool result, std::vector<std::string>& rejected_params) {
-  using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  application_manager_.OnStreamingConfigured(
-      app_id(), ServiceType::kMobileNav, result, rejected_params);
-}
-
 void ApplicationImpl::StartStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;

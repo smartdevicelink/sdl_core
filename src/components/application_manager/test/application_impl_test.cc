@@ -682,17 +682,6 @@ TEST_F(ApplicationImplTest, SetVideoConfig_NotMobileNavi) {
   app_impl->SetVideoConfig(protocol_handler::ServiceType::kAudio, params);
 }
 
-TEST_F(ApplicationImplTest, OnNaviSetVideoConfigDone) {
-  bool result = true;
-  std::vector<std::string> empty;
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnStreamingConfigured(
-          app_id, protocol_handler::ServiceType::kMobileNav, result, empty));
-
-  app_impl->OnNaviSetVideoConfigDone(result, empty);
-}
-
 TEST_F(ApplicationImplTest, StartStreaming_MobileNavi_StreamingNotApproved) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendNaviStartStream(app_id, _));

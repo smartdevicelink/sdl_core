@@ -73,8 +73,6 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD2(SetVideoConfig,
                bool(protocol_handler::ServiceType service_type,
                     const smart_objects::SmartObject& params));
-  MOCK_METHOD2(OnNaviSetVideoConfigDone,
-               void(bool result, std::vector<std::string>& rejected_params));
   MOCK_METHOD1(StartStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));

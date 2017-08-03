@@ -41,6 +41,7 @@
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_event_dispatcher.h"
 
 namespace test {
 namespace components {
@@ -56,6 +57,8 @@ using am::commands::NaviSetVideoConfigRequest;
 using am::event_engine::Event;
 
 namespace {
+const uint32_t kAppId = 1u;
+const uint32_t kHmiAppId = 13u;
 const hmi_apis::FunctionID::eType kEventID =
     hmi_apis::FunctionID::Navigation_SetVideoConfig;
 }  // namespace
@@ -69,17 +72,25 @@ class NaviSetVideoConfigRequestTest
     mock_app_ptr_ = CreateMockApp();
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
+    ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_ptr_));
     ON_CALL(app_mngr_, application_by_hmi_app(_))
         .WillByDefault(Return(mock_app_ptr_));
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(mock_event_dispatcher_));
+    ON_CALL(*mock_app_ptr_, hmi_app_id()).WillByDefault(Return(kHmiAppId));
   }
 
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   MockAppPtr mock_app_ptr_;
+  MockEventDispatcher mock_event_dispatcher_;
 };
 
 TEST_F(NaviSetVideoConfigRequestTest, OnEvent_SUCCESS) {
+  MessageSharedPtr request_msg = CreateMessage();
+  (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+
   NaviSetVideoConfigRequestPtr command =
-      CreateCommand<NaviSetVideoConfigRequest>();
+      CreateCommand<NaviSetVideoConfigRequest>(request_msg);
 
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[am::strings::params][am::hmi_response::code] =
@@ -88,7 +99,11 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(*mock_app_ptr_, OnNaviSetVideoConfigDone(true, empty)).Times(1);
+  EXPECT_CALL(
+      app_mngr_,
+      OnStreamingConfigured(
+          kHmiAppId, protocol_handler::ServiceType::kMobileNav, true, empty))
+      .Times(1);
 
   command->on_event(event);
 }
@@ -116,6 +131,7 @@ static bool ValidateList(std::vector<std::string>& expected,
 
 TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
   MessageSharedPtr request_msg = CreateMessage();
+  (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
   (*request_msg)[am::strings::msg_params][am::strings::config] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   (*request_msg)[am::strings::msg_params][am::strings::config]
@@ -144,8 +160,11 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(*mock_app_ptr_, OnNaviSetVideoConfigDone(false, _))
-      .WillOnce(SaveArg<1>(&rejected_params));
+  EXPECT_CALL(
+      app_mngr_,
+      OnStreamingConfigured(
+          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, _))
+      .WillOnce(SaveArg<3>(&rejected_params));
 
   command->on_event(event);
 
@@ -157,8 +176,11 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
 }
 
 TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE_WithoutParams) {
+  MessageSharedPtr request_msg = CreateMessage();
+  (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+
   NaviSetVideoConfigRequestPtr command =
-      CreateCommand<NaviSetVideoConfigRequest>();
+      CreateCommand<NaviSetVideoConfigRequest>(request_msg);
 
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[am::strings::params][am::hmi_response::code] =
@@ -168,17 +190,28 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE_WithoutParams) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(*mock_app_ptr_, OnNaviSetVideoConfigDone(false, empty)).Times(1);
+  EXPECT_CALL(
+      app_mngr_,
+      OnStreamingConfigured(
+          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+      .WillOnce(Return());
 
   command->on_event(event);
 }
 
 TEST_F(NaviSetVideoConfigRequestTest, OnTimeout) {
+  MessageSharedPtr request_msg = CreateMessage();
+  (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+
   NaviSetVideoConfigRequestPtr command =
-      CreateCommand<NaviSetVideoConfigRequest>();
+      CreateCommand<NaviSetVideoConfigRequest>(request_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(*mock_app_ptr_, OnNaviSetVideoConfigDone(false, empty)).Times(1);
+  EXPECT_CALL(
+      app_mngr_,
+      OnStreamingConfigured(
+          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+      .WillOnce(Return());
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(1);
 

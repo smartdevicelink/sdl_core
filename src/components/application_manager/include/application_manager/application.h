@@ -451,16 +451,6 @@ class Application : public virtual InitialApplicationData,
                               const smart_objects::SmartObject& params) = 0;
 
   /**
-   * @brief Callback when SetVideoConfig response is received
-   * @param result true if HMI accepts video streaming parameters,
-   *        false otherwise
-   * @param rejected_params list of rejected parameters' names. Only
-   *        valid when result is false
-   */
-  virtual void OnNaviSetVideoConfigDone(
-      bool result, std::vector<std::string>& rejected_params) = 0;
-
-  /**
    * @brief Starts streaming service for application
    * @param service_type Type of streaming service
    */
