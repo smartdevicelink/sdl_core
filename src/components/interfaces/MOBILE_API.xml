@@ -701,6 +701,45 @@
 
   </enum>
 
+  <enum name="TextFieldType">
+    <element name="mediaTitle">
+      <description>The data in this field contains the title of the currently playing audio track.</description>
+    </element>
+    <element name="mediaArtist">
+      <description>The data in this field contains the artist or creator of the currently playing audio track.</description>
+    </element>
+    <element name="mediaAlbum">
+      <description>The data in this field contains the album title of the currently playing audio track.</description>
+    </element>
+    <element name="mediaYear">
+      <description>The data in this field contains the creation year of the currently playing audio track.</description>
+    </element>
+    <element name="mediaGenre">
+      <description>The data in this field contains the genre of the currently playing audio track.</description>
+    </element>
+    <element name="mediaStation">
+      <description>The data in this field contains the name of the current source for the media.</description>
+    </element>
+    <element name="rating">
+      <description>The data in this field is a rating.</description>
+    </element>
+    <element name="currentTemperature">
+      <description>The data in this field is the current temperature.</description>
+    </element>
+    <element name="maximumTemperature">
+      <description>The data in this field is the maximum temperature for the day.</description>
+    </element>
+    <element name="minimumTemperature">
+      <description>The data in this field is the minimum temperature for the day.</description>
+    </element>
+    <element name="weatherTerm">
+      <description>The data in this field describes the current weather (ex. cloudy, clear, etc.).</description>
+    </element>
+    <element name="humidity">
+      <description>The data in this field describes the current humidity value.</description>
+    </element>
+  </enum>
+
   <enum name="ImageFieldName">
     <element name="softButtonImage">
       <description>The image field for SoftButton</description>
@@ -838,6 +877,21 @@
     </param>
     <param name="systemAction" type="SystemAction" defvalue="DEFAULT_ACTION" mandatory="false">
       <description>Parameter indicating whether selecting a SoftButton shall call a specific system action.  This is intended to allow Notifications to bring the callee into full / focus; or in the case of persistent overlays, the overlay can persist when a SoftButton is pressed.</description>
+    </param>
+  </struct>
+
+  <struct name="MetadataStruct">
+    <param name="mainField1" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+      <description>The type of data contained in the "mainField1" text field.</description>
+    </param>
+    <param name="mainField2" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+      <description>The type of data contained in the "mainField2" text field.</description>
+    </param>
+    <param name="mainField3" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+      <description>The type of data contained in the "mainField3" text field.</description>
+    </param>
+    <param name="mainField4" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+      <description>The type of data contained in the "mainField4" text field.</description>
     </param>
   </struct>
 
@@ -3286,6 +3340,14 @@
       	App labeled on-screen presets (i.e. on-screen media presets or dynamic search suggestions).
       	If omitted on supported displays, the presets will be shown as not defined.
       </description>
+    </param>
+
+    <param name="textFieldMetadata" type="MetadataStruct" mandatory="false">
+        <description>
+            App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
+            If omitted on supported displays, the currently set metadata tags will not change.
+            If any text field contains no tags, the metadata tag for that textfield should be removed.
+        </description>
     </param>
 
   </function>
