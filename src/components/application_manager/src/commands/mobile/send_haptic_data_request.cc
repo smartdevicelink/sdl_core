@@ -31,19 +31,7 @@
  */
 
 #include "application_manager/commands/mobile/send_haptic_data_request.h"
-
-#include <vector>
-#include <string>
-#include <stdio.h>
-#include <algorithm>
-#include <sstream>
-#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "formatters/CFormatterJsonBase.h"
-#include "json/json.h"
-#include "utils/helpers.h"
-#include "utils/custom_string.h"
 
 namespace application_manager {
 

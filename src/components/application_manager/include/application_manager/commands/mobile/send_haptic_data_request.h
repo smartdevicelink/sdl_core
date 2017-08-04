@@ -75,7 +75,6 @@ class SendHapticDataRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-  std::string processing_file_;
   DISALLOW_COPY_AND_ASSIGN(SendHapticDataRequest);
 };
 
