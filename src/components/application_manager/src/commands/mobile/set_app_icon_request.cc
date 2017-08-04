@@ -115,7 +115,7 @@ void SetAppIconRequest::CopyToIconStorage(
     const std::string& path_to_file) const {
   if (!application_manager_.protocol_handler()
            .get_settings()
-           .enable_protocol_4()) {
+           .max_supported_protocol_version() >= ProtocolVersion::kV4) {
     LOG4CXX_WARN(logger_,
                  "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;

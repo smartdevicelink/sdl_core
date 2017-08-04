@@ -1742,21 +1742,6 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  bool heart_beat_support = (0 != get_settings().heart_beat_timeout());
-
-  bool sdl4_support = get_settings().enable_protocol_4();
-  bool sdl5_support = get_settings().enable_protocol_5();
-
-  if (sdl5_support) {
-    return PROTOCOL_VERSION_5;
-  }
-  if (sdl4_support) {
-    return PROTOCOL_VERSION_4;
-  }
-  if (heart_beat_support) {
-    return PROTOCOL_VERSION_3;
-  }
-  return PROTOCOL_VERSION_2;
+  return get_settings().max_supported_protocol_version();
 }
 }  // namespace protocol_handler
