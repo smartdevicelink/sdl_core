@@ -2267,6 +2267,25 @@
       </param>
   </struct>
 
+  <struct name="SpatialStruct">
+    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>A user control's identifier.
+      </description>
+    </param>
+    <param name="x" type="Float" mandatory="true">
+      <description>The X-coordinate of the user control</description>
+    </param>
+    <param name="y" type="Float" mandatory="true">
+      <description>The Y-coordinate of the user control</description>
+    </param>
+    <param name="width" type="Float" mandatory="true">
+      <description>The width of the user control's bounding rectangle</description>
+    </param>
+    <param name="height" type="Float" mandatory="true">
+      <description>The height of the user control's bounding rectangle</description>
+    </param>
+  </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.2.0" date="2017-04-27">
@@ -3435,6 +3454,22 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+  </function>
+  <function name="SendHapticData" messagetype="request">
+    <description>Send the UI spatial data from MOBILE. This data will be utilized by the HMI to determine how and when haptic events should occur</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Internal ID of the application that requested this RPC.</description>
+    </param>
+    <param name="HapticSpatialData" type="Common.SpatialStruct" minsize="0" maxsize="1000" mandatory="false" array="true">
+      <description>
+        Array of spatial data structures that represent the locations of all user controls present on the HMI.
+        This data should be updated if/when the application presents a new screen.
+        When a request is sent, if successful, it will replace all spatial data previously sent through RPC.
+        Avoidance of doubt, when an empty HapticSpatialData, it will be clear all spatial data previously sent through RPC.
+      </description>
+    </param>
+  </function>
+  <function name="SendHapticData" messagetype="response">
   </function>
 </interface>
 

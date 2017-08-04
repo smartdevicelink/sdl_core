@@ -334,6 +334,8 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_set_icon_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

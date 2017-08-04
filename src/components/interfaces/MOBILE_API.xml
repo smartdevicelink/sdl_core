@@ -2358,6 +2358,7 @@
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
     <element name="GetSystemCapabilityID" value="48" hexvalue="30"/>
+    <element name="SendHapticDataID" value="49" hexvalue="30" />
 
 <!--
 	Base Notifications
@@ -5000,6 +5001,55 @@
       <element name="WARNINGS"/>
       <element name="TIMED_OUT"/>
       <element name="IGNORED"/>
+    </param> 
+  </function>
+
+  <struct name="SpatialStruct">
+    <description>Defines spatial for each user control object for video streaming application</description>
+    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>A user control spatial identifier</description>
+    </param>
+    <param name="x" type="Float" mandatory="true">
+      <description>The X-coordinate of the user control</description>
+    </param>
+    <param name="y" type="Float" mandatory="true">
+      <description>The Y-coordinate of the user control</description>
+    </param>
+    <param name="width" type="Float" mandatory="true">
+      <description>The width of the user control's bounding rectangle</description>
+    </param>
+    <param name="height" type="Float" mandatory="true">
+      <description>The height of the user control's bounding rectangle</description>
+    </param>
+  </struct>
+
+  <function name="SendHapticData" functionID="SendHapticDataID" messagetype="request" >
+    <description>
+      Send the spatial data gathered from SDLCarWindow or VirtualDisplayEncoder to the HMI.
+      This data will be utilized by the HMI to determine how and when haptic events should occur
+    </description>
+    <param name="HapticSpatialData" type="SpatialStruct" minsize="0" maxsize="1000" mandatory="false" array="true">
+      <description>
+        Array of spatial data structures that represent the locations of all user controls present on the HMI.
+        This data should be updated if/when the application presents a new screen.
+        When a request is sent, if successful, it will replace all spatial data previously sent through RPC.
+        If an empty array is sent, the existing spatial data will be cleared
+      </description>
+    </param>
+  </function>
+
+  <function name="SendHapticData" functionID="SendHapticDataID" messagetype="response" >
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="DISALLOWED"/>
     </param> 
   </function>
 

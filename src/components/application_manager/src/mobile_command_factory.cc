@@ -135,6 +135,8 @@
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/send_haptic_data_request.h"
+#include "application_manager/commands/mobile/send_haptic_data_response.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/make_shared.h"
 
@@ -700,6 +702,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       command = utils::MakeShared<commands::OnWayPointChangeNotification>(
           message, application_manager);
+      break;
+    }
+    case mobile_apis::FunctionID::SendHapticDataID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SendHapticDataResponse(message, application_manager));
+      } else {
+        command.reset(
+            new commands::SendHapticDataRequest(message, application_manager));
+      }
       break;
     }
     default: {

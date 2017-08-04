@@ -278,6 +278,8 @@
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_request.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
@@ -2262,6 +2264,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       command.reset(new commands::OnNaviWayPointChangeNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_SendHapticData: {
+      if (is_response) {
+        command.reset(new commands::UISendHapticDataResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::UISendHapticDataRequest(
+            message, application_manager));
+      }
       break;
     }
   }
