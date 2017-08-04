@@ -503,6 +503,45 @@
     <element name="turnText"/>
 </enum>
 
+<enum name="TextFieldType">
+  <element name="mediaTitle">
+    <description>The data in this field contains the title of the currently playing audio track.</description>
+  </element>
+  <element name="mediaArtist">
+    <description>The data in this field contains the artist or creator of the currently playing audio track.</description>
+  </element>
+  <element name="mediaAlbum">
+    <description>The data in this field contains the album title of the currently playing audio track.</description>
+  </element>
+  <element name="mediaYear">
+    <description>The data in this field contains the creation year of the currently playing audio track.</description>
+  </element>
+  <element name="mediaGenre">
+    <description>The data in this field contains the genre of the currently playing audio track.</description>
+  </element>
+  <element name="mediaStation">
+    <description>The data in this field contains the name of the current source for the media.</description>
+  </element>
+  <element name="rating">
+    <description>The data in this field is a rating.</description>
+  </element>
+  <element name="currentTemperature">
+    <description>The data in this field is the current temperature.</description>
+  </element>
+  <element name="maximumTemperature">
+    <description>The data in this field is the maximum temperature for the day.</description>
+  </element>
+  <element name="minimumTemperature">
+    <description>The data in this field is the minimum temperature for the day.</description>
+  </element>
+  <element name="weatherTerm">
+    <description>The data in this field describes the current weather (ex. cloudy, clear, etc.).</description>
+  </element>
+  <element name="humidity">
+    <description>The data in this field describes the current humidity value.</description>
+  </element>
+</enum>
+
 <enum name="ImageFieldName">
   <element name="softButtonImage">
     <description>The image field for SoftButton</description>
@@ -1646,6 +1685,9 @@
   </param>
   <param name="fieldText" type="String" maxlength="500" mandatory="true">
     <description>The  text itself.</description>
+  </param>
+  <param name="fieldTypes" type="Common.TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+    <description>The type of data contained in the field.</description>
   </param>
 </struct>
 
