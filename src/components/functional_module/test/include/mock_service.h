@@ -55,6 +55,7 @@ class MockService : public Service {
   MOCK_METHOD2(NotifyHMIAboutHMILevel,
                void(ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType level));
+  MOCK_CONST_METHOD0(GetRCCapabilities, const smart_objects::SmartObject*());
   MOCK_METHOD4(CheckAccess,
                TypeAccess(const ApplicationId& app_id,
                           const std::string& module,

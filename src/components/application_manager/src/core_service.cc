@@ -243,6 +243,10 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
   MessageHelper::SendHMIStatusNotification(*app, application_manager_);
 }
 
+const smart_objects::SmartObject* CoreService::GetRCCapabilities() const {
+  return application_manager_.hmi_capabilities().rc_capability();
+}
+
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
                                          mobile_apis::HMILevel::eType level) {
   if (app->hmi_level() != mobile_apis::HMILevel::eType::HMI_FULL) {

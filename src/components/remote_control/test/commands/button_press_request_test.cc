@@ -41,6 +41,7 @@
 #include "remote_control/message_helper.h"
 #include "remote_control/rc_command_factory.h"
 #include "remote_control/event_engine/event_dispatcher.h"
+#include "remote_control/rc_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
@@ -91,7 +92,8 @@ namespace button_press_request_test {
 class ButtonPressRequestTest : public ::testing::Test {
  public:
   ButtonPressRequestTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
+      : rc_capabilities_(smart_objects::SmartType_Map)
+      , mock_service_(utils::MakeShared<NiceMock<MockService> >())
       , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
       , rc_app_extention_(
             utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
@@ -104,6 +106,43 @@ class ButtonPressRequestTest : public ::testing::Test {
         .WillRepeatedly(ReturnRef(event_dispatcher_));
     ServicePtr exp_service(mock_service_);
     mock_module_.set_service(exp_service);
+  }
+
+  smart_objects::SmartObject ButtonCapability(const std::string& button_name) {
+    smart_objects::SmartObject button(smart_objects::SmartType_Map);
+    button["name"] = button_name;
+    return button;
+  }
+
+  void SetUp() OVERRIDE {
+    using namespace remote_control;
+    std::vector<std::string> button_names;
+    button_names.push_back(enums_value::kACMax);
+    button_names.push_back(enums_value::kAC);
+    button_names.push_back(enums_value::kRecirculate);
+    button_names.push_back(enums_value::kFanUp);
+    button_names.push_back(enums_value::kFanDown);
+    button_names.push_back(enums_value::kTempUp);
+    button_names.push_back(enums_value::kTempDown);
+    button_names.push_back(enums_value::kDefrostMax);
+    button_names.push_back(enums_value::kDefrost);
+    button_names.push_back(enums_value::kDefrostRear);
+    button_names.push_back(enums_value::kUpperVent);
+    button_names.push_back(enums_value::kLowerVent);
+    button_names.push_back(enums_value::kVolumeUp);
+    button_names.push_back(enums_value::kVolumeDown);
+    button_names.push_back(enums_value::kEject);
+    button_names.push_back(enums_value::kSource);
+    button_names.push_back(enums_value::kShuffle);
+    button_names.push_back(enums_value::kRepeat);
+
+    smart_objects::SmartObject button_caps(smart_objects::SmartType_Array);
+    for (size_t i = 0; i < button_names.size(); i++) {
+      button_caps[i] = ButtonCapability(button_names[i]);
+    }
+    rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
+    ON_CALL(*mock_service_, GetRCCapabilities())
+        .WillByDefault(Return(&rc_capabilities_));
   }
 
   remote_control::request_controller::MobileRequestPtr CreateCommand(
@@ -122,6 +161,7 @@ class ButtonPressRequestTest : public ::testing::Test {
   }
 
  protected:
+  smart_objects::SmartObject rc_capabilities_;
   utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
   utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
   utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;

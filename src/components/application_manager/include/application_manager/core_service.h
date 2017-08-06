@@ -209,6 +209,7 @@ class CoreService : public Service {
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
                             mobile_apis::HMILevel::eType level) FINAL;
 
+  const smart_objects::SmartObject* GetRCCapabilities() const FINAL;
   /**
    * @brief Notify HMI about app changing HMI Level
    * only NONE, BACKGROUND and LIMITED levels are sent

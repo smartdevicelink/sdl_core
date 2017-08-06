@@ -35,7 +35,13 @@
 
 namespace remote_control {
 
-namespace strings {}  //  strings
+namespace strings {
+// RemoteControlCapabilities constants
+const char kclimateControlCapabilities[] = "climateControlCapabilities";
+const char kradioControlCapabilities[] = "radioControlCapabilities";
+const char kbuttonCapabilities[] = "buttonCapabilities";
+// RemoteControlCapabilities constants
+}  //  strings
 
 namespace result_codes {
 const char kSuccess[] = "SUCCESS";
@@ -299,6 +305,7 @@ const char kAutoAllow[] = "AUTO_ALLOW";
 const char kAutoDeny[] = "AUTO_DENY";
 const char kAskDriver[] = "ASK_DRIVER";
 // Access mode enum
+
 }  //  namespace enums_value
 
 }  //  namespace remote_control

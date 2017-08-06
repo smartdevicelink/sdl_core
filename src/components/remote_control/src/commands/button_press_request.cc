@@ -35,6 +35,7 @@
 #include "remote_control/rc_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
+#include "utils/helpers.h"
 
 namespace remote_control {
 
@@ -52,32 +53,80 @@ ButtonPressRequest::ButtonPressRequest(
 
 ButtonPressRequest::~ButtonPressRequest() {}
 
-const bool CheckButtonName(const std::string& module_type,
-                           const std::string& button_name) {
+const std::vector<std::string> buttons_climate() {
+  std::vector<std::string> data;
+  data.push_back(enums_value::kACMax);
+  data.push_back(enums_value::kAC);
+  data.push_back(enums_value::kRecirculate);
+  data.push_back(enums_value::kFanUp);
+  data.push_back(enums_value::kFanDown);
+  data.push_back(enums_value::kTempUp);
+  data.push_back(enums_value::kTempDown);
+  data.push_back(enums_value::kDefrostMax);
+  data.push_back(enums_value::kDefrost);
+  data.push_back(enums_value::kDefrostRear);
+  data.push_back(enums_value::kUpperVent);
+  data.push_back(enums_value::kLowerVent);
+  return data;
+}
+
+const std::vector<std::string> buttons_radio() {
+  std::vector<std::string> data;
+  data.push_back(enums_value::kVolumeUp);
+  data.push_back(enums_value::kVolumeDown);
+  data.push_back(enums_value::kEject);
+  data.push_back(enums_value::kSource);
+  data.push_back(enums_value::kShuffle);
+  data.push_back(enums_value::kRepeat);
+  return data;
+}
+
+bool CheckIfButtonExistInRCCaps(
+    const smart_objects::SmartObject& rc_capabilities,
+    const std::string& button_name) {
+  if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
+    const smart_objects::SmartObject& button_caps =
+        rc_capabilities[strings::kbuttonCapabilities];
+    smart_objects::SmartArray::iterator it = button_caps.asArray()->begin();
+    for (; it != button_caps.asArray()->end(); ++it) {
+      smart_objects::SmartObject& so = *it;
+      if (so[message_params::kName] == button_name) {
+        LOG4CXX_TRACE(logger_,
+                      "Button " << button_name << " exist in capabilities");
+        return true;
+      }
+    }
+  }
+  LOG4CXX_TRACE(logger_,
+                "Button " << button_name << " do not exist in capabilities");
+  return false;
+}
+
+bool CheckButtonName(const std::string& module_type,
+                     const std::string& button_name,
+                     const smart_objects::SmartObject* rc_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (rc_capabilities == NULL) {
+    LOG4CXX_ERROR(logger_, "No remote controll capabilities available");
+    return false;
+  }
+
   if (enums_value::kRadio == module_type) {
-    return (button_name == enums_value::kVolumeUp) ||
-           (button_name == enums_value::kVolumeDown) ||
-           (button_name == enums_value::kEject) ||
-           (button_name == enums_value::kSource) ||
-           (button_name == enums_value::kShuffle) ||
-           (button_name == enums_value::kRepeat);
+    if (!helpers::in_range(buttons_radio(), button_name)) {
+      LOG4CXX_WARN(logger_,
+                   "Trying to acceess climate button with module type radio");
+      return false;
+    }
   }
 
   if (enums_value::kClimate == module_type) {
-    return (button_name == enums_value::kACMax) ||
-           (button_name == enums_value::kAC) ||
-           (button_name == enums_value::kRecirculate) ||
-           (button_name == enums_value::kFanUp) ||
-           (button_name == enums_value::kFanDown) ||
-           (button_name == enums_value::kTempUp) ||
-           (button_name == enums_value::kTempDown) ||
-           (button_name == enums_value::kDefrostMax) ||
-           (button_name == enums_value::kDefrost) ||
-           (button_name == enums_value::kDefrostRear) ||
-           (button_name == enums_value::kUpperVent) ||
-           (button_name == enums_value::kLowerVent);
+    if (!helpers::in_range(buttons_climate(), button_name)) {
+      LOG4CXX_WARN(logger_,
+                   "Trying to acceess radio button with module type climate");
+      return false;
+    }
   }
-  return false;
+  return CheckIfButtonExistInRCCaps(*rc_capabilities, button_name);
 }
 
 void ButtonPressRequest::Execute() {
@@ -89,7 +138,7 @@ void ButtonPressRequest::Execute() {
   const std::string button_name = request_params[kButtonName].asString();
   const std::string module_type = request_params[kModuleType].asString();
   const bool button_name_matches_module_type =
-      CheckButtonName(module_type, button_name);
+      CheckButtonName(module_type, button_name, service()->GetRCCapabilities());
 
   if (button_name_matches_module_type) {
     SendRequest(functional_modules::hmi_api::button_press, request_params);
