@@ -57,6 +57,7 @@ const char* main_field_1 = "mainField1";
 const char* main_field_2 = "mainField2";
 const char* main_field_3 = "mainField3";
 const char* main_field_4 = "mainField4";
+const char* text_field_metadata = "textFieldMetadata";
 const char* eta = "eta";
 const char* time_to_destination = "timeToDestination";
 const char* total_distance = "totalDistance";
@@ -349,6 +350,7 @@ namespace hmi_request {
 const char* parent_id = "parentID";
 const char* field_name = "fieldName";
 const char* field_text = "fieldText";
+const char* field_types = "fieldTypes";
 const char* alert_strings = "alertStrings";
 const char* duration = "duration";
 const char* soft_buttons = "softButtons";
