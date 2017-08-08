@@ -256,8 +256,28 @@ class BaseCommandRequest
   void UpdateHMILevel(
       const rc_event_engine::Event<application_manager::MessagePtr,
                                    std::string>& event);
+
+  /**
+   * @brief CheckPolicyPermissions checks RPC permissions defined in policy
+   * table
+   * @return True if RPC is allowed, otherwise - false
+   */
   bool CheckPolicyPermissions();
+
+  /**
+   * @brief CheckDriverConsent checks driver consent defined in policy table
+   * @return True if no consent is required, otherwise - false
+   */
   bool CheckDriverConsent();
+
+  /**
+   * @brief AqcuireResources checks whether resource status is busy or not and
+   * then tries to acquire this resource. In case driver consent is required -
+   * sends consent request to HMI.
+   * @return True in case of resource is free and successfully acquired,
+   * otherwise false
+   */
+  bool AqcuireResources();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
   inline bool IsNeededDriverConsent(
       application_manager::TypeAccess access) const;

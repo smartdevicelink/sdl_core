@@ -106,13 +106,16 @@ void ResourceAllocationManagerImpl::SetResourceState(
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module_type);
 
-  DCHECK_OR_RETURN_VOID(allocated_resources_.end() != allocated_it)
+  const std::string status = allocated_resources_.end() != allocated_it
+                                 ? " acquired "
+                                 : " not acquired ";
   LOG4CXX_DEBUG(logger_,
-                "Resource " << module_type << " is acquired."
+                "Resource " << module_type << " is " << status
                             << " Owner application id is "
                             << allocated_it->second
                             << " Changing application id is " << app_id);
-  DCHECK_OR_RETURN_VOID(app_id == allocated_it->second);
+
+  DCHECK_OR_RETURN_VOID(allocated_resources_.end() != allocated_it)
 
   resources_state_[module_type] = state;
   LOG4CXX_DEBUG(logger_, "Resource" << module_type << " got state " << state);
