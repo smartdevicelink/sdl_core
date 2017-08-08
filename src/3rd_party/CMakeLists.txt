@@ -296,7 +296,7 @@ ExternalProject_Add(libbson
     BINARY_DIR ${BSON_LIB_SOURCE_DIRECTORY}
     DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in && ./configure
+    CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure && ./configure
     BUILD_COMMAND make
     INSTALL_COMMAND sudo make install)
 
