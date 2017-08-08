@@ -107,7 +107,8 @@ ApplicationImpl::ApplicationImpl(
     , device_(0)
     , mac_address_(mac_address)
     , usage_report_(mobile_app_id, statistics_manager)
-    , protocol_version_(ProtocolVersion::kV3)
+    , protocol_version_(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
     , video_stream_retry_number_(0)
@@ -617,11 +618,12 @@ bool ApplicationImpl::set_activated(bool is_active) {
 }
 
 void ApplicationImpl::set_protocol_version(
-    const ProtocolVersion& protocol_version) {
+    const protocol_handler::MajorProtocolVersion& protocol_version) {
   protocol_version_ = protocol_version;
 }
 
-ProtocolVersion ApplicationImpl::protocol_version() const {
+protocol_handler::MajorProtocolVersion ApplicationImpl::protocol_version()
+    const {
   return protocol_version_;
 }
 

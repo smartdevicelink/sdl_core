@@ -179,7 +179,8 @@ void DBusMessageAdapter::SendMessageToCore(
                                                      // merge
   // MessagePriority::FromServiceType(message.servicetype)
   // shall be used instead
-  message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");

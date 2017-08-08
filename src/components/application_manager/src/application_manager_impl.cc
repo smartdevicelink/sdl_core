@@ -546,15 +546,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
-  ProtocolVersion protocol_version = static_cast<ProtocolVersion>(
-      message[strings::params][strings::protocol_version].asInt());
+  protocol_handler::MajorProtocolVersion protocol_version =
+      static_cast<protocol_handler::MajorProtocolVersion>(
+          message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
 
-  if (ProtocolVersion::kUnknownProtocol != protocol_version) {
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
+      protocol_version) {
     connection_handler().BindProtocolVersionWithSession(
         connection_key, static_cast<uint8_t>(protocol_version));
   }
-  if ((protocol_version == ProtocolVersion::kV3) &&
+  if ((protocol_version ==
+       protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3) &&
       (get_settings().heart_beat_timeout() != 0)) {
     connection_handler().StartSessionHeartBeat(connection_key);
   }
@@ -1392,7 +1395,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
         ((*message)[strings::msg_params][strings::result_code] ==
          NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
       (*message)[strings::params][strings::protocol_version] =
-          ProtocolVersion::kV1;
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1;
     } else {
       (*message)[strings::params][strings::protocol_version] =
           SupportedSDLVersion();
@@ -1838,10 +1841,10 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                     << message.json_message());
 
   switch (message.protocol_version()) {
-    case ProtocolVersion::kV5:
-    case ProtocolVersion::kV4:
-    case ProtocolVersion::kV3:
-    case ProtocolVersion::kV2: {
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2: {
       const bool conversion_result =
           formatters::CFormatterJsonSDLRPCv2::fromString(
               message.json_message(),
@@ -1893,7 +1896,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       break;
     }
-    case ProtocolVersion::kHMI: {
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI: {
 #ifdef ENABLE_LOG
       int32_t result =
 #endif
@@ -1931,7 +1934,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       break;
     }
-    case ProtocolVersion::kV1: {
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
       static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
 
       if (message.function_id() == 0 || message.type() == kUnknownType) {
@@ -2012,7 +2015,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
           return false;
         }
-        output.set_protocol_version(application_manager::kV1);
+        output.set_protocol_version(
+            protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
       } else {
         if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
                                                           output_string)) {
@@ -2020,7 +2024,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
           return false;
         }
         output.set_protocol_version(
-            static_cast<ProtocolVersion>(protocol_version));
+            static_cast<protocol_handler::MajorProtocolVersion>(
+                protocol_version));
       }
 
       break;
@@ -2030,7 +2035,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
         LOG4CXX_WARN(logger_, "Failed to serialize smart object");
         return false;
       }
-      output.set_protocol_version(application_manager::kHMI);
+      output.set_protocol_version(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
       break;
     }
     default:
@@ -3497,30 +3503,39 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   }
 }
 
-ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
+protocol_handler::MajorProtocolVersion
+ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool heart_beat_support = get_settings().heart_beat_timeout();
   bool sdl4_support = protocol_handler_->get_settings().enable_protocol_4();
   bool sdl5_support = protocol_handler_->get_settings().enable_protocol_5();
 
   if (sdl5_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV5);
-    return ProtocolVersion::kV5;
+    LOG4CXX_DEBUG(
+        logger_,
+        "SDL Supported protocol version "
+            << protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5);
+    return protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5;
   }
   if (sdl4_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV4);
-    return ProtocolVersion::kV4;
+    LOG4CXX_DEBUG(
+        logger_,
+        "SDL Supported protocol version "
+            << protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4);
+    return protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4;
   }
   if (heart_beat_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV3);
-    return ProtocolVersion::kV3;
+    LOG4CXX_DEBUG(
+        logger_,
+        "SDL Supported protocol version "
+            << protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3);
+    return protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3;
   }
-  LOG4CXX_DEBUG(logger_,
-                "SDL Supported protocol version " << ProtocolVersion::kV2);
-  return ProtocolVersion::kV2;
+  LOG4CXX_DEBUG(
+      logger_,
+      "SDL Supported protocol version "
+          << protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2);
+  return protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {

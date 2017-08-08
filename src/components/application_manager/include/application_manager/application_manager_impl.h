@@ -1086,8 +1086,10 @@ class ApplicationManagerImpl
     bool operator()(const ApplicationSharedPtr app) const {
       return app
                  ? handle_ == app->device() &&
-                       Message::is_sufficient_version(ProtocolVersion::kV4,
-                                                      app->protocol_version())
+                       Message::is_sufficient_version(
+                           protocol_handler::MajorProtocolVersion::
+                               PROTOCOL_VERSION_4,
+                           app->protocol_version())
                  : false;
     }
   };
@@ -1354,7 +1356,7 @@ class ApplicationManagerImpl
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
    */
-  ProtocolVersion SupportedSDLVersion() const;
+  protocol_handler::MajorProtocolVersion SupportedSDLVersion() const;
 
   /**
    * @brief Types of directories used by Application Manager

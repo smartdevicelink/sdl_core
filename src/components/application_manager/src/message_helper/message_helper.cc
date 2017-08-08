@@ -619,8 +619,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
   (*response)[strings::params][strings::connection_key] = connection_key;
   (*response)[strings::params][strings::protocol_type] =
       commands::CommandImpl::mobile_protocol_type_;
-  (*response)[strings::params][strings::protocol_version] =
-      static_cast<int>(kV2);
+  (*response)[strings::params][strings::protocol_version] = static_cast<int>(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2);
   return response;
 }
 

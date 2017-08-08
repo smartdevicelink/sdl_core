@@ -46,8 +46,10 @@ struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   bool operator()(const ApplicationSharedPtr app) const {
     return app
                ? handle_ == app->device() &&
-                     Message::is_sufficient_version(ProtocolVersion::kV4,
-                                                    app->protocol_version())
+                     Message::is_sufficient_version(
+                         protocol_handler::MajorProtocolVersion::
+                             PROTOCOL_VERSION_4,
+                         app->protocol_version())
                : false;
   }
 };

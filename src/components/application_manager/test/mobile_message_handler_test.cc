@@ -53,7 +53,7 @@ using protocol_handler::ServiceType;
 using protocol_handler::MessagePriority;
 using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using application_manager::MobileMessageHandler;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using ::testing::_;
 using ::application_manager::Message;
 using ::application_manager::MobileMessage;
@@ -176,7 +176,7 @@ class MobileMessageHandlerTest : public testing::Test {
     message->set_correlation_id(correlation_id);
     message->set_connection_key(connection_key);
     message->set_protocol_version(
-        static_cast<ProtocolVersion>(protocol_version));
+        static_cast<protocol_handler::MajorProtocolVersion>(protocol_version));
     message->set_message_type(application_manager::MessageType::kNotification);
     if (data) {
       message->set_binary_data(data);
