@@ -48,6 +48,11 @@ class MockConnectionHandlerObserver
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
   MOCK_METHOD1(RemoveDevice,
                void(const connection_handler::DeviceHandle& device_handle));
+  // DEPRECATED
+  MOCK_METHOD3(OnServiceStartedCallback,
+               bool(const connection_handler::DeviceHandle& device_handle,
+                    const int32_t& session_key,
+                    const protocol_handler::ServiceType& type));
   MOCK_METHOD4(OnServiceStartedCallback,
                void(const connection_handler::DeviceHandle& device_handle,
                     const int32_t& session_key,

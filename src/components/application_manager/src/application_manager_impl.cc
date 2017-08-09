@@ -1260,6 +1260,43 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
+// DEPRECATED
+bool ApplicationManagerImpl::OnServiceStartedCallback(
+    const connection_handler::DeviceHandle& device_handle,
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type) {
+  using namespace helpers;
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "ServiceType = " << type << ". Session = " << std::hex
+                                 << session_key);
+
+  if (type == kRpc) {
+    LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
+    return true;
+  }
+  ApplicationSharedPtr app = application(session_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "The application with id:" << session_key
+                                            << " doesn't exists.");
+    return false;
+  }
+
+  if (Compare<ServiceType, EQ, ONE>(
+          type, ServiceType::kMobileNav, ServiceType::kAudio)) {
+    if (app->is_navi()) {
+      return StartNaviService(session_key, type);
+    } else {
+      LOG4CXX_WARN(logger_, "Refuse not navi application");
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Refuse unknown service");
+  }
+  return false;
+}
+
 void ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
