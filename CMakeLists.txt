@@ -56,7 +56,7 @@ option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded syste
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
-option(USE_DISTCC "Turn on distributed build_usage" ON)
+option(USE_DISTCC "Turn on distributed build_usage" OFF)
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
