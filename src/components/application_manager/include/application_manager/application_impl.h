@@ -162,8 +162,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
 
-  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
-  virtual ProtocolVersion protocol_version() const;
+  virtual void set_protocol_version(
+      const protocol_handler::MajorProtocolVersion& protocol_version);
+  virtual protocol_handler::MajorProtocolVersion protocol_version() const;
 
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
@@ -370,7 +371,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
-  ProtocolVersion protocol_version_;
+  protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
 

@@ -64,7 +64,8 @@ Message::Message(protocol_handler::MessagePriority priority)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(kUnknownProtocol) {}
+    , version_(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {}
 
 Message::Message(const Message& message)
     : priority_(message.priority_), binary_data_(NULL) {
@@ -129,7 +130,7 @@ MessageType Message::type() const {
   return type_;
 }
 
-ProtocolVersion Message::protocol_version() const {
+protocol_handler::MajorProtocolVersion Message::protocol_version() const {
   return version_;
 }
 
@@ -186,7 +187,8 @@ void Message::set_json_message(const std::string& json_message) {
   json_message_ = json_message;
 }
 
-void Message::set_protocol_version(ProtocolVersion version) {
+void Message::set_protocol_version(
+    protocol_handler::MajorProtocolVersion version) {
   version_ = version;
 }
 
@@ -206,8 +208,10 @@ void Message::set_payload_size(size_t payload_size) {
   payload_size_ = payload_size;
 }
 
-bool Message::is_sufficient_version(ProtocolVersion minVersion,
-                                    ProtocolVersion version) {
-  return version >= minVersion && version <= ProtocolVersion::kV5;
+bool Message::is_sufficient_version(
+    protocol_handler::MajorProtocolVersion minVersion,
+    protocol_handler::MajorProtocolVersion version) {
+  return version >= minVersion &&
+         version <= protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5;
 }
 }  // namespace application_manager

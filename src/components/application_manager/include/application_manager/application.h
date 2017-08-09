@@ -542,8 +542,8 @@ class Application : public virtual InitialApplicationData,
   virtual void set_grammar_id(uint32_t value) = 0;
 
   virtual void set_protocol_version(
-      const ProtocolVersion& protocol_version) = 0;
-  virtual ProtocolVersion protocol_version() const = 0;
+      const protocol_handler::MajorProtocolVersion& protocol_version) = 0;
+  virtual protocol_handler::MajorProtocolVersion protocol_version() const = 0;
 
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;

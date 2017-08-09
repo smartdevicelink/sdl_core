@@ -123,9 +123,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_grammar_id, void(uint32_t value));
   MOCK_METHOD1(
       set_protocol_version,
-      void(const ::application_manager::ProtocolVersion& protocol_version));
+      void(const ::protocol_handler::MajorProtocolVersion& protocol_version));
   MOCK_CONST_METHOD0(protocol_version,
-                     ::application_manager::ProtocolVersion());
+                     ::protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
   MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));

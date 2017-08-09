@@ -96,7 +96,8 @@ TEST(MessageHelperTestCreate,
             obj[strings::params][strings::correlation_id].asUInt());
   EXPECT_EQ(connection_key,
             obj[strings::params][strings::connection_key].asUInt());
-  EXPECT_EQ(kV2, obj[strings::params][strings::protocol_version].asInt());
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            obj[strings::params][strings::protocol_version].asInt());
 }
 
 TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
