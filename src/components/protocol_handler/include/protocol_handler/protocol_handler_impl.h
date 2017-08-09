@@ -522,6 +522,9 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
+  // DEPRECATED
+  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket& packet);
+
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);

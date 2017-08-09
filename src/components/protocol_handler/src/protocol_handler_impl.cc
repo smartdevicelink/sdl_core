@@ -1253,6 +1253,160 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 }  // namespace
 #endif  // ENABLE_SECURITY
 
+// DEPRECATED
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
+    const ProtocolPacket& packet) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Protocol version:" << static_cast<int>(packet.protocol_version()));
+  const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
+  const uint8_t protocol_version = packet.protocol_version();
+
+#ifdef ENABLE_SECURITY
+  const bool protection =
+      // Protocolo version 1 is not support protection
+      (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
+                                              : false;
+#else
+  const bool protection = false;
+#endif  // ENABLE_SECURITY
+
+  uint32_t hash_id;
+  const ConnectionID connection_id = packet.connection_id();
+  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
+      connection_id, packet.session_id(), service_type, protection, &hash_id);
+
+  if (0 == session_id) {
+    LOG4CXX_WARN(logger_,
+                 "Refused by session_observer to create service "
+                     << static_cast<int32_t>(service_type) << " type.");
+    SendStartSessionNAck(connection_id,
+                         packet.session_id(),
+                         protocol_version,
+                         packet.service_type());
+    return RESULT_OK;
+  }
+
+#ifdef ENABLE_SECURITY
+  // for packet is encrypted and security plugin is enable
+  if (protection && security_manager_) {
+    const uint32_t connection_key =
+        session_observer_.KeyFromPair(connection_id, session_id);
+
+    security_manager::SSLContext* ssl_context =
+        security_manager_->CreateSSLContext(connection_key);
+    if (!ssl_context) {
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          connection_key,
+          security_manager::SecurityManager::ERROR_INTERNAL,
+          error);
+      // Start service without protection
+      SendStartSessionAck(connection_id,
+                          session_id,
+                          packet.protocol_version(),
+                          hash_id,
+                          packet.service_type(),
+                          PROTECTION_OFF);
+      return RESULT_OK;
+    }
+    ProtocolPacket::ProtocolVersion* fullVersion;
+    std::vector<std::string> rejectedParams(0, std::string(""));
+    // Can't check protocol_version because the first packet is v1, but there
+    // could still be a payload, in which case we can get the real protocol
+    // version
+    if (packet.service_type() == kRpc && packet.data_size() != 0) {
+      BsonObject obj = bson_object_from_bytes(packet.data());
+      fullVersion = new ProtocolPacket::ProtocolVersion(
+          std::string(bson_object_get_string(&obj, "protocolVersion")));
+      bson_object_deinitialize(&obj);
+      // Constructed payloads added in Protocol v5
+      if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+        rejectedParams.push_back(std::string("protocolVersion"));
+      }
+    } else {
+      fullVersion = new ProtocolPacket::ProtocolVersion();
+    }
+    if (!rejectedParams.empty()) {
+      SendStartSessionNAck(connection_id,
+                           packet.session_id(),
+                           protocol_version,
+                           packet.service_type(),
+                           rejectedParams);
+    } else if (ssl_context->IsInitCompleted()) {
+      // mark service as protected
+      session_observer_.SetProtectionFlag(connection_key, service_type);
+      // Start service as protected with current SSLContext
+      SendStartSessionAck(connection_id,
+                          session_id,
+                          packet.protocol_version(),
+                          hash_id,
+                          packet.service_type(),
+                          PROTECTION_ON,
+                          *fullVersion);
+    } else {
+      security_manager_->AddListener(
+          new StartSessionHandler(connection_key,
+                                  this,
+                                  session_observer_,
+                                  connection_id,
+                                  session_id,
+                                  packet.protocol_version(),
+                                  hash_id,
+                                  service_type,
+                                  get_settings().force_protected_service(),
+                                  *fullVersion));
+      if (!ssl_context->IsHandshakePending()) {
+        // Start handshake process
+        security_manager_->StartHandshake(connection_key);
+      }
+    }
+    delete fullVersion;
+    LOG4CXX_DEBUG(logger_,
+                  "Protection establishing for connection "
+                      << connection_key << " is in progress");
+    return RESULT_OK;
+  }
+#endif  // ENABLE_SECURITY
+  if (packet.service_type() == kRpc && packet.data_size() != 0) {
+    BsonObject obj = bson_object_from_bytes(packet.data());
+    ProtocolPacket::ProtocolVersion fullVersion(
+        bson_object_get_string(&obj, "protocolVersion"));
+    bson_object_deinitialize(&obj);
+
+    if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
+      // Start service without protection
+      SendStartSessionAck(connection_id,
+                          session_id,
+                          packet.protocol_version(),
+                          hash_id,
+                          packet.service_type(),
+                          PROTECTION_OFF,
+                          fullVersion);
+    } else {
+      std::vector<std::string> rejectedParams(1,
+                                              std::string("protocolVersion"));
+      SendStartSessionNAck(connection_id,
+                           packet.session_id(),
+                           protocol_version,
+                           packet.service_type(),
+                           rejectedParams);
+    }
+
+  } else {
+    // Start service without protection
+    SendStartSessionAck(connection_id,
+                        session_id,
+                        packet.protocol_version(),
+                        hash_id,
+                        packet.service_type(),
+                        PROTECTION_OFF);
+  }
+  return RESULT_OK;
+}
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
