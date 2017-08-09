@@ -55,7 +55,6 @@ class MockProtocolHandlerSettings
   MOCK_CONST_METHOD0(heart_beat_timeout, uint32_t());
   MOCK_CONST_METHOD0(max_supported_protocol_version, uint16_t());
   MOCK_CONST_METHOD0(enable_protocol_4, bool());
-  MOCK_CONST_METHOD0(enable_protocol_5, bool());
   MOCK_CONST_METHOD0(multiframe_waiting_timeout, uint32_t());
 #ifdef ENABLE_SECURITY
   MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());

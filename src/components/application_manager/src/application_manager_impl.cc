@@ -3499,28 +3499,8 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
 ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool heart_beat_support = get_settings().heart_beat_timeout();
-  bool sdl4_support = protocol_handler_->get_settings().enable_protocol_4();
-  bool sdl5_support = protocol_handler_->get_settings().enable_protocol_5();
-
-  if (sdl5_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV5);
-    return ProtocolVersion::kV5;
-  }
-  if (sdl4_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV4);
-    return ProtocolVersion::kV4;
-  }
-  if (heart_beat_support) {
-    LOG4CXX_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV3);
-    return ProtocolVersion::kV3;
-  }
-  LOG4CXX_DEBUG(logger_,
-                "SDL Supported protocol version " << ProtocolVersion::kV2);
-  return ProtocolVersion::kV2;
+  return static_cast<ProtocolVersion> get_settings()
+      .max_supported_protocol_version();
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
