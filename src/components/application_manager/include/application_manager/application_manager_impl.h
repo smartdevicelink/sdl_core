@@ -1346,6 +1346,16 @@ class ApplicationManagerImpl
    * @brief Starts specified navi service for application
    * @param app_id Application to proceed
    * @param service_type Type of service to start
+   * @return True on success, false on fail
+   */
+  // DEPRECATED
+  bool StartNaviService(uint32_t app_id,
+                        protocol_handler::ServiceType service_type);
+
+  /**
+   * @brief Starts specified navi service for application
+   * @param app_id Application to proceed
+   * @param service_type Type of service to start
    * @param params configuration parameters specified by mobile
    * @return True if service is immediately started or configuration
    * parameters are sent to HMI, false on other cases

@@ -1138,6 +1138,39 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
+// DEPRECATED
+bool ApplicationManagerImpl::StartNaviService(
+    uint32_t app_id, protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (HMILevelAllowsStreaming(app_id, service_type)) {
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      std::pair<NaviServiceStatusMap::iterator, bool> res =
+          navi_service_status_.insert(
+              std::pair<uint32_t, std::pair<bool, bool> >(
+                  app_id, std::make_pair(false, false)));
+      if (!res.second) {
+        LOG4CXX_WARN(logger_, "Navi service refused");
+        return false;
+      }
+      it = res.first;
+    }
+    // Fill NaviServices map. Set true to first value of pair if
+    // we've started video service or to second value if we've
+    // started audio service
+    service_type == ServiceType::kMobileNav ? it->second.first = true
+                                            : it->second.second = true;
+
+    application(app_id)->StartStreaming(service_type);
+    return true;
+  } else {
+    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
+  }
+  return false;
+}
+
 bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id,
     protocol_handler::ServiceType service_type,
