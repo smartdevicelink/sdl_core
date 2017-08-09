@@ -5039,11 +5039,11 @@
   </function>
 
   <function name="SendHapticData" functionID="SendHapticDataID" messagetype="response" >
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
