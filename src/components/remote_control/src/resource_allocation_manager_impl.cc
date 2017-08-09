@@ -14,7 +14,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 ResourceAllocationManagerImpl::ResourceAllocationManagerImpl(
     RemotePluginInterface& rc_plugin)
     : current_access_mode_(hmi_apis::Common_RCAccessMode::AUTO_ALLOW)
-    , active_call_back_()
     , rc_plugin_(rc_plugin) {}
 
 ResourceAllocationManagerImpl::~ResourceAllocationManagerImpl() {}
@@ -144,33 +143,6 @@ void ResourceAllocationManagerImpl::SetAccessMode(
     rejected_resources_for_application_.clear();
   }
   current_access_mode_ = access_mode;
-}
-
-void ResourceAllocationManagerImpl::AskDriver(const std::string& module_type,
-                                              const uint32_t hmi_app_id,
-                                              AskDriverCallBackPtr callback) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(callback);
-  // Create GetInteriorConsent request to HMI
-  Json::Value params;
-  params[message_params::kModuleType] = module_type;
-  application_manager::MessagePtr message_to_send =
-      remote_control::MessageHelper::CreateHmiRequest(
-          functional_modules::hmi_api::get_user_consent,
-          hmi_app_id,
-          params,
-          rc_plugin_);
-
-  LOG4CXX_DEBUG(logger_,
-                "Request to HMI: \n" << message_to_send->json_message());
-  // Send GetInteriorConsent request to HMI
-  rc_plugin_.service()->SendMessageToHMI(message_to_send);
-
-  // Execute callback on response
-  rc_plugin_.event_dispatcher().add_observer(message_to_send->function_name(),
-                                             message_to_send->correlation_id(),
-                                             callback.get());
-  active_call_back_ = callback;
 }
 
 void ResourceAllocationManagerImpl::ForceAcquireResource(

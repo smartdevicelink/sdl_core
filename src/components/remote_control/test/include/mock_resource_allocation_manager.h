@@ -8,14 +8,6 @@ namespace test {
 namespace components {
 namespace remote_control_test {
 
-class MockAskDriverCallBack : public remote_control::AskDriverCallBack {
- public:
-  MOCK_METHOD1(
-      on_event,
-      void(const rc_event_engine::Event<application_manager::MessagePtr,
-                                        std::string>& event));
-};
-
 class MockResourceAllocationManager
     : public remote_control::ResourceAllocationManager {
  public:
@@ -26,10 +18,6 @@ class MockResourceAllocationManager
                void(const std::string& module_type, const uint32_t app_id));
   MOCK_METHOD2(OnDriverDisallowed,
                void(const std::string& module_type, const uint32_t app_id));
-  MOCK_METHOD3(AskDriver,
-               void(const std::string& module_type,
-                    const uint32_t app_id,
-                    remote_control::AskDriverCallBackPtr callback));
   MOCK_METHOD1(SetAccessMode,
                void(const hmi_apis::Common_RCAccessMode::eType access_mode));
   MOCK_METHOD3(SetResourceState,

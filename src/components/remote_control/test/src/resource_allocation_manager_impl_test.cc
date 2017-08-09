@@ -254,29 +254,4 @@ TEST_F(RAManagerTest,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
-TEST_F(RAManagerTest, AskDriver_ExpectDriverConsentRequestSentToHMI) {
-  // Arrange
-  EXPECT_CALL(*mock_service_, GetNextCorrelationID())
-      .WillOnce(Return(kCorrelationId));
-  EXPECT_CALL(mock_module_, event_dispatcher())
-      .WillOnce(ReturnRef(event_dispatcher_));
-  application_manager::MessagePtr result_msg;
-  EXPECT_CALL(*mock_service_, SendMessageToHMI(_))
-      .WillOnce(SaveArg<0>(&result_msg));
-  ResourceAllocationManagerImpl ra_manager(mock_module_);
-  AskDriverCallBackPtr ask_driver_callback_ptr =
-      utils::MakeShared<remote_control_test::MockAskDriverCallBack>();
-  ra_manager.AskDriver(kModuleType1, kAppId1, ask_driver_callback_ptr);
-  // Assertions
-  const Json::Value message_to_hmi =
-      MessageHelper::StringToValue(result_msg->json_message());
-  EXPECT_EQ(kAppId1,
-            message_to_hmi[json_keys::kParams][json_keys::kAppId].asUInt());
-  EXPECT_EQ(kModuleType1,
-            message_to_hmi[json_keys::kParams][message_params::kModuleType]
-                .asString());
-  EXPECT_EQ(functional_modules::hmi_api::get_user_consent,
-            message_to_hmi[json_keys::kMethod].asString());
-}
-
 }  // namespace remote_control

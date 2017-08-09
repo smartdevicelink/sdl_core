@@ -23,10 +23,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   bool IsResourceFree(const std::string& module_type) const FINAL;
 
-  void AskDriver(const std::string& module_type,
-                 const uint32_t hmi_app_id,
-                 AskDriverCallBackPtr callback) OVERRIDE FINAL;
-
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
 
@@ -72,7 +68,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   RejectedResources rejected_resources_for_application_;
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
-  AskDriverCallBackPtr active_call_back_;
   RemotePluginInterface& rc_plugin_;
 };
 }  // remote_control

@@ -22,18 +22,6 @@ namespace ResourceState {
 enum eType { FREE = 0, BUSY };
 }
 
-/**
- * @brief The AskDriverCallBack class callback for GetInteriourConsent response
- */
-class AskDriverCallBack
-    : public rc_event_engine::EventObserver<application_manager::MessagePtr,
-                                            std::string> {
- public:
-  virtual ~AskDriverCallBack() {}
-};
-
-typedef utils::SharedPtr<AskDriverCallBack> AskDriverCallBackPtr;
-
 class ResourceAllocationManager {
  public:
   /**
@@ -86,17 +74,6 @@ class ResourceAllocationManager {
    */
   virtual void OnDriverDisallowed(const std::string& module_type,
                                   const uint32_t app_id) = 0;
-  /**
-   * @brief AskDriver send GetInteriorConsent request to HMI for acquiring
-   * resource
-   * @param module_type resource to acquire
-   * @param app_id application that acquire resource
-   * @param callback will be executed on OnInteriorConsent response
-   */
-  virtual void AskDriver(const std::string& module_type,
-                         const uint32_t app_id,
-                         AskDriverCallBackPtr callback) = 0;
-
   /**
    * @brief Set current access mode for acquiring resource
    * @param access_mode
