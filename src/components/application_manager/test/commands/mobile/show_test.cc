@@ -151,6 +151,52 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
   }
 
+  void TestSetupHelperWithMetadata(
+      MessageSharedPtr msg,
+      hmi_apis::Common_TextFieldName::eType field_name,
+      const char* field,
+      size_t num_tags,
+      int32_t* field_tags) {
+    SmartObject msg_params(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg)[am::strings::params][am::strings::function_id] = kFunctionID;
+    msg_params[field] = text_field_;
+    msg_params[am::strings::text_field_metadata][field] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (size_t i = 0; i < num_tags; ++i) {
+      const int32_t current_tag = field_tags[i];
+      msg_params[am::strings::text_field_metadata][field][i] = current_tag;
+    }
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    EXPECT_EQ((*msg)[am::strings::msg_params], msg_params);
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+
+    msg_params.erase(field);
+    msg_params.erase(am::strings::text_field_metadata);
+
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::hmi_request::show_strings] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_name] =
+        static_cast<int32_t>(field_name);
+    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_text] =
+        text_field_;
+    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_types] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (size_t i = 0; i < num_tags; ++i) {
+      const int32_t current_tag = field_tags[i];
+      msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_types]
+                [i] = current_tag;
+    }
+
+    EXPECT_CALL(app_mngr_, ManageHMICommand(_));
+    EXPECT_CALL(*mock_app_, set_show_command(msg_params));
+  }
+
   void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
@@ -587,6 +633,90 @@ TEST_F(ShowRequestTest, Run_MainField4_WrongSyntax) {
   TestSetupHelperWrongSyntax(msg,
                              hmi_apis::Common_TextFieldName::mainField4,
                              am::strings::main_field_4);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MultipleMetadataTags) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 5;
+  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaTitle,
+                            hmi_apis::Common_TextFieldType::mediaArtist,
+                            hmi_apis::Common_TextFieldType::rating,
+                            hmi_apis::Common_TextFieldType::humidity,
+                            hmi_apis::Common_TextFieldType::currentTemperature};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField2_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_2";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField2,
+                              am::strings::main_field_2,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField3_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_3";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField3,
+                              am::strings::main_field_3,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_4";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField4,
+                              am::strings::main_field_4,
+                              num_tags,
+                              tags);
   command->Run();
 }
 
