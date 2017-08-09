@@ -300,6 +300,11 @@ const char* const status = "status";
 const char* const external_consent_status = "externalConsentStatus";
 const char* const consented_functions = "consentedFunctions";
 const char* const source = "source";
+const char* const config = "config";
+const char* const protocol = "protocol";
+const char* const codec = "codec";
+const char* const width = "width";
+const char* const height = "height";
 }  // namespace strings
 
 namespace json {

@@ -102,8 +102,9 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
             for (unsigned int i = 0; i < list->size(); i++) {
               const std::string& param = (*list)[i].asString();
               // Make sure that we actually sent the parameter in the request
-              if ((*message_)[strings::msg_params].keyExists("config") &&
-                  (*message_)[strings::msg_params]["config"].keyExists(param)) {
+              if ((*message_)[strings::msg_params].keyExists(strings::config) &&
+                  (*message_)[strings::msg_params][strings::config].keyExists(
+                      param)) {
                 rejected_params.push_back(param);
               }
             }

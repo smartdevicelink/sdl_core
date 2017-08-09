@@ -3831,7 +3831,7 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
         ConvertVideoProtocol(protocol);
     if (protocol_enum !=
         hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM) {
-      output["protocol"] = protocol_enum;
+      output[strings::protocol] = protocol_enum;
     }
   }
   const char* codec = bson_object_get_string(obj, "videoCodec");
@@ -3839,16 +3839,16 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
     hmi_apis::Common_VideoStreamingCodec::eType codec_enum =
         ConvertVideoCodec(codec);
     if (codec_enum != hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM) {
-      output["codec"] = codec_enum;
+      output[strings::codec] = codec_enum;
     }
   }
   BsonElement* element = bson_object_get(obj, "desiredHeight");
   if (element != NULL && element->type == TYPE_INT32) {
-    output["height"] = bson_object_get_int32(obj, "desiredHeight");
+    output[strings::height] = bson_object_get_int32(obj, "desiredHeight");
   }
   element = bson_object_get(obj, "desiredWidth");
   if (element != NULL && element->type == TYPE_INT32) {
-    output["width"] = bson_object_get_int32(obj, "desiredWidth");
+    output[strings::width] = bson_object_get_int32(obj, "desiredWidth");
   }
 }
 
@@ -3857,13 +3857,13 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     const std::vector<std::string>& input) {
   std::vector<std::string> output;
   for (unsigned int i = 0; i < input.size(); i++) {
-    if (input[i] == "protocol") {
+    if (input[i] == strings::protocol) {
       output.push_back("videoProtocol");
-    } else if (input[i] == "codec") {
+    } else if (input[i] == strings::codec) {
       output.push_back("videoCodec");
-    } else if (input[i] == "height") {
+    } else if (input[i] == strings::height) {
       output.push_back("desiredHeight");
-    } else if (input[i] == "width") {
+    } else if (input[i] == strings::width) {
       output.push_back("desiredWidth");
     }
     // ignore unknown parameters

@@ -1760,7 +1760,7 @@ void MessageHelper::SendNaviSetVideoConfig(
       hmi_apis::FunctionID::Navigation_SetVideoConfig;
 
   (*request)[strings::msg_params][strings::app_id] = app_id;
-  (*request)[strings::msg_params]["config"] = video_params;
+  (*request)[strings::msg_params][strings::config] = video_params;
 
   app_mngr.ManageHMICommand(request);
 }

@@ -116,14 +116,18 @@ static bool ValidateList(std::vector<std::string>& expected,
 
 TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
   MessageSharedPtr request_msg = CreateMessage();
-  (*request_msg)[am::strings::msg_params]["config"] =
+  (*request_msg)[am::strings::msg_params][am::strings::config] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  (*request_msg)[am::strings::msg_params]["config"]["protocol"] =
-      hmi_apis::Common_VideoStreamingProtocol::RTP;
-  (*request_msg)[am::strings::msg_params]["config"]["codec"] =
-      hmi_apis::Common_VideoStreamingCodec::H265;
-  (*request_msg)[am::strings::msg_params]["config"]["height"] = 640;
-  (*request_msg)[am::strings::msg_params]["config"]["width"] = 480;
+  (*request_msg)[am::strings::msg_params][am::strings::config]
+                [am::strings::protocol] =
+                    hmi_apis::Common_VideoStreamingProtocol::RTP;
+  (*request_msg)[am::strings::msg_params][am::strings::config]
+                [am::strings::codec] =
+                    hmi_apis::Common_VideoStreamingCodec::H265;
+  (*request_msg)[am::strings::msg_params][am::strings::config]
+                [am::strings::height] = 640;
+  (*request_msg)[am::strings::msg_params][am::strings::config]
+                [am::strings::width] = 480;
 
   NaviSetVideoConfigRequestPtr command =
       CreateCommand<NaviSetVideoConfigRequest>(request_msg);

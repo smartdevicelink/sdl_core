@@ -339,6 +339,11 @@ extern const char* const status;
 extern const char* const external_consent_status;
 extern const char* const consented_functions;
 extern const char* const source;
+extern const char* const config;
+extern const char* const protocol;
+extern const char* const codec;
+extern const char* const width;
+extern const char* const height;
 }  // namespace strings
 
 namespace json {
