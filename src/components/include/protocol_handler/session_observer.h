@@ -67,6 +67,26 @@ class SessionObserver {
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
+   * \param connection_handle Connection identifier within which session
+   * has to be started.
+   * \param sessionId Identifier of the session to be start
+   * \param service_type Type of service
+   * \param protocol_version Version of protocol
+   * \param is_protected would be service protected
+   * \param hash_id pointer for session hash identifier, uint32_t* hash_id
+   * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   */
+  // DEPRECATED
+  virtual uint32_t OnSessionStartedCallback(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t sessionId,
+      const protocol_handler::ServiceType& service_type,
+      const bool is_protected,
+      uint32_t* hash_id) = 0;
+
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates start of new session.
    * Result must be notified through NotifySessionStartedResult().
    * \param connection_handle Connection identifier within which session
    * has to be started.

@@ -207,7 +207,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                          NEW_SESSION_ID,
                                          start_service,
                                          callback_protection_flag,
-                                         _))
+                                         An<const BsonObject*>()))
         .
         // Return sessions start success
         WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
@@ -371,7 +371,7 @@ TEST_F(ProtocolHandlerImplTest,
                                NEW_SESSION_ID,
                                AnyOf(kControl, kRpc, kAudio, kMobileNav, kBulk),
                                PROTECTION_OFF,
-                               _))
+                               An<const BsonObject*>()))
       .Times(call_times)
       .
       // Return sessions start rejection
@@ -435,7 +435,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
                                NEW_SESSION_ID,
                                AnyOf(kControl, kRpc, kAudio, kMobileNav, kBulk),
                                callback_protection_flag,
-                               _))
+                               An<const BsonObject*>()))
       .Times(call_times)
       .
       // Return sessions start rejection
@@ -484,10 +484,12 @@ TEST_F(ProtocolHandlerImplTest,
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_OFF,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -619,10 +621,12 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   const ServiceType start_service = kRpc;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_OFF,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -671,10 +675,12 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_OFF,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -713,10 +719,12 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -764,10 +772,12 @@ TEST_F(ProtocolHandlerImplTest,
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -828,10 +838,12 @@ TEST_F(ProtocolHandlerImplTest,
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -917,10 +929,12 @@ TEST_F(ProtocolHandlerImplTest,
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -1011,10 +1025,12 @@ TEST_F(
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
@@ -1103,10 +1119,12 @@ TEST_F(ProtocolHandlerImplTest,
   uint32_t times = 0;
   std::vector<std::string> empty;
   // Expect ConnectionHandler check
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionStartedCallback(
-          connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id,
+                                       NEW_SESSION_ID,
+                                       start_service,
+                                       PROTECTION_ON,
+                                       An<const BsonObject*>()))
       .
       // Return sessions start success
       WillOnce(DoAll(
