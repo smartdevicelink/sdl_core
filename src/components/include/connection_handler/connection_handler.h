@@ -200,6 +200,8 @@ class ConnectionHandler {
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
    * \param result true if observer accepts starting service, false otherwise
    * \param rejected_params list of rejected parameters' name. Only valid when
    * result is false. Note that even if result is false, this may be empty.
@@ -208,7 +210,9 @@ class ConnectionHandler {
    * Also it can be invoked before OnServiceStartedCallback() returns.
    **/
   virtual void NotifyServiceStartedResult(
-      bool result, std::vector<std::string>& rejected_params) = 0;
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params) = 0;
 
  protected:
   /**

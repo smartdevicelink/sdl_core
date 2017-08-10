@@ -1244,7 +1244,7 @@ void ApplicationManagerImpl::OnStreamingConfigured(
       NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
       if (navi_service_status_.end() == it) {
         LOG4CXX_WARN(logger_, "Application not found in navi status map");
-        connection_handler().NotifyServiceStartedResult(false, empty);
+        connection_handler().NotifyServiceStartedResult(app_id, false, empty);
         return;
       }
 
@@ -1256,11 +1256,12 @@ void ApplicationManagerImpl::OnStreamingConfigured(
     }
 
     application(app_id)->StartStreaming(service_type);
-    connection_handler().NotifyServiceStartedResult(true, empty);
+    connection_handler().NotifyServiceStartedResult(app_id, true, empty);
   } else {
     std::vector<std::string> converted_params =
         ConvertRejectedParamList(rejected_params);
-    connection_handler().NotifyServiceStartedResult(false, converted_params);
+    connection_handler().NotifyServiceStartedResult(
+        app_id, false, converted_params);
   }
 }
 
@@ -1345,7 +1346,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
 
   if (type == kRpc) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
-    connection_handler().NotifyServiceStartedResult(true, empty);
+    connection_handler().NotifyServiceStartedResult(session_key, true, empty);
     return;
   }
   ApplicationSharedPtr app = application(session_key);
@@ -1353,7 +1354,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
     LOG4CXX_WARN(logger_,
                  "The application with id:" << session_key
                                             << " doesn't exists.");
-    connection_handler().NotifyServiceStartedResult(false, empty);
+    connection_handler().NotifyServiceStartedResult(session_key, false, empty);
     return;
   }
 
@@ -1361,7 +1362,8 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     if (app->is_navi() || app->mobile_projection_enabled()) {
       if (!StartNaviService(session_key, type, params)) {
-        connection_handler().NotifyServiceStartedResult(false, empty);
+        connection_handler().NotifyServiceStartedResult(
+            session_key, false, empty);
       }
       return;
     } else {
@@ -1370,7 +1372,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
-  connection_handler().NotifyServiceStartedResult(false, empty);
+  connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
 void ApplicationManagerImpl::OnServiceEndedCallback(

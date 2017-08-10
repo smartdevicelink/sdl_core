@@ -70,7 +70,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_list_lock_()
     , connection_handler_observer_lock_()
     , connection_list_deleter_(&connection_list_)
-    , start_service_context_queue_() {}
+    , start_service_context_map_lock_()
+    , start_service_context_map_() {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -83,6 +84,9 @@ void ConnectionHandlerImpl::Stop() {
     RemoveConnection(itr->second->connection_handle());
     itr = connection_list_.begin();
   }
+
+  sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
+  start_service_context_map_.clear();
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
@@ -415,7 +419,10 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
                                   service_type,
                                   hash_id,
                                   is_protected);
-    start_service_context_queue_.push(context);
+    {
+      sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
+      start_service_context_map_[session_key] = context;
+    }
 
     connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(),
@@ -436,14 +443,22 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 }
 
 void ConnectionHandlerImpl::NotifyServiceStartedResult(
-    bool result, std::vector<std::string>& rejected_params) {
+    uint32_t session_key,
+    bool result,
+    std::vector<std::string>& rejected_params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ServiceStartedContext context;
-  bool available = start_service_context_queue_.pop(context);
-  if (!available) {
-    LOG4CXX_ERROR(logger_, "context for start service not found!");
-    return;
+  {
+    sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
+    std::map<uint32_t, ServiceStartedContext>::iterator it =
+        start_service_context_map_.find(session_key);
+    if (it == start_service_context_map_.end()) {
+      LOG4CXX_ERROR(logger_, "context for start service not found!");
+      return;
+    }
+    context = it->second;
+    start_service_context_map_.erase(it);
   }
 
   Connection* connection = NULL;

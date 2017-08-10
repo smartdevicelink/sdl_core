@@ -62,9 +62,9 @@ using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
 using ::testing::SaveArg;
 
-// custom action to call a member function with 4 arguments
-ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
-  (ptr->*memberFunc)(a, b);
+// custom action to call a member function with 3 arguments
+ACTION_P5(InvokeMemberFuncWithArg3, ptr, memberFunc, a, b, c) {
+  (ptr->*memberFunc)(a, b, c);
 }
 
 namespace {
@@ -1210,9 +1210,10 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   std::vector<std::string> empty;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceStartedCallback(device_handle_, session_key, kRpc, NULL))
-      .WillOnce(InvokeMemberFuncWithArg2(
+      .WillOnce(InvokeMemberFuncWithArg3(
           connection_handler_,
           &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
           true,
           ByRef(empty)));
 
@@ -1246,9 +1247,10 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceStartedCallback(
                   device_handle_, session_key, kMobileNav, dummy_params))
-      .WillOnce(InvokeMemberFuncWithArg2(
+      .WillOnce(InvokeMemberFuncWithArg3(
           connection_handler_,
           &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
           true,
           ByRef(empty)));
 
@@ -1282,9 +1284,10 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceStartedCallback(
                   device_handle_, session_key, kMobileNav, dummy_params))
-      .WillOnce(InvokeMemberFuncWithArg2(
+      .WillOnce(InvokeMemberFuncWithArg3(
           connection_handler_,
           &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
           false,
           ByRef(empty)));
 

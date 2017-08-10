@@ -464,6 +464,8 @@ class ConnectionHandlerImpl
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
    * \param result true if observer accepts starting service, false otherwise
    * \param rejected_params list of rejected parameters' name. Only valid when
    * result is false. Note that even if result is false, this may be empty.
@@ -472,7 +474,9 @@ class ConnectionHandlerImpl
    * Also it can be invoked before OnServiceStartedCallback() returns.
    **/
   virtual void NotifyServiceStartedResult(
-      bool result, std::vector<std::string>& rejected_params);
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params);
 
  private:
   /**
@@ -580,8 +584,8 @@ class ConnectionHandlerImpl
    */
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
-  // we need thread-safe queue
-  utils::MessageQueue<ServiceStartedContext> start_service_context_queue_;
+  sync_primitives::Lock start_service_context_map_lock_;
+  std::map<uint32_t, ServiceStartedContext> start_service_context_map_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage
