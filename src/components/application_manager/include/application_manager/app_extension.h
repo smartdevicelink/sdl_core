@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,48 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "utils/shared_ptr.h"
 
-namespace hmi_message_handler {
+namespace application_manager {
 
-class HMIMessageAdapterImpl : public HMIMessageAdapter {
+typedef int AppExtensionUID;
+
+class AppExtension {
  public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
-
-  /**
-   * \brief Destructor
-   */
-  ~HMIMessageAdapterImpl();
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
- protected:
-  virtual HMIMessageHandler* handler() const {
-    return handler_;
+  explicit AppExtension(AppExtensionUID uid) : kUid_(uid) {}
+  virtual ~AppExtension() {}
+  AppExtensionUID uid() const {
+    return kUid_;
   }
 
  private:
-  /**
-   *\brief Pointer on handler to notify it about receiving message/error.
-   */
-  HMIMessageHandler* handler_;
+  const AppExtensionUID kUid_;
 };
 
-}  // namespace hmi_message_handler
+typedef utils::SharedPtr<AppExtension> AppExtensionPtr;
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+}  //  namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_

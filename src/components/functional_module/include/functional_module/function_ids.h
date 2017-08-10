@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,48 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+namespace functional_modules {
 
-namespace hmi_message_handler {
-
-class HMIMessageAdapterImpl : public HMIMessageAdapter {
- public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
-
-  /**
-   * \brief Destructor
-   */
-  ~HMIMessageAdapterImpl();
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
- protected:
-  virtual HMIMessageHandler* handler() const {
-    return handler_;
-  }
-
- private:
-  /**
-   *\brief Pointer on handler to notify it about receiving message/error.
-   */
-  HMIMessageHandler* handler_;
+enum RCFunctionID {
+  // Remote SDL functions ids
+  BUTTON_PRESS = 41,
+  GET_INTERIOR_VEHICLE_DATA = 43,
+  SET_INTERIOR_VEHICLE_DATA = 44,
+  ON_INTERIOR_VEHICLE_DATA = 32783,
+  ON_REMOTE_CONTROL_SETTINGS,
 };
 
-}  // namespace hmi_message_handler
+namespace hmi_api {
+const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
+const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
+const char on_interior_vehicle_data[] = "RC.OnInteriorVehicleData";
+const char button_press[] = "Buttons.ButtonPress";
+const char on_remote_control_settings[] = "RC.OnRemoteControlSettings";
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+const char get_user_consent[] = "RC.GetInteriorVehicleDataConsent";
+const char on_app_deactivated[] = "BasicCommunication.OnAppDeactivated";
+const char sdl_activate_app[] = "SDL.ActivateApp";
+}
+
+}  //  namespace functional_modules
+
+#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_

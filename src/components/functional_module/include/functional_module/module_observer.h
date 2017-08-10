@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,48 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_OBSERVER_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_OBSERVER_H_
 
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+namespace functional_modules {
 
-namespace hmi_message_handler {
+typedef int ModuleID;
 
-class HMIMessageAdapterImpl : public HMIMessageAdapter {
+class ModuleObserver {
  public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
-
-  /**
-   * \brief Destructor
-   */
-  ~HMIMessageAdapterImpl();
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
- protected:
-  virtual HMIMessageHandler* handler() const {
-    return handler_;
-  }
-
- private:
-  /**
-   *\brief Pointer on handler to notify it about receiving message/error.
-   */
-  HMIMessageHandler* handler_;
+  enum Errors { NONE = -1, OUT_OF_MEMORY, FS_FAILURE };
+  virtual ~ModuleObserver() {}
+  virtual void OnError(Errors error, ModuleID module_id) = 0;
 };
+}  //  namespace functional_modules {
 
-}  // namespace hmi_message_handler
-
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_OBSERVER_H_

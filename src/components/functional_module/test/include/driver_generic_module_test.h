@@ -29,49 +29,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#include "functional_module/generic_module.h"
 
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+namespace functional_modules {
 
-namespace hmi_message_handler {
-
-class HMIMessageAdapterImpl : public HMIMessageAdapter {
+class DriverGenericModuleTest : public GenericModule {
  public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
-
-  /**
-   * \brief Destructor
-   */
-  ~HMIMessageAdapterImpl();
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
- protected:
-  virtual HMIMessageHandler* handler() const {
-    return handler_;
+  explicit DriverGenericModuleTest(ModuleID module_id)
+      : GenericModule(module_id) {}
+  virtual ~DriverGenericModuleTest() {}
+  virtual PluginInfo GetPluginInfo() const {
+    PluginInfo info;
+    info.name = "DriverGenericModuleTest";
+    info.version = 1;
+    return info;
+  }
+  virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) {
+    NotifyObservers(ModuleObserver::FS_FAILURE);
+    return ProcessResult::FAILED;
+  }
+  virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) {
+    return ProcessResult::PROCESSED;
+  }
+  virtual void RemoveAppExtension(uint32_t app_id) {}
+  virtual void RemoveAppExtensions() {}
+  bool IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
+    return true;
   }
 
- private:
-  /**
-   *\brief Pointer on handler to notify it about receiving message/error.
-   */
-  HMIMessageHandler* handler_;
+  void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr,
+                            mobile_apis::HMILevel::eType) {}
+
+  const Observers& observers() {
+    return observers_;
+  }
+
+  void OnDeviceRemoved(const connection_handler::DeviceHandle&) {}
+
+  void OnUnregisterApplication(const uint32_t app_id) {}
 };
 
-}  // namespace hmi_message_handler
+}  // namespace functional_modules
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_

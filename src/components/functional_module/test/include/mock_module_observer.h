@@ -29,49 +29,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_MODULE_OBSERVER_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_MODULE_OBSERVER_H_
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#include "gmock/gmock.h"
+#include "functional_module/module_observer.h"
 
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+namespace functional_modules {
 
-namespace hmi_message_handler {
-
-class HMIMessageAdapterImpl : public HMIMessageAdapter {
+class MockModuleObserver : public ModuleObserver {
  public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
-
-  /**
-   * \brief Destructor
-   */
-  ~HMIMessageAdapterImpl();
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
- protected:
-  virtual HMIMessageHandler* handler() const {
-    return handler_;
+  MOCK_METHOD2(OnError, void(Errors error, ModuleID module_id));
+  int ObserverMethod() {
+    return 13;
   }
-
- private:
-  /**
-   *\brief Pointer on handler to notify it about receiving message/error.
-   */
-  HMIMessageHandler* handler_;
 };
 
-}  // namespace hmi_message_handler
+}  // namespace functional_modules
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_MODULE_OBSERVER_H_

@@ -101,6 +101,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(start_stream_retry_amount,
                      const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(app_icons_folder, const std::string&());
+  MOCK_CONST_METHOD0(plugins_folder, const std::string&());
   MOCK_CONST_METHOD0(app_icons_folder_max_size, const uint32_t&());
   MOCK_CONST_METHOD0(app_icons_amount_to_remove, const uint32_t&());
   MOCK_CONST_METHOD0(list_files_response_size, const uint32_t&());
