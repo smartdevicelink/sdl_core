@@ -286,6 +286,8 @@ class BaseCommandRequest
   void ProcessAccessResponse(
       const rc_event_engine::Event<application_manager::MessagePtr,
                                    std::string>& event);
+
+  const Json::Value msg_json_;
   application_manager::ApplicationSharedPtr app_;
   application_manager::ServicePtr service_;
   bool auto_allowed_;

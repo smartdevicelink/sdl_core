@@ -114,10 +114,8 @@ void ResourceAllocationManagerImpl::SetResourceState(
                             << allocated_it->second
                             << " Changing application id is " << app_id);
 
-  DCHECK_OR_RETURN_VOID(allocated_resources_.end() != allocated_it)
-
   resources_state_[module_type] = state;
-  LOG4CXX_DEBUG(logger_, "Resource" << module_type << " got state " << state);
+  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " got state " << state);
 }
 
 bool ResourceAllocationManagerImpl::IsResourceFree(

@@ -89,7 +89,6 @@ class SetInteriorVehicleDataRequest : public BaseCommandRequest {
    */
   void OnEvent(const rc_event_engine::Event<application_manager::MessagePtr,
                                             std::string>& event) OVERRIDE;
-
   /**
    * @brief Method that check if READ_ONLY parameters present
    * @param request_params params from received message

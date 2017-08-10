@@ -52,7 +52,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message,
     RemotePluginInterface& rc_module)
-    : Command(rc_module), message_(message), auto_allowed_(false) {
+    : Command(rc_module)
+    , message_(message)
+    , msg_json_(MessageHelper::StringToValue(message->json_message()))
+    , auto_allowed_(false) {
   service_ = rc_module_.service();
   app_ = service_->GetApplication(message_->connection_key());
 }
@@ -63,6 +66,8 @@ BaseCommandRequest::~BaseCommandRequest() {
 
 void BaseCommandRequest::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
+  SetResourceState(msg_json_, ResourceState::FREE);
+
   PrepareResponse(
       false, result_codes::kGenericError, "Request timeout expired.");
   rc_module_.SendTimeoutResponseToMobile(message_);
@@ -93,6 +98,7 @@ void BaseCommandRequest::SendResponse(const bool success,
                                       const char* result_code,
                                       const std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
+  SetResourceState(msg_json_, ResourceState::FREE);
   PrepareResponse(success, result_code, info);
   rc_module_.SendResponseToMobile(message_);
 }
@@ -316,11 +322,12 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
 
   mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
   if (ret != mobile_apis::Result::eType::SUCCESS) {
-    SendResponse(false, result_codes::kDisallowed, "");
     LOG4CXX_WARN(logger_,
                  "Function \"" << message_->function_name() << "\" (#"
                                << message_->function_id()
                                << ") not allowed by policy");
+
+    SendResponse(false, result_codes::kDisallowed, "");
     return false;
   }
 
@@ -373,8 +380,7 @@ bool BaseCommandRequest::AqcuireResources() {
   AcquireResult::eType acquire_result = AcquireResource(message_params);
   switch (acquire_result) {
     case AcquireResult::ALLOWED: {
-      SetResourceState(MessageHelper::StringToValue(message_->json_message()),
-                       ResourceState::BUSY);
+      SetResourceState(msg_json_, ResourceState::BUSY);
       return true;
     }
     case AcquireResult::IN_USE: {
@@ -382,8 +388,7 @@ bool BaseCommandRequest::AqcuireResources() {
       return false;
     }
     case AcquireResult::ASK_DRIVER: {
-      SetResourceState(MessageHelper::StringToValue(message_->json_message()),
-                       ResourceState::BUSY);
+      SetResourceState(msg_json_, ResourceState::BUSY);
 
       Json::Value value;
       Json::Reader reader;
@@ -459,8 +464,7 @@ void BaseCommandRequest::on_event(
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SetResourceState(MessageHelper::StringToValue(message_->json_message()),
-                   ResourceState::FREE);
+  SetResourceState(msg_json_, ResourceState::FREE);
 
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
@@ -499,48 +503,61 @@ void BaseCommandRequest::ProcessAccessResponse(
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
+
+  application_manager::Message& hmi_response = *(event.event_message());
+  const application_manager::MessageValidationResult validate_result =
+      service_->ValidateMessageBySchema(hmi_response);
+  LOG4CXX_DEBUG(logger_,
+                "HMI response validation result is " << validate_result);
+
+  if (validate_result !=
+      application_manager::MessageValidationResult::SUCCESS) {
+    SendResponse(
+        false, result_codes::kGenericError, "HMI has sent invalid parameters");
+    return;
+  }
+
   Json::Value value;
   Json::Reader reader;
   reader.parse(event.event_message()->json_message(), value);
 
   std::string result_code;
   std::string info;
-  bool allowed = ParseResultCode(value, result_code, info);
-  // Check if valid successfull message has arrived
-  if (allowed) {
+  const bool is_succeeded = ParseResultCode(value, result_code, info);
+
+  bool is_allowed = false;
+  if (is_succeeded) {
     if (IsMember(value[kResult], message_params::kAllowed) &&
         value[kResult][message_params::kAllowed].isBool()) {
-      allowed = value[kResult][message_params::kAllowed].asBool();
-    } else {
-      allowed = false;
+      is_allowed = value[kResult][message_params::kAllowed].asBool();
     }
-  }
 
-  Json::Value request;
-  reader.parse(message_->json_message(), request);
-  std::string module = ModuleType(request);
+    const std::string module = ModuleType(msg_json_);
 
-  ResourceAllocationManager& resource_manager =
-      rc_module_.resource_allocation_manager();
-
-  // Check the actual User's answer.
-  if (allowed) {
+    // Check the actual User's answer.
     LOG4CXX_DEBUG(logger_,
                   "Setting allowed access for " << app_->app_id() << " for "
                                                 << module);
-    service_->SetAccess(app_->app_id(), module, allowed);
-    CheckHMILevel(application_manager::kManual, allowed);
+    service_->SetAccess(app_->app_id(), module, is_allowed);
+    CheckHMILevel(application_manager::kManual, is_succeeded);
 
-    resource_manager.ForceAcquireResource(module, app_->app_id());
+    if (is_allowed) {
+      rc_module_.resource_allocation_manager().ForceAcquireResource(
+          module, app_->app_id());
 
-    Execute();  // run child's logic
+      Execute();  // run child's logic
+    } else {
+      rc_module_.resource_allocation_manager().OnDriverDisallowed(
+          module, app_->app_id());
+
+      SendResponse(
+          false,
+          result_codes::kRejected,
+          "The resource is in use and the driver disallows this remote "
+          "control RPC");
+    }
   } else {
-    SendResponse(false,
-                 result_codes::kRejected,
-                 "The resource is in use and the driver disallows this remote "
-                 "control RPC");
-
-    resource_manager.OnDriverDisallowed(module, app_->app_id());
+    SendResponse(false, result_code.c_str(), info);
   }
 }
 

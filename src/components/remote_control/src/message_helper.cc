@@ -80,14 +80,10 @@ std::string MessageHelper::ValueToString(const Json::Value& value) {
 
 Json::Value MessageHelper::StringToValue(const std::string& string) {
   Json::Reader reader;
-
   Json::Value json;
 
-  if (reader.parse(string, json)) {
-    return json;
-  }
-
-  return Json::Value(Json::ValueType::nullValue);
+  return reader.parse(string, json) ? json
+                                    : Json::Value(Json::ValueType::nullValue);
 }
 
 bool IsMember(const Json::Value& value, const std::string& key) {

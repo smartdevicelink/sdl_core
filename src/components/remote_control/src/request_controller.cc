@@ -60,6 +60,7 @@ void RequestController::AddRequest(const uint32_t mobile_correlation_id,
                                    MobileRequestPtr request) {
   // TODO(VS) Research and fix be problem with overlap correlation ids from two
   // different apllications(on two different mobile devices)
+  sync_primitives::AutoLock lock(mobile_request_lock_);
   LOG4CXX_DEBUG(logger_,
                 "Add request with correlation_id: " << mobile_correlation_id);
   mobile_request_list_[mobile_correlation_id] = request;
@@ -69,6 +70,7 @@ void RequestController::AddRequest(const uint32_t mobile_correlation_id,
 }
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
+  sync_primitives::AutoLock lock(mobile_request_lock_);
   LOG4CXX_DEBUG(
       logger_, "Delete request with correlation_id: " << mobile_correlation_id);
   mobile_request_list_.erase(mobile_correlation_id);
@@ -77,6 +79,7 @@ void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
 }
 
 void RequestController::OnTimeoutTriggered(const TrackableMessage& expired) {
+  sync_primitives::AutoLock lock(mobile_request_lock_);
   LOG4CXX_DEBUG(logger_,
                 "Timeout is expired for request with correlation_id: "
                     << expired.correlation_id());

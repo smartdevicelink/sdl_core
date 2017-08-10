@@ -196,27 +196,26 @@ void SetInteriorVehicleDataRequest::OnEvent(
       (functional_modules::hmi_api::set_interior_vehicle_data == event.id()));
 
   application_manager::Message& hmi_response = *(event.event_message());
-  const bool validate_result =
-      application_manager::MessageValidationResult::SUCCESS ==
-      service()->ValidateMessageBySchema(hmi_response);
-  LOG4CXX_DEBUG(logger_,
-                "HMI response validation result is " << validate_result);
+  if (application_manager::MessageValidationResult::SUCCESS !=
+      service()->ValidateMessageBySchema(hmi_response)) {
+    SendResponse(false, result_codes::kGenericError, "");
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "HMI response is valid");
   const Json::Value value =
       MessageHelper::StringToValue(hmi_response.json_message());
 
   std::string result_code;
   std::string info;
 
-  const bool success =
-      validate_result && ParseResultCode(value, result_code, info);
+  const bool is_response_successful = ParseResultCode(value, result_code, info);
 
-  if (success) {
+  if (is_response_successful) {
     response_params_[kModuleData] = value[kResult][kModuleData];
-  } else if (!validate_result) {
-    result_code = result_codes::kGenericError;
   }
 
-  SendResponse(success, result_code.c_str(), info);
+  SendResponse(is_response_successful, result_code.c_str(), info);
 }
 
 std::string SetInteriorVehicleDataRequest::ModuleType(

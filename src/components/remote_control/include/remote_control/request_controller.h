@@ -38,6 +38,7 @@
 #include "remote_control/commands/command.h"
 #include "remote_control/rc_module_timer.h"
 #include "functional_module/timer/timer_director.h"
+#include "utils/lock.h"
 
 namespace remote_control {
 
@@ -90,6 +91,7 @@ class RequestController
   std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
   functional_modules::ModuleTimer<TrackableMessage> timer_;
   functional_modules::TimerDirector time_director_;
+  sync_primitives::Lock mobile_request_lock_;
 };
 
 }  // namespace request_controller
