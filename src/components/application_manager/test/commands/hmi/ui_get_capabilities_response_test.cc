@@ -310,7 +310,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   (*command_msg)[strings::msg_params][strings::system_capabilities]
                 [strings::video_streaming_capability]
-                [strings::preferred_resolution][strings::resolution_width] =
+                [strings::preferred_resolution][strings::resolution_height] =
                     350;
 
   (*command_msg)[strings::msg_params][strings::system_capabilities]
