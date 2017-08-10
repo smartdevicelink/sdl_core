@@ -3844,13 +3844,13 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
       output[strings::codec] = codec_enum;
     }
   }
-  BsonElement* element = bson_object_get(obj, "desiredHeight");
+  BsonElement* element = bson_object_get(obj, "height");
   if (element != NULL && element->type == TYPE_INT32) {
-    output[strings::height] = bson_object_get_int32(obj, "desiredHeight");
+    output[strings::height] = bson_object_get_int32(obj, "height");
   }
-  element = bson_object_get(obj, "desiredWidth");
+  element = bson_object_get(obj, "width");
   if (element != NULL && element->type == TYPE_INT32) {
-    output[strings::width] = bson_object_get_int32(obj, "desiredWidth");
+    output[strings::width] = bson_object_get_int32(obj, "width");
   }
 }
 
@@ -3864,9 +3864,9 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     } else if (input[i] == strings::codec) {
       output.push_back("videoCodec");
     } else if (input[i] == strings::height) {
-      output.push_back("desiredHeight");
+      output.push_back("height");
     } else if (input[i] == strings::width) {
-      output.push_back("desiredWidth");
+      output.push_back("width");
     }
     // ignore unknown parameters
   }

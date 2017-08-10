@@ -396,8 +396,8 @@ TEST_F(ApplicationManagerImplTest,
   bson_object_put_string(&input_params, "videoProtocol", protocol_name);
   char codec_name[] = "VP9";
   bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "desiredHeight", 640);
-  bson_object_put_int32(&input_params, "desiredWidth", 480);
+  bson_object_put_int32(&input_params, "height", 640);
+  bson_object_put_int32(&input_params, "width", 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
   converted_params[strings::protocol] =
@@ -476,8 +476,8 @@ TEST_F(ApplicationManagerImplTest,
   bson_object_put_string(&input_params, "videoProtocol", protocol_name);
   char codec_name[] = "VP9";
   bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "desiredHeight", 640);
-  bson_object_put_int32(&input_params, "desiredWidth", 480);
+  bson_object_put_int32(&input_params, "height", 640);
+  bson_object_put_int32(&input_params, "width", 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
   converted_params[strings::protocol] =
@@ -610,8 +610,8 @@ TEST_F(ApplicationManagerImplTest,
   bson_object_put_string(&input_params, "videoProtocol", protocol_name);
   char codec_name[] = "VP9";
   bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "desiredHeight", 640);
-  bson_object_put_int32(&input_params, "desiredWidth", 480);
+  bson_object_put_int32(&input_params, "height", 640);
+  bson_object_put_int32(&input_params, "width", 480);
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(_, _)).Times(0);
