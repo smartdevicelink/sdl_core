@@ -344,6 +344,7 @@ extern const char* const protocol;
 extern const char* const codec;
 extern const char* const width;
 extern const char* const height;
+extern const char* const rejected_params;
 }  // namespace strings
 
 namespace json {

@@ -305,6 +305,7 @@ const char* const protocol = "protocol";
 const char* const codec = "codec";
 const char* const width = "width";
 const char* const height = "height";
+const char* const rejected_params = "rejectedParams";
 }  // namespace strings
 
 namespace json {

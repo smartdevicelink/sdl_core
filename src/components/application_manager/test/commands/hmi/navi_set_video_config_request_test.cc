@@ -152,10 +152,12 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
   (*event_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::REJECTED;
 
-  (*event_msg)[am::strings::msg_params]["rejectedParams"] =
+  (*event_msg)[am::strings::msg_params][am::strings::rejected_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  (*event_msg)[am::strings::msg_params]["rejectedParams"][0] = "codec";
-  (*event_msg)[am::strings::msg_params]["rejectedParams"][1] = "protocol";
+  (*event_msg)[am::strings::msg_params][am::strings::rejected_params][0] =
+      "codec";
+  (*event_msg)[am::strings::msg_params][am::strings::rejected_params][1] =
+      "protocol";
   Event event(kEventID);
   event.set_smart_object(*event_msg);
 

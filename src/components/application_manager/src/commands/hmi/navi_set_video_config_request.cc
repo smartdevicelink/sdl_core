@@ -95,9 +95,9 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
                       "Received SetVideoConfig failure response (" << event.id()
                                                                    << ")");
         result = false;
-        if (message[strings::msg_params].keyExists("rejectedParams")) {
+        if (message[strings::msg_params].keyExists(strings::rejected_params)) {
           const smart_objects::SmartArray* list =
-              message[strings::msg_params]["rejectedParams"].asArray();
+              message[strings::msg_params][strings::rejected_params].asArray();
           if (list != NULL) {
             for (unsigned int i = 0; i < list->size(); i++) {
               const std::string& param = (*list)[i].asString();
