@@ -85,12 +85,6 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    */
   void SendSubscribeButtonNotification();
 
-  /**
-   * @brief Checks HMI capabilities for specified button support
-   * @param button Button to check
-   */
-  bool CheckHMICapabilities(mobile_apis::ButtonName::eType button);
-
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
 
