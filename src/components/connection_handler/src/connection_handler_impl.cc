@@ -364,8 +364,12 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
     std::vector<std::string> empty;
-    protocol_handler_->NotifySessionStartedResult(
-        new_session_id, hash_id, is_protected, empty);
+    protocol_handler_->NotifySessionStartedResult(connection_handle,
+                                                  session_id,
+                                                  new_session_id,
+                                                  hash_id,
+                                                  is_protected,
+                                                  empty);
     return;
   }
 #endif  // ENABLE_SECURITY
@@ -373,7 +377,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    NotifySessionStartedFailure(is_protected);
+    NotifySessionStartedFailure(connection_handle, session_id, is_protected);
     return;
   }
 
@@ -382,7 +386,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     new_session_id = connection->AddNewSession();
     if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
-      NotifySessionStartedFailure(is_protected);
+      NotifySessionStartedFailure(connection_handle, session_id, is_protected);
       return;
     }
     hash_id = KeyFromPair(connection_handle, new_session_id);
@@ -395,7 +399,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 #endif  // ENABLE_SECURITY
                         << " service " << static_cast<int>(service_type)
                         << " for session " << static_cast<int>(session_id));
-      NotifySessionStartedFailure(is_protected);
+      NotifySessionStartedFailure(connection_handle, session_id, is_protected);
       return;
     }
     new_session_id = session_id;
@@ -421,8 +425,12 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   } else {
     if (protocol_handler_) {
       std::vector<std::string> empty;
-      protocol_handler_->NotifySessionStartedResult(
-          new_session_id, hash_id, is_protected, empty);
+      protocol_handler_->NotifySessionStartedResult(connection_handle,
+                                                    session_id,
+                                                    new_session_id,
+                                                    hash_id,
+                                                    is_protected,
+                                                    empty);
     }
   }
 }
@@ -462,19 +470,29 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
   }
 
   if (protocol_handler_ != NULL) {
-    protocol_handler_->NotifySessionStartedResult(context.new_session_id_,
+    protocol_handler_->NotifySessionStartedResult(context.connection_handle_,
+                                                  context.session_id_,
+                                                  context.new_session_id_,
                                                   context.hash_id_,
                                                   context.is_protected_,
                                                   rejected_params);
   }
 }
 
-void ConnectionHandlerImpl::NotifySessionStartedFailure(bool is_protected) {
+void ConnectionHandlerImpl::NotifySessionStartedFailure(
+    const transport_manager::ConnectionUID connection_handle,
+    const uint8_t session_id,
+    bool is_protected) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (protocol_handler_) {
     std::vector<std::string> empty;
     protocol_handler_->NotifySessionStartedResult(
-        0, protocol_handler::HASH_ID_WRONG, is_protected, empty);
+        connection_handle,
+        session_id,
+        0,
+        protocol_handler::HASH_ID_WRONG,
+        is_protected,
+        empty);
   }
 }
 

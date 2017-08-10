@@ -62,8 +62,10 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
   MOCK_CONST_METHOD0(get_settings,
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());
-  MOCK_METHOD4(NotifySessionStartedResult,
-               void(uint8_t session_id,
+  MOCK_METHOD6(NotifySessionStartedResult,
+               void(int32_t connection_id,
+                    uint8_t session_id,
+                    uint8_t generated_session_id,
                     uint32_t hash_id,
                     bool protection,
                     std::vector<std::string>& rejected_params));

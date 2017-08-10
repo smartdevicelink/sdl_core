@@ -84,6 +84,8 @@ class MessagesToMobileAppHandler;
 using transport_manager::TransportManagerListenerEmpty;
 
 typedef std::multimap<int32_t, RawMessagePtr> MessagesOverNaviMap;
+typedef std::map<std::pair<ConnectionID, uint8_t>, ProtocolFramePtr>
+    StartSessionFrameMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
 typedef transport_manager::ConnectionUID ConnectionID;
 
@@ -352,16 +354,20 @@ class ProtocolHandlerImpl
   /**
    * \brief Called by connection handler to notify the result of
    * OnSessionStartedCallback().
-   * \param session_id Generated session ID, will be 0 if session is not
-   * started
+   * \param connection_id Identifier of connection within which session exists
+   * \param session_id session ID passed to OnSessionStartedCallback()
+   * \param generated_session_id Generated session ID, will be 0 if session is
+   * not started
    * \param hash_id Generated Hash ID
    * \param protection whether the service will be protected
    * \param rejected_params list of parameters' name that are rejected.
-   * Only valid when session_id is 0. Note, even if session_id is 0, the
-   * list may be empty.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
    */
   void NotifySessionStartedResult(
+      int32_t connection_id,
       uint8_t session_id,
+      uint8_t generated_session_id,
       uint32_t hash_id,
       bool protection,
       std::vector<std::string>& rejected_params) OVERRIDE;
@@ -638,8 +644,8 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock protocol_observers_lock_;
 
-  // we need thread-safe queue
-  utils::MessageQueue<ProtocolFramePtr> start_session_frame_queue_;
+  sync_primitives::Lock start_session_frame_map_lock_;
+  StartSessionFrameMap start_session_frame_map_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

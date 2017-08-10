@@ -107,9 +107,9 @@ using ::testing::SetArgPointee;
 
 typedef std::vector<uint8_t> UCharDataVector;
 
-// custom action to call a member function with 4 arguments
-ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
-  (ptr->*memberFunc)(a, b, c, d);
+// custom action to call a member function with 6 arguments
+ACTION_P8(InvokeMemberFuncWithArg6, ptr, memberFunc, a, b, c, d, e, f) {
+  (ptr->*memberFunc)(a, b, c, d, e, f);
 }
 
 namespace {
@@ -211,9 +211,11 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .
         // Return sessions start success
         WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                       InvokeMemberFuncWithArg4(
+                       InvokeMemberFuncWithArg6(
                            protocol_handler_impl.get(),
                            &ProtocolHandler::NotifySessionStartedResult,
+                           connection_id,
+                           NEW_SESSION_ID,
                            session_id,
                            HASH_ID_WRONG,
                            callback_protection_flag,
@@ -377,8 +379,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start rejection
       WillRepeatedly(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    SESSION_START_REJECT,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
@@ -441,8 +445,10 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       // Return sessions start rejection
       WillRepeatedly(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    SESSION_START_REJECT,
                                    HASH_ID_WRONG,
                                    callback_protection_flag,
@@ -494,8 +500,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
@@ -631,8 +639,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
@@ -685,8 +695,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
@@ -729,8 +741,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
@@ -782,8 +796,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
@@ -848,8 +864,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
@@ -939,8 +957,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
@@ -1035,8 +1055,10 @@ TEST_F(
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
@@ -1129,8 +1151,10 @@ TEST_F(ProtocolHandlerImplTest,
       // Return sessions start success
       WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg4(protocol_handler_impl.get(),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id,
+                                   NEW_SESSION_ID,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,

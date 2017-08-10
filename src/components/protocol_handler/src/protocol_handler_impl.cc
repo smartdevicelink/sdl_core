@@ -81,7 +81,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
         "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
-    , start_session_frame_queue_()
+    , start_session_frame_map_lock_()
+    , start_session_frame_map_()
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -1432,8 +1433,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 #endif  // ENABLE_SECURITY
 
   const ConnectionID connection_id = packet->connection_id();
+  const uint8_t session_id = packet->session_id();
 
-  start_session_frame_queue_.push(packet);
+  {
+    sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+    start_session_frame_map_[std::make_pair(connection_id, session_id)] =
+        packet;
+  }
 
   session_observer_.OnSessionStartedCallback(
       connection_id, packet->session_id(), service_type, protection, &bson_obj);
@@ -1443,29 +1449,34 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 }
 
 void ProtocolHandlerImpl::NotifySessionStartedResult(
+    int32_t connection_id,
     uint8_t session_id,
+    uint8_t generated_session_id,
     uint32_t hash_id,
     bool protection,
     std::vector<std::string>& rejected_params) {
-
   ProtocolFramePtr packet;
-  bool available = start_session_frame_queue_.pop(packet);
-  if (!available) {
-    LOG4CXX_ERROR(logger_,
-                 "Cannot find Session Started packet");
-    return;
+  {
+    sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+    StartSessionFrameMap::iterator it = start_session_frame_map_.find(
+        std::make_pair(connection_id, session_id));
+    if (it == start_session_frame_map_.end()) {
+      LOG4CXX_ERROR(logger_, "Cannot find Session Started packet");
+      return;
+    }
+    packet = it->second;
+    start_session_frame_map_.erase(it);
   }
 
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
-  const ConnectionID connection_id = packet->connection_id();
 
-  if (0 == session_id) {
+  if (0 == generated_session_id) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
                      << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id,
-                         session_id,
+                         packet->session_id(),
                          protocol_version,
                          packet->service_type(),
                          rejected_params);
@@ -1476,7 +1487,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   // for packet is encrypted and security plugin is enable
   if (protection && security_manager_) {
     const uint32_t connection_key =
-        session_observer_.KeyFromPair(connection_id, session_id);
+        session_observer_.KeyFromPair(connection_id, generated_session_id);
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(connection_key);
@@ -1489,7 +1500,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
           error);
       // Start service without protection
       SendStartSessionAck(connection_id,
-                          session_id,
+                          generated_session_id,
                           packet->protocol_version(),
                           hash_id,
                           packet->service_type(),
@@ -1524,7 +1535,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
       SendStartSessionAck(connection_id,
-                          session_id,
+                          generated_session_id,
                           packet->protocol_version(),
                           hash_id,
                           packet->service_type(),
@@ -1536,7 +1547,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                                   this,
                                   session_observer_,
                                   connection_id,
-                                  session_id,
+                                  generated_session_id,
                                   packet->protocol_version(),
                                   hash_id,
                                   service_type,
@@ -1563,7 +1574,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
       // Start service without protection
       SendStartSessionAck(connection_id,
-                          session_id,
+                          generated_session_id,
                           packet->protocol_version(),
                           hash_id,
                           packet->service_type(),
@@ -1582,7 +1593,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   } else {
     // Start service without protection
     SendStartSessionAck(connection_id,
-                        session_id,
+                        generated_session_id,
                         packet->protocol_version(),
                         hash_id,
                         packet->service_type(),
@@ -1756,6 +1767,9 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
 void ProtocolHandlerImpl::Stop() {
   raw_ford_messages_from_mobile_.Shutdown();
   raw_ford_messages_to_mobile_.Shutdown();
+
+  sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+  start_session_frame_map_.clear();
 }
 
 #ifdef ENABLE_SECURITY

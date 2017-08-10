@@ -536,9 +536,15 @@ class ConnectionHandlerImpl
   /**
    * \brief Convenient method to call NotifySessionStartedResult() with
    * negative result.
+   * \param connection_handle Identifier of connection within which session
+   * exists
+   * \param session_id session ID passed to OnSessionStartedCallback()
    * \param is_protected whether the service would be protected
    **/
-  void NotifySessionStartedFailure(bool is_protected);
+  void NotifySessionStartedFailure(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t session_id,
+      bool is_protected);
 
   const ConnectionHandlerSettings& settings_;
   /**
