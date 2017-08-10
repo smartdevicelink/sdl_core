@@ -654,12 +654,22 @@ TEST_F(ProtocolHandlerImplTest,
                                    ByRef(empty))));
   times++;
 
+  BsonObject bson_ack_params;
+  bson_object_initialize_default(&bson_ack_params);
+  bson_object_put_int64(&bson_ack_params, "mtu", maximum_payload_size);
+  bson_object_put_string(
+      &bson_ack_params, "videoProtocol", const_cast<char*>("RAW"));
+  bson_object_put_string(
+      &bson_ack_params, "videoCodec", const_cast<char*>("H264"));
+  std::vector<uint8_t> ack_params =
+      CreateVectorFromBsonObject(&bson_ack_params);
+  bson_object_deinitialize(&bson_ack_params);
+
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(
-                  FRAME_DATA_START_SERVICE_ACK,
-                  PROTECTION_OFF,
-                  connection_id1,
-                  _)))  // skip checking of non-video parameters like mtu
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id1,
+                                                 Eq(ack_params))))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
