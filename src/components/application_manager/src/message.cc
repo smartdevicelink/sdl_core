@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,15 @@ Message::Message(protocol_handler::MessagePriority priority)
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {}
 
 Message::Message(const Message& message)
-    : priority_(message.priority_), binary_data_(NULL) {
+    : function_id_(0)
+    , correlation_id_(0)
+    , type_(kUnknownType)
+    , priority_(message.priority_)
+    , connection_key_(0)
+    , binary_data_(NULL)
+    , data_size_(0)
+    , payload_size_(0)
+    , version_(kUnknownProtocol) {
   *this = message;
 }
 
@@ -89,7 +97,7 @@ Message& Message::operator=(const Message& message) {
   return *this;
 }
 
-bool Message::operator==(const Message& message) {
+bool Message::operator==(const Message& message) const {
   bool function_id = function_id_ == message.function_id_;
   bool correlation_id = correlation_id_ == message.correlation_id_;
   bool connection_key = connection_key_ == message.connection_key_;
@@ -98,11 +106,13 @@ bool Message::operator==(const Message& message) {
   bool version = version_ == message.version_;
   bool data_size = data_size_ == message.data_size_;
   bool payload_size = payload_size_ == message.payload_size_;
-
-  bool binary_data = std::equal(binary_data_->begin(),
-                                binary_data_->end(),
-                                message.binary_data_->begin(),
-                                BinaryDataPredicate);
+  bool binary_data = true;
+  if (binary_data_) {
+    binary_data = std::equal(binary_data_->begin(),
+                             binary_data_->end(),
+                             message.binary_data_->begin(),
+                             BinaryDataPredicate);
+  }
 
   return function_id && correlation_id && connection_key && type &&
          binary_data && json_message && version && data_size && payload_size;
@@ -118,6 +128,12 @@ int32_t Message::function_id() const {
   return function_id_;
 }
 
+#ifdef SDL_REMOTE_CONTROL
+std::string Message::function_name() const {
+  return function_name_;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 int32_t Message::correlation_id() const {
   return correlation_id_;
 }
@@ -130,7 +146,7 @@ MessageType Message::type() const {
   return type_;
 }
 
-protocol_handler::MajorProtocolVersion Message::protocol_version() const {
+ProtocolVersion Message::protocol_version() const {
   return version_;
 }
 
@@ -158,6 +174,12 @@ void Message::set_function_id(int32_t id) {
   function_id_ = id;
 }
 
+#ifdef SDL_REMOTE_CONTROL
+void Message::set_function_name(const std::string& name) {
+  function_name_ = name;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 void Message::set_correlation_id(int32_t id) {
   correlation_id_ = id;
 }
@@ -180,15 +202,14 @@ void Message::set_binary_data(BinaryData* data) {
     delete binary_data_;
   }
 
-  binary_data_ = data;
+  binary_data_ = new BinaryData(*data);
 }
 
 void Message::set_json_message(const std::string& json_message) {
   json_message_ = json_message;
 }
 
-void Message::set_protocol_version(
-    protocol_handler::MajorProtocolVersion version) {
+void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
