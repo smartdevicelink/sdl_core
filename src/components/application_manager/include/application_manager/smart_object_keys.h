@@ -345,6 +345,11 @@ extern const char* const codec;
 extern const char* const width;
 extern const char* const height;
 extern const char* const rejected_params;
+extern const char* const preferred_resolution;
+extern const char* const resolution_width;
+extern const char* const resolution_height;
+extern const char* const max_bitrate;
+extern const char* const supported_formats;
 }  // namespace strings
 
 namespace json {

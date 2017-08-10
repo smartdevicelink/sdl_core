@@ -306,6 +306,11 @@ const char* const codec = "codec";
 const char* const width = "width";
 const char* const height = "height";
 const char* const rejected_params = "rejectedParams";
+const char* const preferred_resolution = "preferredResolution";
+const char* const resolution_width = "resolutionWidth";
+const char* const resolution_height = "resolutionHeight";
+const char* const max_bitrate = "maxBitrate";
+const char* const supported_formats = "supportedFormats";
 }  // namespace strings
 
 namespace json {
