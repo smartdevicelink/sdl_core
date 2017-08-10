@@ -400,10 +400,11 @@ TEST_F(ApplicationManagerImplTest,
   bson_object_put_int32(&input_params, "desiredWidth", 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
-  converted_params["protocol"] = hmi_apis::Common_VideoStreamingProtocol::RTP;
-  converted_params["codec"] = hmi_apis::Common_VideoStreamingCodec::VP9;
-  converted_params["height"] = 640;
-  converted_params["width"] = 480;
+  converted_params[strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RTP;
+  converted_params[strings::codec] = hmi_apis::Common_VideoStreamingCodec::VP9;
+  converted_params[strings::height] = 640;
+  converted_params[strings::width] = 480;
 
   std::vector<std::string> empty;
 
@@ -479,10 +480,11 @@ TEST_F(ApplicationManagerImplTest,
   bson_object_put_int32(&input_params, "desiredWidth", 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
-  converted_params["protocol"] = hmi_apis::Common_VideoStreamingProtocol::RTP;
-  converted_params["codec"] = hmi_apis::Common_VideoStreamingCodec::VP9;
-  converted_params["height"] = 640;
-  converted_params["width"] = 480;
+  converted_params[strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RTP;
+  converted_params[strings::codec] = hmi_apis::Common_VideoStreamingCodec::VP9;
+  converted_params[strings::height] = 640;
+  converted_params[strings::width] = 480;
 
   std::vector<std::string> rejected_list;
   rejected_list.push_back(std::string("protocol"));
