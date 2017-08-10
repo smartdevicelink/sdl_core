@@ -45,6 +45,7 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/make_shared.h"
 #include "utils/test_async_waiter.h"
+#include <bson_object.h>
 
 namespace test {
 namespace components {
@@ -100,6 +101,7 @@ using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::ByRef;
 using ::testing::DoAll;
+using ::testing::Eq;
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::SetArgReferee;
@@ -540,6 +542,176 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
+
+static std::vector<uint8_t> CreateVectorFromBsonObject(const BsonObject* bo) {
+  std::vector<uint8_t> output;
+  if (bo != NULL) {
+    size_t len = bson_object_size(const_cast<BsonObject*>(bo));
+    uint8_t* bytes = bson_object_to_bytes(const_cast<BsonObject*>(bo));
+    output.assign(bytes, bytes + len);
+    free(bytes);
+  }
+  return output;
+}
+
+/*
+ * Simulate two StartService messages of video service from mobile.
+ * Session observer accepts the first message with delay, while rejects the
+ * second message immediately.
+ */
+TEST_F(ProtocolHandlerImplTest,
+       StartSession_Unprotected_Multiple_SessionObserverAcceptAndReject) {
+  using namespace protocol_handler;
+
+  ON_CALL(protocol_handler_settings_mock, enable_protocol_5())
+      .WillByDefault(Return(true));
+
+  const size_t maximum_payload_size = 1000;
+  InitProtocolHandlerImpl(0u, 0u, false, 0u, 0u, 0, maximum_payload_size);
+
+  const ServiceType start_service = kMobileNav;
+  const ::transport_manager::ConnectionUID connection_id1 = 0xAu;
+  const uint8_t session_id1 = 1u;
+  const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
+  const uint8_t session_id2 = 2u;
+
+  EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id1, _))
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id2, _))
+      .WillRepeatedly(Return(false));
+
+  // Add two connections
+  tm_listener->OnConnectionEstablished(DeviceInfo(DeviceHandle(1u),
+                                                  std::string("mac"),
+                                                  std::string("name"),
+                                                  std::string("BTMAC")),
+                                       connection_id1);
+  tm_listener->OnConnectionEstablished(DeviceInfo(DeviceHandle(2u),
+                                                  std::string("mac"),
+                                                  std::string("name"),
+                                                  std::string("BTMAC")),
+                                       connection_id2);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  BsonObject bson_params1;
+  bson_object_initialize_default(&bson_params1);
+  bson_object_put_string(
+      &bson_params1, "videoProtocol", const_cast<char*>("RAW"));
+  bson_object_put_string(
+      &bson_params1, "videoCodec", const_cast<char*>("H264"));
+  std::vector<uint8_t> params1 = CreateVectorFromBsonObject(&bson_params1);
+
+  uint8_t generated_session_id1 = 100;
+  std::vector<std::string> empty;
+
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id1,
+                                       session_id1,
+                                       start_service,
+                                       PROTECTION_OFF,
+                                       An<const BsonObject*>()))
+      // don't call NotifySessionStartedResult() immediately, instead call it
+      // after second OnSessionStartedCallback()
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
+  BsonObject bson_params2;
+  bson_object_initialize_default(&bson_params2);
+  bson_object_put_string(
+      &bson_params2, "videoProtocol", const_cast<char*>("RTP"));
+  bson_object_put_string(
+      &bson_params2, "videoCodec", const_cast<char*>("H265"));
+  std::vector<uint8_t> params2 = CreateVectorFromBsonObject(&bson_params2);
+
+  std::vector<std::string> rejected_param_list;
+  rejected_param_list.push_back("videoCodec");
+
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id2,
+                                       session_id2,
+                                       start_service,
+                                       PROTECTION_OFF,
+                                       An<const BsonObject*>()))
+      .WillOnce(DoAll(
+          NotifyTestAsyncWaiter(&waiter),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id2,
+                                   session_id2,
+                                   SESSION_START_REJECT,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(rejected_param_list)),
+          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStartedResult,
+                                   connection_id1,
+                                   session_id1,
+                                   generated_session_id1,
+                                   HASH_ID_WRONG,
+                                   PROTECTION_OFF,
+                                   ByRef(empty))));
+  times++;
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(
+                  FRAME_DATA_START_SERVICE_ACK,
+                  PROTECTION_OFF,
+                  connection_id1,
+                  _)))  // skip checking of non-video parameters like mtu
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  BsonArray bson_arr;
+  bson_array_initialize(&bson_arr, rejected_param_list.size());
+  for (unsigned int i = 0; i < rejected_param_list.size(); i++) {
+    bson_array_add_string(&bson_arr,
+                          const_cast<char*>(rejected_param_list[i].c_str()));
+  }
+  BsonObject bson_nack_params;
+  bson_object_initialize_default(&bson_nack_params);
+  bson_object_put_array(&bson_nack_params, "rejectedParams", &bson_arr);
+  std::vector<uint8_t> nack_params =
+      CreateVectorFromBsonObject(&bson_nack_params);
+  bson_object_deinitialize(&bson_nack_params);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id2,
+                                                 Eq(nack_params))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendTMMessage(connection_id1,
+                PROTOCOL_VERSION_5,
+                PROTECTION_OFF,
+                FRAME_TYPE_CONTROL,
+                start_service,
+                FRAME_DATA_START_SERVICE,
+                session_id1,
+                params1.size(),
+                message_id,
+                params1.size() > 0 ? &params1[0] : NULL);
+
+  SendTMMessage(connection_id2,
+                PROTOCOL_VERSION_5,
+                PROTECTION_OFF,
+                FRAME_TYPE_CONTROL,
+                start_service,
+                FRAME_DATA_START_SERVICE,
+                session_id2,
+                params2.size(),
+                message_id,
+                params2.size() > 0 ? &params2[0] : NULL);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+
+  bson_object_deinitialize(&bson_params1);
+  bson_object_deinitialize(&bson_params2);
+}
+
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from
 // protocol_handler_impl.cc
 /*
