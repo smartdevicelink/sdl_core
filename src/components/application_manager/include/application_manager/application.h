@@ -42,6 +42,7 @@
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
+#include "application_manager/app_extension.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
@@ -384,7 +385,6 @@ class Application : public virtual InitialApplicationData,
  public:
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
- public:
   Application() : is_greyed_out_(false) {}
   virtual ~Application() {}
 
@@ -786,6 +786,31 @@ class Application : public virtual InitialApplicationData,
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  virtual void RemoveExtensions() = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+#endif  // SDL_REMOTE_CONTROL
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 
@@ -800,6 +825,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

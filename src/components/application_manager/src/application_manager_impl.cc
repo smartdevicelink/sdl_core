@@ -71,6 +71,12 @@
 #include "utils/custom_string.h"
 #include <time.h>
 
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/usage_statistics/counter.h"
+#include "functional_module/plugin_manager.h"
+#include "application_manager/core_service.h"
+#endif  // SDL_REMOTE_CONTROL
+
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
@@ -331,6 +337,20 @@ struct SubscribedToIVIPredicate {
   bool operator()(const ApplicationSharedPtr app) const {
     return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
   }
+};
+
+struct IsApplication {
+  IsApplication(connection_handler::DeviceHandle device_handle,
+                const std::string& policy_app_id)
+      : device_handle_(device_handle), policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app && app->device() == device_handle_ &&
+           app->policy_app_id() == policy_app_id_;
+  }
+
+ private:
+  connection_handler::DeviceHandle device_handle_;
+  const std::string& policy_app_id_;
 };
 
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
@@ -1571,6 +1591,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
+#ifdef SDL_REMOTE_CONTROL
+  mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asUInt());
+#endif
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
@@ -1578,6 +1603,16 @@ void ApplicationManagerImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::correlation_id].asUInt(),
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
+#ifdef SDL_REMOTE_CONTROL
+    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
+        (*message)[strings::msg_params][strings::success].asBool()) {
+      bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
+      LOG4CXX_INFO(logger_,
+                   "Registered app " << app->app_id() << " is "
+                                     << (is_for_plugin ? "" : "not ")
+                                     << "for plugins.");
+    }
+#endif
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
@@ -1810,6 +1845,25 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   return false;
 }
 
+void ApplicationManagerImpl::RemoveHMIFakeParameters(
+    application_manager::MessagePtr& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace NsSmartDeviceLink::NsJSONHandler;
+  SmartObject so;
+
+  Formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
+                                           hmi_apis::messageType::eType>(
+      message->json_message(), so);
+
+  std::string formatted_message;
+  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  hmi_apis::HMI_API factory;
+  factory.attachSchema(so, true);
+  Formatters::FormatterJsonRpc::ToString(so, formatted_message);
+  message->set_json_message(formatted_message);
+}
+
 void ApplicationManagerImpl::SendMessageToHMI(
     const commands::MessageSharedPtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1954,6 +2008,17 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
+#ifdef SDL_REMOTE_CONTROL
+  if (!hmi_handler_) {
+    LOG4CXX_ERROR(logger_, "HMI message handler was not initialized");
+    return false;
+  }
+  plugin_manager_.SetServiceHandler(utils::MakeShared<CoreService>(*this));
+  plugin_manager_.LoadPlugins(settings_.plugins_folder());
+  plugin_manager_.OnServiceStateChanged(
+      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+#endif  // SDL_REMOTE_CONTROL
+
   return true;
 }
 
@@ -2059,24 +2124,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       if (output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
-
-        if (application_manager::MessageType::kNotification ==
-            output[strings::params][strings::message_type].asInt()) {
-          LOG4CXX_ERROR(logger_, "Ignore wrong HMI notification");
-          return false;
-        }
-
-        if (application_manager::MessageType::kRequest ==
-            output[strings::params][strings::message_type].asInt()) {
-          LOG4CXX_ERROR(logger_, "Ignore wrong HMI request");
-          return false;
-        }
-
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] =
-            std::string("Received invalid data on HMI response");
+        return false;
       }
       break;
     }
@@ -2234,6 +2282,58 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
+MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
+    const Message& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject so;
+  switch (message.protocol_version()) {
+    case ProtocolVersion::kV4:
+    case ProtocolVersion::kV3:
+    case ProtocolVersion::kV2: {
+      const bool conversion_result =
+          formatters::CFormatterJsonSDLRPCv2::fromString(
+              message.json_message(),
+              so,
+              message.function_id(),
+              message.type(),
+              message.correlation_id());
+      if (!conversion_result) {
+        return INVALID_JSON;
+      }
+
+      if (!mobile_so_factory().attachSchema(so, true)) {
+        return INVALID_METADATA;
+      }
+
+      if (so.validate() != smart_objects::Errors::OK) {
+        return SCHEMA_MISMATCH;
+      }
+      break;
+    }
+    case ProtocolVersion::kHMI: {
+      const int32_t conversion_result = formatters::FormatterJsonRpc::
+          FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+              message.json_message(), so);
+      if (0 != conversion_result) {
+        LOG4CXX_WARN(logger_,
+                     "Failed to parse json from HMI: " << conversion_result);
+        return INVALID_JSON;
+      }
+
+      if (!hmi_so_factory().attachSchema(so, true)) {
+        return INVALID_METADATA;
+      }
+
+      if (so.validate() != smart_objects::Errors::OK) {
+        return SCHEMA_MISMATCH;
+      }
+      break;
+    }
+    default: { return UNSUPPORTED_PROTOCOL; }
+  }
+  return SUCCESS;
+}
+
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
     const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2309,8 +2409,17 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
   *smart_object = message->smart_object();
 #else
   if (!ConvertMessageToSO(*message, *smart_object)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
+    if (application_manager::MessageType::kResponse ==
+        (*smart_object)[strings::params][strings::message_type].asInt()) {
+      (*smart_object).erase(strings::msg_params);
+      (*smart_object)[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::INVALID_DATA;
+      (*smart_object)[strings::msg_params][strings::info] =
+          std::string("Received invalid data on HMI response");
+    } else {
+      LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+      return;
+    }
   }
 #endif  // HMI_DBUS_API
 
@@ -2852,6 +2961,10 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendStopAudioPathThru(*this);
   }
 
+#ifdef SDL_REMOTE_CONTROL
+  plugin_manager_.OnUnregisterApplication(app_id);
+#endif
+
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
   request_ctrl_.terminateAppRequests(app_id);
@@ -2875,6 +2988,13 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (plugin_manager_.IsMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    plugin_manager_.ProcessMessage(message);
+    return;
+  }
+#endif
   ProcessMessageFromMobile(message);
 }
 
@@ -2919,6 +3039,18 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  if (plugin_manager_.IsHMIMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    functional_modules::ProcessResult result =
+        plugin_manager_.ProcessHMIMessage(message);
+    if (functional_modules::ProcessResult::PROCESSED == result ||
+        functional_modules::ProcessResult::FAILED == result) {
+      return;
+    }
+  }
+#endif
 
   ProcessMessageFromHMI(message);
 }
@@ -3889,5 +4021,158 @@ void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_list_lock_.Release();
 }
 #endif  // BUILD_TESTS
+#ifdef SDL_REMOTE_CONTROL
+struct MobileAppIdPredicate {
+  std::string policy_app_id_;
+  MobileAppIdPredicate(const std::string& policy_app_id)
+      : policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app ? policy_app_id_ == app->policy_app_id() : false;
+  }
+};
+
+struct TakeDeviceHandle {
+ public:
+  TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
+  std::string operator()(ApplicationSharedPtr& app) {
+    return MessageHelper::GetDeviceMacAddressForHandle(app->device(),
+                                                       app_mngr_);
+  }
+
+ private:
+  const ApplicationManager& app_mngr_;
+};
+
+ApplicationSharedPtr ApplicationManagerImpl::application(
+    const std::string& device_id, const std::string& policy_app_id) const {
+  connection_handler::DeviceHandle device_handle;
+  connection_handler().GetDeviceID(device_id, &device_handle);
+
+  DataAccessor<ApplicationSet> accessor = applications();
+  ApplicationSharedPtr app =
+      FindApp(accessor, IsApplication(device_handle, policy_app_id));
+
+  LOG4CXX_DEBUG(logger_,
+                " policy_app_id << " << policy_app_id << "Found = " << app);
+  return app;
+}
+
+std::vector<std::string> ApplicationManagerImpl::devices(
+    const std::string& policy_app_id) const {
+  MobileAppIdPredicate matcher(policy_app_id);
+  AppSharedPtrs apps = FindAllApps(applications(), matcher);
+  std::vector<std::string> devices;
+  std::transform(apps.begin(),
+                 apps.end(),
+                 std::back_inserter(devices),
+                 TakeDeviceHandle(*this));
+  return devices;
+}
+
+bool ApplicationManagerImpl::IsAudioStreamingAllowed(
+    uint32_t application_key) const {
+  ApplicationSharedPtr app = application(application_key);
+
+  using namespace mobile_apis::HMILevel;
+  using namespace helpers;
+  if (!app) {
+    LOG4CXX_WARN(logger_, "An application is not registered.");
+    return false;
+  }
+
+  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
+}
+
+bool ApplicationManagerImpl::IsVideoStreamingAllowed(
+    uint32_t application_key) const {
+  ApplicationSharedPtr app = application(application_key);
+  using namespace mobile_apis::HMILevel;
+  using namespace helpers;
+
+  if (!app) {
+    LOG4CXX_WARN(logger_, "An application is not registered.");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "HMILevel: " << app->hmi_level());
+  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
+}
+
+void ApplicationManagerImpl::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  hmi_handler_->SubscribeToHMINotification(hmi_notification);
+}
+
+void ApplicationManagerImpl::ChangeAppsHMILevel(
+    uint32_t app_id, mobile_apis::HMILevel::eType level) {
+  using namespace mobile_apis::HMILevel;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "AppID to change: " << app_id << " -> " << level);
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
+    return;
+  }
+  eType old_level = app->hmi_level();
+  if (old_level != level) {
+    app->set_hmi_level(level);
+    OnHMILevelChanged(app_id, old_level, level);
+
+    plugin_manager_.OnAppHMILevelChanged(app, old_level);
+  } else {
+    LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
+  }
+}
+
+void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
+  using namespace mobile_apis;
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
+    return;
+  }
+  ChangeAppsHMILevel(app_id, HMILevel::HMI_BACKGROUND);
+  app->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
+}
+
+bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
+  using namespace mobile_apis;
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
+    return false;
+  }
+
+  ChangeAppsHMILevel(app_id, HMILevel::HMI_FULL);
+  if (app->is_media_application() || app->is_navi()) {
+    app->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
+  }
+  app->set_system_context(SystemContext::SYSCTXT_MAIN);
+
+  if (!app->has_been_activated()) {
+    app->set_activated(true);
+  }
+
+  return true;
+}
+
+uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
+  using namespace connection_handler;
+  uint32_t device_handle = 0;
+  connection_handler().GetDataOnSessionKey(
+      connection_key, 0, NULL, &device_handle);
+  return device_handle;
+}
+
+void ApplicationManagerImpl::SendPostMessageToMobile(
+    const MessagePtr& message) {
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
+}
+
+void ApplicationManagerImpl::SendPostMessageToHMI(const MessagePtr& message) {
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
+}
+
+#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager

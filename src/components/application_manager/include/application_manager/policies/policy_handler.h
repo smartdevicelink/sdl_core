@@ -112,6 +112,159 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sets HMI default type for specified application
+   * @param application_id ID application
+   * @param app_types list of HMI types
+   */
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const smart_objects::SmartObject* app_types) OVERRIDE;
+
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types) OVERRIDE;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  void OnUpdateHMILevel(const std::string& device_id,
+                        const std::string& policy_app_id,
+                        const std::string& hmi_level) OVERRIDE;
+
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
+   */
+  application_manager::TypeAccess CheckAccess(
+      const PTString& device_id,
+      const PTString& app_id,
+      const PTString& module,
+      const std::string& rpc,
+      const std::vector<PTString>& params) OVERRIDE;
+
+  /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  bool CheckModule(const PTString& app_id, const PTString& module) OVERRIDE;
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param module type
+   * @param allowed true if access is allowed
+   */
+  void SetAccess(const PTString& device_id,
+                 const PTString& app_id,
+                 const PTString& module,
+                 bool allowed) OVERRIDE;
+
+  /**
+   * Resets access application to all resources
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   */
+  void ResetAccess(const PTString& device_id, const PTString& app_id) OVERRIDE;
+
+  /**
+   * Resets access by group name for all applications
+   * @param module type
+   */
+  void ResetAccess(const std::string& module) OVERRIDE;
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  void SetPrimaryDevice(const PTString& dev_id) OVERRIDE;
+
+  /**
+   * Resets driver's device
+   */
+  void ResetPrimaryDevice() OVERRIDE;
+
+  /**
+   * Return id of primary device
+   */
+  uint32_t PrimaryDevice() const OVERRIDE;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  void SetRemoteControl(bool enabled) OVERRIDE;
+
+  /**
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  bool GetRemoteControl() const OVERRIDE;
+
+  /**
+   * @brief Notifies passengers' apps about change
+   * @param new_consent New value of remote permission
+   */
+  void OnRemoteAllowedChanged(bool new_consent) OVERRIDE;
+
+  /**
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  void OnRemoteAppPermissionsChanged(
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief Notifies Remote apps about change in HMI status
+   * @param device_id Device on which app is running
+   * @param policy_app_id ID of application
+   * @param hmi_level new HMI level for this application
+   */
+  void OnUpdateHMIStatus(const std::string& device_id,
+                         const std::string& policy_app_id,
+                         const std::string& hmi_level) OVERRIDE;
+
+  /**
+   * @brief Notifies Remote apps about change in HMI status
+   * @param device_id Device on which app is running
+   * @param policy_app_id ID of application
+   * @param hmi_level new HMI level for this application
+   * @param device_rank new device rank
+   */
+  void OnUpdateHMIStatus(const std::string& device_id,
+                         const std::string& policy_app_id,
+                         const std::string& hmi_level,
+                         const std::string& device_rank) OVERRIDE;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -348,7 +501,8 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
-   ** @return function that will notify update manager about new application
+   * @param hmi_types list of hmi types
+   * @return function that will notify update manager about new application
    */
   StatusNotifier AddApplication(
       const std::string& application_id,
@@ -506,6 +660,18 @@ class PolicyHandler : public PolicyHandlerInterface,
       PermissionConsent& out_permissions) OVERRIDE;
 #endif
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Updates HMI level for specified application and send notification
+   * @param app application where HMI level was changed
+   * @param level new HMI level
+   */
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level);
+  std::vector<std::string> GetDevicesIds(
+      const std::string& policy_app_id) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   /**
    * @brief Sets days after epoch on successful policy update
    */
@@ -644,7 +810,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    * otherwise FALSE
    */
   bool IsUrlAppIdValid(const uint32_t app_idx, const EndpointUrls& urls) const;
-
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 

@@ -76,6 +76,10 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::SYSTEM;
   } else if ("PROJECTION" == str) {
     return mobile_apis::AppHMIType::PROJECTION;
+#ifdef SDL_REMOTE_CONTROL
+  } else if ("REMOTE_CONTROL" == str) {
+    return mobile_apis::AppHMIType::REMOTE_CONTROL;
+#endif
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
@@ -84,6 +88,9 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
       {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+#ifdef SDL_REMOTE_CONTROL
+       {mobile_apis::AppHMIType::REMOTE_CONTROL, "REMOTE_CONTROL"},
+#endif  // SDL_REMOTE_CONTROL
        {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
        {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
        {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
@@ -673,6 +680,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
+#ifdef SDL_REMOTE_CONTROL
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
+                                          &(msg_params[strings::app_hmi_type]));
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.

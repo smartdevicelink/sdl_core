@@ -49,6 +49,9 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
+#ifdef SDL_REMOTE_CONTROL
+#include "functional_module/plugin_manager.h"
+#endif
 
 namespace resumption {
 class LastState;
@@ -85,6 +88,7 @@ class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 using policy::RPCParams;
+typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {
@@ -153,9 +157,40 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
-  virtual std::vector<ApplicationSharedPtr> applications_by_button(
-      uint32_t button) = 0;
-  virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
+  virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
+  virtual AppSharedPtrs applications_with_navi() = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  virtual ApplicationSharedPtr application(
+      const std::string& device_id, const std::string& policy_app_id) const = 0;
+
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
+
+  virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
+
+  virtual void ChangeAppsHMILevel(uint32_t app_id,
+                                  mobile_apis::HMILevel::eType level) = 0;
+
+  virtual std::vector<std::string> devices(
+      const std::string& policy_app_id) const = 0;
+
+  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
+
+  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
+
+  virtual functional_modules::PluginManager& GetPluginManager() = 0;
+#endif  // SDL_REMOTE_CONTROL
 
   virtual std::vector<ApplicationSharedPtr>
   applications_with_mobile_projection() = 0;
@@ -264,9 +299,16 @@ class ApplicationManager {
 
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
 
+  virtual void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) = 0;
+
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;
+
+  virtual MessageValidationResult ValidateMessageBySchema(
+      const Message& message) = 0;
+
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**
@@ -340,8 +382,8 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual std::vector<ApplicationSharedPtr> IviInfoUpdated(
-      VehicleDataType vehicle_info, int value) = 0;
+  virtual AppSharedPtrs IviInfoUpdated(VehicleDataType vehicle_info,
+                                       int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
       smart_objects::SmartObject>& request_for_registration) = 0;
@@ -609,6 +651,11 @@ class ApplicationManager {
   virtual const ApplicationManagerSettings& get_settings() const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
+
+  virtual uint32_t GetAvailableSpaceForApp(const std::string& folder_name) = 0;
+  virtual void OnTimerSendTTSGlobalProperties() = 0;
+  virtual void OnLowVoltage() = 0;
+  virtual void OnWakeUp() = 0;
 };
 
 }  // namespace application_manager

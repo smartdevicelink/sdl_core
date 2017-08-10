@@ -62,6 +62,13 @@ set(LIBRARIES
     ${SecurityManagerLibrary}
 )
 
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
+
 if(EXTENDED_MEDIA_MODE)
   list(APPEND LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY})

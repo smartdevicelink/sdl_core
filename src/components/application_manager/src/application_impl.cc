@@ -1008,4 +1008,105 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
+#ifdef SDL_REMOTE_CONTROL
+
+void ApplicationImpl::set_system_context(
+    const mobile_api::SystemContext::eType& system_context) {
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  hmi_state->set_system_context(system_context);
+}
+
+void ApplicationImpl::set_audio_streaming_state(
+    const mobile_api::AudioStreamingState::eType& state) {
+  if (!(is_media_application() || is_navi()) &&
+      state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
+    LOG4CXX_WARN(logger_,
+                 "Trying to set audio streaming state"
+                 " for non-media application to different from NOT_AUDIBLE");
+    return;
+  }
+  CurrentHmiState()->set_audio_streaming_state(state);
+}
+
+void ApplicationImpl::set_hmi_level(
+    const mobile_api::HMILevel::eType& new_hmi_level) {
+  using namespace mobile_apis;
+  const HMILevel::eType current_hmi_level = hmi_level();
+  if (HMILevel::HMI_NONE != current_hmi_level &&
+      HMILevel::HMI_NONE == new_hmi_level) {
+    put_file_in_none_count_ = 0;
+    delete_file_in_none_count_ = 0;
+    list_files_in_none_count_ = 0;
+  }
+  ApplicationSharedPtr app = application_manager_.application(app_id());
+  DCHECK_OR_RETURN_VOID(app)
+  application_manager_.state_controller().SetRegularState(app, new_hmi_level);
+  LOG4CXX_INFO(logger_, "hmi_level = " << new_hmi_level);
+  usage_report_.RecordHmiStateChanged(new_hmi_level);
+}
+
+bool ApplicationImpl::SubscribeToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  subscribed_interior_vehicle_data_.push_front(module);
+  return true;
+}
+
+bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  for (auto it = subscribed_interior_vehicle_data_.begin();
+       it != subscribed_interior_vehicle_data_.end();
+       ++it) {
+    if (*it == module) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  subscribed_interior_vehicle_data_.remove(module);
+  return true;
+}
+
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
+  for (; it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
+
+  return AppExtensionPtr();
+}
+
+bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  if (!QueryInterface(extension->uid())) {
+    extensions_.push_back(extension);
+    return true;
+  }
+  return false;
+}
+
+bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
+       extensions_.end() != it;
+       ++it) {
+    if ((*it)->uid() == uid) {
+      extensions_.erase(it);
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::RemoveExtensions() {
+  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+}
+#endif  // SDL_REMOTE_CONTROL
+
 }  // namespace application_manager

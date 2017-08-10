@@ -77,7 +77,7 @@ const std::string kCreateSchema =
     "  `vehicle_year` VARCHAR(4), "
     "  `preloaded_date` VARCHAR (10), "
     "  `certificate` VARCHAR (45), "
-    "  `user_consent_passengersRC` BOOL,"
+    "  `user_consent_passengersRC` BOOL, "
     "  `country_consent_passengersRC` BOOL "
     "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
@@ -392,31 +392,12 @@ const std::string kCreateSchema =
     "idx` "
     "  ON `app_group_non_primary`(`application_id`); "
 
-    /* interior_zone */
-    "CREATE TABLE `interior_zone`( "
-    "  `id` INTEGER PRIMARY KEY NOT NULL, "
-    "  `name` VARCHAR(100) NOT NULL, "
-    "  `col` INTEGER NOT NULL, "
-    "  `row` INTEGER NOT NULL, "
-    "  `level` INTEGER NOT NULL "
-    "); "
-    "CREATE UNIQUE INDEX `interior_zone.room` ON "
-    "`interior_zone`(`col`,`row`,`level`); "
-
     /* access_module */
     "CREATE TABLE `access_module`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
     "  `name` VARCHAR(45) NOT NULL, "
-    "  `zone_id` INTEGER NOT NULL, "
-    "  `user_consent_needed` INTEGER NOT NULL, "
-    "CONSTRAINT `fk_module_1` "
-    "  FOREIGN KEY(`zone_id`) "
-    "  REFERENCES `interior_zone`(`id`) "
+    "  `user_consent_needed` INTEGER NOT NULL "
     "); "
-    "CREATE INDEX `access_module.zone_module` ON "
-    "`access_module`(`name`,`zone_id`); "
-    "CREATE INDEX `access_module.fk_module_1_idx` ON "
-    "`access_module`(`zone_id`); "
 
     /* remote_rpc */
     "CREATE TABLE `remote_rpc`( "
@@ -522,24 +503,12 @@ const std::string kInsertAppGroupNonPrimary =
 const std::string kUpdateRemoteControlDenied =
     "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
 
-const std::string kCountInteriorZones =
-    "SELECT COUNT(`id`) FROM `interior_zone`";
-
-const std::string kDeleteInteriorZones = "DELETE FROM `interior_zone`";
-
 const std::string kDeleteAccessModules = "DELETE FROM `access_module`";
 
 const std::string kDeleteRemoteRpc = "DELETE FROM `remote_rpc`";
 
-const std::string kInsertInteriorZone =
-    "INSERT INTO `interior_zone` (`name`, `col`, `row`, `level`) "
-    "  VALUES(?, ?, ?, ?)";
-
-const std::string kSelectInteriorZones =
-    "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
-
 const std::string kInsertAccessModule =
-    "INSERT INTO `access_module` (`name`, `zone_id`, `user_consent_needed`) "
+    "INSERT INTO `access_module` (`name`, `user_consent_needed`) "
     "  VALUES(?, ?, ?)";
 
 const std::string kDeleteAppGroupPrimaryByApplicationId =
@@ -550,7 +519,7 @@ const std::string kDeleteAppGroupNonPrimaryByApplicationId =
 
 const std::string kSelectAccessModules =
     "SELECT `id`, `name` FROM `access_module` "
-    "  WHERE `zone_id` = ? AND `user_consent_needed` = ?";
+    "  WHERE `user_consent_needed` = ?";
 
 const std::string kInsertRemoteRpc =
     "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
@@ -619,9 +588,7 @@ const std::string kDropSchema =
     "`app_group_non_primary.fk_application_has_functional_group_functional_"
     "group1_idx`; "
     "DROP TABLE IF EXISTS `app_group_non_primary`; "
-    "DROP TABLE IF EXISTS `interior_zone`; "
     "DROP TABLE IF EXISTS `access_module`; "
-    "DROP INDEX IF EXISTS `access_module.zone_module`; "
     "DROP INDEX IF EXISTS `access_module.fk_module_1_idx`; "
     "DROP INDEX IF EXISTS "
     "`app_group.fk_application_has_functional_group_application1_idx`; "
@@ -674,7 +641,6 @@ const std::string kDeleteData =
     "DELETE FROM `rpc`; "
     "DELETE FROM `app_group_primary`; "
     "DELETE FROM `app_group_non_primary`; "
-    "DELETE FROM `interior_zone`; "
     "DELETE FROM `access_module`; "
     "DELETE FROM `version`; "
     "DELETE FROM `message_type`; "

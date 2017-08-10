@@ -113,7 +113,16 @@ class MockMessageHelper {
                     uint32_t correlation_id,
                     ApplicationManager& app_mngr));
   MOCK_METHOD1(SendGetSystemInfoRequest, void(ApplicationManager& app_mngr));
-
+  MOCK_METHOD4(SendActivateAppToHMI,
+               void(uint32_t const app_id,
+                    ApplicationManager& application_manager,
+                    hmi_apis::Common_HMILevel::eType level,
+                    bool send_policy_priority));
+  MOCK_METHOD2(SendHMIStatusNotification,
+               void(const Application& application_impl,
+                    ApplicationManager& application_manager));
+  MOCK_METHOD1(StringToDeviceRank,
+               mobile_api::DeviceRank::eType(const std::string& device_rank));
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
                     const uint32_t timeout,

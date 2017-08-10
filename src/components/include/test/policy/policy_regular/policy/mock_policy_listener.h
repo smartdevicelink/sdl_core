@@ -43,19 +43,21 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
 
 namespace custom_str = utils::custom_string;
 
-class MockPolicyListener : public PolicyListener {
+class MockPolicyListener : public ::policy::PolicyListener {
  public:
   MOCK_METHOD3(OnPermissionsUpdated,
                void(const std::string& policy_app_id,
-                    const Permissions& permissions,
+                    const policy::Permissions& permissions,
                     const policy::HMILevel& default_hmi));
   MOCK_METHOD2(OnPermissionsUpdated,
                void(const std::string& policy_app_id,
-                    const Permissions& permissions));
+                    const policy::Permissions& permissions));
   MOCK_METHOD1(OnPendingPermissionChange,
                void(const std::string& policy_app_id));
   MOCK_METHOD1(OnUpdateStatusChanged, void(const std::string& status));
@@ -67,17 +69,41 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD0(OnUserRequestedUpdateCheckRequired, void());
   MOCK_METHOD2(OnDeviceConsentChanged,
                void(const std::string& device_id, bool is_allowed));
-  MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, StringArray>));
+  MOCK_METHOD1(OnUpdateHMIAppType,
+               void(std::map<std::string, policy::StringArray>));
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>&));
-  MOCK_METHOD1(OnSnapshotCreated, void(const BinaryMessage& pt_string));
+  MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
-                     void(const AppPermissions&, const std::string&));
+                     void(const policy::AppPermissions&, const std::string&));
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_METHOD1(GetDevicesIds,
+               std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetRegisteredLinks,
                      void(std::map<std::string, std::string>&));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD3(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_METHOD4(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level,
+                    const std::string& device_rank));
+#endif  // SDL_REMOTE_CONTROL
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_POLICY_LISTENER_H_

@@ -43,6 +43,11 @@
 #include "policy/policy_table/functions.h"
 #include "policy/usage_statistics/statistics_manager.h"
 
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote.h"
+#include "policy/access_remote_impl.h"
+#endif  // SDL_REMOTE_CONTROL
+
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
@@ -173,6 +178,41 @@ class PolicyManagerImpl : public PolicyManager {
   StatusNotifier AddApplication(
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types);
+
+#ifdef SDL_REMOTE_CONTROL
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const std::vector<int>& hmi_types);
+
+  /**
+       * Gets HMI types
+       * @param application_id ID application
+       * @param app_types list to save HMI types
+       * @return true if policy has specific policy for this application
+       */
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) OVERRIDE;
+  virtual void set_access_remote(utils::SharedPtr<AccessRemote> access_remote);
+  TypeAccess CheckDriverConsent(const Subject& who,
+                                const Object& what,
+                                const std::string& rpc,
+                                const RemoteControlParams& params);
+  void CheckPTUUpdatesChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+  void CheckRemoteGroupsChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+  void SendHMILevelChanged(const Subject& who);
+  void UpdateDeviceRank(const Subject& who, const std::string& rank);
+
+  void OnPrimaryGroupsChanged(const std::string& application_id);
+  void OnNonPrimaryGroupsChanged(const std::string& application_id);
+#endif  // SDL_REMOTE_CONTROL
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);
@@ -345,6 +385,37 @@ class PolicyManagerImpl : public PolicyManager {
   bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
 
+#ifdef SDL_REMOTE_CONTROL
+  void GetPermissions(const std::string device_id,
+                      const std::string application_id,
+                      Permissions* data);
+  virtual TypeAccess CheckAccess(const PTString& device_id,
+                                 const PTString& app_id,
+                                 const PTString& module,
+                                 const PTString& rpc,
+                                 const RemoteControlParams& params);
+  virtual bool CheckModule(const PTString& app_id, const PTString& module);
+  virtual void SetAccess(const PTString& dev_id,
+                         const PTString& app_id,
+                         const PTString& module,
+                         bool allowed);
+  virtual void ResetAccess(const PTString& dev_id, const PTString& app_id);
+  virtual void ResetAccess(const PTString& module);
+  virtual void SetPrimaryDevice(const PTString& dev_id);
+  virtual void ResetPrimaryDevice();
+  virtual PTString PrimaryDevice() const;
+  virtual void SetRemoteControl(bool enabled);
+  virtual bool GetRemoteControl() const;
+  virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                      const std::string& application_id);
+  virtual void OnChangedRemoteControl(const std::string& device_id,
+                                      const std::string& application_id);
+  virtual void SendAppPermissionsChanged(const std::string& device_id,
+                                         const std::string& application_id);
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) const;
+#endif  // SDL_REMOTE_CONTROL
+
   /**
    * @brief Notify application about its permissions changes by preparing and
    * sending OnPermissionsChanged notification
@@ -449,6 +520,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   UpdateStatusManager update_status_manager_;
   CacheManagerInterfaceSPtr cache_;
+#ifdef SDL_REMOTE_CONTROL
+  utils::SharedPtr<AccessRemote> access_remote_;
+#endif
+
   sync_primitives::Lock apps_registration_lock_;
   sync_primitives::Lock app_permissions_diff_lock_;
 
