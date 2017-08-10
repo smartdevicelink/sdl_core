@@ -221,7 +221,7 @@ void RemoteControlPlugin::SendHmiStatusNotification(
   msg->set_message_type(application_manager::MessageType::kNotification);
 
   msg->set_connection_key(app->app_id());
-  msg->set_protocol_version(application_manager::kV3);
+  msg->set_protocol_version(app->protocol_version());
 
   msg_params["hmiLevel"] = static_cast<uint32_t>(app->hmi_level());
 

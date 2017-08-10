@@ -131,9 +131,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_grammar_id, void(uint32_t value));
   MOCK_METHOD1(
       set_protocol_version,
-      void(const ::application_manager::ProtocolVersion& protocol_version));
+      void(const ::protocol_handler::MajorProtocolVersion& protocol_version));
   MOCK_CONST_METHOD0(protocol_version,
-                     ::application_manager::ProtocolVersion());
+                     ::protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
   MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
@@ -285,6 +285,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(bundle_id, const std::string&());
   MOCK_METHOD1(set_bundle_id, void(const std::string& bundle_id));
   MOCK_METHOD0(GetAvailableDiskSpace, uint32_t());
+
+  MOCK_METHOD1(set_mobile_projection_enabled, void(bool));
+  MOCK_CONST_METHOD0(mobile_projection_enabled, bool());
 
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(is_foreground, bool());

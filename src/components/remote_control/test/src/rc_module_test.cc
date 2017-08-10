@@ -171,6 +171,9 @@ TEST_F(RCModuleTest, ProcessMessagePass) {
   EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
       .WillOnce(Return(rc_app_extention_));
   EXPECT_CALL(*app0_, app_id()).WillRepeatedly(Return(1));
+  EXPECT_CALL(*app0_, protocol_version())
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
   EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
       .WillOnce(Return(apps_));
   EXPECT_CALL(*mock_service_, GetApplication(1)).WillOnce(Return(app0_));

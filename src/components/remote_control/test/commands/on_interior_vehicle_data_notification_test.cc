@@ -128,7 +128,11 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
       .WillOnce(Return(apps_));
   EXPECT_CALL(*mock_app_, QueryInterface(kModuleId))
       .WillOnce(Return(rc_app_extention_));
+
   ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, protocol_version())
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3));
   EXPECT_CALL(*mock_service_, GetApplication(kAppId_))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(_))
@@ -143,7 +147,7 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
       CreateCommand(message);
   command->Run();
   // Assertions
-  EXPECT_EQ(application_manager::ProtocolVersion::kV3,
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3,
             result_msg->protocol_version());
   EXPECT_EQ(application_manager::MessageType::kNotification,
             result_msg->type());

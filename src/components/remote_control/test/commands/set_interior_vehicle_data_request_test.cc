@@ -198,7 +198,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   // Assertions
   EXPECT_EQ(kModuleId, app_extension->uid());
-  EXPECT_EQ(application_manager::ProtocolVersion::kHMI,
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI,
             result_msg->protocol_version());
   EXPECT_EQ(1, result_msg->correlation_id());
   EXPECT_EQ(application_manager::MessageType::kRequest, result_msg->type());
@@ -266,7 +266,7 @@ TEST_F(
 
   // Assertions
   EXPECT_EQ(kModuleId, app_extension->uid());
-  EXPECT_EQ(application_manager::ProtocolVersion::kHMI,
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI,
             result_msg->protocol_version());
   EXPECT_EQ(1, result_msg->correlation_id());
   EXPECT_EQ(application_manager::MessageType::kRequest, result_msg->type());

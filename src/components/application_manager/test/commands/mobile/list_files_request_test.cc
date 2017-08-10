@@ -104,7 +104,8 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
 TEST_F(ListFilesRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
-
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));

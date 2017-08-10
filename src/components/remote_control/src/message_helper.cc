@@ -130,7 +130,7 @@ application_manager::MessagePtr MessageHelper::CreateHmiRequest(
           application_manager::Message(
               protocol_handler::MessagePriority::kDefault));
   message_to_send->set_protocol_version(
-      application_manager::ProtocolVersion::kHMI);
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   message_to_send->set_correlation_id(msg[json_keys::kId].asInt());
   message_to_send->set_function_name(msg[kMethod].asString());
   std::string json_msg = writer.write(msg);

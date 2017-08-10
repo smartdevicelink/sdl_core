@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "functional_module/plugin_manager.h"
 #include "functional_module/function_ids.h"
+#include "protocol/common.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "json/json.h"
@@ -146,9 +147,10 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
     return;
   }
-  if (application_manager::ProtocolVersion::kUnknownProtocol !=
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
           msg->protocol_version() &&
-      application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI !=
+          msg->protocol_version()) {
     PluginFunctionsIterator subscribed_plugin_itr =
         mobile_subscribers_.find(static_cast<RCFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
@@ -198,7 +200,8 @@ ProcessResult PluginManager::ProcessHMIMessage(
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
 
-  if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI ==
+      msg->protocol_version()) {
     const std::string& msg_method = ExtractMethodName(value);
     if (msg_method.empty()) {
       return ProcessResult::CANNOT_PROCESS;
@@ -219,9 +222,10 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
     return false;
   }
-  if (application_manager::ProtocolVersion::kUnknownProtocol !=
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
           msg->protocol_version() &&
-      application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI !=
+          msg->protocol_version()) {
     RCFunctionID id = static_cast<RCFunctionID>(msg->function_id());
     return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
@@ -239,7 +243,8 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   Json::Value value;
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
-  if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI ==
+      msg->protocol_version()) {
     std::string msg_method;
     // Request or notification from HMI
     if (value.isMember("method") && value["method"].isString()) {

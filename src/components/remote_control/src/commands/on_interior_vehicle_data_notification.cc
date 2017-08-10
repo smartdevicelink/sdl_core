@@ -81,7 +81,7 @@ void OnInteriorVehicleDataNotification::Execute() {
           utils::MakeShared<application_manager::Message>(*msg);
       message->set_message_type(
           application_manager::MessageType::kNotification);
-      message->set_protocol_version(application_manager::kV3);
+      message->set_protocol_version(app.protocol_version());
       message->set_function_id(functional_modules::ON_INTERIOR_VEHICLE_DATA);
       message->set_function_name(MessageHelper::GetMobileAPIName(
           functional_modules::ON_INTERIOR_VEHICLE_DATA));

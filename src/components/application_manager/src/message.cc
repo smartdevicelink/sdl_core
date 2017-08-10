@@ -76,7 +76,8 @@ Message::Message(const Message& message)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(kUnknownProtocol) {
+    , version_(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {
   *this = message;
 }
 
@@ -146,7 +147,7 @@ MessageType Message::type() const {
   return type_;
 }
 
-ProtocolVersion Message::protocol_version() const {
+protocol_handler::MajorProtocolVersion Message::protocol_version() const {
   return version_;
 }
 
@@ -209,7 +210,8 @@ void Message::set_json_message(const std::string& json_message) {
   json_message_ = json_message;
 }
 
-void Message::set_protocol_version(ProtocolVersion version) {
+void Message::set_protocol_version(
+    protocol_handler::MajorProtocolVersion version) {
   version_ = version;
 }
 

@@ -8,7 +8,7 @@
 #include "utils/make_shared.h"
 
 using application_manager::Message;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using application_manager::MockService;
 using ::testing::NiceMock;
 using ::testing::Expectation;
@@ -46,14 +46,14 @@ TEST_F(PluginManagerTest, ChangePluginsState) {
 TEST_F(PluginManagerTest, IsMessageForPluginFail) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
   EXPECT_FALSE(manager->IsMessageForPlugin(msg));
 }
 
 TEST_F(PluginManagerTest, IsMessageForPluginPass) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(ProtocolVersion::kV3);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_3);
   msg->set_function_id(101);  // see MockGenericModule
   EXPECT_TRUE(manager->IsMessageForPlugin(msg));
 }
@@ -61,14 +61,14 @@ TEST_F(PluginManagerTest, IsMessageForPluginPass) {
 TEST_F(PluginManagerTest, IsHMIMessageForPluginFail) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
   EXPECT_FALSE(manager->IsHMIMessageForPlugin(msg));
 }
 
 TEST_F(PluginManagerTest, IsHMIMessageForPluginPass) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(ProtocolVersion::kHMI);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
   msg->set_json_message(json);
   EXPECT_TRUE(manager->IsHMIMessageForPlugin(msg));
@@ -84,7 +84,7 @@ TEST_F(PluginManagerTest, ProcessMessageFail) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
-  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
   EXPECT_CALL(*module, ProcessMessage(message)).Times(0);
   manager->ProcessMessage(message);
 }
@@ -93,7 +93,7 @@ TEST_F(PluginManagerTest, ProcessMessagePass) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
-  msg->set_protocol_version(ProtocolVersion::kV3);
+  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_3);
   msg->set_function_id(101);  // see MockGenericModule
   EXPECT_CALL(*module, ProcessMessage(message))
       .Times(1)
@@ -105,7 +105,7 @@ TEST_F(PluginManagerTest, ProcessHMIMessageFail) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
-  message->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  message->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
   EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(0);
   manager->ProcessHMIMessage(message);
 }
@@ -114,7 +114,7 @@ TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
   Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
-  message->set_protocol_version(ProtocolVersion::kHMI);
+  message->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
   message->set_json_message(json);
   EXPECT_CALL(*module, ProcessHMIMessage(message))

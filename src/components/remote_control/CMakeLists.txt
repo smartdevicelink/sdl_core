@@ -21,6 +21,7 @@ include_directories (
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/remote_control/include/
   ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/config_profile/include/
 

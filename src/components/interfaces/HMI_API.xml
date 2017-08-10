@@ -63,6 +63,7 @@
     <element name="USER_DISALLOWED" value="23"/>
     <element name="TRUNCATED_DATA" value="24"/>
     <element name="SAVED" value="25"/>
+    <element name="READ_ONLY" value="26"/>
 </enum>
 
 <enum name="TransportType">

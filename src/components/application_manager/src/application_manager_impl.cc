@@ -2286,10 +2286,12 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
     const Message& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject so;
+  using namespace protocol_handler;
   switch (message.protocol_version()) {
-    case ProtocolVersion::kV4:
-    case ProtocolVersion::kV3:
-    case ProtocolVersion::kV2: {
+    case MajorProtocolVersion::PROTOCOL_VERSION_5:
+    case MajorProtocolVersion::PROTOCOL_VERSION_4:
+    case MajorProtocolVersion::PROTOCOL_VERSION_3:
+    case MajorProtocolVersion::PROTOCOL_VERSION_2: {
       const bool conversion_result =
           formatters::CFormatterJsonSDLRPCv2::fromString(
               message.json_message(),
@@ -2310,7 +2312,7 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
       }
       break;
     }
-    case ProtocolVersion::kHMI: {
+    case MajorProtocolVersion::PROTOCOL_VERSION_HMI: {
       const int32_t conversion_result = formatters::FormatterJsonRpc::
           FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
               message.json_message(), so);
