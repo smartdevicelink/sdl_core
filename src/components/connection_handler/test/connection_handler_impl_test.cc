@@ -1304,6 +1304,100 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
   EXPECT_EQ(0u, new_session_id);
 }
 
+/*
+ * Simulate two OnSessionStartedCallback calls, and connection handler observer
+ * returns a positive reply for the first call with delay and a negative reply
+ * for the second call immediately.
+ */
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
+  AddTestDeviceConnection();
+
+  uint32_t rpc_session_id1;
+  uint32_t rpc_session_id2;
+  uint32_t hash_id1;
+  uint32_t hash_id2;
+
+  protocol_handler_test::MockProtocolHandler temp_protocol_handler;
+  connection_handler_->set_protocol_handler(&temp_protocol_handler);
+  EXPECT_CALL(temp_protocol_handler,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&rpc_session_id1), SaveArg<3>(&hash_id1)))
+      .WillOnce(DoAll(SaveArg<2>(&rpc_session_id2), SaveArg<3>(&hash_id2)));
+
+  // add two sessions
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
+
+  EXPECT_NE(0u, rpc_session_id1);
+  EXPECT_NE(0u, rpc_session_id2);
+  EXPECT_EQ(SessionHash(uid_, rpc_session_id1), hash_id1);
+  EXPECT_EQ(SessionHash(uid_, rpc_session_id2), hash_id2);
+  CheckSessionExists(uid_, rpc_session_id1);
+  CheckSessionExists(uid_, rpc_session_id2);
+
+  connection_handler_->set_protocol_handler(NULL);
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key1 =
+      connection_handler_->KeyFromPair(uid_, rpc_session_id1);
+  uint32_t session_key2 =
+      connection_handler_->KeyFromPair(uid_, rpc_session_id2);
+
+  std::vector<std::string> empty;
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key1, kMobileNav, dummy_params))
+      // don't call NotifyServiceStartedResult() with this event
+      .Times(1);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key2, kMobileNav, dummy_params))
+      // call NotifyServiceStartedResult() twice, first for the second session
+      // then for the first session
+      .WillOnce(DoAll(InvokeMemberFuncWithArg3(
+                          connection_handler_,
+                          &ConnectionHandler::NotifyServiceStartedResult,
+                          session_key2,
+                          false,
+                          ByRef(empty)),
+                      InvokeMemberFuncWithArg3(
+                          connection_handler_,
+                          &ConnectionHandler::NotifyServiceStartedResult,
+                          session_key1,
+                          true,
+                          ByRef(empty))));
+
+  // verify that connection handler will not mix up the two results
+  uint32_t new_session_id1 = 0;
+  uint32_t new_session_id2 = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(
+      mock_protocol_handler_,
+      NotifySessionStartedResult(_, rpc_session_id1, _, _, false, empty))
+      .WillOnce(SaveArg<2>(&new_session_id1));
+  EXPECT_CALL(
+      mock_protocol_handler_,
+      NotifySessionStartedResult(_, rpc_session_id2, _, _, false, empty))
+      .WillOnce(SaveArg<2>(&new_session_id2));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, rpc_session_id1, kMobileNav, PROTECTION_OFF, dummy_params);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, rpc_session_id2, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_NE(0u, new_session_id1);  // result is positive
+  EXPECT_EQ(0u, new_session_id2);  // result is negative
+}
+
 TEST_F(ConnectionHandlerTest,
        SessionStarted_StartSession_SecureSpecific_Unprotect) {
   EXPECT_CALL(mock_connection_handler_settings, heart_beat_timeout())
