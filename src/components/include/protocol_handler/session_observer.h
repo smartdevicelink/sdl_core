@@ -101,7 +101,7 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      const BsonObject *params) = 0;
+      const BsonObject* params) = 0;
 
   // DEPRECATED
   virtual uint32_t OnSessionEndedCallback(

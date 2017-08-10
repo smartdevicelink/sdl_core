@@ -1275,7 +1275,8 @@ void ApplicationManagerImpl::StopNaviService(
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() == it) {
-      LOG4CXX_WARN(logger_, "No Information about navi service " << service_type);
+      LOG4CXX_WARN(logger_,
+                   "No Information about navi service " << service_type);
     } else {
       // Fill NaviServices map. Set false to first value of pair if
       // we've stopped video service or to second value if we've
