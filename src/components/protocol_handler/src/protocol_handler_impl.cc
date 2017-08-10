@@ -34,6 +34,7 @@
 #include <memory.h>
 #include <algorithm>  // std::find
 #include <bson_object.h>
+#include <protocol/bson_object_keys.h>
 
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
@@ -238,14 +239,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     bson_object_initialize_default(&payloadObj);
     bson_object_put_int64(
         &payloadObj,
-        "mtu",
+        strings::mtu,
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
     if (serviceTypeValue == kRpc) {
       // Hash ID is only used in RPC case
       bson_object_put_int32(
-          &payloadObj, "hashId", static_cast<int32_t>(hash_id));
+          &payloadObj, strings::hash_id, static_cast<int32_t>(hash_id));
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
@@ -255,7 +256,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       char protocolVersionString[255];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
-          &payloadObj, "protocolVersion", protocolVersionString);
+          &payloadObj, strings::protocol_version, protocolVersionString);
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
@@ -320,7 +321,8 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
       strncpy(paramPtr, param.c_str(), 255);
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
-    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    bson_object_put_array(
+        &payloadObj, strings::rejected_params, &rejectedParamsArr);
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -381,7 +383,8 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
       strncpy(paramPtr, param.c_str(), 255);
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
-    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    bson_object_put_array(
+        &payloadObj, strings::rejected_params, &rejectedParamsArr);
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -1069,7 +1072,8 @@ uint32_t get_hash_id(const ProtocolPacket& packet) {
   }
   if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
     BsonObject obj = bson_object_from_bytes(packet.data());
-    const uint32_t hash_id = (uint32_t)bson_object_get_int32(&obj, "hashId");
+    const uint32_t hash_id =
+        (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
     bson_object_deinitialize(&obj);
     return hash_id;
   } else {
@@ -1107,7 +1111,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
       std::vector<std::string> rejectedParams;
       if (hash_id == protocol_handler::HASH_ID_WRONG) {
-        rejectedParams.push_back(std::string("hashId"));
+        rejectedParams.push_back(std::string(strings::hash_id));
       }
       SendEndSessionNAck(connection_id,
                          current_session_id,
@@ -1314,11 +1318,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     if (packet.service_type() == kRpc && packet.data_size() != 0) {
       BsonObject obj = bson_object_from_bytes(packet.data());
       fullVersion = new ProtocolPacket::ProtocolVersion(
-          std::string(bson_object_get_string(&obj, "protocolVersion")));
+          std::string(bson_object_get_string(&obj, strings::protocol_version)));
       bson_object_deinitialize(&obj);
       // Constructed payloads added in Protocol v5
       if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
-        rejectedParams.push_back(std::string("protocolVersion"));
+        rejectedParams.push_back(std::string(strings::protocol_version));
       }
     } else {
       fullVersion = new ProtocolPacket::ProtocolVersion();
@@ -1367,7 +1371,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   if (packet.service_type() == kRpc && packet.data_size() != 0) {
     BsonObject obj = bson_object_from_bytes(packet.data());
     ProtocolPacket::ProtocolVersion fullVersion(
-        bson_object_get_string(&obj, "protocolVersion"));
+        bson_object_get_string(&obj, strings::protocol_version));
     bson_object_deinitialize(&obj);
 
     if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
@@ -1380,8 +1384,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           PROTECTION_OFF,
                           fullVersion);
     } else {
-      std::vector<std::string> rejectedParams(1,
-                                              std::string("protocolVersion"));
+      std::vector<std::string> rejectedParams(
+          1, std::string(strings::protocol_version));
       SendStartSessionNAck(connection_id,
                            packet.session_id(),
                            protocol_version,
