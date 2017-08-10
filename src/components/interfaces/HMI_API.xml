@@ -1426,28 +1426,28 @@
  </enum>
 
  <struct name="RdsData">
-   <param name="PS" type="String" minlength="0" maxlength="8" mandatory="true" >
+  <param name="PS" type="String" minlength="0" maxlength="8" mandatory="false">
      <description>Program Service Name</description>
    </param>
-   <param name="RT" type="String" minlength="0" maxlength="64" mandatory="true" >
+  <param name="RT" type="String" minlength="0" maxlength="64" mandatory="false">
      <description>Radio Text</description>
    </param>
    <param name="CT" type="String" minlength="22" maxlength="28" mandatory="false">
      <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
    </param>
-   <param name="PI" type="String" minlength="0" maxlength="6" mandatory="true" >
+  <param name="PI" type="String" minlength="0" maxlength="6" mandatory="false">
      <description>Program Identification - the call sign for the radio station</description>
    </param>
-   <param name="PTY" type="Integer" minvalue="0" maxvalue="31" mandatory="true" >
+  <param name="PTY" type="Integer" minvalue="0" maxvalue="31" mandatory="false">
      <description>The program type - The region should be used to differentiate between EU and North America program types</description>
    </param>
-   <param name="TP" type="Boolean" mandatory="true" >
+  <param name="TP" type="Boolean" mandatory="false">
      <description>Traffic Program Identification - Identifies a station that offers traffic</description>
    </param>
-   <param name="TA" type="Boolean" mandatory="true" >
+  <param name="TA" type="Boolean" mandatory="false">
      <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
    </param>
-   <param name="REG" type="String" mandatory="true" >
+  <param name="REG" type="String" mandatory="false">
      <description>Region</description>
    </param>
  </struct>
@@ -1586,7 +1586,6 @@
    </param>
    <param name="acEnable" type="Boolean" mandatory="false">
    </param>
-
    <param name="circulateAirEnable" type="Boolean" mandatory="false">
    </param>
    <param name="autoModeEnable" type="Boolean" mandatory="false">
@@ -2575,6 +2574,19 @@
       <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
       </param>
   </struct>
+
+
+<struct name="RemoteControlCapabilities">
+  <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
+  </param>
+  <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <description>If included, the platform supports RC radio controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
+  </param>
+  <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
+    <description>If included, the platform supports RC button controls with the included button names.</description >
+  </param>
+</struct>
 
 </interface>
 
@@ -4787,7 +4799,24 @@
     </function>
 </interface>
 
-<interface name="RC" version="1.0" date="2015-10-13">
+<interface name="RC" version="1.1" date="2017-07-18">
+  <function name="IsReady" messagetype="request">
+    <description>Method is invoked at system startup. Response should provide information about presence of any of remote controllable module and its readiness to cooperate with SDL.</description>
+  </function>
+  <function name="IsReady" messagetype="response">
+    <param name="available" type="Boolean" mandatory="true">
+      <description>Must be true if vehicle RC modules are present and ready to communicate with SDL.</description>
+    </param>
+  </function>
+
+  <function name="GetCapabilities" messagetype="request">
+    <description>Method is invoked at system startup by SDL to request information about Remote Control capabilities of HMI.</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="remoteControlCapability" type="Common.RemoteControlCapabilities" mandatory="false">
+      <description>See RemoteControlCapabilities, all available RC modules and buttons shall be returned.</description>
+    </param>
+  </function>
 
  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
     <param name="moduleData" type="Common.ModuleData" mandatory="true" >
@@ -4798,13 +4827,13 @@
     </param>
   </function>
 
-  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response">
+  <function name="SetInteriorVehicleData" messagetype="response">
     <description>Used to set the values of one zone and one data type within that zone</description>
     <param name="moduleData" type="Common.ModuleData" mandatory="true" >
     </param>
   </function>
 
-<function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
+<function name="GetInteriorVehicleData" messagetype="request">
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
@@ -4816,7 +4845,7 @@
   </param>
 </function>
 
-<function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response">
+<function name="GetInteriorVehicleData" messagetype="response">
   <param name="moduleData" type="Common.ModuleData" mandatory="true" >
   </param>
   <param name="isSubscribed" type="Boolean" mandatory="false" >
@@ -4844,7 +4873,7 @@
     </param>
 </function>
 
-<function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+<function name="OnInteriorVehicleData" messagetype="notification">
   <param name="moduleData" type="Common.ModuleData" mandatory="true" >
   </param>
 </function>

@@ -89,6 +89,9 @@ const std::string CreateInfoForUnsupportedResult(
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo): {
       return "VehicleInfo is not supported by system";
     }
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_RC): {
+      return "Remote control is not supported by system";
+    }
     default:
 #ifdef ENABLE_LOG
       CREATE_LOGGERPTR_LOCAL(logger, "Commands");

@@ -419,6 +419,46 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ(
       2,
       vs_capability_so[strings::supported_formats][1][strings::codec].asInt());
+
+  // Check remote control capabilites
+  const smart_objects::SmartObject rc_capability_so =
+      *(hmi_capabilities_test->rc_capability());
+
+  EXPECT_TRUE(rc_capability_so.keyExists("climateControlCapabilities"));
+  EXPECT_TRUE(rc_capability_so.keyExists("radioControlCapabilities"));
+  EXPECT_TRUE(rc_capability_so.keyExists("buttonCapabilities"));
+
+  EXPECT_TRUE(
+      rc_capability_so["climateControlCapabilities"][0]["fanSpeedAvailable"]
+          .asBool());
+  EXPECT_TRUE(rc_capability_so["climateControlCapabilities"][0]
+                              ["desiredTemperatureAvailable"].asBool());
+  EXPECT_TRUE(
+      rc_capability_so["climateControlCapabilities"][0]["acEnableAvailable"]
+          .asBool());
+  EXPECT_TRUE(
+      rc_capability_so["climateControlCapabilities"][0]["acMaxEnableAvailable"]
+          .asBool());
+
+  EXPECT_TRUE(
+      rc_capability_so["radioControlCapabilities"][0]["radioBandAvailable"]
+          .asBool());
+  EXPECT_TRUE(
+      rc_capability_so["radioControlCapabilities"][0]["radioFrequencyAvailable"]
+          .asBool());
+  EXPECT_TRUE(
+      rc_capability_so["radioControlCapabilities"][0]["hdChannelAvailable"]
+          .asBool());
+  EXPECT_TRUE(
+      rc_capability_so["radioControlCapabilities"][0]["rdsDataAvailable"]
+          .asBool());
+
+  EXPECT_TRUE(rc_capability_so["buttonCapabilities"][0]["shortPressAvailable"]
+                  .asBool());
+  EXPECT_TRUE(
+      rc_capability_so["buttonCapabilities"][0]["longPressAvailable"].asBool());
+  EXPECT_FALSE(
+      rc_capability_so["buttonCapabilities"][0]["upDownAvailable"].asBool());
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

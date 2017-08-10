@@ -59,6 +59,16 @@ void GetSystemCapabilityRequest::Run() {
       }
       break;
     }
+    case mobile_apis::SystemCapabilityType::REMOTE_CONTROL: {
+      if (hmi_capabilities.rc_capability()) {
+        response_params[strings::system_capability][strings::rc_capability] =
+            *hmi_capabilities.rc_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
+    }
     case mobile_apis::SystemCapabilityType::VIDEO_STREAMING:
       if (hmi_capabilities.video_streaming_capability()) {
         response_params[strings::system_capability]
@@ -68,13 +78,16 @@ void GetSystemCapabilityRequest::Run() {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
         return;
       }
+      SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+      return;
       break;
     case mobile_apis::SystemCapabilityType::AUDIO_STREAMING:
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
+      break;
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
-      return;
+      break;
   }
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }

@@ -1445,7 +1445,7 @@
     </param>
   </struct>
 
- <enum name="ModuleType">
+  <enum name="ModuleType">
     <element name="CLIMATE"/>
     <element name="RADIO"/>
   </enum>
@@ -1608,7 +1608,7 @@
     </param>
   </struct>
 
-  <struct name="ClimateControlData">
+   <struct name="ClimateControlData">
     <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
     </param>
     <param name="currentTemperature" type="Temperature" mandatory="false">
@@ -2255,6 +2255,24 @@
     </param>
   </struct>
 
+  <struct name="RemoteControlCapabilities">
+    <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+      <description>
+        If included, the platform supports RC climate controls.
+        For this baseline version, maxsize=1. i.e. only one climate control module is supported.
+      </description >
+    </param>
+    <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+      <description>
+        If included, the platform supports RC radio controls.
+        For this baseline version, maxsize=1. i.e. only one radio control module is supported.
+      </description >
+    </param>
+    <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
+      <description>If included, the platform supports RC button controls with the included button names.</description >
+    </param>
+  </struct>
+
   <struct name="SoftButtonCapabilities">
     <description>Contains information about a SoftButton's capabilities.</description>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
@@ -2818,6 +2836,7 @@
     <element name="PHONE_CALL"/>
     <element name="VIDEO_STREAMING"/>
     <element name="AUDIO_STREAMING"/>
+    <element name="REMOTE_CONTROL"/>
   </enum>
 
   <struct name="NavigationCapability">
@@ -2863,6 +2882,7 @@
       <param name="phoneCapability" type="PhoneCapability" mandatory="false">
       </param>
       <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
       </param>
   </struct>
 
@@ -5519,7 +5539,6 @@
         <description> true if successful; false, if failed </description>
     </param>
   </function>
-
 
   <!-- Notifications -->
 

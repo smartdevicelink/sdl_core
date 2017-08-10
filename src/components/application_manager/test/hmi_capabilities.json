@@ -316,6 +316,150 @@
                 {
                     "protocol": "RTP",
                     "codec": "Theora"
+                }]},
+
+            "remoteControlCapability":{
+                "climateControlCapabilities": [{
+                    "moduleName": "primary_climate",
+                    "fanSpeedAvailable": true,
+                    "desiredTemperatureAvailable": true,
+                    "acEnableAvailable": true,
+                    "acMaxEnableAvailable": true,
+                    "circulateAirEnableAvailable": true,
+                    "autoModeEnableAvailable": true,
+                    "dualModeEnableAvailable": true,
+                    "defrostZoneAvailable": true,
+                    "ventilationModeAvailable": true,
+                    "defrostZone": ["FRONT",
+                    "REAR",
+                    "ALL",
+                    "NONE"],
+                    "ventilationMode": ["UPPER",
+                    "LOWER",
+                    "BOTH",
+                    "NONE"]
+                }],
+
+                "radioControlCapabilities": [{
+                    "moduleName": "radio",
+                    "radioEnableAvailable": true,
+                    "radioBandAvailable": true,
+                    "radioFrequencyAvailable": true,
+                    "hdChannelAvailable": true,
+                    "rdsDataAvailable": true,
+                    "availableHDsAvailable": true,
+                    "stateAvailable": true,
+                    "signalStrengthAvailable": true,
+                    "signalChangeThresholdAvailable": true
+                }],
+
+                "buttonCapabilities": [{
+                    "name": "AC_MAX",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "AC",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "RECIRCULATE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "FAN_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "FAN_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "TEMP_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "TEMP_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST_MAX",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST_REAR",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "UPPER_VENT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "LOWER_VENT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "VOLUME_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "VOLUME_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "EJECT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "SOURCE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "SHUFFLE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "REPEAT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
                 }]
             }
         }

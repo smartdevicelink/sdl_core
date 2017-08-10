@@ -725,6 +725,11 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
           hmi_apis::FunctionID::VehicleInfo_IsReady, *this));
   ManageHMICommand(is_ivi_ready);
 
+  utils::SharedPtr<smart_objects::SmartObject> is_rc_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::RC_IsReady,
+                                        *this));
+  ManageHMICommand(is_rc_ready);
+
   utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::Buttons_GetCapabilities, *this));

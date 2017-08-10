@@ -90,6 +90,9 @@ class HMICapabilities {
   virtual bool is_ivi_cooperating() const = 0;
   virtual void set_is_ivi_cooperating(const bool value) = 0;
 
+  virtual bool is_rc_cooperating() const = 0;
+  virtual void set_is_rc_cooperating(const bool value) = 0;
+
   /*
    * @brief Interface used to store information about software version of the
    *target
@@ -409,6 +412,7 @@ class HMICapabilities {
    */
   virtual bool phone_call_supported() const = 0;
 
+<<<<<<< e8f4b4fef6ccb7106fe0a0c4e2b4e828e20ee926
   /*
    * @brief Interface to store whether HMI supports video streaming
    *
@@ -430,33 +434,19 @@ class HMICapabilities {
    * @param navigation_capability contains information related
    * to the navigation system capability.
    */
+=======
+>>>>>>> Implementation of system capabilities
   virtual void set_navigation_capability(
       const smart_objects::SmartObject& navigation_capability) = 0;
 
-  /*
-   * @brief Retrieves information regarding the navigation system capability
-   *
-   * @return NAVIGATION system capability
-   */
   virtual const smart_objects::SmartObject* navigation_capability() const = 0;
 
-  /*
-   * @brief Interface used to store information regarding
-   * the phone "System Capability"
-   *
-   * @param phone_capability contains information related
-   * to the phone system capability.
-   */
   virtual void set_phone_capability(
       const smart_objects::SmartObject& phone_capability) = 0;
 
-  /*
-   * @brief Retrieves information regarding the phone call system capability
-   *
-   * @return PHONE_CALL system capability
-   */
   virtual const smart_objects::SmartObject* phone_capability() const = 0;
 
+<<<<<<< e8f4b4fef6ccb7106fe0a0c4e2b4e828e20ee926
   /*
    * @brief Sets HMI's video streaming related capability information
    *
@@ -472,6 +462,12 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObject* video_streaming_capability()
       const = 0;
+=======
+  virtual void set_rc_capability(
+      const smart_objects::SmartObject& rc_capability) = 0;
+
+  virtual const smart_objects::SmartObject* rc_capability() const = 0;
+>>>>>>> Implementation of system capabilities
 
   virtual void Init(resumption::LastState* last_state) = 0;
 
