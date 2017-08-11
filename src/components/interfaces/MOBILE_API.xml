@@ -1457,28 +1457,28 @@
   </enum>
 
   <struct name="RdsData">
-    <param name="PS" type="String" minlength="0" maxlength="8" mandatory="true" >
+    <param name="PS" type="String" minlength="0" maxlength="8" mandatory="false" >
       <description>Program Service Name</description>
     </param>
-    <param name="RT" type="String" minlength="0" maxlength="64" mandatory="true" >
+    <param name="RT" type="String" minlength="0" maxlength="64" mandatory="false" >
       <description>Radio Text</description>
     </param>
     <param name="CT" type="String" minlength="22" maxlength="28" mandatory="false">
       <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
     </param>
-    <param name="PI" type="String" minlength="0" maxlength="6" mandatory="true" >
+    <param name="PI" type="String" minlength="0" maxlength="6" mandatory="false" >
       <description>Program Identification - the call sign for the radio station</description>
     </param>
-    <param name="PTY" type="Integer" minvalue="0" maxvalue="31" mandatory="true" >
+    <param name="PTY" type="Integer" minvalue="0" maxvalue="31" mandatory="false" >
       <description>The program type - The region should be used to differentiate between EU and North America program types</description>
     </param>
-    <param name="TP" type="Boolean" mandatory="true" >
+    <param name="TP" type="Boolean" mandatory="false" >
       <description>Traffic Program Identification - Identifies a station that offers traffic</description>
     </param>
-    <param name="TA" type="Boolean" mandatory="true" >
+    <param name="TA" type="Boolean" mandatory="false" >
       <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
     </param>
-    <param name="REG" type="String" mandatory="true" >
+    <param name="REG" type="String" mandatory="false" >
       <description>Region</description>
     </param>
   </struct>
