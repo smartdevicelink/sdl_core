@@ -1566,6 +1566,8 @@ class ApplicationManagerImpl
    * @param mock_app the mock app to be registered
    */
   void AddMockApplication(ApplicationSharedPtr mock_app);
+
+ private:
 #endif
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
