@@ -298,7 +298,10 @@ TEST_F(SetInteriorVehicleDataRequestTest,
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
-
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
+      .WillOnce(Return(::remote_control::AcquireResult::ALLOWED));
   application_manager::AppExtensionPtr invalid_ext;
   EXPECT_CALL(*mock_app_, QueryInterface(kModuleId))
       .WillOnce(Return(invalid_ext))

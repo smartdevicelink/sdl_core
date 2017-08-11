@@ -252,6 +252,10 @@ TEST_F(
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
   EXPECT_CALL(*mock_service_, CheckAccess(_, _, _, _))
       .WillOnce(Return(application_manager::TypeAccess::kAllowed));
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
+      .WillOnce(Return(::remote_control::AcquireResult::ALLOWED));
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_)).Times(0);
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(mock_module_, SendResponseToMobile(_))
