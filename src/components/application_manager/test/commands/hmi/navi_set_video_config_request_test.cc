@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+
 #include "application_manager/commands/hmi/navi_set_video_config_request.h"
 
 #include "gtest/gtest.h"
@@ -110,23 +112,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_SUCCESS) {
 
 static bool ValidateList(std::vector<std::string>& expected,
                          std::vector<std::string>& actual) {
-  if (expected.size() != actual.size()) {
-    return false;
-  }
-  for (unsigned int i = 0; i < expected.size(); i++) {
-    std::string& param = expected[i];
-    unsigned int j;
-    for (j = 0; j < actual.size(); j++) {
-      if (param == actual[j]) {
-        break;
-      }
-    }
-    if (j == actual.size()) {
-      // not found
-      return false;
-    }
-  }
-  return true;
+  std::sort(expected.begin(), expected.end());
+  std::sort(actual.begin(), actual.end());
+  return std::equal(expected.begin(), expected.end(), actual.begin());
 }
 
 TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
