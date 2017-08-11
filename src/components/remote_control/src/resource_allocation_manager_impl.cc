@@ -108,6 +108,7 @@ void ResourceAllocationManagerImpl::SetResourceState(
   const std::string status = allocated_resources_.end() != allocated_it
                                  ? " acquired "
                                  : " not acquired ";
+  UNUSED(status);
   LOG4CXX_DEBUG(logger_,
                 "Resource " << module_type << " is " << status
                             << " Owner application id is "
