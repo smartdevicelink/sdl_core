@@ -62,17 +62,17 @@ class NaviSetVideoConfigRequest : public RequestToHMI,
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief On event callback
    **/
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief onTimeOut callback
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviSetVideoConfigRequest);
