@@ -154,8 +154,10 @@ void SetInteriorVehicleDataRequest::Execute() {
   }
 
   if (module_type_and_data_match) {
-    if (!CheckIfModuleDataExistInCapabilities(*(service()->GetRCCapabilities()),
-                                              module_data)) {
+    const smart_objects::SmartObject* capabilities =
+        service()->GetRCCapabilities();
+    if (capabilities &&
+        !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {
       LOG4CXX_WARN(logger_, "Accessing not supported module data");
       SendResponse(false,
                    result_codes::kUnsupportedResource,
