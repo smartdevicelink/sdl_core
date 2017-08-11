@@ -303,9 +303,13 @@ void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
-    if (CheckPolicyPermissions() && CheckDriverConsent() &&
-        AqcuireResources()) {
-      Execute();  // run child's logic
+    if (CheckPolicyPermissions() && CheckDriverConsent()) {
+      if (AqcuireResources()) {
+        Execute();  // run child's logic
+      }
+      // If resource is not aqcuired AqcuireResources method will
+      // either send response to mobile
+      // or send additional request to HMI to ask driver consent
     }
   } else {
     SendResponse(false, result_codes::kInvalidData, "");
