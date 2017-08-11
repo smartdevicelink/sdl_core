@@ -1537,6 +1537,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
       bson_object_put_string(
           &start_session_ack_params, strings::video_codec, codec);
     }
+    bson_object_deinitialize(&req_param);
   }
 
 #ifdef ENABLE_SECURITY
