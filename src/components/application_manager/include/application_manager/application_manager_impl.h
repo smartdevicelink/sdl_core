@@ -1559,8 +1559,12 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
 #ifdef BUILD_TESTS
-  // Methods for test usage
  public:
+  /**
+   * @brief register a mock application without going through the formal
+   * registration process. Only for unit testing.
+   * @param mock_app the mock app to be registered
+   */
   void AddMockApplication(ApplicationSharedPtr mock_app);
 #endif
 
