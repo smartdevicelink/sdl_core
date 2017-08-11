@@ -1232,13 +1232,12 @@ void ApplicationManagerImpl::OnStreamingConfigured(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::vector<std::string> empty;
-
   LOG4CXX_INFO(logger_,
                "OnStreamingConfigured called for service "
                    << service_type << ", result=" << result);
 
   if (result) {
+    std::vector<std::string> empty;
     {
       sync_primitives::AutoLock lock(navi_service_status_lock_);
 
