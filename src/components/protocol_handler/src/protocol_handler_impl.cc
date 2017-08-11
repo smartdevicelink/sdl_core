@@ -212,30 +212,12 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
-    const BsonObject* additional_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ProtocolPacket::ProtocolVersion* fullVersion =
-      new ProtocolPacket::ProtocolVersion();
-  SendStartSessionAck(connection_id,
-                      session_id,
-                      protocol_version,
-                      hash_id,
-                      service_type,
-                      protection,
-                      *fullVersion,
-                      additional_params);
-  delete fullVersion;
-}
-
-void ProtocolHandlerImpl::SendStartSessionAck(
-    ConnectionID connection_id,
-    uint8_t session_id,
-    uint8_t protocol_version,
-    uint32_t hash_id,
-    uint8_t service_type,
-    bool protection,
     ProtocolPacket::ProtocolVersion& full_version) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  BsonObject empty_param;
+  bson_object_initialize_default(&empty_param);
+
   SendStartSessionAck(connection_id,
                       session_id,
                       protocol_version,
@@ -243,7 +225,9 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                       service_type,
                       protection,
                       full_version,
-                      NULL);
+                      empty_param);
+
+  bson_object_deinitialize(&empty_param);
 }
 
 void ProtocolHandlerImpl::SendStartSessionAck(
@@ -254,7 +238,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     uint8_t service_type,
     bool protection,
     ProtocolPacket::ProtocolVersion& full_version,
-    const BsonObject* additional_params) {
+    BsonObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
@@ -279,10 +263,8 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   if (proxy_supports_v5_protocol && maxProtocolVersion >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
-    BsonObject payloadObj;
-    bson_object_initialize_default(&payloadObj);
     bson_object_put_int64(
-        &payloadObj,
+        &params,
         strings::mtu,
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
@@ -290,7 +272,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     if (serviceTypeValue == kRpc) {
       // Hash ID is only used in RPC case
       bson_object_put_int32(
-          &payloadObj, strings::hash_id, static_cast<int32_t>(hash_id));
+          &params, strings::hash_id, static_cast<int32_t>(hash_id));
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
@@ -300,35 +282,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       char protocolVersionString[255];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
-          &payloadObj, strings::protocol_version, protocolVersionString);
-    } else if (serviceTypeValue == kMobileNav && additional_params != NULL) {
-      BsonObject* input = const_cast<BsonObject*>(additional_params);
-      BsonElement* element = NULL;
-      if ((element = bson_object_get(input, strings::height)) != NULL &&
-          element->type == TYPE_INT32) {
-        bson_object_put_int32(&payloadObj,
-                              strings::height,
-                              bson_object_get_int32(input, strings::height));
-      }
-      if ((element = bson_object_get(input, strings::width)) != NULL &&
-          element->type == TYPE_INT32) {
-        bson_object_put_int32(&payloadObj,
-                              strings::width,
-                              bson_object_get_int32(input, strings::width));
-      }
-      char* protocol = bson_object_get_string(input, strings::video_protocol);
-      if (protocol != NULL) {
-        bson_object_put_string(&payloadObj, strings::video_protocol, protocol);
-      }
-      char* codec = bson_object_get_string(input, strings::video_codec);
-      if (codec != NULL) {
-        bson_object_put_string(&payloadObj, strings::video_codec, codec);
-      }
+          &params, strings::protocol_version, protocolVersionString);
     }
-    uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
-    ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
+    uint8_t* payloadBytes = bson_object_to_bytes(&params);
+    ptr->set_data(payloadBytes, bson_object_size(&params));
     free(payloadBytes);
-    bson_object_deinitialize(&payloadObj);
   } else {
     set_hash_id(hash_id, *ptr);
   }
@@ -1548,13 +1506,37 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     return;
   }
 
-  BsonObject input_param;
+  BsonObject start_session_ack_params;
+  bson_object_initialize_default(&start_session_ack_params);
+  // when video service is successfully started, copy input parameters
+  // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
-    // when video service is successfully started, copy input parameters
-    // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
-    input_param = bson_object_from_bytes(packet->data());
-  } else {
-    bson_object_initialize_default(&input_param);
+    BsonObject req_param = bson_object_from_bytes(packet->data());
+    BsonElement* element = NULL;
+
+    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::height,
+                            bson_object_get_int32(&req_param, strings::height));
+    }
+    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::width,
+                            bson_object_get_int32(&req_param, strings::width));
+    }
+    char* protocol =
+        bson_object_get_string(&req_param, strings::video_protocol);
+    if (protocol != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_protocol, protocol);
+    }
+    char* codec = bson_object_get_string(&req_param, strings::video_codec);
+    if (codec != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_codec, codec);
+    }
   }
 
 #ifdef ENABLE_SECURITY
@@ -1572,6 +1554,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
           connection_key,
           security_manager::SecurityManager::ERROR_INTERNAL,
           error);
+      ProtocolPacket::ProtocolVersion fullVersion;
       // Start service without protection
       SendStartSessionAck(connection_id,
                           generated_session_id,
@@ -1579,8 +1562,9 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                           hash_id,
                           packet->service_type(),
                           PROTECTION_OFF,
-                          &input_param);
-      bson_object_deinitialize(&input_param);
+                          fullVersion,
+                          start_session_ack_params);
+      bson_object_deinitialize(&start_session_ack_params);
       return;
     }
     ProtocolPacket::ProtocolVersion* fullVersion;
@@ -1617,7 +1601,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                           packet->service_type(),
                           PROTECTION_ON,
                           *fullVersion,
-                          &input_param);
+                          start_session_ack_params);
     } else {
       security_manager_->AddListener(
           new StartSessionHandler(connection_key,
@@ -1636,7 +1620,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
       }
     }
     delete fullVersion;
-    bson_object_deinitialize(&input_param);
+    bson_object_deinitialize(&start_session_ack_params);
     LOG4CXX_DEBUG(logger_,
                   "Protection establishing for connection "
                       << connection_key << " is in progress");
@@ -1670,15 +1654,17 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
 
   } else {
     // Start service without protection
+    ProtocolPacket::ProtocolVersion fullVersion;
     SendStartSessionAck(connection_id,
                         generated_session_id,
                         packet->protocol_version(),
                         hash_id,
                         packet->service_type(),
                         PROTECTION_OFF,
-                        &input_param);
+                        fullVersion,
+                        start_session_ack_params);
   }
-  bson_object_deinitialize(&input_param);
+  bson_object_deinitialize(&start_session_ack_params);
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
