@@ -297,45 +297,30 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   (*command_msg)[strings::msg_params][strings::system_capabilities]
                 [strings::video_streaming_capability] =
                     smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& video_streaming_capability =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::video_streaming_capability];
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::preferred_resolution] =
-                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  video_streaming_capability[strings::preferred_resolution] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  video_streaming_capability[strings::preferred_resolution]
+                            [strings::resolution_width] = 800;
+  video_streaming_capability[strings::preferred_resolution]
+                            [strings::resolution_height] = 350;
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::preferred_resolution][strings::resolution_width] =
-                    800;
+  video_streaming_capability[strings::max_bitrate] = 10000;
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::preferred_resolution][strings::resolution_height] =
-                    350;
+  video_streaming_capability[strings::supported_formats] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability][strings::max_bitrate] =
-                    10000;
+  video_streaming_capability[strings::supported_formats][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::supported_formats] =
-                    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  video_streaming_capability[strings::supported_formats][0][strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RAW;
 
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::supported_formats][0] =
-                    smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::supported_formats][0][strings::protocol] =
-                    hmi_apis::Common_VideoStreamingProtocol::RAW;
-
-  (*command_msg)[strings::msg_params][strings::system_capabilities]
-                [strings::video_streaming_capability]
-                [strings::supported_formats][0][strings::codec] =
-                    hmi_apis::Common_VideoStreamingCodec::H264;
+  video_streaming_capability[strings::supported_formats][0][strings::codec] =
+      hmi_apis::Common_VideoStreamingCodec::H264;
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
@@ -343,12 +328,8 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  smart_objects::SmartObject vs_capability_so =
-      (*command_msg)[strings::msg_params][strings::system_capabilities]
-                    [strings::video_streaming_capability];
-
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_video_streaming_capability(vs_capability_so));
+              set_video_streaming_capability(video_streaming_capability));
 
   command->Run();
 }
