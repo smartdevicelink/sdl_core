@@ -38,6 +38,10 @@ extern const char* hash_id;
 extern const char* protocol_version;
 extern const char* mtu;
 extern const char* rejected_params;
+extern const char* height;
+extern const char* width;
+extern const char* video_protocol;
+extern const char* video_codec;
 
 }  // namespace strings
 

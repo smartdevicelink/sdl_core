@@ -304,23 +304,25 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     } else if (serviceTypeValue == kMobileNav && additional_params != NULL) {
       BsonObject* input = const_cast<BsonObject*>(additional_params);
       BsonElement* element = NULL;
-      if ((element = bson_object_get(input, "height")) != NULL &&
+      if ((element = bson_object_get(input, strings::height)) != NULL &&
           element->type == TYPE_INT32) {
-        bson_object_put_int32(
-            &payloadObj, "height", bson_object_get_int32(input, "height"));
+        bson_object_put_int32(&payloadObj,
+                              strings::height,
+                              bson_object_get_int32(input, strings::height));
       }
-      if ((element = bson_object_get(input, "width")) != NULL &&
+      if ((element = bson_object_get(input, strings::width)) != NULL &&
           element->type == TYPE_INT32) {
-        bson_object_put_int32(
-            &payloadObj, "width", bson_object_get_int32(input, "width"));
+        bson_object_put_int32(&payloadObj,
+                              strings::width,
+                              bson_object_get_int32(input, strings::width));
       }
-      char* protocol = bson_object_get_string(input, "videoProtocol");
+      char* protocol = bson_object_get_string(input, strings::video_protocol);
       if (protocol != NULL) {
-        bson_object_put_string(&payloadObj, "videoProtocol", protocol);
+        bson_object_put_string(&payloadObj, strings::video_protocol, protocol);
       }
-      char* codec = bson_object_get_string(input, "videoCodec");
+      char* codec = bson_object_get_string(input, strings::video_codec);
       if (codec != NULL) {
-        bson_object_put_string(&payloadObj, "videoCodec", codec);
+        bson_object_put_string(&payloadObj, strings::video_codec, codec);
       }
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);

@@ -33,6 +33,7 @@
 #include <string>
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_impl.h"
+#include "protocol/bson_object_keys.h"
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
@@ -597,10 +598,12 @@ TEST_F(ProtocolHandlerImplTest,
 
   BsonObject bson_params1;
   bson_object_initialize_default(&bson_params1);
-  bson_object_put_string(
-      &bson_params1, "videoProtocol", const_cast<char*>("RAW"));
-  bson_object_put_string(
-      &bson_params1, "videoCodec", const_cast<char*>("H264"));
+  bson_object_put_string(&bson_params1,
+                         protocol_handler::strings::video_protocol,
+                         const_cast<char*>("RAW"));
+  bson_object_put_string(&bson_params1,
+                         protocol_handler::strings::video_codec,
+                         const_cast<char*>("H264"));
   std::vector<uint8_t> params1 = CreateVectorFromBsonObject(&bson_params1);
 
   uint8_t generated_session_id1 = 100;
@@ -619,14 +622,16 @@ TEST_F(ProtocolHandlerImplTest,
 
   BsonObject bson_params2;
   bson_object_initialize_default(&bson_params2);
-  bson_object_put_string(
-      &bson_params2, "videoProtocol", const_cast<char*>("RTP"));
-  bson_object_put_string(
-      &bson_params2, "videoCodec", const_cast<char*>("H265"));
+  bson_object_put_string(&bson_params2,
+                         protocol_handler::strings::video_protocol,
+                         const_cast<char*>("RTP"));
+  bson_object_put_string(&bson_params2,
+                         protocol_handler::strings::video_codec,
+                         const_cast<char*>("H265"));
   std::vector<uint8_t> params2 = CreateVectorFromBsonObject(&bson_params2);
 
   std::vector<std::string> rejected_param_list;
-  rejected_param_list.push_back("videoCodec");
+  rejected_param_list.push_back(protocol_handler::strings::video_codec);
 
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id2,
@@ -656,11 +661,14 @@ TEST_F(ProtocolHandlerImplTest,
 
   BsonObject bson_ack_params;
   bson_object_initialize_default(&bson_ack_params);
-  bson_object_put_int64(&bson_ack_params, "mtu", maximum_payload_size);
-  bson_object_put_string(
-      &bson_ack_params, "videoProtocol", const_cast<char*>("RAW"));
-  bson_object_put_string(
-      &bson_ack_params, "videoCodec", const_cast<char*>("H264"));
+  bson_object_put_int64(
+      &bson_ack_params, protocol_handler::strings::mtu, maximum_payload_size);
+  bson_object_put_string(&bson_ack_params,
+                         protocol_handler::strings::video_protocol,
+                         const_cast<char*>("RAW"));
+  bson_object_put_string(&bson_ack_params,
+                         protocol_handler::strings::video_codec,
+                         const_cast<char*>("H264"));
   std::vector<uint8_t> ack_params =
       CreateVectorFromBsonObject(&bson_ack_params);
   bson_object_deinitialize(&bson_ack_params);
@@ -681,7 +689,8 @@ TEST_F(ProtocolHandlerImplTest,
   }
   BsonObject bson_nack_params;
   bson_object_initialize_default(&bson_nack_params);
-  bson_object_put_array(&bson_nack_params, "rejectedParams", &bson_arr);
+  bson_object_put_array(
+      &bson_nack_params, protocol_handler::strings::rejected_params, &bson_arr);
   std::vector<uint8_t> nack_params =
       CreateVectorFromBsonObject(&bson_nack_params);
   bson_object_deinitialize(&bson_nack_params);

@@ -56,6 +56,7 @@
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "protocol/bson_object_keys.h"
 
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
@@ -3828,7 +3829,8 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
   }
   BsonObject* obj = const_cast<BsonObject*>(input);
 
-  const char* protocol = bson_object_get_string(obj, "videoProtocol");
+  const char* protocol =
+      bson_object_get_string(obj, protocol_handler::strings::video_protocol);
   if (protocol != NULL) {
     hmi_apis::Common_VideoStreamingProtocol::eType protocol_enum =
         ConvertVideoProtocol(protocol);
@@ -3837,7 +3839,8 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
       output[strings::protocol] = protocol_enum;
     }
   }
-  const char* codec = bson_object_get_string(obj, "videoCodec");
+  const char* codec =
+      bson_object_get_string(obj, protocol_handler::strings::video_codec);
   if (codec != NULL) {
     hmi_apis::Common_VideoStreamingCodec::eType codec_enum =
         ConvertVideoCodec(codec);
@@ -3845,13 +3848,16 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
       output[strings::codec] = codec_enum;
     }
   }
-  BsonElement* element = bson_object_get(obj, "height");
+  BsonElement* element =
+      bson_object_get(obj, protocol_handler::strings::height);
   if (element != NULL && element->type == TYPE_INT32) {
-    output[strings::height] = bson_object_get_int32(obj, "height");
+    output[strings::height] =
+        bson_object_get_int32(obj, protocol_handler::strings::height);
   }
-  element = bson_object_get(obj, "width");
+  element = bson_object_get(obj, protocol_handler::strings::width);
   if (element != NULL && element->type == TYPE_INT32) {
-    output[strings::width] = bson_object_get_int32(obj, "width");
+    output[strings::width] =
+        bson_object_get_int32(obj, protocol_handler::strings::width);
   }
 }
 
@@ -3861,13 +3867,13 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
   std::vector<std::string> output;
   for (unsigned int i = 0; i < input.size(); i++) {
     if (input[i] == strings::protocol) {
-      output.push_back("videoProtocol");
+      output.push_back(protocol_handler::strings::video_protocol);
     } else if (input[i] == strings::codec) {
-      output.push_back("videoCodec");
+      output.push_back(protocol_handler::strings::video_codec);
     } else if (input[i] == strings::height) {
-      output.push_back("height");
+      output.push_back(protocol_handler::strings::height);
     } else if (input[i] == strings::width) {
-      output.push_back("width");
+      output.push_back(protocol_handler::strings::width);
     }
     // ignore unknown parameters
   }

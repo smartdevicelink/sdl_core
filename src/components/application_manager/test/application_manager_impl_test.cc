@@ -47,6 +47,7 @@
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
@@ -390,14 +391,18 @@ TEST_F(ApplicationManagerImplTest,
   BsonObject input_params;
   bson_object_initialize_default(&input_params);
   char protocol_version[] = "1.0.0";
-  bson_object_put_string(&input_params, "protocolVersion", protocol_version);
-  bson_object_put_int64(&input_params, "mtu", 100);
+  bson_object_put_string(&input_params,
+                         protocol_handler::strings::protocol_version,
+                         protocol_version);
+  bson_object_put_int64(&input_params, protocol_handler::strings::mtu, 100);
   char protocol_name[] = "RTP";
-  bson_object_put_string(&input_params, "videoProtocol", protocol_name);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_protocol, protocol_name);
   char codec_name[] = "VP9";
-  bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "height", 640);
-  bson_object_put_int32(&input_params, "width", 480);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_codec, codec_name);
+  bson_object_put_int32(&input_params, protocol_handler::strings::height, 640);
+  bson_object_put_int32(&input_params, protocol_handler::strings::width, 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
   converted_params[strings::protocol] =
@@ -470,14 +475,18 @@ TEST_F(ApplicationManagerImplTest,
   BsonObject input_params;
   bson_object_initialize_default(&input_params);
   char protocol_version[] = "1.0.0";
-  bson_object_put_string(&input_params, "protocolVersion", protocol_version);
-  bson_object_put_int64(&input_params, "mtu", 100);
+  bson_object_put_string(&input_params,
+                         protocol_handler::strings::protocol_version,
+                         protocol_version);
+  bson_object_put_int64(&input_params, protocol_handler::strings::mtu, 100);
   char protocol_name[] = "RTP";
-  bson_object_put_string(&input_params, "videoProtocol", protocol_name);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_protocol, protocol_name);
   char codec_name[] = "VP9";
-  bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "height", 640);
-  bson_object_put_int32(&input_params, "width", 480);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_codec, codec_name);
+  bson_object_put_int32(&input_params, protocol_handler::strings::height, 640);
+  bson_object_put_int32(&input_params, protocol_handler::strings::width, 480);
 
   smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
   converted_params[strings::protocol] =
@@ -513,8 +522,9 @@ TEST_F(ApplicationManagerImplTest,
   // check: rejected param list contains "videoProtocol" and "videoCodec"
   ASSERT_EQ(2u, rejected_params.size());
   std::vector<std::string> expected_list;
-  expected_list.push_back(std::string("videoProtocol"));
-  expected_list.push_back(std::string("videoCodec"));
+  expected_list.push_back(
+      std::string(protocol_handler::strings::video_protocol));
+  expected_list.push_back(std::string(protocol_handler::strings::video_codec));
   ASSERT_TRUE(ValidateList(expected_list, rejected_params));
 }
 
@@ -604,14 +614,18 @@ TEST_F(ApplicationManagerImplTest,
   BsonObject input_params;
   bson_object_initialize_default(&input_params);
   char protocol_version[] = "1.0.0";
-  bson_object_put_string(&input_params, "protocolVersion", protocol_version);
-  bson_object_put_int64(&input_params, "mtu", 100);
+  bson_object_put_string(&input_params,
+                         protocol_handler::strings::protocol_version,
+                         protocol_version);
+  bson_object_put_int64(&input_params, protocol_handler::strings::mtu, 100);
   char protocol_name[] = "RTP";
-  bson_object_put_string(&input_params, "videoProtocol", protocol_name);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_protocol, protocol_name);
   char codec_name[] = "VP9";
-  bson_object_put_string(&input_params, "videoCodec", codec_name);
-  bson_object_put_int32(&input_params, "height", 640);
-  bson_object_put_int32(&input_params, "width", 480);
+  bson_object_put_string(
+      &input_params, protocol_handler::strings::video_codec, codec_name);
+  bson_object_put_int32(&input_params, protocol_handler::strings::height, 640);
+  bson_object_put_int32(&input_params, protocol_handler::strings::width, 480);
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(_, _)).Times(0);
