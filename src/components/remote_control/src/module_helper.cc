@@ -64,7 +64,8 @@ application_manager::MessagePtr ModuleHelper::ResponseToHMI(
 
   application_manager::MessagePtr message(new application_manager::Message(
       protocol_handler::MessagePriority::kDefault));
-  message->set_protocol_version(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   message->set_correlation_id(msg[json_keys::kId].asInt());
   Json::FastWriter writer;
   std::string json_msg = writer.write(msg);
