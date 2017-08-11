@@ -56,31 +56,25 @@ void ShowRequest::HandleMetadata(const char* field_id,
       (*message_)[strings::msg_params][strings::text_field_metadata];
 
   if (metadata_struct.keyExists(field_id)) {
-    LOG4CXX_INFO(logger_, "field " << field_id << " exists.");
-
     if (field_index != -1) {
-      LOG4CXX_INFO(logger_, "have a field index of " << field_index);
       msg_params[hmi_request::show_strings][field_index]
                 [hmi_request::field_types] =
                     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
       const size_t num_tags = metadata_struct[field_id].length();
-      LOG4CXX_INFO(logger_, "num_tags = " << num_tags);
-
       for (size_t i = 0; i < num_tags; ++i) {
         const int32_t current_tag = metadata_struct[field_id][i].asInt();
         msg_params[hmi_request::show_strings][field_index]
                   [hmi_request::field_types][i] = current_tag;
-        LOG4CXX_INFO(logger_, "tag " << i << ": " << current_tag);
       }
     } else {
       LOG4CXX_INFO(logger_,
-                   "tag provided with no item for " << field_id
-                                                    << ", ignore with warning");
-      // tag provided with no item, ignore with warning
+                   "metadata tag provided with no item for " << field_id
+                                                             << ", ignoring");
     }
   } else {
-    LOG4CXX_INFO(logger_, "field " << field_id << " does not exist.");
+    LOG4CXX_INFO(logger_,
+                 "No metadata tagging provided for field: " << field_id);
   }
 }
 
@@ -202,8 +196,6 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(
           strings::text_field_metadata)) {
-    LOG4CXX_INFO(logger_, "TextFieldMetadata exists.");
-
     HandleMetadata(strings::main_field_1, main_field_1_index, msg_params);
     HandleMetadata(strings::main_field_2, main_field_2_index, msg_params);
     HandleMetadata(strings::main_field_3, main_field_3_index, msg_params);
