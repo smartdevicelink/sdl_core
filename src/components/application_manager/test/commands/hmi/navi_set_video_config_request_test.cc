@@ -87,7 +87,7 @@ class NaviSetVideoConfigRequestTest
   MockEventDispatcher mock_event_dispatcher_;
 };
 
-TEST_F(NaviSetVideoConfigRequestTest, OnEvent_SUCCESS) {
+TEST_F(NaviSetVideoConfigRequestTest, OnEventWithSuccessResponse) {
   MessageSharedPtr request_msg = CreateMessage();
   (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
 
@@ -117,7 +117,7 @@ static bool ValidateList(std::vector<std::string>& expected,
   return std::equal(expected.begin(), expected.end(), actual.begin());
 }
 
-TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
+TEST_F(NaviSetVideoConfigRequestTest, OnEventWithRejectedResponse) {
   MessageSharedPtr request_msg = CreateMessage();
   (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
   (*request_msg)[am::strings::msg_params][am::strings::config] =
@@ -165,7 +165,8 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE) {
   ASSERT_TRUE(ValidateList(expected_list, rejected_params));
 }
 
-TEST_F(NaviSetVideoConfigRequestTest, OnEvent_FAILURE_WithoutParams) {
+TEST_F(NaviSetVideoConfigRequestTest,
+       OnEventWithRejectedResponseWithoutParams) {
   MessageSharedPtr request_msg = CreateMessage();
   (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
 
