@@ -41,6 +41,9 @@ const char kclimateControlCapabilities[] = "climateControlCapabilities";
 const char kradioControlCapabilities[] = "radioControlCapabilities";
 const char kbuttonCapabilities[] = "buttonCapabilities";
 // RemoteControlCapabilities constants
+
+const char kRadioControlData[] = "radioControlData";
+const char kClimateControlData[] = "climateControlData";
 }  //  strings
 
 namespace result_codes {

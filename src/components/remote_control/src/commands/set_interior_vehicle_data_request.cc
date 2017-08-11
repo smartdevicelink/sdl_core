@@ -61,6 +61,33 @@ std::vector<std::string> GetModuleReadOnlyParams(
   return module_ro_params;
 }
 
+const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
+  std::map<std::string, std::string> mapping;
+  // climate
+  mapping["fanSpeed"] = "fanSpeedAvailable";
+  mapping["currentTemperature"] = "currentTemperatureAvailable";
+  mapping["desiredTemperature"] = "desiredTemperatureAvailable";
+  mapping["acEnable"] = "acEnableAvailable";
+  mapping["circulateAirEnable"] = "circulateAirEnableAvailable";
+  mapping["autoModeEnable"] = "autoModeEnableAvailable";
+  mapping["defrostZone"] = "defrostZoneAvailable";
+  mapping["dualModeEnable"] = "dualModeEnableAvailable";
+  mapping["acMaxEnable"] = "acMaxEnableAvailable";
+  mapping["ventilationMode"] = "ventilationModeAvailable";
+
+  // radio
+  mapping["band"] = "radioBandAvailable";
+  mapping["frequencyInteger"] = "radioFrequencyAvailable";
+  mapping["frequencyFraction"] = "radioFrequencyAvailable";
+  mapping["rdsData"] = "rdsDataAvailable";
+  mapping["availableHDs"] = "availableHDsAvailable";
+  mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["signalStrength"] = "signalStrengthAvailable";
+  mapping["radioEnable"] = "radioEnableAvailable";
+  mapping["state"] = "stateAvailable";
+
+  return mapping;
+}
 }  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
@@ -71,6 +98,43 @@ SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     : BaseCommandRequest(message, rc_module) {}
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
+
+bool CheckControlDataByCapabilities(
+    const smart_objects::SmartObject& module_caps,
+    const Json::Value& control_data) {
+  std::map<std::string, std::string> mapping =
+      GetModuleDataToCapabilitiesMapping();
+  Json::Value::Members control_data_keys = control_data.getMemberNames();
+
+  Json::Value::Members::const_iterator it = control_data_keys.begin();
+  for (; it != control_data_keys.end(); ++it) {
+    const std::string& caps_key = mapping[*it];
+    DCHECK_OR_RETURN(module_caps.keyExists(caps_key), false);
+    if (!module_caps[caps_key].asBool()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CheckIfModuleDataExistInCapabilities(
+    const smart_objects::SmartObject& rc_capabilities,
+    const Json::Value& module_data) {
+  if (rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
+    const smart_objects::SmartObject& radio_caps =
+        rc_capabilities[strings::kradioControlCapabilities];
+    return CheckControlDataByCapabilities(
+        radio_caps, module_data[strings::kRadioControlData]);
+  }
+  if (rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
+    const smart_objects::SmartObject& climate_caps =
+        rc_capabilities[strings::kclimateControlCapabilities];
+    return CheckControlDataByCapabilities(
+        climate_caps, module_data[strings::kClimateControlData]);
+  }
+  DCHECK(false && "Module Data does not contains control data");
+  return true;
+}
 
 void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -90,6 +154,14 @@ void SetInteriorVehicleDataRequest::Execute() {
   }
 
   if (module_type_and_data_match) {
+    if (!CheckIfModuleDataExistInCapabilities(*(service()->GetRCCapabilities()),
+                                              module_data)) {
+      LOG4CXX_WARN(logger_, "Accessing not supported module data");
+      SendResponse(false,
+                   result_codes::kUnsupportedResource,
+                   "Accessing not supported module data");
+      return;
+    }
     if (AreAllParamsReadOnly(request_params)) {
       LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");
       SendResponse(false,
