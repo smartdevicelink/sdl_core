@@ -564,8 +564,8 @@ TEST_F(ProtocolHandlerImplTest,
        StartSession_Unprotected_Multiple_SessionObserverAcceptAndReject) {
   using namespace protocol_handler;
 
-  ON_CALL(protocol_handler_settings_mock, enable_protocol_5())
-      .WillByDefault(Return(true));
+  ON_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillByDefault(Return(PROTOCOL_VERSION_5));
 
   const size_t maximum_payload_size = 1000;
   InitProtocolHandlerImpl(0u, 0u, false, 0u, 0u, 0, maximum_payload_size);
