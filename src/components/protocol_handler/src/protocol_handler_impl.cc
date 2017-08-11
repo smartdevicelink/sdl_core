@@ -1209,7 +1209,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
                       uint32_t hash_id,
                       ServiceType service_type,
                       const std::vector<int>& force_protected_service,
-                      ProtocolPacket::ProtocolVersion& full_version)
+                      ProtocolPacket::ProtocolVersion& full_version,
+                      uint8_t* payload)
       : connection_key_(connection_key)
       , protocol_handler_(protocol_handler)
       , session_observer_(session_observer)
@@ -1219,12 +1220,14 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       , hash_id_(hash_id)
       , service_type_(service_type)
       , force_protected_service_(force_protected_service)
-      , full_version_(full_version) {}
+      , full_version_(full_version)
+      , payload_(payload) {}
 
   bool OnHandshakeDone(
       const uint32_t connection_key,
       security_manager::SSLContext::HandshakeResult result) OVERRIDE {
     if (connection_key != connection_key_) {
+      delete[] payload_;
       return false;
     }
     const bool success =
@@ -1244,13 +1247,24 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       if (success) {
         session_observer_.SetProtectionFlag(connection_key_, service_type_);
       }
+      BsonObject params;
+      if (payload_ != NULL) {
+        params = bson_object_from_bytes(payload_);
+      }
+      else {
+        bson_object_initialize_default(&params);
+      }
       protocol_handler_->SendStartSessionAck(connection_id_,
                                              session_id_,
                                              protocol_version_,
                                              hash_id_,
                                              service_type_,
-                                             success);
+                                             success,
+                                             full_version_,
+                                             params);
+      bson_object_deinitialize(&params);
     }
+    delete[] payload_;
     delete this;
     return true;
   }
@@ -1272,7 +1286,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   const uint32_t hash_id_;
   const ServiceType service_type_;
   const std::vector<int> force_protected_service_;
-  const ProtocolPacket::ProtocolVersion full_version_;
+  ProtocolPacket::ProtocolVersion full_version_;
+  uint8_t* payload_;
 };
 }  // namespace
 #endif  // ENABLE_SECURITY
@@ -1381,7 +1396,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                   hash_id,
                                   service_type,
                                   get_settings().force_protected_service(),
-                                  *fullVersion));
+                                  *fullVersion,
+                                  NULL));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
@@ -1580,6 +1596,8 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                           *fullVersion,
                           start_session_ack_params);
     } else {
+      //Need a copy because fullVersion will be deleted
+      ProtocolPacket::ProtocolVersion fullVersionCopy(*fullVersion);
       security_manager_->AddListener(
           new StartSessionHandler(connection_key,
                                   this,
@@ -1590,7 +1608,8 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                                   hash_id,
                                   service_type,
                                   get_settings().force_protected_service(),
-                                  *fullVersion));
+                                  fullVersionCopy,
+                                  bson_object_to_bytes(&start_session_ack_params)));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
