@@ -199,4 +199,11 @@ void ResourceAllocationManagerImpl::OnUnregisterApplication(
   }
 }
 
+void ResourceAllocationManagerImpl::ResetAllAllocations() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  allocated_resources_.clear();
+  rejected_resources_for_application_.clear();
+  resources_state_.clear();
+}
+
 }  // namespace remote_control

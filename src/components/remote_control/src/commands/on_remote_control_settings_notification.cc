@@ -89,6 +89,8 @@ void OnRemoteControlSettingsNotification::Execute() {
     LOG4CXX_DEBUG(logger_, "RC Functionality remains unchanged");
     return;
   }
+  ResourceAllocationManager& allocation_manager =
+      rc_module_.resource_allocation_manager();
   const bool is_allowed = value[message_params::kAllowed].asBool();
   if (is_allowed) {
     LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
@@ -98,13 +100,12 @@ void OnRemoteControlSettingsNotification::Execute() {
 
     const hmi_apis::Common_RCAccessMode::eType access_mode_ =
         MessageHelper::AccessModeFromString(access_mode);
-    ResourceAllocationManager& allocation_manager =
-        rc_module_.resource_allocation_manager();
     LOG4CXX_DEBUG(logger_, "Setting up access mode : " << access_mode);
     allocation_manager.SetAccessMode(access_mode_);
   } else {
     LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
     DisallowRCFunctionality();
+    allocation_manager.ResetAllAllocations();
   }
 }
 

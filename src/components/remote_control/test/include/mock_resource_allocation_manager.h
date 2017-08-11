@@ -26,6 +26,7 @@ class MockResourceAllocationManager
                     const remote_control::ResourceState::eType state));
   MOCK_METHOD1(OnUnregisterApplication, void(const uint32_t app_id));
   MOCK_CONST_METHOD1(IsResourceFree, bool(const std::string& module_type));
+  MOCK_METHOD0(ResetAllAllocations, void());
 };
 
 }  // namespace remote_control_test

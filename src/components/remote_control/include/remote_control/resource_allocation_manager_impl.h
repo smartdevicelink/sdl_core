@@ -34,6 +34,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void OnUnregisterApplication(const uint32_t app_id) FINAL;
 
+  void ResetAllAllocations() FINAL;
+
  private:
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
