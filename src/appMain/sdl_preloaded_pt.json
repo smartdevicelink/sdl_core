@@ -516,51 +516,30 @@
             "RemoteControl": {
                 "rpcs": {
                     "ButtonPress": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     },
                     "GetInteriorVehicleData": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
-                    },
-                    "GetInteriorVehicleDataCapabilities": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
-                    },
-                    "OnInteriorVehicleData": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED"
-                        ]
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     },
                     "SetInteriorVehicleData": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     },
                     "SystemRequest": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             },
@@ -1032,7 +1011,7 @@
                         ]
                     }
                 }
-            }
+            },
             "BackgroundAPT": {
                 "rpcs": {
                     "EndAudioPassThru": {
@@ -2385,7 +2364,7 @@
                 "groups_primaryRC": [
                     "Base-4",
                     "RemoteControl"
-                ],
+                ]
             },
             "device": {
                 "keep_context": false,

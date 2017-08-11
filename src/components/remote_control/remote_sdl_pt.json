@@ -963,33 +963,24 @@
                     "ButtonPress": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED",
-                        "NONE"]
-                    },
-                    "GetInteriorVehicleDataCapabilities": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED",
-                        "NONE"]
+                        "LIMITED"]
                     },
                     "GetInteriorVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED",
-                        "NONE"]
+                        "LIMITED"]
                     },
                     "SetInteriorVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED",
-                        "NONE"]
+                        "LIMITED"]
                     },
                     "OnInteriorVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
-		    "SystemRequest": {
+		            "SystemRequest": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
