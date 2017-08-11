@@ -3864,14 +3864,16 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
 std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     const std::vector<std::string>& input) {
   std::vector<std::string> output;
-  for (unsigned int i = 0; i < input.size(); i++) {
-    if (input[i] == strings::protocol) {
+  for (std::vector<std::string>::const_iterator it = input.begin();
+       it != input.end();
+       ++it) {
+    if (*it == strings::protocol) {
       output.push_back(protocol_handler::strings::video_protocol);
-    } else if (input[i] == strings::codec) {
+    } else if (*it == strings::codec) {
       output.push_back(protocol_handler::strings::video_codec);
-    } else if (input[i] == strings::height) {
+    } else if (*it == strings::height) {
       output.push_back(protocol_handler::strings::height);
-    } else if (input[i] == strings::width) {
+    } else if (*it == strings::width) {
       output.push_back(protocol_handler::strings::width);
     }
     // ignore unknown parameters
