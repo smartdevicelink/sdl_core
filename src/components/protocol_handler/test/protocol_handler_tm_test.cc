@@ -202,7 +202,6 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     // use protection OFF
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
-    std::vector<std::string> empty;
 
     // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
@@ -222,7 +221,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                            session_id,
                            HASH_ID_WRONG,
                            callback_protection_flag,
-                           ByRef(empty))));
+                           ByRef(empty_rejected_param_))));
     times++;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -315,6 +314,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       security_manager_mock;
   testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
 #endif  // ENABLE_SECURITY
+  std::vector<std::string> empty_rejected_param_;
 };
 
 #ifdef ENABLE_SECURITY
@@ -368,7 +368,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -389,7 +388,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    SESSION_START_REJECT,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times += call_times;
 
   // Expect send NAck
@@ -434,7 +433,6 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -455,7 +453,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
                                    SESSION_START_REJECT,
                                    HASH_ID_WRONG,
                                    callback_protection_flag,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times += call_times;
 
   // Expect send NAck with encryption OFF
@@ -491,7 +489,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -510,7 +507,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -607,7 +604,6 @@ TEST_F(ProtocolHandlerImplTest,
   std::vector<uint8_t> params1 = CreateVectorFromBsonObject(&bson_params1);
 
   uint8_t generated_session_id1 = 100;
-  std::vector<std::string> empty;
 
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id1,
@@ -656,7 +652,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    generated_session_id1,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   BsonObject bson_ack_params;
@@ -818,7 +814,6 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -837,7 +832,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -874,7 +869,6 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -893,7 +887,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_OFF,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -920,7 +914,6 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -939,7 +932,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -975,7 +968,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -994,7 +986,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -1043,7 +1035,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1062,7 +1053,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   std::vector<int> services;
@@ -1136,7 +1127,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1155,7 +1145,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation
@@ -1234,7 +1224,6 @@ TEST_F(
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1253,7 +1242,7 @@ TEST_F(
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation
@@ -1330,7 +1319,6 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  std::vector<std::string> empty;
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1349,7 +1337,7 @@ TEST_F(ProtocolHandlerImplTest,
                                    session_id,
                                    HASH_ID_WRONG,
                                    PROTECTION_ON,
-                                   ByRef(empty))));
+                                   ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation
