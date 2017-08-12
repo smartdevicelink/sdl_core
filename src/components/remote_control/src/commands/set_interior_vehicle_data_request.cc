@@ -116,8 +116,18 @@ bool CheckControlDataByCapabilities(
                   "Checking request parameter "
                       << request_parameter
                       << " with capabilities. Appropriate key is " << caps_key);
-    DCHECK_OR_RETURN(capabilities_status.keyExists(caps_key), false);
+    if (!capabilities_status.keyExists(caps_key)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is missed in RemoteControl capabilities");
+      return false;
+    }
     if (!capabilities_status[caps_key].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is switched off in RemoteControl capabilities");
       return false;
     }
   }
