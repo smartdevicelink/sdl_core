@@ -83,6 +83,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["availableHDs"] = "availableHDsAvailable";
   mapping["hdChannel"] = "availableHDsAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
+  mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
   mapping["state"] = "stateAvailable";
 
@@ -108,9 +109,15 @@ bool CheckControlDataByCapabilities(
 
   Json::Value::Members::const_iterator it = control_data_keys.begin();
   for (; it != control_data_keys.end(); ++it) {
-    const std::string& caps_key = mapping[*it];
-    DCHECK_OR_RETURN(module_caps.keyExists(caps_key), false);
-    if (!module_caps[caps_key].asBool()) {
+    const std::string& request_parameter = *it;
+    const std::string& caps_key = mapping[request_parameter];
+    const smart_objects::SmartObject& capabilities_status = module_caps[0];
+    LOG4CXX_DEBUG(logger_,
+                  "Checking request parameter "
+                      << request_parameter
+                      << " with capabilities. Appropriate key is " << caps_key);
+    DCHECK_OR_RETURN(capabilities_status.keyExists(caps_key), false);
+    if (!capabilities_status[caps_key].asBool()) {
       return false;
     }
   }
@@ -120,20 +127,24 @@ bool CheckControlDataByCapabilities(
 bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const Json::Value& module_data) {
-  if (rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
+  bool is_radio_data_valid = true;
+  bool is_climate_data_valid = true;
+  if (IsMember(module_data, kRadioControlData) &&
+      rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
     const smart_objects::SmartObject& radio_caps =
         rc_capabilities[strings::kradioControlCapabilities];
-    return CheckControlDataByCapabilities(
+    is_radio_data_valid = CheckControlDataByCapabilities(
         radio_caps, module_data[strings::kRadioControlData]);
   }
-  if (rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
+  if (IsMember(module_data, kClimateControlData) &&
+      rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
     const smart_objects::SmartObject& climate_caps =
         rc_capabilities[strings::kclimateControlCapabilities];
-    return CheckControlDataByCapabilities(
+    is_climate_data_valid = CheckControlDataByCapabilities(
         climate_caps, module_data[strings::kClimateControlData]);
   }
-  DCHECK(false && "Module Data does not contains control data");
-  return true;
+
+  return is_radio_data_valid && is_climate_data_valid;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
