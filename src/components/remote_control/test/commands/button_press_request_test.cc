@@ -108,7 +108,8 @@ class ButtonPressRequestTest : public ::testing::Test {
     mock_module_.set_service(exp_service);
   }
 
-  smart_objects::SmartObject ButtonCapability(const std::string& button_name) {
+  smart_objects::SmartObject ButtonCapability(
+      const mobile_apis::ButtonName::eType button_name) {
     smart_objects::SmartObject button(smart_objects::SmartType_Map);
     button["name"] = button_name;
     return button;
@@ -116,25 +117,27 @@ class ButtonPressRequestTest : public ::testing::Test {
 
   void SetUp() OVERRIDE {
     using namespace remote_control;
-    std::vector<std::string> button_names;
-    button_names.push_back(enums_value::kACMax);
-    button_names.push_back(enums_value::kAC);
-    button_names.push_back(enums_value::kRecirculate);
-    button_names.push_back(enums_value::kFanUp);
-    button_names.push_back(enums_value::kFanDown);
-    button_names.push_back(enums_value::kTempUp);
-    button_names.push_back(enums_value::kTempDown);
-    button_names.push_back(enums_value::kDefrostMax);
-    button_names.push_back(enums_value::kDefrost);
-    button_names.push_back(enums_value::kDefrostRear);
-    button_names.push_back(enums_value::kUpperVent);
-    button_names.push_back(enums_value::kLowerVent);
-    button_names.push_back(enums_value::kVolumeUp);
-    button_names.push_back(enums_value::kVolumeDown);
-    button_names.push_back(enums_value::kEject);
-    button_names.push_back(enums_value::kSource);
-    button_names.push_back(enums_value::kShuffle);
-    button_names.push_back(enums_value::kRepeat);
+    using namespace mobile_apis;
+
+    std::vector<ButtonName::eType> button_names;
+    button_names.push_back(ButtonName::AC_MAX);
+    button_names.push_back(ButtonName::AC);
+    button_names.push_back(ButtonName::RECIRCULATE);
+    button_names.push_back(ButtonName::FAN_UP);
+    button_names.push_back(ButtonName::FAN_DOWN);
+    button_names.push_back(ButtonName::TEMP_UP);
+    button_names.push_back(ButtonName::TEMP_DOWN);
+    button_names.push_back(ButtonName::DEFROST_MAX);
+    button_names.push_back(ButtonName::DEFROST);
+    button_names.push_back(ButtonName::DEFROST_REAR);
+    button_names.push_back(ButtonName::UPPER_VENT);
+    button_names.push_back(ButtonName::LOWER_VENT);
+    button_names.push_back(ButtonName::VOLUME_UP);
+    button_names.push_back(ButtonName::VOLUME_DOWN);
+    button_names.push_back(ButtonName::EJECT);
+    button_names.push_back(ButtonName::SOURCE);
+    button_names.push_back(ButtonName::SHUFFLE);
+    button_names.push_back(ButtonName::REPEAT);
 
     smart_objects::SmartObject button_caps(smart_objects::SmartType_Array);
     for (size_t i = 0; i < button_names.size(); i++) {
