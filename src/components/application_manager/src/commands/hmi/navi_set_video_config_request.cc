@@ -112,7 +112,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
         }
       }
       application_manager_.OnStreamingConfigured(
-          application_id(),
+          app->app_id(),
           protocol_handler::ServiceType::kMobileNav,
           result,
           rejected_params);
@@ -136,10 +136,7 @@ void NaviSetVideoConfigRequest::onTimeOut() {
 
   std::vector<std::string> empty;
   application_manager_.OnStreamingConfigured(
-      application_id(),
-      protocol_handler::ServiceType::kMobileNav,
-      false,
-      empty);
+      app->app_id(), protocol_handler::ServiceType::kMobileNav, false, empty);
 
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());

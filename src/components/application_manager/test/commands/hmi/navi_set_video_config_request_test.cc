@@ -79,6 +79,7 @@ class NaviSetVideoConfigRequestTest
         .WillByDefault(Return(mock_app_ptr_));
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
+    ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app_ptr_, hmi_app_id()).WillByDefault(Return(kHmiAppId));
   }
 
@@ -104,7 +105,7 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithSuccessResponse) {
   EXPECT_CALL(
       app_mngr_,
       OnStreamingConfigured(
-          kHmiAppId, protocol_handler::ServiceType::kMobileNav, true, empty))
+          kAppId, protocol_handler::ServiceType::kMobileNav, true, empty))
       .Times(1);
 
   command->on_event(event);
@@ -150,10 +151,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithRejectedResponse) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, _))
+  EXPECT_CALL(app_mngr_,
+              OnStreamingConfigured(
+                  kAppId, protocol_handler::ServiceType::kMobileNav, false, _))
       .WillOnce(SaveArg<3>(&rejected_params));
 
   command->on_event(event);
@@ -184,7 +184,7 @@ TEST_F(NaviSetVideoConfigRequestTest,
   EXPECT_CALL(
       app_mngr_,
       OnStreamingConfigured(
-          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
       .WillOnce(Return());
 
   command->on_event(event);
@@ -201,7 +201,7 @@ TEST_F(NaviSetVideoConfigRequestTest, OnTimeout) {
   EXPECT_CALL(
       app_mngr_,
       OnStreamingConfigured(
-          kHmiAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
       .WillOnce(Return());
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(1);
