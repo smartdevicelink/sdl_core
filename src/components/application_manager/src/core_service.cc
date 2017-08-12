@@ -193,6 +193,17 @@ bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
   return false;
 }
 
+bool CoreService::IsInterfaceAvailable(
+    const HmiInterfaces::InterfaceID interface) const {
+#ifdef SDL_REMOTE_CONTROL
+  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  const HmiInterfaces::InterfaceState state =
+      hmi_interfaces.GetInterfaceState(interface);
+  return HmiInterfaces::STATE_NOT_AVAILABLE != state;
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 void CoreService::RemoveHMIFakeParameters(
     application_manager::MessagePtr& message) {
   application_manager_.RemoveHMIFakeParameters(message);

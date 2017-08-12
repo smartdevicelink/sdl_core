@@ -106,6 +106,19 @@ void BaseCommandRequest::SendResponse(const bool success,
 void BaseCommandRequest::SendMessageToHMI(
     const application_manager::MessagePtr& message_to_send) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using application_manager::HmiInterfaces;
+
+  const bool is_rc_available =
+      service_->IsInterfaceAvailable(HmiInterfaces::HMI_INTERFACE_RC);
+  LOG4CXX_DEBUG(logger_, "HMI interface RC is available: " << is_rc_available);
+  if (!is_rc_available) {
+    const bool success = false;
+    const char* result_code = result_codes::kUnsupportedResource;
+    const std::string info = "Remote control is not supported by system";
+
+    SendResponse(success, result_code, info);
+    return;
+  }
 
   const std::string function_name = message_to_send->function_name();
   const int32_t correlation_id = message_to_send->correlation_id();

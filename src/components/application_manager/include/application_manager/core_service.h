@@ -157,6 +157,14 @@ class CoreService : public Service {
   bool IsRemoteControlApplication(ApplicationSharedPtr app) const FINAL;
 
   /**
+   * @brief Gets current state of the specified interface
+   * @param interface which state to get
+   * @return true if specified interface available otherwise false
+   */
+  bool IsInterfaceAvailable(
+      const HmiInterfaces::InterfaceID interface) const FINAL;
+
+  /**
    * Removes fake parameters from request to HMI
    * @param message message to handle
    */

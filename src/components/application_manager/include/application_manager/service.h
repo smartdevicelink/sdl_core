@@ -38,6 +38,7 @@
 #include <vector>
 #include "application_manager/application.h"
 #include "application_manager/message.h"
+#include "application_manager/hmi_interfaces.h"
 
 namespace application_manager {
 
@@ -218,6 +219,14 @@ class Service {
    * @return true if application has remote control functions
    */
   virtual bool IsRemoteControlApplication(ApplicationSharedPtr app) const = 0;
+
+  /**
+   * @brief Gets current state of the specified interface
+   * @param interface which state to get
+   * @return true if specified interface available otherwise false
+   */
+  virtual bool IsInterfaceAvailable(
+      const HmiInterfaces::InterfaceID interface) const = 0;
 
   /**
    * Gets all allowed module types
