@@ -122,6 +122,8 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_allocation_manager_));
     ON_CALL(mock_module_, service()).WillByDefault(Return(mock_service_));
     ON_CALL(*mock_service_, GetApplication(_)).WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_service_, IsInterfaceAvailable(_))
+        .WillByDefault(Return(true));
     ON_CALL(mock_module_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
     ServicePtr exp_service(mock_service_);

@@ -104,6 +104,8 @@ class OnRemoteControlSettingsNotificationTest : public ::testing::Test {
             utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(mock_module_, resource_allocation_manager())
         .WillByDefault(ReturnRef(mock_allocation_manager_));
+    ON_CALL(*mock_service_, IsInterfaceAvailable(_))
+        .WillByDefault(Return(true));
     apps_.push_back(mock_app_);
   }
 

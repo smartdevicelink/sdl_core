@@ -143,6 +143,8 @@ class ButtonPressRequestTest : public ::testing::Test {
     rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
     ON_CALL(*mock_service_, GetRCCapabilities())
         .WillByDefault(Return(&rc_capabilities_));
+    ON_CALL(*mock_service_, IsInterfaceAvailable(_))
+        .WillByDefault(Return(true));
   }
 
   remote_control::request_controller::MobileRequestPtr CreateCommand(

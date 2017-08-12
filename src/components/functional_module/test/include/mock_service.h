@@ -80,6 +80,8 @@ class MockService : public Service {
 
   MOCK_CONST_METHOD1(IsRemoteControlApplication,
                      bool(ApplicationSharedPtr app));
+  MOCK_CONST_METHOD1(IsInterfaceAvailable,
+                     bool(const HmiInterfaces::InterfaceID interface));
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& application_id,
                           std::vector<std::string>* modules));

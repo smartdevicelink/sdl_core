@@ -113,6 +113,8 @@ class GetInteriorVehicleDataRequestTest : public ::testing::Test {
     ON_CALL(mock_module_, service()).WillByDefault(Return(mock_service_));
     ON_CALL(*mock_service_, GetApplication(app_id_))
         .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_service_, IsInterfaceAvailable(_))
+        .WillByDefault(Return(true));
     EXPECT_CALL(mock_module_, event_dispatcher())
         .WillRepeatedly(ReturnRef(event_dispatcher_));
     ServicePtr exp_service(mock_service_);
