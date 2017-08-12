@@ -36,6 +36,7 @@
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 #include "utils/helpers.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace remote_control {
 
@@ -43,6 +44,8 @@ namespace commands {
 
 using namespace json_keys;
 using namespace message_params;
+
+typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ButtonPressRequest")
 
@@ -81,24 +84,53 @@ const std::vector<std::string> buttons_radio() {
   return data;
 }
 
+const ButtonsMap buttons_map() {
+  using namespace mobile_apis;
+
+  ButtonsMap buttons_map;
+  buttons_map[enums_value::kACMax] = ButtonName::AC_MAX;
+  buttons_map[enums_value::kAC] = ButtonName::AC;
+  buttons_map[enums_value::kRecirculate] = ButtonName::RECIRCULATE;
+  buttons_map[enums_value::kFanUp] = ButtonName::FAN_UP;
+  buttons_map[enums_value::kFanDown] = ButtonName::FAN_DOWN;
+  buttons_map[enums_value::kTempUp] = ButtonName::TEMP_UP;
+  buttons_map[enums_value::kTempDown] = ButtonName::TEMP_DOWN;
+  buttons_map[enums_value::kDefrostMax] = ButtonName::DEFROST_MAX;
+  buttons_map[enums_value::kDefrost] = ButtonName::DEFROST;
+  buttons_map[enums_value::kDefrostRear] = ButtonName::DEFROST_REAR;
+  buttons_map[enums_value::kUpperVent] = ButtonName::UPPER_VENT;
+  buttons_map[enums_value::kLowerVent] = ButtonName::LOWER_VENT;
+  buttons_map[enums_value::kVolumeUp] = ButtonName::VOLUME_UP;
+  buttons_map[enums_value::kVolumeDown] = ButtonName::VOLUME_DOWN;
+  buttons_map[enums_value::kEject] = ButtonName::EJECT;
+  buttons_map[enums_value::kSource] = ButtonName::SOURCE;
+  buttons_map[enums_value::kShuffle] = ButtonName::SHUFFLE;
+  buttons_map[enums_value::kRepeat] = ButtonName::REPEAT;
+
+  return buttons_map;
+}
+
 bool CheckIfButtonExistInRCCaps(
     const smart_objects::SmartObject& rc_capabilities,
-    const std::string& button_name) {
+    const mobile_apis::ButtonName::eType button_id) {
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =
         rc_capabilities[strings::kbuttonCapabilities];
     smart_objects::SmartArray::iterator it = button_caps.asArray()->begin();
     for (; it != button_caps.asArray()->end(); ++it) {
       smart_objects::SmartObject& so = *it;
-      if (so[message_params::kName] == button_name) {
+      const mobile_apis::ButtonName::eType current_id =
+          static_cast<mobile_apis::ButtonName::eType>(
+              so[message_params::kName].asInt());
+      if (current_id == button_id) {
         LOG4CXX_TRACE(logger_,
-                      "Button " << button_name << " exist in capabilities");
+                      "Button id " << button_id << " exist in capabilities");
         return true;
       }
     }
   }
   LOG4CXX_TRACE(logger_,
-                "Button " << button_name << " do not exist in capabilities");
+                "Button id " << button_id << " do not exist in capabilities");
   return false;
 }
 
@@ -126,7 +158,7 @@ bool CheckButtonName(const std::string& module_type,
       return false;
     }
   }
-  return CheckIfButtonExistInRCCaps(*rc_capabilities, button_name);
+  return true;
 }
 
 void ButtonPressRequest::Execute() {
@@ -137,16 +169,34 @@ void ButtonPressRequest::Execute() {
 
   const std::string button_name = request_params[kButtonName].asString();
   const std::string module_type = request_params[kModuleType].asString();
-  const bool button_name_matches_module_type =
-      CheckButtonName(module_type, button_name, service()->GetRCCapabilities());
 
-  if (button_name_matches_module_type) {
+  static ButtonsMap btn_map = buttons_map();
+  mobile_apis::ButtonName::eType button_id =
+      mobile_apis::ButtonName::INVALID_ENUM;
+  if (btn_map.end() != btn_map.find(button_name)) {
+    button_id = btn_map[button_name];
+  }
+
+  const smart_objects::SmartObject* rc_capabilities =
+      service()->GetRCCapabilities();
+  const bool button_name_matches_module_type =
+      CheckButtonName(module_type, button_name, rc_capabilities);
+  const bool button_id_exist_in_caps =
+      rc_capabilities &&
+      CheckIfButtonExistInRCCaps(*rc_capabilities, button_id);
+
+  if (button_name_matches_module_type && button_id_exist_in_caps) {
     SendRequest(functional_modules::hmi_api::button_press, request_params);
-  } else {
+  } else if (!button_name_matches_module_type) {
     LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
     SendResponse(false,
                  result_codes::kInvalidData,
                  "Request module type and button name mismatch!");
+  } else {
+    LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
+    SendResponse(false,
+                 result_codes::kInvalidData,
+                 "Requested button is not exists in capabilities!");
   }
 }
 
