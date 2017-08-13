@@ -204,7 +204,7 @@ void ButtonPressRequest::Execute() {
   } else {
     LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
     SendResponse(false,
-                 result_codes::kInvalidData,
+                 result_codes::kUnsupportedResource,
                  "Requested button is not exists in capabilities!");
   }
 }
