@@ -1530,49 +1530,49 @@
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="radioBandAvailable" type="Boolean" mandatory="true" >
+    <param name="radioBandAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the control of radio band.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="radioFrequencyAvailable" type="Boolean" mandatory="true" >
+    <param name="radioFrequencyAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the control of radio frequency.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="hdChannelAvailable" type="Boolean" mandatory="true" >
+    <param name="hdChannelAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the control of HD radio channel.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="rdsDataAvailable" type="Boolean" mandatory="true" >
+    <param name="rdsDataAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the getting Radio Data System (RDS) data.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="availableHDsAvailable" type="Boolean" mandatory="true" >
+    <param name="availableHDsAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the getting the number of available HD channels.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="stateAvailable" type="Boolean" mandatory="true" >
+    <param name="stateAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the getting the Radio state.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="signalStrengthAvailable" type="Boolean" mandatory="true" >
+    <param name="signalStrengthAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the getting the signal strength.
         True: Available, False: Not Available, Not present: Not Available.
       </description>
     </param>
-    <param name="signalChangeThresholdAvailable" type="Boolean" mandatory="true" >
+    <param name="signalChangeThresholdAvailable" type="Boolean" mandatory="false" >
       <description>
         Availability of the getting the signal Change Threshold.
         True: Available, False: Not Available, Not present: Not Available.
