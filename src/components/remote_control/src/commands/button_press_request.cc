@@ -112,25 +112,34 @@ const ButtonsMap buttons_map() {
 
 bool CheckIfButtonExistInRCCaps(
     const smart_objects::SmartObject& rc_capabilities,
-    const mobile_apis::ButtonName::eType button_id) {
+    const mobile_apis::ButtonName::eType button) {
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =
         rc_capabilities[strings::kbuttonCapabilities];
     smart_objects::SmartArray::iterator it = button_caps.asArray()->begin();
     for (; it != button_caps.asArray()->end(); ++it) {
       smart_objects::SmartObject& so = *it;
-      const mobile_apis::ButtonName::eType current_id =
-          static_cast<mobile_apis::ButtonName::eType>(
-              so[message_params::kName].asInt());
-      if (current_id == button_id) {
+      int64_t current_id = so[message_params::kName].asInt();
+      if (-1 == current_id) {
+        // capabilities received from HMI contains enum values
+        // capabilities loaded from file contains string values
+        // TODO : unificate capabilities storing
+        const std::string& bt_name = so[message_params::kName].asString();
+        static ButtonsMap btn_map = buttons_map();
+        current_id = btn_map[bt_name];
+      }
+      const mobile_apis::ButtonName::eType current_button =
+          static_cast<mobile_apis::ButtonName::eType>(current_id);
+      if (current_button == button) {
         LOG4CXX_TRACE(logger_,
-                      "Button id " << button_id << " exist in capabilities");
+                      "Button id " << current_button
+                                   << " exist in capabilities");
         return true;
       }
     }
   }
   LOG4CXX_TRACE(logger_,
-                "Button id " << button_id << " do not exist in capabilities");
+                "Button id " << button << " do not exist in capabilities");
   return false;
 }
 
