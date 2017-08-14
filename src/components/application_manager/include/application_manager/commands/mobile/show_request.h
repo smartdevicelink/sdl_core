@@ -86,6 +86,9 @@ class ShowRequest : public CommandRequestImpl {
                       int32_t field_index,
                       smart_objects::SmartObject& msg_params);
 
+  mobile_apis::Result::eType core_result_code_;
+  std::string core_response_info_;
+
   DISALLOW_COPY_AND_ASSIGN(ShowRequest);
 };
 

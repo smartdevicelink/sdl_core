@@ -45,7 +45,8 @@ namespace commands {
 
 ShowRequest::ShowRequest(const MessageSharedPtr& message,
                          ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {}
+    : CommandRequestImpl(message, application_manager)
+    , core_result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
 ShowRequest::~ShowRequest() {}
 
@@ -69,8 +70,14 @@ void ShowRequest::HandleMetadata(const char* field_id,
       }
     } else {
       LOG4CXX_INFO(logger_,
-                   "metadata tag provided with no item for " << field_id
-                                                             << ", ignoring");
+                   "metadata tag provided with no item for "
+                       << field_id << ", ignoring with warning");
+      // tag provided with no item, ignore with warning
+      if (mobile_apis::Result::INVALID_ENUM == core_result_code_) {
+        core_result_code_ = mobile_apis::Result::IGNORED;
+        core_response_info_ =
+            "Metadata tag was provided for a field with no data.";
+      }
     }
   } else {
     LOG4CXX_INFO(logger_,
@@ -284,8 +291,15 @@ void ShowRequest::on_event(const event_engine::Event& event) {
         response_info =
             message[strings::params][hmi_response::message].asString();
       }
+      mobile_apis::Result::eType converted_result_code =
+          MessageHelper::HMIToMobileResult(result_code);
+      if (mobile_apis::Result::SUCCESS == converted_result_code &&
+          mobile_apis::Result::INVALID_ENUM != core_result_code_) {
+        converted_result_code = core_result_code_;
+        response_info = core_response_info_;
+      }
       SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
+                   converted_result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
