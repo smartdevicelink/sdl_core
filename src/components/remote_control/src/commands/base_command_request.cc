@@ -335,7 +335,7 @@ void BaseCommandRequest::Run() {
       Execute();  // run child's logic
     }
     // If resource is not aqcuired, AqcuireResources method will either
-    // send response to mobile or 
+    // send response to mobile or
     // send additional request to HMI to ask driver consent
   }
   // TODO : send error in case if policy permissions failed
