@@ -1250,8 +1250,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       BsonObject params;
       if (payload_ != NULL) {
         params = bson_object_from_bytes(payload_);
-      }
-      else {
+      } else {
         bson_object_initialize_default(&params);
       }
       protocol_handler_->SendStartSessionAck(connection_id_,
@@ -1527,8 +1526,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
     start_session_ack_params = bson_object_from_bytes(packet->data());
-  }
-  else {
+  } else {
     bson_object_initialize_default(&start_session_ack_params);
   }
 
@@ -1599,20 +1597,20 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                           *fullVersion,
                           start_session_ack_params);
     } else {
-      //Need a copy because fullVersion will be deleted
+      // Need a copy because fullVersion will be deleted
       ProtocolPacket::ProtocolVersion fullVersionCopy(*fullVersion);
-      security_manager_->AddListener(
-          new StartSessionHandler(connection_key,
-                                  this,
-                                  session_observer_,
-                                  connection_id,
-                                  generated_session_id,
-                                  packet->protocol_version(),
-                                  hash_id,
-                                  service_type,
-                                  get_settings().force_protected_service(),
-                                  fullVersionCopy,
-                                  bson_object_to_bytes(&start_session_ack_params)));
+      security_manager_->AddListener(new StartSessionHandler(
+          connection_key,
+          this,
+          session_observer_,
+          connection_id,
+          generated_session_id,
+          packet->protocol_version(),
+          hash_id,
+          service_type,
+          get_settings().force_protected_service(),
+          fullVersionCopy,
+          bson_object_to_bytes(&start_session_ack_params)));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);

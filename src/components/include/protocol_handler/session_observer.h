@@ -42,10 +42,10 @@
 
 struct BsonObject;
 
-        /**
-         *\namespace protocol_handlerHandler
-         *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
-         */
+/**
+ *\namespace protocol_handler
+ *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
+ */
 namespace protocol_handler {
 /**
  * \brief HASH_ID constants.
