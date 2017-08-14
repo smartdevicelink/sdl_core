@@ -1545,6 +1545,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
       rejected_params.push_back(std::string(strings::protocol_version));
     }
+    bson_object_deinitialize(&request_params);
   } else {
     fullVersion = new ProtocolPacket::ProtocolVersion();
   }
