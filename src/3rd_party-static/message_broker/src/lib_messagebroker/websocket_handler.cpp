@@ -160,8 +160,9 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       memmove(&Buffer[parsedBufferPosition], &recBuffer[position], length);
-
+       for (unsigned long i = 0; (i < size); i++) {
+         Buffer[parsedBufferPosition + i] = recBuffer[i+position];
+       }
        b_size -= position;
        parsedBufferPosition += length;
        recBuffer += length;
