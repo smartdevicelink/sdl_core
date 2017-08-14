@@ -1532,6 +1532,22 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     bson_object_initialize_default(&start_session_ack_params);
   }
 
+  ProtocolPacket::ProtocolVersion* fullVersion;
+
+  // Can't check protocol_version because the first packet is v1, but there
+  // could still be a payload, in which case we can get the real protocol
+  // version
+  if (packet->service_type() == kRpc && packet->data() != NULL) {
+    fullVersion = new ProtocolPacket::ProtocolVersion(
+        std::string(bson_object_get_string(&start_session_ack_params, strings::protocol_version)));
+    // Constructed payloads added in Protocol v5
+    if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+      rejected_params.push_back(std::string(strings::protocol_version));
+    }
+  } else {
+    fullVersion = new ProtocolPacket::ProtocolVersion();
+  }
+
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
   if (protection && security_manager_) {
@@ -1547,7 +1563,6 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
           connection_key,
           security_manager::SecurityManager::ERROR_INTERNAL,
           error);
-      ProtocolPacket::ProtocolVersion fullVersion;
       // Start service without protection
       SendStartSessionAck(connection_id,
                           generated_session_id,
@@ -1555,34 +1570,19 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
                           hash_id,
                           packet->service_type(),
                           PROTECTION_OFF,
-                          fullVersion,
+                          *fullVersion,
                           start_session_ack_params);
+      delete fullVersion;
       bson_object_deinitialize(&start_session_ack_params);
       return;
     }
-    ProtocolPacket::ProtocolVersion* fullVersion;
-    std::vector<std::string> rejectedParams;
-    // Can't check protocol_version because the first packet is v1, but there
-    // could still be a payload, in which case we can get the real protocol
-    // version
-    if (packet->service_type() == kRpc && packet->data_size() != 0) {
-      BsonObject obj = bson_object_from_bytes(packet->data());
-      fullVersion = new ProtocolPacket::ProtocolVersion(
-          std::string(bson_object_get_string(&obj, strings::protocol_version)));
-      bson_object_deinitialize(&obj);
-      // Constructed payloads added in Protocol v5
-      if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
-        rejectedParams.push_back(std::string(strings::protocol_version));
-      }
-    } else {
-      fullVersion = new ProtocolPacket::ProtocolVersion();
-    }
-    if (!rejectedParams.empty()) {
+
+    if (!rejected_params.empty()) {
       SendStartSessionNAck(connection_id,
                            packet->session_id(),
                            protocol_version,
                            packet->service_type(),
-                           rejectedParams);
+                           rejected_params);
     } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
@@ -1623,43 +1623,23 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     return;
   }
 #endif  // ENABLE_SECURITY
-  if (packet->service_type() == kRpc && packet->data_size() != 0) {
-    BsonObject obj = bson_object_from_bytes(packet->data());
-    ProtocolPacket::ProtocolVersion fullVersion(
-        bson_object_get_string(&obj, strings::protocol_version));
-    bson_object_deinitialize(&obj);
-
-    if (fullVersion.majorVersion >= PROTOCOL_VERSION_5) {
-      // Start service without protection
-      SendStartSessionAck(connection_id,
-                          generated_session_id,
-                          packet->protocol_version(),
-                          hash_id,
-                          packet->service_type(),
-                          PROTECTION_OFF,
-                          fullVersion);
-    } else {
-      std::vector<std::string> rejectedParams(
-          1, std::string(strings::protocol_version));
-      SendStartSessionNAck(connection_id,
-                           packet->session_id(),
-                           protocol_version,
-                           packet->service_type(),
-                           rejectedParams);
-    }
-
-  } else {
-    // Start service without protection
-    ProtocolPacket::ProtocolVersion fullVersion;
+  if (rejected_params.empty()) {
     SendStartSessionAck(connection_id,
                         generated_session_id,
                         packet->protocol_version(),
                         hash_id,
                         packet->service_type(),
                         PROTECTION_OFF,
-                        fullVersion,
+                        *fullVersion,
                         start_session_ack_params);
+  } else {
+    SendStartSessionNAck(connection_id,
+                         packet->session_id(),
+                         protocol_version,
+                         packet->service_type(),
+                         rejected_params);
   }
+  delete fullVersion;
   bson_object_deinitialize(&start_session_ack_params);
 }
 
