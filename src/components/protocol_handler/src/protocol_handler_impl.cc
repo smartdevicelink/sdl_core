@@ -1538,8 +1538,11 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   // could still be a payload, in which case we can get the real protocol
   // version
   if (packet->service_type() == kRpc && packet->data() != NULL) {
-    fullVersion = new ProtocolPacket::ProtocolVersion(
-        std::string(bson_object_get_string(&start_session_ack_params, strings::protocol_version)));
+    BsonObject request_params = bson_object_from_bytes(packet->data());
+    char* version_param =
+        bson_object_get_string(&request_params, strings::protocol_version);
+    std::string version_string(version_param == NULL ? "" : version_param);
+    fullVersion = new ProtocolPacket::ProtocolVersion(version_string);
     // Constructed payloads added in Protocol v5
     if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
       rejected_params.push_back(std::string(strings::protocol_version));
