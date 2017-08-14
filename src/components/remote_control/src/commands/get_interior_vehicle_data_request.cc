@@ -54,11 +54,40 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
     RemotePluginInterface& rc_module)
     : BaseCommandRequest(message, rc_module) {}
 
+bool CheckIfModuleTypeExistInCapabilities(
+    const smart_objects::SmartObject& rc_capabilities,
+    const std::string& module_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (enums_value::kRadio == module_type &&
+      !rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
+    return false;
+  }
+  if (enums_value::kClimate == module_type &&
+      !rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
+    return false;
+  }
+
+  return true;
+}
+
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
   Json::Value request_params =
       MessageHelper::StringToValue(message_->json_message());
 
+  const smart_objects::SmartObject* capabilities =
+      service()->GetRCCapabilities();
+  if (capabilities &&
+      !CheckIfModuleTypeExistInCapabilities(*capabilities,
+                                            ModuleType(request_params))) {
+    LOG4CXX_WARN(logger_, "Accessing not supported module data");
+    SendResponse(false,
+                 result_codes::kUnsupportedResource,
+                 "Accessing not supported module data");
+    return;
+  }
   if (HasRequestExcessiveSubscription(request_params)) {
     RemoveExcessiveSubscription(request_params);
   }

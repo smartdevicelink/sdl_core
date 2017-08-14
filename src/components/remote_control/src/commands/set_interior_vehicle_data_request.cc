@@ -137,17 +137,24 @@ bool CheckControlDataByCapabilities(
 bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const Json::Value& module_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   bool is_radio_data_valid = true;
   bool is_climate_data_valid = true;
-  if (IsMember(module_data, kRadioControlData) &&
-      rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
+  if (IsMember(module_data, kRadioControlData)) {
+    if (!rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
+      return false;
+    }
     const smart_objects::SmartObject& radio_caps =
         rc_capabilities[strings::kradioControlCapabilities];
     is_radio_data_valid = CheckControlDataByCapabilities(
         radio_caps, module_data[strings::kRadioControlData]);
   }
-  if (IsMember(module_data, kClimateControlData) &&
-      rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
+  if (IsMember(module_data, kClimateControlData)) {
+    if (!rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
+      return false;
+    }
     const smart_objects::SmartObject& climate_caps =
         rc_capabilities[strings::kclimateControlCapabilities];
     is_climate_data_valid = CheckControlDataByCapabilities(
