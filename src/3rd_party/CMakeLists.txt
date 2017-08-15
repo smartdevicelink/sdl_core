@@ -303,15 +303,13 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
   endif()
   include(ExternalProject)
   ExternalProject_Add(libbson
-      GIT_REPOSITORY "http://github.com/LuxoftAKutsan/bson_c_lib.git"
-# TODO Change GIT_REPOSITORY to http://github.com/smartdevicelink/bson_c_lib.git
-#      after merge of https://github.com/smartdevicelink/bson_c_lib/pull/2
+      GIT_REPOSITORY "http://github.com/smartdevicelink/bson_c_lib.git"
       GIT_TAG "master"
       BINARY_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND make
       INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
 else()
