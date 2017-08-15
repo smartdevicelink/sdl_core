@@ -283,9 +283,27 @@ if(HMI_DBUS_API)
   add_subdirectory(dbus-cmake)
 endif()
 
+set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+set(BSON_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+set(EMHASHMAP_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+set(EMHASHMAP_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib)
+
+include(ExternalProject)
+ExternalProject_Add(libbson
+    GIT_REPOSITORY "http://github.com/smartdevicelink/bson_c_lib.git"
+    GIT_TAG "master"
+    BINARY_DIR ${BSON_LIB_SOURCE_DIRECTORY}
+    DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
+    SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
+    CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure && ./configure
+    BUILD_COMMAND make
+    INSTALL_COMMAND sudo make install)
+
 add_custom_target(install-3rd_party
   DEPENDS ${install-3rd_party_logger_var}
   DEPENDS ${install-3rd_party_dbus_var}
+  DEPENDS libbson
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
 

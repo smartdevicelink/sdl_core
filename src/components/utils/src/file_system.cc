@@ -231,6 +231,10 @@ std::string file_system::GetAbsolutePath(const std::string& path) {
   return std::string(abs_path);
 }
 
+bool file_system::IsFileNameValid(const std::string& file_name) {
+  return file_name.end() == std::find(file_name.begin(), file_name.end(), '/');
+}
+
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());

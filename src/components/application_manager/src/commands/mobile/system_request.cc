@@ -467,6 +467,20 @@ void SystemRequest::Run() {
     file_name = kSYNC;
   }
 
+  if (!CheckSyntax(file_name)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming request contains \t\n \\t \\n or whitespace");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if (!file_system::IsFileNameValid(file_name)) {
+    const std::string err_msg = "Sync file name contains forbidden symbols.";
+    LOG4CXX_ERROR(logger_, err_msg);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+    return;
+  }
+
   bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
                         std::string::npos != file_name.find(kIVSU);
 

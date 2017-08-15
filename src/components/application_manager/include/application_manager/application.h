@@ -37,6 +37,7 @@
 #include <map>
 #include <set>
 #include <list>
+#include <vector>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
@@ -427,6 +428,9 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
+  virtual void set_mobile_projection_enabled(bool option) = 0;
+  virtual bool mobile_projection_enabled() const = 0;
+
   virtual bool video_streaming_approved() const = 0;
   virtual void set_video_streaming_approved(bool state) = 0;
   virtual bool audio_streaming_approved() const = 0;
@@ -436,6 +440,15 @@ class Application : public virtual InitialApplicationData,
   virtual void set_video_streaming_allowed(bool state) = 0;
   virtual bool audio_streaming_allowed() const = 0;
   virtual void set_audio_streaming_allowed(bool state) = 0;
+
+  /**
+   * @brief Sends SetVideoConfig request to HMI to configure streaming
+   * @param service_type Type of streaming service, should be kMobileNav
+   * @param params parameters of video streaming in key-value format
+   * @return true if SetVideoConfig is sent, false otherwise
+   */
+  virtual bool SetVideoConfig(protocol_handler::ServiceType service_type,
+                              const smart_objects::SmartObject& params) = 0;
 
   /**
    * @brief Starts streaming service for application
@@ -539,8 +552,8 @@ class Application : public virtual InitialApplicationData,
   virtual void set_grammar_id(uint32_t value) = 0;
 
   virtual void set_protocol_version(
-      const ProtocolVersion& protocol_version) = 0;
-  virtual ProtocolVersion protocol_version() const = 0;
+      const protocol_handler::MajorProtocolVersion& protocol_version) = 0;
+  virtual protocol_handler::MajorProtocolVersion protocol_version() const = 0;
 
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;

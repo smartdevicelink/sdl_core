@@ -74,6 +74,8 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::TESTING;
   } else if ("SYSTEM" == str) {
     return mobile_apis::AppHMIType::SYSTEM;
+  } else if ("PROJECTION" == str) {
+    return mobile_apis::AppHMIType::PROJECTION;
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
@@ -90,7 +92,8 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
        {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
        {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
        {mobile_apis::AppHMIType::TESTING, "TESTING"},
-       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
+       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"},
+       {mobile_apis::AppHMIType::PROJECTION, "PROJECTION"}};
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
@@ -319,6 +322,11 @@ void RegisterAppInterfaceRequest::Run() {
               app_type.getElement(i).asUInt())) {
         application->set_voice_communication_supported(true);
       }
+      if (mobile_apis::AppHMIType::PROJECTION ==
+          static_cast<mobile_apis::AppHMIType::eType>(
+              app_type.getElement(i).asUInt())) {
+        application->set_mobile_projection_enabled(true);
+      }
     }
   }
 
@@ -477,6 +485,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::hmi_capabilities][strings::video_streaming] =
+      hmi_capabilities.video_streaming_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {

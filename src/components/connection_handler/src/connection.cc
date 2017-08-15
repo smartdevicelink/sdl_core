@@ -352,8 +352,7 @@ bool Connection::SupportHeartBeat(uint8_t session_id) {
   }
   Session& session = session_it->second;
   return (
-      (::protocol_handler::PROTOCOL_VERSION_3 == session.protocol_version ||
-       ::protocol_handler::PROTOCOL_VERSION_4 == session.protocol_version) &&
+      (session.protocol_version >= ::protocol_handler::PROTOCOL_VERSION_3) &&
       (0 != heartbeat_timeout_));
 }
 

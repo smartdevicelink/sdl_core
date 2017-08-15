@@ -167,6 +167,12 @@ extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
 extern const char* audio_pass_thru_icon;
 extern const char* way_points;
+extern const char* system_capability;
+extern const char* system_capability_type;
+extern const char* system_capabilities;
+extern const char* navigation_capability;
+extern const char* phone_capability;
+extern const char* video_streaming_capability;
 
 // PutFile
 extern const char* sync_file_name;
@@ -258,6 +264,7 @@ extern const char* supported_diag_modes;
 extern const char* hmi_capabilities;
 extern const char* navigation;
 extern const char* phone_call;
+extern const char* video_streaming;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
@@ -332,6 +339,17 @@ extern const char* const status;
 extern const char* const external_consent_status;
 extern const char* const consented_functions;
 extern const char* const source;
+extern const char* const config;
+extern const char* const protocol;
+extern const char* const codec;
+extern const char* const width;
+extern const char* const height;
+extern const char* const rejected_params;
+extern const char* const preferred_resolution;
+extern const char* const resolution_width;
+extern const char* const resolution_height;
+extern const char* const max_bitrate;
+extern const char* const supported_formats;
 }  // namespace strings
 
 namespace json {

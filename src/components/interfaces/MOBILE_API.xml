@@ -132,6 +132,9 @@
     <element name="RESUME_FAILED">
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
+    <element name="DATA_NOT_AVAILABLE">
+      <description>The requested data is not available on this vehicle or is not published for the connected app </description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -479,9 +482,9 @@
       Describes different audio type configurations for PerformAudioPassThru.
       e.g. {8kHz,8-bit,PCM}
     </description>     
-    <param name="samplingRate" type="SamplingRate"/>
-    <param name="bitsPerSample" type="BitsPerSample"/>
-    <param name="audioType" type="AudioType"/>
+    <param name="samplingRate" type="SamplingRate" mandatory="true"/>
+    <param name="bitsPerSample" type="BitsPerSample" mandatory="true"/>
+    <param name="audioType" type="AudioType" mandatory="true"/>
   </struct>
 
   <enum name="VehicleDataType">
@@ -835,17 +838,97 @@
     <element name="QUEUE" />
   </enum>
 
+  <enum name="VideoStreamingProtocol">
+    <description>Enum for each type of video streaming protocol type.</description>
+    <element name="RAW">
+      <description>
+        Raw stream bytes that contains no timestamp data and is the lowest supported video streaming
+      </description>
+    </element>
+    <element name="RTP">
+      <description>
+        RTP facilitates the transfer of real-time data. Information provided by this protocol include
+        timestamps (for synchronization), sequence numbers (for packet loss and reordering detection)
+        and the payload format which indicates the encoded format of the data.
+      </description>
+    </element>
+    <element name="RTSP">
+      <description>
+        The transmission of streaming data itself is not a task of RTSP. Most RTSP servers use the
+        Real-time Transport Protocol (RTP) in conjunction with Real-time Control Protocol (RTCP)
+        for media stream delivery. However, some vendors implement proprietary transport protocols.
+      </description>
+    </element>
+    <element name="RTMP">
+      <description>
+        Real-Time Messaging Protocol (RTMP) was initially a proprietary protocol developed by
+        Macromedia for streaming audio, video and data over the Internet, between a Flash player
+        and a server. Macromedia is now owned by Adobe, which has released an incomplete version
+        of the specification of the protocol for public use.
+      </description>
+    </element>
+    <element name="WEBM">
+      <description>
+        The WebM container is based on a profile of Matroska. WebM initially supported VP8 video and
+        Vorbis audio streams. In 2013 it was updated to accommodate VP9 video and Opus audio.
+      </description>
+    </element>
+  </enum>
+
+  <enum name="VideoStreamingCodec">
+    <description>Enum for each type of video streaming codec.</description>
+    <element name="H264">
+      <description>
+        A block-oriented motion-compensation-based video compression standard.
+        As of 2014 it is one of the most commonly used formats for the recording, compression, and
+        distribution of video content.
+      </description>
+    </element>
+    <element name="H265">
+      <description>
+        High Efficiency Video Coding (HEVC), also known as H.265 and MPEG-H Part 2, is a video
+        compression standard, one of several potential successors to the widely used AVC (H.264 or
+        MPEG-4 Part 10). In comparison to AVC, HEVC offers about double the data compression ratio
+        at the same level of video quality, or substantially improved video quality at the same
+        bit rate. It supports resolutions up to 8192x4320, including 8K UHD.
+      </description>
+    </element>
+    <element name="Theora">
+      <description>
+        Theora is derived from the formerly proprietary VP3 codec, released into the public domain
+        by On2 Technologies. It is broadly comparable in design and bitrate efficiency to
+        MPEG-4 Part 2, early versions of Windows Media Video, and RealVideo while lacking some of
+        the features present in some of these other codecs. It is comparable in open standards
+        philosophy to the BBC's Dirac codec.
+      </description>
+    </element>
+    <element name="VP8">
+      <description>
+        VP8 can be multiplexed into the Matroska-based container format WebM along with Vorbis and
+        Opus audio. The image format WebP is based on VP8's intra-frame coding. VP8's direct
+        successor, VP9, and the emerging royalty-free internet video format AV1 from the Alliance for
+        Open Media (AOMedia) are based on VP8.
+      </description>
+    </element>
+    <element name="VP9">
+      <description>
+        Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD)
+        and also enables lossless compression.
+      </description>
+    </element>
+  </enum>
+
   <struct name="Image">
-    <param name="value" minlength="0" maxlength="65535" type="String"> 
+    <param name="value" minlength="0" maxlength="65535" type="String" mandatory="true"> 
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
     </param>
-    <param name="imageType" type="ImageType">
+    <param name="imageType" type="ImageType" mandatory="true">
       <description>Describes, whether it is a static or dynamic image.</description>
     </param>
   </struct>
 
   <struct name="SoftButton">
-    <param name="type" type="SoftButtonType">
+    <param name="type" type="SoftButtonType" mandatory="true">
       <description>Describes, whether it is text, highlighted text, icon, or dynamic image. See softButtonType</description>
     </param>
     <param name="text" minlength="0" maxlength="500" type="String" mandatory="false">
@@ -860,7 +943,7 @@
     		False, if not highlighted
     	</description>
     </param>
-    <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535">
+    <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Value which is returned via OnButtonPress / OnButtonEvent</description>
     </param>
     <param name="systemAction" type="SystemAction" defvalue="DEFAULT_ACTION" mandatory="false">
@@ -870,9 +953,9 @@
 
   <struct name="Choice">
     <description>A choice is an option given to the user, which can be selected either by menu, or through voice recognition system.</description>
-    <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" />
-    <param name="menuName" type="String" maxlength="500" />
-    <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" />
+    <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535"  mandatory="true"/>
+    <param name="menuName" type="String" maxlength="500"  mandatory="true"/>
+    <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true"  mandatory="true"/>
     <param name="image" type="Image" mandatory="false"/>
     <param name="secondaryText" maxlength="500" type="String" mandatory="false">
       <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
@@ -886,13 +969,13 @@
   </struct>
 
   <struct name="VrHelpItem">
-    <param name="text" maxlength="500" type="String">
+    <param name="text" maxlength="500" type="String" mandatory="true">
       <description>Text to display for VR Help item</description>
     </param>
     <param name="image" type="Image" mandatory="false">
       <description>Image struct for VR Help item</description>
     </param>
-    <param name="position" type="Integer" minvalue="1" maxvalue="100">
+    <param name="position" type="Integer" minvalue="1" maxvalue="100" mandatory="true">
       <description>Position to display item in VR Help list</description>
     </param>
   </struct>
@@ -900,10 +983,10 @@
   <struct name="SyncMsgVersion">
     <description>Specifies the version number of the SYNC V4 protocol, that is supported by the mobile application</description>
 
-    <param name="majorVersion" type="Integer" minvalue="1" maxvalue="10">
+    <param name="majorVersion" type="Integer" minvalue="1" maxvalue="10" mandatory="true">
       <description>The major version indicates versions that is not-compatible to previous versions.</description>
     </param>
-    <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000">
+    <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="true">
       <description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
     </param>
     <param name="patchVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
@@ -1027,7 +1110,7 @@
   </enum>
 
   <struct name="SingleTireStatus">
-    <param name="status" type="ComponentVolumeStatus">
+    <param name="status" type="ComponentVolumeStatus" mandatory="true">
       <description>See ComponentVolumeStatus.</description>
 	</param>
   </struct>
@@ -1198,61 +1281,61 @@
   </enum>
 
   <struct name="BeltStatus">
-    <param name="driverBeltDeployed" type="VehicleDataEventStatus">
+    <param name="driverBeltDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerBeltDeployed" type="VehicleDataEventStatus">
+    <param name="passengerBeltDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsPasBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerBuckleBelted" type="VehicleDataEventStatus">
+    <param name="passengerBuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw1PasBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="driverBuckleBelted" type="VehicleDataEventStatus">
+    <param name="driverBuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw1DrvBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus">
+    <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw2lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerChildDetected" type="VehicleDataEventStatus">
+    <param name="passengerChildDetected" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw1PasChld_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus">
+    <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw2rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus">
+    <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw2mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus">
+    <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw3mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus">
+    <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw3lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus">
+    <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw3rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="leftRearInflatableBelted" type="VehicleDataEventStatus">
+    <param name="leftRearInflatableBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw2lRib_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="rightRearInflatableBelted" type="VehicleDataEventStatus">
+    <param name="rightRearInflatableBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw2rRib_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus">
+    <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw1mBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus">
+    <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsRw1mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
   </struct>
 
   <struct name="BodyInformation">
-    <param name="parkBrakeActive" type="Boolean">
+    <param name="parkBrakeActive" type="Boolean" mandatory="true">
       <description>References signal "PrkBrkActv_B_Actl".</description>
 	</param>
-    <param name="ignitionStableStatus" type="IgnitionStableStatus">
+    <param name="ignitionStableStatus" type="IgnitionStableStatus" mandatory="true">
       <description>References signal "Ignition_Switch_Stable". See IgnitionStableStatus.</description>
 	</param>
-    <param name="ignitionStatus" type="IgnitionStatus">
+    <param name="ignitionStatus" type="IgnitionStatus" mandatory="true">
       <description>References signal "Ignition_status". See IgnitionStatus.</description>
 	</param>
     <param name="driverDoorAjar" type="Boolean" mandatory="false">
@@ -1270,46 +1353,46 @@
   </struct>
 
   <struct name="DeviceStatus">
-    <param name="voiceRecOn" type="Boolean">
+    <param name="voiceRecOn" type="Boolean" mandatory="true">
       <description>References signal "CPM_VoiceRec_STAT".</description>
 	</param>
-    <param name="btIconOn" type="Boolean">
+    <param name="btIconOn" type="Boolean" mandatory="true">
       <description>References signal "BT_ICON".</description>
 	</param>
-    <param name="callActive" type="Boolean">
+    <param name="callActive" type="Boolean" mandatory="true">
       <description>References signal "CPM_Call_Active_STAT".</description>
 	</param>
-    <param name="phoneRoaming" type="Boolean">
+    <param name="phoneRoaming" type="Boolean" mandatory="true">
       <description>References signal "CPM_Phone_Roaming_STAT".</description>
 	</param>
-    <param name="textMsgAvailable" type="Boolean">
+    <param name="textMsgAvailable" type="Boolean" mandatory="true">
       <description>References signal "CPM_TextMsg_AVAL".</description>
 	</param>
-    <param name="battLevelStatus" type="DeviceLevelStatus">
+    <param name="battLevelStatus" type="DeviceLevelStatus" mandatory="true">
       <description>Device battery level status.  References signal "CPM_Batt_Level_STAT". See DeviceLevelStatus.</description>
 	</param>
-    <param name="stereoAudioOutputMuted" type="Boolean">
+    <param name="stereoAudioOutputMuted" type="Boolean" mandatory="true">
       <description>References signal "CPM_Stereo_Audio_Output".</description>
 	</param>
-    <param name="monoAudioOutputMuted" type="Boolean">
+    <param name="monoAudioOutputMuted" type="Boolean" mandatory="true">
       <description>References signal "CPM_Mono_Audio_Output".</description>
 	</param>
-    <param name="signalLevelStatus" type="DeviceLevelStatus">
+    <param name="signalLevelStatus" type="DeviceLevelStatus" mandatory="true">
       <description>Device signal level status.  References signal "CPM_Signal_Strength_STAT". See DeviceLevelStatus.</description>
 	</param>
-    <param name="primaryAudioSource" type="PrimaryAudioSource">
+    <param name="primaryAudioSource" type="PrimaryAudioSource" mandatory="true">
       <description>References signal "CPM_Stereo_PAS_Source". See PrimaryAudioSource.</description>
 	</param>
-    <param name="eCallEventActive" type="Boolean">
+    <param name="eCallEventActive" type="Boolean" mandatory="true">
       <description>References signal "eCall_Event".</description>
 	</param>
   </struct>
 
   <struct name="HeadLampStatus">
-    <param name="lowBeamsOn" type="Boolean">
+    <param name="lowBeamsOn" type="Boolean" mandatory="true">
       <description>Status of the low beam lamps.  References signal "HeadLampLoActv_B_Stat".</description>
 	</param>
-    <param name="highBeamsOn" type="Boolean">
+    <param name="highBeamsOn" type="Boolean" mandatory="true">
       <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
 	</param>
     <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="false">
@@ -1445,84 +1528,84 @@
   </enum>
 
   <struct name="ECallInfo">
-    <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus">
+    <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus" mandatory="true">
       <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
 	</param>
-    <param name="auxECallNotificationStatus" type="VehicleDataNotificationStatus">
+    <param name="auxECallNotificationStatus" type="VehicleDataNotificationStatus" mandatory="true">
       <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
 	</param>
-    <param name="eCallConfirmationStatus" type="ECallConfirmationStatus">
+    <param name="eCallConfirmationStatus" type="ECallConfirmationStatus" mandatory="true">
       <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
 	</param>
   </struct>
 
   <struct name="AirbagStatus">
-    <param name="driverAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="driverAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="driverSideAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="driverSideAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="driverCurtainAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="driverCurtainAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="passengerAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerCurtainAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="passengerCurtainAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="driverKneeAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="driverKneeAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerSideAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="passengerSideAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="passengerKneeAirbagDeployed" type="VehicleDataEventStatus">
+    <param name="passengerKneeAirbagDeployed" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
   </struct>
 
   <struct name="EmergencyEvent">
-    <param name="emergencyEventType" type="EmergencyEventType">
+    <param name="emergencyEventType" type="EmergencyEventType" mandatory="true">
       <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
 	</param>
-    <param name="fuelCutoffStatus" type="FuelCutoffStatus">
+    <param name="fuelCutoffStatus" type="FuelCutoffStatus" mandatory="true">
       <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
 	</param>
-    <param name="rolloverEvent" type="VehicleDataEventStatus">
+    <param name="rolloverEvent" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
 
-    <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
+    <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255" mandatory="true">
       <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
         0x00 No event
         0xFE Not supported
         0xFF Fault
       </description>
     </param>
-    <param name="multipleEvents" type="VehicleDataEventStatus">
+    <param name="multipleEvents" type="VehicleDataEventStatus" mandatory="true">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
   </struct>
 
   <struct name="ClusterModeStatus">
-    <param name="powerModeActive" type="Boolean">
+    <param name="powerModeActive" type="Boolean" mandatory="true">
       <description>References signal "PowerMode_UB".</description>
 	</param>
-    <param name="powerModeQualificationStatus" type="PowerModeQualificationStatus">
+    <param name="powerModeQualificationStatus" type="PowerModeQualificationStatus" mandatory="true">
       <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
 	</param>
-    <param name="carModeStatus" type="CarModeStatus">
+    <param name="carModeStatus" type="CarModeStatus" mandatory="true">
       <description>References signal "CarMode". See CarMode.</description>
 	</param>
-    <param name="powerModeStatus" type="PowerModeStatus">
+    <param name="powerModeStatus" type="PowerModeStatus" mandatory="true">
       <description>References signal "PowerMode". See PowerMode.</description>
 	</param>
   </struct>
 
   <struct name="MyKey">
-    <param name="e911Override" type="VehicleDataStatus">
+    <param name="e911Override" type="VehicleDataStatus" mandatory="true">
       <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
 	</param>
   </struct>
@@ -1565,101 +1648,101 @@
   <struct name="TireStatus">
       <description>The status and pressure of the tires.</description>
 
-    <param name="pressureTelltale" type="WarningLightStatus">
+    <param name="pressureTelltale" type="WarningLightStatus" mandatory="true">
       <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
 	</param>
-    <param name="leftFront" type="SingleTireStatus">
+    <param name="leftFront" type="SingleTireStatus" mandatory="true">
       <description>The status of the left front tire.</description>
 	</param>
-    <param name="rightFront" type="SingleTireStatus">
+    <param name="rightFront" type="SingleTireStatus" mandatory="true">
       <description>The status of the right front tire.</description>
 	</param>
-    <param name="leftRear" type="SingleTireStatus">
+    <param name="leftRear" type="SingleTireStatus" mandatory="true">
       <description>The status of the left rear tire.</description>
 	</param>
-    <param name="rightRear" type="SingleTireStatus">
+    <param name="rightRear" type="SingleTireStatus" mandatory="true">
       <description>The status of the right rear tire.</description>
 	</param>
-    <param name="innerLeftRear" type="SingleTireStatus">
+    <param name="innerLeftRear" type="SingleTireStatus" mandatory="true">
       <description>The status of the inner left rear.</description>
 	</param>
-    <param name="innerRightRear" type="SingleTireStatus">
+    <param name="innerRightRear" type="SingleTireStatus" mandatory="true">
       <description>The status of the inner right rear.</description>
 	</param>
   </struct>
 
   <struct name="GPSData">
     <description>Struct with the GPS data.</description>
-	<param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180">
+	<param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
 	</param>
-	<param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90">
+	<param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
 	</param>
-    <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100">
+    <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="true">
     	<description>The current UTC year.</description>
     </param>
-    <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12">
+    <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
     	<description>The current UTC month.</description>
     </param>
-    <param name="utcDay" type="Integer" minvalue="1" maxvalue="31">
+    <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
     	<description>The current UTC day.</description>
     </param>
-    <param name="utcHours" type="Integer" minvalue="0" maxvalue="23">
+    <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
     	<description>The current UTC hour.</description>
     </param>
-    <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59">
+    <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
     	<description>The current UTC minute.</description>
     </param>
-    <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59">
+    <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
     	<description>The current UTC second.</description>
     </param>
-    <param name="compassDirection" type="CompassDirection">
+    <param name="compassDirection" type="CompassDirection" mandatory="true">
     	<description>See CompassDirection.</description>
     </param>
-    <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
     	<description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
     </param>
-    <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
     	<description>HDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
-    <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true">
     	<description>VDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
-    <param name="actual" type="Boolean">
+    <param name="actual" type="Boolean" mandatory="true">
     	<description>
     		True, if actual.
     		False, if infered.
     	</description>
     </param>
-    <param name="satellites" type="Integer" minvalue="0" maxvalue="31">
+    <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="true">
     	<description>Number of satellites in view</description>
     </param>
-    <param name="dimension" type="Dimension">
+    <param name="dimension" type="Dimension" mandatory="true">
     	<description>See Dimension</description>
     </param>
-    <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000">
+    <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="true">
     	<description>Altitude in meters</description>
     </param>
-	<param name="heading" type="Float" minvalue="0" maxvalue="359.99">
+	<param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="true">
     	<description>The heading. North is 0. Resolution is 0.01</description>
     </param>
-    <param name="speed" type="Float" minvalue="0" maxvalue="500">
+    <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="true">
     	<description>The speed in KPH</description>
     </param>
   </struct>
 
   <struct name="VehicleDataResult">
     <description>Individual published data request result</description>
-    <param name="dataType" type="VehicleDataType">
+    <param name="dataType" type="VehicleDataType" mandatory="true">
       <description>Defined published data element type.</description>
     </param>
-    <param name="resultCode" type="VehicleDataResultCode">
+    <param name="resultCode" type="VehicleDataResultCode" mandatory="true">
       <description>Published data result code.</description>
     </param>
   </struct>
 
   <struct name="DIDResult">
     <description>Individual requested DID result and data</description>
-    <param name="resultCode" type="VehicleDataResultCode">
+    <param name="resultCode" type="VehicleDataResultCode" mandatory="true">
       <description>Individual DID result code.</description>
     </param>
     <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
@@ -1671,45 +1754,45 @@
   </struct>
 
   <struct name="StartTime">
-    <param name="hours" type="Integer" minvalue="0" maxvalue="59">
+    <param name="hours" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
     	<description>
     		The hour of the media clock.
     		Some radios only support a max of 19 hours. If out of range, it will be rejected.
     	</description>
    	</param>
-    <param name="minutes" type="Integer" minvalue="0" maxvalue="59" />
-    <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
+    <param name="minutes" type="Integer" minvalue="0" maxvalue="59"  mandatory="true"/>
+    <param name="seconds" type="Integer" minvalue="0" maxvalue="59"  mandatory="true"/>
   </struct>
 
   <struct name="TextField">
-    <param name="name" type="TextFieldName">
+    <param name="name" type="TextFieldName" mandatory="true">
       <description>The name that identifies the field. See TextFieldName.</description>
     </param>
-    <param name="characterSet" type="CharacterSet">
+    <param name="characterSet" type="CharacterSet" mandatory="true">
       <description>The character set that is supported in this field. See CharacterSet.</description>
     </param>
-    <param name="width" type="Integer" minvalue="1" maxvalue="500">
+    <param name="width" type="Integer" minvalue="1" maxvalue="500" mandatory="true">
       <description>The number of characters in one row of this field.</description>
     </param>
-    <param name="rows" type="Integer" minvalue="1" maxvalue="8">
+    <param name="rows" type="Integer" minvalue="1" maxvalue="8" mandatory="true">
       <description>The number of rows of this field.</description>
     </param>
   </struct>
 
   <struct name="ImageResolution">
-    <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000">
+    <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000" mandatory="true">
       <description>The image resolution width.</description>
     </param>
-    <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
+    <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000" mandatory="true">
       <description>The image resolution height.</description>
     </param>
   </struct>
 
   <struct name="ImageField">
-    <param name="name" type="ImageFieldName">
+    <param name="name" type="ImageFieldName" mandatory="true">
       <description>The name that identifies the field. See ImageFieldName.</description>
     </param>
-    <param name="imageTypeSupported" type="FileType" minsize="1" maxsize="100" array="true">
+    <param name="imageTypeSupported" type="FileType" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>The image types that are supported in this field. See FileType.</description>
     </param>
     <param name="imageResolution" type="ImageResolution" mandatory="false">
@@ -1730,6 +1813,7 @@
     <element name="BEGIN"/>
     <element name="MOVE"/>
     <element name="END"/>
+    <element name="CANCEL"/>
   </enum>
 
   <struct name="TouchEvent">
@@ -1779,46 +1863,56 @@
   </enum>
 
   <struct name="HMIPermissions">
-    <param name="allowed" type="HMILevel" minsize="0" maxsize="100" array="true">
+    <param name="allowed" type="HMILevel" minsize="0" maxsize="100" array="true" mandatory="true">
       <description>A set of all HMI levels that are permitted for this given RPC.</description>
     </param>
-    <param name="userDisallowed" type="HMILevel" minsize="0" maxsize="100" array="true">
+    <param name="userDisallowed" type="HMILevel" minsize="0" maxsize="100" array="true" mandatory="true">
       <description>A set of all HMI levels that are prohibited for this given RPC.</description>
     </param>
   </struct>
 
   <struct name="ParameterPermissions">
-    <param name="allowed" type="String" minsize="0" maxsize="100" maxlength = "100" array="true">
+    <param name="allowed" type="String" minsize="0" maxsize="100" maxlength = "100" array="true" mandatory="true">
       <description>A set of all parameters that are permitted for this given RPC.</description>
     </param>
-    <param name="userDisallowed" type="String" minsize="0" maxsize="100" maxlength = "100" array="true">
+    <param name="userDisallowed" type="String" minsize="0" maxsize="100" maxlength = "100" array="true" mandatory="true">
       <description>A set of all parameters that are prohibited for this given RPC.</description>
     </param>
   </struct>
 
   <struct name="PermissionItem">
-    <param name="rpcName" type="String" maxlength="100">
+    <param name="rpcName" type="String" maxlength="100" mandatory="true">
     	<description>Name of the individual RPC in the policy table.</description>
    	</param>
-    <param name="hmiPermissions" type="HMIPermissions" />
-    <param name="parameterPermissions" type="ParameterPermissions" />
+    <param name="hmiPermissions" type="HMIPermissions"  mandatory="true"/>
+    <param name="parameterPermissions" type="ParameterPermissions"  mandatory="true"/>
  </struct>
+
+  <struct name="VideoStreamingFormat">
+    <description>Video streaming formats and their specifications.</description>
+    <param name="protocol" type="VideoStreamingProtocol" mandatory="true">
+      <description>Protocol type, see VideoStreamingProtocol</description>
+    </param>
+    <param name="codec" type="VideoStreamingCodec" mandatory="true">
+      <description>Codec type, see VideoStreamingCodec</description>
+    </param>
+  </struct>
 
   <struct name="DisplayCapabilities">
     <description>Contains information about the display capabilities.</description>
-    <param name="displayType" type="DisplayType">
+    <param name="displayType" type="DisplayType" mandatory="true">
       <description>The type of the display. See DisplayType</description>
     </param>
-    <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true">
+    <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>A set of all fields that support text data. See TextField</description>
     </param>
     <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>A set of all fields that support images. See ImageField</description>
     </param>
-    <param name="mediaClockFormats" type="MediaClockFormat" minsize="0" maxsize="100" array="true">
+    <param name="mediaClockFormats" type="MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
       <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
     </param>
-    <param name="graphicSupported" type="Boolean">
+    <param name="graphicSupported" type="Boolean" mandatory="true">
       <description>The display's persistent screen supports referencing a static or dynamic image.</description>
     </param>
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" mandatory="false">
@@ -1836,22 +1930,22 @@
 
   <struct name="ButtonCapabilities">
     <description>Contains information about a button's capabilities.</description>
-    <param name="name" type="ButtonName">
+    <param name="name" type="ButtonName" mandatory="true">
       <description>The name of the button. See ButtonName.</description>
     </param>
-    <param name="shortPressAvailable" type="Boolean">
+    <param name="shortPressAvailable" type="Boolean" mandatory="true">
       <description>
       	The button supports a short press.
       	Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
       </description>
     </param>
-    <param name="longPressAvailable" type="Boolean">
+    <param name="longPressAvailable" type="Boolean" mandatory="true">
       <description>
       	The button supports a LONG press.
       	Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
       </description>
     </param>
-    <param name="upDownAvailable" type="Boolean">
+    <param name="upDownAvailable" type="Boolean" mandatory="true">
       <description>
       	The button supports "button down" and "button up".
       	Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
@@ -1862,33 +1956,33 @@
 
   <struct name="SoftButtonCapabilities">
     <description>Contains information about a SoftButton's capabilities.</description>
-    <param name="shortPressAvailable" type="Boolean">
+    <param name="shortPressAvailable" type="Boolean" mandatory="true">
       <description>
       	The button supports a short press.
       	Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
       </description>
     </param>
-    <param name="longPressAvailable" type="Boolean">
+    <param name="longPressAvailable" type="Boolean" mandatory="true">
       <description>
     	The button supports a LONG press.
       	Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
       </description>
     </param>
-    <param name="upDownAvailable" type="Boolean">
+    <param name="upDownAvailable" type="Boolean" mandatory="true">
       <description>
       	The button supports "button down" and "button up".
       	Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
       	Whenever the button is released, onButtonEvent( UP) will be invoked.
       </description>
     </param>
-    <param name="imageSupported" type="Boolean">
+    <param name="imageSupported" type="Boolean" mandatory="true">
       <description>The button supports referencing a static or dynamic image.</description>
     </param>
   </struct>
 
   <struct name="PresetBankCapabilities">
     <description>Contains information about on-screen preset capabilities.</description>
-    <param name="onScreenPresetsAvailable" type="Boolean">
+    <param name="onScreenPresetsAvailable" type="Boolean" mandatory="true">
       <description>Onscreen custom presets are available.</description>
     </param>
   </struct>
@@ -1899,6 +1993,9 @@
     </param>
     <param name="phoneCall" type="Boolean" mandatory="false">
       <description>Availability of build in phone. True: Available, False: Not Available </description>
+    </param>
+    <param name="videoStreaming" type="Boolean" mandatory="false">
+      <description>Availability of video streaming. True: Available, False: Not Available</description>
     </param>
   </struct>
 
@@ -1920,20 +2017,20 @@
       </description>
     </param>
 
-    <param name="menuName" type="String" maxlength="500">
+    <param name="menuName" type="String" maxlength="500" mandatory="true">
       <description>Text to show in the menu for this sub menu.</description>
     </param>
   </struct>
 
   <struct name="TTSChunk">
     <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
-    <param name="text" minlength="0" maxlength="500" type="String">
+    <param name="text" minlength="0" maxlength="500" type="String" mandatory="true">
       <description>
       	The text or phonemes to speak.
       	May not be empty.
       </description>
     </param>
-    <param name="type" type="SpeechCapabilities">
+    <param name="type" type="SpeechCapabilities" mandatory="true">
       <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
     </param>
   </struct>
@@ -2081,6 +2178,7 @@
     <element name="BACKGROUND_PROCESS" />
     <element name="TESTING" />
     <element name="SYSTEM" />
+    <element name="PROJECTION" />
   </enum>
 
   <enum name="PredefinedLayout" platform="documentation">
@@ -2259,6 +2357,7 @@
     <element name="GetWayPointsID" value="45" hexvalue="2D" />
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
+    <element name="GetSystemCapabilityID" value="48" hexvalue="30"/>
 
 <!--
 	Base Notifications
@@ -2408,6 +2507,60 @@
       <description>Address to be used by navigation engines for search</description>
     </param>
   </struct>
+
+  <enum name="SystemCapabilityType">
+    <element name="NAVIGATION"/>
+    <element name="PHONE_CALL"/>
+    <element name="VIDEO_STREAMING"/>
+    <element name="AUDIO_STREAMING"/>
+  </enum>
+
+  <struct name="NavigationCapability">
+    <description>Extended capabilities for an onboard navigation system</description>
+    <param name="sendLocationEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to add locations to the onboard nav</description>
+    </param>
+    <param name="getWayPointsEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the ability to return way points from onboard nav</description>
+    </param>
+  </struct>
+
+  <struct name="PhoneCapability">
+    <description>Extended capabilities of the module's phone feature</description>
+    <param name="dialNumberEnabled" type="Boolean" mandatory="false">
+      <description>If the module has the abiulity to perform dial number</description>
+    </param>
+  </struct>
+
+  <struct name="VideoStreamingCapability">
+    <description>Contains information about this system's video streaming capabilities.</description>
+    <param name="preferredResolution" type="ImageResolution" mandatory="false">
+      <description>The preferred resolution of a video stream for decoding and rendering on HMI.</description>
+    </param>
+    <param name="maxBitrate" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
+      <description>The maximum bitrate of video stream that is supported, in kbps.</description>
+    </param>
+    <param name="supportedFormats" type="VideoStreamingFormat" array="true" mandatory="false">
+      <description>
+        Detailed information on each format supported by this system, in its preferred order
+        (i.e. the first element in the array is most preferable to the system).
+        Each object will contain a VideoStreamingFormat that describes what can be expected.
+      </description>
+    </param>
+  </struct>
+
+  <struct name="SystemCapability">
+      <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
+      <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+      </param>
+      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+      </param>
+      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      </param>
+      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      </param>
+  </struct>
+
   <!-- Requests/Responses -->
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -2416,11 +2569,11 @@
     	Before registerAppInterface no other commands will be accepted/executed.
     </description>
 
-    <param name="syncMsgVersion" type="SyncMsgVersion">
+    <param name="syncMsgVersion" type="SyncMsgVersion" mandatory="true">
       <description>See SyncMsgVersion</description>
     </param>
 
-    <param name="appName" type="String" maxlength="100">
+    <param name="appName" type="String" maxlength="100" mandatory="true">
       <description>
       	The mobile application name, e.g. "Ford Drive Green".
       	Needs to be unique over all applications.
@@ -2459,7 +2612,7 @@
       </description>
     </param>
 
-    <param name="isMediaApplication" type="Boolean">
+    <param name="isMediaApplication" type="Boolean" mandatory="true">
       <description>
       	Indicates if the application is a media or a non-media application.
       	Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.
@@ -2513,11 +2666,11 @@
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="response">
     <description>The response to registerAppInterface</description>
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2626,11 +2779,11 @@
 
   <function name="UnregisterAppInterface" functionID="UnregisterAppInterfaceID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2696,11 +2849,11 @@
 
   <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2723,18 +2876,18 @@
   <function name="ResetGlobalProperties" functionID="ResetGlobalPropertiesID" messagetype="request">
     <description>Allows resetting global properties.</description>
 
-    <param name="properties" type="GlobalProperty" minsize="1" maxsize="100" array="true" >
+    <param name="properties" type="GlobalProperty" minsize="1" maxsize="100" array="true"  mandatory="true">
       <description>Contains the names of all global properties (like timeoutPrompt) that should be unset. Resetting means, that they have the same value as at start up (default)</description>
     </param>
   </function>
 
   <function name="ResetGlobalProperties" functionID="ResetGlobalPropertiesID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2783,11 +2936,11 @@
 
   <function name="AddCommand" functionID="AddCommandID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2812,18 +2965,18 @@
   <function name="DeleteCommand" functionID="DeleteCommandID" messagetype="request">
     <description>Deletes all commands from the in-application menu with the specified command id.</description>
 
-    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of the command(s) to delete.</description>
     </param>
 
   </function>
 
   <function name="DeleteCommand" functionID="DeleteCommandID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2845,7 +2998,7 @@
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="request">
     <description>Adds a sub menu to the in-application menu.</description>
 
-    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>unique ID of the sub menu to add.</description>
     </param>
 
@@ -2860,17 +3013,17 @@
       </description>
     </param>
 
-    <param name="menuName" maxlength="500" type="String">
+    <param name="menuName" maxlength="500" type="String" mandatory="true">
       <description>Text to show in the menu for this sub menu.</description>
     </param>
   </function>
 
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2891,7 +3044,7 @@
   <function name="DeleteSubMenu" functionID="DeleteSubMenuID" messagetype="request">
     <description>Deletes a submenu from the in-application menu.</description>
 
-    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
     </param>
 
@@ -2899,11 +3052,11 @@
 
   <function name="DeleteSubMenu" functionID="DeleteSubMenuID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2925,19 +3078,19 @@
   <function name="CreateInteractionChoiceSet" functionID="CreateInteractionChoiceSetID" messagetype="request">
     <description>creates interaction choice set to be used later by performInteraction</description>
 
-    <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>Unique ID used for this interaction choice set.</description>
     </param>
 
-    <param name="choiceSet" type="Choice" minsize="1" maxsize="100" array="true" />
+    <param name="choiceSet" type="Choice" minsize="1" maxsize="100" array="true"  mandatory="true"/>
   </function>
 
   <function name="CreateInteractionChoiceSet" functionID="CreateInteractionChoiceSetID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -2959,7 +3112,7 @@
   <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="request">
     <description>Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
 
-    <param name="initialText" type="String" maxlength="500" >
+    <param name="initialText" type="String" maxlength="500"  mandatory="true">
       <description>
         Text to be displayed first.
       </description>
@@ -2973,11 +3126,11 @@
       </description>
     </param>
 
-    <param name="interactionMode" type="InteractionMode">
+    <param name="interactionMode" type="InteractionMode" mandatory="true">
       <description>See InteractionMode.</description>
     </param>
 
-    <param name="interactionChoiceSetIDList" type="Integer" minsize="0" maxsize="100" minvalue="0" maxvalue="2000000000" array="true">
+    <param name="interactionChoiceSetIDList" type="Integer" minsize="0" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
       <description>List of interaction choice set IDs to use with an interaction.</description>
     </param>
 
@@ -3020,11 +3173,11 @@
 
   <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="response">
 
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3072,17 +3225,17 @@
     <description>Deletes interaction choice set that has been created with "CreateInteractionChoiceSet".</description>
     <description>The interaction may only be deleted when not currently in use by a "performInteraction".</description>
 
-    <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of the interaction choice set to delete.</description>
     </param>
   </function>
 
   <function name="DeleteInteractionChoiceSet" functionID="DeleteInteractionChoiceSetID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3154,11 +3307,11 @@
 
   <function name="Alert" functionID="AlertID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3282,11 +3435,11 @@
 
   <function name="Show" functionID="ShowID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3309,7 +3462,7 @@
   <function name="Speak" functionID="SpeakID" messagetype="request">
     <description>Speaks a text.</description>
 
-    <param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true">
+    <param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>
       	An array of text chunks of type TTSChunk. See TTSChunk.
       	The array must have at least one item.
@@ -3320,11 +3473,11 @@
 
   <function name="Speak" functionID="SpeakID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3375,11 +3528,11 @@
   </function>
 
   <function name="SetMediaClockTimer" functionID="SetMediaClockTimerID" messagetype="response">
-   <param name="success" type="Boolean" platform="documentation">
+   <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3433,11 +3586,11 @@
   </function>
 
   <function name="PerformAudioPassThru" functionID="PerformAudioPassThruID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3462,11 +3615,11 @@
   </function>
 
   <function name="EndAudioPassThru" functionID="EndAudioPassThruID" messagetype="response">
-     <param name="success" type="Boolean" platform="documentation">
+     <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3490,17 +3643,17 @@
     	To unsubscribe the notifications, use unsubscribeButton.
     </description>
 
-    <param name="buttonName" type="ButtonName">
+    <param name="buttonName" type="ButtonName" mandatory="true">
       <description>Name of the button to subscribe.</description>
     </param>
   </function>
 
   <function name="SubscribeButton" functionID="SubscribeButtonID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3521,17 +3674,17 @@
   <function name="UnsubscribeButton" functionID="UnsubscribeButtonID" messagetype="request">
     <description>Unsubscribes from built-in HMI buttons.</description>
 
-    <param name="buttonName" type="ButtonName">
+    <param name="buttonName" type="ButtonName" mandatory="true">
       <description>Name of the button to unsubscribe.</description>
     </param>
   </function>
 
   <function name="UnsubscribeButton" functionID="UnsubscribeButtonID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -3637,11 +3790,11 @@
   </function>
 
   <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response">
-   <param name="success" type="Boolean" platform="documentation">
+   <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="WARNINGS"/>
@@ -3820,11 +3973,11 @@
   </function>
 
   <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="WARNINGS"/>
@@ -4006,11 +4159,11 @@
 
   <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4122,11 +4275,11 @@
 
   <function name="ReadDID" functionID="ReadDIDID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4165,11 +4318,11 @@
 
   <function name="GetDTCs" functionID="GetDTCsID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4220,11 +4373,11 @@
 
   <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4252,7 +4405,7 @@
 
   <function name="ScrollableMessage" functionID="ScrollableMessageID" messagetype="request">
     <description>Creates a full screen overlay containing a large block of formatted text that can be scrolled with up to 8 SoftButtons defined</description>
-    <param name="scrollableMessageBody" type="String" maxlength="500">
+    <param name="scrollableMessageBody" type="String" maxlength="500" mandatory="true">
       <description>Body of text that can include newlines and tabs.</description>
     </param>
     <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="false">
@@ -4267,11 +4420,11 @@
   </function>
 
   <function name="ScrollableMessage" functionID="ScrollableMessageID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4321,11 +4474,11 @@
   </function>
 
   <function name="Slider" functionID="SliderID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="SAVED"/>
@@ -4395,10 +4548,10 @@
   </function>
 
   <function name="ShowConstantTBT" functionID="ShowConstantTBTID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
         <description>See Result</description>
         <element name="SUCCESS"/>
         <element name="INVALID_DATA"/>
@@ -4426,10 +4579,10 @@
   </function>
 
   <function name="AlertManeuver" functionID="AlertManeuverID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
         <description>See Result</description>
         <element name="SUCCESS"/>
         <element name="INVALID_DATA"/>
@@ -4459,10 +4612,10 @@
   </function>
 
   <function name="UpdateTurnList" functionID="UpdateTurnListID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
         <description>See Result</description>
         <element name="SUCCESS"/>
         <element name="INVALID_DATA"/>
@@ -4506,14 +4659,14 @@
 
   <function name="ChangeRegistration" functionID="ChangeRegistrationID" messagetype="response">
 
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		  <description>
 		  	true, if successful
 		  	false, if failed
 		  </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4536,11 +4689,11 @@
     	Generic Response is sent, when the name of a received msg cannot be retrieved. Only used in case of an error.
 		Currently, only resultCode INVALID_DATA is used.
 	</description>
-   <param name="success" type="Boolean" platform="documentation">
+   <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	  </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="INVALID_DATA"/>
     </param>
@@ -4598,11 +4751,11 @@
   <function name="PutFile" functionID="PutFileID" messagetype="response">
     <description>Response is sent, when the file data was copied (success case). Or when an error occured.</description>
     <description>Not supported on First generation SYNC vehicles. </description>
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4614,7 +4767,7 @@
       <element name="UNSUPPORTED_REQUEST"/>
     </param>
 
-    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
           <description>
           	Provides the total local space available in SDL Core for the registered app.
           	If the transfer has systemFile enabled, then the value will be set to 0 automatically.
@@ -4643,11 +4796,11 @@
     	Response is sent, when the file data was deleted (success case). Or when an error occured.
     	Not supported on First generation SYNC vehicles.
     </description>
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4659,7 +4812,7 @@
       <element name="UNSUPPORTED_REQUEST"/>
     </param>
 
-    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
           <description>Provides the total local space available on SYNC for the registered app.</description>
     </param>
 
@@ -4680,11 +4833,11 @@
     	Returns the current list of resident filenames for the registered app along with the current space available
     	Not supported on First generation SYNC vehicles.
     </description>
-   	<param name="success" type="Boolean" platform="documentation">
+   	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4703,7 +4856,7 @@
       </description>
     </param>
 
-    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
           <description>Provides the total local space available on SYNC for the registered app.</description>
     </param>
 
@@ -4730,11 +4883,11 @@
     	Not supported on First generation SYNC vehicles.
     </description>
 
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4769,11 +4922,11 @@
 
   <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
 
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4825,11 +4978,11 @@
   </function>
 
   <function name="SystemRequest" functionID="SystemRequestID" messagetype="response" >
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4896,11 +5049,11 @@
   </function>
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="response" >
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4921,7 +5074,7 @@
   <function name="DialNumber" functionID="DialNumberID" messagetype="request">
     <description>Dials a phone number and switches to phone application.</description>
 
-    <param name="number" type="String" maxlength="40">
+    <param name="number" type="String" maxlength="40" mandatory="true">
 	      <description>
 	        Phone number is a string, which can be up to 40 chars.
             All characters shall be stripped from string except digits 0-9 and * # , ; +
@@ -4930,12 +5083,12 @@
   </function>
 
   <function name="DialNumber" functionID="DialNumberID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
 		  <description>true, if successful</description>
 		  <description>false, if failed</description>
 	  </param>
   
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4956,10 +5109,10 @@
   </function>
 
   <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -4982,10 +5135,10 @@
   </function>
 
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -5010,10 +5163,10 @@
   </function>
 
   <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -5031,32 +5184,64 @@
     </param>
   </function>
 
+  <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="request">
+    <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
+      <description>The type of system capability to get more information on</description>
+    </param>
+  </function>
+
+  <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="response">
+      <param name="systemCapability" type="SystemCapability" mandatory="true">    
+      </param>
+      <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+          <description>See Result</description>
+          <element name="SUCCESS"/>
+          <element name="INVALID_DATA"/>
+          <element name="OUT_OF_MEMORY"/>
+          <element name="TOO_MANY_PENDING_REQUESTS"/>
+          <element name="APPLICATION_NOT_REGISTERED"/>
+          <element name="GENERIC_ERROR"/>
+          <element name="REJECTED"/>
+          <element name="IGNORED"/>
+          <element name="DISALLOWED"/>
+          <element name="USER_DISALLOWED"/>
+          <element name="UNSUPPORTED_RESOURCE"/><description>The capability does not exist on the module</description>
+          <element name="DATA_NOT_AVAILABLE"/><description>The capability should exist on the module but there was an error retrieving the data.</description>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
+        <description> true if successful; false, if failed </description>
+    </param>
+  </function>
+
+
   <!-- Notifications -->
 
   <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification">
-    <param name="hmiLevel" type="HMILevel">
+    <param name="hmiLevel" type="HMILevel" mandatory="true">
       <description>See HMILevel</description>
     </param>
 
-    <param name="audioStreamingState" type="AudioStreamingState">
+    <param name="audioStreamingState" type="AudioStreamingState" mandatory="true">
       <description>See AudioStreamingState</description>
     </param>
 
-    <param name="systemContext" type="SystemContext">
+    <param name="systemContext" type="SystemContext" mandatory="true">
       <description>See SystemContext</description>
     </param>
   </function>
 
   <function name="OnAppInterfaceUnregistered" functionID="OnAppInterfaceUnregisteredID" messagetype="notification">
-    <param name="reason" type="AppInterfaceUnregisteredReason">
+    <param name="reason" type="AppInterfaceUnregisteredReason" mandatory="true">
       <description>See AppInterfaceUnregisteredReason</description>
     </param>
   </function>
 
   <function name="OnButtonEvent" functionID="OnButtonEventID" messagetype="notification">
     <description>Notifies application of UP/DOWN events for buttons to which the application is subscribed.</description>
-    <param name="buttonName" type="ButtonName"/>
-    <param name="buttonEventMode" type="ButtonEventMode">
+    <param name="buttonName" type="ButtonName" mandatory="true"/>
+    <param name="buttonEventMode" type="ButtonEventMode" mandatory="true">
       <description>Indicates whether this is an UP or DOWN event.</description>
     </param>
     <param name="customButtonID" type="Integer" minvalue="0" maxvalue="65536" mandatory="false">
@@ -5066,8 +5251,8 @@
 
   <function name="OnButtonPress" functionID="OnButtonPressID" messagetype="notification">
     <description>Notifies application of LONG/SHORT press events for buttons to which the application is subscribed.</description>
-    <param name="buttonName" type="ButtonName"/>
-    <param name="buttonPressMode" type="ButtonPressMode">
+    <param name="buttonName" type="ButtonName" mandatory="true"/>
+    <param name="buttonPressMode" type="ButtonPressMode" mandatory="true">
       <description>Indicates whether this is a LONG or SHORT button press event.</description>
     </param>
     <param name="customButtonID" type="Integer" minvalue="0" maxvalue="65536" mandatory="false">
@@ -5159,32 +5344,32 @@
   </function>
 
   <function name="OnCommand" functionID="OnCommandID" messagetype="notification">
-    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>Command ID, which is related to a specific menu entry</description>
     </param>
 
-    <param name="triggerSource" type="TriggerSource">
+    <param name="triggerSource" type="TriggerSource" mandatory="true">
       <description>See TriggerSource</description>
     </param>
   </function>
 
   <function name="OnTBTClientState" functionID="OnTBTClientStateID" messagetype="notification" >
     <description>Provides applications with notifications specific to the current TBT client status on the module</description>
-    <param name="state" type="TBTState">
+    <param name="state" type="TBTState" mandatory="true">
       <description>Current State of TBT client</description>
     </param>
   </function>
 
   <function name="OnDriverDistraction" functionID="OnDriverDistractionID" messagetype="notification" >
     <description>Provides driver distraction state to mobile applications</description>
-    <param name="state" type="DriverDistractionState">
+    <param name="state" type="DriverDistractionState" mandatory="true">
       <description>Current State of Driver Distraction</description>
     </param>
   </function>
 
   <function name="OnPermissionsChange" functionID="OnPermissionsChangeID" messagetype="notification" >
     <description>Provides update to app of which policy-table-enabled functions are available</description>
-    <param name="permissionItem" type="PermissionItem" minsize="0" maxsize="500" array="true">
+    <param name="permissionItem" type="PermissionItem" minsize="0" maxsize="500" array="true" mandatory="true">
       <description>Change in permissions for a given set of RPCs</description>
     </param>
   </function>
@@ -5194,10 +5379,10 @@
   </function>
 
   <function name="OnLanguageChange" functionID="OnLanguageChangeID" messagetype="notification">
-    <param name="language" type="Language">
+    <param name="language" type="Language" mandatory="true">
         <description>Current SYNC voice engine (VR+TTS) language</description>
     </param>
-    <param name="hmiDisplayLanguage" type="Language">
+    <param name="hmiDisplayLanguage" type="Language" mandatory="true">
       <description>Current display language</description>
     </param>
   </function>
@@ -5297,11 +5482,11 @@
   </function>
 
   <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="response" >
-  	<param name="success" type="Boolean" platform="documentation">
+  	<param name="success" type="Boolean" platform="documentation" mandatory="true">
 		<description> true, if successful; false, if failed </description>
 	</param>
 
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>
@@ -5326,11 +5511,11 @@
   </function>
 
   <function name="SyncPData" functionID="SyncPDataID" messagetype="response" >
-    <param name="success" type="Boolean" platform="documentation">
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
       <description> true, if successful; false, if failed </description>
     </param>
     
-    <param name="resultCode" type="Result" platform="documentation">
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
       <element name="SUCCESS"/>
       <element name="INVALID_DATA"/>

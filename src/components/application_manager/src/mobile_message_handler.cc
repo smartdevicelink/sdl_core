@@ -67,23 +67,28 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
   switch (message->protocol_version()) {
-    case ProtocolVersion::kV1:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1:
       LOG4CXX_DEBUG(logger_, "Protocol version - V1");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
       break;
-    case ProtocolVersion::kV2:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2:
       LOG4CXX_DEBUG(logger_, "Protocol version - V2");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
-    case ProtocolVersion::kV3:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3:
       LOG4CXX_DEBUG(logger_, "Protocol version - V3");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
-    case ProtocolVersion::kV4:
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4:
       LOG4CXX_DEBUG(logger_, "Protocol version - V4");
+      out_message =
+          MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+      break;
+    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5:
+      LOG4CXX_DEBUG(logger_, "Protocol version - V5");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
@@ -116,12 +121,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
                                       << message->correlation_id() << ", "
                                       << message->json_message());
 
-  if (message->protocol_version() == application_manager::kV1) {
+  if (message->protocol_version() ==
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
-  if ((message->protocol_version() == application_manager::kV2) ||
-      (message->protocol_version() == application_manager::kV3) ||
-      (message->protocol_version() == application_manager::kV4)) {
+  if (Message::is_sufficient_version(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+          message->protocol_version())) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   }
   return NULL;
@@ -142,7 +148,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
-      static_cast<application_manager::ProtocolVersion>(
+      static_cast<protocol_handler::MajorProtocolVersion>(
           message->protocol_version()));
   outgoing_message->set_json_message(std::string(
       reinterpret_cast<const char*>(message->data()), message->data_size()));
@@ -184,7 +190,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   outgoing_message->set_correlation_id(int32_t(payload.header.correlation_id));
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
-      static_cast<application_manager::ProtocolVersion>(
+      static_cast<protocol_handler::MajorProtocolVersion>(
           message->protocol_version()));
   outgoing_message->set_data_size(message->data_size());
   outgoing_message->set_payload_size(message->payload_size());

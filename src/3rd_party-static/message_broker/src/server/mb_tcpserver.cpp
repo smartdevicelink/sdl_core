@@ -64,7 +64,7 @@ bool TcpServer::Recv(int fd) {
 
   std::vector<char> buf;
   buf.reserve(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  DBG_MSG(("Left in  pReceivingBuffer: %d \n",
+  DBG_MSG(("Left in  pReceivingBuffer: %zu\n",
            pReceivingBuffer->size()));
   buf.assign(pReceivingBuffer->c_str(),
              pReceivingBuffer->c_str() + pReceivingBuffer->size());
@@ -102,7 +102,7 @@ bool TcpServer::Recv(int fd) {
     }
 
     *pReceivingBuffer = std::string(&buf[0], nb);
-    DBG_MSG(("pReceivingBuffer before onMessageReceived:%d : %s\n",
+    DBG_MSG(("pReceivingBuffer before onMessageReceived: %zu: %s\n",
              pReceivingBuffer->size(), pReceivingBuffer->c_str()));
 
     // we need to check for websocket handshake

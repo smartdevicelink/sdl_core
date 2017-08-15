@@ -201,6 +201,32 @@ TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
   EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
+TEST_F(ConnectionTest, HeartBeat_Protocol5_PositiveHeartBeat_Supported) {
+  // Arrange
+  StartSession();
+  // Check execution if protocol version is 5
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_5);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Protocol5_ZeroHeartBeat_NotSupported) {
+  // Correctc of connection (need connection with heartbeat=0)
+  delete connection_;
+  connection_ = 0;
+
+  const ConnectionHandle connectionHandle = 0;
+  const DeviceHandle device_handle = 0u;
+  const uint32_t heart_beat = 0u;
+  connection_ = new Connection(
+      connectionHandle, device_handle, connection_handler_, heart_beat);
+  StartSession();
+  // Check execution if protocol version is 5
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_5);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
+}
+
 // Try to add service without session
 TEST_F(ConnectionTest, Session_AddNewServiceWithoutSession) {
   EXPECT_EQ(connection_->AddNewService(session_id, kAudio, true),

@@ -43,6 +43,10 @@ class MockProtocolHandlerSettings
     : public protocol_handler::ProtocolHandlerSettings {
  public:
   MOCK_CONST_METHOD0(maximum_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_control_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_rpc_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_audio_payload_size, size_t());
+  MOCK_CONST_METHOD0(maximum_video_payload_size, size_t());
   MOCK_CONST_METHOD0(message_frequency_count, size_t());
   MOCK_CONST_METHOD0(message_frequency_time, size_t());
   MOCK_CONST_METHOD0(malformed_message_filtering, bool());

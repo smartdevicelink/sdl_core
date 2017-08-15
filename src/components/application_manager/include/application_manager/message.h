@@ -39,6 +39,7 @@
 #include "utils/shared_ptr.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
+#include "protocol/common.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -57,15 +58,6 @@ enum MessageType {
 // Map PrcType to corresponding MessageType
 MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type);
 
-enum ProtocolVersion {
-  kUnknownProtocol = -1,
-  kHMI = 0,
-  kV1 = 1,
-  kV2 = 2,
-  kV3 = 3,
-  kV4 = 4
-};
-
 class Message {
  public:
   Message(protocol_handler::MessagePriority priority);
@@ -80,7 +72,7 @@ class Message {
   int32_t connection_key() const;
 
   MessageType type() const;
-  ProtocolVersion protocol_version() const;
+  protocol_handler::MajorProtocolVersion protocol_version() const;
 
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
@@ -96,10 +88,14 @@ class Message {
   void set_message_type(MessageType type);
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
-  void set_protocol_version(ProtocolVersion version);
+  void set_protocol_version(protocol_handler::MajorProtocolVersion version);
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
+
+  static bool is_sufficient_version(
+      protocol_handler::MajorProtocolVersion minVersion,
+      protocol_handler::MajorProtocolVersion version);
 
   protocol_handler::MessagePriority Priority() const {
     return priority_;
@@ -122,7 +118,7 @@ class Message {
   BinaryData* binary_data_;
   size_t data_size_;
   size_t payload_size_;
-  ProtocolVersion version_;
+  protocol_handler::MajorProtocolVersion version_;
 };
 }  // namespace application_manager
 

@@ -35,6 +35,7 @@ include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
@@ -46,6 +47,8 @@ collect_sources(SOURCES "${PATHS}")
 set(LIBRARIES
   ProtocolLibrary
   Utils
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
@@ -55,6 +58,7 @@ endforeach()
 
 
 add_library(ProtocolHandler ${SOURCES})
+add_dependencies(ProtocolHandler libbson)
 target_link_libraries(ProtocolHandler ${LIBRARIES})
 
 if(BUILD_TESTS)

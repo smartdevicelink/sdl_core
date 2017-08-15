@@ -15,6 +15,10 @@ class ProtocolHandlerSettings {
   virtual ~ProtocolHandlerSettings() {}
 
   virtual size_t maximum_payload_size() const = 0;
+  virtual size_t maximum_control_payload_size() const = 0;
+  virtual size_t maximum_rpc_payload_size() const = 0;
+  virtual size_t maximum_audio_payload_size() const = 0;
+  virtual size_t maximum_video_payload_size() const = 0;
   virtual size_t message_frequency_count() const = 0;
   virtual size_t message_frequency_time() const = 0;
   virtual bool malformed_message_filtering() const = 0;
@@ -25,10 +29,12 @@ class ProtocolHandlerSettings {
    */
   virtual uint32_t heart_beat_timeout() const = 0;
 
-  virtual uint16_t max_supported_protocol_version() const = 0;
   /*
    * @brief Protocol version, from .ini file.
    */
+  virtual uint16_t max_supported_protocol_version() const = 0;
+
+  // DEPRECATED
   virtual bool enable_protocol_4() const = 0;
 
   virtual uint32_t multiframe_waiting_timeout() const = 0;

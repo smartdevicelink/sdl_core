@@ -53,7 +53,7 @@ using protocol_handler::ServiceType;
 using protocol_handler::MessagePriority;
 using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using application_manager::MobileMessageHandler;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using ::testing::_;
 using ::application_manager::Message;
 using ::application_manager::MobileMessage;
@@ -176,7 +176,7 @@ class MobileMessageHandlerTest : public testing::Test {
     message->set_correlation_id(correlation_id);
     message->set_connection_key(connection_key);
     message->set_protocol_version(
-        static_cast<ProtocolVersion>(protocol_version));
+        static_cast<protocol_handler::MajorProtocolVersion>(protocol_version));
     message->set_message_type(application_manager::MessageType::kNotification);
     if (data) {
       message->set_binary_data(data);
@@ -270,7 +270,7 @@ TEST_F(
   size_t payload_size = data.size();
   std::srand(time(0));
   // Generate unknown random protocol version except 1-3
-  uint32_t protocol_version = 4 + rand() % UINT32_MAX;
+  uint32_t protocol_version = 5 + rand() % UINT32_MAX;
   Message* message =
       HandleIncomingMessage(protocol_version, data, payload_size);
 
@@ -288,7 +288,7 @@ TEST_F(
   const uint32_t correlation_id = 92u;
   const uint32_t connection_key = 1u;
   // Generate unknown random protocol version except 1-3
-  uint32_t protocol_version = 4 + rand() % UINT32_MAX;
+  uint32_t protocol_version = 5 + rand() % UINT32_MAX;
 
   MobileMessage message_to_send = CreateMessageForSending(
       protocol_version, function_id, correlation_id, connection_key, data);

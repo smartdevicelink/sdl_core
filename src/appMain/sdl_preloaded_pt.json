@@ -99,6 +99,12 @@
                         "FULL",
                         "LIMITED"]
                     },
+                    "GetSystemCapability": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "ListFiles": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",

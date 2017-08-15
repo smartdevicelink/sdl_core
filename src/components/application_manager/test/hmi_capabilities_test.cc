@@ -357,12 +357,68 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   // Check vehicle type
   const smart_objects::SmartObject vehicle_type_so =
       *(hmi_capabilities_test->vehicle_type());
-  EXPECT_TRUE(preset_bank_so["onScreenPresetsAvailable"].asBool());
 
   EXPECT_EQ("Ford", vehicle_type_so["make"].asString());
   EXPECT_EQ("Fiesta", vehicle_type_so["model"].asString());
   EXPECT_EQ("2013", vehicle_type_so["modelYear"].asString());
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
+
+  // Check system capabilities
+  smart_objects::SmartObject navigation_capability_so =
+      *(hmi_capabilities_test->navigation_capability());
+
+  EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
+  EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
+  EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
+  EXPECT_TRUE(navigation_capability_so["getWayPointsEnabled"].asBool());
+
+  const smart_objects::SmartObject phone_capability_so =
+      *(hmi_capabilities_test->phone_capability());
+
+  EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
+  EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+
+  const smart_objects::SmartObject vs_capability_so =
+      *(hmi_capabilities_test->video_streaming_capability());
+
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_resolution));
+  EXPECT_TRUE(vs_capability_so[strings::preferred_resolution].keyExists(
+      strings::resolution_width));
+  EXPECT_TRUE(vs_capability_so[strings::preferred_resolution].keyExists(
+      strings::resolution_height));
+  EXPECT_EQ(
+      800,
+      vs_capability_so[strings::preferred_resolution][strings::resolution_width]
+          .asInt());
+  EXPECT_EQ(350,
+            vs_capability_so[strings::preferred_resolution]
+                            [strings::resolution_height].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
+  EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
+  const uint32_t supported_formats_len =
+      vs_capability_so[strings::supported_formats].length();
+  EXPECT_EQ(2u, supported_formats_len);
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
+      strings::protocol));
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
+      strings::codec));
+  EXPECT_EQ(0,
+            vs_capability_so[strings::supported_formats][0][strings::protocol]
+                .asInt());
+  EXPECT_EQ(
+      0,
+      vs_capability_so[strings::supported_formats][0][strings::codec].asInt());
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
+      strings::protocol));
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
+      strings::codec));
+  EXPECT_EQ(1,
+            vs_capability_so[strings::supported_formats][1][strings::protocol]
+                .asInt());
+  EXPECT_EQ(
+      2,
+      vs_capability_so[strings::supported_formats][1][strings::codec].asInt());
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

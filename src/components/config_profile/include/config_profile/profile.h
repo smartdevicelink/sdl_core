@@ -111,6 +111,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns true, if SDL 4.0 is enabled
    */
+  // DEPRECATED, use max_supported_protocol_version instead
   bool enable_protocol_4() const OVERRIDE;
 
   /**
@@ -128,6 +129,26 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * if maximum size exceeded
    */
   const uint32_t& app_icons_amount_to_remove() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for control services
+   */
+  size_t maximum_control_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for RPC services
+   */
+  size_t maximum_rpc_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for audio services
+   */
+  size_t maximum_audio_payload_size() const OVERRIDE;
+
+  /**
+   * @brief Returns the maximum payload size for video services
+   */
+  size_t maximum_video_payload_size() const OVERRIDE;
 
   /**
    * @brief Returns the path to the config file
@@ -759,10 +780,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string app_config_folder_;
   std::string app_storage_folder_;
   std::string app_resource_folder_;
-  bool enable_protocol_4_;
   std::string app_icons_folder_;
   uint32_t app_icons_folder_max_size_;
   uint32_t app_icons_amount_to_remove_;
+  size_t maximum_control_payload_size_;
+  size_t maximum_rpc_payload_size_;
+  size_t maximum_audio_payload_size_;
+  size_t maximum_video_payload_size_;
   std::string config_file_name_;
   std::string server_address_;
   uint16_t server_port_;

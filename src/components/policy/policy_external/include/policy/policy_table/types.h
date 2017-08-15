@@ -69,9 +69,9 @@ typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
 typedef Array<Enum<Parameter>, 0, 100> Parameters;
 
-typedef Map<RpcParameters, 0, 65535> Rpc;
+typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 
-typedef Array<String<10, 65535>, 1, 3> URL;
+typedef Array<String<10, 255>, 1, 3> URL;
 
 typedef Map<URL, 1, 255> URLList;
 

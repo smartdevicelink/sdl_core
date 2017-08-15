@@ -157,6 +157,8 @@ class ApplicationManager {
       uint32_t button) = 0;
   virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
 
+  virtual std::vector<ApplicationSharedPtr>
+  applications_with_mobile_projection() = 0;
   /**
    * @brief Returns media application with LIMITED HMI Level if exists
    *
@@ -181,6 +183,9 @@ class ApplicationManager {
    * exist returns empty shared pointer
    */
   virtual ApplicationSharedPtr get_limited_voice_application() const = 0;
+
+  virtual ApplicationSharedPtr get_limited_mobile_projection_application()
+      const = 0;
 
   /**
    * @brief Retrieves application id associated with correlation id
@@ -586,6 +591,20 @@ class ApplicationManager {
    * @param app_id the application's id which should stop streaming.
    */
   virtual void ForbidStreaming(uint32_t app_id) = 0;
+
+  /**
+   * @brief Called when application completes streaming configuration
+   * @param app_id Streaming application id
+   * @param service_type Streaming service type
+   * @param result true if configuration is successful, false otherwise
+   * @param rejected_params list of rejected parameters' name. Valid
+   *                        only when result is false.
+   */
+  virtual void OnStreamingConfigured(
+      uint32_t app_id,
+      protocol_handler::ServiceType service_type,
+      bool result,
+      std::vector<std::string>& rejected_params) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
 

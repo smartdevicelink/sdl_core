@@ -58,8 +58,16 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const uint32_t btn_id =
-      (*message_)[str::msg_params][str::button_name].asUInt();
+  const mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[str::msg_params][str::button_name].asInt());
+
+  if (!CheckHMICapabilities(btn_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Button " << btn_id << " isn't allowed by HMI capabilities");
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    return;
+  }
 
   if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
@@ -81,7 +89,7 @@ void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
   msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
-      (*message_)[strings::msg_params][strings::button_name].asUInt());
+      (*message_)[strings::msg_params][strings::button_name].asInt());
   msg_params[strings::is_suscribed] = false;
   CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }

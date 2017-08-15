@@ -134,6 +134,12 @@ const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
 const char* audio_pass_thru_icon = "audioPassThruIcon";
 const char* way_points = "wayPoints";
+const char* system_capability = "systemCapability";
+const char* system_capability_type = "systemCapabilityType";
+const char* system_capabilities = "systemCapabilities";
+const char* navigation_capability = "navigationCapability";
+const char* phone_capability = "phoneCapability";
+const char* video_streaming_capability = "videoStreamingCapability";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -225,6 +231,7 @@ const char* supported_diag_modes = "supportedDiagModes";
 const char* hmi_capabilities = "hmiCapabilities";
 const char* navigation = "navigation";
 const char* phone_call = "phoneCall";
+const char* video_streaming = "videoStreaming";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
@@ -293,6 +300,17 @@ const char* const status = "status";
 const char* const external_consent_status = "externalConsentStatus";
 const char* const consented_functions = "consentedFunctions";
 const char* const source = "source";
+const char* const config = "config";
+const char* const protocol = "protocol";
+const char* const codec = "codec";
+const char* const width = "width";
+const char* const height = "height";
+const char* const rejected_params = "rejectedParams";
+const char* const preferred_resolution = "preferredResolution";
+const char* const resolution_width = "resolutionWidth";
+const char* const resolution_height = "resolutionHeight";
+const char* const max_bitrate = "maxBitrate";
+const char* const supported_formats = "supportedFormats";
 }  // namespace strings
 
 namespace json {
