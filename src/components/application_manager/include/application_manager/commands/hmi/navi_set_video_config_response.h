@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Ford Motor Company
+ * Copyright (c) 2017 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -30,19 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace protocol_handler {
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_RESPONSE_H_
 
-namespace strings {
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-extern const char* hash_id;
-extern const char* protocol_version;
-extern const char* mtu;
-extern const char* rejected_params;
-extern const char* height;
-extern const char* width;
-extern const char* video_protocol;
-extern const char* video_codec;
+namespace application_manager {
 
-}  // namespace strings
+namespace commands {
 
-}  // namespace protocol_handler
+/**
+ * @brief NaviSetVideoConfigResponse command class
+ **/
+class NaviSetVideoConfigResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief NaviSetVideoConfigResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   * @param application_manager Reference of application manager
+   **/
+  NaviSetVideoConfigResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
+
+  /**
+   * @brief NaviSetVideoConfigResponse class destructor
+   **/
+  virtual ~NaviSetVideoConfigResponse();
+
+  /**
+   * @brief Execute command
+   **/
+  void Run() OVERRIDE;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NaviSetVideoConfigResponse);
+};
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_RESPONSE_H_

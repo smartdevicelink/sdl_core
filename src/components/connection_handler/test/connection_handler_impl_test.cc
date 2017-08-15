@@ -54,10 +54,18 @@ using namespace ::connection_handler;
 using ::protocol_handler::ServiceType;
 using namespace ::protocol_handler;
 using ::testing::_;
+using ::testing::ByRef;
+using ::testing::DoAll;
 using ::testing::InSequence;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
+using ::testing::SaveArg;
+
+// custom action to call a member function with 3 arguments
+ACTION_P5(InvokeMemberFuncWithArg3, ptr, memberFunc, a, b, c) {
+  (ptr->*memberFunc)(a, b, c);
+}
 
 namespace {
 const uint32_t kAsyncExpectationsTimeout = 10000u;
@@ -108,8 +116,16 @@ class ConnectionHandlerTest : public ::testing::Test {
     // Remove all specific services
   }
   void AddTestSession() {
-    start_session_id_ = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+    protocol_handler_test::MockProtocolHandler temp_protocol_handler;
+    connection_handler_->set_protocol_handler(&temp_protocol_handler);
+    EXPECT_CALL(temp_protocol_handler,
+                NotifySessionStartedResult(_, _, _, _, _, _))
+        .WillOnce(
+            DoAll(SaveArg<2>(&start_session_id_), SaveArg<3>(&out_hash_id_)));
+
+    connection_handler_->OnSessionStartedCallback(
+        uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
+    connection_handler_->set_protocol_handler(NULL);
     EXPECT_NE(0u, start_session_id_);
     EXPECT_EQ(SessionHash(uid_, start_session_id_), out_hash_id_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, start_session_id_);
@@ -123,8 +139,20 @@ class ConnectionHandlerTest : public ::testing::Test {
     EXPECT_EQ(SessionHash(uid_, start_session_id_), out_hash_id_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, start_session_id_);
     CheckSessionExists(uid_, start_session_id_);
-    uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, service_type, PROTECTION_OFF, 0);
+
+    uint32_t session_id = 0;
+    protocol_handler_test::MockProtocolHandler temp_protocol_handler;
+    connection_handler_->set_protocol_handler(&temp_protocol_handler);
+    EXPECT_CALL(temp_protocol_handler,
+                NotifySessionStartedResult(_, _, _, _, _, _))
+        .WillOnce(SaveArg<2>(&session_id));
+
+    connection_handler_->OnSessionStartedCallback(uid_,
+                                                  start_session_id_,
+                                                  service_type,
+                                                  PROTECTION_OFF,
+                                                  static_cast<BsonObject*>(0));
+    connection_handler_->set_protocol_handler(NULL);
     EXPECT_EQ(session_id, start_session_id_);
   }
 
@@ -267,8 +295,14 @@ TEST_F(ConnectionHandlerTest, StartSession_NoConnection) {
   // Null sessionId for start new session
   const uint8_t sessionID = 0;
   // Start new session with RPC service
-  const uint32_t result_fail = connection_handler_->OnSessionStartedCallback(
-      uid_, sessionID, kRpc, PROTECTION_ON, &out_hash_id_);
+  uint32_t result_fail = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&result_fail), SaveArg<3>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, sessionID, kRpc, PROTECTION_ON, static_cast<BsonObject*>(NULL));
   // Unknown connection error is '0'
   EXPECT_EQ(0u, result_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1013,19 +1047,58 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
   AddTestDeviceConnection();
   AddTestSession();
 
+  uint32_t start_audio = 0;
+  uint32_t start_video = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&start_audio), SaveArg<3>(&out_hash_id_)))
+      .WillOnce(DoAll(SaveArg<2>(&start_video), SaveArg<3>(&out_hash_id_)));
+
   // Start Audio service
-  const uint32_t start_audio = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_OFF,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(start_session_id_, start_audio);
   CheckServiceExists(uid_, start_session_id_, kAudio, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
 
   // Start Audio service
-  const uint32_t start_video = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kMobileNav,
+                                                PROTECTION_OFF,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(start_session_id_, start_video);
   CheckServiceExists(uid_, start_session_id_, kMobileNav, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
+
+  connection_handler_->set_protocol_handler(NULL);
+}
+
+TEST_F(ConnectionHandlerTest, StartService_withServices_withParams) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  uint32_t start_video = 0;
+  // create a dummy pointer
+  int dummy = 0;
+  std::vector<std::string> empty;
+  BsonObject* dummy_param = reinterpret_cast<BsonObject*>(&dummy);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, empty))
+      .WillOnce(DoAll(SaveArg<2>(&start_video), SaveArg<3>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_param);
+  EXPECT_EQ(start_session_id_, start_video);
+  CheckServiceExists(uid_, start_session_id_, kMobileNav, true);
+  EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
+
+  connection_handler_->set_protocol_handler(NULL);
 }
 
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
@@ -1052,11 +1125,23 @@ TEST_F(ConnectionHandlerTest, ServiceStop_UnExistService) {
 TEST_F(ConnectionHandlerTest, ServiceStop) {
   AddTestDeviceConnection();
   AddTestSession();
+
+  uint32_t start_audio = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillRepeatedly(
+          DoAll(SaveArg<2>(&start_audio), SaveArg<3>(&out_hash_id_)));
+
   // Check ignoring hash_id on stop non-rpc service
   for (uint32_t some_hash_id = 0; some_hash_id < 0xFF; ++some_hash_id) {
     // Start audio service
-    const uint32_t start_audio = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+    connection_handler_->OnSessionStartedCallback(
+        uid_,
+        start_session_id_,
+        kAudio,
+        PROTECTION_OFF,
+        static_cast<BsonObject*>(NULL));
     EXPECT_EQ(start_session_id_, start_audio);
     EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
 
@@ -1122,15 +1207,195 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
       &mock_connection_handler_observer);
   uint32_t session_key =
       connection_handler_->KeyFromPair(uid_, start_session_id_);
+  std::vector<std::string> empty;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceStartedCallback(device_handle_, session_key, kRpc))
-      .WillOnce(Return(true));
+              OnServiceStartedCallback(device_handle_, session_key, kRpc, NULL))
+      .WillOnce(InvokeMemberFuncWithArg3(
+          connection_handler_,
+          &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
+          true,
+          ByRef(empty)));
+
+  uint32_t new_session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&new_session_id), SaveArg<3>(&out_hash_id_)));
 
   // Start new session with RPC service
-  uint32_t new_session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
 
   EXPECT_NE(0u, new_session_id);
+}
+
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key =
+      connection_handler_->KeyFromPair(uid_, start_session_id_);
+  std::vector<std::string> empty;
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key, kMobileNav, dummy_params))
+      .WillOnce(InvokeMemberFuncWithArg3(
+          connection_handler_,
+          &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
+          true,
+          ByRef(empty)));
+
+  // confirm that NotifySessionStartedResult() is called
+  uint32_t new_session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, false, empty))
+      .WillOnce(DoAll(SaveArg<2>(&new_session_id), SaveArg<3>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_NE(0u, new_session_id);
+}
+
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key =
+      connection_handler_->KeyFromPair(uid_, start_session_id_);
+  std::vector<std::string> empty;
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key, kMobileNav, dummy_params))
+      .WillOnce(InvokeMemberFuncWithArg3(
+          connection_handler_,
+          &ConnectionHandler::NotifyServiceStartedResult,
+          session_key,
+          false,
+          ByRef(empty)));
+
+  // confirm that NotifySessionStartedResult() is called
+  uint32_t new_session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, false, empty))
+      .WillOnce(DoAll(SaveArg<2>(&new_session_id), SaveArg<3>(&out_hash_id_)));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_EQ(0u, new_session_id);
+}
+
+/*
+ * Simulate two OnSessionStartedCallback calls, and connection handler observer
+ * returns a positive reply for the first call with delay and a negative reply
+ * for the second call immediately.
+ */
+TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
+  AddTestDeviceConnection();
+
+  uint32_t rpc_session_id1;
+  uint32_t rpc_session_id2;
+  uint32_t hash_id1;
+  uint32_t hash_id2;
+
+  protocol_handler_test::MockProtocolHandler temp_protocol_handler;
+  connection_handler_->set_protocol_handler(&temp_protocol_handler);
+  EXPECT_CALL(temp_protocol_handler,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&rpc_session_id1), SaveArg<3>(&hash_id1)))
+      .WillOnce(DoAll(SaveArg<2>(&rpc_session_id2), SaveArg<3>(&hash_id2)));
+
+  // add two sessions
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
+
+  EXPECT_NE(0u, rpc_session_id1);
+  EXPECT_NE(0u, rpc_session_id2);
+  EXPECT_EQ(SessionHash(uid_, rpc_session_id1), hash_id1);
+  EXPECT_EQ(SessionHash(uid_, rpc_session_id2), hash_id2);
+  CheckSessionExists(uid_, rpc_session_id1);
+  CheckSessionExists(uid_, rpc_session_id2);
+
+  connection_handler_->set_protocol_handler(NULL);
+
+  int dummy = 0;
+  BsonObject* dummy_params = reinterpret_cast<BsonObject*>(&dummy);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  uint32_t session_key1 =
+      connection_handler_->KeyFromPair(uid_, rpc_session_id1);
+  uint32_t session_key2 =
+      connection_handler_->KeyFromPair(uid_, rpc_session_id2);
+
+  std::vector<std::string> empty;
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key1, kMobileNav, dummy_params))
+      // don't call NotifyServiceStartedResult() with this event
+      .Times(1);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceStartedCallback(
+                  device_handle_, session_key2, kMobileNav, dummy_params))
+      // call NotifyServiceStartedResult() twice, first for the second session
+      // then for the first session
+      .WillOnce(DoAll(InvokeMemberFuncWithArg3(
+                          connection_handler_,
+                          &ConnectionHandler::NotifyServiceStartedResult,
+                          session_key2,
+                          false,
+                          ByRef(empty)),
+                      InvokeMemberFuncWithArg3(
+                          connection_handler_,
+                          &ConnectionHandler::NotifyServiceStartedResult,
+                          session_key1,
+                          true,
+                          ByRef(empty))));
+
+  // verify that connection handler will not mix up the two results
+  uint32_t new_session_id1 = 0;
+  uint32_t new_session_id2 = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(
+      mock_protocol_handler_,
+      NotifySessionStartedResult(_, rpc_session_id1, _, _, false, empty))
+      .WillOnce(SaveArg<2>(&new_session_id1));
+  EXPECT_CALL(
+      mock_protocol_handler_,
+      NotifySessionStartedResult(_, rpc_session_id2, _, _, false, empty))
+      .WillOnce(SaveArg<2>(&new_session_id2));
+
+  connection_handler_->OnSessionStartedCallback(
+      uid_, rpc_session_id1, kMobileNav, PROTECTION_OFF, dummy_params);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, rpc_session_id2, kMobileNav, PROTECTION_OFF, dummy_params);
+
+  EXPECT_NE(0u, new_session_id1);  // result is positive
+  EXPECT_EQ(0u, new_session_id2);  // result is negative
 }
 
 TEST_F(ConnectionHandlerTest,
@@ -1142,10 +1407,18 @@ TEST_F(ConnectionHandlerTest,
   // Forbid start kRPC without encryption
   protected_services_.push_back(kRpc);
   SetSpecificServices();
+
+  uint32_t session_id_fail = 0;
+  uint32_t session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&session_id_fail), SaveArg<3>(&out_hash_id_)))
+      .WillOnce(DoAll(SaveArg<2>(&session_id), SaveArg<3>(&out_hash_id_)));
+
   // Start new session with RPC service
-  const uint32_t session_id_fail =
-      connection_handler_->OnSessionStartedCallback(
-          uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1159,8 +1432,8 @@ TEST_F(ConnectionHandlerTest,
   protected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with RPC service
-  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
   EXPECT_NE(0u, session_id);
   CheckService(uid_, session_id, kRpc, NULL, PROTECTION_OFF);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
@@ -1176,10 +1449,18 @@ TEST_F(ConnectionHandlerTest,
   unprotected_services_.push_back(UnnamedService::kServedService2);
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
+
+  uint32_t session_id_fail = 0;
+  uint32_t session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id_fail))
+      .WillOnce(DoAll(SaveArg<2>(&session_id), SaveArg<3>(&out_hash_id_)));
+
   // Start new session with RPC service
-  const uint32_t session_id_fail =
-      connection_handler_->OnSessionStartedCallback(
-          uid_, 0, kRpc, PROTECTION_ON, NULL);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_ON, static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
 #else
@@ -1191,8 +1472,8 @@ TEST_F(ConnectionHandlerTest,
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with RPC service
-  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(
+      uid_, 0, kRpc, PROTECTION_ON, static_cast<BsonObject*>(NULL));
   EXPECT_NE(0u, session_id);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
 
@@ -1211,9 +1492,21 @@ TEST_F(ConnectionHandlerTest,
   protected_services_.push_back(UnnamedService::kServedService2);
   protected_services_.push_back(kControl);
   SetSpecificServices();
+
+  uint32_t session_id2 = 0;
+  uint32_t session_id3 = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id2))
+      .WillOnce(DoAll(SaveArg<2>(&session_id3), SaveArg<3>(&out_hash_id_)));
+
   // Start new session with Audio service
-  const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_OFF, NULL);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_OFF,
+                                                static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id2);
 #else
@@ -1226,8 +1519,11 @@ TEST_F(ConnectionHandlerTest,
   protected_services_.push_back(UnnamedService::kServedService2);
   protected_services_.push_back(kControl);
   SetSpecificServices();
-  const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_OFF,
+                                                static_cast<BsonObject*>(NULL));
 // Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
@@ -1250,10 +1546,21 @@ TEST_F(ConnectionHandlerTest,
   unprotected_services_.push_back(UnnamedService::kServedService2);
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
+
+  uint32_t session_id_reject = 0;
+  uint32_t session_id3 = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id_reject))
+      .WillOnce(DoAll(SaveArg<2>(&session_id3), SaveArg<3>(&out_hash_id_)));
+
   // Start new session with Audio service
-  const uint32_t session_id_reject =
-      connection_handler_->OnSessionStartedCallback(
-          uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_reject);
 #else
@@ -1262,8 +1569,11 @@ TEST_F(ConnectionHandlerTest,
   // Allow start kAudio with encryption
   unprotected_services_.clear();
   SetSpecificServices();
-  const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
 // Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
@@ -1280,9 +1590,22 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   AddTestDeviceConnection();
   AddTestSession();
 
+  uint32_t session_id_new = 0;
+  uint32_t session_id2 = 0;
+  uint32_t session_id3 = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(DoAll(SaveArg<2>(&session_id_new), SaveArg<3>(&out_hash_id_)))
+      .WillOnce(DoAll(SaveArg<2>(&session_id2), SaveArg<3>(&out_hash_id_)))
+      .WillOnce(DoAll(SaveArg<2>(&session_id3), SaveArg<3>(&out_hash_id_)));
+
   // Start RPC protection
-  const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kRpc, PROTECTION_ON, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kRpc,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
   // Post protection nedd no hash
@@ -1296,15 +1619,21 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 #endif  // ENABLE_SECURITY
 
   // Start Audio session without protection
-  const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_OFF,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(start_session_id_, session_id2);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
   CheckService(uid_, start_session_id_, kAudio, NULL, PROTECTION_OFF);
 
   // Start Audio protection
-  const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
@@ -1320,8 +1649,16 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kBulk, PROTECTION_ON, NULL);
+  uint32_t session_id_new = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id_new));
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kBulk,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
   CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_ON);
@@ -1416,9 +1753,19 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   // kAudio is not exists yet
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
+
+  uint32_t session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id));
+
   // Open kAudio service
-  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kAudio,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(session_id, start_session_id_);
   CheckService(uid_, session_id, kAudio, &mock_ssl_context, PROTECTION_ON);
 
@@ -1441,9 +1788,18 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 
+  uint32_t session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id));
+
   // Protect kRpc (Bulk will be protect also)
-  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kRpc, PROTECTION_ON, NULL);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kRpc,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(start_session_id_, session_id);
   CheckService(uid_, session_id, kRpc, &mock_ssl_context, PROTECTION_ON);
 
@@ -1469,9 +1825,18 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 
+  uint32_t session_id = 0;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_,
+              NotifySessionStartedResult(_, _, _, _, _, _))
+      .WillOnce(SaveArg<2>(&session_id));
+
   // Protect Bulk (kRpc will be protected also)
-  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, start_session_id_, kBulk, PROTECTION_ON, NULL);
+  connection_handler_->OnSessionStartedCallback(uid_,
+                                                start_session_id_,
+                                                kBulk,
+                                                PROTECTION_ON,
+                                                static_cast<BsonObject*>(NULL));
   EXPECT_EQ(start_session_id_, session_id);
   CheckService(uid_, session_id, kRpc, &mock_ssl_context, PROTECTION_ON);
 

@@ -70,6 +70,10 @@ class MockMessageHelper {
                    const connection_handler::DeviceMap& devices,
                    const policy::PolicyHandlerInterface& policy_handler,
                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendNaviSetVideoConfig,
+               void(int32_t app_id,
+                    ApplicationManager& app_mngr,
+                    const smart_objects::SmartObject& video_params));
   MOCK_METHOD2(SendNaviStartStream,
                void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStopStream,

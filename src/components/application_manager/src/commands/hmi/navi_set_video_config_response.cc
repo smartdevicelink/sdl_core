@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Ford Motor Company
+ * Copyright (c) 2017 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -29,20 +29,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "application_manager/commands/hmi/navi_set_video_config_response.h"
+#include "application_manager/event_engine/event.h"
 
-namespace protocol_handler {
+namespace application_manager {
 
-namespace strings {
+namespace commands {
 
-extern const char* hash_id;
-extern const char* protocol_version;
-extern const char* mtu;
-extern const char* rejected_params;
-extern const char* height;
-extern const char* width;
-extern const char* video_protocol;
-extern const char* video_codec;
+NaviSetVideoConfigResponse::NaviSetVideoConfigResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-}  // namespace strings
+NaviSetVideoConfigResponse::~NaviSetVideoConfigResponse() {}
 
-}  // namespace protocol_handler
+void NaviSetVideoConfigResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_SetVideoConfig);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
+
+}  // namespace commands
+
+}  // namespace application_manager

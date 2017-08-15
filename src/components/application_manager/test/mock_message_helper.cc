@@ -41,6 +41,13 @@ void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
       app_id, app_mngr);
 }
+void MessageHelper::SendNaviSetVideoConfig(
+    int32_t app_id,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& video_params) {
+  MockMessageHelper::message_helper_mock()->SendNaviSetVideoConfig(
+      app_id, app_mngr, video_params);
+}
 void MessageHelper::SendNaviStartStream(int32_t connection_key,
                                         ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendNaviStartStream(connection_key,

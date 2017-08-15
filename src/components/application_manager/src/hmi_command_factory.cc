@@ -246,6 +246,8 @@
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/commands/hmi/navi_set_video_config_request.h"
+#include "application_manager/commands/hmi/navi_set_video_config_response.h"
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
@@ -2076,6 +2078,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       command.reset(new commands::hmi::OnUIResetTimeoutNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_SetVideoConfig: {
+      if (is_response) {
+        command.reset(new commands::NaviSetVideoConfigResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::NaviSetVideoConfigRequest(
+            message, application_manager));
+      }
       break;
     }
     case hmi_apis::FunctionID::Navigation_StartStream: {

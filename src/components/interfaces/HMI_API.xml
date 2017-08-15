@@ -1208,6 +1208,86 @@
   <element name="QUEUE" />
 </enum>
 
+<enum name="VideoStreamingProtocol">
+  <description>Enum for each type of video streaming protocol type.</description>
+  <element name="RAW">
+    <description>
+      Raw stream bytes that contains no timestamp data and is the lowest supported video streaming
+    </description>
+  </element>
+  <element name="RTP">
+    <description>
+      RTP facilitates the transfer of real-time data. Information provided by this protocol include
+      timestamps (for synchronization), sequence numbers (for packet loss and reordering detection)
+      and the payload format which indicates the encoded format of the data.
+    </description>
+  </element>
+  <element name="RTSP">
+    <description>
+      The transmission of streaming data itself is not a task of RTSP. Most RTSP servers use the
+      Real-time Transport Protocol (RTP) in conjunction with Real-time Control Protocol (RTCP)
+      for media stream delivery. However, some vendors implement proprietary transport protocols.
+    </description>
+  </element>
+  <element name="RTMP">
+    <description>
+      Real-Time Messaging Protocol (RTMP) was initially a proprietary protocol developed by
+      Macromedia for streaming audio, video and data over the Internet, between a Flash player
+      and a server. Macromedia is now owned by Adobe, which has released an incomplete version
+      of the specification of the protocol for public use.
+    </description>
+  </element>
+  <element name="WEBM">
+    <description>
+      The WebM container is based on a profile of Matroska. WebM initially supported VP8 video and
+      Vorbis audio streams. In 2013 it was updated to accommodate VP9 video and Opus audio.
+    </description>
+  </element>
+</enum>
+
+<enum name="VideoStreamingCodec">
+  <description>Enum for each type of video streaming codec.</description>
+  <element name="H264">
+    <description>
+      A block-oriented motion-compensation-based video compression standard.
+      As of 2014 it is one of the most commonly used formats for the recording, compression, and
+      distribution of video content.
+    </description>
+  </element>
+  <element name="H265">
+    <description>
+      High Efficiency Video Coding (HEVC), also known as H.265 and MPEG-H Part 2, is a video
+      compression standard, one of several potential successors to the widely used AVC (H.264 or
+      MPEG-4 Part 10). In comparison to AVC, HEVC offers about double the data compression ratio
+      at the same level of video quality, or substantially improved video quality at the same
+      bit rate. It supports resolutions up to 8192x4320, including 8K UHD.
+    </description>
+  </element>
+  <element name="Theora">
+    <description>
+      Theora is derived from the formerly proprietary VP3 codec, released into the public domain
+      by On2 Technologies. It is broadly comparable in design and bitrate efficiency to
+      MPEG-4 Part 2, early versions of Windows Media Video, and RealVideo while lacking some of
+      the features present in some of these other codecs. It is comparable in open standards
+      philosophy to the BBC's Dirac codec.
+    </description>
+  </element>
+  <element name="VP8">
+    <description>
+      VP8 can be multiplexed into the Matroska-based container format WebM along with Vorbis and
+      Opus audio. The image format WebP is based on VP8's intra-frame coding. VP8's direct
+      successor, VP9, and the emerging royalty-free internet video format AV1 from the Alliance for
+      Open Media (AOMedia) are based on VP8.
+    </description>
+  </element>
+  <element name="VP9">
+    <description>
+      Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD)
+      and also enables lossless compression.
+    </description>
+  </element>
+</enum>
+
 <!-- Policies -->
   <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
@@ -1568,6 +1648,32 @@
   </param>
   <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
     <description>The image resolution of this field.</description>
+  </param>
+</struct>
+
+<struct name="VideoStreamingFormat">
+  <description>Video streaming formats and their specifications.</description>
+  <param name="protocol" type="Common.VideoStreamingProtocol" mandatory="true">
+    <description>Protocol type, see VideoStreamingProtocol</description>
+  </param>
+  <param name="codec" type="Common.VideoStreamingCodec" mandatory="true">
+    <description>Codec type, see VideoStreamingCodec</description>
+  </param>
+</struct>
+
+<struct name="VideoConfig">
+  <description>Configuration of a video stream.</description>
+  <param name="protocol" type="Common.VideoStreamingProtocol" mandatory="false">
+    <description>The video protocol configuration</description>
+  </param>
+  <param name="codec" type="Common.VideoStreamingCodec" mandatory="false">
+    <description>The video codec configuration</description>
+  </param>
+  <param name="width" type="Integer" mandatory="false">
+    <description>Width of the video stream, in pixels.</description>
+  </param>
+  <param name="height" type="Integer" mandatory="false">
+    <description>Height of the video stream, in pixels.</description>
   </param>
 </struct>
 
@@ -2105,10 +2211,29 @@
     </param>
   </struct>
 
+  <struct name="VideoStreamingCapability">
+    <description>Contains information about this system's video streaming capabilities.</description>
+    <param name="preferredResolution" type="Common.ImageResolution" mandatory="false">
+      <description>The preferred resolution of a video stream for decoding and rendering on HMI.</description>
+    </param>
+    <param name="maxBitrate" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
+      <description>The maximum bitrate of video stream that is supported, in kbps.</description>
+    </param>
+    <param name="supportedFormats" type="Common.VideoStreamingFormat" array="true" mandatory="false">
+      <description>
+        Detailed information on each format supported by this system, in its preferred order
+        (i.e. the first element in the array is most preferable to the system).
+        Each object will contain a VideoStreamingFormat that describes what can be expected.
+      </description>
+    </param>
+  </struct>
+
   <struct name="SystemCapabilities">
       <param name="navigationCapability" type="NavigationCapability" mandatory="false">
       </param>
       <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      </param>
+      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
       </param>
   </struct>
 
@@ -3396,6 +3521,27 @@
     <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
     <param name="state" type="Common.TBTState" mandatory="true">
       <description>Current State of TBT client</description>
+    </param>
+  </function>
+  <function name="SetVideoConfig" messagetype="request">
+    <description>Request from SDL to HMI to ask whether HMI accepts a video stream with given configuration.</description>
+    <param name="config" type="Common.VideoConfig" mandatory="true">
+      <description>Configuration of a video stream.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="SetVideoConfig" messagetype="response">
+    <description>
+      Response from HMI to SDL whether the configuration is accepted.
+      In a negative response, a list of rejected parameters are supplied.
+    </description>
+    <param name="rejectedParams" type="String" array="true" minsize="1" maxsize="1000" mandatory="false">
+      <description>
+        List of params of VideoConfig struct which are not accepted by HMI, e.g. "protocol" and "codec".
+        This param exists only when the response is negative.
+      </description>
     </param>
   </function>
   <function name="StartStream" messagetype="request">

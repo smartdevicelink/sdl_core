@@ -78,6 +78,12 @@ void UIGetCapabilitiesResponse::Run() {
       hmi_capabilities.set_phone_call_supported(
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
+    if (msg_params[strings::hmi_capabilities].keyExists(
+            strings::video_streaming)) {
+      hmi_capabilities.set_video_streaming_supported(
+          msg_params[strings::hmi_capabilities][strings::video_streaming]
+              .asBool());
+    }
   }
 
   if (msg_params.keyExists(strings::system_capabilities)) {
@@ -91,6 +97,12 @@ void UIGetCapabilitiesResponse::Run() {
             strings::phone_capability)) {
       hmi_capabilities.set_phone_capability(
           msg_params[strings::system_capabilities][strings::phone_capability]);
+    }
+    if (msg_params[strings::system_capabilities].keyExists(
+            strings::video_streaming_capability)) {
+      hmi_capabilities.set_video_streaming_capability(
+          msg_params[strings::system_capabilities]
+                    [strings::video_streaming_capability]);
     }
   }
 }

@@ -36,6 +36,7 @@
 #include <string>
 #include <fstream>
 #include <utility>
+#include <bson_object.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
@@ -55,6 +56,7 @@
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "protocol/bson_object_keys.h"
 
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
@@ -1137,6 +1139,7 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
+// DEPRECATED
 bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
@@ -1169,20 +1172,118 @@ bool ApplicationManagerImpl::StartNaviService(
   return false;
 }
 
+bool ApplicationManagerImpl::StartNaviService(
+    uint32_t app_id,
+    protocol_handler::ServiceType service_type,
+    const BsonObject* params) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (HMILevelAllowsStreaming(app_id, service_type)) {
+    {
+      sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+      if (navi_service_status_.end() == it) {
+        std::pair<NaviServiceStatusMap::iterator, bool> res =
+            navi_service_status_.insert(
+                std::pair<uint32_t, std::pair<bool, bool> >(
+                    app_id, std::make_pair(false, false)));
+        if (!res.second) {
+          LOG4CXX_WARN(logger_, "Navi service refused");
+          return false;
+        }
+        it = res.first;
+      }
+    }
+
+    if (service_type == ServiceType::kMobileNav) {
+      smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
+      ConvertVideoParamsToSO(converted_params, params);
+
+      if (!converted_params.empty()) {
+        LOG4CXX_INFO(logger_, "Sending video configuration params");
+#ifdef DEBUG
+        MessageHelper::PrintSmartObject(converted_params);
+#endif
+        bool request_sent =
+            application(app_id)->SetVideoConfig(service_type, converted_params);
+        if (request_sent) {
+          return true;
+        }
+      }
+    }
+    // no configuration is needed, or SetVideoConfig is not sent
+    std::vector<std::string> empty;
+    OnStreamingConfigured(app_id, service_type, true, empty);
+    return true;
+
+  } else {
+    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
+  }
+  return false;
+}
+
+void ApplicationManagerImpl::OnStreamingConfigured(
+    uint32_t app_id,
+    protocol_handler::ServiceType service_type,
+    bool result,
+    std::vector<std::string>& rejected_params) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_INFO(logger_,
+               "OnStreamingConfigured called for service "
+                   << service_type << ", result=" << result);
+
+  if (result) {
+    std::vector<std::string> empty;
+    {
+      sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+      if (navi_service_status_.end() == it) {
+        LOG4CXX_WARN(logger_, "Application not found in navi status map");
+        connection_handler().NotifyServiceStartedResult(app_id, false, empty);
+        return;
+      }
+
+      // Fill NaviServices map. Set true to first value of pair if
+      // we've started video service or to second value if we've
+      // started audio service
+      service_type == ServiceType::kMobileNav ? it->second.first = true
+                                              : it->second.second = true;
+    }
+
+    application(app_id)->StartStreaming(service_type);
+    connection_handler().NotifyServiceStartedResult(app_id, true, empty);
+  } else {
+    std::vector<std::string> converted_params =
+        ConvertRejectedParamList(rejected_params);
+    connection_handler().NotifyServiceStartedResult(
+        app_id, false, converted_params);
+  }
+}
+
 void ApplicationManagerImpl::StopNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it) {
-    LOG4CXX_WARN(logger_, "No Information about navi service " << service_type);
-  } else {
-    // Fill NaviServices map. Set false to first value of pair if
-    // we've stopped video service or to second value if we've
-    // stopped audio service
-    service_type == ServiceType::kMobileNav ? it->second.first = false
-                                            : it->second.second = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      LOG4CXX_WARN(logger_,
+                   "No Information about navi service " << service_type);
+    } else {
+      // Fill NaviServices map. Set false to first value of pair if
+      // we've stopped video service or to second value if we've
+      // stopped audio service
+      service_type == ServiceType::kMobileNav ? it->second.first = false
+                                              : it->second.second = false;
+    }
   }
 
   ApplicationSharedPtr app = application(app_id);
@@ -1194,6 +1295,7 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
+// DEPRECATED
 bool ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
@@ -1219,15 +1321,59 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 
   if (Compare<ServiceType, EQ, ONE>(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    if (app->is_navi() || app->mobile_projection_enabled()) {
+    if (app->is_navi()) {
       return StartNaviService(session_key, type);
+    } else {
+      LOG4CXX_WARN(logger_, "Refuse not navi application");
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Refuse unknown service");
+  }
+  return false;
+}
+
+void ApplicationManagerImpl::OnServiceStartedCallback(
+    const connection_handler::DeviceHandle& device_handle,
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type,
+    const BsonObject* params) {
+  using namespace helpers;
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "ServiceType = " << type << ". Session = " << std::hex
+                                 << session_key);
+  std::vector<std::string> empty;
+
+  if (type == kRpc) {
+    LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
+    connection_handler().NotifyServiceStartedResult(session_key, true, empty);
+    return;
+  }
+  ApplicationSharedPtr app = application(session_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "The application with id:" << session_key
+                                            << " doesn't exists.");
+    connection_handler().NotifyServiceStartedResult(session_key, false, empty);
+    return;
+  }
+
+  if (Compare<ServiceType, EQ, ONE>(
+          type, ServiceType::kMobileNav, ServiceType::kAudio)) {
+    if (app->is_navi() || app->mobile_projection_enabled()) {
+      if (!StartNaviService(session_key, type, params)) {
+        connection_handler().NotifyServiceStartedResult(
+            session_key, false, empty);
+      }
+      return;
     } else {
       LOG4CXX_WARN(logger_, "Refuse not navi/projection application");
     }
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
-  return false;
+  connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
 void ApplicationManagerImpl::OnServiceEndedCallback(
@@ -2617,9 +2763,13 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    navi_service_status_.erase(it);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      navi_service_status_.erase(it);
+    }
   }
 
   // remove appID from tts_global_properties_app_list_
@@ -2960,9 +3110,17 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it ||
-      (!it->second.first && !it->second.second)) {
+  bool unregister = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it ||
+        (!it->second.first && !it->second.second)) {
+      unregister = true;
+    }
+  }
+  if (unregister) {
     ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app_id, PROTOCOL_VIOLATION),
@@ -3008,19 +3166,27 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() == it) {
-    LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
-    return;
+  bool end_video = false;
+  bool end_audio = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
+      return;
+    }
+    end_video = it->second.first;
+    end_audio = it->second.second;
   }
 
   if (connection_handler_) {
-    if (it->second.first) {
+    if (end_video) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler().SendEndService(app_id, ServiceType::kMobileNav);
       app->StopStreamingForce(ServiceType::kMobileNav);
     }
-    if (it->second.second) {
+    if (end_audio) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
@@ -3142,17 +3308,25 @@ void ApplicationManagerImpl::CloseNaviApp() {
   uint32_t app_id = navi_app_to_stop_.front();
   navi_app_to_stop_.pop_front();
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first || it->second.second) {
-      LOG4CXX_INFO(logger_,
-                   "App haven't answered for EndService. Unregister it.");
-      ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app_id, PROTOCOL_VIOLATION),
-          commands::Command::ORIGIN_SDL);
-      UnregisterApplication(app_id, ABORTED);
+  bool unregister = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first || it->second.second) {
+        unregister = true;
+      }
     }
+  }
+  if (unregister) {
+    LOG4CXX_INFO(logger_,
+                 "App haven't answered for EndService. Unregister it.");
+    ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app_id, PROTOCOL_VIOLATION),
+        commands::Command::ORIGIN_SDL);
+    UnregisterApplication(app_id, ABORTED);
   }
 }
 
@@ -3182,13 +3356,17 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first) {
-      app->set_video_streaming_allowed(false);
-    }
-    if (it->second.second) {
-      app->set_audio_streaming_allowed(false);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first) {
+        app->set_video_streaming_allowed(false);
+      }
+      if (it->second.second) {
+        app->set_audio_streaming_allowed(false);
+      }
     }
   }
 }
@@ -3203,13 +3381,17 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
     return;
   }
 
-  NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-  if (navi_service_status_.end() != it) {
-    if (it->second.first) {
-      app->set_video_streaming_allowed(true);
-    }
-    if (it->second.second) {
-      app->set_audio_streaming_allowed(true);
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() != it) {
+      if (it->second.first) {
+        app->set_video_streaming_allowed(true);
+      }
+      if (it->second.second) {
+        app->set_audio_streaming_allowed(true);
+      }
     }
   }
 }
@@ -3605,5 +3787,107 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
 }
+
+static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(
+    const char* str) {
+  if (strcmp(str, "RAW") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RAW;
+  } else if (strcmp(str, "RTP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTP;
+  } else if (strcmp(str, "RTSP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTSP;
+  } else if (strcmp(str, "RTMP") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::RTMP;
+  } else if (strcmp(str, "WEBM") == 0) {
+    return hmi_apis::Common_VideoStreamingProtocol::WEBM;
+  }
+  return hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM;
+}
+
+static hmi_apis::Common_VideoStreamingCodec::eType ConvertVideoCodec(
+    const char* str) {
+  if (strcmp(str, "H264") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::H264;
+  } else if (strcmp(str, "H265") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::H265;
+  } else if (strcmp(str, "Theora") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::Theora;
+  } else if (strcmp(str, "VP8") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::VP8;
+  } else if (strcmp(str, "VP9") == 0) {
+    return hmi_apis::Common_VideoStreamingCodec::VP9;
+  }
+  return hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM;
+}
+
+// static
+void ApplicationManagerImpl::ConvertVideoParamsToSO(
+    smart_objects::SmartObject& output, const BsonObject* input) {
+  if (input == NULL) {
+    return;
+  }
+  BsonObject* obj = const_cast<BsonObject*>(input);
+
+  const char* protocol =
+      bson_object_get_string(obj, protocol_handler::strings::video_protocol);
+  if (protocol != NULL) {
+    hmi_apis::Common_VideoStreamingProtocol::eType protocol_enum =
+        ConvertVideoProtocol(protocol);
+    if (protocol_enum !=
+        hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM) {
+      output[strings::protocol] = protocol_enum;
+    }
+  }
+  const char* codec =
+      bson_object_get_string(obj, protocol_handler::strings::video_codec);
+  if (codec != NULL) {
+    hmi_apis::Common_VideoStreamingCodec::eType codec_enum =
+        ConvertVideoCodec(codec);
+    if (codec_enum != hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM) {
+      output[strings::codec] = codec_enum;
+    }
+  }
+  BsonElement* element =
+      bson_object_get(obj, protocol_handler::strings::height);
+  if (element != NULL && element->type == TYPE_INT32) {
+    output[strings::height] =
+        bson_object_get_int32(obj, protocol_handler::strings::height);
+  }
+  element = bson_object_get(obj, protocol_handler::strings::width);
+  if (element != NULL && element->type == TYPE_INT32) {
+    output[strings::width] =
+        bson_object_get_int32(obj, protocol_handler::strings::width);
+  }
+}
+
+// static
+std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
+    const std::vector<std::string>& input) {
+  std::vector<std::string> output;
+  for (std::vector<std::string>::const_iterator it = input.begin();
+       it != input.end();
+       ++it) {
+    if (*it == strings::protocol) {
+      output.push_back(protocol_handler::strings::video_protocol);
+    } else if (*it == strings::codec) {
+      output.push_back(protocol_handler::strings::video_codec);
+    } else if (*it == strings::height) {
+      output.push_back(protocol_handler::strings::height);
+    } else if (*it == strings::width) {
+      output.push_back(protocol_handler::strings::width);
+    }
+    // ignore unknown parameters
+  }
+  return output;
+}
+
+#ifdef BUILD_TESTS
+void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
+  applications_list_lock_.Acquire();
+  applications_.insert(mock_app);
+  apps_size_ = applications_.size();
+  applications_list_lock_.Release();
+}
+#endif  // BUILD_TESTS
 
 }  // namespace application_manager

@@ -154,6 +154,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(phone_call_supported, bool());
   MOCK_METHOD1(set_phone_call_supported, void(const bool supported));
 
+  MOCK_CONST_METHOD0(video_streaming_supported, bool());
+  MOCK_METHOD1(set_video_streaming_supported, void(const bool supported));
+
   MOCK_CONST_METHOD0(navigation_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_navigation_capability,
@@ -162,6 +165,12 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(phone_capability, const smart_objects::SmartObject*());
   MOCK_METHOD1(set_phone_capability,
                void(const smart_objects::SmartObject& phone_capability));
+
+  MOCK_CONST_METHOD0(video_streaming_capability,
+                     const smart_objects::SmartObject*());
+  MOCK_METHOD1(
+      set_video_streaming_capability,
+      void(const smart_objects::SmartObject& video_streaming_capability));
 
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
 

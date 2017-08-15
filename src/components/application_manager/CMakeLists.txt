@@ -57,6 +57,7 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -306,6 +307,8 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_stop_stream_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_request_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_put_file_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_resume_audio_source_notification.cc
@@ -397,6 +400,8 @@ set(LIBRARIES
   formatters
   dbms
   Utils
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -435,6 +440,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+add_dependencies("ApplicationManager" libbson)
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)
