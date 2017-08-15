@@ -125,7 +125,7 @@ TEST_F(ProtocolPacketTest, SerializePacketWithDiffServiceType) {
   for (size_t i = 0; i < serv_types.size(); ++i) {
     RawMessagePtr res =
         GetRawMessage(PROTOCOL_VERSION_3, FRAME_TYPE_CONTROL, serv_types[i]);
-    EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
+    EXPECT_EQ(static_cast<uint32_t>(PROTOCOL_VERSION_3), res->protocol_version());
     EXPECT_EQ(serv_types[i], res->service_type());
     EXPECT_EQ(PROTOCOL_HEADER_V2_SIZE, res->data_size());
   }
@@ -146,7 +146,7 @@ TEST_F(ProtocolPacketTest, SerializePacketWithWrongServiceType) {
   for (size_t i = 0; i < serv_types.size(); ++i) {
     RawMessagePtr res =
         GetRawMessage(PROTOCOL_VERSION_3, FRAME_TYPE_CONTROL, serv_types[i]);
-    EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
+    EXPECT_EQ(static_cast<uint32_t>(PROTOCOL_VERSION_3), res->protocol_version());
     EXPECT_EQ(kInvalidServiceType, res->service_type());
   }
 }
@@ -156,7 +156,7 @@ TEST_F(ProtocolPacketTest, SetPacketWithDiffFrameType) {
   for (frame_type = FRAME_TYPE_CONTROL + 1; frame_type <= FRAME_TYPE_MAX_VALUE;
        ++frame_type) {
     RawMessagePtr res = GetRawMessage(PROTOCOL_VERSION_3, frame_type, kControl);
-    EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
+    EXPECT_EQ(static_cast<uint32_t>(PROTOCOL_VERSION_3), res->protocol_version());
     EXPECT_EQ(kControl, res->service_type());
   }
 }
