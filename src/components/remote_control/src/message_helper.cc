@@ -52,6 +52,11 @@ std::map<RCFunctionID, std::string> GenerateAPINames() {
       RCFunctionID::ON_REMOTE_CONTROL_SETTINGS, "OnRemoteControlSettingd"));
   return result;
 }
+
+std::map<std::string, hmi_apis::Common_RCAccessMode::eType> access_modes{
+    {enums_value::kAutoAllow, hmi_apis::Common_RCAccessMode::AUTO_ALLOW},
+    {enums_value::kAutoDeny, hmi_apis::Common_RCAccessMode::AUTO_DENY},
+    {enums_value::kAskDriver, hmi_apis::Common_RCAccessMode::ASK_DRIVER}};
 }
 
 uint32_t MessageHelper::next_correlation_id_ = 1;
@@ -138,16 +143,25 @@ application_manager::MessagePtr MessageHelper::CreateHmiRequest(
 
 hmi_apis::Common_RCAccessMode::eType MessageHelper::AccessModeFromString(
     const std::string& access_mode) {
-  if (enums_value::kAutoAllow == access_mode) {
-    return hmi_apis::Common_RCAccessMode::AUTO_ALLOW;
+  std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator
+      mode = access_modes.find(access_mode);
+  return access_modes.end() != mode
+             ? mode->second
+             : hmi_apis::Common_RCAccessMode::INVALID_ENUM;
+}
+
+std::string MessageHelper::AccessModeToString(
+    const hmi_apis::Common_RCAccessMode::eType access_mode) {
+  std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator
+      it = access_modes.begin();
+  for (; access_modes.end() != it; ++it) {
+    if (access_mode == it->second) {
+      return it->first;
+    }
   }
-  if (enums_value::kAutoDeny == access_mode) {
-    return hmi_apis::Common_RCAccessMode::AUTO_DENY;
-  }
-  if (enums_value::kAskDriver == access_mode) {
-    return hmi_apis::Common_RCAccessMode::ASK_DRIVER;
-  }
-  return hmi_apis::Common_RCAccessMode::INVALID_ENUM;
+  const std::string error = "UNKNOW_ACCESS_MODE";
+  DCHECK_OR_RETURN(false, error);
+  return error;
 }
 
 }  // namespace remote_control

@@ -93,15 +93,23 @@ void OnRemoteControlSettingsNotification::Execute() {
       rc_module_.resource_allocation_manager();
   const bool is_allowed = value[message_params::kAllowed].asBool();
   if (is_allowed) {
+    hmi_apis::Common_RCAccessMode::eType access_mode =
+        hmi_apis::Common_RCAccessMode::INVALID_ENUM;
     LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
-    const std::string access_mode =
-        value.get(message_params::kAccessMode, enums_value::kAutoAllow)
-            .asString();
+    if (value.isMember(message_params::kAccessMode)) {
+      const std::string access_mode_str =
+          value.get(message_params::kAccessMode, enums_value::kAutoAllow)
+              .asString();
 
-    const hmi_apis::Common_RCAccessMode::eType access_mode_ =
-        MessageHelper::AccessModeFromString(access_mode);
-    LOG4CXX_DEBUG(logger_, "Setting up access mode : " << access_mode);
-    allocation_manager.SetAccessMode(access_mode_);
+      access_mode = MessageHelper::AccessModeFromString(access_mode_str);
+      LOG4CXX_DEBUG(logger_, "Setting up access mode : " << access_mode_str);
+    } else {
+      access_mode = allocation_manager.GetAccessMode();
+      LOG4CXX_DEBUG(logger_,
+                    "No access mode received. Using last known: "
+                        << MessageHelper::AccessModeToString(access_mode));
+    }
+    allocation_manager.SetAccessMode(access_mode);
   } else {
     LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
     DisallowRCFunctionality();

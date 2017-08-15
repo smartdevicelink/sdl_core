@@ -26,6 +26,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
 
+  hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
+
   void ForceAcquireResource(const std::string& module_type,
                             const uint32_t app_id) OVERRIDE FINAL;
 

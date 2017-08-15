@@ -82,6 +82,12 @@ class ResourceAllocationManager {
       const hmi_apis::Common_RCAccessMode::eType access_mode) = 0;
 
   /**
+   * @brief Get last set access mode for acquiring resource
+   * @param access_mode
+   */
+  virtual hmi_apis::Common_RCAccessMode::eType GetAccessMode() const = 0;
+
+  /**
    * @brief Remove all information about all allocations
    */
   virtual void ResetAllAllocations() = 0;

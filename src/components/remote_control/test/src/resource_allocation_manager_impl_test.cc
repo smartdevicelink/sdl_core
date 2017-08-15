@@ -254,4 +254,24 @@ TEST_F(RAManagerTest,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
+TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::AUTO_DENY);
+  EXPECT_EQ(hmi_apis::Common_RCAccessMode::AUTO_DENY,
+            ra_manager.GetAccessMode());
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER);
+  EXPECT_EQ(hmi_apis::Common_RCAccessMode::ASK_DRIVER,
+            ra_manager.GetAccessMode());
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::AUTO_ALLOW);
+  EXPECT_EQ(hmi_apis::Common_RCAccessMode::AUTO_ALLOW,
+            ra_manager.GetAccessMode());
+
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::INVALID_ENUM);
+  EXPECT_EQ(hmi_apis::Common_RCAccessMode::INVALID_ENUM,
+            ra_manager.GetAccessMode());
+}
+
 }  // namespace remote_control

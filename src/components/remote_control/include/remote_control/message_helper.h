@@ -114,6 +114,14 @@ class MessageHelper {
   static hmi_apis::Common_RCAccessMode::eType AccessModeFromString(
       const std::string& access_mode);
 
+  /**
+   * @brief AccessModeToString converts enum values to string
+   * @param access_mode Access mode enum value
+   * @return Appropriate string value
+   */
+  static std::string AccessModeToString(
+      const hmi_apis::Common_RCAccessMode::eType access_mode);
+
  private:
   MessageHelper();
 

@@ -144,6 +144,11 @@ void ResourceAllocationManagerImpl::SetAccessMode(
   current_access_mode_ = access_mode;
 }
 
+hmi_apis::Common_RCAccessMode::eType
+ResourceAllocationManagerImpl::GetAccessMode() const {
+  return current_access_mode_;
+}
+
 void ResourceAllocationManagerImpl::ForceAcquireResource(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Force " << app_id << " acquiring " << module_type);

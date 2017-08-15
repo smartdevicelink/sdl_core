@@ -20,6 +20,7 @@ class MockResourceAllocationManager
                void(const std::string& module_type, const uint32_t app_id));
   MOCK_METHOD1(SetAccessMode,
                void(const hmi_apis::Common_RCAccessMode::eType access_mode));
+  MOCK_CONST_METHOD0(GetAccessMode, hmi_apis::Common_RCAccessMode::eType());
   MOCK_METHOD3(SetResourceState,
                void(const std::string& module_type,
                     const uint32_t app_id,
