@@ -901,10 +901,11 @@ class ApplicationManagerImpl
    * @param rejected_params list of rejected parameters' name. Valid
    *                        only when result is false.
    */
-  void OnStreamingConfigured(uint32_t app_id,
-                             protocol_handler::ServiceType service_type,
-                             bool result,
-                             std::vector<std::string>& rejected_params);
+  void OnStreamingConfigured(
+      uint32_t app_id,
+      protocol_handler::ServiceType service_type,
+      bool result,
+      std::vector<std::string>& rejected_params) OVERRIDE;
 
   /**
    * @brief Callback calls when application starts/stops data streaming
