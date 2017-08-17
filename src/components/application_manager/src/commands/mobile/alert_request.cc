@@ -208,29 +208,40 @@ bool AlertRequest::PrepareResponseParameters(
   ResponseInfo tts_alert_info(tts_speak_result_,
                               HmiInterfaces::HMI_INTERFACE_TTS);
 
-  bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
-
-  /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
-   * TTS.IsReady.
-   */
-  if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
-    result = false;
-  }
-  result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
-      tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
-    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(
-        ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
-    return result;
-  }
+  const bool result =
+      PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
   info = MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+
   return result;
+}
+
+bool AlertRequest::PrepareResultForMobileResponse(
+    ResponseInfo& ui_alert_info, ResponseInfo& tts_alert_info) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  bool result = CommandRequestImpl::PrepareResultForMobileResponse(
+      ui_alert_info, tts_alert_info);
+  if (IsResultCodeUnsupported(ui_alert_info, tts_alert_info)) {
+    result = true;
+  }
+
+  return result;
+}
+
+mobile_apis::Result::eType AlertRequest::PrepareResultCodeForResponse(
+    const ResponseInfo& ui_alert_info, const ResponseInfo& tts_alert_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
+      tts_alert_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
+    return mobile_apis::Result::WARNINGS;
+  }
+
+  return CommandRequestImpl::PrepareResultCodeForResponse(ui_alert_info,
+                                                          tts_alert_info);
 }
 
 bool AlertRequest::Validate(uint32_t app_id) {

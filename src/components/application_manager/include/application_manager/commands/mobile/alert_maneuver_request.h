@@ -83,6 +83,32 @@ class AlertManeuverRequest : public CommandRequestImpl {
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& return_info);
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param navigation_alert_info contains result_code from HMI response and
+   * interface that returns navi response
+   * @param tts_alert_info contains result_code from HMI response and
+   * interface that returns tts response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& navigation_alert_info,
+                                      ResponseInfo& tts_alert_info) const FINAL;
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param navigation_alert_info contains result_code from HMI response and
+   * interface that returns navi response
+   * @param tts_alert_info contains result_code from HMI response and
+   * interface that returns tts response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& navigation_alert_info,
+      const ResponseInfo& tts_alert_info) FINAL;
+
   /**
    * @brief Checks alert maneuver params(ttsChunks, ...).
    * When type is String there is a check on the contents \t\n \\t \\n

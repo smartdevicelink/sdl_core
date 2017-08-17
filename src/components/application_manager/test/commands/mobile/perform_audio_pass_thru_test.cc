@@ -602,12 +602,13 @@ TEST_F(PerformAudioPassThruRequestTest,
       hmi_apis::FunctionID::UI_PerformAudioPassThru);
 
   (*message_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  event_speak.set_smart_object(*message_);
-
-  (*message_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   event_perform.set_smart_object(*message_);
+
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*message_)[am::strings::msg_params][am::strings::info] = return_info;
+  event_speak.set_smart_object(*message_);
 
   ON_CALL(hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
