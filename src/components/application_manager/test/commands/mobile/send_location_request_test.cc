@@ -351,11 +351,19 @@ TEST_F(SendLocationRequestTest, Run_HMIUINotCoop_Cancelled) {
 TEST_F(SendLocationRequestTest, OnEvent_Success) {
   mobile_apis::Result::eType response_code = mobile_apis::Result::SUCCESS;
   (*message_)[strings::params][hmi_response::code] = response_code;
+  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
+
   Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);
+
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(app));
+
   command_->on_event(event);
 }
 

@@ -53,18 +53,23 @@ class SubscribeWayPointsRequest : public CommandRequestImpl {
   /**
    * \brief SubscribeWayPointsRequest class destructor
    **/
-  virtual ~SubscribeWayPointsRequest();
+  ~SubscribeWayPointsRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run() OVERRIDE;
+  void Run() FINAL;
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeWayPointsRequest);

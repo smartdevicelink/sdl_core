@@ -65,7 +65,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::testing::Mock;
 using ::utils::SharedPtr;
@@ -118,28 +117,28 @@ class ChangeRegistrationRequestTest
         .WillOnce(Return(supported_languages_.get()));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillRepeatedly(ReturnRef(hmi_interfaces_));
+        .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
     EXPECT_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    EXPECT_CALL(hmi_interfaces_,
+    EXPECT_CALL(mock_hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
     EXPECT_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-    EXPECT_CALL(hmi_interfaces_,
+    EXPECT_CALL(mock_hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
     EXPECT_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    EXPECT_CALL(hmi_interfaces_,
+    EXPECT_CALL(mock_hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
@@ -185,10 +184,7 @@ class ChangeRegistrationRequestTest
     (*tts_response)[strings::params][hmi_response::code] = hmi_response;
     (*tts_response)[strings::msg_params] = 0;
 
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillRepeatedly(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
 
     am::event_engine::Event event_ui(
@@ -251,8 +247,6 @@ class ChangeRegistrationRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(hmi_capabilities_));
   }
@@ -288,7 +282,6 @@ class ChangeRegistrationRequestTest
       MockHMICapabilities;
   sync_primitives::Lock app_set_lock_;
   MockHMICapabilities hmi_capabilities_;
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr supported_languages_;
@@ -322,25 +315,25 @@ TEST_F(ChangeRegistrationRequestTest,
 
   ExpectationsHmiCapabilities(supported_languages);
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
   ON_CALL(
-      hmi_interfaces_,
+      mock_hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   command->Run();
@@ -367,10 +360,7 @@ TEST_F(ChangeRegistrationRequestTest,
       hmi_apis::FunctionID::TTS_ChangeRegistration);
   event_tts.set_smart_object(*tts_response);
 
-  MockHmiInterfaces hmi_interfaces;
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillRepeatedly(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
@@ -478,25 +468,25 @@ TEST_F(ChangeRegistrationRequestTest,
 
   ExpectationsHmiCapabilities(supported_languages);
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   ON_CALL(
-      hmi_interfaces_,
+      mock_hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 

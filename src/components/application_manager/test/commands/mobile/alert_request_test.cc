@@ -56,7 +56,6 @@ using am::commands::AlertRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
@@ -125,15 +124,13 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
 
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(
             Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
 
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(
             Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
@@ -199,7 +196,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
   MockPolicyHandlerInterface mock_policy_handler_;
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
 };
 
 TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {

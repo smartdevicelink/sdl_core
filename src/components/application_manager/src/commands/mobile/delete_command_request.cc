@@ -201,9 +201,11 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
   SendResponse(
       result, result_code, info.empty() ? NULL : info.c_str(), &msg_params);
-  if (result) {
-    application->UpdateHash();
-  }
+}
+
+bool DeleteCommandRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool DeleteCommandRequest::IsPendingResponseExist() {

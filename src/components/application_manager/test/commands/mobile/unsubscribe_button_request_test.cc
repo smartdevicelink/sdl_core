@@ -132,7 +132,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillRepeatedly(Return(mock_app));
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(true));

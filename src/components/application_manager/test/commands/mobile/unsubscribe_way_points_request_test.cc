@@ -152,7 +152,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
        OnEvent_ReceivedNavigationUnSubscribeWayPointsEvent_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillRepeatedly(Return(mock_app));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::msg_params] = 0;

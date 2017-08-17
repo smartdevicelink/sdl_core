@@ -121,7 +121,6 @@ class VIIsReadyRequestTest
   }
 
   VIIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };

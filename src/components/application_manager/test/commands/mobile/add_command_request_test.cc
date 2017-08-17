@@ -62,7 +62,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
@@ -520,7 +519,6 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, UpdateHash());
   request_ptr->on_event(event);
 }
 
@@ -541,7 +539,6 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(*mock_app_, UpdateHash());
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
@@ -668,7 +665,6 @@ TEST_F(AddCommandRequestTest,
   event_ui.set_smart_object(*msg_);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg_);
-  EXPECT_CALL(*mock_app_, UpdateHash());
   request_ptr->on_event(event_ui);
   request_ptr->on_event(event_vr);
 }

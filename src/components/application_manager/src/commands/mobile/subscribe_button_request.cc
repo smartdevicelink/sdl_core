@@ -86,10 +86,11 @@ void SubscribeButtonRequest::Run() {
 
   const bool is_succedeed = true;
   SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+}
 
-  if (is_succedeed) {
-    app->UpdateHash();
-  }
+bool SubscribeButtonRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(

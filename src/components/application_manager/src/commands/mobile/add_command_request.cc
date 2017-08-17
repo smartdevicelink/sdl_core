@@ -64,6 +64,11 @@ void AddCommandRequest::onTimeOut() {
   CommandRequestImpl::onTimeOut();
 }
 
+bool AddCommandRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
+}
+
 void AddCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -492,10 +497,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
                result_code,
                info.empty() ? NULL : info.c_str(),
                &(message[strings::msg_params]));
-
-  if (result) {
-    application->UpdateHash();
-  }
 }
 
 bool AddCommandRequest::IsPendingResponseExist() {

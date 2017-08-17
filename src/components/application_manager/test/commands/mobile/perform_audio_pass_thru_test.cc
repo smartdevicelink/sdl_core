@@ -55,7 +55,6 @@ using am::commands::PerformAudioPassThruRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Mock;
@@ -131,8 +130,6 @@ class PerformAudioPassThruRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
     command_sptr_ =
         CreateCommand<am::commands::PerformAudioPassThruRequest>(message_);
 
@@ -156,7 +153,6 @@ class PerformAudioPassThruRequestTest
   }
 
   sync_primitives::Lock lock_;
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
@@ -217,10 +213,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   am::event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*msg);
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
@@ -312,10 +308,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     // Send speak request sending
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_Speak))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
@@ -324,10 +320,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
     ON_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_PerformAudioPassThru))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
@@ -359,10 +355,10 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_StopSpeaking))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
@@ -395,10 +391,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     InSequence dummy;
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_Speak))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
@@ -407,10 +403,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
     ON_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_PerformAudioPassThru))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
@@ -463,10 +459,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     InSequence dummy;
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_Speak))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
@@ -475,10 +471,10 @@ TEST_F(PerformAudioPassThruRequestTest,
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
     ON_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_PerformAudioPassThru))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
@@ -506,10 +502,10 @@ TEST_F(
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
     ON_CALL(
-        hmi_interfaces_,
+        mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_PerformAudioPassThru))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     // Perform audio path thru request sending
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
@@ -518,10 +514,10 @@ TEST_F(
     // Perform audio path thru request sending
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
-    ON_CALL(hmi_interfaces_,
+    ON_CALL(mock_hmi_interfaces_,
             GetInterfaceFromFunction(hmi_apis::FunctionID::UI_OnRecordStart))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     // Start recording notification sending
     EXPECT_CALL(app_mngr_, ManageHMICommand(_))
@@ -583,7 +579,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
 
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
@@ -609,7 +605,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       hmi_apis::Common_Result::SUCCESS;
   event_perform.set_smart_object(*message_);
 
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // First call on_event for setting result_tts_speak_ to UNSUPPORTED_RESOURCE
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
@@ -619,7 +615,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   // Second call for test correct behavior of UI_PerformAudioPassThru event
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_)).Times(0);
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   CallOnEvent caller_perform(*command_sptr_, event_perform);
 
@@ -648,7 +644,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
@@ -673,7 +669,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       app_mngr_,
       StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   CallOnEvent caller(*command_sptr_, event);
   caller();
@@ -732,10 +728,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   MessageSharedPtr perform_result_msg;
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_Speak))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
@@ -744,10 +740,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
   ON_CALL(
-      hmi_interfaces_,
+      mock_hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::UI_PerformAudioPassThru))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
