@@ -701,7 +701,7 @@
 
   </enum>
 
-  <enum name="TextFieldType">
+  <enum name="MetadataType">
     <element name="mediaTitle">
       <description>The data in this field contains the title of the currently playing audio track.</description>
     </element>
@@ -880,17 +880,17 @@
     </param>
   </struct>
 
-  <struct name="MetadataStruct">
-    <param name="mainField1" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+  <struct name="MetadataTags">
+    <param name="mainField1" type="MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
       <description>The type of data contained in the "mainField1" text field.</description>
     </param>
-    <param name="mainField2" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+    <param name="mainField2" type="MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
       <description>The type of data contained in the "mainField2" text field.</description>
     </param>
-    <param name="mainField3" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+    <param name="mainField3" type="MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
       <description>The type of data contained in the "mainField3" text field.</description>
     </param>
-    <param name="mainField4" type="TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+    <param name="mainField4" type="MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
       <description>The type of data contained in the "mainField4" text field.</description>
     </param>
   </struct>
@@ -3342,9 +3342,9 @@
       </description>
     </param>
 
-    <param name="textFieldMetadata" type="MetadataStruct" mandatory="false">
+    <param name="metadataTags" type="MetadataTags" mandatory="false">
         <description>
-            App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
+            App defined metadata information. See MetadataTags. Uses mainField1, mainField2, mainField3, mainField4.
             If omitted on supported displays, the currently set metadata tags will not change.
             If any text field contains no tags, the metadata tag for that textfield should be removed.
         </description>

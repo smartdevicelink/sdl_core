@@ -53,18 +53,18 @@ ShowRequest::~ShowRequest() {}
 void ShowRequest::HandleMetadata(const char* field_id,
                                  int32_t field_index,
                                  smart_objects::SmartObject& msg_params) {
-  smart_objects::SmartObject& metadata_struct =
-      (*message_)[strings::msg_params][strings::text_field_metadata];
+  smart_objects::SmartObject& metadata_tags =
+      (*message_)[strings::msg_params][strings::metadata_tags];
 
-  if (metadata_struct.keyExists(field_id)) {
+  if (metadata_tags.keyExists(field_id)) {
     if (field_index != -1) {
       msg_params[hmi_request::show_strings][field_index]
                 [hmi_request::field_types] =
                     smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-      const size_t num_tags = metadata_struct[field_id].length();
+      const size_t num_tags = metadata_tags[field_id].length();
       for (size_t i = 0; i < num_tags; ++i) {
-        const int32_t current_tag = metadata_struct[field_id][i].asInt();
+        const int32_t current_tag = metadata_tags[field_id][i].asInt();
         msg_params[hmi_request::show_strings][field_index]
                   [hmi_request::field_types][i] = current_tag;
       }
@@ -201,8 +201,7 @@ void ShowRequest::Run() {
     ++index;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(
-          strings::text_field_metadata)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::metadata_tags)) {
     HandleMetadata(strings::main_field_1, main_field_1_index, msg_params);
     HandleMetadata(strings::main_field_2, main_field_2_index, msg_params);
     HandleMetadata(strings::main_field_3, main_field_3_index, msg_params);

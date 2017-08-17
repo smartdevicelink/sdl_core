@@ -503,7 +503,7 @@
     <element name="turnText"/>
 </enum>
 
-<enum name="TextFieldType">
+<enum name="MetadataType">
   <element name="mediaTitle">
     <description>The data in this field contains the title of the currently playing audio track.</description>
   </element>
@@ -1686,7 +1686,7 @@
   <param name="fieldText" type="String" maxlength="500" mandatory="true">
     <description>The  text itself.</description>
   </param>
-  <param name="fieldTypes" type="Common.TextFieldType" minsize="0" maxsize="5" array="true" mandatory="false">
+  <param name="fieldTypes" type="Common.MetadataType" minsize="0" maxsize="5" array="true" mandatory="false">
     <description>The type of data contained in the field.</description>
   </param>
 </struct>

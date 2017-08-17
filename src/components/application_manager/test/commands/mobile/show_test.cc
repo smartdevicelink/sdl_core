@@ -161,11 +161,11 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     (*msg)[am::strings::params][am::strings::function_id] = kFunctionID;
     msg_params[field] = text_field_;
-    msg_params[am::strings::text_field_metadata][field] =
+    msg_params[am::strings::metadata_tags][field] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (size_t i = 0; i < num_tags; ++i) {
       const int32_t current_tag = field_tags[i];
-      msg_params[am::strings::text_field_metadata][field][i] = current_tag;
+      msg_params[am::strings::metadata_tags][field][i] = current_tag;
     }
     (*msg)[am::strings::msg_params] = msg_params;
 
@@ -176,7 +176,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
     msg_params.erase(field);
-    msg_params.erase(am::strings::text_field_metadata);
+    msg_params.erase(am::strings::metadata_tags);
 
     msg_params[am::strings::app_id] = kAppId;
     msg_params[am::hmi_request::show_strings] =
@@ -643,7 +643,7 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTag) {
 
   text_field_ = "Main_Field_1";
   const size_t num_tags = 1;
-  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
   TestSetupHelperWithMetadata(msg,
                               hmi_apis::Common_TextFieldName::mainField1,
                               am::strings::main_field_1,
@@ -659,11 +659,11 @@ TEST_F(ShowRequestTest, Run_MainField1_MultipleMetadataTags) {
 
   text_field_ = "Main_Field_1";
   const size_t num_tags = 5;
-  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaTitle,
-                            hmi_apis::Common_TextFieldType::mediaArtist,
-                            hmi_apis::Common_TextFieldType::rating,
-                            hmi_apis::Common_TextFieldType::humidity,
-                            hmi_apis::Common_TextFieldType::currentTemperature};
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaTitle,
+                            hmi_apis::Common_MetadataType::mediaArtist,
+                            hmi_apis::Common_MetadataType::rating,
+                            hmi_apis::Common_MetadataType::humidity,
+                            hmi_apis::Common_MetadataType::currentTemperature};
   TestSetupHelperWithMetadata(msg,
                               hmi_apis::Common_TextFieldName::mainField1,
                               am::strings::main_field_1,
@@ -679,7 +679,7 @@ TEST_F(ShowRequestTest, Run_MainField2_MetadataTag) {
 
   text_field_ = "Main_Field_2";
   const size_t num_tags = 1;
-  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
   TestSetupHelperWithMetadata(msg,
                               hmi_apis::Common_TextFieldName::mainField2,
                               am::strings::main_field_2,
@@ -695,7 +695,7 @@ TEST_F(ShowRequestTest, Run_MainField3_MetadataTag) {
 
   text_field_ = "Main_Field_3";
   const size_t num_tags = 1;
-  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
   TestSetupHelperWithMetadata(msg,
                               hmi_apis::Common_TextFieldName::mainField3,
                               am::strings::main_field_3,
@@ -711,7 +711,7 @@ TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
 
   text_field_ = "Main_Field_4";
   const size_t num_tags = 1;
-  int32_t tags[num_tags] = {hmi_apis::Common_TextFieldType::mediaArtist};
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
   TestSetupHelperWithMetadata(msg,
                               hmi_apis::Common_TextFieldName::mainField4,
                               am::strings::main_field_4,

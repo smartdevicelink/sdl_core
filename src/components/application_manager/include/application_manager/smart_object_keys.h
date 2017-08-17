@@ -90,7 +90,7 @@ extern const char* main_field_1;
 extern const char* main_field_2;
 extern const char* main_field_3;
 extern const char* main_field_4;
-extern const char* text_field_metadata;
+extern const char* metadata_tags;
 extern const char* eta;
 extern const char* time_to_destination;
 extern const char* total_distance;
