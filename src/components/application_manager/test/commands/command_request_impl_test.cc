@@ -515,6 +515,18 @@ TEST_F(CommandRequestImplTest,
       (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
+TEST_F(CommandRequestImplTest,
+       CheckResultCode_UIUnsupportedResourseAndOtherOk_True) {
+  application_manager::commands::ResponseInfo ok_response;
+  ok_response.is_ok = true;
+  application_manager::commands::ResponseInfo unsupported_resourse_response;
+  unsupported_resourse_response.is_unsupported_resource = true;
+  unsupported_resourse_response.interface ==
+      application_manager::HmiInterfaces::HMI_INTERFACE_UI;
+  EXPECT_TRUE(application_manager::commands::CheckResultCode(
+      ok_response, unsupported_resourse_response));
+}
+
 }  // namespace command_request_impl
 }  // namespace commands_test
 }  // namespace components

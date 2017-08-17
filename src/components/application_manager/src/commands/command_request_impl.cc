@@ -106,6 +106,10 @@ bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
       second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
     return true;
   }
+  if (first.is_ok && second.is_unsupported_resource &&
+      second.interface == HmiInterfaces::HMI_INTERFACE_UI) {
+    return true;
+  }
   return false;
 }
 

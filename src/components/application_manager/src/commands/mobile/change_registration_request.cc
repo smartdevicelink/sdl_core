@@ -318,6 +318,10 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
         PrepareResultForMobileResponse(ui_properties_info,
                                        tts_properties_info) &&
         PrepareResultForMobileResponse(tts_properties_info, vr_properties_info);
+    if (ui_properties_info.is_unsupported_resource &&
+        (tts_properties_info.is_ok || vr_properties_info.is_ok)) {
+      result = true;
+    }
   } else {
     // If response contains erroneous result code SDL need return erroneus
     // result code.
