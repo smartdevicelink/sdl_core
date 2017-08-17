@@ -74,7 +74,7 @@ void ShowRequest::HandleMetadata(const char* field_id,
                        << field_id << ", ignoring with warning");
       // tag provided with no item, ignore with warning
       if (mobile_apis::Result::INVALID_ENUM == core_result_code_) {
-        core_result_code_ = mobile_apis::Result::IGNORED;
+        core_result_code_ = mobile_apis::Result::WARNINGS;
         core_response_info_ =
             "Metadata tag was provided for a field with no data.";
       }
