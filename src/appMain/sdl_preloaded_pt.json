@@ -2375,10 +2375,6 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "moduleType": [
-                    "RADIO",
-                    "CLIMATE"
-                ],
                 "groups": ["DataConsent-2"]
             },
             "pre_DataConsent": {

@@ -787,16 +787,31 @@ class Application : public virtual InitialApplicationData,
   virtual uint32_t GetAvailableDiskSpace() = 0;
 
 #ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief set_system_context Set system context for application
+   * @param system_context Current context
+   */
   virtual void set_system_context(
       const mobile_api::SystemContext::eType& system_context) = 0;
+  
+  /**
+   * @brief set_audio_streaming_state Set audio streaming state for application
+   * @param state Current audio streaming state
+   */
   virtual void set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state) = 0;
+    
   virtual bool IsSubscribedToInteriorVehicleData(
       smart_objects::SmartObject module) = 0;
   virtual bool SubscribeToInteriorVehicleData(
       smart_objects::SmartObject module) = 0;
   virtual bool UnsubscribeFromInteriorVehicleData(
       smart_objects::SmartObject module) = 0;
+
+  /**
+   * @brief set_hmi_level Set HMI level for application
+   * @param hmi_level Current HMI level
+   */  
   virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
 
   /**
@@ -805,9 +820,30 @@ class Application : public virtual InitialApplicationData,
    * @return Pointer to extension, if extension was initialized, otherwise NULL
    */
   virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
   virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  
+  /**
+   * @brief Removes all extensions
+   */
   virtual void RemoveExtensions() = 0;
+  
+  /**
+   * @brief Get list of subscriptions to vehicle info notifications
+   * @return list of subscriptions to vehicle info notifications
+   */
   virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
 #endif  // SDL_REMOTE_CONTROL
 

@@ -104,8 +104,8 @@ class CoreService : public Service {
                  bool allowed) FINAL;
 
   /**
-   * Resets access by group name for all applications
-   * @param group_name group name
+   * @brief ResetAccess Resets access by application id
+   * @param app_id Application id
    */
   void ResetAccess(const ApplicationId& app_id) FINAL;
 
@@ -236,14 +236,42 @@ class CoreService : public Service {
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const FINAL;
 
+  /**
+   * @brief ValidateMessageBySchema Checks whether message is valid according
+   * to API
+   * @param message Message to check
+   * @return Check result
+   */
   MessageValidationResult ValidateMessageBySchema(
       const Message& message) OVERRIDE;
 
  private:
+  /**
+   * @brief AreParametersAllowed Checks message parameters across current policy
+   * permissions
+   * @param msg Message having parameters
+   * @param params Parameters sorted by permissions
+   * @return True if allowed, otherwise - false
+   */
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
+  
+  /**
+   * @brief CheckParams Checks object params with allowed parameters received 
+   * from policy
+   * @param object Message object
+   * @param allowed_params Parameters allowed by policy
+   * @return True if all parameters allowed, otherwise - false
+   */
   bool CheckParams(const Json::Value& object,
                    const policy::RPCParams& allowed_params);
+  
+  /**
+   * @brief IsAllowed Checks particular parameter among allowed list
+   * @param name Parameter name
+   * @param allowed_params List of allowed parameters
+   * @return True if found, otherwise - false
+   */
   bool IsAllowed(const std::string& name,
                  const policy::RPCParams& allowed_params);
 

@@ -186,7 +186,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void ResetAccess(const PTString& device_id, const PTString& app_id) OVERRIDE;
 
   /**
-   * Resets access by group name for all applications
+   * Resets access by module name for all applications
    * @param module type
    */
   void ResetAccess(const std::string& module) OVERRIDE;
