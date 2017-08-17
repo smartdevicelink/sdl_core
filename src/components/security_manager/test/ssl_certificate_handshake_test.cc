@@ -56,12 +56,12 @@ namespace custom_str = utils::custom_string;
 namespace {
 const std::string server_ca_cert_filename = "server";
 const std::string client_ca_cert_filename = "client";
-const std::string client_certificate = "client/client_credential.p12.enc";
-const std::string server_certificate = "server/spt_credential.p12.enc";
+const std::string client_certificate = "client/client_credential.pem";
+const std::string server_certificate = "server/spt_credential.pem";
 const std::string server_unsigned_cert_file =
-    "server/spt_credential_unsigned.p12.enc";
+    "server/spt_credential_unsigned.pem";
 const std::string server_expired_cert_file =
-    "server/spt_credential_expired.p12.enc";
+    "server/spt_credential_expired.pem";
 
 const bool verify_peer = true;
 const bool skip_peer_verification = false;
