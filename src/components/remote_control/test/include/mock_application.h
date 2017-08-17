@@ -78,6 +78,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(audio_streaming_allowed, bool());
   MOCK_METHOD1(set_audio_streaming_allowed, void(bool state));
   MOCK_CONST_METHOD0(is_audio, bool());
+  MOCK_METHOD2(SetVideoConfig,
+               bool(protocol_handler::ServiceType service_type,
+                    const smart_objects::SmartObject& params));
   MOCK_METHOD1(StartStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));

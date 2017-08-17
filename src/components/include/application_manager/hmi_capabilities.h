@@ -412,7 +412,6 @@ class HMICapabilities {
    */
   virtual bool phone_call_supported() const = 0;
 
-<<<<<<< e8f4b4fef6ccb7106fe0a0c4e2b4e828e20ee926
   /*
    * @brief Interface to store whether HMI supports video streaming
    *
@@ -434,8 +433,6 @@ class HMICapabilities {
    * @param navigation_capability contains information related
    * to the navigation system capability.
    */
-=======
->>>>>>> Implementation of system capabilities
   virtual void set_navigation_capability(
       const smart_objects::SmartObject& navigation_capability) = 0;
 
@@ -446,7 +443,6 @@ class HMICapabilities {
 
   virtual const smart_objects::SmartObject* phone_capability() const = 0;
 
-<<<<<<< e8f4b4fef6ccb7106fe0a0c4e2b4e828e20ee926
   /*
    * @brief Sets HMI's video streaming related capability information
    *
@@ -462,12 +458,10 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObject* video_streaming_capability()
       const = 0;
-=======
   virtual void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) = 0;
 
   virtual const smart_objects::SmartObject* rc_capability() const = 0;
->>>>>>> Implementation of system capabilities
 
   virtual void Init(resumption::LastState* last_state) = 0;
 

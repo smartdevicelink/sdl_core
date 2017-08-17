@@ -674,6 +674,8 @@ void HMICapabilitiesImpl::set_video_streaming_capability(
   }
   video_streaming_capability_ =
       new smart_objects::SmartObject(video_streaming_capability);
+}
+
 void HMICapabilitiesImpl::set_rc_capability(
     const smart_objects::SmartObject& rc_capability) {
   if (rc_capability_) {
@@ -814,8 +816,9 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability()
 const smart_objects::SmartObject*
 HMICapabilitiesImpl::video_streaming_capability() const {
   return video_streaming_capability_;
+}
 
-  const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
+const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
   return rc_capability_;
 }
 
@@ -1131,13 +1134,13 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           set_video_streaming_capability(vs_capability_so);
         }
         if (check_existing_json_member(system_capabilities,
-                                             "remoteControlCapability")) {
-                Json::Value rc_capability =
-                    system_capabilities.get("remoteControlCapability", "");
-                smart_objects::SmartObject rc_capability_so;
-                Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
-                                                               rc_capability_so);
-                set_rc_capability(rc_capability_so);
+                                       "remoteControlCapability")) {
+          Json::Value rc_capability =
+              system_capabilities.get("remoteControlCapability", "");
+          smart_objects::SmartObject rc_capability_so;
+          Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
+                                                         rc_capability_so);
+          set_rc_capability(rc_capability_so);
         }
       }
     }  // UI end

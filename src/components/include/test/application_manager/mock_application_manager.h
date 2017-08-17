@@ -291,6 +291,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     protocol_handler::ServiceType service_type,
                     bool result,
                     std::vector<std::string>& rejected_params));
+  MOCK_METHOD1(ValidateMessageBySchema,
+               application_manager::MessageValidationResult(
+                   const application_manager::Message& message));
 };
 
 }  // namespace application_manager_test
