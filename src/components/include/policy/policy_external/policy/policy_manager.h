@@ -522,24 +522,21 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                            std::vector<int>* app_types) = 0;
 
   /**
-   * Checks access to equipment of vehicle for application by RPC
+   * Checks access to module of vehicle for application
    * @param device_id unique identifier of device
    * @param app_id policy id application
-   * @param module
-   * @param rpc name of rpc
-   * @param params parameters list
+   * @param module module name
+   * @return Allowed if module is allowed, otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const PTString& device_id,
                                  const PTString& app_id,
-                                 const PTString& module,
-                                 const PTString& rpc,
-                                 const RemoteControlParams& params) = 0;
+                                 const PTString& module) = 0;
 
   /**
-   * Checks access to module for application
-   * @param app_id policy id application
-   * @param module
-   * @return true if module is allowed for application
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
    */
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
 

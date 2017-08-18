@@ -154,12 +154,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(GetHMITypes,
                bool(const std::string& application_id,
                     std::vector<int>* app_types));
-  MOCK_METHOD5(CheckAccess,
+  MOCK_METHOD3(CheckAccess,
                TypeAccess(const PTString& device_id,
                           const PTString& app_id,
-                          const PTString& module,
-                          const PTString& rpc,
-                          const RemoteControlParams& params));
+                          const PTString& module));
   MOCK_METHOD2(CheckModule,
                bool(const PTString& app_id, const PTString& module));
   MOCK_METHOD4(SetAccess,

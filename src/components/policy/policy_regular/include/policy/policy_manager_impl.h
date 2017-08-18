@@ -362,9 +362,7 @@ class PolicyManagerImpl : public PolicyManager {
                       Permissions* data);
   virtual TypeAccess CheckAccess(const PTString& device_id,
                                  const PTString& app_id,
-                                 const PTString& module,
-                                 const PTString& rpc,
-                                 const RemoteControlParams& params);
+                                 const PTString& module);
   virtual bool CheckModule(const PTString& app_id, const PTString& module);
   virtual void SetAccess(const PTString& dev_id,
                          const PTString& app_id,

@@ -1982,13 +1982,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(const PTString& device_id,
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
   if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
-    if (access_remote_->IsPrimaryDevice(device_id)) {
-      return TypeAccess::kAllowed;
-    } else {
-      Subject who = {device_id, app_id};
-      Object what = {module_type};
-      return CheckDriverConsent(who, what, rpc, params);
-    }
+    return TypeAccess::kAllowed;
   }
   LOG4CXX_DEBUG(logger_, TypeAccess::kDisallowed);
   return TypeAccess::kDisallowed;

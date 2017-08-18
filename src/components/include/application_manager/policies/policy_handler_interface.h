@@ -449,25 +449,22 @@ class PolicyHandlerInterface {
                                 const std::string& hmi_level) = 0;
 
   /**
-   * Checks access to equipment of vehicle for application by RPC
+   * Checks access to module of vehicle for application
    * @param device_id unique identifier of device
    * @param app_id policy id application
-   * @param module type
-   * @param rpc name of rpc
-   * @param params parameters list
+   * @param module module name
+   * @return Allowed if module is allowed, otherwise disallowed
    */
   virtual application_manager::TypeAccess CheckAccess(
       const PTString& device_id,
       const PTString& app_id,
-      const PTString& module,
-      const std::string& rpc,
-      const std::vector<PTString>& params) = 0;
+      const PTString& module) = 0;
 
   /**
-   * Checks access to module for application
-   * @param app_id policy id application
-   * @param module
-   * @return true if module is allowed for application
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
    */
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
 

@@ -1962,9 +1962,6 @@ application_manager::TypeAccess ConvertTypeAccess(policy::TypeAccess access) {
     case policy::TypeAccess::kAllowed:
       converted = application_manager::TypeAccess::kAllowed;
       break;
-    case policy::TypeAccess::kManual:
-      converted = application_manager::TypeAccess::kManual;
-      break;
     case policy::TypeAccess::kDisallowed:
       converted = application_manager::TypeAccess::kDisallowed;
       break;
@@ -1996,14 +1993,10 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 }
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& device_id,
-    const PTString& app_id,
-    const PTString& module,
-    const std::string& rpc,
-    const std::vector<PTString>& params) {
+    const PTString& device_id, const PTString& app_id, const PTString& module) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::TypeAccess access =
-      policy_manager_->CheckAccess(device_id, app_id, module, rpc, params);
+      policy_manager_->CheckAccess(device_id, app_id, module);
   return ConvertTypeAccess(access);
 }
 

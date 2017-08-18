@@ -277,8 +277,6 @@ class BaseCommandRequest
    */
   bool AqcuireResources();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
-  inline bool IsNeededDriverConsent(
-      application_manager::TypeAccess access) const;
   void SendDisallowed(application_manager::TypeAccess access);
   void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(

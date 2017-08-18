@@ -56,11 +56,9 @@ class MockService : public Service {
                void(ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType level));
   MOCK_CONST_METHOD0(GetRCCapabilities, const smart_objects::SmartObject*());
-  MOCK_METHOD4(CheckAccess,
+  MOCK_METHOD2(CheckAccess,
                TypeAccess(const ApplicationId& app_id,
-                          const std::string& module,
-                          const std::string& rpc,
-                          const std::vector<std::string>& params));
+                          const std::string& module));
   MOCK_METHOD2(CheckModule,
                bool(const ApplicationId& app_id, const std::string& module));
   MOCK_METHOD3(SetAccess,

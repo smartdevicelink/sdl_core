@@ -174,7 +174,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _, _, _))
+  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
       .WillOnce(Return(application_manager::TypeAccess::kAllowed));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
@@ -242,7 +242,7 @@ TEST_F(
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _, _, _))
+  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
       .WillOnce(Return(application_manager::TypeAccess::kAllowed));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
@@ -312,7 +312,7 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _, _, _))
+  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
       .WillOnce(Return(application_manager::TypeAccess::kAllowed));
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_)).Times(0);
 

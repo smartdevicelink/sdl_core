@@ -83,16 +83,14 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
 }
 
 TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
-                                    const std::string& module,
-                                    const std::string& rpc,
-                                    const std::vector<std::string>& params) {
+                                    const std::string& module) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
         app->device(), application_manager_);
     return application_manager_.GetPolicyHandler().CheckAccess(
-        device_handle, app->policy_app_id(), module, rpc, params);
+        device_handle, app->policy_app_id(), module);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;

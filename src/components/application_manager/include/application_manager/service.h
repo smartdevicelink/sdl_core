@@ -42,7 +42,7 @@
 
 namespace application_manager {
 
-enum TypeAccess { kNone, kDisallowed, kAllowed, kManual };
+enum TypeAccess { kNone, kDisallowed, kAllowed };
 
 enum MessageValidationResult {
   SUCCESS = 0,
@@ -70,24 +70,20 @@ class Service {
   virtual mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) = 0;
 
   /**
-   * Checks access to requested equipment of vehicle
-   * @param app_id id of application
-   * @param module type
-   * @param rpc name of rpc
-   * @param params parameters list
-   * @return return allowed if access exist,
-   * manual if need to send question to driver otherwise disallowed
+   * Checks access to module of vehicle for application
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param module module name
+   * @return Allowed if module is allowed, otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
-                                 const std::string& module,
-                                 const std::string& rpc,
-                                 const std::vector<std::string>& params) = 0;
+                                 const std::string& module) = 0;
 
   /**
-   * Checks access to module for application
+   * Checks if module for application is present in policy table
    * @param app_id id of application
    * @param module type
-   * @return true if module is allowed for application
+   * @return true if module is present, otherwise - false
    */
   virtual bool CheckModule(const ApplicationId& app_id,
                            const std::string& module) = 0;

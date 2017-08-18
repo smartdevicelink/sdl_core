@@ -365,8 +365,7 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
 application_manager::TypeAccess BaseCommandRequest::CheckAccess(
     const Json::Value& message) {
   const std::string& module = ModuleType(message);
-  return service_->CheckAccess(
-      app_->app_id(), module, message_->function_name(), ControlData(message));
+  return service_->CheckAccess(app_->app_id(), module);
 }
 
 bool BaseCommandRequest::CheckDriverConsent() {
@@ -385,9 +384,6 @@ bool BaseCommandRequest::CheckDriverConsent() {
   if (IsAutoAllowed(access)) {
     set_auto_allowed(true);
     return true;
-  }
-  if (IsNeededDriverConsent(access)) {
-    SendGetUserConsent(value);
   } else {
     SendDisallowed(access);
   }
@@ -436,11 +432,6 @@ bool BaseCommandRequest::AqcuireResources() {
   return false;
 }
 
-bool BaseCommandRequest::IsNeededDriverConsent(
-    application_manager::TypeAccess access) const {
-  return access == application_manager::kManual;
-}
-
 bool BaseCommandRequest::IsAutoAllowed(
     application_manager::TypeAccess access) const {
   return access == application_manager::kAllowed;
@@ -452,7 +443,6 @@ void BaseCommandRequest::SendDisallowed(
   std::string info;
   switch (access) {
     case application_manager::kAllowed:
-    case application_manager::kManual:
       return;
     case application_manager::kDisallowed:
       info = disallowed_info_.empty()
@@ -567,7 +557,6 @@ void BaseCommandRequest::ProcessAccessResponse(
                   "Setting allowed access for " << app_->app_id() << " for "
                                                 << module);
     service_->SetAccess(app_->app_id(), module, is_allowed);
-    CheckHMILevel(application_manager::kManual, is_succeeded);
 
     if (is_allowed) {
       rc_module_.resource_allocation_manager().ForceAcquireResource(
@@ -605,20 +594,6 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
         }
       }
       break;
-    case application_manager::kManual: {
-      if (user_consented) {
-        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
-            app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
-          LOG4CXX_DEBUG(logger_,
-                        "User consented RSDL functionality for "
-                            << app_->name().c_str()
-                            << "; setting LIMITED level.");
-          service_->ChangeNotifyHMILevel(
-              app_, mobile_apis::HMILevel::eType::HMI_LIMITED);
-        }
-      }
-      break;
-    }
     case application_manager::kDisallowed:
     case application_manager::kNone:
     default:
