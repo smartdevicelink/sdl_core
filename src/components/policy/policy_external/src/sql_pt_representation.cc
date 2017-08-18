@@ -1658,6 +1658,24 @@ bool SQLPTRepresentation::GatherModuleType(
   return true;
 }
 
+bool SQLPTRepresentation::SaveRemoteControlDenied(const std::string& app_id,
+                                                  bool deny) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect update statement for remote control flag");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "App: " << app_id << std::boolalpha << " - " << deny);
+  query.Bind(0, deny);
+  query.Bind(1, app_id);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect update remote control flag.");
+    return false;
+  }
+  return true;
+}
+
 bool SQLPTRepresentation::SaveModuleType(
     const std::string& app_id, const policy_table::ModuleTypes& types) {
   dbms::SQLQuery query(db());
