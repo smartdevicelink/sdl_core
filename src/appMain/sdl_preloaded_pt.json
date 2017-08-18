@@ -2356,10 +2356,6 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": ["Base-4"],
-                "groups_nonPrimaryRC": [
-                    "Notifications-RC",
-                    "RemoteControl"
-                ],
                 "groups_primaryRC": [
                     "Base-4",
                     "RemoteControl"

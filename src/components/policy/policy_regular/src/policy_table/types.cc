@@ -169,7 +169,6 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
 #ifdef SDL_REMOTE_CONTROL
     , groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC"))
-    , groups_nonPrimaryRC(impl::ValueMember(value__, "groups_nonPrimaryRC"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
 #endif  // SDL_REMOTE_CONTROL
 {
@@ -186,7 +185,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
 #ifdef SDL_REMOTE_CONTROL
   impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
-  impl::WriteJsonField("groups_nonPrimaryRC", groups_nonPrimaryRC, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
 #endif  // SDL_REMOTE_CONTROL
   return result__;
@@ -218,9 +216,6 @@ bool ApplicationParams::is_valid() const {
   }
 #ifdef SDL_REMOTE_CONTROL
   if (!groups_primaryRC.is_valid()) {
-    return false;
-  }
-  if (!groups_nonPrimaryRC.is_valid()) {
     return false;
   }
   if (!moduleType.is_valid()) {
@@ -261,9 +256,6 @@ bool ApplicationParams::struct_empty() const {
   }
 #ifdef SDL_REMOTE_CONTROL
   if (groups_primaryRC.is_initialized()) {
-    return false;
-  }
-  if (groups_nonPrimaryRC.is_initialized()) {
     return false;
   }
   if (moduleType.is_initialized()) {
@@ -307,10 +299,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     groups_primaryRC.ReportErrors(
         &report__->ReportSubobject("groups_primaryRC"));
   }
-  if (!groups_nonPrimaryRC.is_valid()) {
-    groups_nonPrimaryRC.ReportErrors(
-        &report__->ReportSubobject("groups_nonPrimaryRC"));
-  }
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
@@ -327,7 +315,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   certificate.SetPolicyTableType(pt_type);
 #ifdef SDL_REMOTE_CONTROL
   groups_primaryRC.SetPolicyTableType(pt_type);
-  groups_nonPrimaryRC.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
 #endif  // SDL_REMOTE_CONTROL
 }

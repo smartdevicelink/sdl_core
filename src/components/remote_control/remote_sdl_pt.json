@@ -2320,8 +2320,7 @@
                 "default_hmi": "NONE",
                 "moduleType": ["RADIO", "CLIMATE"],
                 "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "RemoteControl"],
-                "groups_nonPrimaryRC": ["Notifications-RC", "RemoteControl"]
+                "groups_primaryRC": ["Base-4", "RemoteControl"]
             },
             "pre_consent_passengersRC": {
                 "keep_context": false,

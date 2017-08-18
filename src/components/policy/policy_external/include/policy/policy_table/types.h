@@ -177,7 +177,6 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Strings> groups_primaryRC;
-  Optional<Strings> groups_nonPrimaryRC;
   mutable Optional<ModuleTypes> moduleType;
 #endif  // SDL_REMOTE_CONTROL
 

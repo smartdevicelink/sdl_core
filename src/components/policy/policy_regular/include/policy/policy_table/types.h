@@ -144,7 +144,6 @@ struct ApplicationParams : PolicyBase {
   Optional<String<0, 255> > certificate;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Strings> groups_primaryRC;
-  Optional<Strings> groups_nonPrimaryRC;
   mutable Optional<ModuleTypes> moduleType;
 #endif  // SDL_REMOTE_CONTROL
 

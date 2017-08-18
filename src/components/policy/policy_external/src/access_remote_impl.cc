@@ -293,9 +293,6 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
     if (IsPrimaryDevice(who.dev_id)) {
       return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
                   .groups_primaryRC;
-    } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
-                  .groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }

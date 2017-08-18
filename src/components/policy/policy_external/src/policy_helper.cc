@@ -904,12 +904,6 @@ void ProccessAppGroups::operator()(
 
       pm_->OnPrimaryGroupsChanged(app.first);
     }
-    if (HaveGroupsChanged(i->second.groups_nonPrimaryRC,
-                          app.second.groups_nonPrimaryRC)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Non-primary groups for " << app.first << " have changed");
-      pm_->OnNonPrimaryGroupsChanged(app.first);
-    }
   }
 }
 

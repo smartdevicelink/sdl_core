@@ -769,9 +769,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
       return false;
     }
-    if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
-      return false;
-    }
     bool denied = false;
     if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
@@ -1071,9 +1068,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
 
 #ifdef SDL_REMOTE_CONTROL
   if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
-    return false;
-  }
-  if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_nonPrimaryRC)) {
     return false;
   }
 

@@ -223,7 +223,6 @@ TEST(AccessRemoteImplTest, GetGroups) {
   policy_table::ApplicationPolicies& apps =
       access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"].groups.push_back("group_default");
-  apps["1234"].groups_nonPrimaryRC->push_back("group_non_primary");
   apps["1234"].groups_primaryRC->push_back("group_primary");
   apps["1234"].AppHMIType->push_back(policy_table::AHT_MEDIA);
 

@@ -295,10 +295,6 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
       return *cache_->pt()
                   ->policy_table.app_policies_section.apps[who.app_id]
                   .groups_primaryRC;
-    } else if (IsEnabled()) {
-      return *cache_->pt()
-                  ->policy_table.app_policies_section.apps[who.app_id]
-                  .groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }
