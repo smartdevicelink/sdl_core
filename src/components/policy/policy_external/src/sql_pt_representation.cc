@@ -555,8 +555,6 @@ void SQLPTRepresentation::GatherModuleConfig(
 #ifdef SDL_REMOTE_CONTROL
     *config->user_consent_passengersRC =
         query.IsNull(8) ? true : query.GetBoolean(10);
-    *config->country_consent_passengersRC =
-        query.IsNull(9) ? true : query.GetBoolean(11);
 #endif  // SDL_REMOTE_CONTROL
   }
 
@@ -1256,9 +1254,6 @@ bool SQLPTRepresentation::SaveModuleConfig(
   config.user_consent_passengersRC.is_initialized()
       ? query.Bind(10, *(config.user_consent_passengersRC))
       : query.Bind(10);
-  config.country_consent_passengersRC.is_initialized()
-      ? query.Bind(11, *(config.country_consent_passengersRC))
-      : query.Bind(11);
 #endif  // SDL_REMOTE_CONTROL
 
   if (!query.Exec()) {

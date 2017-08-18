@@ -249,7 +249,6 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 65535> > certificate;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Boolean> user_consent_passengersRC;
-  Optional<Boolean> country_consent_passengersRC;
 #endif  // SDL_REMOTE_CONTROL
 
  public:

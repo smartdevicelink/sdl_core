@@ -605,8 +605,6 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
 #ifdef SDL_REMOTE_CONTROL
     , user_consent_passengersRC(
           impl::ValueMember(value__, "user_consent_passengersRC"))
-    , country_consent_passengersRC(
-          impl::ValueMember(value__, "country_consent_passengersRC"))
 #endif  // SDL_REMOTE_CONTROL
 {
 }
@@ -628,8 +626,6 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   vehicle_year.assign_if_valid(from.vehicle_year);
 #ifdef SDL_REMOTE_CONTROL
   user_consent_passengersRC.assign_if_valid(from.user_consent_passengersRC);
-  country_consent_passengersRC.assign_if_valid(
-      from.country_consent_passengersRC);
 #endif  // SDL_REMOTE_CONTROL
 }
 
@@ -660,8 +656,6 @@ Json::Value ModuleConfig::ToJsonValue() const {
 #ifdef SDL_REMOTE_CONTROL
   impl::WriteJsonField(
       "user_consent_passengersRC", user_consent_passengersRC, &result__);
-  impl::WriteJsonField(
-      "country_consent_passengersRC", country_consent_passengersRC, &result__);
 #endif  // SDL_REMOTE_CONTROL
   return result__;
 }
@@ -711,9 +705,6 @@ bool ModuleConfig::is_valid() const {
   }
 #ifdef SDL_REMOTE_CONTROL
   if (!user_consent_passengersRC.is_valid()) {
-    return false;
-  }
-  if (!country_consent_passengersRC.is_valid()) {
     return false;
   }
 #endif  // SDL_REMOTE_CONTROL
@@ -770,9 +761,6 @@ bool ModuleConfig::struct_empty() const {
   if (user_consent_passengersRC.is_initialized()) {
     return false;
   }
-  if (country_consent_passengersRC.is_initialized()) {
-    return false;
-  }
 #endif  // SDL_REMOTE_CONTROL
   return true;
 }
@@ -827,10 +815,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!user_consent_passengersRC.is_valid()) {
     user_consent_passengersRC.ReportErrors(
         &report__->ReportSubobject("user_consent_passengersRC"));
-  }
-  if (!country_consent_passengersRC.is_valid()) {
-    country_consent_passengersRC.ReportErrors(
-        &report__->ReportSubobject("country_consent_passengersRC"));
   }
 #endif  // SDL_REMOTE_CONTROL
   const std::string validation_info =
@@ -893,7 +877,6 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_year.SetPolicyTableType(pt_type);
 #ifdef SDL_REMOTE_CONTROL
   user_consent_passengersRC.SetPolicyTableType(pt_type);
-  country_consent_passengersRC.SetPolicyTableType(pt_type);
 #endif  // SDL_REMOTE_CONTROL
 }
 

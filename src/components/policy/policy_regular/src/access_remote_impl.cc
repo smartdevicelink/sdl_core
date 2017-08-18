@@ -121,8 +121,7 @@ void AccessRemoteImpl::Init() {
   DCHECK(cache_->pt());
 
   policy_table::ModuleConfig& config = cache_->pt()->policy_table.module_config;
-  enabled_ = country_consent() &&
-             (!config.user_consent_passengersRC.is_initialized() ||
+  enabled_ = (!config.user_consent_passengersRC.is_initialized() ||
               *config.user_consent_passengersRC);
 }
 
@@ -257,15 +256,9 @@ void AccessRemoteImpl::Disable() {
 }
 
 void AccessRemoteImpl::set_enabled(bool value) {
-  enabled_ = country_consent() && value;
+  enabled_ = value;
   *cache_->pt()->policy_table.module_config.user_consent_passengersRC = value;
   cache_->Backup();
-}
-
-bool AccessRemoteImpl::country_consent() const {
-  policy_table::ModuleConfig& config = cache_->pt()->policy_table.module_config;
-  return !config.country_consent_passengersRC.is_initialized() ||
-         *config.country_consent_passengersRC;
 }
 
 bool AccessRemoteImpl::IsEnabled() const {

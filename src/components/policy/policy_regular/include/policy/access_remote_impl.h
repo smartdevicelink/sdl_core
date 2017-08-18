@@ -81,7 +81,6 @@ class AccessRemoteImpl : public AccessRemote {
 
  private:
   inline void set_enabled(bool value);
-  inline bool country_consent() const;
   const policy_table::AppHMITypes& HmiTypes(const Subject& who);
   void GetGroupsIds(const std::string& device_id,
                     const std::string& app_id,

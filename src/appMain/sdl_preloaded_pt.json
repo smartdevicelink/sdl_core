@@ -1,7 +1,6 @@
 {
     "policy_table": {
         "module_config": {
-            "country_consent_passengersRC": true,
             "equipment": {},
             "preloaded_pt": true,
             "exchange_after_x_ignition_cycles": 100,

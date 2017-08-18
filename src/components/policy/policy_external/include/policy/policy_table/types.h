@@ -310,7 +310,6 @@ struct ModuleConfig : CompositeType {
   Optional<Boolean> preloaded_pt;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Boolean> user_consent_passengersRC;
-  Optional<Boolean> country_consent_passengersRC;
 #endif  // SDL_REMOTE_CONTROL
 
  public:

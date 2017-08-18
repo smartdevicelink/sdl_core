@@ -1420,31 +1420,11 @@ bool PolicyManagerImpl::CheckPTURemoteCtrlChange(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
   LOG4CXX_AUTO_TRACE(logger_);
+  const bool is_allowed = true;
 
-  rpc::Optional<rpc::Boolean>& new_consent =
-      pt_update->policy_table.module_config.country_consent_passengersRC;
-  rpc::Optional<rpc::Boolean>& old_consent =
-      snapshot->policy_table.module_config.country_consent_passengersRC;
-
-  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
-    return false;
-  }
-
-  bool result = false;
-  if (new_consent.is_initialized() && old_consent.is_initialized()) {
-    result = (*new_consent != *old_consent);
-  } else {
-    bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
-    bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
-
-    result = !(not_changed_consent1 || not_changed_consent2);
-  }
-
-  if (result) {
-    listener()->OnRemoteAllowedChanged(result);
-  }
-
-  return result;
+  // TODO: Rework
+  listener()->OnRemoteAllowedChanged(is_allowed);
+  return is_allowed;
 }
 
 void PolicyManagerImpl::CheckRemoteGroupsChange(

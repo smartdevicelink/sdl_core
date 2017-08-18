@@ -183,28 +183,22 @@ TEST(AccessRemoteImplTest, EnableDisable) {
 
   // Country is enabled
   access_remote.enabled_ = true;
-  *config.country_consent_passengersRC = true;
   access_remote.Enable();
   EXPECT_TRUE(*config.user_consent_passengersRC);
-  EXPECT_TRUE(*config.country_consent_passengersRC);
   EXPECT_TRUE(access_remote.IsEnabled());
 
   access_remote.Disable();
   EXPECT_FALSE(*config.user_consent_passengersRC);
-  EXPECT_TRUE(*config.country_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 
   // Country is disabled
   access_remote.enabled_ = false;
-  *config.country_consent_passengersRC = false;
   access_remote.Enable();
   EXPECT_TRUE(*config.user_consent_passengersRC);
-  EXPECT_FALSE(*config.country_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 
   access_remote.Disable();
   EXPECT_FALSE(*config.user_consent_passengersRC);
-  EXPECT_FALSE(*config.country_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 }
 
