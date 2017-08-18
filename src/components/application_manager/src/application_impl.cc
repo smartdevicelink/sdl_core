@@ -1045,30 +1045,6 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-bool ApplicationImpl::SubscribeToInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  subscribed_interior_vehicle_data_.push_front(module);
-  return true;
-}
-
-bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  for (auto it = subscribed_interior_vehicle_data_.begin();
-       it != subscribed_interior_vehicle_data_.end();
-       ++it) {
-    if (*it == module) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  subscribed_interior_vehicle_data_.remove(module);
-  return true;
-}
-
 const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
