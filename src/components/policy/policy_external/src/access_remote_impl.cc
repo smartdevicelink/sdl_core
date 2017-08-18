@@ -120,9 +120,9 @@ void AccessRemoteImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(cache_->pt_);
 
-  policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
-  enabled_ = (!config.user_consent_passengersRC.is_initialized() ||
-              *config.user_consent_passengersRC);
+  // TODO: Rework
+
+  enabled_ = true;
 }
 
 bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
@@ -257,7 +257,6 @@ void AccessRemoteImpl::Disable() {
 
 void AccessRemoteImpl::set_enabled(bool value) {
   enabled_ = value;
-  *cache_->pt_->policy_table.module_config.user_consent_passengersRC = value;
   cache_->Backup();
 }
 

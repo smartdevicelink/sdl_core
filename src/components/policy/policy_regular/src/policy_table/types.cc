@@ -482,13 +482,7 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
-    , certificate(impl::ValueMember(value__, "certificate"))
-#ifdef SDL_REMOTE_CONTROL
-    , user_consent_passengersRC(
-          impl::ValueMember(value__, "user_consent_passengersRC"))
-#endif  // SDL_REMOTE_CONTROL
-{
-}
+    , certificate(impl::ValueMember(value__, "certificate")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   //  device_certificates = from.device_certificates;  // According to the
@@ -506,9 +500,6 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
   certificate.assign_if_valid(from.certificate);
-#ifdef SDL_REMOTE_CONTROL
-  user_consent_passengersRC.assign_if_valid(from.user_consent_passengersRC);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 Json::Value ModuleConfig::ToJsonValue() const {
@@ -534,10 +525,6 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
-#ifdef SDL_REMOTE_CONTROL
-  impl::WriteJsonField(
-      "user_consent_passengersRC", user_consent_passengersRC, &result__);
-#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 bool ModuleConfig::is_valid() const {
@@ -580,11 +567,6 @@ bool ModuleConfig::is_valid() const {
   if (!preloaded_date.is_valid()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
-  if (!user_consent_passengersRC.is_valid()) {
-    return false;
-  }
-#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 bool ModuleConfig::is_initialized() const {
@@ -629,11 +611,6 @@ bool ModuleConfig::struct_empty() const {
   if (vehicle_year.is_initialized()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
-  if (user_consent_passengersRC.is_initialized()) {
-    return false;
-  }
-#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
@@ -683,12 +660,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!vehicle_year.is_valid()) {
     vehicle_year.ReportErrors(&report__->ReportSubobject("vehicle_year"));
   }
-#ifdef SDL_REMOTE_CONTROL
-  if (!user_consent_passengersRC.is_valid()) {
-    user_consent_passengersRC.ReportErrors(
-        &report__->ReportSubobject("user_consent_passengersRC"));
-  }
-#endif  // SDL_REMOTE_CONTROL
   if (PT_PRELOADED == GetPolicyTableType()) {
     std::string validation_info =
         omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
@@ -705,13 +676,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
       omitted_field_report = &report__->ReportSubobject("vehicle_model");
       omitted_field_report->set_validation_info(validation_info);
     }
-#ifdef SDL_REMOTE_CONTROL
-    if (user_consent_passengersRC.is_initialized()) {
-      omitted_field_report =
-          &report__->ReportSubobject("user_consent_passengersRC");
-      omitted_field_report->set_validation_info(validation_info);
-    }
-#endif  // SDL_REMOTE_CONTROL
   }
 }
 
@@ -728,9 +692,6 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
-#ifdef SDL_REMOTE_CONTROL
-  user_consent_passengersRC.SetPolicyTableType(pt_type);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 // MessageString methods

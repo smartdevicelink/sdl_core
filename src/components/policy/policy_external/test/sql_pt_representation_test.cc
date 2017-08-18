@@ -1607,8 +1607,6 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_config"]["preloaded_pt"] = Json::Value(false);
-  table["policy_table"]["module_config"]["user_consent_passengersRC"] =
-      Json::Value(false);
   policy_table::Table expected(&table);
   Json::StyledWriter writer;
   // Checks

@@ -76,8 +76,7 @@ const std::string kCreateSchema =
     "  `vehicle_model` VARCHAR(45), "
     "  `vehicle_year` VARCHAR(4), "
     "  `preloaded_date` VARCHAR (10), "
-    "  `certificate` VARCHAR (45), "
-    "  `user_consent_passengersRC` BOOL "
+    "  `certificate` VARCHAR (45) "
     "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -741,7 +740,7 @@ const std::string kUpdateModuleConfig =
     "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
     "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
     "  `vehicle_model` = ?, `vehicle_year` = ?, `preloaded_date` = ?, "
-    "`certificate` = ?, `user_consent_passengersRC` = ? ";
+    "  `certificate` = ? ";
 
 const std::string kInsertEndpoint =
     "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -792,8 +791,7 @@ const std::string kSelectModuleConfig =
     "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
     " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
     " `timeout_after_x_seconds`, `vehicle_make`,"
-    " `vehicle_model`, `vehicle_year`, `preloaded_date`, `certificate`, "
-    " `user_consent_passengersRC` "
+    " `vehicle_model`, `vehicle_year`, `preloaded_date`, `certificate` "
     " FROM `module_config`";
 
 const std::string kSelectEndpoints =

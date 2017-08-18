@@ -178,27 +178,21 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
 TEST(AccessRemoteImplTest, EnableDisable) {
   AccessRemoteImpl access_remote;
   access_remote.cache_->pt_ = new policy_table::Table();
-  policy_table::ModuleConfig& config =
-      access_remote.cache_->pt_->policy_table.module_config;
 
   // Country is enabled
   access_remote.enabled_ = true;
   access_remote.Enable();
-  EXPECT_TRUE(*config.user_consent_passengersRC);
   EXPECT_TRUE(access_remote.IsEnabled());
 
   access_remote.Disable();
-  EXPECT_FALSE(*config.user_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 
   // Country is disabled
   access_remote.enabled_ = false;
   access_remote.Enable();
-  EXPECT_TRUE(*config.user_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 
   access_remote.Disable();
-  EXPECT_FALSE(*config.user_consent_passengersRC);
   EXPECT_FALSE(access_remote.IsEnabled());
 }
 

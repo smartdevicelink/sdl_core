@@ -323,7 +323,6 @@ TEST_F(SQLPTExtRepresentationTest,
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");
   module_config["certificate"] = Json::Value("my_cert");
-  module_config["user_consent_passengersRC"] = Json::Value(false);
 
   Json::Value& functional_groupings = policy_table["functional_groupings"];
   functional_groupings["default"] = Json::Value(Json::objectValue);

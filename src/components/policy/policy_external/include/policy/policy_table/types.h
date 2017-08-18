@@ -308,9 +308,6 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
-#ifdef SDL_REMOTE_CONTROL
-  Optional<Boolean> user_consent_passengersRC;
-#endif  // SDL_REMOTE_CONTROL
 
  public:
   ModuleConfig();
