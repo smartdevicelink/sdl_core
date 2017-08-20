@@ -286,10 +286,6 @@ TEST_F(RCPolicyHandlerTest, CheckAccess_ValidParams_SUCCESS) {
 
   EXPECT_EQ(application_manager::TypeAccess::kAllowed,
             policy_handler_.CheckAccess(kDeviceId_, kPolicyAppId_, module));
-
-  EXPECT_CALL(*mock_policy_manager_,
-              CheckAccess(kDeviceId_, kPolicyAppId_, module))
-      .WillOnce(Return(policy::TypeAccess::kManual));
 }
 
 TEST_F(RCPolicyHandlerTest, SetAccess_ValidParams_SUCCESS) {
@@ -345,22 +341,6 @@ TEST_F(RCPolicyHandlerTest, SetRemoteControl_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
   const bool enabled(true);
   EXPECT_CALL(*mock_policy_manager_, SetRemoteControl(enabled));
-
-  connection_handler::DeviceHandle device_handle(1u);
-  EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId_, _))
-      .WillOnce(DoAll(SetDeviceHandle(device_handle), Return(true)));
-
-  test_app.insert(mock_app_);
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-
-  connection_handler::DeviceHandle app_device_handle(2u);
-  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(app_device_handle));
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-
-  EXPECT_CALL(mock_message_helper_,
-              GetDeviceMacAddressForHandle(app_device_handle, _))
-      .WillOnce(Return(kMacAddr_));
 
   policy_handler_.SetRemoteControl(enabled);
 }

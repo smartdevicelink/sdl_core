@@ -131,23 +131,11 @@ TEST(AccessRemoteImplTest, CheckDisallowed) {
   Object what = {policy_table::MT_RADIO};
 
   access_remote.Allow(who, what);
-  EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who1, what));
+  EXPECT_EQ(TypeAccess::kAllowed, access_remote.Check(who1, what));
 
   access_remote.Reset(who);
   access_remote.Deny(who1, what);
   EXPECT_EQ(TypeAccess::kDisallowed, access_remote.Check(who1, what));
-}
-
-TEST(AccessRemoteImplTest, CheckManual) {
-  AccessRemoteImpl access_remote;
-  Subject who = {"dev1", "12345"};
-  Subject who1 = {"dev1", "123456"};
-  Object what = {policy_table::MT_RADIO};
-
-  EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
-
-  access_remote.Deny(who1, what);
-  EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
 }
 
 TEST(AccessRemoteImplTest, CheckModuleType) {
@@ -183,14 +171,6 @@ TEST(AccessRemoteImplTest, EnableDisable) {
   access_remote.enabled_ = true;
   access_remote.Enable();
   EXPECT_TRUE(access_remote.IsEnabled());
-
-  access_remote.Disable();
-  EXPECT_FALSE(access_remote.IsEnabled());
-
-  // Country is disabled
-  access_remote.enabled_ = false;
-  access_remote.Enable();
-  EXPECT_FALSE(access_remote.IsEnabled());
 
   access_remote.Disable();
   EXPECT_FALSE(access_remote.IsEnabled());
@@ -233,15 +213,6 @@ TEST(AccessRemoteImplTest, GetGroups) {
   apps["1234"].set_to_string(policy::kDefaultId);
   const policy_table::Strings& groups2 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
-
-  apps["1234"].set_to_string(policy::kDefaultId);
-  Subject who2 = {"dev2", "1234"};
-
-  // Empty groups
-  access_remote.enabled_ = false;
-  apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups4 = access_remote.GetGroups(who2);
-  EXPECT_TRUE(groups4.empty());
 }
 
 }  // namespace policy

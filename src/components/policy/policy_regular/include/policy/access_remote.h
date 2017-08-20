@@ -42,7 +42,7 @@ namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
 
-enum TypeAccess { kDisallowed, kAllowed, kManual };
+enum TypeAccess { kDisallowed, kAllowed };
 inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   output << "Access: ";
   switch (x) {
@@ -51,9 +51,6 @@ inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
       break;
     case kAllowed:
       output << "ALLOWED";
-      break;
-    case kManual:
-      output << "MANUAL";
       break;
     default:
       output << "Error: Unknown type";

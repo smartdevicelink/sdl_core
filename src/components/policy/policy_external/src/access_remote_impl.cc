@@ -141,7 +141,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
       return ret;
     }
   }
-  return TypeAccess::kManual;
+  return TypeAccess::kAllowed;
 }
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
