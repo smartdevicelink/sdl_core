@@ -37,7 +37,6 @@
 #include "remote_control/rc_app_extension.h"
 #include "remote_control/message_helper.h"
 #include "remote_control/policy_helper.h"
-#include "remote_control/module_helper.h"
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
