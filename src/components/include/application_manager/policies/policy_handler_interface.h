@@ -547,18 +547,6 @@ class PolicyHandlerInterface {
                                  const std::string& hmi_level) = 0;
 
   /**
-   * @brief Notifies Remote apps about change in HMI status
-   * @param device_id Device on which app is running
-   * @param policy_app_id ID of application
-   * @param hmi_level new HMI level for this application
-   * @param device_rank new device rank
-   */
-  virtual void OnUpdateHMIStatus(const std::string& device_id,
-                                 const std::string& policy_app_id,
-                                 const std::string& hmi_level,
-                                 const std::string& device_rank) = 0;
-
-  /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
    * @param list of allowed module types

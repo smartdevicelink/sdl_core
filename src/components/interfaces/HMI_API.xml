@@ -1687,15 +1687,6 @@
    </param>
  </struct>
 
-<enum name="DeviceRank">
-  <element name="DRIVER">
-    <description>The device is ranked as driver's</description>
-  </element>
-  <element name="PASSENGER">
-    <description>The device is ranked as passenger's</description>
-  </element>
-</enum>
-
 <enum name="RCAccessMode">
   <description>Enumeration that describes possible remote control access mode the application might be in on HU.</description>
   <element name="AUTO_ALLOW"/>

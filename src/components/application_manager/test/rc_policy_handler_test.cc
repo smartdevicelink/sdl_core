@@ -512,18 +512,6 @@ TEST_F(RCPolicyHandlerTest, OnUpdateHMIStatus_ValidAppAndHmiLevel_SUCCESS) {
   policy_handler_.OnUpdateHMIStatus(kDeviceId_, kPolicyAppId_, hmi_level);
 }
 
-TEST_F(RCPolicyHandlerTest, OnUpdateHMIStatusFourParams_InvalidApp_UNSUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  utils::SharedPtr<application_manager_test::MockApplication> invalid_app;
-  EXPECT_CALL(app_manager_, application(_, _)).WillOnce(Return(invalid_app));
-  EXPECT_CALL(app_manager_, ChangeAppsHMILevel(_, _)).Times(0);
-
-  const std::string hmi_level("HMI_NONE");
-  const std::string device_rank("INVALID_ENUM");
-  policy_handler_.OnUpdateHMIStatus(
-      kDeviceId_, kPolicyAppId_, hmi_level, device_rank);
-}
-
 TEST_F(RCPolicyHandlerTest,
        OnUpdateHMIStatusFourParams_HmiLevelInvalidEnum_UNSUCCESS) {
   EnablePolicyAndPolicyManagerMock();
@@ -535,13 +523,10 @@ TEST_F(RCPolicyHandlerTest,
       .WillOnce(Return(mobile_apis::HMILevel::INVALID_ENUM));
 
   EXPECT_CALL(app_manager_, ChangeAppsHMILevel(_, _)).Times(0);
-  const std::string device_rank("INVALID_ENUM");
-  policy_handler_.OnUpdateHMIStatus(
-      kDeviceId_, kPolicyAppId_, hmi_level, device_rank);
+  policy_handler_.OnUpdateHMIStatus(kDeviceId_, kPolicyAppId_, hmi_level);
 }
 
-TEST_F(RCPolicyHandlerTest,
-       OnUpdateHMIStatusFourParams_DeviceRankInvalidEnum_UNSUCCESS) {
+TEST_F(RCPolicyHandlerTest, OnUpdateHMIStatus_ValidParams_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
   EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(mock_app_));
@@ -549,56 +534,13 @@ TEST_F(RCPolicyHandlerTest,
   const std::string hmi_level("HMI_NONE");
   EXPECT_CALL(mock_message_helper_, StringToHMILevel(hmi_level))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-
-  const std::string device_rank("INVALID_ENUM");
-  EXPECT_CALL(mock_message_helper_, StringToDeviceRank(device_rank))
-      .WillOnce(Return(mobile_apis::DeviceRank::INVALID_ENUM));
-
-  EXPECT_CALL(app_manager_, ChangeAppsHMILevel(_, _)).Times(0);
-  policy_handler_.OnUpdateHMIStatus(
-      kDeviceId_, kPolicyAppId_, hmi_level, device_rank);
-}
-
-TEST_F(RCPolicyHandlerTest,
-       OnUpdateHMIStatusFourParams_DeviceRankDriver_UNSUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
-      .WillOnce(Return(mock_app_));
-
-  const std::string hmi_level("HMI_NONE");
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(hmi_level))
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-
-  const std::string device_rank("DRIVER");
-  EXPECT_CALL(mock_message_helper_, StringToDeviceRank(device_rank))
-      .WillOnce(Return(mobile_apis::DeviceRank::DRIVER));
-  EXPECT_CALL(mock_message_helper_, SendHMIStatusNotification(_, _));
-
-  EXPECT_CALL(app_manager_, ChangeAppsHMILevel(_, _)).Times(0);
-  policy_handler_.OnUpdateHMIStatus(
-      kDeviceId_, kPolicyAppId_, hmi_level, device_rank);
-}
-
-TEST_F(RCPolicyHandlerTest, OnUpdateHMIStatusFourParams_ValidParams_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
-      .WillOnce(Return(mock_app_));
-
-  const std::string hmi_level("HMI_NONE");
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(hmi_level))
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-
-  const std::string device_rank("PASSENGER");
-  EXPECT_CALL(mock_message_helper_, StringToDeviceRank(device_rank))
-      .WillOnce(Return(mobile_apis::DeviceRank::PASSENGER));
 
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
   EXPECT_CALL(app_manager_,
               ChangeAppsHMILevel(kAppId1_, mobile_apis::HMILevel::HMI_NONE));
   EXPECT_CALL(mock_message_helper_, SendHMIStatusNotification(_, _));
 
-  policy_handler_.OnUpdateHMIStatus(
-      kDeviceId_, kPolicyAppId_, hmi_level, device_rank);
+  policy_handler_.OnUpdateHMIStatus(kDeviceId_, kPolicyAppId_, hmi_level);
 }
 
 TEST_F(RCPolicyHandlerTest, GetModuleTypes_GetModuleTypes_SUCCESS) {

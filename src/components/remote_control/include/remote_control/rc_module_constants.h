@@ -89,6 +89,7 @@ const char kCode[] = "code";
 }  //  json_keys
 
 namespace message_params {
+const char kName[] = "name";
 /*
 const char kCustomPresets[] = "customPresets";
 const char kRadioStation[]  = "radioStation";
@@ -180,12 +181,6 @@ const char kIsSubscribed[] = "isSubscribed";
 const char kAccessMode[] = "accessMode";
 const char kAllowed[] = "allowed";
 // OnRemoteControlSettings notification
-
-// RC.OnDriverRankChanged notification
-const char kDevice[] = "device";
-const char kName[] = "name";
-const char kRank[] = "deviceRank";
-// RC.OnDriverRankChanged notification
 
 // ButtonPress request
 const char kModuleType[] = "moduleType";

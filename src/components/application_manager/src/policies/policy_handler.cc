@@ -2174,49 +2174,6 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
   MessageHelper::SendHMIStatusNotification(*app, application_manager_);
 }
 
-void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
-                                      const std::string& policy_app_id,
-                                      const std::string& hmi_level,
-                                      const std::string& device_rank) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      application_manager_.application(device_id, policy_app_id);
-  if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "Could not find application: " << device_id << " - "
-                                                << policy_app_id);
-    return;
-  }
-  mobile_apis::HMILevel::eType level =
-      MessageHelper::StringToHMILevel(hmi_level);
-  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't convert default hmi level " << hmi_level
-                                                       << " to enum.");
-    return;
-  }
-  mobile_apis::DeviceRank::eType rank =
-      MessageHelper::StringToDeviceRank(device_rank);
-  if (rank == mobile_apis::DeviceRank::INVALID_ENUM) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't convert device rank " << device_rank << " to enum.");
-    return;
-  }
-
-  if (rank == mobile_apis::DeviceRank::DRIVER) {
-    MessageHelper::SendHMIStatusNotification(*app, application_manager_);
-    LOG4CXX_DEBUG(logger_, "Device rank: " << rank);
-    return;
-  }
-  LOG4CXX_INFO(logger_,
-               "Changing hmi level of application "
-                   << app->app_id() << " to default hmi level " << level);
-
-  // Set application hmi level
-  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
-  MessageHelper::SendHMIStatusNotification(*app, application_manager_);
-}
-
 bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
                                    std::vector<std::string>* modules) const {
   LOG4CXX_AUTO_TRACE(logger_);

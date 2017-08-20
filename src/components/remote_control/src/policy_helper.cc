@@ -44,22 +44,6 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(
   rc_module.service()->SetRemoteControl(allowed);
 }
 
-void PolicyHelper::ChangeDeviceRank(const uint32_t device_handle,
-                                    const std::string& rank,
-                                    RemotePluginInterface& rc_module) {
-  if (rank == "DRIVER") {
-    rc_module.service()->SetPrimaryDevice(device_handle);
-    // MarkApplications(device_handle);
-  } else if (rank == "PASSENGER") {
-    if (rc_module.service()->PrimaryDevice() == device_handle) {
-      rc_module.service()->ResetPrimaryDevice();
-      // MarkApplications(0);
-    }
-  } else {
-    LOG4CXX_WARN(logger_, "Unknown device rank");
-  }
-}
-
 void PolicyHelper::SetIsAppOnPrimaryDevice(
     application_manager::ApplicationSharedPtr app,
     RemotePluginInterface& rc_module) {

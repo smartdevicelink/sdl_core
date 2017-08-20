@@ -43,9 +43,6 @@ class PolicyHelper {
  public:
   static void OnRSDLFunctionalityAllowing(bool allowed,
                                           RemotePluginInterface& rc_module);
-  static void ChangeDeviceRank(const uint32_t device_handle,
-                               const std::string& rank,
-                               RemotePluginInterface& rc_module);
   static void SetIsAppOnPrimaryDevice(
       application_manager::ApplicationSharedPtr app,
       RemotePluginInterface& rc_module);

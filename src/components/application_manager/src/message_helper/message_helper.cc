@@ -444,17 +444,6 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
 }
 
 #ifdef SDL_REMOTE_CONTROL
-mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
-    const std::string& device_rank) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  mobile_apis::DeviceRank::eType value;
-  if (EnumConversionHelper<mobile_apis::DeviceRank::eType>::StringToEnum(
-          device_rank, &value)) {
-    return value;
-  }
-  return mobile_apis::DeviceRank::INVALID_ENUM;
-}
-
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {

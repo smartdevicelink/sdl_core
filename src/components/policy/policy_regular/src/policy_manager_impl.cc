@@ -461,9 +461,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
-    const std::string rank =
-        access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-    UpdateDeviceRank(who, rank);
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
@@ -1318,9 +1315,6 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
     return;
   }
 
-  const std::string rank =
-      access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-  UpdateDeviceRank(who, rank);
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
@@ -1343,19 +1337,6 @@ void PolicyManagerImpl::OnChangedRemoteControl(
   }
 
   SendAppPermissionsChanged(who.dev_id, who.app_id);
-}
-
-void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
-                                         const std::string& rank) {
-  std::string default_hmi("NONE");
-  if (GetDefaultHmi(who.app_id, &default_hmi)) {
-    access_remote_->Reset(who);
-    listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi, rank);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't get default HMI level for application "
-                     << who.app_id);
-  }
 }
 
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {

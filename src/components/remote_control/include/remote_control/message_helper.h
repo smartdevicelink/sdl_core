@@ -79,13 +79,6 @@ class MessageHelper {
   static Json::Value StringToValue(const std::string& string);
 
   /**
-   * Validates structure InteriorZone
-   * @param value json of InteriorZone
-   * @return true if json is valid
-   */
-  static bool ValidateInteriorZone(const Json::Value& value);
-
-  /**
    * Creates hmi request
    * @param function_id - API function we create request for
    * @param message_params - params in request

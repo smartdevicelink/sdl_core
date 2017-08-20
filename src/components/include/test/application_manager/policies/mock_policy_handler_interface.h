@@ -278,12 +278,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
-
-  MOCK_METHOD4(OnUpdateHMIStatus,
-               void(const std::string& device_id,
-                    const std::string& policy_app_id,
-                    const std::string& hmi_level,
-                    const std::string& device_rank));
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));

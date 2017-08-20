@@ -49,7 +49,7 @@ std::map<RCFunctionID, std::string> GenerateAPINames() {
   result.insert(std::make_pair<RCFunctionID, std::string>(
       RCFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
   result.insert(std::make_pair<RCFunctionID, std::string>(
-      RCFunctionID::ON_REMOTE_CONTROL_SETTINGS, "OnRemoteControlSettingd"));
+      RCFunctionID::ON_REMOTE_CONTROL_SETTINGS, "OnRemoteControlSetting"));
   return result;
 }
 

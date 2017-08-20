@@ -230,18 +230,6 @@ void RemoteControlPlugin::SendHmiStatusNotification(
 
   msg_params["systemContext"] = static_cast<uint32_t>(app->system_context());
 
-  application_manager::AppExtensionPtr app_extension =
-      app->QueryInterface(GetModuleID());
-  RCAppExtensionPtr rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
-          app_extension);
-
-  if (rc_app_extension->is_on_driver_device()) {
-    msg_params[message_params::kRank] = "DRIVER";
-  } else {
-    msg_params[message_params::kRank] = "PASSENGER";
-  }
-
   msg->set_json_message(MessageHelper::ValueToString(msg_params));
 
   service()->SendMessageToMobile(msg);
