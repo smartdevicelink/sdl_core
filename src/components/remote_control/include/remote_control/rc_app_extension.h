@@ -59,14 +59,6 @@ class RCAppExtension : public application_manager::AppExtension {
    */
   void GiveControl(bool is_control_given);
 
-  bool is_on_driver_device() const {
-    return is_on_driver_device_;
-  }
-
-  void set_is_on_driver_device(bool is_driver_dev) {
-    is_on_driver_device_ = is_driver_dev;
-  }
-
   /**
    * @brief Subscribe to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)

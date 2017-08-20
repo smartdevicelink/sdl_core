@@ -214,7 +214,6 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
 
 TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
-  access_remote.primary_device_ = "dev1";
   access_remote.enabled_ = true;
   Subject who = {"dev1", "1234"};
   access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);

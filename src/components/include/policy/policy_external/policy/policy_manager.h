@@ -566,23 +566,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void ResetAccess(const PTString& module) = 0;
 
   /**
-   * Sets driver as primary device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Resets driver's device
-   */
-  virtual void ResetPrimaryDevice() = 0;
-
-  /**
-   * Gets current primary device
-   * @return ID device
-   */
-  virtual PTString PrimaryDevice() const = 0;
-
-  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */
@@ -593,14 +576,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * by User and by Policy
    */
   virtual bool GetRemoteControl() const = 0;
-
-  /**
-   * Handles changed primary device event for a application
-   * @param device_id Device on which app is running
-   * @param application_id ID application
-   */
-  virtual void OnChangedPrimaryDevice(const std::string& device_id,
-                                      const std::string& application_id) = 0;
 
   /*
    * Send OnPermissionsChange notification to mobile app

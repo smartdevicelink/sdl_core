@@ -334,42 +334,7 @@ void PluginManager::OnAppHMILevelChanged(
   }
 }
 
-bool PluginManager::CanAppChangeHMILevel(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level) {
-  DCHECK_OR_RETURN(app, false);
-  bool result = true;
-  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
-    if (it->second->IsAppForPlugin(app)) {
-      result = result && it->second->CanAppChangeHMILevel(app, new_level);
-      LOG4CXX_DEBUG(logger_,
-                    "Application " << app->name().AsMBString() << " of plugin "
-                                   << it->second->GetModuleID() << " is "
-                                   << (result ? "allowed" : "not allowed")
-                                   << " to change level to " << new_level);
-    }
-  }
-  return result;
-}
-
 typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
-struct HandleDeviceRemoved {
- private:
-  const connection_handler::DeviceHandle& device_;
-
- public:
-  explicit HandleDeviceRemoved(const connection_handler::DeviceHandle& device)
-      : device_(device) {}
-  void operator()(PluginsValueType& x) {
-    x.second->OnDeviceRemoved(device_);
-  }
-};
-
-void PluginManager::OnDeviceRemoved(
-    const connection_handler::DeviceHandle& device) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(plugins_.begin(), plugins_.end(), HandleDeviceRemoved(device));
-}
 
 struct HandleApplicationUnregistered {
  private:

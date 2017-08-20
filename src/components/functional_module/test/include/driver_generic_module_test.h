@@ -67,8 +67,6 @@ class DriverGenericModuleTest : public GenericModule {
     return observers_;
   }
 
-  void OnDeviceRemoved(const connection_handler::DeviceHandle&) {}
-
   void OnUnregisterApplication(const uint32_t app_id) {}
 };
 

@@ -48,12 +48,4 @@ TEST(CanAppExtensionTest, Control) {
   ASSERT_TRUE(extension.IsControlGiven());
 }
 
-TEST(CanAppExtensionTest, DriverDevice) {
-  RCAppExtension extension(5);
-  ASSERT_EQ(5, extension.uid());
-  ASSERT_FALSE(extension.is_on_driver_device());
-  extension.set_is_on_driver_device(true);
-  ASSERT_TRUE(extension.is_on_driver_device());
-}
-
 }  // namespace remote_control

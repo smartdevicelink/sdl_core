@@ -147,27 +147,6 @@ uint32_t CoreService::GetDeviceHandlerById(const std::string& device_id) {
   return device_handle;
 }
 
-void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
-#ifdef SDL_REMOTE_CONTROL
-  std::string device_handle =
-      MessageHelper::GetDeviceMacAddressForHandle(dev_id, application_manager_);
-  application_manager_.GetPolicyHandler().SetPrimaryDevice(device_handle);
-#endif  // SDL_REMOTE_CONTROL
-}
-
-void CoreService::ResetPrimaryDevice() {
-#ifdef SDL_REMOTE_CONTROL
-  application_manager_.GetPolicyHandler().ResetPrimaryDevice();
-#endif  // SDL_REMOTE_CONTROL
-}
-
-uint32_t CoreService::PrimaryDevice() const {
-#ifdef SDL_REMOTE_CONTROL
-  return application_manager_.GetPolicyHandler().PrimaryDevice();
-#endif  // SDL_REMOTE_CONTROL
-  return 0;
-}
-
 void CoreService::SetRemoteControl(bool enabled) {
 #ifdef SDL_REMOTE_CONTROL
   application_manager_.GetPolicyHandler().SetRemoteControl(enabled);

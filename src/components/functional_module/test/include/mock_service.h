@@ -68,9 +68,6 @@ class MockService : public Service {
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
   MOCK_METHOD1(ResetAccess, void(const std::string& module));
   MOCK_METHOD1(GetDeviceHandlerById, uint32_t(const std::string& device_id));
-  MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
-  MOCK_METHOD0(ResetPrimaryDevice, void());
-  MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
   MOCK_METHOD1(RemoveHMIFakeParameters,
                void(application_manager::MessagePtr& message));

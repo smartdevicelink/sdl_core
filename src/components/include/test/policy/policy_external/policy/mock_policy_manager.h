@@ -169,15 +169,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(ResetAccess,
                void(const PTString& dev_id, const PTString& app_id));
   MOCK_METHOD1(ResetAccess, void(const PTString& module));
-  MOCK_METHOD1(SetPrimaryDevice, void(const PTString& dev_id));
-  MOCK_METHOD0(ResetPrimaryDevice, void());
-  MOCK_CONST_METHOD0(PrimaryDevice, PTString());
-
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
   MOCK_CONST_METHOD0(GetRemoteControl, bool());
-  MOCK_METHOD2(OnChangedPrimaryDevice,
-               void(const std::string& device_id,
-                    const std::string& application_id));
   MOCK_METHOD2(SendAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));

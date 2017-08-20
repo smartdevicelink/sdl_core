@@ -330,98 +330,8 @@ TEST_F(RCPolicyHandlerTest, CheckModule_SUCCESS) {
   EXPECT_TRUE(policy_handler_.CheckModule(kPolicyAppId_, module));
 }
 
-TEST_F(RCPolicyHandlerTest, SetPrimaryDevice_EqualDeviceId_UNSUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(kDeviceId_));
-
-  policy_handler_.SetPrimaryDevice(kDeviceId_);
-}
-
 ACTION_P(SetDeviceHandle, handle) {
   *arg1 = handle;
-}
-
-TEST_F(RCPolicyHandlerTest, SetPrimaryDevice_DifferentSUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  const PTString old_device_id("00:00:00:00:00:01");
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(old_device_id));
-  EXPECT_CALL(*mock_policy_manager_, SetPrimaryDevice(kDeviceId_));
-
-  connection_handler::DeviceHandle old_device_handle(1u);
-  EXPECT_CALL(conn_handler, GetDeviceID(old_device_id, _))
-      .WillOnce(DoAll(SetDeviceHandle(old_device_handle), Return(true)));
-
-  connection_handler::DeviceHandle device_handle(2u);
-  EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId_, _))
-      .WillOnce(DoAll(SetDeviceHandle(device_handle), Return(true)));
-
-  test_app.insert(mock_app_);
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-
-  EXPECT_CALL(*mock_app_, device())
-      .WillOnce(Return(device_handle))
-      .WillOnce(Return(device_handle));
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-
-  EXPECT_CALL(*mock_policy_manager_,
-              OnChangedPrimaryDevice(kDeviceId_, kPolicyAppId_));
-
-  policy_handler_.SetPrimaryDevice(kDeviceId_);
-}
-
-TEST_F(RCPolicyHandlerTest, ResetPrimaryDevice_DifferenrDevIds_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(kMacAddr_));
-  EXPECT_CALL(*mock_policy_manager_, ResetPrimaryDevice());
-
-  connection_handler::DeviceHandle old_device_handle(1u);
-  EXPECT_CALL(conn_handler, GetDeviceID(kMacAddr_, _))
-      .WillOnce(DoAll(SetDeviceHandle(old_device_handle), Return(true)));
-
-  test_app.insert(mock_app_);
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-
-  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(old_device_handle));
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-
-  EXPECT_CALL(*mock_policy_manager_,
-              OnChangedPrimaryDevice(kMacAddr_, kPolicyAppId_));
-
-  policy_handler_.ResetPrimaryDevice();
-}
-
-TEST_F(RCPolicyHandlerTest, PrimaryDevice_ValidDeviceHandle_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(kDeviceId_));
-
-  connection_handler::DeviceHandle device_handle(1u);
-  EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId_, _))
-      .WillOnce(DoAll(SetDeviceHandle(device_handle), Return(true)));
-
-  EXPECT_EQ(device_handle, policy_handler_.PrimaryDevice());
-}
-
-TEST_F(RCPolicyHandlerTest, PrimaryDevice_GetDeviceIdFalse_UNSUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(kDeviceId_));
-
-  connection_handler::DeviceHandle device_handle(1u);
-  EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId_, _))
-      .WillOnce(DoAll(SetDeviceHandle(device_handle), Return(false)));
-
-  EXPECT_EQ(0u, policy_handler_.PrimaryDevice());
 }
 
 TEST_F(RCPolicyHandlerTest, GetRemoteControl_SUCCESS) {
@@ -435,9 +345,6 @@ TEST_F(RCPolicyHandlerTest, SetRemoteControl_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
   const bool enabled(true);
   EXPECT_CALL(*mock_policy_manager_, SetRemoteControl(enabled));
-
-  EXPECT_CALL(*mock_policy_manager_, PrimaryDevice())
-      .WillOnce(Return(kDeviceId_));
 
   connection_handler::DeviceHandle device_handle(1u);
   EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId_, _))

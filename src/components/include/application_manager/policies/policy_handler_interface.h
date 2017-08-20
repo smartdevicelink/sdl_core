@@ -495,22 +495,6 @@ class PolicyHandlerInterface {
   virtual void ResetAccess(const std::string& module) = 0;
 
   /**
-   * Sets device as primary device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Resets driver's device
-   */
-  virtual void ResetPrimaryDevice() = 0;
-
-  /**
-   * Return id of primary device
-   */
-  virtual uint32_t PrimaryDevice() const = 0;
-
-  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */

@@ -251,9 +251,6 @@ class BaseCommandRequest
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
-  void UpdateHMILevel(
-      const rc_event_engine::Event<application_manager::MessagePtr,
-                                   std::string>& event);
 
   /**
    * @brief CheckPolicyPermissions checks RPC permissions defined in policy

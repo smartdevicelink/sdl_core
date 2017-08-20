@@ -2048,21 +2048,6 @@ void PolicyManagerImpl::ResetAccess(const PTString& module) {
   access_remote_->Reset(what);
 }
 
-void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  access_remote_->SetPrimaryDevice(dev_id);
-}
-
-void PolicyManagerImpl::ResetPrimaryDevice() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  access_remote_->SetPrimaryDevice("");
-}
-
-PTString PolicyManagerImpl::PrimaryDevice() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return access_remote_->PrimaryDevice();
-}
-
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (enabled) {
@@ -2074,18 +2059,6 @@ void PolicyManagerImpl::SetRemoteControl(bool enabled) {
 
 bool PolicyManagerImpl::GetRemoteControl() const {
   return access_remote_->IsEnabled();
-}
-
-void PolicyManagerImpl::OnChangedPrimaryDevice(
-    const std::string& device_id, const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppRemoteControl(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
-    return;
-  }
-
-  SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
@@ -2158,8 +2131,7 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
        i != devices.end();
        ++i) {
     const Subject who = {*i, application_id};
-    if (access_remote_->IsAppRemoteControl(who) &&
-        access_remote_->IsPrimaryDevice(who.dev_id)) {
+    if (access_remote_->IsAppRemoteControl(who)) {
       SendAppPermissionsChanged(who.dev_id, who.app_id);
     }
   }

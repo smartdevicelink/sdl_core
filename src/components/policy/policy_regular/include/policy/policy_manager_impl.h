@@ -365,13 +365,8 @@ class PolicyManagerImpl : public PolicyManager {
                          bool allowed);
   virtual void ResetAccess(const PTString& dev_id, const PTString& app_id);
   virtual void ResetAccess(const PTString& module);
-  virtual void SetPrimaryDevice(const PTString& dev_id);
-  virtual void ResetPrimaryDevice();
-  virtual PTString PrimaryDevice() const;
   virtual void SetRemoteControl(bool enabled);
   virtual bool GetRemoteControl() const;
-  virtual void OnChangedPrimaryDevice(const std::string& device_id,
-                                      const std::string& application_id);
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id);
   virtual bool GetModuleTypes(const std::string& policy_app_id,

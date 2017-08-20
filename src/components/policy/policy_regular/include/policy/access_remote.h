@@ -118,25 +118,6 @@ class AccessRemote {
   virtual bool IsEnabled() const = 0;
 
   /**
-   * Checks whether device is driver's device
-   * @param dev_id unique device id
-   * @return true if device is have driver
-   */
-  virtual bool IsPrimaryDevice(const PTString& dev_id) const = 0;
-
-  /**
-   * Sets device as driver's device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Gets current primary device
-   * @return ID device
-   */
-  virtual PTString PrimaryDevice() const = 0;
-
-  /**
    * Allows access subject to object
    * @param who subject is dev_id and app_id
    * @param what object is group_id

@@ -111,10 +111,10 @@ struct ToModuleType {
 };
 
 AccessRemoteImpl::AccessRemoteImpl()
-    : cache_(new CacheManager()), primary_device_(), enabled_(true), acl_() {}
+    : cache_(new CacheManager()), enabled_(true), acl_() {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache), primary_device_(), enabled_(true), acl_() {}
+    : cache_(cache), enabled_(true), acl_() {}
 
 void AccessRemoteImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -123,11 +123,6 @@ void AccessRemoteImpl::Init() {
   // TODO: Rework
 
   enabled_ = true;
-}
-
-bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return primary_device_ == dev_id;
 }
 
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
@@ -236,15 +231,6 @@ void AccessRemoteImpl::Reset() {
   acl_.clear();
 }
 
-void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  primary_device_ = dev_id;
-}
-
-PTString AccessRemoteImpl::PrimaryDevice() const {
-  return primary_device_;
-}
-
 void AccessRemoteImpl::Enable() {
   LOG4CXX_AUTO_TRACE(logger_);
   set_enabled(true);
@@ -290,10 +276,8 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (IsAppRemoteControl(who)) {
-    if (IsPrimaryDevice(who.dev_id)) {
-      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
-                  .groups_primaryRC;
-    }
+    return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
+                .groups_primaryRC;
   }
   return cache_->GetGroups(who.app_id);
 }

@@ -53,9 +53,6 @@ class MockAccessRemote : public policy::AccessRemote {
   MOCK_METHOD0(Enable, void());
   MOCK_METHOD0(Disable, void());
   MOCK_CONST_METHOD0(IsEnabled, bool());
-  MOCK_CONST_METHOD1(IsPrimaryDevice, bool(const policy::PTString& dev_id));
-  MOCK_METHOD1(SetPrimaryDevice, void(const policy::PTString& dev_id));
-  MOCK_CONST_METHOD0(PrimaryDevice, policy::PTString());
 
   MOCK_METHOD2(Allow,
                void(const policy::Subject& who, const policy::Object& what));

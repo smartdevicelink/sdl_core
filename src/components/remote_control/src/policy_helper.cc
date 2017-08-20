@@ -44,34 +44,4 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(
   rc_module.service()->SetRemoteControl(allowed);
 }
 
-void PolicyHelper::SetIsAppOnPrimaryDevice(
-    application_manager::ApplicationSharedPtr app,
-    RemotePluginInterface& rc_module) {
-  MarkAppOnPrimaryDevice(app, rc_module.service()->PrimaryDevice(), rc_module);
-}
-
-void PolicyHelper::MarkAppOnPrimaryDevice(
-    application_manager::ApplicationSharedPtr app,
-    const uint32_t device_handle,
-    RemotePluginInterface& rc_module) {
-  application_manager::AppExtensionUID module_id = rc_module.GetModuleID();
-  RCAppExtensionPtr extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
-          app->QueryInterface(module_id));
-  DCHECK(extension);
-  bool is_driver = (app->device() == device_handle);
-  extension->set_is_on_driver_device(is_driver);
-}
-
-void PolicyHelper::MarkApplications(const uint32_t device_handle,
-                                    RemotePluginInterface& rc_module) {
-  application_manager::AppExtensionUID module_id = rc_module.GetModuleID();
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-      rc_module.service()->GetApplications(module_id);
-
-  for (size_t i = 0; i < applications.size(); ++i) {
-    MarkAppOnPrimaryDevice(applications[i], device_handle, rc_module);
-  }
-}
-
 }  // namespace remote_control

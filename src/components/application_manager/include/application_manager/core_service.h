@@ -118,22 +118,6 @@ class CoreService : public Service {
   uint32_t GetDeviceHandlerById(const std::string& device_id) FINAL;
 
   /**
-   * Sets device as primary device
-   * @param dev_id ID device
-   */
-  void SetPrimaryDevice(const uint32_t dev_id) FINAL;
-
-  /**
-   * Resets driver's device
-   */
-  void ResetPrimaryDevice() FINAL;
-
-  /**
-   * Return id of primary device
-   */
-  uint32_t PrimaryDevice() const FINAL;
-
-  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */

@@ -32,11 +32,6 @@ class MockRemotePluginInterface : public remote_control::RemotePluginInterface {
   MOCK_METHOD2(OnAppHMILevelChanged,
                void(application_manager::ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType old_level));
-  MOCK_METHOD2(CanAppChangeHMILevel,
-               bool(application_manager::ApplicationSharedPtr app,
-                    mobile_apis::HMILevel::eType new_level));
-  MOCK_METHOD1(OnDeviceRemoved,
-               void(const connection_handler::DeviceHandle& device));
   MOCK_METHOD1(OnUnregisterApplication, void(const uint32_t app_id));
   MOCK_METHOD1(SendHmiStatusNotification,
                void(application_manager::ApplicationSharedPtr app));

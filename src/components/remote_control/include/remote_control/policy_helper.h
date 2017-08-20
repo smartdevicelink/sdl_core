@@ -43,17 +43,6 @@ class PolicyHelper {
  public:
   static void OnRSDLFunctionalityAllowing(bool allowed,
                                           RemotePluginInterface& rc_module);
-  static void SetIsAppOnPrimaryDevice(
-      application_manager::ApplicationSharedPtr app,
-      RemotePluginInterface& rc_module);
-
- private:
-  static void MarkApplications(const uint32_t device_handle,
-                               RemotePluginInterface& rc_module);
-  static void MarkAppOnPrimaryDevice(
-      application_manager::ApplicationSharedPtr app,
-      const uint32_t device_handle,
-      RemotePluginInterface& rc_module);
 };
 
 }  //  namespace remote_control

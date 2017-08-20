@@ -487,28 +487,7 @@ void BaseCommandRequest::on_event(
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
   } else {
-    if (auto_allowed()) {
-      UpdateHMILevel(event);
-    }
     OnEvent(event);  // run child's logic
-  }
-}
-
-void BaseCommandRequest::UpdateHMILevel(
-    const rc_event_engine::Event<application_manager::MessagePtr, std::string>&
-        event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  RCAppExtensionPtr extension = GetAppExtension(app_);
-  if (!extension) {
-    return;
-  }
-  if (!extension->is_on_driver_device()) {
-    Json::Value value =
-        MessageHelper::StringToValue(event.event_message()->json_message());
-    std::string result_code;
-    std::string info;
-    bool success = ParseResultCode(value, result_code, info);
-    CheckHMILevel(application_manager::kAllowed, success);
   }
 }
 

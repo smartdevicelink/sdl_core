@@ -94,22 +94,6 @@ class RemotePluginInterface : public functional_modules::GenericModule {
       application_manager::ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType old_level) = 0;
 
-  /**
-   * @brief Checks if plugin hasn't put restrictions on app's HMI Level
-   * @param app App with old HMILevel
-   * @param new_level HMILevel which is about to be set to app
-   */
-  virtual bool CanAppChangeHMILevel(
-      application_manager::ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType new_level) = 0;
-
-  /**
-   * Handles removing (disconnecting) device
-   * @param device removed
-   */
-  virtual void OnDeviceRemoved(
-      const connection_handler::DeviceHandle& device) = 0;
-
   virtual void SendHmiStatusNotification(
       application_manager::ApplicationSharedPtr app) = 0;
 

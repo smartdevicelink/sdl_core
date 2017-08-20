@@ -216,7 +216,6 @@ TEST_F(RCModuleTest, IsAppForPluginSuccess) {
   EXPECT_CALL(*app0_, hmi_level()).WillRepeatedly(Return(hmi));
   ON_CALL(*app0_, device()).WillByDefault(Return(1));
   EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _));
-  EXPECT_CALL(*mock_service_, PrimaryDevice());
   EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
       .WillOnce(Return(true));
   ASSERT_TRUE(module_.IsAppForPlugin(app0_));
@@ -248,64 +247,6 @@ TEST_F(RCModuleTest, OnAppHMILevelChanged) {
               NotifyHMIAboutHMILevel(Eq(app0_),
                                      mobile_apis::HMILevel::eType::HMI_NONE));
   module_.OnAppHMILevelChanged(app0_, mobile_apis::HMILevel::eType::HMI_FULL);
-}
-
-TEST_F(RCModuleTest, SetDriverDeviceOnRegister) {
-  application_manager::AppExtensionPtr invalid_ext;
-  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-      .Times(2)
-      .WillOnce(Return(invalid_ext))
-      .WillRepeatedly(Return(rc_app_extention_));
-  EXPECT_CALL(*app0_, AddExtension(_)).WillOnce(Return(true));
-  ON_CALL(*app0_, device()).WillByDefault(Return(12));
-  mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
-  EXPECT_CALL(*app0_, hmi_level()).Times(1).WillRepeatedly(Return(hmi));
-  EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _)).Times(1);
-  EXPECT_CALL(*mock_service_, PrimaryDevice()).Times(1).WillOnce(Return(12));
-  EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
-      .Times(1)
-      .WillOnce(Return(true));
-
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
-  ASSERT_TRUE(rc_app_extention_->is_on_driver_device());
-}
-
-TEST_F(RCModuleTest, SetDriverDeviceOnRegisterFail) {
-  application_manager::AppExtensionPtr invalid_ext;
-  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-      .Times(2)
-      .WillOnce(Return(invalid_ext))
-      .WillRepeatedly(Return(rc_app_extention_));
-  EXPECT_CALL(*app0_, AddExtension(_)).WillOnce(Return(true));
-  mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app0_, hmi_level()).WillRepeatedly(Return(hmi));
-  ON_CALL(*app0_, device()).WillByDefault(Return(12));
-  EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _)).Times(1);
-  EXPECT_CALL(*mock_service_, PrimaryDevice()).Times(1).WillOnce(Return(3));
-  EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
-      .Times(1)
-      .WillOnce(Return(true));
-
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
-  ASSERT_FALSE(rc_app_extention_->is_on_driver_device());
-}
-
-TEST_F(RCModuleTest, CanAppChangeHMILevelPrimary) {
-  apps_.push_back(app0_);
-
-  rc_app_extention_->set_is_on_driver_device(true);
-
-  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-      .WillRepeatedly(Return(rc_app_extention_));
-
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_FULL));
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_LIMITED));
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_NONE));
 }
 
 }  // namespace remote_control
