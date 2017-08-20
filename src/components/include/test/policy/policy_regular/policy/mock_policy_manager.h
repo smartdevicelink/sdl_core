@@ -177,9 +177,6 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(OnChangedPrimaryDevice,
                void(const std::string& device_id,
                     const std::string& application_id));
-  MOCK_METHOD2(OnChangedRemoteControl,
-               void(const std::string& device_id,
-                    const std::string& application_id));
   MOCK_METHOD2(SendAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));

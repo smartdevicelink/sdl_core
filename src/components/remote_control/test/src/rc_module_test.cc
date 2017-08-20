@@ -308,21 +308,4 @@ TEST_F(RCModuleTest, CanAppChangeHMILevelPrimary) {
       app0_, mobile_apis::HMILevel::eType::HMI_NONE));
 }
 
-TEST_F(RCModuleTest, CanAppChangeHMILevelPassenger) {
-  apps_.push_back(app0_);
-
-  rc_app_extention_->set_is_on_driver_device(false);
-
-  EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-      .WillRepeatedly(Return(rc_app_extention_));
-
-  ASSERT_FALSE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_FULL));
-  ASSERT_FALSE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_LIMITED));
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
-  ASSERT_TRUE(module_.CanAppChangeHMILevel(
-      app0_, mobile_apis::HMILevel::eType::HMI_NONE));
-}
 }  // namespace remote_control

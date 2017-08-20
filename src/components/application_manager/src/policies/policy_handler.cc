@@ -2108,35 +2108,11 @@ uint32_t PolicyHandler::PrimaryDevice() const {
 void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);
-
-  OnRemoteAllowedChanged(enabled);
 }
 
 bool PolicyHandler::GetRemoteControl() const {
   POLICY_LIB_CHECK(false);
   return policy_manager_->GetRemoteControl();
-}
-
-void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
-  POLICY_LIB_CHECK_VOID();
-  connection_handler::DeviceHandle device_handle = PrimaryDevice();
-
-  DataAccessor<ApplicationSet> accessor = application_manager_.applications();
-  for (ApplicationSetConstIt i = accessor.GetData().begin();
-       i != accessor.GetData().end();
-       ++i) {
-    const ApplicationSharedPtr app = *i;
-    LOG4CXX_DEBUG(logger_,
-                  "Item: " << app->device() << " - " << app->policy_app_id());
-    if (app->device() != device_handle) {
-      LOG4CXX_DEBUG(logger_,
-                    "Send notify " << app->device() << " - "
-                                   << app->policy_app_id());
-      std::string mac = MessageHelper::GetDeviceMacAddressForHandle(
-          app->device(), application_manager_);
-      policy_manager_->OnChangedRemoteControl(mac, app->policy_app_id());
-    }
-  }
 }
 
 void PolicyHandler::OnRemoteAppPermissionsChanged(

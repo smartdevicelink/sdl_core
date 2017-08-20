@@ -175,15 +175,6 @@ class PolicyManagerImplTest : public ::testing::Test {
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
   }
-
-#ifdef SDL_REMOTE_CONTROL
- public:
-  bool CheckPTURemoteCtrlChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot) {
-    return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
-  }
-#endif  // SDL_REMOTE_CONTROL
 };
 
 class PolicyManagerImplTest2 : public ::testing::Test {

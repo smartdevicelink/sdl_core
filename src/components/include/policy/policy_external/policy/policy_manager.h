@@ -602,14 +602,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void OnChangedPrimaryDevice(const std::string& device_id,
                                       const std::string& application_id) = 0;
 
-  /**
-   * Handles changed remote control event for a application
-   * @param device_id Device on which app is running
-   * @param application_id ID application
-   */
-  virtual void OnChangedRemoteControl(const std::string& device_id,
-                                      const std::string& application_id) = 0;
-
   /*
    * Send OnPermissionsChange notification to mobile app
    * when it's permissions are changed.

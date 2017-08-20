@@ -2088,27 +2088,6 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
-void PolicyManagerImpl::OnChangedRemoteControl(
-    const std::string& device_id, const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppRemoteControl(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
-    return;
-  }
-
-  if (access_remote_->IsPrimaryDevice(who.dev_id)) {
-    LOG4CXX_INFO(logger_, "Device " << who.dev_id << " is primary");
-    return;
-  }
-
-  if (!access_remote_->IsEnabled()) {
-    SendHMILevelChanged(who);
-  }
-
-  SendAppPermissionsChanged(who.dev_id, who.app_id);
-}
-
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
@@ -2155,20 +2134,7 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
 void PolicyManagerImpl::CheckPTUUpdatesChange(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
-  CheckPTURemoteCtrlChange(pt_update, snapshot);
   CheckRemoteGroupsChange(pt_update, snapshot);
-}
-
-bool PolicyManagerImpl::CheckPTURemoteCtrlChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  // TODO: Rework
-
-  const bool is_allowed = true;
-  listener()->OnRemoteAllowedChanged(is_allowed);
-  return is_allowed;
 }
 
 void PolicyManagerImpl::CheckRemoteGroupsChange(

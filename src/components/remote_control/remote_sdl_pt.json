@@ -2322,13 +2322,6 @@
                 "groups": ["Base-4"],
                 "groups_primaryRC": ["Base-4", "RemoteControl"]
             },
-            "pre_consent_passengersRC": {
-                "keep_context": false,
-                "steal_focus": false,
-                "priority": "NONE",
-                "default_hmi":"NONE",
-                "groups": ["pre_BaseRC-1"]
-            },
             "device": {
                 "keep_context": false,
                 "steal_focus": false,

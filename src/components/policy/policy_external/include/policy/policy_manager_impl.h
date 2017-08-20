@@ -199,9 +199,6 @@ class PolicyManagerImpl : public PolicyManager {
   void CheckPTUUpdatesChange(
       const utils::SharedPtr<policy_table::Table> pt_update,
       const utils::SharedPtr<policy_table::Table> snapshot);
-  bool CheckPTURemoteCtrlChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
 
   void CheckRemoteGroupsChange(
       const utils::SharedPtr<policy_table::Table> pt_update,
@@ -403,8 +400,6 @@ class PolicyManagerImpl : public PolicyManager {
   virtual void SetRemoteControl(bool enabled);
   virtual bool GetRemoteControl() const;
   virtual void OnChangedPrimaryDevice(const std::string& device_id,
-                                      const std::string& application_id);
-  virtual void OnChangedRemoteControl(const std::string& device_id,
                                       const std::string& application_id);
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id);

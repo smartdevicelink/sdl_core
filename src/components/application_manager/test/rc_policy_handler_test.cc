@@ -455,9 +455,6 @@ TEST_F(RCPolicyHandlerTest, SetRemoteControl_SUCCESS) {
               GetDeviceMacAddressForHandle(app_device_handle, _))
       .WillOnce(Return(kMacAddr_));
 
-  EXPECT_CALL(*mock_policy_manager_,
-              OnChangedRemoteControl(kMacAddr_, kPolicyAppId_));
-
   policy_handler_.SetRemoteControl(enabled);
 }
 

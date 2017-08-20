@@ -268,8 +268,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 
   MOCK_CONST_METHOD0(GetRemoteControl, bool());
 
-  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
-
   MOCK_METHOD2(OnRemoteAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));

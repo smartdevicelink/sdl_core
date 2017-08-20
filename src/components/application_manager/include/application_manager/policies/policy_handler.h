@@ -216,12 +216,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool GetRemoteControl() const OVERRIDE;
 
   /**
-   * @brief Notifies passengers' apps about change
-   * @param new_consent New value of remote permission
-   */
-  void OnRemoteAllowedChanged(bool new_consent) OVERRIDE;
-
-  /**
    * @brief Notifies Remote apps about change in permissions
    * @param device_id Device on which app is running
    * @param application_id ID of app whose permissions are changed

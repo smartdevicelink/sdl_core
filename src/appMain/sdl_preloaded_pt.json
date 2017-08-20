@@ -2378,15 +2378,6 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": ["BaseBeforeDataConsent"]
-            },
-            "pre_consent_passengersRC": {
-                "default_hmi": "NONE",
-                "groups": [
-                    "pre_BaseRC-1"
-                ],
-                "keep_context": false,
-                "priority": "NONE",
-                "steal_focus": false
             }
         }
     }
