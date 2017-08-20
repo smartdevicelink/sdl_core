@@ -235,12 +235,8 @@ TEST(AccessRemoteImplTest, GetGroups) {
   const policy_table::Strings& groups2 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
 
-  // Non primary groups
   apps["1234"].set_to_string(policy::kDefaultId);
   Subject who2 = {"dev2", "1234"};
-  access_remote.hmi_types_[who2].push_back(policy_table::AHT_REMOTE_CONTROL);
-  const policy_table::Strings& groups3 = access_remote.GetGroups(who2);
-  EXPECT_EQ(std::string("group_non_primary"), std::string(groups3[0]));
 
   // Empty groups
   access_remote.enabled_ = false;

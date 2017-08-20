@@ -1428,22 +1428,6 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
   }
 }
 
-void PolicyManagerImpl::OnNonPrimaryGroupsChanged(
-    const std::string& application_id) {
-  const std::vector<std::string> devices =
-      listener()->GetDevicesIds(application_id);
-  for (std::vector<std::string>::const_iterator i = devices.begin();
-       i != devices.end();
-       ++i) {
-    const Subject who = {*i, application_id};
-    if (access_remote_->IsAppRemoteControl(who) &&
-        !access_remote_->IsPrimaryDevice(who.dev_id) &&
-        access_remote_->IsEnabled()) {
-      SendAppPermissionsChanged(who.dev_id, who.app_id);
-    }
-  }
-}
-
 bool PolicyManagerImpl::GetModuleTypes(
     const std::string& application_id,
     std::vector<std::string>* modules) const {

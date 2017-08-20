@@ -101,8 +101,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   enum TypeAccess { kAllowed, kManual };
   bool GatherAppGroupPrimary(const std::string& app_id,
                              policy_table::Strings* app_groups) const;
-  bool GatherAppGroupNonPrimary(const std::string& app_id,
-                                policy_table::Strings* app_groups) const;
   bool GatherModuleType(const std::string& app_id,
                         policy_table::ModuleTypes* module_types) const;
   bool GatherRemoteControlDenied(const std::string& app_id, bool* denied) const;
@@ -111,8 +109,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool GatherRemoteRpc(int module_id, policy_table::RemoteRpcs* rpcs) const;
   bool SaveAppGroupPrimary(const std::string& app_id,
                            const policy_table::Strings& app_groups);
-  bool SaveAppGroupNonPrimary(const std::string& app_id,
-                              const policy_table::Strings& app_groups);
   bool SaveModuleType(const std::string& app_id,
                       const policy_table::ModuleTypes& types);
   bool SaveRemoteControlDenied(const std::string& app_id, bool deny);

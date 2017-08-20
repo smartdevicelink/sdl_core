@@ -878,10 +878,6 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group_primary.");
     return false;
   }
-  if (!query_delete.Exec(sql_pt::kDeleteAppGroupNonPrimary)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
-    return false;
-  }
   if (!query_delete.Exec(sql_pt::kDeleteModuleTypes)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from module_type.");
     return false;
@@ -1560,22 +1556,6 @@ bool SQLPTRepresentation::GatherAppGroupPrimary(
   return true;
 }
 
-bool SQLPTRepresentation::GatherAppGroupNonPrimary(
-    const std::string& app_id, policy_table::Strings* app_groups) const {
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectAppGroupsNonPrimary)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select from app groups for non primary RC");
-    return false;
-  }
-
-  query.Bind(0, app_id);
-  while (query.Next()) {
-    app_groups->push_back(query.GetString(0));
-  }
-  return true;
-}
-
 bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
                                                     bool* denied) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1629,32 +1609,6 @@ bool SQLPTRepresentation::SaveAppGroupPrimary(
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_,
                    "Incorrect insert into app group primary."
-                       << query.LastError().text());
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool SQLPTRepresentation::SaveAppGroupNonPrimary(
-    const std::string& app_id, const policy_table::Strings& app_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertAppGroupNonPrimary)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement for app group non primary");
-    return false;
-  }
-  policy_table::Strings::const_iterator it;
-  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
-    std::string ssss = *it;
-    LOG4CXX_INFO(logger_, "Group: " << ssss);
-    query.Bind(0, app_id);
-    query.Bind(1, *it);
-    if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert into app group non primary."
                        << query.LastError().text());
       return false;
     }
@@ -1914,18 +1868,6 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     LOG4CXX_ERROR(logger_, "Failed deleting from app_group_primary.");
     return false;
   }
-
-  utils::dbms::SQLQuery query_np(db());
-  if (!query_np.Prepare(sql_pt::kDeleteAppGroupNonPrimaryByApplicationId)) {
-    LOG4CXX_ERROR(logger_,
-                  "Incorrect statement to delete from app_group_non_primary.");
-    return false;
-  }
-  query_np.Bind(0, app_id);
-  if (!query_np.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_non_primary.");
-    return false;
-  }
 #endif  // SDL_REMOTE_CONTROL
 
   if (!CopyApplication(kDefaultId, app_id)) {
@@ -1956,9 +1898,6 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   policy_table::Strings groups_primary;
   ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary) &&
                 SaveAppGroupPrimary(app_id, groups_primary));
-  policy_table::Strings groups_non_primary;
-  ret = ret && (GatherAppGroupNonPrimary(kDefaultId, &groups_non_primary) &&
-                SaveAppGroupNonPrimary(app_id, groups_non_primary));
 #endif  // SDL_REMOTE_CONTROL
 
   if (ret) {

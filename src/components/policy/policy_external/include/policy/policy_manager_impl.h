@@ -210,7 +210,6 @@ class PolicyManagerImpl : public PolicyManager {
   void SendHMILevelChanged(const Subject& who);
 
   void OnPrimaryGroupsChanged(const std::string& application_id);
-  void OnNonPrimaryGroupsChanged(const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
