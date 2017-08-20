@@ -322,6 +322,7 @@ bool PluginManager::IsAppForPlugins(
 
 bool PluginManager::IsAppForPlugin(
     application_manager::ApplicationSharedPtr app, ModuleID module_id) const {
+  DCHECK_OR_RETURN(app, false);
   Modules::const_iterator i = plugins_.find(module_id);
   return i != plugins_.end() ? i->second->IsAppForPlugin(app) : false;
 }
@@ -329,10 +330,7 @@ bool PluginManager::IsAppForPlugin(
 void PluginManager::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level) {
-  DCHECK(app);
-  if (!app) {
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     if (it->second->IsAppForPlugin(app)) {
       LOG4CXX_DEBUG(logger_,
@@ -348,10 +346,7 @@ void PluginManager::OnAppHMILevelChanged(
 bool PluginManager::CanAppChangeHMILevel(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType new_level) {
-  DCHECK(app);
-  if (!app) {
-    return false;
-  }
+  DCHECK_OR_RETURN(app, false);
   bool result = true;
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     if (it->second->IsAppForPlugin(app)) {
