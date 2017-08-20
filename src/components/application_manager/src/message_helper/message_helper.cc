@@ -512,8 +512,6 @@ void MessageHelper::SendActivateAppToHMI(
 
   if (send_policy_priority) {
     std::string priority;
-    // TODO(KKolodiy): need remove method policy_manager
-
     application_manager.GetPolicyHandler().GetPriority(app->policy_app_id(),
                                                        &priority);
     // According SDLAQ-CRS-2794
@@ -1547,8 +1545,6 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
 
   if (send_policy_priority) {
     std::string priority;
-    // TODO(KKolodiy): need remove method policy_manager
-
     policy_handler.GetPriority(app->policy_app_id(), &priority);
     // According SDLAQ-CRS-2794
     // SDL have to send ActivateApp without "proirity" parameter to HMI.

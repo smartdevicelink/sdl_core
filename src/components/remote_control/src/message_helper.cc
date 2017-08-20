@@ -99,14 +99,6 @@ bool IsMember(const Json::Value& value, const std::string& key) {
   return value.isMember(key);
 }
 
-// TODO(KKolodiy): after creating commands for notification from HMI
-// this validate methods may move to commands
-bool MessageHelper::ValidateDeviceInfo(const Json::Value& value) {
-  return value.isObject() && value.isMember(json_keys::kId) &&
-         value.isMember(message_params::kName) &&
-         value[message_params::kName].isString();
-}
-
 application_manager::MessagePtr MessageHelper::CreateHmiRequest(
     const char* function_id,
     const uint32_t hmi_app_id,

@@ -126,7 +126,6 @@ class RemotePluginInterface : public functional_modules::GenericModule {
    */
   virtual void RemoveAppExtensions() = 0;
 
-  // TODO(VS): must be uid
   static const functional_modules::ModuleID kCANModuleID = 153;
 };
 
