@@ -44,29 +44,6 @@ using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
-struct Erase {
- private:
-  const Subject& who_;
-
- public:
-  explicit Erase(const Subject& who) : who_(who) {}
-  void operator()(AccessRemoteImpl::AccessControlList::value_type& row) const {
-    row.second.erase(who_);
-  }
-};
-
-struct IsTypeAccess {
- private:
-  const TypeAccess& type_;
-
- public:
-  explicit IsTypeAccess(const TypeAccess& type) : type_(type) {}
-  bool operator()(
-      const AccessRemoteImpl::AccessControlRow::value_type& item) const {
-    return item.second == type_;
-  }
-};
-
 struct ToHMIType {
   policy_table::AppHMITypes::value_type operator()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);

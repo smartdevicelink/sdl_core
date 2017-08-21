@@ -267,27 +267,6 @@ TEST_F(RCPolicyHandlerTest, OnUpdateHMILevel_HmiLevelChanged_SUCCESS) {
   policy_handler_.OnUpdateHMILevel(kDeviceId_, kPolicyAppId_, hmi_level);
 }
 
-TEST_F(RCPolicyHandlerTest, CheckAccess_ValidParams_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  const PTString module("module");
-  const PTString pt_rpc("rpc");
-  const std::vector<PTString> params;
-
-  EXPECT_CALL(*mock_policy_manager_,
-              CheckAccess(kDeviceId_, kPolicyAppId_, module))
-      .WillOnce(Return(policy::TypeAccess::kDisallowed));
-  EXPECT_EQ(application_manager::TypeAccess::kDisallowed,
-            policy_handler_.CheckAccess(kDeviceId_, kPolicyAppId_, module));
-
-  EXPECT_CALL(*mock_policy_manager_,
-              CheckAccess(kDeviceId_, kPolicyAppId_, module))
-      .WillOnce(Return(policy::TypeAccess::kAllowed));
-
-  EXPECT_EQ(application_manager::TypeAccess::kAllowed,
-            policy_handler_.CheckAccess(kDeviceId_, kPolicyAppId_, module));
-}
-
 TEST_F(RCPolicyHandlerTest, CheckModule_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 

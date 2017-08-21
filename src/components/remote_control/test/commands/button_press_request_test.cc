@@ -199,8 +199,7 @@ TEST_F(ButtonPressRequestTest,
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
-      .WillOnce(Return(application_manager::TypeAccess::kAllowed));
+  EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID()).WillOnce(Return(1));
 
   const std::string resource = "CLIMATE";
@@ -255,8 +254,7 @@ TEST_F(
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
-      .WillOnce(Return(application_manager::TypeAccess::kAllowed));
+  EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(mock_allocation_manager_, IsResourceFree(_))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))

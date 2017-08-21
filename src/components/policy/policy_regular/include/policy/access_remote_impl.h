@@ -45,8 +45,6 @@ namespace policy {
 
 class AccessRemoteImpl : public AccessRemote {
  public:
-  typedef std::map<Subject, TypeAccess> AccessControlRow;
-  typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
 
   AccessRemoteImpl();

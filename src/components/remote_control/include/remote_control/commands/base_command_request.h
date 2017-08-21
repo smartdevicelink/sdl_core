@@ -229,7 +229,7 @@ class BaseCommandRequest
 
   virtual std::string ModuleType(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual application_manager::TypeAccess CheckAccess(
+  virtual application_manager::TypeAccess CheckModule(
       const Json::Value& message);
 
   bool auto_allowed() const {

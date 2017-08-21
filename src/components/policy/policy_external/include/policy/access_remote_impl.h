@@ -60,8 +60,6 @@ class AccessRemoteImpl : public AccessRemote {
                               std::vector<std::string>* modules);
 
  private:
-  typedef std::map<Subject, TypeAccess> AccessControlRow;
-  typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
   inline bool country_consent() const;
@@ -77,7 +75,6 @@ class AccessRemoteImpl : public AccessRemote {
                          RemoteControlParams* input) const;
   utils::SharedPtr<CacheManager> cache_;
   bool enabled_;
-  AccessControlList acl_;
   HMIList hmi_types_;
 
   friend struct Erase;

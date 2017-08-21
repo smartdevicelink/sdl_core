@@ -236,11 +236,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                bool(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,
                     const smart_objects::SmartObject* app_types));
-  MOCK_METHOD3(
-      CheckAccess,
-      application_manager::TypeAccess(const policy::PTString& device_id,
-                                      const policy::PTString& app_id,
-                                      const policy::PTString& module));
 
   MOCK_METHOD2(CheckModule,
                bool(const policy::PTString& app_id,

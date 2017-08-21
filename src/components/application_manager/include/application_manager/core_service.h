@@ -71,15 +71,6 @@ class CoreService : public Service {
   mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) FINAL;
 
   /**
-   * Checks access to requested module of vehicle
-   * @param app_id id of application
-   * @param module type
-   * @return return allowed if module is allowed, otherwise - disallowed
-   */
-  TypeAccess CheckAccess(const ApplicationId& app_id,
-                         const std::string& module) FINAL;
-
-  /**
    * Checks if module for application is present in policy table
    * @param app_id id of application
    * @param module type

@@ -380,9 +380,6 @@ class PolicyManagerImpl : public PolicyManager {
   void GetPermissions(const std::string device_id,
                       const std::string application_id,
                       Permissions* data);
-  virtual TypeAccess CheckAccess(const PTString& device_id,
-                                 const PTString& app_id,
-                                 const PTString& module);
   virtual bool CheckModule(const PTString& app_id, const PTString& module);
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id);

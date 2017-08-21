@@ -41,23 +41,6 @@
 namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
-
-enum TypeAccess { kDisallowed, kAllowed };
-inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
-  output << "Access: ";
-  switch (x) {
-    case kDisallowed:
-      output << "DISALLOWED";
-      break;
-    case kAllowed:
-      output << "ALLOWED";
-      break;
-    default:
-      output << "Error: Unknown type";
-  }
-  return output;
-}
-
 struct Subject {
   PTString dev_id;
   PTString app_id;

@@ -44,29 +44,6 @@ using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
-struct Erase {
- private:
-  const Subject& who_;
-
- public:
-  explicit Erase(const Subject& who) : who_(who) {}
-  void operator()(AccessRemoteImpl::AccessControlList::value_type& row) const {
-    row.second.erase(who_);
-  }
-};
-
-struct IsTypeAccess {
- private:
-  const TypeAccess& type_;
-
- public:
-  explicit IsTypeAccess(const TypeAccess& type) : type_(type) {}
-  bool operator()(
-      const AccessRemoteImpl::AccessControlRow::value_type& item) const {
-    return item.second == type_;
-  }
-};
-
 struct ToHMIType {
   policy_table::AppHMITypes::value_type operator()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
@@ -110,29 +87,10 @@ struct ToModuleType {
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()), acl_() {}
+AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()) {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache), acl_() {}
-
-TypeAccess AccessRemoteImpl::Check(const Subject& who,
-                                   const Object& what) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  AccessControlList::const_iterator i = acl_.find(what);
-  if (i != acl_.end()) {
-    const AccessControlRow& row = i->second;
-    AccessControlRow::const_iterator j = row.find(who);
-    if (j != row.end()) {
-      // who has permissions
-      TypeAccess ret = j->second;
-      LOG4CXX_TRACE(logger_,
-                    "Subject " << who << " has permissions " << ret
-                               << " to object " << what);
-      return ret;
-    }
-  }
-  return TypeAccess::kAllowed;
-}
+    : cache_(cache) {}
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
                                        policy_table::ModuleType module) const {

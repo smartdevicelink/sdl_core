@@ -42,7 +42,7 @@
 
 namespace application_manager {
 
-enum TypeAccess { kNone, kDisallowed, kAllowed };
+enum TypeAccess { kDisallowed, kAllowed };
 
 enum MessageValidationResult {
   SUCCESS = 0,
@@ -68,16 +68,6 @@ class Service {
    * @return result according by mobile API
    */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) = 0;
-
-  /**
-   * Checks access to module of vehicle for application
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   * @param module module name
-   * @return Allowed if module is allowed, otherwise disallowed
-   */
-  virtual TypeAccess CheckAccess(const ApplicationId& app_id,
-                                 const std::string& module) = 0;
 
   /**
    * Checks if module for application is present in policy table

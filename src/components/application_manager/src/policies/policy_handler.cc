@@ -1955,23 +1955,6 @@ std::vector<std::string> PolicyHandler::GetDevicesIds(
   return application_manager_.devices(policy_app_id);
 }
 
-namespace {
-application_manager::TypeAccess ConvertTypeAccess(policy::TypeAccess access) {
-  application_manager::TypeAccess converted;
-  switch (access) {
-    case policy::TypeAccess::kAllowed:
-      converted = application_manager::TypeAccess::kAllowed;
-      break;
-    case policy::TypeAccess::kDisallowed:
-      converted = application_manager::TypeAccess::kDisallowed;
-      break;
-    default:
-      converted = application_manager::TypeAccess::kNone;
-  }
-  return converted;
-}
-}  // namespace
-
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                                    mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1990,14 +1973,6 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
       MessageHelper::SendHMIStatusNotification(*app, application_manager_);
     }
   }
-}
-
-application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& device_id, const PTString& app_id, const PTString& module) {
-  POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::TypeAccess access =
-      policy_manager_->CheckAccess(device_id, app_id, module);
-  return ConvertTypeAccess(access);
 }
 
 bool PolicyHandler::CheckModule(const PTString& app_id,

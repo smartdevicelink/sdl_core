@@ -164,8 +164,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::AppExtensionPtr app_extension;
   EXPECT_CALL(*mock_app_, AddExtension(_))
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
-  EXPECT_CALL(*mock_service_, CheckAccess(_, _))
-      .WillOnce(Return(application_manager::TypeAccess::kAllowed));
+  EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID()).WillOnce(Return(1));
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_))

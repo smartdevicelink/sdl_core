@@ -49,20 +49,6 @@ class MockObject : public policy::Object {
 
 class MockAccessRemote : public policy::AccessRemote {
  public:
-  MOCK_METHOD0(Init, void());
-  MOCK_METHOD0(Enable, void());
-  MOCK_METHOD0(Disable, void());
-  MOCK_CONST_METHOD0(IsEnabled, bool());
-
-  MOCK_METHOD2(Allow,
-               void(const policy::Subject& who, const policy::Object& what));
-  MOCK_METHOD2(Deny,
-               void(const policy::Subject& who, const policy::Object& what));
-  MOCK_METHOD1(Reset, void(const policy::Subject& who));
-  MOCK_METHOD1(Reset, void(const policy::Object& what));
-  MOCK_CONST_METHOD2(Check,
-                     policy::TypeAccess(const policy::Subject& who,
-                                        const policy::Object& what));
   MOCK_CONST_METHOD3(
       FindGroup,
       policy::PTString(const policy::Subject& who,
@@ -81,7 +67,6 @@ class MockAccessRemote : public policy::AccessRemote {
                      bool(const policy::PTString& app_id,
                           policy_table::ModuleType module));
   MOCK_METHOD1(IsAppRemoteControl, bool(const policy::Subject& who));
-  MOCK_METHOD0(Reset, void());
   MOCK_METHOD2(GetModuleTypes,
                bool(const std::string& application_id,
                     std::vector<std::string>* modules));

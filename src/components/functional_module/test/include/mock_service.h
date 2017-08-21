@@ -56,9 +56,6 @@ class MockService : public Service {
                void(ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType level));
   MOCK_CONST_METHOD0(GetRCCapabilities, const smart_objects::SmartObject*());
-  MOCK_METHOD2(CheckAccess,
-               TypeAccess(const ApplicationId& app_id,
-                          const std::string& module));
   MOCK_METHOD2(CheckModule,
                bool(const ApplicationId& app_id, const std::string& module));
   MOCK_METHOD1(RemoveHMIFakeParameters,
