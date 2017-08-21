@@ -449,87 +449,12 @@ class PolicyHandlerInterface {
                                 const std::string& hmi_level) = 0;
 
   /**
-   * Checks access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
    * @param module type
-   * @param rpc name of rpc
-   * @param params parameters list
-   */
-  virtual application_manager::TypeAccess CheckAccess(
-      const PTString& device_id,
-      const PTString& app_id,
-      const PTString& module,
-      const std::string& rpc,
-      const std::vector<PTString>& params) = 0;
-
-  /**
-   * Checks access to module for application
-   * @param app_id policy id application
-   * @param module
-   * @return true if module is allowed for application
+   * @return true if module is present, otherwise - false
    */
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
-
-  /**
-   * Sets access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   * @param module type
-   * @param allowed true if access is allowed
-   */
-  virtual void SetAccess(const PTString& device_id,
-                         const PTString& app_id,
-                         const PTString& module,
-                         bool allowed) = 0;
-
-  /**
-   * Resets access application to all resources
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   */
-  virtual void ResetAccess(const PTString& device_id,
-                           const PTString& app_id) = 0;
-
-  /**
-   * Resets access by group name for all applications
-   * @param module type
-   */
-  virtual void ResetAccess(const std::string& module) = 0;
-
-  /**
-   * Sets device as primary device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Resets driver's device
-   */
-  virtual void ResetPrimaryDevice() = 0;
-
-  /**
-   * Return id of primary device
-   */
-  virtual uint32_t PrimaryDevice() const = 0;
-
-  /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  virtual void SetRemoteControl(bool enabled) = 0;
-
-  /**
-   * @brief If remote control is enabled
-   * by User and by Policy
-   */
-  virtual bool GetRemoteControl() const = 0;
-
-  /**
-   * @brief Notifies passengers' apps about change
-   * @param new_consent New value of remote permission
-   */
-  virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
 
   /**
    * @brief Notifies Remote apps about change in permissions
@@ -548,18 +473,6 @@ class PolicyHandlerInterface {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
-
-  /**
-   * @brief Notifies Remote apps about change in HMI status
-   * @param device_id Device on which app is running
-   * @param policy_app_id ID of application
-   * @param hmi_level new HMI level for this application
-   * @param device_rank new device rank
-   */
-  virtual void OnUpdateHMIStatus(const std::string& device_id,
-                                 const std::string& policy_app_id,
-                                 const std::string& hmi_level,
-                                 const std::string& device_rank) = 0;
 
   /**
    * Gets all allowed module types

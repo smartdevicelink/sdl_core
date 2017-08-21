@@ -130,11 +130,6 @@ class PolicyListener {
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level) = 0;
-  /**
-   * @brief Signal that country_consent field was updated during PTU
-   * @param new_consent New value of country_consent
-   */
-  virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
 
   /**
    * @brief Notifies Remote apps about change in permissions
@@ -154,17 +149,6 @@ class PolicyListener {
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
 
-  /**
-   * Notifies about changing HMI status
-   * @param device_id unique identifier of device
-   * @param policy_app_id unique identifier of application in policy
-   * @param hmi_level default HMI level for this application
-   * @param device_rank device rank
-   */
-  virtual void OnUpdateHMIStatus(const std::string& device_id,
-                                 const std::string& policy_app_id,
-                                 const std::string& hmi_level,
-                                 const std::string& device_rank) = 0;
 #endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy

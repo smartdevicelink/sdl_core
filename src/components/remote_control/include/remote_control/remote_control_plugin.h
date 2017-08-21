@@ -92,21 +92,6 @@ class RemoteControlPlugin : public RemotePluginInterface {
                             mobile_apis::HMILevel::eType old_level);
 
   /**
-   * @brief Checks if plugin hasn't put restrictions on app's HMI Level
-   * @param app App with old HMILevel
-   * @param new_level HMILevel which is about to be set to app
-   */
-  virtual bool CanAppChangeHMILevel(
-      application_manager::ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType new_level);
-
-  /**
-   * Handles removing (disconnecting) device
-   * @param device removed
-   */
-  void OnDeviceRemoved(const connection_handler::DeviceHandle& device) OVERRIDE;
-
-  /**
    * @brief OnUnregisterApplication handles application unregistering event
    * @param app_id application id which was unregistered
    */

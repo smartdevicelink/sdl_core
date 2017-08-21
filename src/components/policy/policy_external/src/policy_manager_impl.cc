@@ -341,7 +341,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
 #ifdef SDL_REMOTE_CONTROL
-    access_remote_->Init();
     CheckPTUUpdatesChange(pt_update, policy_table_snapshot);
 #endif  // SDL_REMOTE_CONTROL
 
@@ -785,9 +784,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
-    const std::string rank =
-        access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-    UpdateDeviceRank(who, rank);
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
@@ -1909,9 +1905,6 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
-#ifdef SDL_REMOTE_CONTROL
-    access_remote_->Init();
-#endif  // SDL_REMOTE_CONTROL
   }
   return ret;
 }
@@ -1971,29 +1964,6 @@ bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
   return hmi_types;
 }
 
-TypeAccess PolicyManagerImpl::CheckAccess(const PTString& device_id,
-                                          const PTString& app_id,
-                                          const PTString& module,
-                                          const PTString& rpc,
-                                          const RemoteControlParams& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Module type: " << module);
-
-  policy_table::ModuleType module_type;
-  bool is_valid = EnumFromJsonString(module, &module_type);
-  if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
-    if (access_remote_->IsPrimaryDevice(device_id)) {
-      return TypeAccess::kAllowed;
-    } else {
-      Subject who = {device_id, app_id};
-      Object what = {module_type};
-      return CheckDriverConsent(who, what, rpc, params);
-    }
-  }
-  LOG4CXX_DEBUG(logger_, TypeAccess::kDisallowed);
-  return TypeAccess::kDisallowed;
-}
-
 bool PolicyManagerImpl::CheckModule(const PTString& app_id,
                                     const PTString& module) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2002,142 +1972,9 @@ bool PolicyManagerImpl::CheckModule(const PTString& app_id,
          access_remote_->CheckModuleType(app_id, module_type);
 }
 
-TypeAccess PolicyManagerImpl::CheckDriverConsent(
-    const Subject& who,
-    const Object& what,
-    const std::string& rpc,
-    const RemoteControlParams& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!access_remote_->IsEnabled()) {
-    return TypeAccess::kDisallowed;
-  }
-
-  return access_remote_->Check(who, what);
-}
-
-void PolicyManagerImpl::SetAccess(const PTString& dev_id,
-                                  const PTString& app_id,
-                                  const PTString& module,
-                                  bool allowed) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::ModuleType module_type;
-  bool is_valid = EnumFromJsonString(module, &module_type);
-  if (!is_valid) {
-    return;
-  }
-
-  Subject who = {dev_id, app_id};
-  Object what = {module_type};
-  LOG4CXX_DEBUG(logger_,
-                "Driver's consent: " << who << ", " << what << " is "
-                                     << std::boolalpha << allowed);
-  if (allowed) {
-    access_remote_->Allow(who, what);
-  } else {
-    access_remote_->Deny(who, what);
-  }
-}
-
-void PolicyManagerImpl::ResetAccess(const PTString& dev_id,
-                                    const PTString& app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {dev_id, app_id};
-  access_remote_->Reset(who);
-}
-
-void PolicyManagerImpl::ResetAccess(const PTString& module) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::ModuleType module_type;
-  bool is_valid = EnumFromJsonString(module, &module_type);
-  if (!is_valid) {
-    return;
-  }
-
-  Object what = {module_type};
-  access_remote_->Reset(what);
-}
-
-void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  access_remote_->SetPrimaryDevice(dev_id);
-}
-
-void PolicyManagerImpl::ResetPrimaryDevice() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  access_remote_->SetPrimaryDevice("");
-}
-
-PTString PolicyManagerImpl::PrimaryDevice() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return access_remote_->PrimaryDevice();
-}
-
-void PolicyManagerImpl::SetRemoteControl(bool enabled) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (enabled) {
-    access_remote_->Enable();
-  } else {
-    access_remote_->Disable();
-  }
-}
-
-bool PolicyManagerImpl::GetRemoteControl() const {
-  return access_remote_->IsEnabled();
-}
-
-void PolicyManagerImpl::OnChangedPrimaryDevice(
-    const std::string& device_id, const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppRemoteControl(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
-    return;
-  }
-
-  const std::string rank =
-      access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-  UpdateDeviceRank(who, rank);
-  SendAppPermissionsChanged(who.dev_id, who.app_id);
-}
-
-void PolicyManagerImpl::OnChangedRemoteControl(
-    const std::string& device_id, const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {device_id, application_id};
-  if (!access_remote_->IsAppRemoteControl(who)) {
-    LOG4CXX_INFO(logger_, "Application " << who << " isn't remote");
-    return;
-  }
-
-  if (access_remote_->IsPrimaryDevice(who.dev_id)) {
-    LOG4CXX_INFO(logger_, "Device " << who.dev_id << " is primary");
-    return;
-  }
-
-  if (!access_remote_->IsEnabled()) {
-    SendHMILevelChanged(who);
-  }
-
-  SendAppPermissionsChanged(who.dev_id, who.app_id);
-}
-
-void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
-                                         const std::string& rank) {
-  std::string default_hmi("NONE");
-  if (GetDefaultHmi(who.app_id, &default_hmi)) {
-    access_remote_->Reset(who);
-    listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi, rank);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't get default HMI level for application "
-                     << who.app_id);
-  }
-}
-
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
-    access_remote_->Reset(who);
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(logger_,
@@ -2180,39 +2017,7 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
 void PolicyManagerImpl::CheckPTUUpdatesChange(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
-  CheckPTURemoteCtrlChange(pt_update, snapshot);
   CheckRemoteGroupsChange(pt_update, snapshot);
-}
-
-bool PolicyManagerImpl::CheckPTURemoteCtrlChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  rpc::Optional<rpc::Boolean>& new_consent =
-      pt_update->policy_table.module_config.country_consent_passengersRC;
-  rpc::Optional<rpc::Boolean>& old_consent =
-      snapshot->policy_table.module_config.country_consent_passengersRC;
-
-  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
-    return false;
-  }
-
-  bool result = false;
-  if (new_consent.is_initialized() && old_consent.is_initialized()) {
-    result = (*new_consent != *old_consent);
-  } else {
-    bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
-    bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
-
-    result = !(not_changed_consent1 || not_changed_consent2);
-  }
-
-  if (result) {
-    listener()->OnRemoteAllowedChanged(result);
-  }
-
-  return result;
 }
 
 void PolicyManagerImpl::CheckRemoteGroupsChange(
@@ -2236,24 +2041,7 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
        i != devices.end();
        ++i) {
     const Subject who = {*i, application_id};
-    if (access_remote_->IsAppRemoteControl(who) &&
-        access_remote_->IsPrimaryDevice(who.dev_id)) {
-      SendAppPermissionsChanged(who.dev_id, who.app_id);
-    }
-  }
-}
-
-void PolicyManagerImpl::OnNonPrimaryGroupsChanged(
-    const std::string& application_id) {
-  const std::vector<std::string> devices =
-      listener()->GetDevicesIds(application_id);
-  for (std::vector<std::string>::const_iterator i = devices.begin();
-       i != devices.end();
-       ++i) {
-    const Subject who = {*i, application_id};
-    if (access_remote_->IsAppRemoteControl(who) &&
-        !access_remote_->IsPrimaryDevice(who.dev_id) &&
-        access_remote_->IsEnabled()) {
+    if (access_remote_->IsAppRemoteControl(who)) {
       SendAppPermissionsChanged(who.dev_id, who.app_id);
     }
   }

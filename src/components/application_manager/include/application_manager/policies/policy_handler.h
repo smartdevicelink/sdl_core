@@ -144,86 +144,12 @@ class PolicyHandler : public PolicyHandlerInterface,
                         const std::string& hmi_level) OVERRIDE;
 
   /**
-   * Checks access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
    * @param module type
-   * @param rpc name of rpc
-   * @param params parameters list
-   */
-  application_manager::TypeAccess CheckAccess(
-      const PTString& device_id,
-      const PTString& app_id,
-      const PTString& module,
-      const std::string& rpc,
-      const std::vector<PTString>& params) OVERRIDE;
-
-  /**
-   * Checks access to module for application
-   * @param app_id policy id application
-   * @param module
-   * @return true if module is allowed for application
+   * @return true if module is present, otherwise - false
    */
   bool CheckModule(const PTString& app_id, const PTString& module) OVERRIDE;
-
-  /**
-   * Sets access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   * @param module type
-   * @param allowed true if access is allowed
-   */
-  void SetAccess(const PTString& device_id,
-                 const PTString& app_id,
-                 const PTString& module,
-                 bool allowed) OVERRIDE;
-
-  /**
-   * Resets access application to all resources
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   */
-  void ResetAccess(const PTString& device_id, const PTString& app_id) OVERRIDE;
-
-  /**
-   * Resets access by module name for all applications
-   * @param module type
-   */
-  void ResetAccess(const std::string& module) OVERRIDE;
-
-  /**
-   * Sets device as primary device
-   * @param dev_id ID device
-   */
-  void SetPrimaryDevice(const PTString& dev_id) OVERRIDE;
-
-  /**
-   * Resets driver's device
-   */
-  void ResetPrimaryDevice() OVERRIDE;
-
-  /**
-   * Return id of primary device
-   */
-  uint32_t PrimaryDevice() const OVERRIDE;
-
-  /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  void SetRemoteControl(bool enabled) OVERRIDE;
-
-  /**
-   * @brief If remote control is enabled
-   * by User and by Policy
-   */
-  bool GetRemoteControl() const OVERRIDE;
-
-  /**
-   * @brief Notifies passengers' apps about change
-   * @param new_consent New value of remote permission
-   */
-  void OnRemoteAllowedChanged(bool new_consent) OVERRIDE;
 
   /**
    * @brief Notifies Remote apps about change in permissions
@@ -242,18 +168,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnUpdateHMIStatus(const std::string& device_id,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
-
-  /**
-   * @brief Notifies Remote apps about change in HMI status
-   * @param device_id Device on which app is running
-   * @param policy_app_id ID of application
-   * @param hmi_level new HMI level for this application
-   * @param device_rank new device rank
-   */
-  void OnUpdateHMIStatus(const std::string& device_id,
-                         const std::string& policy_app_id,
-                         const std::string& hmi_level,
-                         const std::string& device_rank) OVERRIDE;
 
   /**
    * Gets all allowed module types

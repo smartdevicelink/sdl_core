@@ -246,11 +246,6 @@ void MessageHelper::SendHMIStatusNotification(
       application_impl, application_manager);
 }
 
-mobile_api::DeviceRank::eType MessageHelper::StringToDeviceRank(
-    const std::string& device_rank) {
-  return MockMessageHelper::message_helper_mock()->StringToDeviceRank(
-      device_rank);
-}
 #endif  // SDL_REMOTE_CONTROL
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,

@@ -56,28 +56,10 @@ class MockService : public Service {
                void(ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType level));
   MOCK_CONST_METHOD0(GetRCCapabilities, const smart_objects::SmartObject*());
-  MOCK_METHOD4(CheckAccess,
-               TypeAccess(const ApplicationId& app_id,
-                          const std::string& module,
-                          const std::string& rpc,
-                          const std::vector<std::string>& params));
   MOCK_METHOD2(CheckModule,
                bool(const ApplicationId& app_id, const std::string& module));
-  MOCK_METHOD3(SetAccess,
-               void(const ApplicationId& app_id,
-                    const std::string& module,
-                    bool allowed));
-  MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
-  MOCK_METHOD1(ResetAccess, void(const std::string& module));
-  MOCK_METHOD1(GetDeviceHandlerById, uint32_t(const std::string& device_id));
-  MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
-  MOCK_METHOD0(ResetPrimaryDevice, void());
-  MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
-  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
   MOCK_METHOD1(RemoveHMIFakeParameters,
                void(application_manager::MessagePtr& message));
-  MOCK_CONST_METHOD0(IsRemoteControlAllowed, bool());
-
   MOCK_CONST_METHOD1(IsRemoteControlApplication,
                      bool(ApplicationSharedPtr app));
   MOCK_CONST_METHOD1(IsInterfaceAvailable,

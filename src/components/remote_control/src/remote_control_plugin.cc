@@ -36,8 +36,6 @@
 #include "remote_control/rc_module_constants.h"
 #include "remote_control/rc_app_extension.h"
 #include "remote_control/message_helper.h"
-#include "remote_control/policy_helper.h"
-#include "remote_control/module_helper.h"
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
@@ -230,18 +228,6 @@ void RemoteControlPlugin::SendHmiStatusNotification(
 
   msg_params["systemContext"] = static_cast<uint32_t>(app->system_context());
 
-  application_manager::AppExtensionPtr app_extension =
-      app->QueryInterface(GetModuleID());
-  RCAppExtensionPtr rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
-          app_extension);
-
-  if (rc_app_extension->is_on_driver_device()) {
-    msg_params[message_params::kRank] = "DRIVER";
-  } else {
-    msg_params[message_params::kRank] = "PASSENGER";
-  }
-
   msg->set_json_message(MessageHelper::ValueToString(msg_params));
 
   service()->SendMessageToMobile(msg);
@@ -309,8 +295,6 @@ bool RemoteControlPlugin::IsAppForPlugin(
     RCAppExtensionPtr rc_app_extension = new RCAppExtension(GetModuleID());
     app->AddExtension(rc_app_extension);
     service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
-    service()->SetPrimaryDevice(app->device());
-    PolicyHelper::SetIsAppOnPrimaryDevice(app, *this);
     return true;
   }
   return false;
@@ -324,33 +308,6 @@ void RemoteControlPlugin::OnAppHMILevelChanged(
                                     << " has changed hmi level to "
                                     << app->hmi_level());
   service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
-}
-
-bool RemoteControlPlugin::CanAppChangeHMILevel(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level) {
-  application_manager::AppExtensionPtr app_extension =
-      app->QueryInterface(GetModuleID());
-  if (!app_extension) {
-    return true;
-  }
-  RCAppExtensionPtr rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
-          app_extension);
-  if (new_level == mobile_apis::HMILevel::eType::HMI_FULL ||
-      new_level == mobile_apis::HMILevel::eType::HMI_LIMITED) {
-    return rc_app_extension->is_on_driver_device();
-  }
-  return true;
-}
-
-void RemoteControlPlugin::OnDeviceRemoved(
-    const connection_handler::DeviceHandle& device) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  bool is_driver = service()->PrimaryDevice() == device;
-  if (is_driver) {
-    service()->ResetPrimaryDevice();
-  }
 }
 
 void RemoteControlPlugin::OnUnregisterApplication(const uint32_t app_id) {

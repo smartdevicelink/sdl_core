@@ -229,7 +229,7 @@ class BaseCommandRequest
 
   virtual std::string ModuleType(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual application_manager::TypeAccess CheckAccess(
+  virtual application_manager::TypeAccess CheckModule(
       const Json::Value& message);
 
   bool auto_allowed() const {
@@ -251,9 +251,6 @@ class BaseCommandRequest
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
-  void UpdateHMILevel(
-      const rc_event_engine::Event<application_manager::MessagePtr,
-                                   std::string>& event);
 
   /**
    * @brief CheckPolicyPermissions checks RPC permissions defined in policy
@@ -277,8 +274,6 @@ class BaseCommandRequest
    */
   bool AqcuireResources();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
-  inline bool IsNeededDriverConsent(
-      application_manager::TypeAccess access) const;
   void SendDisallowed(application_manager::TypeAccess access);
   void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(

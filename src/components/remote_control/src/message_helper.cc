@@ -49,7 +49,7 @@ std::map<RCFunctionID, std::string> GenerateAPINames() {
   result.insert(std::make_pair<RCFunctionID, std::string>(
       RCFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
   result.insert(std::make_pair<RCFunctionID, std::string>(
-      RCFunctionID::ON_REMOTE_CONTROL_SETTINGS, "OnRemoteControlSettingd"));
+      RCFunctionID::ON_REMOTE_CONTROL_SETTINGS, "OnRemoteControlSettings"));
   return result;
 }
 
@@ -59,13 +59,8 @@ std::map<std::string, hmi_apis::Common_RCAccessMode::eType> access_modes{
     {enums_value::kAskDriver, hmi_apis::Common_RCAccessMode::ASK_DRIVER}};
 }
 
-uint32_t MessageHelper::next_correlation_id_ = 1;
 const std::map<RCFunctionID, std::string> MessageHelper::kMobileAPINames =
     GenerateAPINames();
-
-uint32_t MessageHelper::GetNextRCCorrelationID() {
-  return next_correlation_id_++;
-}
 
 const std::string MessageHelper::GetMobileAPIName(RCFunctionID func_id) {
   std::map<RCFunctionID, std::string>::const_iterator it =

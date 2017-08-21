@@ -71,83 +71,13 @@ class CoreService : public Service {
   mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) FINAL;
 
   /**
-   * Checks access to requested equipment of vehicle
+   * Checks if module for application is present in policy table
    * @param app_id id of application
    * @param module type
-   * @param rpc name of rpc
-   * @param params parameters list
-   * @return return allowed if access exist,
-   * manual if need to send question to driver otherwise disallowed
-   */
-  TypeAccess CheckAccess(const ApplicationId& app_id,
-                         const std::string& module,
-                         const std::string& rpc,
-                         const std::vector<std::string>& params) FINAL;
-
-  /**
-   * Checks access to module for application
-   * @param app_id id of application
-   * @param module type
-   * @return true if module is allowed for application
+   * @return true if module is present, otherwise - false
    */
   bool CheckModule(const ApplicationId& app_id,
                    const std::string& module) FINAL;
-
-  /**
-   * Sets access to functional group which contains given RPC for application
-   * @param app_id id of application
-   * @param module type
-   * @param allowed true if driver has given access
-   */
-  void SetAccess(const ApplicationId& app_id,
-                 const std::string& module,
-                 bool allowed) FINAL;
-
-  /**
-   * @brief ResetAccess Resets access by application id
-   * @param app_id Application id
-   */
-  void ResetAccess(const ApplicationId& app_id) FINAL;
-
-  /**
-   * Resets access by module type for all applications
-   * @param module type
-   */
-  void ResetAccess(const std::string& module) FINAL;
-
-  /**
-   * Gets device handler for device with certain ID
-   * @param device_id the ID of the connected device
-   * @return device handler if device with requested ID was found
-   */
-  uint32_t GetDeviceHandlerById(const std::string& device_id) FINAL;
-
-  /**
-   * Sets device as primary device
-   * @param dev_id ID device
-   */
-  void SetPrimaryDevice(const uint32_t dev_id) FINAL;
-
-  /**
-   * Resets driver's device
-   */
-  void ResetPrimaryDevice() FINAL;
-
-  /**
-   * Return id of primary device
-   */
-  uint32_t PrimaryDevice() const FINAL;
-
-  /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  void SetRemoteControl(bool enabled) FINAL;
-
-  /**
-   * @brief Is Remote Control allowed by Policy and User
-   */
-  bool IsRemoteControlAllowed() const FINAL;
 
   /**
    * Checks if application has remote control functions

@@ -362,11 +362,12 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
   return true;
 }
 
-application_manager::TypeAccess BaseCommandRequest::CheckAccess(
+application_manager::TypeAccess BaseCommandRequest::CheckModule(
     const Json::Value& message) {
   const std::string& module = ModuleType(message);
-  return service_->CheckAccess(
-      app_->app_id(), module, message_->function_name(), ControlData(message));
+  return service_->CheckModule(app_->app_id(), module)
+             ? application_manager::TypeAccess::kAllowed
+             : application_manager::TypeAccess::kDisallowed;
 }
 
 bool BaseCommandRequest::CheckDriverConsent() {
@@ -380,14 +381,11 @@ bool BaseCommandRequest::CheckDriverConsent() {
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
 
-  application_manager::TypeAccess access = CheckAccess(value);
+  application_manager::TypeAccess access = CheckModule(value);
 
   if (IsAutoAllowed(access)) {
     set_auto_allowed(true);
     return true;
-  }
-  if (IsNeededDriverConsent(access)) {
-    SendGetUserConsent(value);
   } else {
     SendDisallowed(access);
   }
@@ -436,11 +434,6 @@ bool BaseCommandRequest::AqcuireResources() {
   return false;
 }
 
-bool BaseCommandRequest::IsNeededDriverConsent(
-    application_manager::TypeAccess access) const {
-  return access == application_manager::kManual;
-}
-
 bool BaseCommandRequest::IsAutoAllowed(
     application_manager::TypeAccess access) const {
   return access == application_manager::kAllowed;
@@ -452,15 +445,11 @@ void BaseCommandRequest::SendDisallowed(
   std::string info;
   switch (access) {
     case application_manager::kAllowed:
-    case application_manager::kManual:
       return;
     case application_manager::kDisallowed:
       info = disallowed_info_.empty()
                  ? "The RPC is disallowed by vehicle settings"
                  : disallowed_info_;
-      break;
-    case application_manager::kNone:
-      info = "Internal issue";
       break;
     default:
       info = "Unknown issue";
@@ -497,28 +486,7 @@ void BaseCommandRequest::on_event(
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
   } else {
-    if (auto_allowed()) {
-      UpdateHMILevel(event);
-    }
     OnEvent(event);  // run child's logic
-  }
-}
-
-void BaseCommandRequest::UpdateHMILevel(
-    const rc_event_engine::Event<application_manager::MessagePtr, std::string>&
-        event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  RCAppExtensionPtr extension = GetAppExtension(app_);
-  if (!extension) {
-    return;
-  }
-  if (!extension->is_on_driver_device()) {
-    Json::Value value =
-        MessageHelper::StringToValue(event.event_message()->json_message());
-    std::string result_code;
-    std::string info;
-    bool success = ParseResultCode(value, result_code, info);
-    CheckHMILevel(application_manager::kAllowed, success);
   }
 }
 
@@ -566,9 +534,6 @@ void BaseCommandRequest::ProcessAccessResponse(
     LOG4CXX_DEBUG(logger_,
                   "Setting allowed access for " << app_->app_id() << " for "
                                                 << module);
-    service_->SetAccess(app_->app_id(), module, is_allowed);
-    CheckHMILevel(application_manager::kManual, is_succeeded);
-
     if (is_allowed) {
       rc_module_.resource_allocation_manager().ForceAcquireResource(
           module, app_->app_id());
@@ -605,22 +570,7 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
         }
       }
       break;
-    case application_manager::kManual: {
-      if (user_consented) {
-        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
-            app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
-          LOG4CXX_DEBUG(logger_,
-                        "User consented RSDL functionality for "
-                            << app_->name().c_str()
-                            << "; setting LIMITED level.");
-          service_->ChangeNotifyHMILevel(
-              app_, mobile_apis::HMILevel::eType::HMI_LIMITED);
-        }
-      }
-      break;
-    }
     case application_manager::kDisallowed:
-    case application_manager::kNone:
     default:
       LOG4CXX_DEBUG(logger_,
                     "No access information or disallowed: "

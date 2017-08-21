@@ -144,7 +144,6 @@ struct ApplicationParams : PolicyBase {
   Optional<String<0, 255> > certificate;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Strings> groups_primaryRC;
-  Optional<Strings> groups_nonPrimaryRC;
   mutable Optional<ModuleTypes> moduleType;
 #endif  // SDL_REMOTE_CONTROL
 
@@ -247,10 +246,6 @@ struct ModuleConfig : CompositeType {
   Optional<String<4, 4> > vehicle_year;
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
-#ifdef SDL_REMOTE_CONTROL
-  Optional<Boolean> user_consent_passengersRC;
-  Optional<Boolean> country_consent_passengersRC;
-#endif  // SDL_REMOTE_CONTROL
 
  public:
   ModuleConfig();

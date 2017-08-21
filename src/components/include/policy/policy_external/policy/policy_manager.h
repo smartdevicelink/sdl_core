@@ -522,96 +522,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                            std::vector<int>* app_types) = 0;
 
   /**
-   * Checks access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   * @param module
-   * @param rpc name of rpc
-   * @param params parameters list
-   */
-  virtual TypeAccess CheckAccess(const PTString& device_id,
-                                 const PTString& app_id,
-                                 const PTString& module,
-                                 const PTString& rpc,
-                                 const RemoteControlParams& params) = 0;
-
-  /**
-   * Checks access to module for application
-   * @param app_id policy id application
-   * @param module
-   * @return true if module is allowed for application
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
    */
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
-
-  /**
-     * Sets access to equipment of vehicle for application by RPC
-     * @param dev_id unique identifier of device
-     * @param app_id policy id application
-     * @param module type
-     * @param allowed true if access is allowed
-     */
-  virtual void SetAccess(const PTString& dev_id,
-                         const PTString& app_id,
-                         const PTString& module,
-                         bool allowed) = 0;
-
-  /**
-   * Resets access application to all resources
-   * @param dev_id unique identifier of device
-   * @param app_id policy id application
-   */
-  virtual void ResetAccess(const PTString& dev_id, const PTString& app_id) = 0;
-
-  /**
-   * Resets access by functional group for all applications
-   * @param module type
-   */
-  virtual void ResetAccess(const PTString& module) = 0;
-
-  /**
-   * Sets driver as primary device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Resets driver's device
-   */
-  virtual void ResetPrimaryDevice() = 0;
-
-  /**
-   * Gets current primary device
-   * @return ID device
-   */
-  virtual PTString PrimaryDevice() const = 0;
-
-  /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  virtual void SetRemoteControl(bool enabled) = 0;
-
-  /*
-   * @brief If remote control is enabled
-   * by User and by Policy
-   */
-  virtual bool GetRemoteControl() const = 0;
-
-  /**
-   * Handles changed primary device event for a application
-   * @param device_id Device on which app is running
-   * @param application_id ID application
-   */
-  virtual void OnChangedPrimaryDevice(const std::string& device_id,
-                                      const std::string& application_id) = 0;
-
-  /**
-   * Handles changed remote control event for a application
-   * @param device_id Device on which app is running
-   * @param application_id ID application
-   */
-  virtual void OnChangedRemoteControl(const std::string& device_id,
-                                      const std::string& application_id) = 0;
 
   /*
    * Send OnPermissionsChange notification to mobile app

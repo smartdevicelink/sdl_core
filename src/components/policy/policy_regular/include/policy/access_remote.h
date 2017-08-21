@@ -41,26 +41,6 @@
 namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
-
-enum TypeAccess { kDisallowed, kAllowed, kManual };
-inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
-  output << "Access: ";
-  switch (x) {
-    case kDisallowed:
-      output << "DISALLOWED";
-      break;
-    case kAllowed:
-      output << "ALLOWED";
-      break;
-    case kManual:
-      output << "MANUAL";
-      break;
-    default:
-      output << "Error: Unknown type";
-  }
-  return output;
-}
-
 struct Subject {
   PTString dev_id;
   PTString app_id;
@@ -95,87 +75,6 @@ typedef std::vector<PTString> RemoteControlParams;
 class AccessRemote {
  public:
   virtual ~AccessRemote() {}
-
-  /**
-   * Initializes oneself
-   */
-  virtual void Init() = 0;
-
-  /**
-   * Enables remote control
-   */
-  virtual void Enable() = 0;
-
-  /**
-   * Disables remote control
-   */
-  virtual void Disable() = 0;
-
-  /**
-   * Checks if remote control is enabled
-   * @return true if enabled
-   */
-  virtual bool IsEnabled() const = 0;
-
-  /**
-   * Checks whether device is driver's device
-   * @param dev_id unique device id
-   * @return true if device is have driver
-   */
-  virtual bool IsPrimaryDevice(const PTString& dev_id) const = 0;
-
-  /**
-   * Sets device as driver's device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
-
-  /**
-   * Gets current primary device
-   * @return ID device
-   */
-  virtual PTString PrimaryDevice() const = 0;
-
-  /**
-   * Allows access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   */
-  virtual void Allow(const Subject& who, const Object& what) = 0;
-
-  /**
-   * Denies access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   */
-  virtual void Deny(const Subject& who, const Object& what) = 0;
-
-  /**
-   * Resets access subject to all object
-   * @param who subject is dev_id and app_id
-   */
-  virtual void Reset(const Subject& who) = 0;
-
-  /**
-   * Resets access to object for all subjects
-   * @param what object is group
-   */
-  virtual void Reset(const Object& what) = 0;
-
-  /*
-   * Resets all stored consents
-   */
-  virtual void Reset() = 0;
-
-  /**
-   * Checks access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   * @return allowed if access was given, disallowed if access was denied
-   * manual if need to ask driver
-   */
-  virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
-
   /**
    * Checks permissions for module
    * @param app_id application ID

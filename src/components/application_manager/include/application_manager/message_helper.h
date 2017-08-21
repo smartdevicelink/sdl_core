@@ -129,17 +129,6 @@ class MessageHelper {
   static hmi_apis::Common_Result::eType HMIResultFromString(
       const std::string& hmi_result);
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Converts string to device rank, if possible
-   * @param device_rank Stringified device rank
-   * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
-   * is not possible
-   */
-  static mobile_api::DeviceRank::eType StringToDeviceRank(
-      const std::string& device_rank);
-#endif  // SDL_REMOTE_CONTROL
-
   /**
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value

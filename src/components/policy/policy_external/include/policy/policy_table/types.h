@@ -177,7 +177,6 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
 #ifdef SDL_REMOTE_CONTROL
   Optional<Strings> groups_primaryRC;
-  Optional<Strings> groups_nonPrimaryRC;
   mutable Optional<ModuleTypes> moduleType;
 #endif  // SDL_REMOTE_CONTROL
 
@@ -308,10 +307,6 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
-#ifdef SDL_REMOTE_CONTROL
-  Optional<Boolean> user_consent_passengersRC;
-  Optional<Boolean> country_consent_passengersRC;
-#endif  // SDL_REMOTE_CONTROL
 
  public:
   ModuleConfig();

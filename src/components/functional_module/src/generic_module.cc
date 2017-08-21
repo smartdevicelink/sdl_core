@@ -50,9 +50,6 @@ void GenericModule::OnServiceStateChanged(ServiceState state) {
     // We must subscribe to necessary HMI notifications
     service_->SubscribeToHMINotification(hmi_api::on_interior_vehicle_data);
     service_->SubscribeToHMINotification(hmi_api::on_remote_control_settings);
-    // Disabled
-    //    service_->SubscribeToHMINotification(hmi_api::on_reverse_apps_allowing);
-    //    service_->SubscribeToHMINotification(hmi_api::on_device_rank_changed);
   }
 }
 

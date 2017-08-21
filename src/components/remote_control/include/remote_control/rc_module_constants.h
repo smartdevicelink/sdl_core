@@ -89,103 +89,24 @@ const char kCode[] = "code";
 }  //  json_keys
 
 namespace message_params {
-/*
-const char kCustomPresets[] = "customPresets";
-const char kRadioStation[]  = "radioStation";
-const char kSongInfo[]      = "songInfo";
-const char kEvent[]         = "event";
-const char kAdvertisement[] = "advertisement";
-const char kActivity[]      = "activity";
-const char kTriggerSource[] = "triggerSource";
-
-// RadioStation struct
-const char kFrequency[]     = "frequency";
-const char kFraction[]      = "fraction";
-const char kAvailableHDs[]  = "availableHDs";
-const char kCurrentHD[]     = "currentHD";
-// RadioStation struct
-
-// Time struct
-const char kHours[]   = "hours";
-const char kMinutes[] = "minutes";
-const char kSeconds[] = "seconds";
-const char kYear[]    = "year";
-const char kMonth[]   = "month";
-const char kDay[]     = "day";
-const char kTZD[]     = "TZD";
-// Time struct
-
-// Address struct
-const char kState[]   = "state";
-const char kZipCode[] = "zipcode";
-const char kCity[]    = "city";
-const char kStreet[]  = "street";
-// Address struct
-
-// Location struct
-const char kGPSCoordinates[] = "gpsCoordinates";
-const char kAddress[]        = "address";
-// Location struct
-
-// SongInfo struct
-const char kArtist[]   = "artist";
-const char kGenre[]    = "genre";
-const char kAlbum[]    = "album";
-const char kSongYear[] = "year";
-const char kDuration[] = "duration";
-// SongInfo struct
-
-// Advertisement struct
-const char kProductName[] = "productName";
-const char kCompanyName[] = "companyName";
-const char kPhoneNumber[] = "phoneNumber";
-const char kLocation[]    = "location";
-// Advertisement struct
-
-// EventDetails struct
-const char kEventName[]      = "eventName";
-// const char kPhoneNumber[] = "phoneNumber";
-const char kPrice[]          = "price";
-const char kEventTime[]      = "eventTime";
-// EventDetails struct
-
-// WebActivity struct
-const char kURL[]        = "url";
-const char kActionCode[] = "actionCode";
-// WebActivity struct
-*/
+const char kName[] = "name";
 
 // SetInteriorVehicleData request
 const char kModuleData[] = "moduleData";
 // SetInteriorVehicleData request
-
-// SetInteriorVehicleData response
-// const char kModuleData[] = "moduleData";
-// SetInteriorVehicleData response
 
 // GetInteriorVehicleData request
 const char kSubscribe[] = "subscribe";
 // GetInteriorVehicleData request
 
 // GetInteriorVehicleData response
-// const char kModuleData[] = "moduleData";
 const char kIsSubscribed[] = "isSubscribed";
 // GetInteriorVehicleData response
-
-// OnInteriorVehicleData notification
-// const char kModuleData[] = "moduleData";
-// OnInteriorVehicleData notification
 
 // OnRemoteControlSettings notification
 const char kAccessMode[] = "accessMode";
 const char kAllowed[] = "allowed";
 // OnRemoteControlSettings notification
-
-// RC.OnDriverRankChanged notification
-const char kDevice[] = "device";
-const char kName[] = "name";
-const char kRank[] = "deviceRank";
-// RC.OnDriverRankChanged notification
 
 // ButtonPress request
 const char kModuleType[] = "moduleType";
@@ -243,10 +164,6 @@ const char kAudioState[] = "audioStreamingState";
 }  //  namespace message_params
 
 namespace enums_value {
-// TriggerSource enum
-// const char kMenu[]              = "MENU";
-// const char kVR[]                = "VR";
-// TriggerSource enum
 
 // ModuleType enum
 const char kClimate[] = "CLIMATE";

@@ -1718,15 +1718,6 @@
     </param>
   </struct>
 
-  <enum name="DeviceRank">
-   <element name="DRIVER">
-    <description>The device is ranked as driver's</description>
-   </element>
-   <element name="PASSENGER">
-    <description>The device is ranked as passenger's</description>
-   </element>
-  </enum>
-
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
 <!-- Ford Specific Data Items -->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     

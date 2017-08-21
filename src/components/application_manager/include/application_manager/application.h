@@ -801,13 +801,6 @@ class Application : public virtual InitialApplicationData,
   virtual void set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state) = 0;
 
-  virtual bool IsSubscribedToInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-  virtual bool SubscribeToInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-  virtual bool UnsubscribeFromInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-
   /**
    * @brief set_hmi_level Set HMI level for application
    * @param hmi_level Current HMI level

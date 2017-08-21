@@ -44,29 +44,6 @@ using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
-struct Erase {
- private:
-  const Subject& who_;
-
- public:
-  explicit Erase(const Subject& who) : who_(who) {}
-  void operator()(AccessRemoteImpl::AccessControlList::value_type& row) const {
-    row.second.erase(who_);
-  }
-};
-
-struct IsTypeAccess {
- private:
-  const TypeAccess& type_;
-
- public:
-  explicit IsTypeAccess(const TypeAccess& type) : type_(type) {}
-  bool operator()(
-      const AccessRemoteImpl::AccessControlRow::value_type& item) const {
-    return item.second == type_;
-  }
-};
-
 struct ToHMIType {
   policy_table::AppHMITypes::value_type operator()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
@@ -110,45 +87,10 @@ struct ToModuleType {
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl()
-    : cache_(new CacheManager()), primary_device_(), enabled_(true), acl_() {}
+AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()) {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache), primary_device_(), enabled_(true), acl_() {}
-
-void AccessRemoteImpl::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(cache_->pt_);
-
-  policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
-  enabled_ = country_consent() &&
-             (!config.user_consent_passengersRC.is_initialized() ||
-              *config.user_consent_passengersRC);
-}
-
-bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return primary_device_ == dev_id;
-}
-
-TypeAccess AccessRemoteImpl::Check(const Subject& who,
-                                   const Object& what) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  AccessControlList::const_iterator i = acl_.find(what);
-  if (i != acl_.end()) {
-    const AccessControlRow& row = i->second;
-    AccessControlRow::const_iterator j = row.find(who);
-    if (j != row.end()) {
-      // who has permissions
-      TypeAccess ret = j->second;
-      LOG4CXX_TRACE(logger_,
-                    "Subject " << who << " has permissions " << ret
-                               << " to object " << what);
-      return ret;
-    }
-  }
-  return TypeAccess::kManual;
-}
+    : cache_(cache) {}
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
                                        policy_table::ModuleType module) const {
@@ -237,42 +179,6 @@ void AccessRemoteImpl::Reset() {
   acl_.clear();
 }
 
-void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  primary_device_ = dev_id;
-}
-
-PTString AccessRemoteImpl::PrimaryDevice() const {
-  return primary_device_;
-}
-
-void AccessRemoteImpl::Enable() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  set_enabled(true);
-}
-
-void AccessRemoteImpl::Disable() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  set_enabled(false);
-}
-
-void AccessRemoteImpl::set_enabled(bool value) {
-  enabled_ = country_consent() && value;
-  *cache_->pt_->policy_table.module_config.user_consent_passengersRC = value;
-  cache_->Backup();
-}
-
-bool AccessRemoteImpl::country_consent() const {
-  policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
-  return !config.country_consent_passengersRC.is_initialized() ||
-         *config.country_consent_passengersRC;
-}
-
-bool AccessRemoteImpl::IsEnabled() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return enabled_;
-}
-
 void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -298,15 +204,8 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (IsAppRemoteControl(who)) {
-    if (IsPrimaryDevice(who.dev_id)) {
-      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
-                  .groups_primaryRC;
-    } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
-                  .groups_nonPrimaryRC;
-    } else {
-      return cache_->GetGroups(kPreConsentPassengersRC);
-    }
+    return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
+                .groups_primaryRC;
   }
   return cache_->GetGroups(who.app_id);
 }
