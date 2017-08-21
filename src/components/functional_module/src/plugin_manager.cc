@@ -52,7 +52,6 @@ PluginManager::PluginManager() : service_() {
 }
 
 PluginManager::~PluginManager() {
-  // TODO(PV): unsubscribe plugins from functions
   mobile_subscribers_.clear();
   hmi_subscribers_.clear();
   UnloadPlugins();
@@ -138,9 +137,6 @@ void PluginManager::UnloadPlugins() {
   dlls_.clear();
 }
 
-// TODO(VS): Optimize similar code in ProcessMessage, IsMessageForPlugin,
-// ProcessHMIMessage, IsHMIMessageForPlugin methods
-// (also we have similar code in can module)
 void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
@@ -278,10 +274,6 @@ void PluginManager::OnServiceStateChanged(ServiceState state) {
   }
 }
 
-void PluginManager::OnHMIResponse(application_manager::MessagePtr msg) {
-  // TODO(PV)
-}
-
 void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
   std::string error_string;
   switch (error) {
@@ -291,13 +283,12 @@ void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
     case ModuleObserver::Errors::FS_FAILURE:
       error_string = "Plugin failed to run file system operation.";
       break;
-    default:
-      break;
+    default: {
+      LOG4CXX_ERROR(logger_,
+                    "Error " << error_string << " was received from module "
+                             << module_id);
+    } break;
   }
-  LOG4CXX_ERROR(logger_,
-                "Error " << error_string << " was received from module "
-                         << module_id);
-  // TODO(PV)
 }
 
 void PluginManager::RemoveAppExtension(uint32_t app_id) {

@@ -71,7 +71,6 @@ class BaseCommandNotification : public Command {
    */
   virtual void OnTimeout() {}
 
-  // TODO(KKolodiy): need rename to Execute
   void Run();
 
  protected:
@@ -86,7 +85,6 @@ class BaseCommandNotification : public Command {
   /**
    * @brief executes specific logic of children classes
    */
-  // TODO(KKolodiy): need rename to Run
   virtual void Execute() = 0;
 
   /**

@@ -2173,8 +2173,6 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       break;
     }
     default:
-      // TODO(PV):
-      //  removed NOTREACHED() because some app can still have vesion 1.
       LOG4CXX_WARN(logger_,
                    "Application used unsupported protocol :"
                        << message.protocol_version() << ".");

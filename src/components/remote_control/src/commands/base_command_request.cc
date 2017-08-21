@@ -338,7 +338,6 @@ void BaseCommandRequest::Run() {
     // send response to mobile or
     // send additional request to HMI to ask driver consent
   }
-  // TODO : send error in case if policy permissions failed
 }
 
 bool BaseCommandRequest::CheckPolicyPermissions() {

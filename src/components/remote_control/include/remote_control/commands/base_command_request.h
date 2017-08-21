@@ -76,7 +76,6 @@ class BaseCommandRequest
    */
   virtual void OnTimeout();
 
-  // TODO(KKolodiy): need rename to Execute
   void Run();
   void on_event(const rc_event_engine::Event<application_manager::MessagePtr,
                                              std::string>& event);
@@ -206,7 +205,6 @@ class BaseCommandRequest
   /**
    * @brief executes specific logic of children classes
    */
-  // TODO(KKolodiy): need rename to Run
   void virtual Execute() = 0;
 
   /**

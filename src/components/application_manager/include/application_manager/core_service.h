@@ -255,9 +255,9 @@ class CoreService : public Service {
    */
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
-  
+
   /**
-   * @brief CheckParams Checks object params with allowed parameters received 
+   * @brief CheckParams Checks object params with allowed parameters received
    * from policy
    * @param object Message object
    * @param allowed_params Parameters allowed by policy
@@ -265,7 +265,7 @@ class CoreService : public Service {
    */
   bool CheckParams(const Json::Value& object,
                    const policy::RPCParams& allowed_params);
-  
+
   /**
    * @brief IsAllowed Checks particular parameter among allowed list
    * @param name Parameter name
