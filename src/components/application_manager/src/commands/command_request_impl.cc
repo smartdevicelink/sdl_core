@@ -150,11 +150,15 @@ CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager)
     : CommandImpl(message, application_manager)
     , EventObserver(application_manager.event_dispatcher())
-    , current_state_(kAwaitingHMIResponse) {}
+    , current_state_(kAwaitingHMIResponse)
+    , is_success_result_(false) {}
 
-CommandRequestImpl::~CommandRequestImpl() {}
+CommandRequestImpl::~CommandRequestImpl() {
+  UpdateHash();
+}
 
 bool CommandRequestImpl::Init() {
+  hash_update_mode_ = kSkipHashUpdate;
   return true;
 }
 
@@ -252,6 +256,8 @@ void CommandRequestImpl::SendResponse(
   response[strings::msg_params][strings::success] = success;
   response[strings::msg_params][strings::result_code] = result_code;
 
+  is_success_result_ = success;
+
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
@@ -309,6 +315,46 @@ bool CommandRequestImpl::ProcessHMIInterfacesAvailability(
     return false;
   }
   return true;
+}
+
+void CommandRequestImpl::UpdateHash() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (hash_update_mode_ == kSkipHashUpdate) {
+    LOG4CXX_DEBUG(logger_, "Hash update is disabled for " << function_id());
+    return;
+  }
+
+  if (HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE ==
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_UI)) {
+    LOG4CXX_ERROR(logger_,
+                  "UI interface has not responded. Hash won't be updated.");
+    return;
+  }
+
+  if (!is_success_result_) {
+    LOG4CXX_WARN(logger_, "Command is not succeeded. Hash won't be updated.");
+    return;
+  }
+
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key "
+                      << connection_key()
+                      << " not found. Not able to update hash.");
+    return;
+  }
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Updating hash for application with connection key "
+          << connection_key() << " while processing function id "
+          << MessageHelper::StringifiedFunctionID(
+                 static_cast<mobile_api::FunctionID::eType>(function_id())));
+
+  application->UpdateHash();
 }
 
 uint32_t CommandRequestImpl::SendHMIRequest(

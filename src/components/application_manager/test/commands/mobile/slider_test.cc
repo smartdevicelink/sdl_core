@@ -56,7 +56,6 @@ using am::commands::SliderRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
@@ -159,11 +158,6 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       .WillByDefault(Return(mock_app));
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =

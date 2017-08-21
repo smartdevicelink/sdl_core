@@ -98,6 +98,9 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+
   command->on_event(event);
 
   testing::Mock::VerifyAndClearExpectations(&mock_message_helper);

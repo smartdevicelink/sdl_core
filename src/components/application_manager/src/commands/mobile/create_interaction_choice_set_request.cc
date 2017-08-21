@@ -386,6 +386,11 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
       connection_key(), correlation_id(), function_id());
 }
 
+bool CreateInteractionChoiceSetRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
+}
+
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -421,14 +426,6 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
   if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
-
-    ApplicationSharedPtr application =
-        application_manager_.application(connection_key());
-    if (!application) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-    application->UpdateHash();
   } else {
     DeleteChoices();
   }

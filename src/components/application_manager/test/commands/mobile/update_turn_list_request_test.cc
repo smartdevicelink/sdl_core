@@ -281,6 +281,9 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
+
   command_->on_event(event);
 }
 
@@ -302,6 +305,9 @@ TEST_F(UpdateTurnListRequestTest,
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
 
   command_->on_event(event);
 }
