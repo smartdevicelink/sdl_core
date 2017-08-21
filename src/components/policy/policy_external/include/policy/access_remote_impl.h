@@ -48,11 +48,6 @@ class AccessRemoteImpl : public AccessRemote {
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
 
-  virtual void Init();
-  virtual void Enable();
-  virtual void Disable();
-  virtual bool IsEnabled() const;
-
   virtual void Allow(const Subject& who, const Object& what);
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);

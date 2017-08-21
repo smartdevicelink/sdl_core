@@ -111,19 +111,10 @@ struct ToModuleType {
 };
 
 AccessRemoteImpl::AccessRemoteImpl()
-    : cache_(new CacheManager()), enabled_(true), acl_() {}
+    : cache_(new CacheManager()), acl_() {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache), enabled_(true), acl_() {}
-
-void AccessRemoteImpl::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(cache_->pt());
-
-  // TODO: Rework
-
-  enabled_ = true;
-}
+    : cache_(cache), acl_() {}
 
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
@@ -229,26 +220,6 @@ void AccessRemoteImpl::Reset(const Object& what) {
 
 void AccessRemoteImpl::Reset() {
   acl_.clear();
-}
-
-void AccessRemoteImpl::Enable() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  set_enabled(true);
-}
-
-void AccessRemoteImpl::Disable() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  set_enabled(false);
-}
-
-void AccessRemoteImpl::set_enabled(bool value) {
-  enabled_ = value;
-  cache_->Backup();
-}
-
-bool AccessRemoteImpl::IsEnabled() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return enabled_;
 }
 
 void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,

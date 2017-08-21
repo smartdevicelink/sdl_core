@@ -147,19 +147,6 @@ uint32_t CoreService::GetDeviceHandlerById(const std::string& device_id) {
   return device_handle;
 }
 
-void CoreService::SetRemoteControl(bool enabled) {
-#ifdef SDL_REMOTE_CONTROL
-  application_manager_.GetPolicyHandler().SetRemoteControl(enabled);
-#endif  // SDL_REMOTE_CONTROL
-}
-
-bool CoreService::IsRemoteControlAllowed() const {
-#ifdef SDL_REMOTE_CONTROL
-  return application_manager_.GetPolicyHandler().GetRemoteControl();
-#endif  // SDL_REMOTE_CONTROL
-  return false;
-}
-
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
   return application_manager_.GetPolicyHandler().CheckHMIType(

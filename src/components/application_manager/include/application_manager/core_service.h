@@ -118,17 +118,6 @@ class CoreService : public Service {
   uint32_t GetDeviceHandlerById(const std::string& device_id) FINAL;
 
   /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  void SetRemoteControl(bool enabled) FINAL;
-
-  /**
-   * @brief Is Remote Control allowed by Policy and User
-   */
-  bool IsRemoteControlAllowed() const FINAL;
-
-  /**
    * Checks if application has remote control functions
    * @param app application
    * @return true if application has remote control functions

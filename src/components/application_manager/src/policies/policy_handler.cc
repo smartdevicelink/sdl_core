@@ -2025,16 +2025,6 @@ void PolicyHandler::ResetAccess(const std::string& module) {
   policy_manager_->ResetAccess(module);
 }
 
-void PolicyHandler::SetRemoteControl(bool enabled) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetRemoteControl(enabled);
-}
-
-bool PolicyHandler::GetRemoteControl() const {
-  POLICY_LIB_CHECK(false);
-  return policy_manager_->GetRemoteControl();
-}
-
 void PolicyHandler::OnRemoteAppPermissionsChanged(
     const std::string& device_id, const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();

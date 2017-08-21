@@ -539,18 +539,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual void ResetAccess(const PTString& module) = 0;
 
-  /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  virtual void SetRemoteControl(bool enabled) = 0;
-
-  /*
-   * @brief If remote control is enabled
-   * by User and by Policy
-   */
-  virtual bool GetRemoteControl() const = 0;
-
   /*
    * Send OnPermissionsChange notification to mobile app
    * when it's permissions are changed.

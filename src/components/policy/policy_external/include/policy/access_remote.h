@@ -94,27 +94,6 @@ class AccessRemote {
   virtual ~AccessRemote() {}
 
   /**
-   * Initializes oneself
-   */
-  virtual void Init() = 0;
-
-  /**
-   * Enables remote control
-   */
-  virtual void Enable() = 0;
-
-  /**
-   * Disables remote control
-   */
-  virtual void Disable() = 0;
-
-  /**
-   * Checks if remote control is enabled
-   * @return true if enabled
-   */
-  virtual bool IsEnabled() const = 0;
-
-  /**
    * Allows access subject to object
    * @param who subject is dev_id and app_id
    * @param what object is group_id

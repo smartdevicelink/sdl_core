@@ -118,17 +118,6 @@ class Service {
   virtual uint32_t GetDeviceHandlerById(const std::string& device_id) = 0;
 
   /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  virtual void SetRemoteControl(bool enabled) = 0;
-
-  /**
-   * @brief Is Remote Control allowed by Policy and User
-   */
-  virtual bool IsRemoteControlAllowed() const = 0;
-
-  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application

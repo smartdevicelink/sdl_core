@@ -52,11 +52,6 @@ class AccessRemoteImpl : public AccessRemote {
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
 
-  virtual void Init();
-  virtual void Enable();
-  virtual void Disable();
-  virtual bool IsEnabled() const;
-
   virtual void Allow(const Subject& who, const Object& what);
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
@@ -76,7 +71,6 @@ class AccessRemoteImpl : public AccessRemote {
                               std::vector<std::string>* modules);
 
  private:
-  inline void set_enabled(bool value);
   const policy_table::AppHMITypes& HmiTypes(const Subject& who);
   void GetGroupsIds(const std::string& device_id,
                     const std::string& app_id,
@@ -88,7 +82,6 @@ class AccessRemoteImpl : public AccessRemote {
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;
   utils::SharedPtr<CacheManager> cache_;
-  bool enabled_;
   AccessControlList acl_;
   HMIList hmi_types_;
 

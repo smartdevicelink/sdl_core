@@ -330,21 +330,6 @@ ACTION_P(SetDeviceHandle, handle) {
   *arg1 = handle;
 }
 
-TEST_F(RCPolicyHandlerTest, GetRemoteControl_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(*mock_policy_manager_, GetRemoteControl()).WillOnce(Return(true));
-
-  EXPECT_TRUE(policy_handler_.GetRemoteControl());
-}
-
-TEST_F(RCPolicyHandlerTest, SetRemoteControl_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-  const bool enabled(true);
-  EXPECT_CALL(*mock_policy_manager_, SetRemoteControl(enabled));
-
-  policy_handler_.SetRemoteControl(enabled);
-}
-
 TEST_F(RCPolicyHandlerTest,
        OnRemoteAppPermissionsChanged_DifferentDeviceHandle_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();

@@ -188,18 +188,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void ResetAccess(const std::string& module) OVERRIDE;
 
   /**
-   * Sets mode of remote control (on/off)
-   * @param enabled true if remote control is turned on
-   */
-  void SetRemoteControl(bool enabled) OVERRIDE;
-
-  /**
-   * @brief If remote control is enabled
-   * by User and by Policy
-   */
-  bool GetRemoteControl() const OVERRIDE;
-
-  /**
    * @brief Notifies Remote apps about change in permissions
    * @param device_id Device on which app is running
    * @param application_id ID of app whose permissions are changed

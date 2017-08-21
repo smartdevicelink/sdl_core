@@ -341,7 +341,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
 #ifdef SDL_REMOTE_CONTROL
-    access_remote_->Init();
     CheckPTUUpdatesChange(pt_update, policy_table_snapshot);
 #endif  // SDL_REMOTE_CONTROL
 
@@ -1906,9 +1905,6 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
-#ifdef SDL_REMOTE_CONTROL
-    access_remote_->Init();
-#endif  // SDL_REMOTE_CONTROL
   }
   return ret;
 }
@@ -1999,9 +1995,6 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
     const std::string& rpc,
     const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!access_remote_->IsEnabled()) {
-    return TypeAccess::kDisallowed;
-  }
 
   return access_remote_->Check(who, what);
 }
@@ -2046,19 +2039,6 @@ void PolicyManagerImpl::ResetAccess(const PTString& module) {
 
   Object what = {module_type};
   access_remote_->Reset(what);
-}
-
-void PolicyManagerImpl::SetRemoteControl(bool enabled) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (enabled) {
-    access_remote_->Enable();
-  } else {
-    access_remote_->Disable();
-  }
-}
-
-bool PolicyManagerImpl::GetRemoteControl() const {
-  return access_remote_->IsEnabled();
 }
 
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {

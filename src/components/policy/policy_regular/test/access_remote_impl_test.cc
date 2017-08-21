@@ -163,19 +163,6 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_CLIMATE));
 }
 
-TEST(AccessRemoteImplTest, EnableDisable) {
-  AccessRemoteImpl access_remote;
-  access_remote.cache_->pt_ = new policy_table::Table();
-
-  // Country is enabled
-  access_remote.enabled_ = true;
-  access_remote.Enable();
-  EXPECT_TRUE(access_remote.IsEnabled());
-
-  access_remote.Disable();
-  EXPECT_FALSE(access_remote.IsEnabled());
-}
-
 TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   AccessRemoteImpl access_remote;
 
@@ -194,7 +181,6 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
 
 TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
-  access_remote.enabled_ = true;
   Subject who = {"dev1", "1234"};
   access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
 
