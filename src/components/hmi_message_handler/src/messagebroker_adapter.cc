@@ -141,12 +141,6 @@ void MessageBrokerAdapter::SubscribeTo() {
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
-#ifdef SDL_REMOTE_CONTROL
-void MessageBrokerAdapter::SubscribeToHMINotification(
-    const std::string& hmi_notification) {
-  MessageBrokerController::subscribeTo(hmi_notification);
-}
-#endif
 
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
   PassToThread(threads::Thread::CurrentId());

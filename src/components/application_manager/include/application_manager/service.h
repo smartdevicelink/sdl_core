@@ -119,13 +119,6 @@ class Service {
       AppExtensionUID uid) = 0;
 
   /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification) = 0;
-
-  /**
    * @brief Change hmi level of app and notify it
    * @param app Application to be changed and notified
    * @param level New HMI level of app

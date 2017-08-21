@@ -76,13 +76,6 @@ class MessageBrokerAdapter : public HMIMessageAdapterImpl,
 
   void* SubscribeAndBeginReceiverThread(void* param);
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) FINAL;
-#endif  // SDL_REMOTE_CONTROL
  protected:
   void ProcessRecievedFromMB(Json::Value& root);
 

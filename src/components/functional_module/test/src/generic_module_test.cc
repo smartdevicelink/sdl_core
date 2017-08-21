@@ -24,37 +24,6 @@ TEST(GenericModuleTest, SetService) {
   EXPECT_EQ(exp_service.get(), out_service.get());
 }
 
-TEST(GenericModuleTest, OnServiceStateChangedFail) {
-  DriverGenericModuleTest module(18);
-  MockService* mock_service = new MockService();
-  ServicePtr exp_service(mock_service);
-  module.set_service(exp_service);
-
-  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(0);
-
-  module.OnServiceStateChanged(LOWVOLTAGE);
-}
-
-TEST(GenericModuleTest, OnServiceStateChangedPass) {
-  DriverGenericModuleTest module(18);
-  MockService* mock_service = new MockService();
-  ServicePtr exp_service(mock_service);
-  module.set_service(exp_service);
-
-  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(2);
-
-  module.OnServiceStateChanged(HMI_ADAPTER_INITIALIZED);
-}
-
-TEST(GenericModuleTest, AddObserver) {
-  DriverGenericModuleTest module(18);
-  MockModuleObserver observer;
-  module.AddObserver(&observer);
-  const DriverGenericModuleTest::Observers& full = module.observers();
-  ASSERT_EQ(1u, full.size());
-  EXPECT_EQ(&observer, full[0]);
-}
-
 TEST(GenericModuleTest, RemoveObserver) {
   DriverGenericModuleTest module(18);
   MockModuleObserver* observer = new MockModuleObserver();

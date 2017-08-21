@@ -299,12 +299,6 @@ class ApplicationManagerImpl
   bool MakeAppFullScreen(uint32_t app_id);
 
   /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-
-  /**
    * @brief Checks HMI level and returns true if audio streaming is allowed
    */
   bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
