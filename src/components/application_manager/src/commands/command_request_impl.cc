@@ -151,6 +151,7 @@ CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
     : CommandImpl(message, application_manager)
     , EventObserver(application_manager.event_dispatcher())
     , current_state_(kAwaitingHMIResponse)
+    , hash_update_mode_(kSkipHashUpdate)
     , is_success_result_(false) {}
 
 CommandRequestImpl::~CommandRequestImpl() {
@@ -158,7 +159,6 @@ CommandRequestImpl::~CommandRequestImpl() {
 }
 
 bool CommandRequestImpl::Init() {
-  hash_update_mode_ = kSkipHashUpdate;
   return true;
 }
 
