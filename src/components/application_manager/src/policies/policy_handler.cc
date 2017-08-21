@@ -2014,17 +2014,6 @@ void PolicyHandler::SetAccess(const PTString& device_id,
   policy_manager_->SetAccess(device_id, app_id, module, allowed);
 }
 
-void PolicyHandler::ResetAccess(const PTString& device_id,
-                                const PTString& app_id) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(device_id, app_id);
-}
-
-void PolicyHandler::ResetAccess(const std::string& module) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(module);
-}
-
 void PolicyHandler::OnRemoteAppPermissionsChanged(
     const std::string& device_id, const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();

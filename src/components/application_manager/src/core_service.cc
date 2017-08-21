@@ -122,31 +122,6 @@ void CoreService::SetAccess(const ApplicationId& app_id,
 #endif  // SDL_REMOTE_CONTROL
 }
 
-void CoreService::ResetAccess(const ApplicationId& app_id) {
-#ifdef SDL_REMOTE_CONTROL
-  ApplicationSharedPtr app = GetApplication(app_id);
-  if (app) {
-    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-        app->device(), application_manager_);
-    application_manager_.GetPolicyHandler().ResetAccess(device_handle,
-                                                        app->policy_app_id());
-  }
-#endif  // SDL_REMOTE_CONTROL
-}
-
-void CoreService::ResetAccess(const std::string& module) {
-#ifdef SDL_REMOTE_CONTROL
-  application_manager_.GetPolicyHandler().ResetAccess(module);
-#endif  // SDL_REMOTE_CONTROL
-}
-
-uint32_t CoreService::GetDeviceHandlerById(const std::string& device_id) {
-  uint32_t device_handle = 0;
-  application_manager_.connection_handler().GetDeviceID(device_id,
-                                                        &device_handle);
-  return device_handle;
-}
-
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
   return application_manager_.GetPolicyHandler().CheckHMIType(

@@ -526,19 +526,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                          const PTString& module,
                          bool allowed) = 0;
 
-  /**
-   * Resets access application to all resources
-   * @param dev_id unique identifier of device
-   * @param app_id policy id application
-   */
-  virtual void ResetAccess(const PTString& dev_id, const PTString& app_id) = 0;
-
-  /**
-   * Resets access by functional group for all applications
-   * @param module type
-   */
-  virtual void ResetAccess(const PTString& module) = 0;
-
   /*
    * Send OnPermissionsChange notification to mobile app
    * when it's permissions are changed.

@@ -110,8 +110,7 @@ struct ToModuleType {
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl()
-    : cache_(new CacheManager()), acl_() {}
+AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()), acl_() {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
     : cache_(cache), acl_() {}

@@ -175,19 +175,6 @@ class PolicyHandler : public PolicyHandlerInterface,
                  bool allowed) OVERRIDE;
 
   /**
-   * Resets access application to all resources
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   */
-  void ResetAccess(const PTString& device_id, const PTString& app_id) OVERRIDE;
-
-  /**
-   * Resets access by module name for all applications
-   * @param module type
-   */
-  void ResetAccess(const std::string& module) OVERRIDE;
-
-  /**
    * @brief Notifies Remote apps about change in permissions
    * @param device_id Device on which app is running
    * @param application_id ID of app whose permissions are changed

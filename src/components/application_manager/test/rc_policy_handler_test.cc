@@ -299,23 +299,6 @@ TEST_F(RCPolicyHandlerTest, SetAccess_ValidParams_SUCCESS) {
   policy_handler_.SetAccess(kDeviceId_, kPolicyAppId_, module, allowed);
 }
 
-TEST_F(RCPolicyHandlerTest, ResetAccess_ValidParams_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(*mock_policy_manager_, ResetAccess(kDeviceId_, kPolicyAppId_));
-
-  policy_handler_.ResetAccess(kDeviceId_, kPolicyAppId_);
-}
-
-TEST_F(RCPolicyHandlerTest, ResetAccess_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  const PTString module("module");
-  EXPECT_CALL(*mock_policy_manager_, ResetAccess(module));
-
-  policy_handler_.ResetAccess(module);
-}
-
 TEST_F(RCPolicyHandlerTest, CheckModule_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 

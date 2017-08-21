@@ -1252,25 +1252,6 @@ void PolicyManagerImpl::SetAccess(const PTString& dev_id,
   }
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& dev_id,
-                                    const PTString& app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Subject who = {dev_id, app_id};
-  access_remote_->Reset(who);
-}
-
-void PolicyManagerImpl::ResetAccess(const PTString& module) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::ModuleType module_type;
-  bool is_valid = EnumFromJsonString(module, &module_type);
-  if (!is_valid) {
-    return;
-  }
-
-  Object what = {module_type};
-  access_remote_->Reset(what);
-}
-
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {

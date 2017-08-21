@@ -99,25 +99,6 @@ class CoreService : public Service {
                  bool allowed) FINAL;
 
   /**
-   * @brief ResetAccess Resets access by application id
-   * @param app_id Application id
-   */
-  void ResetAccess(const ApplicationId& app_id) FINAL;
-
-  /**
-   * Resets access by module type for all applications
-   * @param module type
-   */
-  void ResetAccess(const std::string& module) FINAL;
-
-  /**
-   * Gets device handler for device with certain ID
-   * @param device_id the ID of the connected device
-   * @return device handler if device with requested ID was found
-   */
-  uint32_t GetDeviceHandlerById(const std::string& device_id) FINAL;
-
-  /**
    * Checks if application has remote control functions
    * @param app application
    * @return true if application has remote control functions

@@ -99,25 +99,6 @@ class Service {
                          bool allowed) = 0;
 
   /**
-   * Resets access application to all resources
-   * @param app_id ID application
-   */
-  virtual void ResetAccess(const ApplicationId& app_id) = 0;
-
-  /**
-   * Resets access by module and interior zone for all applications
-   * @param module type
-   */
-  virtual void ResetAccess(const std::string& module) = 0;
-
-  /**
-   * Gets device handler for device with certain ID
-   * @param device_id the ID of the connected device
-   * @return device handler if device with requested ID was found
-   */
-  virtual uint32_t GetDeviceHandlerById(const std::string& device_id) = 0;
-
-  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application
