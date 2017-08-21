@@ -315,6 +315,7 @@ class ApplicationManagerImpl
   bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 
   void Erase(ApplicationSharedPtr app_to_remove) {
+    DCHECK(app_to_remove);
     app_to_remove->RemoveExtensions();
     applications_.erase(app_to_remove);
   }
