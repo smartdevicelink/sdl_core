@@ -156,11 +156,14 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
       hmi_apis::Common_TextFieldName::eType field_name,
       const char* field,
       size_t num_tags,
-      int32_t* field_tags) {
+      int32_t* field_tags,
+      bool set_field_text = true) {
     SmartObject msg_params(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     (*msg)[am::strings::params][am::strings::function_id] = kFunctionID;
-    msg_params[field] = text_field_;
+    if (set_field_text) {
+      msg_params[field] = text_field_;
+    }
     msg_params[am::strings::metadata_tags][field] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (size_t i = 0; i < num_tags; ++i) {
@@ -181,16 +184,20 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     msg_params[am::strings::app_id] = kAppId;
     msg_params[am::hmi_request::show_strings] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
-    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_name] =
-        static_cast<int32_t>(field_name);
-    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_text] =
-        text_field_;
-    msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_types] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < num_tags; ++i) {
-      const int32_t current_tag = field_tags[i];
-      msg_params[am::hmi_request::show_strings][0][am::hmi_request::field_types]
-                [i] = current_tag;
+    if (set_field_text) {
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_name] =
+                    static_cast<int32_t>(field_name);
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_text] = text_field_;
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_types] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Array);
+      for (size_t i = 0; i < num_tags; ++i) {
+        const int32_t current_tag = field_tags[i];
+        msg_params[am::hmi_request::show_strings][0]
+                  [am::hmi_request::field_types][i] = current_tag;
+      }
     }
 
     EXPECT_CALL(app_mngr_, ManageHMICommand(_));
@@ -718,6 +725,48 @@ TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
                               num_tags,
                               tags);
   command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags,
+                              false);
+  command->Run();
+
+  MessageSharedPtr ev_msg = CreateMessage(smart_objects::SmartType_Map);
+  (*ev_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+  (*ev_msg)[am::strings::msg_params][am::strings::info] = "";
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*ev_msg);
+
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  command->on_event(event);
+
+  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
+                .asBool(),
+            true);
+  EXPECT_EQ(
+      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
+          .asInt(),
+      static_cast<int32_t>(mobile_apis::Result::WARNINGS));
 }
 
 TEST_F(ShowRequestTest, Run_MediaClock_SUCCESS) {
