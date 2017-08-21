@@ -40,12 +40,4 @@ TEST(CanAppExtensionTest, Create) {
   ASSERT_TRUE(extension.uid() == 7);
 }
 
-TEST(CanAppExtensionTest, Control) {
-  RCAppExtension extension(3);
-  ASSERT_EQ(3, extension.uid());
-  ASSERT_FALSE(extension.IsControlGiven());
-  extension.GiveControl(true);
-  ASSERT_TRUE(extension.IsControlGiven());
-}
-
 }  // namespace remote_control

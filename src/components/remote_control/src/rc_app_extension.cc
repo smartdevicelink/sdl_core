@@ -34,17 +34,7 @@
 
 namespace remote_control {
 RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
-    : AppExtension(uid)
-    , is_control_given_(false)
-    , is_on_driver_device_(false) {}
-
-bool RCAppExtension::IsControlGiven() const {
-  return is_control_given_;
-}
-
-void RCAppExtension::GiveControl(bool is_control_given) {
-  is_control_given_ = is_control_given;
-}
+    : AppExtension(uid) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(
     const Json::Value& module_type) {

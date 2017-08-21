@@ -48,18 +48,6 @@ class RCAppExtension : public application_manager::AppExtension {
   ~RCAppExtension();
 
   /**
-   * @brief Checks is application has access to a radio tune control
-   * @return true if control given
-   */
-  bool IsControlGiven() const;
-
-  /**
-   * @brief Give radio tune control to application
-   * @param is_control_given true - give control, false - cancel control
-   */
-  void GiveControl(bool is_control_given);
-
-  /**
    * @brief Subscribe to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
@@ -78,8 +66,6 @@ class RCAppExtension : public application_manager::AppExtension {
   bool IsSubscibedToInteriorVehicleData(const Json::Value& module_type);
 
  private:
-  bool is_control_given_;
-  bool is_on_driver_device_;
   std::set<Json::Value> subscribed_interior_vehicle_data_;
 };
 
