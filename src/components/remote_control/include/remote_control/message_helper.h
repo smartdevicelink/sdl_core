@@ -51,12 +51,6 @@ namespace remote_control {
  **/
 class MessageHelper {
  public:
-  /**
-   * @brief Returns unique correlation ID for next CAN request
-   *
-   * @return Unique correlation ID
-   */
-  static uint32_t GetNextRCCorrelationID();
   static const std::string GetMobileAPIName(
       functional_modules::RCFunctionID func_id);
 
@@ -111,7 +105,6 @@ class MessageHelper {
  private:
   MessageHelper();
 
-  static uint32_t next_correlation_id_;
   static const std::map<functional_modules::RCFunctionID, std::string>
       kMobileAPINames;
   DISALLOW_COPY_AND_ASSIGN(MessageHelper);
