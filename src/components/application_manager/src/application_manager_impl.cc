@@ -4105,11 +4105,6 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(
   return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
 }
 
-void ApplicationManagerImpl::SubscribeToHMINotification(
-    const std::string& hmi_notification) {
-  hmi_handler_->SubscribeToHMINotification(hmi_notification);
-}
-
 void ApplicationManagerImpl::ChangeAppsHMILevel(
     uint32_t app_id, mobile_apis::HMILevel::eType level) {
   using namespace mobile_apis::HMILevel;

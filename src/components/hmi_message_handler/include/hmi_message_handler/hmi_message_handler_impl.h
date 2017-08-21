@@ -96,13 +96,6 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
   const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS

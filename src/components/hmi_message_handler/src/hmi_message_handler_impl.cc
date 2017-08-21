@@ -132,16 +132,5 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
     (*it)->SendMessageToHMI(message);
   }
 }
-#ifdef SDL_REMOTE_CONTROL
-void HMIMessageHandlerImpl::SubscribeToHMINotification(
-    const std::string& hmi_notification) {
-  sync_primitives::AutoLock lock(message_adapters_locker_);
-  for (std::set<HMIMessageAdapter*>::iterator it = message_adapters_.begin();
-       it != message_adapters_.end();
-       ++it) {
-    (*it)->SubscribeToHMINotification(hmi_notification);
-  }
-}
-#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace hmi_message_handler

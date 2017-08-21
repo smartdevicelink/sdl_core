@@ -45,12 +45,6 @@ void GenericModule::set_service(application_manager::ServicePtr service) {
 
 void GenericModule::OnServiceStateChanged(ServiceState state) {
   state_ = state;
-
-  if (HMI_ADAPTER_INITIALIZED == state_) {
-    // We must subscribe to necessary HMI notifications
-    service_->SubscribeToHMINotification(hmi_api::on_interior_vehicle_data);
-    service_->SubscribeToHMINotification(hmi_api::on_remote_control_settings);
-  }
 }
 
 application_manager::ServicePtr GenericModule::service() {

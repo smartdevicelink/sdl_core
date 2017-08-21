@@ -164,9 +164,6 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
 
-  virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification) = 0;
-
   virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
 
   /**

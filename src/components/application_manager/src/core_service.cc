@@ -152,13 +152,6 @@ std::vector<ApplicationSharedPtr> CoreService::GetApplications(
   return result;
 }
 
-void CoreService::SubscribeToHMINotification(
-    const std::string& hmi_notification) {
-  if (!hmi_notification.empty()) {
-    application_manager_.SubscribeToHMINotification(hmi_notification);
-  }
-}
-
 void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
                                        mobile_apis::HMILevel::eType level) {
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
