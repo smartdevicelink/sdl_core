@@ -246,12 +246,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                bool(const policy::PTString& app_id,
                     const policy::PTString& module));
 
-  MOCK_METHOD4(SetAccess,
-               void(const policy::PTString& device_id,
-                    const policy::PTString& app_id,
-                    const policy::PTString& module,
-                    bool allowed));
-
   MOCK_METHOD2(OnRemoteAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));

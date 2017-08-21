@@ -93,46 +93,6 @@ class AccessRemote {
  public:
   virtual ~AccessRemote() {}
   /**
-   * Allows access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   */
-  virtual void Allow(const Subject& who, const Object& what) = 0;
-
-  /**
-   * Denies access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   */
-  virtual void Deny(const Subject& who, const Object& what) = 0;
-
-  /**
-   * Resets access subject to all object
-   * @param who subject is dev_id and app_id
-   */
-  virtual void Reset(const Subject& who) = 0;
-
-  /**
-   * Resets access to object for all subjects
-   * @param what object is group
-   */
-  virtual void Reset(const Object& what) = 0;
-
-  /*
-   * Resets all stored consents
-   */
-  virtual void Reset() = 0;
-
-  /**
-   * Checks access subject to object
-   * @param who subject is dev_id and app_id
-   * @param what object is group_id
-   * @return allowed if access was given, disallowed if access was denied
-   * manual if need to ask driver
-   */
-  virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
-
-  /**
    * Checks permissions for module
    * @param app_id application ID
    * @param module type

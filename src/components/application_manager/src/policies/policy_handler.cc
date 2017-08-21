@@ -2006,14 +2006,6 @@ bool PolicyHandler::CheckModule(const PTString& app_id,
   return policy_manager_->CheckModule(app_id, module);
 }
 
-void PolicyHandler::SetAccess(const PTString& device_id,
-                              const PTString& app_id,
-                              const PTString& module,
-                              bool allowed) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(device_id, app_id, module, allowed);
-}
-
 void PolicyHandler::OnRemoteAppPermissionsChanged(
     const std::string& device_id, const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();

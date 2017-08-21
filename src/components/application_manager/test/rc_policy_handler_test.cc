@@ -288,17 +288,6 @@ TEST_F(RCPolicyHandlerTest, CheckAccess_ValidParams_SUCCESS) {
             policy_handler_.CheckAccess(kDeviceId_, kPolicyAppId_, module));
 }
 
-TEST_F(RCPolicyHandlerTest, SetAccess_ValidParams_SUCCESS) {
-  EnablePolicyAndPolicyManagerMock();
-
-  const PTString module("module");
-  const bool allowed(true);
-  EXPECT_CALL(*mock_policy_manager_,
-              SetAccess(kDeviceId_, kPolicyAppId_, module, allowed));
-
-  policy_handler_.SetAccess(kDeviceId_, kPolicyAppId_, module, allowed);
-}
-
 TEST_F(RCPolicyHandlerTest, CheckModule_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 

@@ -61,10 +61,6 @@ class MockService : public Service {
                           const std::string& module));
   MOCK_METHOD2(CheckModule,
                bool(const ApplicationId& app_id, const std::string& module));
-  MOCK_METHOD3(SetAccess,
-               void(const ApplicationId& app_id,
-                    const std::string& module,
-                    bool allowed));
   MOCK_METHOD1(RemoveHMIFakeParameters,
                void(application_manager::MessagePtr& message));
   MOCK_CONST_METHOD1(IsRemoteControlApplication,

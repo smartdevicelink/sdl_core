@@ -108,20 +108,6 @@ bool CoreService::CheckModule(const ApplicationId& app_id,
   return false;
 }
 
-void CoreService::SetAccess(const ApplicationId& app_id,
-                            const std::string& module,
-                            bool allowed) {
-#ifdef SDL_REMOTE_CONTROL
-  ApplicationSharedPtr app = GetApplication(app_id);
-  if (app) {
-    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-        app->device(), application_manager_);
-    application_manager_.GetPolicyHandler().SetAccess(
-        device_handle, app->policy_app_id(), module, allowed);
-  }
-#endif  // SDL_REMOTE_CONTROL
-}
-
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
   return application_manager_.GetPolicyHandler().CheckHMIType(

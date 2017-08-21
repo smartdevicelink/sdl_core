@@ -368,7 +368,7 @@ application_manager::TypeAccess BaseCommandRequest::CheckAccess(
   return service_->CheckAccess(app_->app_id(), module);
 }
 
-bool BaseCommandRequest::CheckDriverConsent() {
+bool BaseCommandRequest:: CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   RCAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
@@ -535,8 +535,6 @@ void BaseCommandRequest::ProcessAccessResponse(
     LOG4CXX_DEBUG(logger_,
                   "Setting allowed access for " << app_->app_id() << " for "
                                                 << module);
-    service_->SetAccess(app_->app_id(), module, is_allowed);
-
     if (is_allowed) {
       rc_module_.resource_allocation_manager().ForceAcquireResource(
           module, app_->app_id());

@@ -192,10 +192,7 @@ class PolicyManagerImpl : public PolicyManager {
   virtual bool GetHMITypes(const std::string& application_id,
                            std::vector<int>* app_types) OVERRIDE;
   virtual void set_access_remote(utils::SharedPtr<AccessRemote> access_remote);
-  TypeAccess CheckDriverConsent(const Subject& who,
-                                const Object& what,
-                                const std::string& rpc,
-                                const RemoteControlParams& params);
+
   void CheckPTUUpdatesChange(
       const utils::SharedPtr<policy_table::Table> pt_update,
       const utils::SharedPtr<policy_table::Table> snapshot);
@@ -359,10 +356,6 @@ class PolicyManagerImpl : public PolicyManager {
                                  const PTString& app_id,
                                  const PTString& module);
   virtual bool CheckModule(const PTString& app_id, const PTString& module);
-  virtual void SetAccess(const PTString& dev_id,
-                         const PTString& app_id,
-                         const PTString& module,
-                         bool allowed);
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id);
   virtual bool GetModuleTypes(const std::string& policy_app_id,

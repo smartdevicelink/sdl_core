@@ -1219,43 +1219,9 @@ bool PolicyManagerImpl::CheckModule(const PTString& app_id,
          access_remote_->CheckModuleType(app_id, module_type);
 }
 
-TypeAccess PolicyManagerImpl::CheckDriverConsent(
-    const Subject& who,
-    const Object& what,
-    const std::string& rpc,
-    const RemoteControlParams& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  return access_remote_->Check(who, what);
-}
-
-void PolicyManagerImpl::SetAccess(const PTString& dev_id,
-                                  const PTString& app_id,
-                                  const PTString& module,
-                                  bool allowed) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::ModuleType module_type;
-  bool is_valid = EnumFromJsonString(module, &module_type);
-  if (!is_valid) {
-    return;
-  }
-
-  Subject who = {dev_id, app_id};
-  Object what = {module_type};
-  LOG4CXX_DEBUG(logger_,
-                "Driver's consent: " << who << ", " << what << " is "
-                                     << std::boolalpha << allowed);
-  if (allowed) {
-    access_remote_->Allow(who, what);
-  } else {
-    access_remote_->Deny(who, what);
-  }
-}
-
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
-    access_remote_->Reset(who);
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(logger_,

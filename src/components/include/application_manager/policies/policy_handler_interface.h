@@ -469,18 +469,6 @@ class PolicyHandlerInterface {
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
 
   /**
-   * Sets access to equipment of vehicle for application by RPC
-   * @param device_id unique identifier of device
-   * @param app_id policy id application
-   * @param module type
-   * @param allowed true if access is allowed
-   */
-  virtual void SetAccess(const PTString& device_id,
-                         const PTString& app_id,
-                         const PTString& module,
-                         bool allowed) = 0;
-
-  /**
    * @brief Notifies Remote apps about change in permissions
    * @param device_id Device on which app is running
    * @param application_id ID of app whose permissions are changed

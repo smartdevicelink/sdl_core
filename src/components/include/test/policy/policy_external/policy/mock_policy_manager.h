@@ -161,11 +161,6 @@ class MockPolicyManager : public PolicyManager {
                           const PTString& module));
   MOCK_METHOD2(CheckModule,
                bool(const PTString& app_id, const PTString& module));
-  MOCK_METHOD4(SetAccess,
-               void(const PTString& dev_id,
-                    const PTString& app_id,
-                    const PTString& module,
-                    bool allowed));
   MOCK_METHOD2(SendAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));

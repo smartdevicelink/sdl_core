@@ -514,18 +514,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
 
-  /**
-   * Sets access to equipment of vehicle for application by RPC
-   * @param dev_id unique identifier of device
-   * @param app_id policy id application
-   * @param module type
-   * @param allowed true if access is allowed
-   */
-  virtual void SetAccess(const PTString& dev_id,
-                         const PTString& app_id,
-                         const PTString& module,
-                         bool allowed) = 0;
-
   /*
    * Send OnPermissionsChange notification to mobile app
    * when it's permissions are changed.

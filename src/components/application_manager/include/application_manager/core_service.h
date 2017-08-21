@@ -89,16 +89,6 @@ class CoreService : public Service {
                    const std::string& module) FINAL;
 
   /**
-   * Sets access to functional group which contains given RPC for application
-   * @param app_id id of application
-   * @param module type
-   * @param allowed true if driver has given access
-   */
-  void SetAccess(const ApplicationId& app_id,
-                 const std::string& module,
-                 bool allowed) FINAL;
-
-  /**
    * Checks if application has remote control functions
    * @param app application
    * @return true if application has remote control functions

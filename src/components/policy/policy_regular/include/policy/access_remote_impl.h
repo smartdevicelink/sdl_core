@@ -51,13 +51,6 @@ class AccessRemoteImpl : public AccessRemote {
 
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
-
-  virtual void Allow(const Subject& who, const Object& what);
-  virtual void Deny(const Subject& who, const Object& what);
-  virtual void Reset(const Subject& who);
-  virtual void Reset(const Object& what);
-  virtual void Reset();
-  virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
   virtual void SetDefaultHmiTypes(const Subject& who,
@@ -82,7 +75,6 @@ class AccessRemoteImpl : public AccessRemote {
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;
   utils::SharedPtr<CacheManager> cache_;
-  AccessControlList acl_;
   HMIList hmi_types_;
 
 #ifdef BUILD_TESTS

@@ -89,16 +89,6 @@ class Service {
                            const std::string& module) = 0;
 
   /**
-   * Sets access to functional group which contains given RPC for application
-   * @param app_id id of application
-   * @param module type
-   * @param allowed true if driver has given access
-   */
-  virtual void SetAccess(const ApplicationId& app_id,
-                         const std::string& module,
-                         bool allowed) = 0;
-
-  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application

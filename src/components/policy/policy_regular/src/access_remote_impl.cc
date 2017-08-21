@@ -110,29 +110,10 @@ struct ToModuleType {
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()), acl_() {}
+AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()) {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache), acl_() {}
-
-TypeAccess AccessRemoteImpl::Check(const Subject& who,
-                                   const Object& what) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  AccessControlList::const_iterator i = acl_.find(what);
-  if (i != acl_.end()) {
-    const AccessControlRow& row = i->second;
-    AccessControlRow::const_iterator j = row.find(who);
-    if (j != row.end()) {
-      // who has permissions
-      TypeAccess ret = j->second;
-      LOG4CXX_TRACE(logger_,
-                    "Subject " << who << " has permissions " << ret
-                               << " to object " << what);
-      return ret;
-    }
-  }
-  return TypeAccess::kAllowed;
-}
+    : cache_(cache) {}
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
                                        policy_table::ModuleType module) const {
@@ -195,30 +176,6 @@ bool AccessRemoteImpl::CompareParameters(
       std::remove_if(input->begin(), input->end(), Contained(parameters)),
       input->end());
   return input->empty();
-}
-
-void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_[what][who] = TypeAccess::kAllowed;
-}
-
-void AccessRemoteImpl::Deny(const Subject& who, const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_[what][who] = TypeAccess::kDisallowed;
-}
-
-void AccessRemoteImpl::Reset(const Subject& who) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(acl_.begin(), acl_.end(), Erase(who));
-}
-
-void AccessRemoteImpl::Reset(const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_.erase(what);
-}
-
-void AccessRemoteImpl::Reset() {
-  acl_.clear();
 }
 
 void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
