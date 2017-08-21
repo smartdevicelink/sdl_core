@@ -32,25 +32,25 @@
  */
 
 #include "application_manager/commands/mobile/get_dtcs_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetDTCsRequest::~GetDTCsRequest() {
-}
+GetDTCsRequest::~GetDTCsRequest() {}
 
 void GetDTCsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -59,8 +59,8 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
@@ -81,13 +81,19 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      std::string response_info;
+      GetInfo(message, response_info);
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

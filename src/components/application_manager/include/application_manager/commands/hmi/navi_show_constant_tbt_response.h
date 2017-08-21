@@ -49,7 +49,8 @@ class NaviShowConstantTBTResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviShowConstantTBTResponse(const MessageSharedPtr& message);
+  NaviShowConstantTBTResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief NaviShowConstantTBTResponse class destructor

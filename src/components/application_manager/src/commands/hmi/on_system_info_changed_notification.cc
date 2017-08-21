@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,12 +39,10 @@ namespace application_manager {
 namespace commands {
 
 OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
-}
+OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {}
 
 void OnSystemInfoChangedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,13 +50,11 @@ void OnSystemInfoChangedNotification::Run() {
       (*message_)[strings::msg_params][strings::language].asUInt();
   const std::string language =
       application_manager::MessageHelper::CommonLanguageToString(
-        static_cast<hmi_apis::Common_Language::eType>(lang_code));
+          static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  policy::PolicyHandler::instance()->OnSystemInfoChanged(language);
+  application_manager_.GetPolicyHandler().OnSystemInfoChanged(language);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-

@@ -31,22 +31,21 @@
  */
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NotificationFromHMI::NotificationFromHMI(const MessageSharedPtr& message)
-    : CommandImpl(message) {
-
+NotificationFromHMI::NotificationFromHMI(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {
   // Replace HMI app id with Mobile connection id
-  ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*message);
+  ReplaceHMIByMobileAppId(*message);
 }
 
-NotificationFromHMI::~NotificationFromHMI() {
-}
+NotificationFromHMI::~NotificationFromHMI() {}
 
 bool NotificationFromHMI::Init() {
   return true;
@@ -56,21 +55,18 @@ bool NotificationFromHMI::CleanUp() {
   return true;
 }
 
-void NotificationFromHMI::Run() {
-}
+void NotificationFromHMI::Run() {}
 
 void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
-
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-  ApplicationManagerImpl::instance()->ManageMobileCommand(message);
+  application_manager_.ManageMobileCommand(message, ORIGIN_SDL);
 }
 
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
@@ -78,8 +74,8 @@ void NotificationFromHMI::CreateHMIRequest(
   }
 
   // get hmi correlation id for chaining further request from this object
-  const uint32_t hmi_correlation_id_ = ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
+  const uint32_t hmi_correlation_id_ =
+      application_manager_.GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] =
@@ -94,7 +90,7 @@ void NotificationFromHMI::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+  if (!application_manager_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }

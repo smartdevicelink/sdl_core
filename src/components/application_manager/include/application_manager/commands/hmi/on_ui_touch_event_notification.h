@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_TOUCH_EVENT_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -52,7 +52,8 @@ class OnUITouchEventNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUITouchEventNotification(const MessageSharedPtr& message);
+  OnUITouchEventNotification(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief OnUITouchEventNotification class destructor

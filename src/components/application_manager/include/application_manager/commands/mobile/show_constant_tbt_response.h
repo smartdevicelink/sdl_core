@@ -51,7 +51,8 @@ class ShowConstantTBTResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ShowConstantTBTResponse(const MessageSharedPtr& message);
+  ShowConstantTBTResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTResponse class destructor

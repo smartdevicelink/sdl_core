@@ -30,28 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_get_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
-  const MessageSharedPtr& message)
-  : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {
-}
+VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_vr_capabilities(
-    (*message_)[strings::msg_params][strings::vr_capabilities]);
+      (*message_)[strings::msg_params][strings::vr_capabilities]);
 }
 
 }  // namespace commands

@@ -43,12 +43,13 @@
 // TODO(VS): lint error: Streams are highly discouraged.
 #include <fstream>
 #include <cstddef>
+#include <cstdio>
 #include <algorithm>
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
-  struct statvfs fsInfo = { 0 };
+  struct statvfs fsInfo = {0};
   if (statvfs(path.c_str(), &fsInfo) == 0) {
     return fsInfo.f_bsize * fsInfo.f_bfree;
   } else {
@@ -56,11 +57,14 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   }
 }
 
-int64_t file_system::FileSize(const std::string &path) {
+int64_t file_system::FileSize(const std::string& path) {
   if (file_system::FileExists(path)) {
-    struct stat file_info = { 0 };
-    stat(path.c_str(), &file_info);
-    return file_info.st_size;
+    struct stat file_info = {0};
+    if (0 != stat(path.c_str(), &file_info)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
+    } else {
+      return file_info.st_size;
+    }
   }
   return 0;
 }
@@ -74,28 +78,31 @@ size_t file_system::DirectorySize(const std::string& path) {
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new(direntbuffer) dirent;
+  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
+                                pathconf(path.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
-  struct stat file_info = { 0 };
+  struct stat file_info = {0};
   directory = opendir(path.c_str());
   if (NULL != directory) {
     return_code = readdir_r(directory, dir_element, &result);
     for (; NULL != result && 0 == return_code;
          return_code = readdir_r(directory, dir_element, &result)) {
-      if (0 == strcmp(result->d_name, "..")
-          || 0 == strcmp(result->d_name, ".")) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
         continue;
       }
       std::string full_element_path = path + "/" + result->d_name;
       if (file_system::IsDirectory(full_element_path)) {
         size += DirectorySize(full_element_path);
       } else {
-        stat(full_element_path.c_str(), &file_info);
-        size += file_info.st_size;
+        if (0 != stat(full_element_path.c_str(), &file_info)) {
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Could not get file info: " << full_element_path);
+        } else {
+          size += file_info.st_size;
+        }
       }
     }
   }
@@ -108,7 +115,9 @@ size_t file_system::DirectorySize(const std::string& path) {
 
 std::string file_system::CreateDirectory(const std::string& name) {
   if (!DirectoryExists(name)) {
-    mkdir(name.c_str(), S_IRWXU);
+    if (0 != mkdir(name.c_str(), S_IRWXU)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+    }
   }
 
   return name;
@@ -131,7 +140,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 }
 
 bool file_system::IsDirectory(const std::string& name) {
-  struct stat status = { 0 };
+  struct stat status = {0};
 
   if (-1 == stat(name.c_str(), &status)) {
     return false;
@@ -141,7 +150,7 @@ bool file_system::IsDirectory(const std::string& name) {
 }
 
 bool file_system::DirectoryExists(const std::string& name) {
-  struct stat status = { 0 };
+  struct stat status = {0};
 
   if (-1 == stat(name.c_str(), &status) || !S_ISDIR(status.st_mode)) {
     return false;
@@ -151,7 +160,7 @@ bool file_system::DirectoryExists(const std::string& name) {
 }
 
 bool file_system::FileExists(const std::string& name) {
-  struct stat status = { 0 };
+  struct stat status = {0};
 
   if (-1 == stat(name.c_str(), &status)) {
     return false;
@@ -159,9 +168,9 @@ bool file_system::FileExists(const std::string& name) {
   return true;
 }
 
-bool file_system::Write(
-  const std::string& file_name, const std::vector<uint8_t>& data,
-  std::ios_base::openmode mode) {
+bool file_system::Write(const std::string& file_name,
+                        const std::vector<uint8_t>& data,
+                        std::ios_base::openmode mode) {
   std::ofstream file(file_name.c_str(), std::ios_base::binary | mode);
   if (file.is_open()) {
     for (uint32_t i = 0; i < data.size(); ++i) {
@@ -175,15 +184,13 @@ bool file_system::Write(
 
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
-
-
   std::ofstream* file = new std::ofstream();
-  file->open( file_name.c_str(),std::ios_base::binary | mode);
+  file->open(file_name.c_str(), std::ios_base::binary | mode);
   if (file->is_open()) {
-
     return file;
   }
 
+  delete file;
   return NULL;
 }
 
@@ -215,6 +222,15 @@ std::string file_system::CurrentWorkingDirectory() {
   return std::string(path);
 }
 
+std::string file_system::GetAbsolutePath(const std::string& path) {
+  char abs_path[PATH_MAX];
+  if (NULL == realpath(path.c_str(), abs_path)) {
+    return std::string();
+  }
+
+  return std::string(abs_path);
+}
+
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());
@@ -232,7 +248,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   char* direntbuffer =
       new char[offsetof(struct dirent, d_name) +
                pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new(direntbuffer) dirent;
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
 
@@ -243,8 +259,8 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 
     for (; NULL != result && 0 == return_code;
          return_code = readdir_r(directory, dir_element, &result)) {
-      if (0 == strcmp(result->d_name, "..")
-          || 0 == strcmp(result->d_name, ".")) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
         continue;
       }
 
@@ -254,7 +270,10 @@ void file_system::remove_directory_content(const std::string& directory_name) {
         remove_directory_content(full_element_path);
         rmdir(full_element_path.c_str());
       } else {
-        remove(full_element_path.c_str());
+        if (0 != remove(full_element_path.c_str())) {
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Unable to remove file: " << full_element_path);
+        }
       }
     }
   }
@@ -267,8 +286,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
                                   bool is_recursively) {
-  if (DirectoryExists(directory_name)
-      && IsAccessible(directory_name, W_OK)) {
+  if (DirectoryExists(directory_name) && IsAccessible(directory_name, W_OK)) {
     if (is_recursively) {
       remove_directory_content(directory_name);
     }
@@ -291,7 +309,7 @@ bool file_system::IsReadingAllowed(const std::string& name) {
 }
 
 std::vector<std::string> file_system::ListFiles(
-  const std::string& directory_name) {
+    const std::string& directory_name) {
   std::vector<std::string> listFiles;
   if (!DirectoryExists(directory_name)) {
     return listFiles;
@@ -306,7 +324,7 @@ std::vector<std::string> file_system::ListFiles(
   char* direntbuffer =
       new char[offsetof(struct dirent, d_name) +
                pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new(direntbuffer) dirent;
+  struct dirent* dir_element = new (direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
 
@@ -316,8 +334,8 @@ std::vector<std::string> file_system::ListFiles(
 
     for (; NULL != result && 0 == return_code;
          return_code = readdir_r(directory, dir_element, &result)) {
-      if (0 == strcmp(result->d_name, "..")
-          || 0 == strcmp(result->d_name, ".")) {
+      if (0 == strcmp(result->d_name, "..") ||
+          0 == strcmp(result->d_name, ".")) {
         continue;
       }
 
@@ -325,7 +343,6 @@ std::vector<std::string> file_system::ListFiles(
     }
 
     closedir(directory);
-
   }
 
 #ifdef __QNXNTO__
@@ -338,7 +355,7 @@ std::vector<std::string> file_system::ListFiles(
 bool file_system::WriteBinaryFile(const std::string& name,
                                   const std::vector<uint8_t>& contents) {
   using namespace std;
-  ofstream output(name.c_str(), ios_base::binary|ios_base::trunc);
+  ofstream output(name.c_str(), ios_base::binary | ios_base::trunc);
   output.write(reinterpret_cast<const char*>(&contents.front()),
                contents.size());
   return output.good();
@@ -353,7 +370,7 @@ bool file_system::ReadBinaryFile(const std::string& name,
   std::ifstream file(name.c_str(), std::ios_base::binary);
   std::ostringstream ss;
   ss << file.rdbuf();
-  const std::string& s = ss.str();
+  const std::string s = ss.str();
 
   result.resize(s.length());
   std::copy(s.begin(), s.end(), result.begin());
@@ -377,29 +394,20 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   std::string::const_iterator it_path_end = path.end();
 
   const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
-  std::string::const_iterator it_sym = reserved_symbols.begin();
-  std::string::const_iterator it_sym_end = reserved_symbols.end();
-
+  size_t pos = std::string::npos;
   std::string converted_path;
-  while (it_path != it_path_end) {
 
-    it_sym = reserved_symbols.begin();
-    for (; it_sym != it_sym_end; ++it_sym) {
-
-      if (*it_path == *it_sym) {
-        const size_t size = 100;
-        char percent_value[size];
-        snprintf(percent_value, size, "%%%x", *it_path);
-        converted_path += percent_value;
-        ++it_path;
-        continue;
-      }
+  for (; it_path != it_path_end; ++it_path) {
+    pos = reserved_symbols.find_first_of(*it_path);
+    if (pos != std::string::npos) {
+      const size_t size = 100;
+      char percent_value[size];
+      snprintf(percent_value, size, "%%%x", *it_path);
+      converted_path += percent_value;
+    } else {
+      converted_path += *it_path;
     }
-
-    converted_path += *it_path;
-    ++it_path;
   }
-
   return converted_path;
 }
 
@@ -413,10 +421,11 @@ bool file_system::CreateFile(const std::string& path) {
   }
 }
 
-
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
-  stat(path.c_str(), &info);
+  if (0 != stat(path.c_str(), &info)) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file mod time: " << path);
+  }
 #ifndef __QNXNTO__
   return static_cast<uint64_t>(info.st_mtim.tv_nsec);
 #else
@@ -424,8 +433,7 @@ uint64_t file_system::GetFileModificationTime(const std::string& path) {
 #endif
 }
 
-bool file_system::CopyFile(const std::string& src,
-                           const std::string& dst) {
+bool file_system::CopyFile(const std::string& src, const std::string& dst) {
   if (!FileExists(src) || FileExists(dst) || !CreateFile(dst)) {
     return false;
   }
@@ -437,14 +445,27 @@ bool file_system::CopyFile(const std::string& src,
   return true;
 }
 
-bool file_system::MoveFile(const std::string& src,
-                           const std::string& dst) {
-  if (!CopyFile(src, dst)) {
-    return false;
+bool file_system::MoveFile(const std::string& src, const std::string& dst) {
+  if (std::rename(src.c_str(), dst.c_str()) == 0) {
+    return true;
+  } else {
+    // In case of src and dst on different file systems std::rename returns
+    // an error (at least on QNX).
+    // Seems, streams are not recommended for use, so have
+    // to find another way to do this.
+    std::ifstream s_src(src, std::ios::binary);
+    if (!s_src.good()) {
+      return false;
+    }
+    std::ofstream s_dst(dst, std::ios::binary);
+    if (!s_dst.good()) {
+      return false;
+    }
+    s_dst << s_src.rdbuf();
+    s_dst.close();
+    s_src.close();
+    DeleteFile(src);
+    return true;
   }
-  if (!DeleteFile(src)) {
-    DeleteFile(dst);
-    return false;
-  }
-  return true;
+  return false;
 }

@@ -33,29 +33,30 @@
 
 #include <string.h>
 #include "application_manager/commands/mobile/speak_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+SpeakRequest::SpeakRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
-SpeakRequest::~SpeakRequest() {
-}
+SpeakRequest::~SpeakRequest() {}
 
 void SpeakRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-                     ->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -72,7 +73,8 @@ void SpeakRequest::Run() {
   (*message_)[strings::msg_params][hmi_request::speak_type] =
       hmi_apis::Common_MethodName::SPEAK;
   SendHMIRequest(hmi_apis::FunctionID::TTS_Speak,
-                 &message_->getElement(strings::msg_params), true);
+                 &message_->getElement(strings::msg_params),
+                 true);
 }
 
 void SpeakRequest::on_event(const event_engine::Event& event) {
@@ -87,7 +89,7 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
@@ -99,38 +101,35 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 }
 
 void SpeakRequest::ProcessTTSSpeakResponse(
-  const smart_objects::SmartObject& message) {
+    const smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-                               connection_key());
+  using namespace helpers;
+
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  bool result = false;
+  hmi_apis::Common_Result::eType hmi_result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
   mobile_apis::Result::eType result_code =
-    static_cast<mobile_apis::Result::eType>(
-      message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS ==
-      static_cast<hmi_apis::Common_Result::eType>(result_code)) {
-    result = true;
-  }
+      MessageHelper::HMIToMobileResult(hmi_result_code);
+
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result_code, HmiInterfaces::HMI_INTERFACE_TTS);
+
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::SpeakID;
+      mobile_apis::FunctionID::SpeakID;
 
   const char* return_info = NULL;
 
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-      static_cast<hmi_apis::Common_Result::eType>(result_code)) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string(
-        "Unsupported phoneme type sent in a prompt").c_str();
-  }
-
-  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-               return_info, &(message[strings::msg_params]));
+  SendResponse(
+      result, result_code, return_info, &(message[strings::msg_params]));
 }
 
 bool SpeakRequest::IsWhiteSpaceExist() {

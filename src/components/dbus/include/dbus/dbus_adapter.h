@@ -42,8 +42,6 @@ struct DBusMessageIter;
 
 namespace dbus {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 /**
  * \brief class for work with DBus
  */
@@ -85,7 +83,9 @@ class DBusAdapter {
    * \param name pair interface and name of method for call
    * \param obj params for call
    */
-  void MethodCall(uint id, const MessageId func_id, const MessageName& name,
+  void MethodCall(uint id,
+                  const MessageId func_id,
+                  const MessageName& name,
                   const smart_objects::SmartObject& obj);
 
   /**
@@ -95,7 +95,8 @@ class DBusAdapter {
    * \param name pair interface and name of signal for call
    * \param obj params for signal
    */
-  void Signal(const MessageId func_id, const MessageName& name,
+  void Signal(const MessageId func_id,
+              const MessageName& name,
               const smart_objects::SmartObject& obj);
 
   /**
@@ -103,7 +104,9 @@ class DBusAdapter {
    * \param id id message
    * \param obj params for return
    */
-  void MethodReturn(uint id, const MessageId func_id, const MessageName& name,
+  void MethodReturn(uint id,
+                    const MessageId func_id,
+                    const MessageName& name,
                     const smart_objects::SmartObject& obj);
 
   /**
@@ -219,7 +222,8 @@ class DBusAdapter {
    * \param args map of arguments
    * \return true if success
    */
-  bool SetArguments(DBusMessage* msg, const ListArgs& rules,
+  bool SetArguments(DBusMessage* msg,
+                    const ListArgs& rules,
                     const smart_objects::SmartObject& args);
 
   /**
@@ -278,7 +282,7 @@ class DBusAdapter {
   bool SetOptionalValue(
       DBusMessageIter* iter,
       const ford_message_descriptions::ParameterDescription* rules,
-      const smart_objects::SmartObject &param);
+      const smart_objects::SmartObject& param);
 
   /**
    * \brief gets arguments from message
@@ -287,7 +291,7 @@ class DBusAdapter {
    * \param message response message (output)
    * \return true if success
    */
-  bool GetHeader(DBusMessageIter* iter, int *code, std::string *message);
+  bool GetHeader(DBusMessageIter* iter, int* code, std::string* message);
 
   /**
    * \brief gets arguments from message with header
@@ -296,7 +300,8 @@ class DBusAdapter {
    * \param args map of arguments
    * \return true if success
    */
-  bool GetArguments(DBusMessageIter* iter, const ListArgs& rules,
+  bool GetArguments(DBusMessageIter* iter,
+                    const ListArgs& rules,
                     smart_objects::SmartObject& args);
 
   /**
@@ -309,7 +314,7 @@ class DBusAdapter {
   bool GetOneArgument(
       DBusMessageIter* iter,
       const ford_message_descriptions::ParameterDescription* rules,
-      smart_objects::SmartObject &args);
+      smart_objects::SmartObject& args);
 
   /**
    * \brief gets value for argument
@@ -355,7 +360,7 @@ class DBusAdapter {
   bool GetOptionalValue(
       DBusMessageIter* iter,
       const ford_message_descriptions::ParameterDescription* rules,
-      smart_objects::SmartObject &param);
+      smart_objects::SmartObject& param);
 
   /**
    * \brief processes request on introspect

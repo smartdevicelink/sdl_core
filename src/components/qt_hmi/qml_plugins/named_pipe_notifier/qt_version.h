@@ -37,11 +37,12 @@
 
 #include <qglobal.h>
 
-#define QT_4 ((QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
-  (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)))
+#define QT_4                                    \
+  ((QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
+   (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)))
 
-#define QT_5 ((QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
-  (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)))
+#define QT_5                                    \
+  ((QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
+   (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)))
 
 #endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_QT_VERSION_H_
-

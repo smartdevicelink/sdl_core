@@ -100,6 +100,7 @@ class Thread {
   sync_primitives::ConditionalVariable run_cond_;
 
  public:
+  static int count;
   /**
    * @brief Starts the thread.
    * @return true if the thread was successfully started.
@@ -119,12 +120,11 @@ class Thread {
     return delegate_lock_;
   }
 
-  ThreadDelegate *delegate() const {
+  ThreadDelegate* delegate() const {
     return delegate_;
   }
 
-  void set_delegate(ThreadDelegate *delegate) {
-    DCHECK(!isThreadRunning_);
+  void set_delegate(ThreadDelegate* delegate) {
     delegate_ = delegate;
   }
 
@@ -132,6 +132,9 @@ class Thread {
   friend void DeleteThread(Thread* thread);
 
  public:
+  // Yield current thread
+  static void yield();
+
   // Get unique ID of currently executing thread
   static PlatformThreadHandle CurrentId();
 
@@ -193,6 +196,12 @@ class Thread {
   PlatformThreadHandle thread_handle() const {
     return handle_;
   }
+
+  /**
+   * @brief Checks if invoked in this Thread context
+   * @return True if called from this Thread class, false otherwise
+   */
+  bool IsCurrentThread() const;
 
   /**
    * @brief Thread options.

@@ -2,7 +2,7 @@
  * \file tcp_socket_connection.h
  * \brief TcpSocketConnection class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,11 +36,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
@@ -71,35 +66,13 @@ class TcpSocketConnection : public ThreadedSocketConnection {
 
  protected:
   /**
-   * @brief
-   */
-  virtual bool Establish(ConnectError** error);
-};
-
-/**
- * @brief Class responsible for communication over sockets that originated by server.
- */
-class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
- public:
-  /**
-   * @brief Constructor.
+   * @brief Check if we can start the connection attempt and establish
+   *connection status.
    *
-   * @param device_uid Device unique identifier.
-   * @param app_handle Handle of application.
-   * @param controller Pointer to the device adapter controller.
-   */
-  TcpServerOiginatedSocketConnection(const DeviceUID& device_uid,
-                      const ApplicationHandle& app_handle,
-                      TransportAdapterController* controller);
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~TcpServerOiginatedSocketConnection();
-
- protected:
-  /**
-   * @brief
+   * @param error contains information of any error that occurred during
+   *connection attempt.
+   *
+   * @return result that states whether we successfully connected or not.
    */
   virtual bool Establish(ConnectError** error);
 };

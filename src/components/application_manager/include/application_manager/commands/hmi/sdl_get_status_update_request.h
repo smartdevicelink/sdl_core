@@ -43,29 +43,30 @@ namespace commands {
  * @brief SDLGetStatusUpdateRequest command class
  **/
 class SDLGetStatusUpdateRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetStatusUpdateRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetStatusUpdateRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetStatusUpdateRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  SDLGetStatusUpdateRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLGetStatusUpdateRequest class destructor
-     **/
-    virtual ~SDLGetStatusUpdateRequest();
+  /**
+   * @brief SDLGetStatusUpdateRequest class destructor
+   **/
+  virtual ~SDLGetStatusUpdateRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetStatusUpdateRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetStatusUpdateRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_STATUS_UPDATE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_STATUS_UPDATE_REQUEST_H_

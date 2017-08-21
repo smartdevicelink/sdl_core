@@ -49,7 +49,8 @@ class NaviSendLocationResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    */
-  explicit NaviSendLocationResponse(const MessageSharedPtr& message);
+  NaviSendLocationResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief NaviSendLocationResponse class destructor

@@ -49,7 +49,8 @@ class UIChangeRegistratioResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIChangeRegistratioResponse(const MessageSharedPtr& message);
+  UIChangeRegistratioResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIChangeRegistratioResponse class destructor

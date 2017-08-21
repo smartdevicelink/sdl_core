@@ -31,26 +31,23 @@
  */
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/event_engine/event.h"
-#include "application_manager/application_manager_impl.h"
-
 
 namespace application_manager {
 
 namespace commands {
 
-VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIReadDIDResponse::~VIReadDIDResponse() {
-}
+VIReadDIDResponse::~VIReadDIDResponse() {}
 
 void VIReadDIDResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_ReadDID);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

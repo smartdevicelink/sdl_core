@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
-#define HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
@@ -44,7 +44,7 @@ namespace commands {
  *
  * Template class for sending 1 subscribe thin request
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIGetVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
@@ -52,15 +52,15 @@ class VIGetVehicleDataRequestTemplate : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message)
-      : RequestToHMI(message) {
-  }
+  VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager)
+      : RequestToHMI(message, application_manager) {}
 
   /**
    * @brief Execute command with sending DBus thin request to HMI
    **/
   virtual void Run() {
-    LOG4CXX_INFO(logger_, "VIGetVehicleDataRequestTemplate::Run");
+    LOG4CXX_AUTO_TRACE(logger_);
     SendRequest();
   }
 
@@ -70,4 +70,4 @@ class VIGetVehicleDataRequestTemplate : public RequestToHMI {
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_TEMPLATE_H_

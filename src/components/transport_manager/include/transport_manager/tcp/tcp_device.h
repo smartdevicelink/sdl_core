@@ -121,7 +121,7 @@ class TcpDevice : public Device {
    *
    * @return Application's port No.
    */
-  int GetApplicationPort(const ApplicationHandle app_handle) const;
+  virtual int GetApplicationPort(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return address.

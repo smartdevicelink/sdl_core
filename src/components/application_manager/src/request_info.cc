@@ -40,51 +40,44 @@ namespace application_manager {
 
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 uint32_t RequestInfo::HmiConnectoinKey = 0;
 
-HMIRequestInfo::HMIRequestInfo(
-    RequestPtr request,
-    const uint64_t timeout_sec):
-  RequestInfo(request, HMIRequest, timeout_sec) {
-    correlation_id_ = request_->correlation_id();
-    app_id_ = RequestInfo::HmiConnectoinKey;
+HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
+    : RequestInfo(request, HMIRequest, timeout_msec) {
+  correlation_id_ = request_->correlation_id();
+  app_id_ = RequestInfo::HmiConnectoinKey;
 }
 
-HMIRequestInfo::HMIRequestInfo(
-    RequestPtr request,
-    const TimevalStruct &start_time,
-    const uint64_t timeout_sec):
-  RequestInfo(request, HMIRequest, start_time, timeout_sec) {
-    correlation_id_ = request_->correlation_id();
-    app_id_ = RequestInfo::HmiConnectoinKey;
+HMIRequestInfo::HMIRequestInfo(RequestPtr request,
+                               const TimevalStruct& start_time,
+                               const uint64_t timeout_msec)
+    : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
+  correlation_id_ = request_->correlation_id();
+  app_id_ = RequestInfo::HmiConnectoinKey;
 }
 
-MobileRequestInfo::MobileRequestInfo(
-    RequestPtr request,
-    const uint64_t timeout_sec):
-  RequestInfo(request, MobileRequest, timeout_sec) {
-    correlation_id_ = request_.get()->correlation_id();
-    app_id_ = request_.get()->connection_key();
+MobileRequestInfo::MobileRequestInfo(RequestPtr request,
+                                     const uint64_t timeout_msec)
+    : RequestInfo(request, MobileRequest, timeout_msec) {
+  correlation_id_ = request_.get()->correlation_id();
+  app_id_ = request_.get()->connection_key();
 }
 
-MobileRequestInfo::MobileRequestInfo(
-    RequestPtr request,
-    const TimevalStruct &start_time,
-    const uint64_t timeout_sec):
-  RequestInfo(request, MobileRequest, start_time, timeout_sec) {
-    correlation_id_ = request_.get()->correlation_id();
-    app_id_ = request_.get()->connection_key();
+MobileRequestInfo::MobileRequestInfo(RequestPtr request,
+                                     const TimevalStruct& start_time,
+                                     const uint64_t timeout_msec)
+    : RequestInfo(request, MobileRequest, start_time, timeout_msec) {
+  correlation_id_ = request_.get()->correlation_id();
+  app_id_ = request_.get()->connection_key();
 }
 
 RequestInfo::RequestInfo(RequestPtr request,
                          const RequestInfo::RequestType requst_type,
                          const TimevalStruct& start_time,
-                         const uint64_t timeout_sec):
-  request_(request),
-  start_time_(start_time),
-  timeout_sec_(timeout_sec) {
+                         const uint64_t timeout_msec)
+    : request_(request), start_time_(start_time), timeout_msec_(timeout_msec) {
   updateEndTime();
   requst_type_ = requst_type;
   correlation_id_ = request_->correlation_id();
@@ -93,23 +86,18 @@ RequestInfo::RequestInfo(RequestPtr request,
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
   end_time_ = date_time::DateTime::getCurrentTime();
-  end_time_.tv_sec += timeout_sec_;
-
-  // possible delay during IPC
-  const uint32_t hmi_delay_sec = 1;
-  end_time_.tv_sec += hmi_delay_sec;
+  date_time::DateTime::AddMilliseconds(end_time_, timeout_msec_);
 }
 
-void RequestInfo::updateTimeOut(const uint64_t& timeout_sec)  {
-  timeout_sec_ = timeout_sec;
+void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
+  timeout_msec_ = timeout_msec;
   updateEndTime();
 }
 
 bool RequestInfo::isExpired() {
   TimevalStruct curr_time = date_time::DateTime::getCurrentTime();
-  return end_time_.tv_sec <= curr_time.tv_sec;
-  // TODO(AKutsan) APPLINK-9711 Need to use compareTime method when timer will support millisecconds
-  // return date_time::GREATER == date_time::DateTime::compareTime(end_time_, curr_time);
+  return date_time::DateTime::getmSecs(end_time_) <=
+         date_time::DateTime::getmSecs(curr_time);
 }
 
 uint64_t RequestInfo::hash() {
@@ -120,7 +108,7 @@ uint64_t RequestInfo::GenerateHash(uint32_t var1, uint32_t var2) {
   uint64_t hash_result = 0;
   hash_result = var1;
   hash_result = hash_result << 32;
-  hash_result =  hash_result | var2;
+  hash_result = hash_result | var2;
   return hash_result;
 }
 
@@ -131,8 +119,10 @@ FakeRequestInfo::FakeRequestInfo(uint32_t app_id, uint32_t correaltion_id) {
 
 bool RequestInfoSet::Add(RequestInfoPtr request_info) {
   DCHECK_OR_RETURN(request_info, false);
-  LOG4CXX_DEBUG(logger_, "Add request app_id = " << request_info->app_id()
-                << "; corr_id = " << request_info->requestId());
+  LOG4CXX_DEBUG(
+      logger_,
+      "Add request app_id = " << request_info->app_id()
+                              << "; corr_id = " << request_info->requestId());
   sync_primitives::AutoLock lock(this_lock_);
   CheckSetSizes();
   const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_resilt =
@@ -147,8 +137,10 @@ bool RequestInfoSet::Add(RequestInfoPtr request_info) {
     CheckSetSizes();
     return true;
   } else {
-    LOG4CXX_ERROR(logger_, "Request with app_id = " << request_info->app_id()
-                  << "; corr_id " << request_info->requestId() << " Already exist ");
+    LOG4CXX_ERROR(logger_,
+                  "Request with app_id = "
+                      << request_info->app_id() << "; corr_id "
+                      << request_info->requestId() << " Already exist ");
   }
   CheckSetSizes();
   return false;
@@ -166,7 +158,7 @@ RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
   HashSortedRequestInfoSet::iterator it =
       hash_sorted_pending_requests_.find(request_info_for_search);
   if (it != hash_sorted_pending_requests_.end()) {
-     result = *it;
+    result = *it;
   }
   return result;
 }
@@ -189,7 +181,7 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
   while (it != time_sorted_pending_requests_.end()) {
     RequestInfoPtr tmp = *it;
-    if (0 == tmp ->timeout_sec()) {
+    if (0 == tmp->timeout_msec()) {
       ++it;
     } else {
       result = tmp;
@@ -207,8 +199,7 @@ bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
   }
   CheckSetSizes();
 
-  size_t erased_count =
-      hash_sorted_pending_requests_.erase(request_info);
+  size_t erased_count = hash_sorted_pending_requests_.erase(request_info);
   DCHECK((erased_count <= 1));
   if (1 == erased_count) {
     TimeSortedRequestInfoSet::iterator it =
@@ -233,17 +224,17 @@ bool RequestInfoSet::RemoveRequest(const RequestInfoPtr request_info) {
   return Erase(request_info);
 }
 
-
-uint32_t RequestInfoSet::RemoveRequests(const RequestInfoSet::AppIdCompararator& filter) {
+uint32_t RequestInfoSet::RemoveRequests(
+    const RequestInfoSet::AppIdCompararator& filter) {
   LOG4CXX_AUTO_TRACE(logger_);
   uint32_t erased = 0;
 
   sync_primitives::AutoLock lock(this_lock_);
-  HashSortedRequestInfoSet::iterator it = std::find_if(
-                                            hash_sorted_pending_requests_.begin(),
-                                            hash_sorted_pending_requests_.end(),
-                                            filter);
-  while (it !=  hash_sorted_pending_requests_.end()) {
+  HashSortedRequestInfoSet::iterator it =
+      std::find_if(hash_sorted_pending_requests_.begin(),
+                   hash_sorted_pending_requests_.end(),
+                   filter);
+  while (it != hash_sorted_pending_requests_.end()) {
     HashSortedRequestInfoSet::iterator to_erase = it++;
     Erase(*to_erase);
     it = std::find_if(it, hash_sorted_pending_requests_.end(), filter);
@@ -253,15 +244,16 @@ uint32_t RequestInfoSet::RemoveRequests(const RequestInfoSet::AppIdCompararator&
   return erased;
 }
 
-
 uint32_t RequestInfoSet::RemoveByConnectionKey(uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return RemoveRequests(AppIdCompararator(AppIdCompararator::Equal, connection_key));
+  return RemoveRequests(
+      AppIdCompararator(AppIdCompararator::Equal, connection_key));
 }
 
 uint32_t RequestInfoSet::RemoveMobileRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual, RequestInfo::HmiConnectoinKey));
+  return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual,
+                                          RequestInfo::HmiConnectoinKey));
 }
 
 const size_t RequestInfoSet::Size() {
@@ -276,62 +268,8 @@ void RequestInfoSet::CheckSetSizes() {
   DCHECK(set_sizes_equal);
 }
 
-bool RequestInfoSet::CheckTimeScaleMaxRequest(
-    uint32_t app_id,
-    uint32_t app_time_scale,
-    uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (max_request_per_time_scale > 0
-      && app_time_scale > 0) {
-    TimevalStruct end = date_time::DateTime::getCurrentTime();
-    TimevalStruct start = {0, 0};
-    start.tv_sec = end.tv_sec - app_time_scale;
-
-    sync_primitives::AutoLock lock(this_lock_);
-    TimeScale scale(start, end, app_id);
-    const uint32_t count = std::count_if(time_sorted_pending_requests_.begin(),
-                                         time_sorted_pending_requests_.end(), scale);
-    if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_, "Processing requests count " << count <<
-                   " exceed application limit " << max_request_per_time_scale);
-      return false;
-    }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
-  } else {
-    LOG4CXX_DEBUG(logger_, "CheckTimeScaleMaxRequest disabled");
-  }
-  return true;
-}
-
-bool RequestInfoSet::CheckHMILevelTimeScaleMaxRequest(mobile_apis::HMILevel::eType hmi_level,
-    uint32_t app_id,
-    uint32_t app_time_scale,
-    uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (max_request_per_time_scale > 0 &&
-      app_time_scale > 0) {
-    TimevalStruct end = date_time::DateTime::getCurrentTime();
-    TimevalStruct start = {0, 0};
-    start.tv_sec = end.tv_sec - app_time_scale;
-
-    sync_primitives::AutoLock lock(this_lock_);
-    HMILevelTimeScale scale(start, end, app_id, hmi_level);
-    const uint32_t count = std::count_if(time_sorted_pending_requests_.begin(),
-                                         time_sorted_pending_requests_.end(), scale);
-    if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_, "Processing requests count " << count
-                   << " exceed application limit " << max_request_per_time_scale
-                   << " in hmi level " << hmi_level);
-      return false;
-    }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
-  } else {
-    LOG4CXX_DEBUG(logger_, "CheckHMILevelTimeScaleMaxRequest disabled");
-  }
-  return true;
-}
-
-bool RequestInfoSet::AppIdCompararator::operator()(const RequestInfoPtr value_compare) const {
+bool RequestInfoSet::AppIdCompararator::operator()(
+    const RequestInfoPtr value_compare) const {
   switch (compare_type_) {
     case Equal:
       return value_compare->app_id() == app_id_;

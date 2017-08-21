@@ -30,11 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
-#define HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
@@ -42,7 +43,7 @@ namespace commands {
 /**
  * @brief VIGetVehicleDataResponseTemplate command class
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
@@ -50,18 +51,18 @@ class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message)
-      : ResponseFromHMI(message) {
-  }
+  VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+      : ResponseFromHMI(message, application_manager) {}
 
   /**
    * @brief Execute command
    **/
   virtual void Run() {
-    LOG4CXX_INFO(logger_, "VIGetVehicleDataResponseTemplate::Run");
+    LOG4CXX_AUTO_TRACE(logger_);
     event_engine::Event event(eventID);
     event.set_smart_object(*message_);
-    event.raise();
+    event.raise(application_manager_.event_dispatcher());
   }
 
  private:
@@ -70,4 +71,4 @@ class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_RESPONSE_TEMPLATE_H_

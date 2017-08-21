@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -43,36 +43,39 @@ namespace commands {
 namespace mobile {
 
 OnKeyBoardInputNotification::OnKeyBoardInputNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {
-}
+OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {}
 
 void OnKeyBoardInputNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app_to_notify;
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
-  for (; accessor.end() != it; ++it) {
+  DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+  ApplicationSetIt it = accessor.GetData().begin();
+  for (; accessor.GetData().end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
-    if ((*it)->is_perform_interaction_active()) {
-      LOG4CXX_INFO(logger_, "There is application with active PerformInteraction");
-      app_to_notify = *it;
+    ApplicationSharedPtr app = *it;
+    if (app->is_perform_interaction_active() &&
+        (*it)->perform_interaction_layout() ==
+            mobile_apis::LayoutMode::KEYBOARD) {
+      LOG4CXX_INFO(logger_,
+                   "There is application with active PerformInteraction");
+      app_to_notify = app;
       break;
     }
 
-    if (mobile_apis::HMILevel::eType::HMI_FULL == (*it)->hmi_level()) {
+    if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level()) {
       LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
-      app_to_notify = *it;
+      app_to_notify = app;
     }
   }
 
   if (app_to_notify.valid()) {
-    (*message_)[strings::params][strings::connection_key] = app_to_notify->app_id();
+    (*message_)[strings::params][strings::connection_key] =
+        app_to_notify->app_id();
     SendNotification();
   }
 }

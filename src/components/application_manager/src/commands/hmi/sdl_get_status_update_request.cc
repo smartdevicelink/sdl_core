@@ -31,26 +31,23 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_status_update_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
-}
+SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {
-}
+SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnGetStatusUpdate(
-        (*message_)[strings::params][strings::correlation_id].asUInt());
+  application_manager_.GetPolicyHandler().OnGetStatusUpdate(
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
-
-

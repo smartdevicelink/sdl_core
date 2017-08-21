@@ -50,16 +50,17 @@ class MessagePriority {
   static MessagePriority FromServiceType(ServiceType service_type);
 
   // Trivial inline copy constructor
-  MessagePriority(const MessagePriority &that);
+  MessagePriority(const MessagePriority& that);
 
   // Ordering value which is used by queues to order messages
   // Higher value means higher prioirty
   size_t OrderingValue() const;
+
  private:
   // Constructor is private to prevent creation
   // of random priorities in the code please use static constructor if you
   // need priority value
-  explicit MessagePriority(int32_t value): value_(value) {}
+  explicit MessagePriority(int32_t value) : value_(value) {}
   size_t value_;
 };
 }  // namespace protocol_handler

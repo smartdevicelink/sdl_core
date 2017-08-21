@@ -40,45 +40,48 @@ namespace utils {
  * Utility class that automatically deletes STL collection of
  * freestore objects
  */
-template<class T>
+template <class T>
 class StlCollectionDeleter {
  public:
   typedef T Collection;
-  StlCollectionDeleter(T* collection)
-      : collection_(collection) {
+  StlCollectionDeleter(T* collection) : collection_(collection) {
     DCHECK(collection_);
   }
   ~StlCollectionDeleter() {
-    for (typename Collection::iterator i = collection_->begin(), end =
-        collection_->end(); i != end; ++i) {
+    for (typename Collection::iterator i = collection_->begin(),
+                                       end = collection_->end();
+         i != end;
+         ++i) {
       delete *i;
       *i = NULL;
     }
   }
+
  private:
   Collection* collection_;
 };
 
-template<class T>
+template <class T>
 class StlMapDeleter {
  public:
   typedef T Collection;
-  StlMapDeleter(T* collection)
-      : collection_(collection) {
+  StlMapDeleter(T* collection) : collection_(collection) {
     DCHECK(collection_);
   }
   ~StlMapDeleter() {
-    for (typename Collection::iterator i = collection_->begin(), end =
-        collection_->end(); i != end; ++i) {
+    for (typename Collection::iterator i = collection_->begin(),
+                                       end = collection_->end();
+         i != end;
+         ++i) {
       delete i->second;
       i->second = NULL;
     }
-
   }
+
  private:
   Collection* collection_;
 };
 
 }  // namespace utils
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_

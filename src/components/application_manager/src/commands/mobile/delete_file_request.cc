@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -32,27 +32,26 @@
  */
 
 #include "application_manager/commands/mobile/delete_file_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DeleteFileRequest::~DeleteFileRequest() {
-}
+DeleteFileRequest::~DeleteFileRequest() {}
 
 void DeleteFileRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,20 +60,21 @@ void DeleteFileRequest::Run() {
   }
 
   if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
-      (profile::Profile::instance()->delete_file_in_none() <=
+      (application_manager_.get_settings().delete_file_in_none() <=
        application->delete_file_in_none_count())) {
-      // If application is in the HMI_NONE level the quantity of allowed
-      // DeleteFile request is limited by the configuration profile
-      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
+    // If application is in the HMI_NONE level the quantity of allowed
+    // DeleteFile request is limited by the configuration profile
+    LOG4CXX_ERROR(logger_,
+                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
   }
 
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
+      application_manager_.get_settings().app_storage_folder() + "/";
   full_file_path += application->folder_name();
   full_file_path += "/";
   full_file_path += sync_file_name;
@@ -93,21 +93,20 @@ void DeleteFileRequest::Run() {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::REJECTED);
   }
 }
 
-void DeleteFileRequest::SendFileRemovedNotification(
-    const AppFile* file) const {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::app_id] = connection_key();
-    msg_params[strings::file_name] = file->file_name;
-    msg_params[strings::file_type] = file->file_type;
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::file_name] = file->file_name;
+  msg_params[strings::file_type] = file->file_type;
 
-    CreateHMINotification(
-            hmi_apis::FunctionID::BasicCommunication_OnFileRemoved, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_OnFileRemoved,
+                        msg_params);
 }
 
 }  // namespace commands

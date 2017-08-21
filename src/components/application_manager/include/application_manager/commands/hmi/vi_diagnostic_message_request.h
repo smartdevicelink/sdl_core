@@ -49,7 +49,8 @@ class VIDiagnosticMessageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIDiagnosticMessageRequest(const MessageSharedPtr& message);
+  VIDiagnosticMessageRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief VIDiagnosticMessageRequest class destructor

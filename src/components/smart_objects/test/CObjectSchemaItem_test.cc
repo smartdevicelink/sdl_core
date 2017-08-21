@@ -43,7 +43,7 @@
 #include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/object_schema_item.h"
 #include "formatters/generic_json_formatter.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
@@ -53,8 +53,7 @@ using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
 
 namespace FunctionID {
 enum eType {
@@ -120,8 +119,8 @@ class ObjectSchemaItemTest : public ::testing::Test {
     CObjectSchemaItem::Members paramsMembersMap;
     paramsMembersMap[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
         TEnumSchemaItem<FunctionID::eType>::create(function_values), true);
-    paramsMembersMap[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-        TNumberSchemaItem<int>::create(), true);
+    paramsMembersMap[S_CORRELATION_ID] =
+        CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
     paramsMembersMap[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
         TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
                                        TSchemaItemParameter<int>(2)),
@@ -134,8 +133,8 @@ class ObjectSchemaItemTest : public ::testing::Test {
         CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                   TSchemaItemParameter<size_t>(10)),
         false);
-    schemaMembersMap[Keys::SUCCESS] = CObjectSchemaItem::SMember(
-        CBoolSchemaItem::create(), false);
+    schemaMembersMap[Keys::SUCCESS] =
+        CObjectSchemaItem::SMember(CBoolSchemaItem::create(), false);
 
     CObjectSchemaItem::Members rootMembersMap;
     rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
@@ -313,7 +312,6 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::SUCCESS));
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-
   obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
   obj[S_MSG_PARAMS][fake3] = true;
@@ -368,9 +366,11 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
       EnumConversionHelper<FunctionID::eType>::cstring_to_enum_map();
 
   for (Results::const_iterator res_it = results.begin();
-      res_it != results.end(); ++res_it) {
+       res_it != results.end();
+       ++res_it) {
     for (Functions::const_iterator func_it = functions.begin();
-        func_it != functions.end(); ++func_it) {
+         func_it != functions.end();
+         ++func_it) {
       const char* const function_str = func_it->first;
       const char* const result_type_str = res_it->first;
       const FunctionID::eType function_type = func_it->second;
@@ -400,62 +400,85 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
     }
   }
 }
-// ----------------------------------------------------------------------------
-}// namespace SchemaItem
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-namespace FunctionID = test::components::SmartObjects::SchemaItem::FunctionID;
+namespace FunctionID = test::components::smart_object_test::FunctionID;
 typedef EnumConversionHelper<FunctionID::eType> FunctionConvertor;
 
-template<>
-const FunctionConvertor::EnumToCStringMap FunctionConvertor::enum_to_cstring_map_ =
-    FunctionConvertor::InitEnumToCStringMap();
+template <>
+const FunctionConvertor::EnumToCStringMap
+    FunctionConvertor::enum_to_cstring_map_ =
+        FunctionConvertor::InitEnumToCStringMap();
 
-template<>
-const FunctionConvertor::CStringToEnumMap FunctionConvertor::cstring_to_enum_map_ =
-    FunctionConvertor::InitCStringToEnumMap();
+template <>
+const FunctionConvertor::CStringToEnumMap
+    FunctionConvertor::cstring_to_enum_map_ =
+        FunctionConvertor::InitCStringToEnumMap();
 
-template<>
-const char* const FunctionConvertor::cstring_values_[] =
-    { "Function0", "Function1", "Function2", "Function3", "Function4",
-        "Function5", "Function6" };
+template <>
+const char* const FunctionConvertor::cstring_values_[] = {"Function0",
+                                                          "Function1",
+                                                          "Function2",
+                                                          "Function3",
+                                                          "Function4",
+                                                          "Function5",
+                                                          "Function6"};
 
-template<>
+template <>
 const FunctionID::eType FunctionConvertor::enum_values_[] = {
-    FunctionID::Function0, FunctionID::Function1, FunctionID::Function2,
-    FunctionID::Function3, FunctionID::Function4, FunctionID::Function5,
-    FunctionID::Function6 };
+    FunctionID::Function0,
+    FunctionID::Function1,
+    FunctionID::Function2,
+    FunctionID::Function3,
+    FunctionID::Function4,
+    FunctionID::Function5,
+    FunctionID::Function6};
 
 // ----------------------------------------------------------------------------
 
-namespace ResultType = test::components::SmartObjects::SchemaItem::ResultType;
+namespace ResultType = test::components::smart_object_test::ResultType;
 typedef EnumConversionHelper<ResultType::eType> ResultTypeConvertor;
 
-template<>
-const ResultTypeConvertor::EnumToCStringMap ResultTypeConvertor::enum_to_cstring_map_ =
-    ResultTypeConvertor::InitEnumToCStringMap();
+template <>
+const ResultTypeConvertor::EnumToCStringMap
+    ResultTypeConvertor::enum_to_cstring_map_ =
+        ResultTypeConvertor::InitEnumToCStringMap();
 
-template<>
-const ResultTypeConvertor::CStringToEnumMap ResultTypeConvertor::cstring_to_enum_map_ =
-    ResultTypeConvertor::InitCStringToEnumMap();
+template <>
+const ResultTypeConvertor::CStringToEnumMap
+    ResultTypeConvertor::cstring_to_enum_map_ =
+        ResultTypeConvertor::InitCStringToEnumMap();
 
-template<>
+template <>
 const char* const ResultTypeConvertor::cstring_values_[] = {
-    "APPLICATION_NOT_REGISTERED", "SUCCESS", "TOO_MANY_PENDING_REQUESTS",
-    "REJECTED", "INVALID_DATA", "OUT_OF_MEMORY", "ABORTED", "USER_DISALLOWED",
-    "GENERIC_ERROR", "DISALLOWED" };
+    "APPLICATION_NOT_REGISTERED",
+    "SUCCESS",
+    "TOO_MANY_PENDING_REQUESTS",
+    "REJECTED",
+    "INVALID_DATA",
+    "OUT_OF_MEMORY",
+    "ABORTED",
+    "USER_DISALLOWED",
+    "GENERIC_ERROR",
+    "DISALLOWED"};
 
-template<>
+template <>
 const ResultType::eType ResultTypeConvertor::enum_values_[] = {
-    ResultType::APPLICATION_NOT_REGISTERED, ResultType::SUCCESS,
-    ResultType::TOO_MANY_PENDING_REQUESTS, ResultType::REJECTED,
-    ResultType::INVALID_DATA, ResultType::OUT_OF_MEMORY, ResultType::ABORTED,
-    ResultType::USER_DISALLOWED, ResultType::GENERIC_ERROR,
-    ResultType::DISALLOWED };
+    ResultType::APPLICATION_NOT_REGISTERED,
+    ResultType::SUCCESS,
+    ResultType::TOO_MANY_PENDING_REQUESTS,
+    ResultType::REJECTED,
+    ResultType::INVALID_DATA,
+    ResultType::OUT_OF_MEMORY,
+    ResultType::ABORTED,
+    ResultType::USER_DISALLOWED,
+    ResultType::GENERIC_ERROR,
+    ResultType::DISALLOWED};
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

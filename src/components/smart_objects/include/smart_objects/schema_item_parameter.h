@@ -42,7 +42,7 @@ namespace NsSmartObjects {
  * etc. which may be unspecified.
  * @tparam ParameterType Type of a parameter.
  */
-template<typename ParameterType>
+template <typename ParameterType>
 class TSchemaItemParameter FINAL {
  public:
   /**
@@ -79,20 +79,16 @@ class TSchemaItemParameter FINAL {
   const ParameterType mValue;
 };
 
-template<typename ParameterType>
+template <typename ParameterType>
 TSchemaItemParameter<ParameterType>::TSchemaItemParameter()
-    : mIsSpecified(false),
-      mValue() {
-}
+    : mIsSpecified(false), mValue() {}
 
-template<typename ParameterType>
+template <typename ParameterType>
 TSchemaItemParameter<ParameterType>::TSchemaItemParameter(
     const ParameterType& ParameterValue)
-    : mIsSpecified(true),
-      mValue(ParameterValue) {
-}
+    : mIsSpecified(true), mValue(ParameterValue) {}
 
-template<typename ParameterType>
+template <typename ParameterType>
 bool TSchemaItemParameter<ParameterType>::getValue(ParameterType& Value) const {
   if (mIsSpecified) {
     Value = mValue;

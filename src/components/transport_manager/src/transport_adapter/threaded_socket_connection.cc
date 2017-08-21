@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,19 +49,20 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 ThreadedSocketConnection::ThreadedSocketConnection(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle,
+    const DeviceUID& device_id,
+    const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
-    : read_fd_(-1),
-      write_fd_(-1),
-      controller_(controller),
-      frames_to_send_(),
-      frames_to_send_mutex_(),
-      socket_(-1),
-      terminate_flag_(false),
-      unexpected_disconnect_(false),
-      device_uid_(device_id),
-      app_handle_(app_handle),
-      thread_(NULL) {
+    : read_fd_(-1)
+    , write_fd_(-1)
+    , controller_(controller)
+    , frames_to_send_()
+    , frames_to_send_mutex_()
+    , socket_(-1)
+    , terminate_flag_(false)
+    , unexpected_disconnect_(false)
+    , device_uid_(device_id)
+    , app_handle_(app_handle)
+    , thread_(NULL) {
   const std::string thread_name = std::string("Socket ") + device_handle();
   thread_ = threads::CreateThread(thread_name.c_str(),
                                   new SocketConnectionDelegate(this));
@@ -69,10 +70,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
   LOG4CXX_AUTO_TRACE(logger_);
-  Disconnect();
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
+  DCHECK(NULL == thread_);
 
   if (-1 != read_fd_) {
     close(read_fd_);
@@ -80,6 +78,14 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   if (-1 != write_fd_) {
     close(write_fd_);
   }
+}
+
+void ThreadedSocketConnection::StopAndJoinThread() {
+  Disconnect();
+  thread_->join();
+  delete thread_->delegate();
+  threads::DeleteThread(thread_);
+  thread_ = NULL;
 }
 
 void ThreadedSocketConnection::Abort() {
@@ -100,8 +106,8 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
     LOG4CXX_ERROR(logger_, "pipe creation failed");
     return TransportAdapter::FAIL;
   }
-  const int fcntl_ret = fcntl(read_fd_, F_SETFL,
-                              fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
+  const int fcntl_ret =
+      fcntl(read_fd_, F_SETFL, fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
   if (0 != fcntl_ret) {
     LOG4CXX_ERROR(logger_, "fcntl failed");
     return TransportAdapter::FAIL;
@@ -119,13 +125,14 @@ void ThreadedSocketConnection::Finalize() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (unexpected_disconnect_) {
     LOG4CXX_DEBUG(logger_, "unexpected_disconnect");
-    controller_->ConnectionAborted(device_handle(), application_handle(),
-                                   CommunicationError());
+    controller_->ConnectionAborted(
+        device_handle(), application_handle(), CommunicationError());
   } else {
     LOG4CXX_DEBUG(logger_, "not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
-  close(socket_);
+
+  ShutdownAndCloseSocket();
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Notify() const {
@@ -156,12 +163,12 @@ TransportAdapter::Error ThreadedSocketConnection::SendData(
 TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger_);
   terminate_flag_ = true;
+  ShutdownAndCloseSocket();
   return Notify();
 }
 
 void ThreadedSocketConnection::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  controller_->ConnectionCreated(this, device_uid_, app_handle_);
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
@@ -179,8 +186,8 @@ void ThreadedSocketConnection::threadMain() {
     LOG4CXX_INFO(logger_, "removing message");
     ::protocol_handler::RawMessagePtr message = frames_to_send_.front();
     frames_to_send_.pop();
-    controller_->DataSendFailed(device_handle(), application_handle(),
-                                message, DataSendError());
+    controller_->DataSendFailed(
+        device_handle(), application_handle(), message, DataSendError());
   }
 }
 
@@ -188,6 +195,22 @@ bool ThreadedSocketConnection::IsFramesToSendQueueEmpty() const {
   // Check Frames queue is empty or not
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   return frames_to_send_.empty();
+}
+
+void ThreadedSocketConnection::ShutdownAndCloseSocket() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const int socket = socket_;
+  socket_ = -1;
+  if (socket != -1) {
+    if (shutdown(socket, SHUT_RDWR) != 0) {
+      LOG4CXX_WARN(logger_, "Socket was unable to be shutdowned");
+    }
+    if (close(socket) != 0) {
+      LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Socket has been already closed or not created yet");
+  }
 }
 
 void ThreadedSocketConnection::Transmit() {
@@ -199,8 +222,8 @@ void ThreadedSocketConnection::Transmit() {
 
   const bool is_queue_empty_on_poll = IsFramesToSendQueueEmpty();
 
-  poll_fds[0].events = POLLIN | POLLPRI
-      | (is_queue_empty_on_poll ? 0 : POLLOUT);
+  poll_fds[0].events =
+      POLLIN | POLLPRI | (is_queue_empty_on_poll ? 0 : POLLOUT);
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
@@ -210,10 +233,10 @@ void ThreadedSocketConnection::Transmit() {
     Abort();
     return;
   }
-  LOG4CXX_DEBUG(
-      logger_,
-      "poll is ok " << this << " revents0: " << std::hex << poll_fds[0].revents <<
-      " revents1:" << std::hex << poll_fds[1].revents);
+  LOG4CXX_DEBUG(logger_,
+                "poll is ok " << this << " revents0: " << std::hex
+                              << poll_fds[0].revents << " revents1:" << std::hex
+                              << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(logger_,
@@ -244,7 +267,7 @@ void ThreadedSocketConnection::Transmit() {
   const bool is_queue_empty = IsFramesToSendQueueEmpty();
 
   // Send data if possible
-  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
+  if (!is_queue_empty && (poll_fds[0].revents & POLLOUT)) {
     LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
 
     // send data
@@ -276,13 +299,13 @@ bool ThreadedSocketConnection::Receive() {
     bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
 
     if (bytes_read > 0) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Received " << bytes_read << " bytes for connection " << this);
+      LOG4CXX_DEBUG(logger_,
+                    "Received " << bytes_read << " bytes for connection "
+                                << this);
       ::protocol_handler::RawMessagePtr frame(
           new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
-      controller_->DataReceiveDone(device_handle(), application_handle(),
-                                   frame);
+      controller_->DataReceiveDone(
+          device_handle(), application_handle(), frame);
     } else if (bytes_read < 0) {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
         LOG4CXX_ERROR_WITH_ERRNO(logger_,
@@ -311,8 +334,8 @@ bool ThreadedSocketConnection::Send() {
   while (!frames_to_send_local.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty");
     ::protocol_handler::RawMessagePtr frame = frames_to_send_local.front();
-    const ssize_t bytes_sent = ::send(socket_, frame->data() + offset,
-                                      frame->data_size() - offset, 0);
+    const ssize_t bytes_sent =
+        ::send(socket_, frame->data() + offset, frame->data_size() - offset, 0);
 
     if (bytes_sent >= 0) {
       LOG4CXX_DEBUG(logger_, "bytes_sent >= 0");
@@ -327,8 +350,8 @@ bool ThreadedSocketConnection::Send() {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
       frames_to_send_local.pop();
       offset = 0;
-      controller_->DataSendFailed(device_handle(), application_handle(), frame,
-                                  DataSendError());
+      controller_->DataSendFailed(
+          device_handle(), application_handle(), frame, DataSendError());
     }
   }
 
@@ -337,8 +360,7 @@ bool ThreadedSocketConnection::Send() {
 
 ThreadedSocketConnection::SocketConnectionDelegate::SocketConnectionDelegate(
     ThreadedSocketConnection* connection)
-    : connection_(connection) {
-}
+    : connection_(connection) {}
 
 void ThreadedSocketConnection::SocketConnectionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);

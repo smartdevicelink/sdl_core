@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config_profile/profile.h"
+#include <string>
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
-#include "utils/logger.h"
+
+namespace {
+const std::string kHeader =
+    "HTTP/1.1 200 OK\r\n"
+    "Connection: Keep-Alive\r\n"
+    "Keep-Alive: timeout=15, max=300\r\n"
+    "Server: SDL\r\n"
+    "Content-Type: video/mp4\r\n\r\n";
+}
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "SocketAudioStreamerAdapter")
+SocketAudioStreamerAdapter::SocketAudioStreamerAdapter(
+    const std::string& server_address, uint16_t audio_streaming_port)
+    : SocketStreamerAdapter(server_address, audio_streaming_port, kHeader) {}
 
-SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger);
-  port_ = profile::Profile::instance()->audio_streaming_port();
-  ip_ = profile::Profile::instance()->server_address();
+SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {}
 
-  Init();
-}
-
-SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {
-}
 }  // namespace media_manager

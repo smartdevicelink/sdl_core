@@ -63,7 +63,8 @@
         Lists of the transport types used for device connection to HU.
       </description>
       <element name="BLUETOOTH"/>
-      <element name="USB"/>
+      <element name="USB_IOS"/>
+      <element name="USB_AOA"/>
       <element name="WIFI"/>
     </enum>
     <enum name="ButtonName">
@@ -174,6 +175,21 @@
       </element>
       <element name="NO-NO" internal_name="NO_NO">
         <description>Norwegian - Norway</description>
+      </element>
+      <element name="NL-BE" internal_name="NL_BE">
+        <description>Dutch (Flemish) - Belgium</description>
+      </element>
+      <element name="EL-GR" internal_name="EL_GR">
+        <description>Greek - Greece</description>
+      </element>
+      <element name="HU-HU" internal_name="HU_HU">
+        <description>Hungarian - Hungary</description>
+      </element>
+      <element name="FI-FI" internal_name="FI_FI">
+        <description>Finnish - Finland</description>
+      </element>
+      <element name="SK-SK" internal_name="SK_SK">
+        <description>Slovak - Slovakia</description>
       </element>
     </enum>
     <enum name="SoftButtonType">
@@ -356,10 +372,16 @@
       <element name="STATIC"/>
       <element name="DYNAMIC"/>
     </enum>
-    <enum name="ApplicationToNONEReason">
-      <description>Describes the reasons of moving the app to NONE.</description>
-      <element name="DRIVER_DISTRACTION_VIOLATION" />
-      <element name="USER_EXIT" />
+    <enum name="ApplicationExitReason">
+      <element name="DRIVER_DISTRACTION_VIOLATION" >
+        <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+      </element>
+      <element name="USER_EXIT" >
+        <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+      </element>
+      <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
+        <description>By getting this value, SDL unregisters the named application</description>
+      </element>
     </enum>
     <enum name="TextFieldName">
       <element name="mainField1">
@@ -1188,6 +1210,20 @@
       </param>
       <param name="resultCode" type="Common.VehicleDataResultCode">
         <description>Published data result code.</description>
+      </param>
+    </struct>
+    <struct name="DeviceInfo">
+      <param name="name" type="String" mandatory="true">
+        <description>The name of the device connected.</description>
+      </param>
+      <param name="id" type="String" mandatory="true">
+        <description>The ID of the device connected: either hash of device's USB serial number(in case of USB connection) or hash of device's MAC address(in case of BlueTooth or WIFI connection).</description>
+      </param>
+      <param name="transportType" type="Common.TransportType" mandatory="false">
+        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
+      </param>
+      <param name="isSDLAllowed" type="Boolean" mandatory="false">
+        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
       </param>
     </struct>
     <struct name="TouchCoord">
@@ -2036,7 +2072,7 @@
     </function>
     <function name="OnExitApplication" messagetype="notification" provider="hmi">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
-      <param name="reason" type="Common.ApplicationToNONEReason" mandatory="true">
+      <param name="reason" type="Common.ApplicationExitReason" mandatory="true">
         <description>Specifies reason of moving the app to NONE</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -2215,6 +2251,15 @@
     <function name="OnIgnitionCycleOver" messagetype="notification" provider="hmi">
       <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
     </function>
+    <function name="DecryptCertificate" messagetype="request">
+       <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+           <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
+       </param>
+     </function>
+     <function name="DecryptCertificate" messagetype="response">
+           <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+     </function>
     <!-- End of Policies -->
   </interface>
   <interface name="VR" version="1.0" date="2013-04-17">
@@ -2718,7 +2763,7 @@
       </param>
       <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
       <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>Must be returned if the platform supports on-screen SoftButtons.</description>
       </param>
       <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
@@ -3013,6 +3058,34 @@
     </function>
     <function name="SendLocation" messagetype="response" >
     </function>
+
+    <function name="DialNumber" functionID="DialNumberID" messagetype="request">
+      <description>Dials a phone number and switches to phone application.</description>
+      <param name="number" type="String" maxlength="40">
+        <description>Phone number is a string, which can be up to 40 chars.</description>
+      </param>
+    </function>
+
+    <function name="DialNumber" functionID="DialNumberID" messagetype="response">
+      <param name="success" type="Boolean" platform="documentation">
+      <description>true, if successful</description>
+      <description>false, if failed</description>
+      </param>
+      <param name="resultCode" type="Result" platform="documentation">
+        <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      </param>
+      <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+        <description>Provides additional human readable info regarding the result.</description>
+      </param>
+    </function>
+
     <function name="ShowConstantTBT" messagetype="request" provider="hmi">
       <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
       <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="5">
@@ -3081,7 +3154,7 @@
       </param>
     </function>
     <function name="StartStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
       <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
         <description>URL that HMI start playing.</description>
       </param>
@@ -3092,7 +3165,7 @@
     <function name="StartStream" messagetype="response">
   </function>
     <function name="StopStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to stop playing video streaming.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
       </param>
@@ -3100,7 +3173,7 @@
     <function name="StopStream" messagetype="response">
   </function>
     <function name="StartAudioStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
       <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
         <description>URL that HMI start playing.</description>
       </param>
@@ -3111,7 +3184,7 @@
     <function name="StartAudioStream" messagetype="response">
   </function>
     <function name="StopAudioStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to stop playing audio streaming.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
       </param>
@@ -3594,9 +3667,6 @@
     <!--end Qt HMI version of OnVehicleData-->
     <!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
     <function name="SubscribeGps" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeGps" messagetype="response">
       <param name="gps" type="Common.VehicleDataResult" mandatory="true">
@@ -3604,9 +3674,6 @@
       </param>
     </function>
     <function name="UnsubscribeGps" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeGps" messagetype="response">
       <param name="gps" type="Common.VehicleDataResult" mandatory="true">
@@ -3614,9 +3681,6 @@
       </param>
     </function>
     <function name="SubscribeSpeed" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeSpeed" messagetype="response">
       <param name="speed" type="Common.VehicleDataResult" mandatory="true">
@@ -3624,9 +3688,6 @@
       </param>
     </function>
     <function name="UnsubscribeSpeed" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeSpeed" messagetype="response">
       <param name="speed" type="Common.VehicleDataResult" mandatory="true">
@@ -3634,9 +3695,6 @@
       </param>
     </function>
     <function name="SubscribeRpm" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeRpm" messagetype="response">
       <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
@@ -3644,9 +3702,6 @@
       </param>
     </function>
     <function name="UnsubscribeRpm" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeRpm" messagetype="response">
       <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
@@ -3654,9 +3709,6 @@
       </param>
     </function>
     <function name="SubscribeFuelLevel" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeFuelLevel" messagetype="response">
       <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
@@ -3664,9 +3716,6 @@
       </param>
     </function>
     <function name="UnsubscribeFuelLevel" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeFuelLevel" messagetype="response">
       <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
@@ -3674,9 +3723,6 @@
       </param>
     </function>
     <function name="SubscribeFuelLevel_State" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeFuelLevel_State" messagetype="response">
       <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
@@ -3684,9 +3730,6 @@
       </param>
     </function>
     <function name="UnsubscribeFuelLevel_State" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeFuelLevel_State" messagetype="response">
       <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
@@ -3694,9 +3737,6 @@
       </param>
     </function>
     <function name="SubscribeInstantFuelConsumption" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeInstantFuelConsumption" messagetype="response">
       <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
@@ -3704,9 +3744,6 @@
       </param>
     </function>
     <function name="UnsubscribeInstantFuelConsumption" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeInstantFuelConsumption" messagetype="response">
       <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
@@ -3714,9 +3751,6 @@
       </param>
     </function>
     <function name="SubscribeExternalTemperature" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeExternalTemperature" messagetype="response">
       <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
@@ -3724,9 +3758,6 @@
       </param>
     </function>
     <function name="UnsubscribeExternalTemperature" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeExternalTemperature" messagetype="response">
       <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
@@ -3734,9 +3765,6 @@
       </param>
     </function>
     <function name="SubscribePrndl" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribePrndl" messagetype="response">
       <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
@@ -3744,9 +3772,6 @@
       </param>
     </function>
     <function name="UnsubscribePrndl" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribePrndl" messagetype="response">
       <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
@@ -3754,9 +3779,6 @@
       </param>
     </function>
     <function name="SubscribeVin" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeVin" messagetype="response">
       <param name="vin" type="String" maxlength="17" mandatory="true">
@@ -3764,9 +3786,6 @@
       </param>
     </function>
     <function name="UnsubscribeVin" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeVin" messagetype="response">
       <param name="vin" type="String" maxlength="17" mandatory="true">
@@ -3774,9 +3793,6 @@
       </param>
     </function>
     <function name="SubscribeTirePressure" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeTirePressure" messagetype="response">
       <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
@@ -3784,9 +3800,6 @@
       </param>
     </function>
     <function name="UnsubscribeTirePressure" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeTirePressure" messagetype="response">
       <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
@@ -3794,9 +3807,6 @@
       </param>
     </function>
     <function name="SubscribeOdometer" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeOdometer" messagetype="response">
       <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
@@ -3804,9 +3814,6 @@
       </param>
     </function>
     <function name="UnsubscribeOdometer" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeOdometer" messagetype="response">
       <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
@@ -3814,9 +3821,6 @@
       </param>
     </function>
     <function name="SubscribeBeltStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeBeltStatus" messagetype="response">
       <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3824,9 +3828,6 @@
       </param>
     </function>
     <function name="UnsubscribeBeltStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeBeltStatus" messagetype="response">
       <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3834,9 +3835,6 @@
       </param>
     </function>
     <function name="SubscribeBodyInformation" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeBodyInformation" messagetype="response">
       <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
@@ -3844,9 +3842,6 @@
       </param>
     </function>
     <function name="UnsubscribeBodyInformation" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeBodyInformation" messagetype="response">
       <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
@@ -3854,9 +3849,6 @@
       </param>
     </function>
     <function name="SubscribeDeviceStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeDeviceStatus" messagetype="response">
       <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3864,9 +3856,6 @@
       </param>
     </function>
     <function name="UnsubscribeDeviceStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeDeviceStatus" messagetype="response">
       <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3874,9 +3863,6 @@
       </param>
     </function>
     <function name="SubscribeDriverBraking" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeDriverBraking" messagetype="response">
       <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
@@ -3884,9 +3870,6 @@
       </param>
     </function>
     <function name="UnsubscribeDriverBraking" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeDriverBraking" messagetype="response">
       <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
@@ -3894,9 +3877,6 @@
       </param>
     </function>
     <function name="SubscribeWiperStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeWiperStatus" messagetype="response">
       <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3904,9 +3884,6 @@
       </param>
     </function>
     <function name="UnsubscribeWiperStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeWiperStatus" messagetype="response">
       <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3914,9 +3891,6 @@
       </param>
     </function>
     <function name="SubscribeHeadLampStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeHeadLampStatus" messagetype="response">
       <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3924,9 +3898,6 @@
       </param>
     </function>
     <function name="UnsubscribeHeadLampStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeHeadLampStatus" messagetype="response">
       <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -3934,9 +3905,6 @@
       </param>
     </function>
     <function name="SubscribeEngineTorque" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeEngineTorque" messagetype="response">
       <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
@@ -3944,9 +3912,6 @@
       </param>
     </function>
     <function name="UnsubscribeEngineTorque" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeEngineTorque" messagetype="response">
       <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
@@ -3954,9 +3919,6 @@
       </param>
     </function>
     <function name="SubscribeAccPedalPosition" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeAccPedalPosition" messagetype="response">
       <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
@@ -3964,9 +3926,6 @@
       </param>
     </function>
     <function name="UnsubscribeAccPedalPosition" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeAccPedalPosition" messagetype="response">
       <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
@@ -3974,9 +3933,6 @@
       </param>
     </function>
     <function name="SubscribeSteeringWheelAngle" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeSteeringWheelAngle" messagetype="response">
       <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
@@ -3984,9 +3940,6 @@
       </param>
     </function>
     <function name="UnsubscribeSteeringWheelAngle" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeSteeringWheelAngle" messagetype="response">
       <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
@@ -3994,9 +3947,6 @@
       </param>
     </function>
     <function name="SubscribeECallInfo" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeECallInfo" messagetype="response">
       <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
@@ -4004,9 +3954,6 @@
       </param>
     </function>
     <function name="UnsubscribeECallInfo" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeECallInfo" messagetype="response">
       <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
@@ -4014,9 +3961,6 @@
       </param>
     </function>
     <function name="SubscribeAirbagStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeAirbagStatus" messagetype="response">
       <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -4024,9 +3968,6 @@
       </param>
     </function>
     <function name="UnsubscribeAirbagStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeAirbagStatus" messagetype="response">
       <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -4034,9 +3975,6 @@
       </param>
     </function>
     <function name="SubscribeEmergencyEvent" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeEmergencyEvent" messagetype="response">
       <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
@@ -4044,9 +3982,6 @@
       </param>
     </function>
     <function name="UnsubscribeEmergencyEvent" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeEmergencyEvent" messagetype="response">
       <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
@@ -4054,9 +3989,6 @@
       </param>
     </function>
     <function name="SubscribeClusterModeStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeClusterModeStatus" messagetype="response">
       <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -4064,9 +3996,6 @@
       </param>
     </function>
     <function name="UnsubscribeClusterModeStatus" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeClusterModeStatus" messagetype="response">
       <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
@@ -4074,9 +4003,6 @@
       </param>
     </function>
     <function name="SubscribeMyKey" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="SubscribeMyKey" messagetype="response">
       <param name="myKey" type="Common.VehicleDataResult" mandatory="true">
@@ -4084,9 +4010,6 @@
       </param>
     </function>
     <function name="UnsubscribeMyKey" messagetype="request" provider="hmi">
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application requested this RPC.</description>
-      </param>
     </function>
     <function name="UnsubscribeMyKey" messagetype="response">
       <param name="myKey" type="Common.VehicleDataResult" mandatory="true">

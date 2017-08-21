@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnHMIStatusNotification(const MessageSharedPtr& message);
+  OnHMIStatusNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotification class destructor
@@ -63,11 +64,11 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    **/
   virtual void Run();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotification);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_H_

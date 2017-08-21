@@ -56,19 +56,18 @@ MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
 }
 
 Message::Message(protocol_handler::MessagePriority priority)
-    : function_id_(0),
-      correlation_id_(0),
-      type_(kUnknownType),
-      priority_(priority),
-      connection_key_(0),
-      binary_data_(NULL),
-      data_size_(0),
-      payload_size_(0),
-      version_(kUnknownProtocol) {
-}
+    : function_id_(0)
+    , correlation_id_(0)
+    , type_(kUnknownType)
+    , priority_(priority)
+    , connection_key_(0)
+    , binary_data_(NULL)
+    , data_size_(0)
+    , payload_size_(0)
+    , version_(kUnknownProtocol) {}
 
 Message::Message(const Message& message)
-    : priority_(message.priority_) {
+    : priority_(message.priority_), binary_data_(NULL) {
   *this = message;
 }
 
@@ -99,13 +98,13 @@ bool Message::operator==(const Message& message) {
   bool data_size = data_size_ == message.data_size_;
   bool payload_size = payload_size_ == message.payload_size_;
 
-
-  bool binary_data = std::equal(binary_data_->begin(), binary_data_->end(),
+  bool binary_data = std::equal(binary_data_->begin(),
+                                binary_data_->end(),
                                 message.binary_data_->begin(),
                                 BinaryDataPredicate);
 
-  return function_id && correlation_id && connection_key && type && binary_data
-      && json_message && version && data_size && payload_size;
+  return function_id && correlation_id && connection_key && type &&
+         binary_data && json_message && version && data_size && payload_size;
 }
 
 Message::~Message() {
@@ -191,7 +190,7 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
-const smart_objects::SmartObject &Message::smart_object() const {
+const smart_objects::SmartObject& Message::smart_object() const {
   return smart_object_;
 }
 

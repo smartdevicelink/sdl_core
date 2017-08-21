@@ -64,6 +64,33 @@ GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
   Log(severity, s.str(), 0);
 }
 
+// Unlock internal mutex and wait for a while
+void UnlockAndSleep(const long usecs) {
+  g_gmock_mutex.Unlock();
+  Assert(usecs < 60L*1000*1000,  __FILE__, __LINE__,
+         "Long sleep makes a bare back");
+  ::std::ostringstream s;
+  s << "Sleeping for " << 0.001 * usecs << "mSecs" << ::std::endl;
+  Log(testing::internal::kInfo, s.str(), 0);
+  usleep(usecs);
+  g_gmock_mutex.Lock();
+}
+
+// Return time structure with the current date/time stamp
+timeval GetCurrentTime() {
+  timeval now;
+  gettimeofday(&now, NULL);
+  return now;
+}
+
+// Unlock internal mutex and wait for a while
+long UsecsElapsed(const timeval start_time) {
+  timeval now = GetCurrentTime();
+  timeval priviously_elapsed;
+  timersub(&now, &start_time, &priviously_elapsed);
+  return priviously_elapsed.tv_sec*1000000L + priviously_elapsed.tv_usec;
+}
+
 // Constructs an ExpectationBase object.
 ExpectationBase::ExpectationBase(const char* a_file,
                                  int a_line,
@@ -258,7 +285,9 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_("") {}
+    : mock_obj_(NULL), name_("") {
+  timerclear(&registered_time_);
+}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -273,6 +302,7 @@ void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
     mock_obj_ = mock_obj;
   }
   Mock::Register(mock_obj, this);
+  gettimeofday(&registered_time_, NULL);
 }
 
 // Sets the mock object this mock method belongs to, and sets the name
@@ -320,6 +350,17 @@ const char* UntypedFunctionMockerBase::Name() const
     name = name_;
   }
   return name;
+}
+
+// Returns the time of this mock method registering.  Must be called
+// after RegisterOwner() has been called.
+timeval UntypedFunctionMockerBase::RegisteredTime() const
+    GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+  g_gmock_mutex.AssertHeld();
+  Assert(timerisset(&registered_time_), __FILE__, __LINE__,
+         "RegisteredTime() must not be called before SetOwnerAndName() has "
+         "been called.");
+  return registered_time_;
 }
 
 // Calculates the result of invoking this mock function with the given
@@ -497,6 +538,23 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   g_gmock_mutex.Lock();
 
   return expectations_met;
+}
+
+ExpectationResult UntypedFunctionMockerBase::VerifyExpectationsLocked()
+    GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
+  g_gmock_mutex.AssertHeld();
+  for (UntypedExpectations::const_iterator it =
+       untyped_expectations_.begin();
+       it != untyped_expectations_.end(); ++it) {
+    ExpectationBase* const untyped_expectation = it->get();
+    if (untyped_expectation->IsOverSaturated()) {
+      return OverSaturated;
+    }
+    if (!untyped_expectation->IsSatisfied()) {
+      return NotSatisfied;
+    }
+  }
+  return Satisfied;
 }
 
 }  // namespace internal

@@ -34,12 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_NOTIFICATION_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -47,12 +42,14 @@ namespace commands {
 
 class CommandNotificationImpl : public CommandImpl {
  public:
-  explicit CommandNotificationImpl(const MessageSharedPtr& message);
+  CommandNotificationImpl(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
   virtual ~CommandNotificationImpl();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationImpl);
 };

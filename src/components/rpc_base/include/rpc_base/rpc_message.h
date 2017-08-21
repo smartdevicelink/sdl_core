@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TYPE_BASE_H_
-#define TYPE_BASE_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_
 
 #include "rpc_base.h"
 
@@ -41,17 +41,13 @@ class Value;
 
 namespace rpc {
 
-enum MessageType {
-  kRequest = 0,
-  kResponse = 1,
-  kNotification = 2
-};
+enum MessageType { kRequest = 0, kResponse = 1, kNotification = 2 };
 
 // Base class for all RPC messages
 // Has methods to identify interface this message belongs to
 // And message ID
 class Message {
-public:
+ public:
   // Type of message
   virtual MessageType message_type() const = 0;
   // Numerical function identifier, unique to the interface
@@ -69,30 +65,38 @@ public:
 // Base class for all interface-specific requests
 class RequestBase : public Message, public CompositeType {
  public:
-  explicit RequestBase(InitializationState init_state): CompositeType(init_state) {}
+  explicit RequestBase(InitializationState init_state)
+      : CompositeType(init_state) {}
   // Message interface
-  MessageType message_type() const { return kRequest; }
+  MessageType message_type() const {
+    return kRequest;
+  }
   virtual ~RequestBase() {}
 };
 
 // Base class for all interface-specific responses
 class ResponseBase : public Message, public CompositeType {
  public:
-  ResponseBase(InitializationState init_state): CompositeType(init_state) {}
+  ResponseBase(InitializationState init_state) : CompositeType(init_state) {}
   // Message interface
-  MessageType message_type() const { return kResponse; }
+  MessageType message_type() const {
+    return kResponse;
+  }
   virtual ~ResponseBase() {}
 };
 
 // Base class for all interface-specific notifications
 class NotificationBase : public Message, public CompositeType {
  public:
-  explicit NotificationBase(InitializationState init_state): CompositeType(init_state) {}
-  MessageType message_type() const { return kNotification; }
+  explicit NotificationBase(InitializationState init_state)
+      : CompositeType(init_state) {}
+  MessageType message_type() const {
+    return kNotification;
+  }
   // Message interface
   virtual ~NotificationBase() {}
 };
 
 }  // namespace rpc
 
-#endif /* TYPE_BASE_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_

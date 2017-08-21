@@ -41,6 +41,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol/service_type.h"
+#include "protocol_handler/protocol_packet.h"
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -73,13 +74,10 @@ struct Service {
   protocol_handler::ServiceType service_type;
   bool is_protected_;
   Service()
-    : service_type(protocol_handler::kInvalidServiceType),
-      is_protected_(false) {
-  }
+      : service_type(protocol_handler::kInvalidServiceType)
+      , is_protected_(false) {}
   explicit Service(protocol_handler::ServiceType service_type)
-    : service_type(service_type),
-      is_protected_(false) {
-  }
+      : service_type(service_type), is_protected_(false) {}
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
   }
@@ -94,23 +92,27 @@ struct Session {
   ServiceList service_list;
   uint8_t protocol_version;
 #ifdef ENABLE_SECURITY
-  security_manager::SSLContext *ssl_context;
+  security_manager::SSLContext* ssl_context;
 #endif  // ENABLE_SECURITY
   Session()
-    : service_list()
-#ifdef ENABLE_SECURITY
-    , ssl_context(NULL)
-#endif  // ENABLE_SECURITY
-  {}
-  explicit Session(const ServiceList &services, uint8_t protocol_version)
-    : service_list(services),
-      protocol_version(protocol_version)
+      : service_list()
+      , protocol_version(::protocol_handler::PROTOCOL_VERSION_2)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
-  {}
-  Service *FindService(const protocol_handler::ServiceType &service_type);
-  const Service *FindService(const protocol_handler::ServiceType &service_type) const;
+  {
+  }
+  explicit Session(const ServiceList& services, uint8_t protocol_version)
+      : service_list(services)
+      , protocol_version(protocol_version)
+#ifdef ENABLE_SECURITY
+      , ssl_context(NULL)
+#endif  // ENABLE_SECURITY
+  {
+  }
+  Service* FindService(const protocol_handler::ServiceType& service_type);
+  const Service* FindService(
+      const protocol_handler::ServiceType& service_type) const;
 };
 
 /**
@@ -128,8 +130,8 @@ class Connection {
    */
   Connection(ConnectionHandle connection_handle,
              DeviceHandle connection_device_handle,
-             ConnectionHandler *connection_handler,
-             int32_t heartbeat_timeout);
+             ConnectionHandler* connection_handler,
+             uint32_t heartbeat_timeout);
 
   /**
    * @brief Destructor
@@ -146,7 +148,7 @@ class Connection {
    * @brief Returns connection device handle
    * @return ConnectionDeviceHandle
    */
-  DeviceHandle connection_device_handle();
+  DeviceHandle connection_device_handle() const;
 
   /**
    * @brief Adds session to connection
@@ -187,8 +189,7 @@ class Connection {
    * @param context SSL for connection
    * @return \c true in case of service is protected or \c false otherwise
    */
-  int SetSSLContext(uint8_t session_id,
-                    security_manager::SSLContext *context);
+  int SetSSLContext(uint8_t session_id, security_manager::SSLContext* context);
   /**
    * @brief Gets crypto context of session, use service_type to get NULL
    * SSLContext for not protected services or ControlService (0x0)
@@ -197,23 +198,22 @@ class Connection {
    * @param service_type Type of service
    * @return \ref SSLContext of connection
    */
-  security_manager::SSLContext *GetSSLContext(
-    const uint8_t session_id,
-    const protocol_handler::ServiceType &service_type) const;
+  security_manager::SSLContext* GetSSLContext(
+      const uint8_t session_id,
+      const protocol_handler::ServiceType& service_type) const;
   /**
    * @brief Set protection flag to service in session by key
    * to get current SSLContext of connection
    * @param session_id Identifier of the session
    * @param service_type Type of service
    */
-  void SetProtectionFlag(
-    const uint8_t session_id,
-    const protocol_handler::ServiceType &service_type);
+  void SetProtectionFlag(const uint8_t session_id,
+                         const protocol_handler::ServiceType& service_type);
 #endif  // ENABLE_SECURITY
-  /**
-   * @brief Returns map of sessions which have been opened in
-   *  current connection.
-   */
+        /**
+         * @brief Returns map of sessions which have been opened in
+         *  current connection.
+         */
   const SessionMap session_map() const;
 
   /**
@@ -242,16 +242,17 @@ class Connection {
 
   /**
    * @brief Sets heart beat timeout
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
-  void SetHeartBeatTimeout(int32_t timeout, uint8_t session_id);
+  void SetHeartBeatTimeout(uint32_t timeout, uint8_t session_id);
 
   /**
    * @brief changes protocol version in session
    * @param  session_id session id
    * @param  protocol_version protocol version registered application
    */
-  void UpdateProtocolVersionSession(uint8_t session_id, uint8_t protocol_version);
+  void UpdateProtocolVersionSession(uint8_t session_id,
+                                    uint8_t protocol_version);
 
   /**
    * @brief checks if session supports heartbeat
@@ -267,14 +268,13 @@ class Connection {
    * @return TRUE if session exists otherwise
    *   return FALSE
    */
-   bool ProtocolVersion(uint8_t session_id, uint8_t& protocol_version);
-
+  bool ProtocolVersion(uint8_t session_id, uint8_t& protocol_version);
 
  private:
   /**
    * @brief Current connection handler.
    */
-  ConnectionHandler *connection_handler_;
+  ConnectionHandler* connection_handler_;
 
   /**
    * @brief Current connection handle.
@@ -289,7 +289,7 @@ class Connection {
   /**
    * @brief session/services map
    */
-  SessionMap  session_map_;
+  SessionMap session_map_;
 
   mutable sync_primitives::Lock session_map_lock_;
 
@@ -297,7 +297,8 @@ class Connection {
    * @brief monitor that closes connection if there is no traffic over it
    */
   HeartBeatMonitor* heartbeat_monitor_;
-  threads::Thread *heart_beat_monitor_thread_;
+  uint32_t heartbeat_timeout_;
+  threads::Thread* heart_beat_monitor_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };

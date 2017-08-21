@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="Ford Sync RAPI" version="4.0" date="2015-03-30">
+<interface name="Ford Sync RAPI" version="4.4.0" date="2017-04-27">
 
   <enum name="Result" internal_scope="base">
     <element name="SUCCESS">
@@ -231,6 +231,21 @@
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
      </element>
+     <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+     </element>
+     <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+     </element>
+     <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+     </element>
+     <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+     </element>
+     <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
+     </element>
 </enum>
 
   <enum name="UpdateMode">
@@ -370,6 +385,7 @@
     <element name="FACTORY_DEFAULTS" />
     <element name="APP_UNAUTHORIZED" />
     <element name="PROTOCOL_VIOLATION" />
+    <element name="UNSUPPORTED_HMI_RESOURCE" />
   </enum>
 
   <enum name="TriggerSource">
@@ -564,6 +580,7 @@
     <element name="MFD4" />
     <element name="MFD5" />
     <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
+    <element name="SDL_GENERIC" />
   </enum>
 
   <enum name="TextFieldName">
@@ -781,6 +798,13 @@
     <element name="DYNAMIC" />
   </enum>
 
+  <enum name="DeliveryMode">
+    <description>The mode in which the SendLocation request is sent</description>
+    <element name="PROMPT" />
+    <element name="DESTINATION" />
+    <element name="QUEUE" />
+  </enum>
+
   <struct name="Image">
     <param name="value" minlength="0" maxlength="65535" type="String"> 
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
@@ -851,6 +875,9 @@
     </param>
     <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000">
       <description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
+    </param>
+    <param name="patchVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
+      <description>The patch version indicates a fix to existing functionality in a previous version that should still be able to be run on an older version </description>
     </param>
   </struct>
 
@@ -1257,6 +1284,26 @@
 	</param>
     <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="false">
       <description>Status of the ambient light sensor.</description>
+    </param>
+  </struct>
+
+  <struct name="AppInfo">
+    <description>Contains detailed information about the registered application.</description>
+
+    <param name="appDisplayName" type="String" maxlength="100" mandatory="true">
+    <description>The name displayed for the mobile application on the mobile device (can differ from the app name set in the initial RAI request).</description>
+    </param>
+
+    <param name="appBundleID" type="String" maxlength="256" mandatory="true">
+    <description>The AppBundleID of an iOS application or package name of the Android application. This supports App Launch strategies for each platform.</description>
+    </param>
+
+    <param name="appVersion" type="String" maxlength="256" mandatory="true">
+    <description>Represents the build version number of this particular mobile app.</description>
+    </param>
+
+    <param name="appIcon" type="String" maxlength="500" mandatory="false">
+    <description>A file reference to the icon utilized by this app (simplifies the process of setting an app icon during app registration).</description>
     </param>
   </struct>
 
@@ -2178,7 +2225,10 @@
     <element name="DiagnosticMessageID" value="37" hexvalue="25" />
     <element name="SystemRequestID" value="38" hexvalue="26" />
     <element name="SendLocationID" value="39" hexvalue="27" />
-    <element name="DialNumberID" value="40" hexvalue="28" />    
+    <element name="DialNumberID" value="40" hexvalue="28" />
+    <element name="GetWayPointsID" value="45" hexvalue="2D" />
+    <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
+    <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
 
 <!--
 	Base Notifications
@@ -2200,6 +2250,7 @@
     <element name="OnTouchEventID" value="32780" hexvalue="800C" />
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
+    <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -2229,6 +2280,104 @@
     <element name="notification" value="2" />
   </enum>
 
+  <struct name="DateTime">
+    <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
+      <description>Milliseconds </description>     
+    </param>
+    <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
+      <description>Seconds part of time</description>
+    </param>
+    <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
+      <description>Minutes part of time</description>
+    </param>
+    <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
+      <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
+    </param>
+    <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
+      <description>Day of the month</description>
+    </param>
+    <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
+      <description>Month of the year</description>
+    </param>
+    <param name="year" type="Integer" maxvalue="4095" mandatory="false">
+      <description>The year in YYYY format</description>
+    </param>
+    <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="false">
+      <description>Time zone offset in Hours wrt UTC.</description>
+    </param>
+    <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="false">
+      <description>Time zone offset in Min wrt UTC.</description>
+    </param>
+  </struct>
+
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
+
+  <struct name="Coordinate">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
+      <description>Latitude of the location.</description>
+    </param>
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
+      <description>Longitude of the location.</description>
+    </param>
+  </struct>
+
+<struct name="OASISAddress">
+  <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Name of the country (localized)</description>
+  </param>
+  <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+    <description>Name of country (ISO 3166-2)</description>
+  </param>
+  <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+    <description>(PLZ, ZIP, PIN, CAP etc.)</description>
+  </param>
+  <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of country (e.g. state)</description>
+  </param>
+  <param name="subAdministrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of e.g. state (e.g. county)</description>
+  </param>
+  <param name="locality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. city/village</description>
+  </param>
+  <param name="subLocality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. district</description>
+  </param>
+  <param name="thoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for street, road etc.</description>
+  </param>
+  <param name="subThoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of thoroughfare e.g. house number</description>
+  </param>
+</struct>
+
+  <struct name="LocationDetails">
+    <param name="coordinate" type="Coordinate" mandatory="false">
+      <description>Latitude/Longitude of the location.</description>
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>Name of location.</description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>Location address for display purposes only</description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>Description intended location / establishment (if applicable)</description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>Phone number of location / establishment.</description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>Image / icon of intended location.</description>
+    </param>
+    <param name="searchAddress" type="OASISAddress" mandatory="false">
+      <description>Address to be used by navigation engines for search</description>
+    </param>
+  </struct>
   <!-- Requests/Responses -->
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -2324,6 +2473,11 @@
     <param name="appID" type="String" maxlength="100" mandatory="true">
       <description>ID used to validate app with policy table entries</description>
     </param>
+    <param name="appInfo" type="AppInfo" mandatory="false">
+      <description>
+        See AppInfo.
+      </description>
+    </param>
   </function>
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="response">
@@ -2400,6 +2554,10 @@
     </param>
 
     <param name="audioPassThruCapabilities" type="AudioPassThruCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>See AudioPassThruCapability</description>
+    </param>
+
+    <param name="pcmStreamCapabilities" type="AudioPassThruCapabilities" array="false" mandatory="false">
       <description>See AudioPassThruCapability</description>
     </param>
 
@@ -4663,9 +4821,9 @@
   </function>
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="request">
-    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
     </param>
-    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>
@@ -4691,6 +4849,19 @@
       <description>
         Image / icon of intended location (if applicable and supported)
       </description>
+     </param>
+
+     <param name="timeStamp" type="DateTime" mandatory="false">
+        <description>
+            timestamp in ISO 8601 format
+        </description>
+    </param>
+
+    <param name="address" type="OASISAddress" mandatory="false">
+        <description>Address to be used for setting destination</description>
+    </param>
+    <param name="deliveryMode" type="DeliveryMode" mandatory="false">
+      <description>Defines the mode of prompt for user</description>
     </param>
   </function>
 
@@ -4747,6 +4918,86 @@
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+    <description>To subscribe in getting changes for Waypoints/destinations</description>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+       <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="WayPointType" mandatory="true">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+  </function>
+
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="TIMED_OUT"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="IN_USE"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+       <description>Provides additional human readable info regarding the result.</description>
+    </param>
+    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10"> 
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+    <description>Request to unsubscribe from WayPoints and Destination</description>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
     </param>
   </function>
 
@@ -4957,10 +5208,10 @@
     <param name="requestType" type="RequestType" mandatory="true">
       <description>The type of system request.</description>
     </param>
-    <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="url" type="String" maxlength="1000" mandatory="false">
       <description>
         Optional URL for HTTP requests.
-	If blank, the binary data shall be forwarded to the app.
+        If blank, the binary data shall be forwarded to the app.
         If not blank, the binary data shall be forwarded to the url with a provided timeout in seconds.
       </description>
     </param>
@@ -4973,13 +5224,13 @@
     <param name="fileType" type="FileType" mandatory="false">
        <description>Optional file type (meant for HTTP file requests).</description>
     </param>
-    <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Optional offset in bytes for resuming partial data chunks</description>
     </param>
-    <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Optional length in bytes for resuming partial data chunks</description>
-    </param>    
-  </function>	
+    </param>
+  </function>
 
   <function name="OnHashChange" functionID="OnHashChangeID" messagetype="notification">
 	<description>
@@ -4989,6 +5240,13 @@
 	<param name="hashID" type="String" maxlength="100" mandatory="true">
 		<description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
 	</param>
+  </function>
+
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
   </function>
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
@@ -5081,6 +5339,7 @@
       </description>
     </param>  
   </function>
+
 
 <!-- Deprecating - covered by OnSystemRequest
   <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification" >

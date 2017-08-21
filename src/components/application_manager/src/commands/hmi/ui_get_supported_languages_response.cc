@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
-}
+UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {}
 
 void UIGetSupportedLanguagesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,8 +51,7 @@ void UIGetSupportedLanguagesResponse::Run() {
           (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
-    HMICapabilities& hmi_capabilities =
-        ApplicationManagerImpl::instance()->hmi_capabilities();
+    HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
     hmi_capabilities.set_ui_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);

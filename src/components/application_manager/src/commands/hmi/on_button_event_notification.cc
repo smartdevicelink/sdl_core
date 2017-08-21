@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_button_event_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 
@@ -42,8 +42,8 @@ namespace commands {
 namespace hmi {
 
 OnButtonEventNotification::OnButtonEventNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 void OnButtonEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,4 +59,3 @@ void OnButtonEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

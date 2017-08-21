@@ -32,17 +32,19 @@
 
 #include "gtest/gtest.h"
 #include "formatters/meta_formatter.h"
-#include "meta_formatter_test_helper.h"
+#include "formatters/meta_formatter_test_helper.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-TEST_F(CMetaFormatterTestHelper, inputObjectIdenticalToSchemaWithAndWithoutMandatoryParams) {
+TEST_F(CMetaFormatterTestHelper,
+       inputObjectIdenticalToSchemaWithAndWithoutMandatoryParams) {
   Json::Value value;
   Json::Reader reader;
-  CSmartFactory<FunctionIDTest::eType, MessageTypeTest::eType,
-      StructIdentifiers::eType> factory_;
+  CSmartFactory<FunctionIDTest::eType,
+                MessageTypeTest::eType,
+                StructIdentifiers::eType> factory_;
 
   SmartObject object1 = factory_.CreateSmartObject(
       FunctionIDTest::RegisterAppInterface, MessageTypeTest::request);
@@ -59,31 +61,32 @@ TEST_F(CMetaFormatterTestHelper, inputObjectIdenticalToSchemaWithAndWithoutManda
   FillObjectIdenticalToSchema(object1);
   FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(object2);
   bool creationresult;
-  creationresult = CMetaFormatter::CreateObjectByPattern(object1, schema,
-                                                         result_object1);
+  creationresult =
+      CMetaFormatter::CreateObjectByPattern(object1, schema, result_object1);
   EXPECT_TRUE(creationresult);
-  creationresult = CMetaFormatter::CreateObjectByPattern(object2, schema,
-                                                         result_object2);
+  creationresult =
+      CMetaFormatter::CreateObjectByPattern(object2, schema, result_object2);
   EXPECT_TRUE(creationresult);
 
   // Uncomment code to print objects in console
-//    std::string formatted_string;
-//    CFormatterJsonSDLRPCv1::toString(object1, formatted_string);
-//    printf("object1 %s\n", formatted_string.c_str());
-//
-//    CFormatterJsonSDLRPCv1::toString(result_object1, formatted_string);
-//    printf("result_object1 %s\n", formatted_string.c_str());
-//
-//    CFormatterJsonSDLRPCv1::toString(object2, formatted_string);
-//    printf("object2 %s\n", formatted_string.c_str());
-//
-//    CFormatterJsonSDLRPCv1::toString(result_object2, formatted_string);
-//    printf("result_object2 %s\n", formatted_string.c_str());
+  //    std::string formatted_string;
+  //    CFormatterJsonSDLRPCv1::toString(object1, formatted_string);
+  //    printf("object1 %s\n", formatted_string.c_str());
+  //
+  //    CFormatterJsonSDLRPCv1::toString(result_object1, formatted_string);
+  //    printf("result_object1 %s\n", formatted_string.c_str());
+  //
+  //    CFormatterJsonSDLRPCv1::toString(object2, formatted_string);
+  //    printf("object2 %s\n", formatted_string.c_str());
+  //
+  //    CFormatterJsonSDLRPCv1::toString(result_object2, formatted_string);
+  //    printf("result_object2 %s\n", formatted_string.c_str());
 
   CompareObjects(object1, result_object1);
   CompareObjects(object2, result_object2);
 
-  // Enums must be unapplied (converted to string) in order to be compared against strings
+  // Enums must be unapplied (converted to string) in order to be compared
+  // against strings
   result_object1.getSchema().unapplySchema(result_object1);
   EXPECT_EQ("request", result_object1[S_PARAMS][S_MESSAGE_TYPE].asString());
   EXPECT_EQ("RegisterAppInterface",
@@ -102,25 +105,24 @@ TEST_F(CMetaFormatterTestHelper, NormalSchemaWithEmptyObject) {
 
   // Get schema
   CSmartSchema schema = initSchemaForMetaFormatter();
-  bool create_object_result = CMetaFormatter::CreateObjectByPattern(
-      object, schema, result_object);
+  bool create_object_result =
+      CMetaFormatter::CreateObjectByPattern(object, schema, result_object);
   EXPECT_TRUE(create_object_result);
 
   FillObjectWithDefaultValues(expected_object);
 
   CompareObjects(expected_object, result_object);
 
-// Uncomment code to print objects in console
-//    std::string str;
-//    AnyObjectToJsonString(result_object, str);
-//    printf("result_object(default) %s", str.c_str());
-//    AnyObjectToJsonString(expected_object, str);
-//    printf("expected_object %s", str.c_str());
-
-
+  // Uncomment code to print objects in console
+  //    std::string str;
+  //    AnyObjectToJsonString(result_object, str);
+  //    printf("result_object(default) %s", str.c_str());
+  //    AnyObjectToJsonString(expected_object, str);
+  //    printf("expected_object %s", str.c_str());
 }
 
-TEST_F(CMetaFormatterTestHelper, NormalSchemaWithObjectWithoutSomeMandatoryFields) {
+TEST_F(CMetaFormatterTestHelper,
+       NormalSchemaWithObjectWithoutSomeMandatoryFields) {
   SmartObject object;
   SmartObject result_object;
 
@@ -136,59 +138,64 @@ TEST_F(CMetaFormatterTestHelper, NormalSchemaWithObjectWithoutSomeMandatoryField
       0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"].asInt());
   EXPECT_EQ(
       0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"].asInt());
+  EXPECT_EQ(
+      0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"].asInt());
 
-// Uncomment code to print object in console
-//    std::string str;
-//    AnyObjectToJsonString(result_object, str);
-//    printf("result_object %s", str.c_str());
-
+  // Uncomment code to print object in console
+  //    std::string str;
+  //    AnyObjectToJsonString(result_object, str);
+  //    printf("result_object %s", str.c_str());
 }
 
 TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyMap) {
   std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
-  CSmartSchema map_schema = CSmartSchema(
-      CObjectSchemaItem::create(schemaMembersMap));
+  CSmartSchema map_schema =
+      CSmartSchema(CObjectSchemaItem::create(schemaMembersMap));
 
   SmartObject object;
   SmartObject result_object_empty_map;
 
   SmartObject object_empty_map = SmartObject(SmartType_Map);
-  CMetaFormatter::CreateObjectByPattern(object_empty_map, map_schema,
-                                        result_object_empty_map);
-  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())<< "smartObject is not map type";
-  EXPECT_EQ(0u, result_object_empty_map.length())<< "non empty map";
+  CMetaFormatter::CreateObjectByPattern(
+      object_empty_map, map_schema, result_object_empty_map);
+  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())
+      << "smartObject is not map type";
+  EXPECT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
-  CMetaFormatter::CreateObjectByPattern(object, map_schema,
-                                        result_object_empty_map);
-  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())<< "smartObject is not map type";
-  EXPECT_EQ(0u, result_object_empty_map.length())<< "non empty map";
+  CMetaFormatter::CreateObjectByPattern(
+      object, map_schema, result_object_empty_map);
+  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())
+      << "smartObject is not map type";
+  EXPECT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   object["field1"] = 0;
   object["field2"] = SmartObject();
-  CMetaFormatter::CreateObjectByPattern(object, map_schema,
-                                        result_object_empty_map);
-  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())<< "smartObject is not map type";
-  EXPECT_EQ(0u, result_object_empty_map.length())<< "non empty map";
+  CMetaFormatter::CreateObjectByPattern(
+      object, map_schema, result_object_empty_map);
+  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())
+      << "smartObject is not map type";
+  EXPECT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   // Fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
-  CMetaFormatter::CreateObjectByPattern(object, map_schema,
-                                        result_object_empty_map);
-  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())<< "smartObject is not map type";
-  EXPECT_EQ(0u, result_object_empty_map.length())<< "non empty map";
+  CMetaFormatter::CreateObjectByPattern(
+      object, map_schema, result_object_empty_map);
+  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())
+      << "smartObject is not map type";
+  EXPECT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   // Fill object with any values. Result must be the same
   FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(object);
-  CMetaFormatter::CreateObjectByPattern(object, map_schema,
-                                        result_object_empty_map);
-  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())<< "smartObject is not map type";
-  EXPECT_EQ(0u, result_object_empty_map.length())<< "non empty map";
+  CMetaFormatter::CreateObjectByPattern(
+      object, map_schema, result_object_empty_map);
+  EXPECT_EQ(SmartType_Map, result_object_empty_map.getType())
+      << "smartObject is not map type";
+  EXPECT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
-// Uncomment code to print object in console
-//    std::string str;
-//    AnyObjectToJsonString(result_object_empty_map, str);
-//    printf("result_object(empty map) %s", str.c_str());
-
+  // Uncomment code to print object in console
+  //    std::string str;
+  //    AnyObjectToJsonString(result_object_empty_map, str);
+  //    printf("result_object(empty map) %s", str.c_str());
 }
 
 TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArray) {
@@ -199,38 +206,42 @@ TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArray) {
 
   SmartObject object_empty_aray = SmartObject(SmartType_Array);
 
-  CMetaFormatter::CreateObjectByPattern(object_empty_aray, array_schema,
-                                        result_object_empty_array);
-  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())<< "smartObject is not array type";
-  EXPECT_EQ(0u, result_object_empty_array.length())<< "non empty array";
+  CMetaFormatter::CreateObjectByPattern(
+      object_empty_aray, array_schema, result_object_empty_array);
+  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())
+      << "smartObject is not array type";
+  EXPECT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
-  CMetaFormatter::CreateObjectByPattern(object, array_schema,
-                                        result_object_empty_array);
-  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())<< "smartObject is not array type";
-  EXPECT_EQ(0u, result_object_empty_array.length())<< "non empty array";
+  CMetaFormatter::CreateObjectByPattern(
+      object, array_schema, result_object_empty_array);
+  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())
+      << "smartObject is not array type";
+  EXPECT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
   // Fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
-  CMetaFormatter::CreateObjectByPattern(object, array_schema,
-                                        result_object_empty_array);
-  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())<< "smartObject is not array type";
-  EXPECT_EQ(0u, result_object_empty_array.length())<< "non empty array";
+  CMetaFormatter::CreateObjectByPattern(
+      object, array_schema, result_object_empty_array);
+  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())
+      << "smartObject is not array type";
+  EXPECT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
   // Fill object with any values. Result must be the same
   FillObjectWithoutSomeMandatoryFields(object);
-  CMetaFormatter::CreateObjectByPattern(object, array_schema,
-                                        result_object_empty_array);
-  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())<< "smartObject is not array type";
-  EXPECT_EQ(0u, result_object_empty_array.length())<< "non empty array";
+  CMetaFormatter::CreateObjectByPattern(
+      object, array_schema, result_object_empty_array);
+  EXPECT_EQ(SmartType_Array, result_object_empty_array.getType())
+      << "smartObject is not array type";
+  EXPECT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
-// Uncomment code to print object in console
-//    std::string str;
-//    AnyObjectToJsonString(result_object_empty_array, str);
-//    printf("result_object(empty array) %s", str.c_str());
-
+  // Uncomment code to print object in console
+  //    std::string str;
+  //    AnyObjectToJsonString(result_object_empty_array, str);
+  //    printf("result_object(empty array) %s", str.c_str());
 }
 
-TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArrayAndEmptyMapWithOtherParameters) {
+TEST_F(CMetaFormatterTestHelper,
+       ObjectWithEmptyArrayAndEmptyMapWithOtherParameters) {
   // Arrange
   SmartObject result_object;
   SmartObject object;
@@ -254,8 +265,8 @@ TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArrayAndEmptyMapWithOtherParamet
       TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
                                      TSchemaItemParameter<int>(2)),
       false);
-  paramsMembersMap[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), false);
+  paramsMembersMap[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), false);
 
   std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
 
@@ -286,7 +297,8 @@ TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArrayAndEmptyMapWithOtherParamet
 
   schemaMembersMap["non_mandatory_string"] = CObjectSchemaItem::SMember(
       CStringSchemaItem::create(
-          TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(500),
+          TSchemaItemParameter<size_t>(0),
+          TSchemaItemParameter<size_t>(500),
           TSchemaItemParameter<std::string>("ignoredDefValue")),
       false);
 
@@ -313,13 +325,12 @@ TEST_F(CMetaFormatterTestHelper, ObjectWithEmptyArrayAndEmptyMapWithOtherParamet
 
   CMetaFormatter::CreateObjectByPattern(object, schema, result_object);
 
-// Uncomment code to print object in console
-//    std::string str;
-//    AnyObjectToJsonString(object, str);
-//    printf("object %s", str.c_str());
-//    AnyObjectToJsonString(result_object, str);
-//    printf("result_object %s", str.c_str());
-
+  // Uncomment code to print object in console
+  //    std::string str;
+  //    AnyObjectToJsonString(object, str);
+  //    printf("object %s", str.c_str());
+  //    AnyObjectToJsonString(result_object, str);
+  //    printf("result_object %s", str.c_str());
 
   // Assert
   EXPECT_EQ(500, result_object[S_PARAMS][S_FUNCTION_ID].asInt());

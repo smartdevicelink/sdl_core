@@ -1,0 +1,15 @@
+---
+Language: Cpp
+Standard: Cpp03
+BasedOnStyle: Google
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializersBeforeComma: true
+DerivePointerAlignment: false
+TabWidth: 2
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left

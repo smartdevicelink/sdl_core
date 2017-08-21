@@ -25,7 +25,7 @@ We use <a href="http://nvie.com/posts/a-successful-git-branching-model/">Gitflow
 * A great example of a [pull request can be found here](https://github.com/smartdevicelink/SmartDeviceLink-iOS/pull/45).
 
 ### Contributor's License Agreement (CLA)
-In order to accept Pull Requests from contributors, you must first sign [the Contributor's License Agreement](https://docs.google.com/forms/d/1VNR8EUd5b46cQ7uNbCq1fJmnu0askNpUp5dudLKRGpU/viewform). If you need to make a change to information that you entered, [please contact us](mailto:justin@livio.io).
+In order to accept Pull Requests from contributors, you must first sign [the Contributor's License Agreement](https://docs.google.com/forms/d/1VNR8EUd5b46cQ7uNbCq1fJmnu0askNpUp5dudLKRGpU/viewform). If you need to make a change to information that you entered, [please contact us](mailto:theresa@livio.io).
 
 ## Additional Resources
 * [General GitHub documentation](https://help.github.com/)

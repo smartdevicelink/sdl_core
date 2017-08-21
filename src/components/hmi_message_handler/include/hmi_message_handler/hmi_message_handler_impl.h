@@ -36,15 +36,14 @@
 #include <set>
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
-#include "utils/singleton.h"
 
 namespace hmi_message_handler {
-
 
 namespace impl {
 /*
@@ -54,35 +53,41 @@ namespace impl {
 * TODO(ik): replace these with globally defined message types
 * when we have them.
 */
-struct MessageFromHmi: public MessageSharedPointer {
-  MessageFromHmi(const MessageSharedPointer& message)
+struct MessageFromHmi : public MessageSharedPointer {
+  MessageFromHmi() {}
+  explicit MessageFromHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
-struct MessageToHmi: public MessageSharedPointer {
-  MessageToHmi(const MessageSharedPointer& message)
+struct MessageToHmi : public MessageSharedPointer {
+  MessageToHmi() {}
+  explicit MessageToHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
+    FromHmiQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
+    ToHmiQueue;
 }
 
 class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
-class HMIMessageHandlerImpl
-    : public HMIMessageHandler,
-      public impl::FromHmiQueue::Handler,
-      public impl::ToHmiQueue::Handler,
-      public utils::Singleton<HMIMessageHandlerImpl> {
+class HMIMessageHandlerImpl : public HMIMessageHandler,
+                              public impl::FromHmiQueue::Handler,
+                              public impl::ToHmiQueue::Handler {
  public:
+  explicit HMIMessageHandlerImpl(const HMIMessageHandlerSettings& settings);
+
   ~HMIMessageHandlerImpl();
   void OnMessageReceived(MessageSharedPointer message);
   void SendMessageToHMI(MessageSharedPointer message);
@@ -91,18 +96,36 @@ class HMIMessageHandlerImpl
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
 
+  virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
+
+#ifdef BUILD_TESTS
+  std::set<HMIMessageAdapter*> message_adapters() const {
+    return message_adapters_;
+  }
+
+  HMIMessageObserver* observer() const {
+    return observer_;
+  }
+
+  impl::ToHmiQueue* messages_to_hmi() {
+    return &messages_to_hmi_;
+  }
+
+  impl::FromHmiQueue* messages_from_hmi() {
+    return &messages_from_hmi_;
+  }
+#endif  // BUILD_TESTS
+
  private:
-  HMIMessageHandlerImpl();
-
-
   // threads::MessageLoopThread<*>::Handler implementations
 
   // CALLED ON messages_from_hmi_ THREAD!
   virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
   // CALLED ON messages_to_hmi_ THREAD!
   virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
- private:
 
+ private:
+  const HMIMessageHandlerSettings& settings_;
   HMIMessageObserver* observer_;
   mutable sync_primitives::Lock observer_locker_;
   std::set<HMIMessageAdapter*> message_adapters_;
@@ -115,7 +138,6 @@ class HMIMessageHandlerImpl
   impl::FromHmiQueue messages_from_hmi_;
 
   DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
-  FRIEND_BASE_SINGLETON_CLASS(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 

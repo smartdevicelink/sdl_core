@@ -38,11 +38,11 @@
 #include "qt_version.h"
 
 #if QT_4
-#  include <QtDeclarative/QDeclarativeExtensionPlugin>
+#include <QtDeclarative/QDeclarativeExtensionPlugin>
 typedef QDeclarativeExtensionPlugin ExtensionPlugin;
 typedef QDeclarativeEngine Engine;
 #elif QT_5
-#  include <QtQml/QQmlExtensionPlugin>
+#include <QtQml/QQmlExtensionPlugin>
 typedef QQmlExtensionPlugin ExtensionPlugin;
 typedef QQmlEngine Engine;
 #endif  // QT_VERSION
@@ -58,13 +58,12 @@ class DbusPlugin : public ExtensionPlugin, public QDBusContext {
   Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 #endif  // QT_5
 
-  DBusController *dbusController_;
-  RequestToSDL *requestToSDL_;
+  DBusController* dbusController_;
+  RequestToSDL* requestToSDL_;
 
  public:
-  void registerTypes(const char *uri);
-  void initializeEngine(Engine *engine, const char *uri);
+  void registerTypes(const char* uri);
+  void initializeEngine(Engine* engine, const char* uri);
 };
 
 #endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_DBUS_PLUGIN_H_
-

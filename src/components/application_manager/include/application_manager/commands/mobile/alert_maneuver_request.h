@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
@@ -53,7 +53,8 @@ class AlertManeuverRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertManeuverRequest(const MessageSharedPtr& message);
+  AlertManeuverRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief AlertManeuverRequest class destructor
@@ -74,6 +75,15 @@ class AlertManeuverRequest : public CommandRequestImpl {
 
  private:
   /**
+   * @brief Prepare parameters for  sending to mobile application
+   * @param result_code contains result code for sending to mobile application
+   * @param return_info contains resulting info for sending to mobile
+   * application
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& return_info);
+  /**
    * @brief Checks alert maneuver params(ttsChunks, ...).
    * When type is String there is a check on the contents \t\n \\t \\n
    * @return if alert maneuver contains \t\n \\t \\n return TRUE,
@@ -81,8 +91,10 @@ class AlertManeuverRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
-  mobile_apis::Result::eType  tts_speak_result_code_;
-  mobile_apis::Result::eType  navi_alert_maneuver_result_code_;
+  hmi_apis::Common_Result::eType tts_speak_result_code_;
+  hmi_apis::Common_Result::eType navi_alert_maneuver_result_code_;
+  std::string info_navi_;
+  std::string info_tts_;
   Pending pending_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
@@ -91,4 +103,4 @@ class AlertManeuverRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_

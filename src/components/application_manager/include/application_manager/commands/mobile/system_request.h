@@ -31,17 +31,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYSTEM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYSTEM_REQUEST_H_
 
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "application_manager/application_manager.h"
+#include "application_manager/event_engine/event.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -57,7 +54,8 @@ class SystemRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SystemRequest(const MessageSharedPtr& message);
+  SystemRequest(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
 
   /**
    * @brief SystemRequest class destructor
@@ -76,21 +74,21 @@ class SystemRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
-private:
+ private:
   /**
    * @brief Validates data coming within QueryApps response
    * @param data Data
    * @return true, if data is valid, otherwise - false
    */
-  bool ValidateQueryAppData(const smart_objects::SmartObject& data) const;
+  bool ValidateQueryAppData(smart_objects::SmartObject& data) const;
 
  private:
   static uint32_t index;
-  std::string     processing_file_;
+  std::string processing_file_;
   DISALLOW_COPY_AND_ASSIGN(SystemRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYSTEM_REQUEST_H_

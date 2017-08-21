@@ -31,21 +31,20 @@
  */
 
 #include "application_manager/commands/hmi/on_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
 
-OnPolicyUpdate::OnPolicyUpdate(const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
-}
+OnPolicyUpdate::OnPolicyUpdate(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnPolicyUpdate::~OnPolicyUpdate() {
-}
+OnPolicyUpdate::~OnPolicyUpdate() {}
 
 void OnPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+  application_manager_.GetPolicyHandler().OnPTExchangeNeeded();
 }
 
 }  // namespace commands

@@ -53,186 +53,210 @@ namespace commands {
  **/
 class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
  public:
-    /**
-     * @brief CreateInteractionChoiceSetRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit CreateInteractionChoiceSetRequest(const MessageSharedPtr& message);
+  /**
+   * @brief CreateInteractionChoiceSetRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  CreateInteractionChoiceSetRequest(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
-    /**
-     * @brief CreateInteractionChoiceSetRequest class destructor
-     **/
-    virtual ~CreateInteractionChoiceSetRequest();
+  /**
+   * @brief CreateInteractionChoiceSetRequest class destructor
+   **/
+  virtual ~CreateInteractionChoiceSetRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  virtual void onTimeOut();
+  /**
+   * @brief DeleteChoices allows to walk through the sent commands collection
+   * in order to sent appropriate DeleteCommand request.
+   */
 
  private:
-    /**
-     * @brief Interface method that is called whenever new event received
-     *
-     * @param event The received event
-     */
-    virtual void on_event(const event_engine::Event& event);
+  void DeleteChoices();
 
-    /**
-     * @brief Function is called by RequestController when request execution time
-     * has exceed it's limit
-     */
-    virtual void onTimeOut();
-    /**
-     * @brief DeleteChoices allows to walk through the sent commands collection
-     * in order to sent appropriate DeleteCommand request.
-     */
-    void DeleteChoices();
+  /**
+   * @brief Calls after all responses from HMI were received.
+   * Terminates request and sends successful response to mobile
+   * if all responses were SUCCESS or calls DeleteChoices in other case.
+   */
+  void OnAllHMIResponsesReceived();
 
-    /**
-     * @brief Calls after all responses from HMI were received.
-     * Terminates request and sends successful response to mobile
-     * if all responses were SUCCESS or calls DeleteChoices in other case.
-     */
-    void OnAllHMIResponsesReceived();
+  /**
+   * @brief The VRCommand struct
+   * Collect minimum information about sent VR commands, for correctly
+   * processing deleting sent commands if error from HMI received
+   */
+  struct VRCommandInfo {
+    VRCommandInfo() : cmd_id_(0), succesful_response_received_(false) {}
+    VRCommandInfo(uint32_t cmd_id)
+        : cmd_id_(cmd_id), succesful_response_received_(false) {}
+    uint32_t cmd_id_;
+    bool succesful_response_received_;
+  };
 
-    /**
-     * @brief The VRCommand struct
-     * Collect minimum information about sent VR commands, for correctly
-     * processing deleting sent commands if error from HMI received
-     */
-    struct VRCommandInfo {
-      VRCommandInfo() {}
-      explicit VRCommandInfo(uint32_t cmd_id):
-        cmd_id_(cmd_id),
-        succesful_response_received_(false) {}
-      uint32_t cmd_id_;
-      bool succesful_response_received_;
-    };
+  typedef std::map<uint32_t, VRCommandInfo> SentCommandsMap;
+  SentCommandsMap sent_commands_map_;
 
-    typedef std::map<uint32_t, VRCommandInfo> SentCommandsMap;
-    SentCommandsMap sent_commands_map_;
+  int32_t choice_set_id_;
+  size_t expected_chs_count_;
+  size_t received_chs_count_;
 
-    int32_t choice_set_id_;
-    size_t expected_chs_count_;
-    size_t received_chs_count_;
+  /**
+   * @brief Flag for stop sending VR commands to HMI, in case one of responses
+   * failed
+   */
+  volatile bool error_from_hmi_;
+  sync_primitives::Lock error_from_hmi_lock_;
 
-    /**
-     * @brief Flag for stop sending VR commands to HMI, in case one of responses
-     * failed
-     */
-    volatile bool error_from_hmi_;
-    sync_primitives::Lock error_from_hmi_lock_;
+  /**
+   * @brief Flag shows if request already was expired by timeout
+   */
+  volatile bool is_timed_out_;
+  sync_primitives::Lock is_timed_out_lock_;
 
-    /**
-     * @brief Flag shows if request already was expired by timeout
-     */
-    volatile bool is_timed_out_;
-    sync_primitives::Lock is_timed_out_lock_;
+  sync_primitives::Lock vr_commands_lock_;
+  /*
+   * @brief Sends VR AddCommand request to HMI
+   *
+   * @param app_id Application ID
+   *
+   */
+  void SendVRAddCommandRequests(ApplicationSharedPtr const app);
 
-    sync_primitives::Lock vr_commands_lock_;
-    /*
-     * @brief Sends VR AddCommand request to HMI
-     *
-     * @param app_id Application ID
-     *
-     */
-    void SendVRAddCommandRequests(ApplicationSharedPtr const app);
+  /*
+   * @brief Checks incoming choiseSet params.
+   * @param app Registred mobile application
+   *
+   * @return Mobile result code
+   */
+  mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
 
-    /*
-     * @brief Checks incoming choiseSet params.
-     * @param app Registred mobile application
-     *
-     * @return Mobile result code
-     */
-    mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare choice ID
+  *param
+  *
+  * return TRUE if there is coincidence of choice ID, otherwise FALSE
+  */
+  struct CoincidencePredicateChoiceID {
+    CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
 
-    /*
-    * @brief Predicate for using with CheckChoiceSet method to compare choice ID param
-    *
-    * return TRUE if there is coincidence of choice ID, otherwise FALSE
-    */
-    struct CoincidencePredicateChoiceID {
-      explicit CoincidencePredicateChoiceID(const uint32_t newItem)
-        : newItem_(newItem)
-      {}
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::choice_id].asUInt() == newItem_;
+    }
 
-      bool operator()(smart_objects::SmartObject obj) {
-        return obj[strings::choice_id].asUInt() == newItem_;
-      }
+    const uint32_t newItem_;
+  };
 
-      const uint32_t newItem_;
-    };
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare menu name
+  *param
+  *
+  * return TRUE if there is coincidence of menu name, otherwise FALSE
+  */
+  struct CoincidencePredicateMenuName {
+    CoincidencePredicateMenuName(const std::string& newItem)
+        : newItem_(newItem){};
 
-    /*
-    * @brief Predicate for using with CheckChoiceSet method to compare menu name param
-    *
-    * return TRUE if there is coincidence of menu name, otherwise FALSE
-    */
-    struct CoincidencePredicateMenuName {
-      explicit CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem)
-      {};
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::menu_name].asString() == newItem_;
+    }
 
-      bool operator()(smart_objects::SmartObject obj) {
-        return obj[strings::menu_name].asString() == newItem_;
-      }
+    const std::string& newItem_;
+  };
 
-      const std::string& newItem_;
-    };
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare VR commands
+  *param
+  *
+  * return TRUE if there is coincidence of VR commands, otherwise FALSE
+  */
+  struct CoincidencePredicateVRCommands {
+    CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
+        : newItem_(newItem) {}
 
-    /*
-    * @brief Predicate for using with CheckChoiceSet method to compare VR commands param
-    *
-    * return TRUE if there is coincidence of VR commands, otherwise FALSE
-    */
-    struct CoincidencePredicateVRCommands {
-      explicit CoincidencePredicateVRCommands(
-            const smart_objects::SmartObject& newItem): newItem_(newItem) {}
+    bool operator()(smart_objects::SmartObject obj) {
+      return compareStr(obj, newItem_);
+    }
 
-      bool operator()(smart_objects::SmartObject obj) {
-        return compareStr(obj, newItem_);
-      }
+    const smart_objects::SmartObject& newItem_;
+  };
 
-      const smart_objects::SmartObject& newItem_;
-    };
-
-    /*
-     * @brief Checks if incoming choice set doesn't has similar VR synonyms.
-     *
-     * @param choice1  Choice to compare
-     * @param choice2  Choice to compare
-     *
-     * return Return TRUE if there are similar VR synonyms in choice set,
-     * otherwise FALSE
-    */
-    bool compareSynonyms(
+  /*
+   * @brief Checks if incoming choice set doesn't has similar VR synonyms.
+   *
+   * @param choice1  Choice to compare
+   * @param choice2  Choice to compare
+   *
+   * return Return TRUE if there are similar VR synonyms in choice set,
+   * otherwise FALSE
+  */
+  bool compareSynonyms(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2);
 
-    /*
-     * @brief Checks VR synonyms ignoring differences in case.
-     *
-     * @param str1 VR synonym to compare
-     * @param str2 VR synonym to compare
-     *
-     * return Return TRUE if there are similar VR synonyms in choice set,
-     * otherwise FALSE
-    */
-    static bool compareStr(
+  /*
+   * @brief Checks VR synonyms ignoring differences in case.
+   *
+   * @param str1 VR synonym to compare
+   * @param str2 VR synonym to compare
+   *
+   * return Return TRUE if there are similar VR synonyms in choice set,
+   * otherwise FALSE
+  */
+  static bool compareStr(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
 
-    /**
-     * @brief Checks choice set params(menuName, tertiaryText, ...)
-     * When type is String there is a check on the contents \t\n \\t \\n
-     * @param choice_set which must check
-     * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
-     */
-    bool IsWhiteSpaceExist(const smart_objects::SmartObject& choice_set);
+  /**
+   * @brief Checks choice set params(menuName, tertiaryText, ...)
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @param choice_set which must check
+   * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
+   */
+  bool IsWhiteSpaceExist(const smart_objects::SmartObject& choice_set);
 
-    DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
+  /**
+   * @brief ProcessHmiError process received error from HMI.
+   * This function id not thread safe. It should be protected with
+   * vr_commands_lock_
+   * @param vr_result ERROR type
+   */
+  void ProcessHmiError(const hmi_apis::Common_Result::eType vr_result);
+
+  /**
+   * @brief ProcessSuccesfulHMIResponse process succesful response from HMI\
+   * This function id not thread safe. It should be protected with
+   * vr_commands_lock_
+   * @param corr_id correlation id of received response
+   * @return true if resuest with corr_itd was sent on HMI, false otherwise
+   */
+  bool ProcessSuccesfulHMIResponse(const uint32_t corr_id);
+
+  /**
+   * @brief CountReceivedVRResponses counts received HMI responses. Updated
+   * request timeout if not all responses received
+   * Send response to mobile if all responses received.
+   */
+  void CountReceivedVRResponses();
+
+  DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };
 
 }  // namespace commands

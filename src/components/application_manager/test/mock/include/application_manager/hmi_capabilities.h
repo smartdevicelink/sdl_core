@@ -1,1 +1,0 @@
-../../../../include/application_manager/hmi_capabilities.h

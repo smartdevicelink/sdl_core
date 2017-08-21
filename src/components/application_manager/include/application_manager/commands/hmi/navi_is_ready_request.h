@@ -42,14 +42,16 @@ namespace commands {
 /**
  * @brief NaviIsReadyRequest command class
  **/
-class NaviIsReadyRequest : public RequestToHMI {
+class NaviIsReadyRequest : public RequestToHMI,
+                           public event_engine::EventObserver {
  public:
   /**
    * @brief NaviIsReadyRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviIsReadyRequest(const MessageSharedPtr& message);
+  NaviIsReadyRequest(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief NaviIsReadyRequest class destructor
@@ -59,7 +61,12 @@ class NaviIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief On event callback
+   **/
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviIsReadyRequest);
@@ -69,4 +76,4 @@ class NaviIsReadyRequest : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVIGATION_IS_READY_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_IS_READY_REQUEST_H_

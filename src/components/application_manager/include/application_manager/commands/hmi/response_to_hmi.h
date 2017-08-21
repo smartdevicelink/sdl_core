@@ -36,12 +36,7 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/HMI_API.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -51,7 +46,8 @@ namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class ResponseToHMI : public CommandImpl {
  public:
-  explicit ResponseToHMI(const MessageSharedPtr& message);
+  ResponseToHMI(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
   virtual ~ResponseToHMI();
   virtual bool Init();
   virtual bool CleanUp();

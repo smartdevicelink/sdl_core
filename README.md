@@ -1,6 +1,8 @@
-[![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.org)
+[![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
 
 [![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
+
+ [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
 
 # SmartDeviceLink (SDL)
 
@@ -14,12 +16,11 @@ Pull Requests Welcome!
 
 ## Documentation
 
-  * [Software Architecture Document](https://app.box.com/s/v5ymu5kathzkwfx8iigxxdpr7d5a2xhh)
-  * [Transport Manager Programming Guide](https://app.box.com/s/1pjquttvmhf19uujtw4x4fv4t1leqasa)
+  * [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+  * [Transport Manager Programming Guide](https://smartdevicelink.com/en/guides/core/transport-manager-programming/)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
-  * [Integration Guidelines](https://app.box.com/s/ohcgjv61cykgkuhycglju6cc4efr0ym3)
-  
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=AzdQdSCS24M" target="_blank"><img src="http://i.imgur.com/nm8UujD.png?1" alt="SmartDeviceLink" border="10" /></a>
+  * [Integration Guidelines](https://smartdevicelink.com/en/docs/hmi/master/overview/)
+  * [Evolution Proposals versus Issues](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals_versus_issues.md)
 
 ## SDL Core
 
@@ -41,16 +42,14 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 ```
 %make
 %make install
-%cp bin/mykey.pem src/appMain
-%cp bin/mycert.pem src/appMain
 ```
 
 ## Start SDL Core
 Once SDL Core is compiled and installed you can start it from the executable in the bin folder
 
 ```
-%cd src/appMain
-%./smartDeviceLinkCore
+%cd bin/
+%./start.sh
 ```
 
 ## Start WEB HMI
@@ -73,6 +72,11 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
+
+#### Sample Policy Manager
+The included sample policy manager (for use with `EXTERNAL_PROPRIETARY` policy mode) requires the following packages:
+  - python-pip
+  - python-dev
 
 ### Known Dependency Issues
   * log4cxx - We know that the version of log4cxx on a linux machine can conflict with the one used, which is why it is provided in the repository. To avoid the conflict, we recommend removing liblog4cxx*.
@@ -164,6 +168,26 @@ Take the following steps to launch applications from sdl core.
   5. Connect the application via wifi by entering the IP address of Core into the V4 tester
   6. Both applications should show up on the head unit for launching
   7. Select the other application, and you should see it launched and brought to the foreground on the phone
+
+## Test Coverage
+### Used technologies
+  * GCOV - test coverage program.
+  * LCOV - graphical front-end for GCC's coverage testing tool for gcov.
+  * codecov.io - service for assembling code coverage and representing it in a clear for reading form.
+
+### Excluded folders
+_We test only sources written by us and we don`t need to test external sources(open source libraries)._
+  * '/usr/\*' - local libraries shouldn`t be covered by tests.
+  * '\*/test/\*' - we don`t need to cover tests.
+  * '\*/src/3rd\*' - open source libraries shouldn`t be covered by tests.
+
+### Current test coverage
+You can find it in [Coverage report](https://codecov.io/gh/smartdevicelink/sdl_core/branch/develop)
+
+### How to get Test Coverage locally
+ 1. Build project with enabled flag _-DBUILD_TESTS=on_
+ 2. Execute command 'make test'
+ 3. Execute './tools/Utils/collect_coverage.sh <path_to_build_directory>'
 
 ## Contributions
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 
 <!--
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.1" date="2013-10-02">
+<interface name="Common" version="1.6.0" date="2017-04-27">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -62,15 +62,15 @@
     <element name="GENERIC_ERROR" value="22"/>
     <element name="USER_DISALLOWED" value="23"/>
     <element name="TRUNCATED_DATA" value="24"/>
+    <element name="SAVED" value="25"/>
 </enum>
 
 <enum name="TransportType">
-    <description>
-      Lists of the transport types used for device connection to HU.
-    </description>
-    <element name="BLUETOOTH"/>
-    <element name="USB"/>
-    <element name="WIFI"/>
+  <description>Lists of the transport types used for device connection to HU.</description>
+  <element name="BLUETOOTH"/>
+  <element name="USB_IOS"/>
+  <element name="USB_AOA"/>
+  <element name="WIFI"/>
 </enum>
 
 <enum name="ButtonName">
@@ -185,6 +185,21 @@
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
     </element>
+    <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+    </element>
+    <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+    </element>
+    <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+    </element>
+    <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+    </element>
+    <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
+    </element>
 </enum>
 
 <enum name="SoftButtonType">
@@ -221,6 +236,21 @@
   <element name="SYSTEM" />
 </enum>
 
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
+
+  <struct name="Coordinate">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
+      <description>Latitude of the location.</description>
+    </param>
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
+      <description>Longitude of the location.</description>
+    </param>
+  </struct>
+
 <enum name="LayoutMode">
   <description>For touchscreen interactions, the mode of how the choices are presented.</description>
   <element name="ICON_ONLY" />
@@ -233,28 +263,6 @@
     <description>This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.</description>
   <element name="KEYBOARD" />
     <description>This mode causes the interaction to immediately display a keyboard entry through the HMI.</description>
-</enum>
-
-<enum name="DeactivateReason">
-  <description>Specifies the functionality the User has switched to.</description>
-  <element name="AUDIO">
-      <description>Navigated to audio(radio, etc)</description>
-  </element>
-  <element name="PHONECALL">
-      <description>Navigated to make a call.</description>
-  </element>
-  <element name="NAVIGATIONMAP">
-      <description>Navigated to navigation screen.</description>
-  </element>
-  <element name="PHONEMENU">
-      <description>Navigated to phone menu.</description>
-  </element>
-  <element name="SYNCSETTINGS">
-      <description>Navigated to settings menu.</description>
-  </element>
-  <element name="GENERAL">
-      <description>Other screens navigation apart from other mobile app.</description>
-  </element>
 </enum>
 
 <enum name="ClockUpdateMode">
@@ -374,6 +382,7 @@
     <description> 5 inch GEN1.1 display </description>
     </element>
     <element name="GEN3_8_INCH"/>
+    <element name="SDL_GENERIC" />
   </enum>
 
 <enum name="ImageType">
@@ -382,10 +391,19 @@
   <element name="DYNAMIC" />
 </enum>
 
-<enum name="ApplicationToNONEReason">
-  <description>Describes the reasons of moving the app to NONE.</description>
-  <element name="DRIVER_DISTRACTION_VIOLATION" />
-  <element name="USER_EXIT" />
+<enum name="ApplicationExitReason">
+  <element name="DRIVER_DISTRACTION_VIOLATION" >
+    <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+  </element>
+  <element name="USER_EXIT" >
+    <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+  </element>
+  <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
+    <description>By getting this value, SDL unregisters the named application</description>
+  </element>
+  <element name="UNSUPPORTED_HMI_RESOURCE">
+    <description>By getting this value, SDL unregisters the named application</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
@@ -1162,23 +1180,53 @@
   <element name="NONE"/>
 </enum>
 
+<enum name="EventTypes">
+  <description>Reflects the current active event</description>
+  <element name="AUDIO_SOURCE">
+    <description>Navigated to audio(radio, etc)</description>
+  </element>
+  <element name="EMBEDDED_NAVI">
+    <description>Navigated to navigation screen</description>
+  </element>
+  <element name="PHONE_CALL">
+    <description>Phone call is active</description>
+  </element>
+  <element name="EMERGENCY_EVENT">
+    <description>Active emergency event, active parking event</description>
+  </element>
+  <element name="DEACTIVATE_HMI">
+    <description> GAL/DIO is active </description>
+  </element>
+</enum>
+
+<enum name="DeliveryMode">
+  <description>The mode in which the SendLocation request is sent</description>
+  <element name="PROMPT" />
+  <element name="DESTINATION" />
+  <element name="QUEUE" />
+</enum>
+
 <!-- Policies -->
-<enum name="UpdateResult">
+  <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
+  
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
+  
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
+  
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
+  
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1191,23 +1239,41 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
+  
   <struct name="PermissionItem">
-  <param name="name" type="String" mandatory="true">
-    <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
-  </param>
-  <param name="id" type="Integer" mandatory="true">
-    <description>Id of corresponding functional group, needed by SDL.</description>
-  </param>
-  <param name="allowed" type="Boolean" mandatory="false">
-    <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
-  </param>
-  </struct>
+    <param name="name" type="String" mandatory="true">
+      <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
+    </param>
+    <param name="id" type="Integer" mandatory="true">
+      <description>Id of corresponding functional group, needed by SDL.</description>
+    </param>
+    <param name="allowed" type="Boolean" mandatory="false">
+      <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
+    </param>
+  </struct>  
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
+    </param>
+  </struct>
+
+  <enum name="EntityStatus">
+    <element name="ON"/>
+    <element name="OFF"/>
+  </enum>
+
+  <struct name="ExternalConsentStatus">
+    <param name="entityType" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The entityType which status is informed by "status" param.</description>
+    </param>
+    <param name="entityID" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The corresponding ID of entityType which status is informed by "status" param</description>
+    </param>
+    <param name="status" type="Common.EntityStatus" mandatory="true">
+      <description>Status of the ExternalConsentStatus entity: "ON" or "OFF". </description>
     </param>
   </struct>
 <!-- End of Policies -->
@@ -1303,7 +1369,7 @@
     <description>The name of the device connected.</description>
   </param>
   <param name="id" type="String" mandatory="true">
-    <description>The ID of the device connected</description>
+    <description>The ID of the device connectedi: either hash of device's USB serial number(in case of USB connection) or has of device's MAC address(in case of BlueTooth or WIFI connection</description>
   </param>
   <param name="transportType" type="Common.TransportType" mandatory="false">
     <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
@@ -1393,7 +1459,7 @@
     </param>
     <param name="greyOut" type="Boolean" mandatory="false">
       <description>Indicates whether application should be dimmed on the screen.</description>
-      <description>In case app is not in foreground SDL must notify HMI to grey out the corresponding apps-available-for-launching and currently not registered</description>
+      <description>Applicable only for apps received through QueryApps and still not registered.</description>
     </param>
     <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
       <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
@@ -1438,7 +1504,7 @@
   <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
     <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
   </param>
-  <param name="secondaryImage" type="Image" mandatory="false">
+  <param name="secondaryImage" type="Common.Image" mandatory="false">
     <description>Optional secondary image struct for choice</description>
   </param>
 </struct>
@@ -1936,9 +2002,93 @@
 </struct>
 <!--end of IVI part-->
 
+<struct name="DateTime">
+  <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
+    <description>Milliseconds </description>     
+  </param>
+  <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
+    <description>Seconds part of time</description>
+  </param>
+  <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
+    <description>Minutes part of time</description>
+  </param>
+  <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
+    <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
+  </param>
+  <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
+    <description>Day of the month</description>
+  </param>
+  <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
+    <description>Month of the year</description>
+  </param>
+  <param name="year" type="Integer" maxvalue="4095" mandatory="false">
+    <description>The year in YYYY format</description>
+  </param>
+  <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="false">
+    <description>Time zone offset in Hours wrt UTC.</description>
+  </param>
+  <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="false">
+    <description>Time zone offset in Min wrt UTC.</description>
+  </param>
+</struct>
+
+<struct name="OASISAddress">
+  <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Name of the country (localized)</description>
+  </param>
+  <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+    <description>Name of country (ISO 3166-2)</description>
+  </param>
+  <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+    <description>(PLZ, ZIP, PIN, CAP etc.)</description>
+  </param>
+  <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of country (e.g. state)</description>
+  </param>
+  <param name="subAdministrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of e.g. state (e.g. county)</description>
+  </param>
+  <param name="locality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. city/village</description>
+  </param>
+  <param name="subLocality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. district</description>
+  </param>
+  <param name="thoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for street, road etc.</description>
+  </param>
+  <param name="subThoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of thoroughfare e.g. house number</description>
+  </param>
+</struct>
+
+  <struct name="LocationDetails">
+    <param name="coordinate" type="Coordinate" mandatory="false">
+      <description>Latitude/Longitude of the location.</description>
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>Name of location.</description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>Location address for display purposes only</description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>Description intended location / establishment (if applicable)</description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>Phone number of location / establishment.</description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>Image / icon of intended location.</description>
+    </param>
+    <param name="searchAddress" type="OASISAddress" mandatory="false">
+      <description>Address to be used by navigation engines for search</description>
+    </param>
+  </struct>
+
 </interface>
 
-<interface name="Buttons" version="1.0" date="2013-04-12">
+<interface name="Buttons" version="1.2.0" date="2017-04-27">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
     </function>
@@ -1961,8 +2111,10 @@
       </param>
       <param name="appID" type="Integer" mandatory="false">
         <description>
-                In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
-                Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+                If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
+                If appID is omited for OK button -> SDL transfers notification to app in FULL
         </description>
       </param>
     </function>
@@ -1976,8 +2128,10 @@
         </param>
         <param name="appID" type="Integer" mandatory="false">
             <description>
-                In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
-                Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
+                If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
+                If appID is omited for OK button -> SDL transfers notification to app in FULL
             </description>
         </param>
     </function>
@@ -2001,7 +2155,7 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="1.0" date="2013-04-12">
+<interface name="BasicCommunication" version="1.2.0" date="2017-04-27">
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2010,21 +2164,6 @@
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
-    </function>
-    <function name="OnPhoneCall" messagetype="notification">
-        <description>Sender: HMI->SDL. When: upon phone-call event started or ended</description>
-        <param name="isActive" type="Boolean" mandatory="true">
-            <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
-        </param>
-    </function>
-    <function name="OnEmergencyEvent" messagetype="notification">
-        <description>
-            "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
-            or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
-            NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
-        </description>
-        <param name="enabled" type="Boolean" mandatory="true">
-        </param>
     </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
@@ -2104,9 +2243,6 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of deactivated application.</description>
       </param>
-      <param name="reason" type="Common.DeactivateReason" mandatory="true">
-        <description>Specifies the functionality the user has switched to.</description>
-      </param>
     </function>
     <function name="OnAppRegistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about new application registered.</description>
@@ -2152,7 +2288,7 @@
     </function>
     <function name="OnExitApplication" messagetype="notification">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
-      <param name="reason" type="Common.ApplicationToNONEReason" mandatory="true">
+      <param name="reason" type="Common.ApplicationExitReason" mandatory="true">
         <description>Specifies reason of moving the app to NONE</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -2179,27 +2315,15 @@
         <description>Must be true if supported</description>
       </param>
     </function>
-    <function name="PlayTone" messagetype="notification">
-      <description>Sent by SDL to HMI to notify that the tone should be played.</description>
-      <param name="appID" type="Integer" mandatory="true">
-         <description>ID of the application that invoked this notification</description>
-      </param>
-      <param name="methodName" type="Common.MethodName" mandatory="true">
-         <description>Defines the name of app's request that initiates playing a tone</description>
-      </param>
-    </function>
     <function name="DialNumber" messagetype="request">
       <description>Request from SDL to call a specific number.</description>
       <param name="number" type="String" maxlength="40">
-        <description>Phone number is a string, which can be up to 40 chars.
-        All characters shall be stripped from string except digits 0-9 and * # , ; +
-        </description>
+        <description>The number to dial. Only the character + and numbers are allowed.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
       </param>
     </function>
-
     <function name="DialNumber" messagetype="response">
     </function>
     <!-- Policies -->
@@ -2242,8 +2366,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>Internal ID of the application that requested this RPC.</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="response">
@@ -2341,10 +2465,28 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
+  <function name="DecryptCertificate" messagetype="request">
+     <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+     <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+         <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
+     </param>
+   </function>
+   <function name="DecryptCertificate" messagetype="response">
+         <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+   </function>
   <!-- End of Policies -->
+   <function name="OnEventChanged" messagetype="notification">
+     <description>Sender: HMI->SDL. When event is become active</description>
+     <param name="eventName" type="Common.EventTypes" mandatory="true">
+        <description>Specifies the types of active events.</description>
+     </param>
+     <param name="isActive" type="Boolean" mandatory="true">
+        <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
+     </param>
+   </function>
 </interface>
 
-<interface name="VR" version="1.0" date="2013-04-17">
+<interface name="VR" version="1.1.0" date="2017-04-27">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
@@ -2425,6 +2567,9 @@
         IDs of the specific compiled grammars for this voice interaction.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
@@ -2490,7 +2635,7 @@
   </function>
 </interface>
 
-<interface name="TTS" version="1.0" date="2013-04-18">
+<interface name="TTS" version="1.1.0" date="2017-04-27">
   <description>RPCs for communication between TTS and SDL.</description>
   <function name="GetCapabilities" messagetype="request">
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
@@ -2527,6 +2672,9 @@
     </param>
     <param name="speakType" type="Common.MethodName" mandatory="false">
       <description>Defines the type of the request which causes text-to-speech</description>
+    </param>
+    <param name="playTone" type="Boolean" mandatory="false">
+      <description>Defines that the tone should be played</description>
     </param>
   </function>
   <function name="Speak" messagetype="response">
@@ -2613,7 +2761,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.0" date="2013-04-16">
+<interface name="UI" version="1.1.0" date="2017-04-27">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -2772,14 +2920,14 @@
   <function name="SetMediaClockTimer" messagetype="request">
     <description>Sets the initial media clock value and automatic update method.</description>
     <param name="startTime" type="Common.TimeFormat" mandatory="false">
-      <description>startTime should be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
+      <description>SDL transfers startTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI.
+      SDL ignores startTime for modes: "RESUME", and "CLEAR"</description>
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
           See TimeFormat.
-          endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-          If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-          endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+          SDL transfers endTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI. To be used to calculate any visual progress bar (if not provided, this feature is ignored).
+          SDL ignores endTime for modes: "RESUME", and "CLEAR"
       </description>
     </param>
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
@@ -2846,7 +2994,7 @@
     </param>
     <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
     <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
     </param>
     <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
@@ -3106,7 +3254,8 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.0" date="2013-05-22">
+<interface name="Navigation" version="1.4.0" date="2017-04-27"> 
+
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
   </function>
@@ -3120,9 +3269,9 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
-    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
     </param>
-    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>     Name / title of intended location   </description>
@@ -3138,6 +3287,17 @@
     </param>
     <param name="locationImage" type="Common.Image" mandatory="false">
       <description>     Image / icon of intended location (if applicable and supported)   </description>
+    </param>
+    <param name="timeStamp" type="Common.DateTime" mandatory="false">
+        <description>
+            timestamp in ISO 8601 format
+        </description>
+    </param>
+    <param name="address" type="Common.OASISAddress" mandatory="false">
+        <description>Address to be used for setting destination</description>
+    </param>
+    <param name="deliveryMode" type="Common.DeliveryMode" mandatory="false">
+      <description>Defines the mode of prompt for user</description>
     </param>
   </function>
   <function name="SendLocation" messagetype="response" >
@@ -3210,7 +3370,7 @@
     </param>
   </function>
   <function name="StartStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3221,7 +3381,7 @@
   <function name="StartStream" messagetype="response">
   </function>
   <function name="StopStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing video streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
@@ -3229,7 +3389,7 @@
   <function name="StopStream" messagetype="response">
   </function>
   <function name="StartAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3240,7 +3400,7 @@
   <function name="StartAudioStream" messagetype="response">
   </function>
   <function name="StopAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing audio streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
@@ -3259,10 +3419,47 @@
       <description>If "true" - video data started. If "false" - video data stopped.</description>
     </param>
   </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="Common.WayPointType" mandatory="true">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+    <description>To subscribe in getting changes for Waypoints/destinations</description>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+    <description>Request to unsubscribe from WayPoints and Destination</description>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
+  </function>
 
 </interface>
 
-<interface name="VehicleInfo" version="1.0" date="2013-04-21">
+<interface name="VehicleInfo" version="1.1.0" date="2017-04-27">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
   </function>
@@ -3349,9 +3546,6 @@
         The application will be notified by the onVehicleData notification whenever new data is available.
         To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
@@ -3738,9 +3932,6 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
-    </param>
   </function>
   <function name="GetVehicleData" messagetype="response">
     <param name="gps" type="Common.GPSData" mandatory="false">
@@ -3900,7 +4091,7 @@
 </interface>
 
  <!-- Policies -->
-<interface name="SDL" version="1.0" date="2014-03-12">
+<interface name="SDL" version="1.1.0" date="2017-04-27">
 <function name="ActivateApp" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
     </param>
@@ -3976,19 +4167,22 @@
       <param name="allowedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="0" maxsize="100">
         <description>If no permissions were specified for application the array will come empty.</description>
       </param>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="true" array="true" minsize="0" maxsize="100">
+        <description>External User Consent Settings (defined by entityType and entityID) status: enabled/disabled. If empty array is returned, SDL does not have any stored status.</description>
+      </param>
     </function>
 
     <function name="OnAppPermissionConsent" messagetype="notification">
       <description>Initiated by HMI for specifying the allowance for the application to perform some functionality. Duplicates functionality of the request, needed if HMI has specific ways to allow/disallow functionality (i.e.Setting Menu)</description>
       <param name="appID" type="Integer" mandatory="false">
-          <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
+        <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
       </param>
-      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="1" maxsize="100">
-      </param>
+      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="false" array="true" minsize="1" maxsize="100"/>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
      </function>
 
-     <function name="OnAppPermissionChanged" messagetype="notification">
+    <function name="OnAppPermissionChanged" messagetype="notification">
       <description>Notification from SDL to HMI. Occurs when app permissions were reduced. If no permission specified means that app was dissallowed and has to be unregitstered.</description>
       <param name="appID" type="Integer" mandatory="true"/>
       <param name="isAppPermissionsRevoked" type="Boolean" mandatory="false"/>

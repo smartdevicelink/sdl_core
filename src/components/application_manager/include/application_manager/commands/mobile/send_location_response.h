@@ -36,7 +36,6 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
 
-
 namespace application_manager {
 namespace commands {
 
@@ -45,7 +44,8 @@ class SendLocationResponse : public CommandResponseImpl {
   /**
    * @brief SendLocationResponse class constructor
    */
-  explicit SendLocationResponse(const MessageSharedPtr& message);
+  SendLocationResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationResponse class destructor

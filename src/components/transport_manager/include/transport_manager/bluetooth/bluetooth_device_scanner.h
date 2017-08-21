@@ -62,11 +62,14 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief Constructor.
    * @param controller Transport adapter controller
-   * @param auto_repeat_search true - autorepeated or continous device search, false - search on demand
-   * @param repeat_search_pause_sec - pause between device searches, 0 means continous search
+   * @param auto_repeat_search true - autorepeated or continous device search,
+   * false - search on demand
+   * @param repeat_search_pause_sec - pause between device searches, 0 means
+   * continous search
    */
   BluetoothDeviceScanner(TransportAdapterController* controller,
-                         bool auto_repeat_search, int repeat_search_pause_sec);
+                         bool auto_repeat_search,
+                         int repeat_search_pause_sec);
   /**
    * @brief Destructor.
    */
@@ -75,8 +78,8 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @brief Main thread initialization.
    */
   void Thread();
- protected:
 
+ protected:
   /**
    * @brief Start device scanner.
    *
@@ -103,12 +106,13 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * false - not initialized.
    */
   virtual bool IsInitialised() const;
- private:
 
-  class BluetoothDeviceScannerDelegate: public threads::ThreadDelegate {
+ private:
+  class BluetoothDeviceScannerDelegate : public threads::ThreadDelegate {
    public:
     explicit BluetoothDeviceScannerDelegate(BluetoothDeviceScanner* scanner);
     void threadMain() OVERRIDE;
+
    private:
     BluetoothDeviceScanner* scanner_;
   };
@@ -116,7 +120,8 @@ class BluetoothDeviceScanner : public DeviceScanner {
   typedef std::vector<uint8_t> RfcommChannelVector;
 
   /**
-   * @brief Waits for external scan request or time out for repeated search or terminate request
+   * @brief Waits for external scan request or time out for repeated search or
+   * terminate request
    */
   void TimedWaitForDeviceScanRequest();
 
@@ -126,7 +131,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @return List of RFCOMM-channels lists
    */
   std::vector<RfcommChannelVector> DiscoverSmartDeviceLinkRFCOMMChannels(
-    const std::vector<bdaddr_t>& device_addresses);
+      const std::vector<bdaddr_t>& device_addresses);
 
   /**
    * @brief Finds RFCOMM-channels of SDL enabled applications for given device
@@ -134,10 +139,11 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @return true - if search was OK, false if it failed
    */
   bool DiscoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t& device_address,
-      RfcommChannelVector* discovered);
+                                             RfcommChannelVector* discovered);
 
   /**
-   * @brief Summarizes the total list of devices (paired and scanned) and notifies controller
+   * @brief Summarizes the total list of devices (paired and scanned) and
+   * notifies controller
    */
   void UpdateTotalDeviceList();
 
@@ -147,10 +153,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
   void DoInquiry();
 
   /**
-   * @brief Checks if given devices have SDL service and creates appropriate BluetoothDevice objects
+   * @brief Checks if given devices have SDL service and creates appropriate
+   * BluetoothDevice objects
    * @param bd_address List of bluetooth addresses to check
    * @param device_handle HCI handle
-   * @param[out] discovered_devices List of created BluetoothDevice objects to fill
+   * @param[out] discovered_devices List of created BluetoothDevice objects to
+   * fill
    */
   void CheckSDLServiceOnDevices(const std::vector<bdaddr_t>& bd_address,
                                 int device_handle,
@@ -180,4 +188,4 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif /* BLUETOOTH_DEVICE_SCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_

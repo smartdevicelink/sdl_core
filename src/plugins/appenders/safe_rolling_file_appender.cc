@@ -37,10 +37,10 @@ using namespace log4cxx::helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(SafeRollingFileAppender)
 
-void SafeRollingFileAppender::subAppend(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p) {
+void SafeRollingFileAppender::subAppend(const spi::LoggingEventPtr& event,
+                                        log4cxx::helpers::Pool& p) {
   try {
     RollingFileAppenderSkeleton::subAppend(event, p);
-  }
-  catch (...) {
+  } catch (...) {
   }
 }

@@ -51,7 +51,7 @@
 #include "utils/threads/thread_delegate.h"
 
 namespace threads {
-  class Thread;
+class Thread;
 
 /*
  * This class is here currently to remember names associated to threads.
@@ -69,12 +69,13 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
   };
   ThreadManager() {}
   MessageQueue<ThreadDesc> threads_to_terminate;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 
   FRIEND_BASE_SINGLETON_CLASS(ThreadManager);
 };
 
-} // namespace threads
+}  // namespace threads
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_MANAGER_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_MANAGER_H_

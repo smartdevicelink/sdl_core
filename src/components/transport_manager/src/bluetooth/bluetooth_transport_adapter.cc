@@ -2,7 +2,7 @@
  * \file bluetooth_transport_adapter.cc
  * \brief BluetoothTransportAdapter class source file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,6 @@
 #include <set>
 #include <bluetooth/bluetooth.h>
 
-#include "resumption/last_state.h"
-
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
@@ -56,13 +54,15 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-BluetoothTransportAdapter::~BluetoothTransportAdapter() {
-}
+BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
-BluetoothTransportAdapter::BluetoothTransportAdapter()
-  : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
-                         new BluetoothConnectionFactory(this), 0) {
-}
+BluetoothTransportAdapter::BluetoothTransportAdapter(
+    resumption::LastState& last_state, const TransportManagerSettings& settings)
+    : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
+                           new BluetoothConnectionFactory(this),
+                           NULL,
+                           last_state,
+                           settings) {}
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return BLUETOOTH;
@@ -73,14 +73,15 @@ void BluetoothTransportAdapter::Store() const {
   Json::Value bluetooth_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
-  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
+  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end();
+       ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
-    if (!device) { // device could have been disconnected
+    if (!device) {  // device could have been disconnected
       continue;
     }
     utils::SharedPtr<BluetoothDevice> bluetooth_device =
-      DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
+        DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = bluetooth_device->name();
     char address[18];
@@ -88,15 +89,19 @@ void BluetoothTransportAdapter::Store() const {
     device_dictionary["address"] = std::string(address);
     Json::Value applications_dictionary;
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
-    for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
+    for (ApplicationList::const_iterator j = app_ids.begin();
+         j != app_ids.end();
+         ++j) {
       ApplicationHandle app_handle = *j;
-      if (FindEstablishedConnection(bluetooth_device->unique_device_id(), app_handle)) {
+      if (FindEstablishedConnection(bluetooth_device->unique_device_id(),
+                                    app_handle)) {
         uint8_t rfcomm_channel;
         bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
         Json::Value application_dictionary;
         char rfcomm_channel_record[4];
         sprintf(rfcomm_channel_record, "%u", rfcomm_channel);
-        application_dictionary["rfcomm_channel"] = std::string(rfcomm_channel_record);
+        application_dictionary["rfcomm_channel"] =
+            std::string(rfcomm_channel_record);
         applications_dictionary.append(application_dictionary);
       }
     }
@@ -106,8 +111,9 @@ void BluetoothTransportAdapter::Store() const {
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"] =
-    bluetooth_adapter_dictionary;
+  Json::Value& dictionary = last_state().get_dictionary();
+  dictionary["TransportManager"]["BluetoothAdapter"] =
+      bluetooth_adapter_dictionary;
   LOG4CXX_TRACE(logger_, "exit");
 }
 
@@ -115,34 +121,39 @@ bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE(logger_, "enter");
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
-    resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
-  const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
+      last_state().get_dictionary()["TransportManager"]["BluetoothAdapter"];
+  const Json::Value devices_dictionary =
+      bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end();
+       ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     bdaddr_t address;
     str2ba(address_record.c_str(), &address);
     RfcommChannelVector rfcomm_channels;
-    const Json::Value applications_dictionary = device_dictionary["applications"];
+    const Json::Value applications_dictionary =
+        device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end();
+         ++j) {
       const Json::Value application_dictionary = *j;
       std::string rfcomm_channel_record =
-        application_dictionary["rfcomm_channel"].asString();
+          application_dictionary["rfcomm_channel"].asString();
       uint8_t rfcomm_channel =
-        static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
+          static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
       rfcomm_channels.push_back(rfcomm_channel);
     }
     BluetoothDevice* bluetooth_device =
-      new BluetoothDevice(address, name.c_str(), rfcomm_channels);
+        new BluetoothDevice(address, name.c_str(), rfcomm_channels);
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
-    for (RfcommChannelVector::const_iterator j =
-           rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
+    for (RfcommChannelVector::const_iterator j = rfcomm_channels.begin();
+         j != rfcomm_channels.end();
+         ++j) {
       ApplicationHandle app_handle =
-        *j; // for Bluetooth device app_handle is just RFCOMM channel
+          *j;  // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occured = true;
       }

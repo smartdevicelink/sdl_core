@@ -30,34 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/allow_app_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AllowAppResponse::AllowAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+AllowAppResponse::AllowAppResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-AllowAppResponse::~AllowAppResponse() {
-}
+AllowAppResponse::~AllowAppResponse() {}
 
 void AllowAppResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t connection_key =
-    (*message_)[strings::params][strings::connection_key].asInt();
+      (*message_)[strings::params][strings::connection_key].asInt();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
-                     application(connection_key);
+  ApplicationSharedPtr app = application_manager_.application(connection_key);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
-  app->set_app_allowed((*message_)[strings::msg_params][hmi_response::allowed].asBool());
+  app->set_app_allowed(
+      (*message_)[strings::msg_params][hmi_response::allowed].asBool());
 }
 
 }  // namespace commands

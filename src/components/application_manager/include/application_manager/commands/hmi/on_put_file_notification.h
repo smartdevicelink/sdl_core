@@ -50,7 +50,8 @@ class OnPutFileNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnPutFileNotification(const MessageSharedPtr& message);
+  OnPutFileNotification(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief OnPutFileNotification class destructor
@@ -63,7 +64,6 @@ class OnPutFileNotification : public NotificationToHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnPutFileNotification);
 };
 

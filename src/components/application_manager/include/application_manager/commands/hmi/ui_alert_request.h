@@ -49,7 +49,8 @@ class UIAlertRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAlertRequest(const MessageSharedPtr& message);
+  UIAlertRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief UIAlertRequest class destructor

@@ -66,11 +66,11 @@ const uint8_t SERVICE_TYPE_BULK = 0x0F;
     Navi for video streaming, bulk for PutFile.
   */
 enum ServiceType {
-  kControl =   SERVICE_TYPE_CONTROL,
-  kRpc =       SERVICE_TYPE_RPC,
-  kAudio =     SERVICE_TYPE_AUDIO,
+  kControl = SERVICE_TYPE_CONTROL,
+  kRpc = SERVICE_TYPE_RPC,
+  kAudio = SERVICE_TYPE_AUDIO,
   kMobileNav = SERVICE_TYPE_NAVI,
-  kBulk =      SERVICE_TYPE_BULK,
+  kBulk = SERVICE_TYPE_BULK,
   kInvalidServiceType
 };
 

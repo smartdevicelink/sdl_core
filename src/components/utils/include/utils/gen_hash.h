@@ -37,6 +37,10 @@
 
 namespace utils {
 
+namespace custom_string {
+class CustomString;
+}
+
 /**
  * @brief generate random alphanumeric string of specified length
  * @param size length of random string
@@ -44,6 +48,32 @@ namespace utils {
  */
 
 const std::string gen_hash(size_t size);
+
+/**
+ * @brief Allows to generate hash from the specified string.
+ * The djb2 algorithm uses for hash generation.
+ * @param str_to_hash - the string from which hash should be generated.
+ * @return integer hash for the specified string.
+ */
+int32_t Djb2HashFromString(const std::string& str_to_hash);
+
+/**
+ * @brief Generates hash.
+ * The faq6 algorithm uses for hash generation.
+ * @param str_to_hash - the CustomSting contains ASCII or UTF8 string from which
+ * hash should be generated.
+ * @return uint32_t hash for the specified string.
+ */
+uint32_t CaseInsensitiveFaq6HashFromString(
+    const custom_string::CustomString& str_to_hash);
+
+/**
+ * @brief Transforms input string to lower case and then generates hash.
+ * The faq6 algorithm uses for hash generation.
+ * @param str_to_hash - the string from which hash should be generated.
+ * @return uint32_t hash for the specified string.
+ */
+uint32_t CaseInsensitiveFaq6HashFromString(const char* cstr);
 
 }  // namespace utils
 

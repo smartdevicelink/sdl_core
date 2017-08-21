@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,15 @@
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
-#include "include/application_mock.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager_settings.h"
 #include "interfaces/MOBILE_API.h"
-#include "sql_database.h"
-#include "sql_query.h"
-
-#include "application_manager/application_manager_impl.h"
-#include "config_profile/profile.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/make_shared.h"
 #include "utils/file_system.h"
-#include "include/resumption_data_test.h"
+#include "application_manager/resumption_data_test.h"
+#include "application_manager/test_resumption_data_db.h"
 
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
@@ -51,6 +51,8 @@ namespace components {
 namespace resumption_test {
 
 using ::testing::NiceMock;
+using ::testing::ReturnRef;
+using application_manager_test::MockApplication;
 
 namespace am = application_manager;
 using namespace file_system;
@@ -58,17 +60,14 @@ using namespace file_system;
 using namespace resumption;
 using namespace mobile_apis;
 
-class TestResumptionDataDB : public ResumptionDataDB {
- public:
-  utils::dbms::SQLDatabase* get_db_handle() { return db(); }
-
-  TestResumptionDataDB(DbStorage db_storage) : ResumptionDataDB(db_storage) {}
-};
-
+namespace {
+const std::string kPath =
+    file_system::CurrentWorkingDirectory() + "/" + "test_storage";
+}
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
-  virtual void SetUp() {
-    app_mock = new NiceMock<ApplicationMock>();
+  void SetUp() OVERRIDE {
+    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;
@@ -78,7 +77,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     ign_off_count_ = 0;
     grammar_id_ = 16;
   }
-  virtual void TearDown() {
+  void TearDown() OVERRIDE {
     utils::dbms::SQLQuery query(test_db());
     EXPECT_TRUE(query.Prepare(remove_all_tables));
     EXPECT_TRUE(query.Exec());
@@ -87,12 +86,11 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   static void SetUpTestCase() {
     kDatabaseName = "resumption";
     if (is_in_file) {
-      ::profile::Profile::instance()->config_file_name(
-          "smartDeviceLink_test.ini");
-      path_ = profile::Profile::instance()->app_storage_folder();
-      CreateDirectory("./" + path_);
+      path_ = "test_storage";
+      CreateDirectory(file_system::CurrentWorkingDirectory() + "/" + path_);
+      CreateDirectory(kPath);
       test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
-      test_db_->set_path(path_ + "/");
+      test_db_->set_path(kPath + "/");
       res_db_ = new TestResumptionDataDB(In_File_Storage);
     } else {
       res_db_ = new TestResumptionDataDB(In_Memory_Storage);
@@ -110,14 +108,17 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   static void TearDownTestCase() {
     test_db_->Close();
     if (is_in_file) {
-      ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
       RemoveDirectory("./" + path_, true);
     }
     delete res_db_;
   }
 
-  utils::dbms::SQLDatabase* test_db() { return test_db_; }
-  std::string path() { return path_; }
+  utils::dbms::SQLDatabase* test_db() {
+    return test_db_;
+  }
+  std::string path() {
+    return path_;
+  }
 
   void SetZeroIgnOffTime() {
     utils::dbms::SQLQuery query(test_db());
@@ -128,11 +129,12 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   static TestResumptionDataDB* res_db_;
 
-  TestResumptionDataDB* res_db() { return res_db_; }
+  TestResumptionDataDB* res_db() {
+    return res_db_;
+  }
 
   // Check that db includes tables with given elements
   void CheckSavedDB();
-
   static const bool is_in_file = false;
   const std::string tables_exist =
       "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table';";
@@ -142,6 +144,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   const std::string remove_all_tables =
       "DELETE FROM `resumption`; "
+      "DELETE FROM `subscribedForWayPoints`; "
       "DELETE FROM `image`; "
       "DELETE FROM `applicationChoiceSet`; "
       "DELETE FROM `file`; "
@@ -205,7 +208,7 @@ void ResumptionDataDBTest::CheckSavedDB() {
 void ResumptionDataDBTest::CheckExistenceApplication() {
   utils::dbms::SQLQuery query(test_db());
   EXPECT_TRUE(query.Prepare(kCheckApplication));
-  query.Bind(0, device_id_);
+  query.Bind(0, kMacAddress_);
   query.Bind(1, policy_app_id_);
   EXPECT_TRUE(query.Exec());
   EXPECT_EQ(1, query.GetInteger(0));
@@ -225,7 +228,7 @@ void ResumptionDataDBTest::CheckAppData() {
 
   EXPECT_EQ(ign_off_count_, query.GetUInteger(6));
 
-  EXPECT_EQ(device_id_, query.GetString(8));
+  EXPECT_EQ(kMacAddress_, query.GetString(8));
   EXPECT_EQ(is_audio_, query.GetBoolean(9));
 }
 
@@ -348,7 +351,7 @@ void ResumptionDataDBTest::CheckSubmenuData() {
   EXPECT_TRUE(select_submenu.Prepare(kSelectCountSubMenu));
   BindId(select_submenu);
   EXPECT_TRUE(select_submenu.Exec());
-  EXPECT_EQ(count_of_submenues, select_submenu.GetUInteger(0));
+  EXPECT_EQ(kCountOfSubmenues_, select_submenu.GetUInteger(0));
 
   EXPECT_TRUE(select_submenu.Prepare(kSelectSubMenu));
   BindId(select_submenu);
@@ -371,7 +374,7 @@ void ResumptionDataDBTest::CheckCommandsData() {
   EXPECT_TRUE(select_commands.Prepare(kSelectCountCommands));
   BindId(select_commands);
   EXPECT_TRUE(select_commands.Exec());
-  EXPECT_EQ(count_of_commands, select_commands.GetUInteger(0));
+  EXPECT_EQ(kCountOfCommands_, select_commands.GetUInteger(0));
 
   EXPECT_TRUE(select_commands.Prepare(kSelectCommands));
   BindId(select_commands);
@@ -419,7 +422,7 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
   EXPECT_TRUE(select_choice_set.Prepare(kSelectCountChoiceSet));
   BindId(select_choice_set);
   EXPECT_TRUE(select_choice_set.Exec());
-  EXPECT_EQ(count_of_choice_sets, select_choice_set.GetUInteger(0));
+  EXPECT_EQ(kCountOfChoiceSets_, select_choice_set.GetUInteger(0));
 
   EXPECT_TRUE(select_choice_set.Prepare(kSelectChoiceSets));
   int64_t app_set_key = 0;
@@ -507,7 +510,7 @@ void ResumptionDataDBTest::CheckAppFilesData() {
   EXPECT_TRUE(query.Prepare(kSelectCountFiles));
   BindId(query);
   EXPECT_TRUE(query.Exec());
-  EXPECT_EQ(count_of_files, query.GetUInteger(0));
+  EXPECT_EQ(kCountOfFiles_, query.GetUInteger(0));
 
   EXPECT_TRUE(query.Prepare(kSelectFiles));
   BindId(query);
@@ -528,7 +531,7 @@ void ResumptionDataDBTest::CheckAppFilesData() {
 
 void ResumptionDataDBTest::BindId(utils::dbms::SQLQuery& query) {
   query.Bind(0, policy_app_id_);
-  query.Bind(1, device_id_);
+  query.Bind(1, kMacAddress_);
 }
 
 TEST_F(ResumptionDataDBTest, Init) {
@@ -565,11 +568,12 @@ TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved) {
   EXPECT_TRUE(res_db()->Init());
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
-  EXPECT_TRUE(res_db()->RemoveApplicationFromSaved(policy_app_id_, device_id_));
+  EXPECT_TRUE(
+      res_db()->RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
 
   sm::SmartObject remove_app;
   EXPECT_FALSE(
-      res_db()->GetSavedApplication(policy_app_id_, device_id_, remove_app));
+      res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, remove_app));
   EXPECT_TRUE(remove_app.empty());
 }
 
@@ -608,7 +612,7 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   res_db()->SaveApplication(app_mock);
-  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, device_id_);
+  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(0, result);
 }
 
@@ -616,8 +620,9 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationRemoved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   res_db()->SaveApplication(app_mock);
-  EXPECT_TRUE(res_db()->RemoveApplicationFromSaved(policy_app_id_, device_id_));
-  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, device_id_);
+  EXPECT_TRUE(
+      res_db()->RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
+  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(-1, result);
 }
 
@@ -629,7 +634,7 @@ TEST_F(ResumptionDataDBTest, GetSavedApplication) {
 
   sm::SmartObject saved_app;
   EXPECT_TRUE(
-      res_db()->GetSavedApplication(policy_app_id_, device_id_, saved_app));
+      res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, saved_app));
   CheckSavedApp(saved_app);
 }
 
@@ -651,9 +656,10 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData) {
   res_db()->GetDataForLoadResumeData(saved_app);
 
   EXPECT_EQ(policy_app_id_, saved_app[0][am::strings::app_id].asString());
-  EXPECT_EQ(device_id_, saved_app[0][am::strings::device_id].asString());
-  EXPECT_EQ(hmi_level_, static_cast<HMILevel::eType>(
-                            saved_app[0][am::strings::hmi_level].asInt()));
+  EXPECT_EQ(kMacAddress_, saved_app[0][am::strings::device_id].asString());
+  EXPECT_EQ(hmi_level_,
+            static_cast<HMILevel::eType>(
+                saved_app[0][am::strings::hmi_level].asInt()));
   EXPECT_EQ(ign_off_count_, saved_app[0][am::strings::ign_off_count].asUInt());
 }
 
@@ -664,7 +670,8 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData_AppRemove) {
   EXPECT_TRUE(res_db()->Init());
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
-  EXPECT_TRUE(res_db()->RemoveApplicationFromSaved(policy_app_id_, device_id_));
+  EXPECT_TRUE(
+      res_db()->RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
   res_db()->GetDataForLoadResumeData(saved_app);
   EXPECT_TRUE(saved_app.empty());
 }
@@ -675,7 +682,7 @@ TEST_F(ResumptionDataDBTest, UpdateHmiLevel) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   HMILevel::eType new_hmi_level = HMILevel::HMI_LIMITED;
-  res_db()->UpdateHmiLevel(policy_app_id_, device_id_, new_hmi_level);
+  res_db()->UpdateHmiLevel(policy_app_id_, kMacAddress_, new_hmi_level);
   hmi_level_ = new_hmi_level;
   CheckSavedDB();
 }
@@ -703,7 +710,7 @@ TEST_F(ResumptionDataDBTest, GetHMIApplicationID) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_EQ(hmi_app_id_,
-            res_db()->GetHMIApplicationID(policy_app_id_, device_id_));
+            res_db()->GetHMIApplicationID(policy_app_id_, kMacAddress_));
 }
 
 TEST_F(ResumptionDataDBTest, GetHMIApplicationID_AppNotSaved) {
@@ -746,7 +753,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
 
   res_db()->OnSuspend();
 
-  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, device_id_);
+  ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(-1, result);
 }
 
@@ -804,7 +811,7 @@ TEST_F(ResumptionDataDBTest, GetHashId) {
   res_db()->SaveApplication(app_mock);
 
   std::string test_hash;
-  EXPECT_TRUE(res_db()->GetHashId(policy_app_id_, device_id_, test_hash));
+  EXPECT_TRUE(res_db()->GetHashId(policy_app_id_, kMacAddress_, test_hash));
   EXPECT_EQ(hash_, test_hash);
 }
 
@@ -830,6 +837,39 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
 
   after_awake = res_db()->GetIgnOffTime();
   EXPECT_LE(after_suspend, after_awake);
+}
+
+TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
+  PrepareData();
+  EXPECT_TRUE(res_db()->Init());
+  SetZeroIgnOffTime();
+
+  res_db()->SaveApplication(app_mock);
+
+  EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
+
+  smart_objects::SmartObject app;
+  EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&
+              app[am::strings::application_commands].empty());
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_submenus) &&
+              app[am::strings::application_submenus].empty());
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_choice_sets) &&
+              app[am::strings::application_choice_sets].empty());
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_global_properties) &&
+              app[am::strings::application_global_properties].empty());
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_subscribtions) &&
+              app[am::strings::application_subscribtions].empty());
+
+  EXPECT_TRUE(app.keyExists(am::strings::application_files) &&
+              app[am::strings::application_files].empty());
+
+  EXPECT_FALSE(app.keyExists(am::strings::grammar_id));
 }
 
 }  // namespace resumption_test

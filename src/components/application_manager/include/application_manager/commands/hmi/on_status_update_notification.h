@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_STATUS_UPDATE_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_STATUS_UPDATE_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_STATUS_UPDATE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_STATUS_UPDATE_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_to_hmi.h"
 
@@ -43,30 +43,31 @@ namespace commands {
  * @brief OnGetStatusUpdateNotification command class
  **/
 class OnStatusUpdateNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnGetStatusUpdateNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnStatusUpdateNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnGetStatusUpdateNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnStatusUpdateNotification(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
-    /**
-     * @brief OnGetStatusUpdateNotification class destructor
-     **/
-    virtual ~OnStatusUpdateNotification();
+  /**
+   * @brief OnGetStatusUpdateNotification class destructor
+   **/
+  virtual ~OnStatusUpdateNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnStatusUpdateNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnStatusUpdateNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_STATUS_UPDATE_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_STATUS_UPDATE_NOTIFICATION_H_

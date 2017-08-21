@@ -51,15 +51,12 @@ class ThreadOptions {
    * @param is_joinable - is thread joinable?
    */
   explicit ThreadOptions(size_t stack_size = 0, bool is_joinable = true)
-      : stack_size_(stack_size),
-        is_joinable_(is_joinable) {
-  }
+      : stack_size_(stack_size), is_joinable_(is_joinable) {}
 
   /**
    * Dtor.
    */
-  virtual ~ThreadOptions() {
-  }
+  virtual ~ThreadOptions() {}
 
   /**
    * Copy ctor.

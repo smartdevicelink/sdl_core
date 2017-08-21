@@ -37,13 +37,15 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderListener")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 FromMicRecorderListener::FromMicRecorderListener(
-  const std::string& file_name)
-  : reader_(NULL)
-  , file_name_(file_name) {
-}
+    const std::string& file_name,
+    application_manager::ApplicationManager& app_mngr)
+    : reader_(NULL)
+    , file_name_(file_name)
+    , current_application_(0)
+    , application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,25 +56,22 @@ FromMicRecorderListener::~FromMicRecorderListener() {
   }
 }
 
-void FromMicRecorderListener::OnDataReceived(
-  int32_t application_key,
-  const DataForListener& data) {
-}
+void FromMicRecorderListener::OnDataReceived(int32_t application_key,
+                                             const DataForListener& data) {}
 
-void FromMicRecorderListener::OnErrorReceived(
-  int32_t application_key,
-  const DataForListener& data) {
-}
+void FromMicRecorderListener::OnErrorReceived(int32_t application_key,
+                                              const DataForListener& data) {}
 
 void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityStarted "
-               << application_key);
+  LOG4CXX_INFO(logger_,
+               "FromMicRecorderListener::OnActivityStarted "
+                   << application_key);
   if (application_key == current_application_) {
     return;
   }
   if (!reader_) {
-    AudioStreamSenderThread* thread_delegate =
-      new AudioStreamSenderThread(file_name_, application_key);
+    AudioStreamSenderThread* thread_delegate = new AudioStreamSenderThread(
+        file_name_, application_key, application_manager_);
     reader_ = threads::CreateThread("RecorderSender", thread_delegate);
   }
   if (reader_) {
@@ -82,11 +81,12 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
 }
 
 void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityEnded "
-               << application_key);
+  LOG4CXX_INFO(logger_,
+               "FromMicRecorderListener::OnActivityEnded " << application_key);
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Not performing activity on " << application_key
-                 << " but on " << current_application_);
+    LOG4CXX_WARN(logger_,
+                 "Not performing activity on " << application_key << " but on "
+                                               << current_application_);
     return;
   }
   if (reader_) {

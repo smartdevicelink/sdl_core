@@ -49,7 +49,8 @@ class TTSStopSpeakingResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSStopSpeakingResponse(const MessageSharedPtr& message);
+  TTSStopSpeakingResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief TTSStopSpeakingResponse class destructor

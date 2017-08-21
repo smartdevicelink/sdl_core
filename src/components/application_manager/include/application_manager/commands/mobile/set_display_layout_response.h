@@ -51,7 +51,8 @@ class SetDisplayLayoutResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetDisplayLayoutResponse(const MessageSharedPtr& message);
+  SetDisplayLayoutResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief SetDisplayLayoutResponse class destructor

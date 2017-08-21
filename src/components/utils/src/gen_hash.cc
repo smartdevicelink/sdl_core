@@ -31,21 +31,75 @@
  */
 
 #include "utils/gen_hash.h"
-
 #include <cstdlib>
+#include <string>
+#include <locale>
+#include "utils/custom_string.h"
 
 namespace utils {
 
 const std::string gen_hash(size_t size) {
-  static const char symbols[] = "0123456789"
-                                "abcdefghijklmnopqrstuvwxyz"
-                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  static const char symbols[] =
+      "0123456789"
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   static const size_t capacity = sizeof(symbols) - 1;
 
   std::string hash(size, '\0');
   for (std::string::iterator i = hash.begin(); i != hash.end(); ++i) {
     int index = std::rand() % capacity;
     *i = symbols[index];
+  }
+  return hash;
+}
+
+int32_t Djb2HashFromString(const std::string& str_to_hash) {
+  uint32_t hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (; it != it_end; ++it) {
+    hash = ((hash << 5) + hash) + (*it);
+  }
+
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
+  return result;
+}
+
+uint32_t CaseInsensitiveFaq6HashFromString(const char* cstr) {
+  uint32_t hash = 0;
+  std::locale loc;
+  for (; *cstr; ++cstr) {
+    char lower_char = std::tolower(*cstr, loc);
+    hash += static_cast<uint32_t>(lower_char);
+    hash += (hash << 10);
+    hash ^= (hash >> 6);
+  }
+  hash += (hash << 3);
+  hash ^= (hash >> 11);
+  hash += (hash << 15);
+
+  return hash;
+}
+
+uint32_t CaseInsensitiveFaq6HashFromString(
+    const custom_string::CustomString& str_to_hash) {
+  uint32_t hash = 0;
+  if (str_to_hash.is_ascii_string()) {
+    hash = CaseInsensitiveFaq6HashFromString(str_to_hash.c_str());
+  } else {
+    const std::wstring& wstr = str_to_hash.ToWStringLowerCase();
+    size_t size = wstr.size();
+    for (size_t i = 0; i < size; ++i) {
+      hash += static_cast<uint32_t>(wstr[i]);
+      hash += (hash << 10);
+      hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
   }
   return hash;
 }

@@ -32,8 +32,8 @@
 
 #include "gtest/gtest.h"
 
-#include "formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "create_smartSchema.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/create_smartSchema.h"
 
 namespace test {
 namespace components {
@@ -89,7 +89,8 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
+TEST(CFormatterJsonSDLRPCv1Test,
+     SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -121,7 +122,8 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithEmptyMsgWithTestSchemaToStr
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
+TEST(CFormatterJsonSDLRPCv1Test,
+     SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -278,7 +280,8 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseWithoutSchemaWithoutParamsToString) {
+TEST(CFormatterJsonSDLRPCv1Test,
+     SmObjWithResponseWithoutSchemaWithoutParamsToString) {
   SmartObject srcObj;
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
   std::string jsonString;
@@ -326,7 +329,8 @@ TEST(CFormatterJsonSDLRPCv1Test, StringRequestToSmObj) {
   obj.setSchema(schema);
 
   bool result = CFormatterJsonSDLRPCv1::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj);
+                                                   MessageTypeTest::eType>(
+      inputJsonString, obj);
 
   EXPECT_EQ(CFormatterJsonSDLRPCv1::kSuccess, result);
   EXPECT_EQ(Errors::eType::OK, obj.validate());
@@ -369,7 +373,8 @@ TEST(CFormatterJsonSDLRPCv1Test, StringRequestWithoutNameToSmartObject) {
   SmartObject obj;
 
   bool result = CFormatterJsonSDLRPCv1::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj);
+                                                   MessageTypeTest::eType>(
+      inputJsonString, obj);
 
   EXPECT_EQ(CFormatterJsonSDLRPCv1::kParsingError, result);
 
@@ -410,7 +415,8 @@ TEST(CFormatterJsonSDLRPCv1Test, StringRequestWithIncorrectCorIDToSmartObject) {
   SmartObject obj;
 
   bool result = CFormatterJsonSDLRPCv1::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj);
+                                                   MessageTypeTest::eType>(
+      inputJsonString, obj);
   EXPECT_EQ(CFormatterJsonSDLRPCv1::kParsingError, result);
 
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::request);
@@ -440,7 +446,8 @@ TEST(CFormatterJsonSDLRPCv1Test, StringResponceToSmartObject) {
   obj.setSchema(schema);
 
   bool result = CFormatterJsonSDLRPCv1::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj);
+                                                   MessageTypeTest::eType>(
+      inputJsonString, obj);
   EXPECT_EQ(CFormatterJsonSDLRPCv1::kSuccess, result);
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::response);
   EXPECT_EQ(obj[S_PARAMS][S_FUNCTION_ID], 0);
@@ -467,7 +474,8 @@ TEST(CFormatterJsonSDLRPCv1Test, StringNotificationToSmartObject) {
   obj.setSchema(schema);
 
   bool result = CFormatterJsonSDLRPCv1::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj);
+                                                   MessageTypeTest::eType>(
+      inputJsonString, obj);
   EXPECT_EQ(CFormatterJsonSDLRPCv1::kSuccess, result);
   EXPECT_EQ(Errors::eType::OK, obj.validate());
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::notification);
@@ -497,6 +505,6 @@ TEST(CFormatterJsonSDLRPCv1Test, MetaFormatToString) {
   EXPECT_EQ(meta_formatter_error_code::kErrorOk, result);
 }
 
-} // namespace formatters
-} // namespace components
-} // namespace test
+}  // namespace formatters
+}  // namespace components
+}  // namespace test

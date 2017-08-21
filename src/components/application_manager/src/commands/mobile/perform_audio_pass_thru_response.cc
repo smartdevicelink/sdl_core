@@ -32,25 +32,21 @@
  */
 
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
-#include "application_manager/application_manager_impl.h"
-
 
 namespace application_manager {
 
 namespace commands {
 
 PerformAudioPassThruResponse::PerformAudioPassThruResponse(
-  const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {
-}
+PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {}
 
 void PerformAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

@@ -32,25 +32,25 @@
  */
 
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/message_helper.h"
 #include "application_manager/application.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-AddSubMenuRequest::~AddSubMenuRequest() {
-}
+AddSubMenuRequest::~AddSubMenuRequest() {}
 
 void AddSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -58,34 +58,37 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  if (app->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
-    LOG4CXX_ERROR(logger_, "INVALID_ID");
+  const int32_t menu_id =
+      (*message_)[strings::msg_params][strings::menu_id].asInt();
+  if (app->FindSubMenu(menu_id)) {
+    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
-  if (app->IsSubMenuNameAlreadyExist(
-      (*message_)[strings::msg_params][strings::menu_name].asString())) {
-    LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
+  const std::string& menu_name =
+      (*message_)[strings::msg_params][strings::menu_name].asString();
+
+  if (app->IsSubMenuNameAlreadyExist(menu_name)) {
+    LOG4CXX_ERROR(logger_, "Menu name " << menu_name << " is duplicated.");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
   if (!CheckSubMenuName()) {
-    LOG4CXX_ERROR(logger_, "SubMenuName is not valid");
+    LOG4CXX_ERROR(logger_, "Sub-menu name is not valid.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
   if ((*message_)[strings::msg_params].keyExists(strings::position)) {
-     msg_params[strings::menu_params][strings::position] =
-         (*message_)[strings::msg_params][strings::position];
+    msg_params[strings::menu_params][strings::position] =
+        (*message_)[strings::msg_params][strings::position];
   }
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
@@ -100,14 +103,16 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_AddSubMenu: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      std::string response_info;
+      GetInfo(message, response_info);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
 
       ApplicationSharedPtr application =
-             ApplicationManagerImpl::instance()->application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -115,11 +120,14 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       }
 
       if (result) {
-        application->AddSubMenu((*message_)[strings::msg_params]
-                                   [strings::menu_id].asInt(),
-                        (*message_)[strings::msg_params]);
-       }
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+        application->AddSubMenu(
+            (*message_)[strings::msg_params][strings::menu_id].asInt(),
+            (*message_)[strings::msg_params]);
+      }
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       if (result) {
         application->UpdateHash();
       }
@@ -133,6 +141,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AddSubMenuRequest::CheckSubMenuName() {
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();

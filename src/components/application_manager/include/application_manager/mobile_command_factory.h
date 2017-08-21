@@ -39,6 +39,7 @@
 namespace application_manager {
 
 typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+class ApplicationManager;
 
 /**
  * @brief Factory class for command creation
@@ -51,9 +52,10 @@ class MobileCommandFactory {
    * @param  smartObject SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
-  static commands::Command* CreateCommand(
-          const commands::MessageSharedPtr& message,
-          commands::Command::CommandOrigin origin);
+  static CommandSharedPtr CreateCommand(
+      const commands::MessageSharedPtr& message,
+      commands::Command::CommandOrigin origin,
+      ApplicationManager& application_manager);
 
  private:
   MobileCommandFactory();

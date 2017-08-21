@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_VEHICLE_DATA_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -49,7 +50,8 @@ class VIGetVehicleDataResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataResponse(const MessageSharedPtr& message);
+  VIGetVehicleDataResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleDataResponse class destructor

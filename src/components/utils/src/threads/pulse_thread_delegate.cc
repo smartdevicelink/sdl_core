@@ -61,7 +61,8 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 
 void PulseThreadDelegate::threadMain() {
   if (!Init()) {
-    LOG4CXX_ERROR(logger_, "Failed to initialize thread for QNX channel " << chid_);
+    LOG4CXX_ERROR(logger_,
+                  "Failed to initialize thread for QNX channel " << chid_);
     return;
   }
   while (run_) {
@@ -77,13 +78,14 @@ void PulseThreadDelegate::threadMain() {
             OnPulse();
             break;
         }
-      }
-      else {
+      } else {
         if (run_) {
-          LOG4CXX_WARN(logger_, "Error occurred while waiting for pulse on QNX channel " << chid_);
-        }
-        else {
-          LOG4CXX_INFO(logger_, "QNX channel " << chid_ << " is apparently destroyed");
+          LOG4CXX_WARN(logger_,
+                       "Error occurred while waiting for pulse on QNX channel "
+                           << chid_);
+        } else {
+          LOG4CXX_INFO(logger_,
+                       "QNX channel " << chid_ << " is apparently destroyed");
         }
       }
     }
@@ -97,16 +99,14 @@ void PulseThreadDelegate::exitThreadMain() {
   LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel " << chid_);
   if (ConnectDetach(coid_) != -1) {
     LOG4CXX_DEBUG(logger_, "Disconnected from QNX channel " << chid_);
-  }
-  else {
+  } else {
     LOG4CXX_WARN(logger_, "Failed to disconnect from QNX channel " << chid_);
   }
 
   LOG4CXX_TRACE(logger_, "Destroying QNX channel " << chid_);
-  if (ChannelDestroy(chid_) != -1) { // unblocks MsgReceivePulse()
+  if (ChannelDestroy(chid_) != -1) {  // unblocks MsgReceivePulse()
     LOG4CXX_DEBUG(logger_, "QNX channel " << chid_ << " destroyed");
-  }
-  else {
+  } else {
     LOG4CXX_WARN(logger_, "Failed to destroy QNX channel " << chid_);
   }
 }

@@ -38,37 +38,28 @@
 
 namespace test {
 namespace components {
-namespace utils {
-namespace SharedPtrTest {
+namespace utils_test {
 
 class CMockObject {
-  public:
-    CMockObject(int id);
-    virtual ~CMockObject();
-    virtual int getId() const;
+ public:
+  CMockObject(int id);
+  virtual ~CMockObject();
+  virtual int getId() const;
 
-    MOCK_METHOD0(destructor, void ());
+  MOCK_METHOD0(destructor, void());
 
-  private:
-    int mId_;
+ private:
+  int mId_;
 };
 
 class CExtendedMockObject : public CMockObject {
-  public:
-    CExtendedMockObject(int id);
+ public:
+  CExtendedMockObject(int id);
 };
 
-}  // namespace CMockObject
-}  // namespace SmartObjects
-}  // namespace components
-}  // namespace test
-
-using namespace test::components::utils::SharedPtrTest;
 using ::testing::NiceMock;
 
-CMockObject::CMockObject(int id)
-    : mId_(id) {
-}
+CMockObject::CMockObject(int id) : mId_(id) {}
 
 CMockObject::~CMockObject() {
   destructor();
@@ -78,9 +69,7 @@ int CMockObject::getId() const {
   return mId_;
 }
 
-CExtendedMockObject::CExtendedMockObject(int id)
-    : CMockObject(id) {
-}
+CExtendedMockObject::CExtendedMockObject(int id) : CMockObject(id) {}
 
 typedef utils::SharedPtr<CMockObject> tMockObjectPtr;
 typedef utils::SharedPtr<CExtendedMockObject> tExtendedMockObjectPtr;
@@ -120,9 +109,9 @@ TEST(SharedPtrTest, CopyConstructorTest) {
   ASSERT_EQ(1, p3->getId());
   ASSERT_EQ(3u, *(p3.get_ReferenceCounter()));
   {
-  tMockObjectPtr p4 = p3;
-  ASSERT_EQ(1, p4->getId());
-  ASSERT_EQ(4u, *(p3.get_ReferenceCounter()));
+    tMockObjectPtr p4 = p3;
+    ASSERT_EQ(1, p4->getId());
+    ASSERT_EQ(4u, *(p3.get_ReferenceCounter()));
   }
   // Check reference counter decreased
   ASSERT_EQ(3u, *(p3.get_ReferenceCounter()));
@@ -283,10 +272,9 @@ TEST(SharedPtrTest, LessThanOperatorTest) {
 
   // Checks
   if (object1 < object2) {
-      ASSERT_TRUE(p1 < p2);
-  }
-  else {
-  ASSERT_FALSE(p1 < p2);
+    ASSERT_TRUE(p1 < p2);
+  } else {
+    ASSERT_FALSE(p1 < p2);
   }
 
   EXPECT_CALL(*object1, destructor());
@@ -309,7 +297,8 @@ TEST(SharedPtrTest, StaticPointerCastTest_DerivedToBase_ExpectCastOk) {
   ASSERT_EQ(2, ep1->getId());
   ASSERT_EQ(1u, *(ep1.get_ReferenceCounter()));
   // Cast from SharedPtr to Derived class to SharedPtr to Base class
-  p1 = utils::SharedPtr<CExtendedMockObject>::static_pointer_cast< CMockObject >(ep1);
+  p1 = utils::SharedPtr<CExtendedMockObject>::static_pointer_cast<CMockObject>(
+      ep1);
   // Checks
   ASSERT_EQ(2, p1->getId());
   ASSERT_EQ(2u, *(p1.get_ReferenceCounter()));
@@ -334,7 +323,8 @@ TEST(SharedPtrTest, StaticPointerCastTest_BaseToDerived_ExpectCastOk) {
   ASSERT_EQ(2, ep1->getId());
   ASSERT_EQ(1u, *(ep1.get_ReferenceCounter()));
   // Cast from SharedPtr to Base class to SharedPtr to Derived class
-  ep1 = utils::SharedPtr<CMockObject>::static_pointer_cast<CExtendedMockObject>(p1);
+  ep1 = utils::SharedPtr<CMockObject>::static_pointer_cast<CExtendedMockObject>(
+      p1);
   // Checks
   ASSERT_EQ(1, ep1->getId());
   ASSERT_EQ(2u, *(ep1.get_ReferenceCounter()));
@@ -359,7 +349,8 @@ TEST(SharedPtrTest, DynamicPointerCastTest_DerivedToBase_ExpectCastOk) {
   ASSERT_EQ(2, ep1->getId());
   ASSERT_EQ(1u, *(ep1.get_ReferenceCounter()));
   // Cast from SharedPtr to Derived class to SharedPtr to Base class
-  p1 = utils::SharedPtr<CExtendedMockObject>::dynamic_pointer_cast< CMockObject >(ep1);
+  p1 = utils::SharedPtr<CExtendedMockObject>::dynamic_pointer_cast<CMockObject>(
+      ep1);
   // Checks
   ASSERT_EQ(2, p1->getId());
   ASSERT_EQ(2u, *(p1.get_ReferenceCounter()));
@@ -384,7 +375,9 @@ TEST(SharedPtrTest, DynamicPointerCastTest_BaseToDerived_ExpectNullPtr) {
   ASSERT_EQ(2, ep1->getId());
   ASSERT_EQ(1u, *(ep1.get_ReferenceCounter()));
   // Cast from SharedPtr to Base class to SharedPtr to Derived class
-  ep1 = utils::SharedPtr<CMockObject>::dynamic_pointer_cast<CExtendedMockObject>(p1);
+  ep1 =
+      utils::SharedPtr<CMockObject>::dynamic_pointer_cast<CExtendedMockObject>(
+          p1);
   // Checks
   ASSERT_EQ(NULL, ep1);
 
@@ -539,6 +532,11 @@ TEST(SharedPtrTest, StressTest) {
       }
     }
   }
-  printf("%zu objects created, %zu pointers copied\n", objectCreated,
+  printf("%zu objects created, %zu pointers copied\n",
+         objectCreated,
          pointersCopied);
 }
+
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

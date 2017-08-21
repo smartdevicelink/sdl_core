@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "config_profile/profile.h"
+
 #include "utils/helpers.h"
 
 namespace application_manager {
@@ -42,77 +42,19 @@ namespace application_manager {
 namespace commands {
 
 OnAppDeactivatedNotification::OnAppDeactivatedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
-}
+OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {}
 
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application with id " << app_id << " not found");
-    return;
-  }
-
-  using namespace hmi_apis;
-  using namespace mobile_apis;
-  using namespace helpers;
-
-  Common_DeactivateReason::eType deactivate_reason =
-      static_cast<Common_DeactivateReason::eType>
-          ((*message_)[strings::msg_params][hmi_request::reason].asInt());
-
-  if (!((Common_DeactivateReason::AUDIO == deactivate_reason ||
-      Common_DeactivateReason::PHONECALL == deactivate_reason) &&
-      HMILevel::HMI_LIMITED == app->hmi_level())) {
-    app = ApplicationManagerImpl::instance()->active_application();
-
-    if (!app.valid()) {
-      LOG4CXX_ERROR_EXT(logger_, "No active application");
-      return;
-    }
-    if (app_id != app->app_id()) {
-      LOG4CXX_ERROR_EXT(logger_, "Wrong application id");
-      return;
-    }
-  }
-
-  if (HMILevel::HMI_NONE == app->hmi_level()) {
-    return;
-  }
-  HmiStatePtr regular = app->RegularHmiState();
-  DCHECK_OR_RETURN_VOID(regular);
-  HmiStatePtr new_regular(new HmiState(*regular));
-
-  switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
-    case hmi_apis::Common_DeactivateReason::AUDIO: {
-      new_regular->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-      break;
-    }
-    case hmi_apis::Common_DeactivateReason::NAVIGATIONMAP:
-    case hmi_apis::Common_DeactivateReason::PHONEMENU:
-    case hmi_apis::Common_DeactivateReason::SYNCSETTINGS:
-    case hmi_apis::Common_DeactivateReason::GENERAL: {
-      if (app->IsAudioApplication()) {
-        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
-      } else {
-        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-      }
-    }
-  }
-  ApplicationManagerImpl::instance()->SetState<false>(app->app_id(), new_regular);
-
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

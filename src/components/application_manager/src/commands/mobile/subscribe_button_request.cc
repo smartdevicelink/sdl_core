@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/subscribe_button_request.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -40,45 +39,44 @@ namespace commands {
 
 namespace str = strings;
 
-SubscribeButtonRequest::SubscribeButtonRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+SubscribeButtonRequest::SubscribeButtonRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-SubscribeButtonRequest::~SubscribeButtonRequest() {
-}
+SubscribeButtonRequest::~SubscribeButtonRequest() {}
 
 void SubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   const mobile_apis::ButtonName::eType btn_id =
       static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[str::msg_params][str::button_name].asUInt());
+          (*message_)[str::msg_params][str::button_name].asInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
-                      << " isn't allowed");
+    LOG4CXX_ERROR(logger_,
+                  "Subscribe on button " << btn_id << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (!CheckHMICapabilities(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
-                      << " isn't allowed by HMI capabilities");
+    LOG4CXX_ERROR(logger_,
+                  "Subscribe on button "
+                      << btn_id << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 
   if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
@@ -96,15 +94,13 @@ void SubscribeButtonRequest::Run() {
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
-
   if (!app->is_media_application() &&
       ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
-       (mobile_apis::ButtonName::SEEKRIGHT == btn_id)||
-       (mobile_apis::ButtonName::TUNEUP == btn_id)   ||
+       (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
+       (mobile_apis::ButtonName::TUNEUP == btn_id) ||
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }
-
   return true;
 }
 
@@ -114,12 +110,9 @@ bool SubscribeButtonRequest::CheckHMICapabilities(
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN(app_mgr, false);
-
-  const HMICapabilities& hmi_caps = app_mgr->hmi_capabilities();
+  const HMICapabilities& hmi_caps = application_manager_.hmi_capabilities();
   if (!hmi_caps.is_ui_cooperating()) {
-    LOG4CXX_ERROR_EXT(logger_, "UI is not supported by HMI.");
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI.");
     return false;
   }
 
@@ -129,8 +122,8 @@ bool SubscribeButtonRequest::CheckHMICapabilities(
     const size_t length = button_caps.length();
     for (size_t i = 0; i < length; ++i) {
       const SmartObject& caps = button_caps[i];
-      const ButtonName::eType name =
-          static_cast<ButtonName::eType>(caps.getElement(hmi_response::button_name).asInt());
+      const ButtonName::eType name = static_cast<ButtonName::eType>(
+          caps.getElement(hmi_response::button_name).asInt());
       if (name == button) {
         return true;
       }

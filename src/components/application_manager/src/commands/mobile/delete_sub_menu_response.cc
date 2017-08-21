@@ -32,24 +32,21 @@
  */
 
 #include "application_manager/commands/mobile/delete_sub_menu_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+DeleteSubMenuResponse::DeleteSubMenuResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DeleteSubMenuResponse::~DeleteSubMenuResponse() {
-}
+DeleteSubMenuResponse::~DeleteSubMenuResponse() {}
 
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

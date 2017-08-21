@@ -39,7 +39,6 @@
 
 #include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/singleton.h"
 
 namespace logger {
 
@@ -54,26 +53,20 @@ typedef struct {
 
 typedef std::queue<LogMessage> LogMessageQueue;
 
-typedef threads::MessageLoopThread<LogMessageQueue> LogMessageLoopThreadTemplate;
+typedef threads::MessageLoopThread<LogMessageQueue>
+    LogMessageLoopThreadTemplate;
 
 class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
  public:
   virtual void Handle(const LogMessage message) OVERRIDE;
 };
 
-class LogMessageLoopThread :
-  public LogMessageLoopThreadTemplate,
-  public utils::Singleton<LogMessageLoopThread> {
-
+class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
  public:
+  LogMessageLoopThread();
   ~LogMessageLoopThread();
 
- private:
-  LogMessageLoopThread();
-
-DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
-FRIEND_BASE_SINGLETON_CLASS(LogMessageLoopThread);
-
+  DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 
 }  // namespace logger

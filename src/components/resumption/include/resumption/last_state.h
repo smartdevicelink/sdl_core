@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,44 +35,26 @@
 
 #include <string>
 
-#include "utils/macro.h"
-#include "utils/singleton.h"
 #include "json/json.h"
 
 namespace resumption {
 
-class LastState : public utils::Singleton<LastState> {
+class LastState {
  public:
+  /**
+   * @brief Destructor
+   */
+  virtual ~LastState() {}
+
   /**
    * @brief Saving dictionary to filesystem
    */
-  void SaveToFileSystem();
+  virtual void SaveStateToFileSystem() = 0;
 
   /**
-   * @brief public dictionary
+   * @brief Get reference to dictionary
    */
-  Json::Value dictionary;
-
- private:
-
-  /**
-   * @brief Load dictionary from filesystem
-   */
-  void LoadFromFileSystem();
-
-  /**
-   * @brief Private default constructor
-   */
-  LastState();
-
-  /**
-   * @brief Private destructor
-   */
-  ~LastState();
-
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  FRIEND_BASE_SINGLETON_CLASS(LastState);
+  virtual Json::Value& get_dictionary() = 0;
 };
 
 }  // namespace resumption

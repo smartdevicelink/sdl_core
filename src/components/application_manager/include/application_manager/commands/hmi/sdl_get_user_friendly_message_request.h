@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -43,29 +44,30 @@ namespace commands {
  * @brief SDLGetUserFriendlyMessageRequest command class
  **/
 class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetUserFriendlyMessageRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class destructor
-     **/
-    virtual ~SDLGetUserFriendlyMessageRequest();
+  /**
+   * @brief SDLGetUserFriendlyMessageRequest class destructor
+   **/
+  virtual ~SDLGetUserFriendlyMessageRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_

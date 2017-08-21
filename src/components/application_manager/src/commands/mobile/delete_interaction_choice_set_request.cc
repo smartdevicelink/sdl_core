@@ -32,59 +32,60 @@
  */
 
 #include "application_manager/commands/mobile/delete_interaction_choice_set_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+
 namespace application_manager {
 
 namespace commands {
 
 DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
-}
+DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {}
 
 void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_,
+                  "No application associated with connection key "
+                      << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const int32_t choise_set_id =
-      (*message_)[strings::msg_params]
-                  [strings::interaction_choice_set_id].asInt();
+  const int32_t choice_set_id =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id]
+          .asInt();
 
-  if (!app->FindChoiceSet(choise_set_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
+  if (!app->FindChoiceSet(choice_set_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Choice set with id " << choice_set_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
   if (ChoiceSetInUse(app)) {
-    LOG4CXX_ERROR_EXT(logger_, "Choice set currently in use");
+    LOG4CXX_ERROR(logger_, "Choice set currently in use.");
     SendResponse(false, mobile_apis::Result::IN_USE);
     return;
   }
   SendVrDeleteCommand(app);
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[strings::interaction_choice_set_id] = choise_set_id;
+  msg_params[strings::interaction_choice_set_id] = choice_set_id;
   msg_params[strings::app_id] = app->app_id();
 
-  app->RemoveChoiceSet(choise_set_id);
+  app->RemoveChoiceSet(choice_set_id);
 
   // Checking of HMI responses will be implemented with APPLINK-14600
   const bool result = true;
@@ -94,49 +95,60 @@ void DeleteInteractionChoiceSetRequest::Run() {
   }
 }
 
-bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr app) {
-  if (app->is_perform_interaction_active()) {
-    // retrieve stored choice sets for perform interaction
+bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
+    ApplicationConstSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!app->is_perform_interaction_active()) {
+    return false;
+  }
   const DataAccessor<PerformChoiceSetMap> accessor =
       app->performinteraction_choice_set_map();
   const PerformChoiceSetMap& choice_set_map = accessor.GetData();
 
-    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-    for (; choice_set_map.end() != it; ++it) {
-      const PerformChoice& choice =  it->second;
-      PerformChoice::const_iterator choice_it = choice.begin();
-      for (; choice.end() != choice_it; ++choice_it) {
-        if (choice_it->first == (*message_)[strings::msg_params]
-                                [strings::interaction_choice_set_id].asUInt()) {
-          LOG4CXX_ERROR_EXT(logger_,
-                            "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
-          return true;
-        }
+  const uint32_t choice_set_id =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id]
+          .asUInt();
+
+  PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+  for (; choice_set_map.end() != it; ++it) {
+    const PerformChoice& choice = it->second;
+    PerformChoice::const_iterator choice_it = choice.begin();
+    for (; choice.end() != choice_it; ++choice_it) {
+      if (choice_it->first == choice_set_id) {
+        LOG4CXX_ERROR(logger_,
+                      "Choice set with id " << choice_set_id << " is in use.");
+        return true;
       }
     }
   }
-  return false;
+  return true;
 }
 
 void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
     application_manager::ApplicationSharedPtr app) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObject* choice_set =
-                              app->FindChoiceSet((*message_)[strings::msg_params]
-                               [strings::interaction_choice_set_id].asInt());
+  const uint32_t choice_set_id =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id]
+          .asUInt();
 
-  if (choice_set) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::app_id] = app->app_id();
-    msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-    msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
-    choice_set = &((*choice_set)[strings::choice_set]);
-    for (uint32_t i = 0; i < (*choice_set).length() ; ++i) {
-      msg_params[strings::cmd_id] = (*choice_set)[i][strings::choice_id];
-      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-    }
+  smart_objects::SmartObject* choice_set = app->FindChoiceSet(choice_set_id);
+
+  if (!choice_set) {
+    LOG4CXX_ERROR(logger_,
+                  "Choice set with id " << choice_set_id << " is not found.");
+    return;
+  }
+
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
+  msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
+  choice_set = &((*choice_set)[strings::choice_set]);
+  for (uint32_t i = 0; i < (*choice_set).length(); ++i) {
+    msg_params[strings::cmd_id] = (*choice_set)[i][strings::choice_id];
+    SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
   }
 }
 

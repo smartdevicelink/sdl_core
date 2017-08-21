@@ -32,25 +32,21 @@
  */
 
 #include "application_manager/commands/mobile/set_global_properties_response.h"
-#include "application_manager/application_manager_impl.h"
-
 
 namespace application_manager {
 
 namespace commands {
 
 SetGlobalPropertiesResponse::SetGlobalPropertiesResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SetGlobalPropertiesResponse::~SetGlobalPropertiesResponse() {
-}
+SetGlobalPropertiesResponse::~SetGlobalPropertiesResponse() {}
 
 void SetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-VRDeleteCommandRequest::VRDeleteCommandRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VRDeleteCommandRequest::VRDeleteCommandRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VRDeleteCommandRequest::~VRDeleteCommandRequest() {
-}
+VRDeleteCommandRequest::~VRDeleteCommandRequest() {}
 
 void VRDeleteCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void VRDeleteCommandRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

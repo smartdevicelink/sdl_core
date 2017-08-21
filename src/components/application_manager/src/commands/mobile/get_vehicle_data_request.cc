@@ -33,7 +33,7 @@
 
 #include <string>
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -46,18 +46,18 @@ namespace commands {
 namespace str = strings;
 
 #ifdef HMI_DBUS_API
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetVehicleDataRequest::~GetVehicleDataRequest() {
-}
+GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  int32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = appplication_manager.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -69,8 +69,8 @@ void GetVehicleDataRequest::Run() {
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)
-        && true == (*message_)[str::msg_params][it->first].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
+        true == (*message_)[str::msg_params][it->first].asBool()) {
       SendRequestsToHmi(app->app_id());
       return;
     }
@@ -80,37 +80,44 @@ void GetVehicleDataRequest::Run() {
 }
 
 namespace {
-  struct Subrequest {
-    hmi_apis::FunctionID::eType func_id;
-    const char* str;
-  };
-  Subrequest subrequests[] = {
-    { hmi_apis::FunctionID::VehicleInfo_GetGpsData, str::gps},
-    { hmi_apis::FunctionID::VehicleInfo_GetSpeed, str::speed},
-    { hmi_apis::FunctionID::VehicleInfo_GetRpm, str::rpm},
-    { hmi_apis::FunctionID::VehicleInfo_GetFuelLevel, str::fuel_level},
-    { hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState, str::fuel_level_state},
-    { hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption, str::instant_fuel_consumption},
-    { hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature, str::external_temp},
-    { hmi_apis::FunctionID::VehicleInfo_GetVin, str::vin},
-    { hmi_apis::FunctionID::VehicleInfo_GetPrndl, str::prndl},
-    { hmi_apis::FunctionID::VehicleInfo_GetTirePressure, str::tire_pressure},
-    { hmi_apis::FunctionID::VehicleInfo_GetOdometer, str::odometer},
-    { hmi_apis::FunctionID::VehicleInfo_GetBeltStatus, str::belt_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetBodyInformation, str::body_information},
-    { hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus, str::device_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetDriverBraking, str::driver_braking},
-    { hmi_apis::FunctionID::VehicleInfo_GetWiperStatus, str::wiper_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus, str::head_lamp_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
-    { hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
-    { hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle, str::steering_wheel_angle},
-    { hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
-    { hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
-    { hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus, str::cluster_mode_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
-  };
+struct Subrequest {
+  hmi_apis::FunctionID::eType func_id;
+  const char* str;
+};
+Subrequest subrequests[] = {
+    {hmi_apis::FunctionID::VehicleInfo_GetGpsData, str::gps},
+    {hmi_apis::FunctionID::VehicleInfo_GetSpeed, str::speed},
+    {hmi_apis::FunctionID::VehicleInfo_GetRpm, str::rpm},
+    {hmi_apis::FunctionID::VehicleInfo_GetFuelLevel, str::fuel_level},
+    {hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState,
+     str::fuel_level_state},
+    {hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption,
+     str::instant_fuel_consumption},
+    {hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature,
+     str::external_temp},
+    {hmi_apis::FunctionID::VehicleInfo_GetVin, str::vin},
+    {hmi_apis::FunctionID::VehicleInfo_GetPrndl, str::prndl},
+    {hmi_apis::FunctionID::VehicleInfo_GetTirePressure, str::tire_pressure},
+    {hmi_apis::FunctionID::VehicleInfo_GetOdometer, str::odometer},
+    {hmi_apis::FunctionID::VehicleInfo_GetBeltStatus, str::belt_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetBodyInformation,
+     str::body_information},
+    {hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus, str::device_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetDriverBraking, str::driver_braking},
+    {hmi_apis::FunctionID::VehicleInfo_GetWiperStatus, str::wiper_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus,
+     str::head_lamp_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
+    {hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
+    {hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle,
+     str::steering_wheel_angle},
+    {hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
+    {hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
+    {hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus,
+     str::cluster_mode_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
+};
 }
 
 void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
@@ -119,8 +126,8 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
 
   for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
-    if (true == (*message_)[str::msg_params].keyExists(sr.str)
-        && true == (*message_)[str::msg_params][sr.str].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(sr.str) &&
+        true == (*message_)[str::msg_params][sr.str].asBool()) {
       HmiRequest hmi_request;
       hmi_request.str = sr.str;
       hmi_request.func_id = sr.func_id;
@@ -133,7 +140,8 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
                hmi_requests_.size() << " requests are going to be sent to HMI");
 
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
-      it != hmi_requests_.end(); ++it) {
+       it != hmi_requests_.end();
+       ++it) {
     SendHMIRequest(it->func_id, &msg_params, true);
   }
 }
@@ -144,12 +152,12 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   for (HmiRequests::iterator it = hmi_requests_.begin();
-      it != hmi_requests_.end(); ++it) {
-    HmiRequest & hmi_request = *it;
+       it != hmi_requests_.end();
+       ++it) {
+    HmiRequest& hmi_request = *it;
     if (hmi_request.func_id == event.id()) {
-      hmi_request.status =
-          static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-              .asInt());
+      hmi_request.status = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
         hmi_request.value = message[str::msg_params][hmi_request.str];
       hmi_request.complete = true;
@@ -161,7 +169,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   bool any_arg_success = false;
   mobile_api::Result::eType status = mobile_api::Result::eType::SUCCESS;
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
-      it != hmi_requests_.end(); ++it) {
+       it != hmi_requests_.end();
+       ++it) {
     if (!it->complete) {
       all_complete = false;
       break;
@@ -169,13 +178,16 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     if (hmi_apis::Common_Result::SUCCESS != it->status) {
       if (mobile_api::Result::SUCCESS == status) {
         status = static_cast<mobile_apis::Result::eType>(it->status);
-      } else if (status
-          != static_cast<mobile_apis::Result::eType>(it->status)) {
+      } else if (status !=
+                 static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
-      LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status << ", so response status become " << status);
+      LOG4CXX_TRACE(logger_,
+                    "Status from HMI: " << it->status
+                                        << ", so response status become "
+                                        << status);
     } else {
-        any_arg_success = true;
+      any_arg_success = true;
     }
   }
 
@@ -183,34 +195,34 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
     if (any_arg_success) {
       for (HmiRequests::const_iterator it = hmi_requests_.begin();
-          it != hmi_requests_.end(); ++it) {
+           it != hmi_requests_.end();
+           ++it) {
         response_params[it->str] = it->value;
       }
     }
-    LOG4CXX_INFO(
-        logger_, "All HMI requests are complete");
-    const char *info = NULL;
+    LOG4CXX_INFO(logger_, "All HMI requests are complete");
+    const char* info = NULL;
     std::string error_message;
     if (true == message[strings::params].keyExists(strings::error_msg)) {
       error_message = message[strings::params][strings::error_msg].asString();
       info = error_message.c_str();
     }
-    SendResponse( any_arg_success, status, info, &response_params);
+    SendResponse(any_arg_success, status, info, &response_params);
   }
 }
 #else
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetVehicleDataRequest::~GetVehicleDataRequest() {
-}
+GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  int32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -218,28 +230,28 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
-        static_cast<mobile_apis::FunctionID::eType>(function_id()),
-        application_manager::TLimitSource::CONFIG_FILE)) {
+  if (app->AreCommandLimitsExceeded(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   const uint32_t min_length_msg_params = 1;
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)
-        && true == (*message_)[str::msg_params][it->first].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
+        true == (*message_)[str::msg_params][it->first].asBool()) {
       msg_params[it->first] = (*message_)[strings::msg_params][it->first];
     }
   }
   if (msg_params.length() > min_length_msg_params) {
-    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                   &msg_params, true);
+    SendHMIRequest(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &msg_params, true);
     return;
   } else if (HasDisallowedParams()) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
@@ -254,27 +266,28 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code ||
-          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE ==
-              static_cast<hmi_apis::Common_Result::eType>(result_code)
-                    && message[strings::msg_params].length() > 1)) {
-        result = true;
-      }
-      const char *info = NULL;
-      std::string error_message;
+      bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      std::string response_info;
+      GetInfo(message, response_info);
+      result = result ||
+               ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
+                (message[strings::msg_params].length() > 1));
+
       if (true ==
           message[strings::msg_params].keyExists(hmi_response::method)) {
         message[strings::msg_params].erase(hmi_response::method);
       }
       if (true == message[strings::params].keyExists(strings::error_msg)) {
-        error_message = message[strings::params][strings::error_msg].asString();
-        info = error_message.c_str();
+        response_info = message[strings::params][strings::error_msg].asString();
       }
-      SendResponse(result, result_code, info, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -284,8 +297,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager

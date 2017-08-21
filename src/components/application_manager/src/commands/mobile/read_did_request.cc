@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,55 +30,58 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/read_did_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-ReadDIDRequest::~ReadDIDRequest() {
-}
+ReadDIDRequest::~ReadDIDRequest() {}
 
 void ReadDIDRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-  LOG4CXX_INFO(logger_, "Correlation_id :" << (*message_)[strings::params][strings::correlation_id]
-               .asUInt());
+  ApplicationSharedPtr app = application_manager_.application(app_id);
+  LOG4CXX_INFO(
+      logger_,
+      "Correlation_id :"
+          << (*message_)[strings::params][strings::correlation_id].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+    LOG4CXX_ERROR(logger_, "An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
-        static_cast<mobile_apis::FunctionID::eType>(function_id()),
-        application_manager::TLimitSource::CONFIG_FILE)) {
+  if (app->AreCommandLimitsExceeded(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::did_location].empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
@@ -95,13 +97,18 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      std::string response_info;
+      GetInfo(message, response_info);
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

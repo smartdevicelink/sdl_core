@@ -31,21 +31,21 @@
  */
 
 #include "application_manager/commands/mobile/dial_number_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DialNumberResponse::~DialNumberResponse() {
-}
+DialNumberResponse::~DialNumberResponse() {}
 
 void DialNumberResponse::Run() {
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

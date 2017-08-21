@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class DeleteInteractionChoiceSetResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteInteractionChoiceSetResponse(const MessageSharedPtr& message);
+  DeleteInteractionChoiceSetResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetResponse class destructor
@@ -70,4 +71,4 @@ class DeleteInteractionChoiceSetResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_RESPONSE_COMMAND_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_RESPONSE_H_

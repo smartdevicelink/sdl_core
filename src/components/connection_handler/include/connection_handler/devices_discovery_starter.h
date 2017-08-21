@@ -49,7 +49,7 @@ class DevicesDiscoveryStarter {
   /**
    * \brief Method which should start devices discoveryng
    */
-  virtual void StartDevicesDiscovery()=0;
+  virtual void StartDevicesDiscovery() = 0;
 
   /**
    * \brief Connects to all services of device
@@ -64,8 +64,7 @@ class DevicesDiscoveryStarter {
   /**
    * \brief Destructor
    */
-  virtual ~DevicesDiscoveryStarter() {
-  }
+  virtual ~DevicesDiscoveryStarter() {}
 };
 }  // namespace connection_handler
 

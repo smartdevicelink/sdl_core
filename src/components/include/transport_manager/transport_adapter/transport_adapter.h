@@ -2,7 +2,7 @@
  * \file transport_adapter.h
  * \brief TransportAdapter class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,24 +50,16 @@
 
 namespace transport_manager {
 
-class TMMetricObserver;
+class TMTelemetryObserver;
 
 namespace transport_adapter {
 
 class TransportAdapterListener;
 
 // TODO(EZamakhov): cahnge to DeviceUID
-//typedef std::string DeviceType;
+// typedef std::string DeviceType;
 
-enum DeviceType {
-  AOA,
-  PASA_AOA,
-  BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
-  TCP,
-  UNKNOWN
-};
+enum DeviceType { AOA, PASA_AOA, BLUETOOTH, PASA_BLUETOOTH, MME, TCP, UNKNOWN };
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
@@ -87,14 +79,7 @@ class TransportAdapter {
   /**
    * @enum Available types of errors.
    */
-  enum Error {
-    OK,
-    FAIL,
-    NOT_SUPPORTED,
-    ALREADY_EXISTS,
-    BAD_STATE,
-    BAD_PARAM
-  };
+  enum Error { OK, FAIL, NOT_SUPPORTED, ALREADY_EXISTS, BAD_STATE, BAD_PARAM };
 
  public:
   /**
@@ -190,6 +175,18 @@ class TransportAdapter {
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
+   * @brief RunAppOnDevice allows to run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param app_id application id also known as bundle id on some devices to
+   *run.
+   */
+  virtual void RunAppOnDevice(const std::string& device_uid,
+                              const std::string& bundle_id) = 0;
+
+  /**
    * @brief Notify that listener of client connection is available.
    *
    * @return true - available, false - not available.
@@ -209,6 +206,15 @@ class TransportAdapter {
    * @return Error information about possible reason of failure.
    */
   virtual Error StopClientListening() = 0;
+
+  /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void RemoveFinalizedConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Disconnect from specified session.
@@ -260,8 +266,8 @@ class TransportAdapter {
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
-      const = 0;
+  virtual ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const = 0;
 
   /**
    * @brief Return name of device.
@@ -272,14 +278,14 @@ class TransportAdapter {
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
-  virtual TMMetricObserver* GetTimeMetricObserver() = 0;
-#endif  // TIME_TESTER
+  virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+#endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

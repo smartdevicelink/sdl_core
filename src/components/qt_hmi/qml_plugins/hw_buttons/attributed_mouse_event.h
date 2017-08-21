@@ -38,10 +38,10 @@
 
 #include <QtCore/QObject>
 #if QT_4
-#  include <QtDeclarative/QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeItem>
 typedef QDeclarativeItem Item;
 #elif QT_5
-#  include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickItem>
 typedef QQuickItem Item;
 #endif  // QT_VERSION
 
@@ -50,12 +50,12 @@ class AttributedMouseEvent : public QObject {
   Q_PROPERTY(Item* item READ item)
 
  public:
-  explicit AttributedMouseEvent(Item *item) : item_(item) {}
+  explicit AttributedMouseEvent(Item* item) : item_(item) {}
 
-  Item *item() const;
+  Item* item() const;
 
  private:
-  Item *item_;
+  Item* item_;
   Q_DISABLE_COPY(AttributedMouseEvent)
 };
 

@@ -39,8 +39,8 @@
 #endif
 #include "logger.h"
 
-
-
+// A macro to set some action for variable to avoid "unused variable" warning
+#define UNUSED(x) (void) x;
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -59,50 +59,59 @@
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
 #ifdef DEBUG
-  #define ASSERT(condition) \
-    do { \
-      DEINIT_LOGGER(); \
-      assert(condition); \
-    } while (false)
+#define ASSERT(condition) \
+  FLUSH_LOGGER();         \
+  do {                    \
+    DEINIT_LOGGER();      \
+    assert(condition);    \
+  } while (false)
 #else  // RELEASE
-  #define ASSERT(condition) \
-    fprintf(stderr, "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
-                    __FILE__, __LINE__, __FUNCTION__)
+#define ASSERT(condition)                                        \
+  fprintf(stderr,                                                \
+          "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
+          __FILE__,                                              \
+          __LINE__,                                              \
+          __FUNCTION__)
 #endif
 
-#define DCHECK(condition) \
-  if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
-    LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
-    ASSERT((condition)); \
+#define DCHECK(condition)                                                     \
+  if (!(condition)) {                                                         \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+    LOG4CXX_FATAL(logger_,                                                    \
+                  "DCHECK failed with \"" << #condition << "\" ["             \
+                                          << __FUNCTION__ << "][" << __FILE__ \
+                                          << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                      \
   }
 
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN(condition, return_value) \
-  if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
-    LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']' ); \
-    ASSERT((condition)); \
-    return (return_value); \
+#define DCHECK_OR_RETURN(condition, return_value)                             \
+  if (!(condition)) {                                                         \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+    LOG4CXX_FATAL(logger_,                                                    \
+                  "DCHECK failed with \"" << #condition << "\" ["             \
+                                          << __FUNCTION__ << "][" << __FILE__ \
+                                          << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                      \
+    return (return_value);                                                    \
   }
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN_VOID(condition) \
-  if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
-    LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']' ); \
-    ASSERT((condition)); \
-    return ; \
+#define DCHECK_OR_RETURN_VOID(condition)                                      \
+  if (!(condition)) {                                                         \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+    LOG4CXX_FATAL(logger_,                                                    \
+                  "DCHECK failed with \"" << #condition << "\" ["             \
+                                          << __FUNCTION__ << "][" << __FILE__ \
+                                          << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                      \
+    return;                                                                   \
   }
-
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
@@ -120,11 +129,11 @@
 * @brief Calculate size of na array
 * @param arr  array, which size need to calculate
 */
-#define ARRAYSIZE(arr) sizeof (arr) / sizeof(*arr)
+#define ARRAYSIZE(arr) sizeof(arr) / sizeof(*arr)
 
 #ifdef BUILD_TESTS
-#define FRIEND_TEST(test_case_name, test_name)\
-friend class test_case_name##_##test_name##_Test
+#define FRIEND_TEST(test_case_name, test_name) \
+  friend class test_case_name##_##test_name##_Test
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

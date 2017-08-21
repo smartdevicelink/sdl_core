@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_START_DEVICE_DISCOVERY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_START_DEVICE_DISCOVERY_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -49,7 +49,8 @@ class OnStartDeviceDiscovery : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnStartDeviceDiscovery(const MessageSharedPtr& message);
+  OnStartDeviceDiscovery(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnStartDeviceDiscovery class destructor
@@ -69,4 +70,4 @@ class OnStartDeviceDiscovery : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_START_DEVICE_DISCOVERY_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_START_DEVICE_DISCOVERY_H_

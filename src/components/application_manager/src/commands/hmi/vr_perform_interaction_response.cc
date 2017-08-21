@@ -37,18 +37,16 @@ namespace application_manager {
 namespace commands {
 
 VRPerformInteractionResponse::VRPerformInteractionResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRPerformInteractionResponse::~VRPerformInteractionResponse() {
-}
+VRPerformInteractionResponse::~VRPerformInteractionResponse() {}
 
 void VRPerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

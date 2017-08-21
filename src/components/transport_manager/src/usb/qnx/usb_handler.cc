@@ -53,10 +53,10 @@ UsbHandler* usb_handler;
 }
 
 UsbHandler::UsbHandler()
-    : usb_device_listeners_(),
-      devices_(),
-      usbd_general_connection_(NULL),
-      usbd_aoa_connection_(NULL) {
+    : usb_device_listeners_()
+    , devices_()
+    , usbd_general_connection_(NULL)
+    , usbd_aoa_connection_(NULL) {
   usb_handler = this;
 }
 
@@ -65,15 +65,15 @@ UsbHandler::~UsbHandler() {
   if (usbd_general_connection_) {
     const int disconnect_rc = usbd_disconnect(usbd_general_connection_);
     if (EOK != disconnect_rc) {
-      LOG4CXX_ERROR(logger_, "usbd_disconnect failed, error code "
-                                 << disconnect_rc);
+      LOG4CXX_ERROR(logger_,
+                    "usbd_disconnect failed, error code " << disconnect_rc);
     }
   }
   if (usbd_aoa_connection_) {
     const int disconnect_rc = usbd_disconnect(usbd_aoa_connection_);
     if (EOK != disconnect_rc) {
-      LOG4CXX_ERROR(logger_, "usbd_disconnect failed, error code "
-                                 << disconnect_rc);
+      LOG4CXX_ERROR(logger_,
+                    "usbd_disconnect failed, error code " << disconnect_rc);
     }
   }
 }
@@ -87,7 +87,8 @@ void UsbHandler::DeviceArrived(usbd_connection* connection,
                                usbd_device_instance_t* instance) {
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
        ++it) {
-    if ((*it)->GetDeviceInstance() == *instance) return;
+    if ((*it)->GetDeviceInstance() == *instance)
+      return;
   }
   usbd_device* device_usbd = 0;
   const int attach_rc = usbd_attach(connection, instance, 0, &device_usbd);
@@ -109,7 +110,8 @@ void UsbHandler::DeviceArrived(usbd_connection* connection,
   devices_.push_back(device);
   for (std::list<UsbDeviceListener*>::iterator it =
            usb_device_listeners_.begin();
-       it != usb_device_listeners_.end(); ++it) {
+       it != usb_device_listeners_.end();
+       ++it) {
     (*it)->OnDeviceArrived(device);
   }
 }
@@ -128,7 +130,8 @@ void UsbHandler::DeviceLeft(usbd_device_instance_t* instance) {
 
   for (std::list<UsbDeviceListener*>::iterator it =
            usb_device_listeners_.begin();
-       it != usb_device_listeners_.end(); ++it) {
+       it != usb_device_listeners_.end();
+       ++it) {
     (*it)->OnDeviceLeft(device);
   }
 
@@ -163,7 +166,8 @@ void UsbHandler::StartControlTransferSequence(
 
   for (UsbControlTransferSequence::Transfers::const_iterator it =
            sequence->transfers().begin();
-       it != sequence->transfers().end(); ++it) {
+       it != sequence->transfers().end();
+       ++it) {
     UsbControlTransfer* transfer = *it;
 
     usbd_urb* urb = usbd_alloc_urb(NULL);
@@ -187,15 +191,21 @@ void UsbHandler::StartControlTransferSequence(
       UsbControlOutTransfer* out_transfer =
           static_cast<UsbControlOutTransfer*>(transfer);
       std::copy(out_transfer->Data(),
-                out_transfer->Data() + out_transfer->Length(), buf);
+                out_transfer->Data() + out_transfer->Length(),
+                buf);
     } else {
       assert(0);
     }
 
     assert(transfer->Type() == UsbControlTransfer::VENDOR);
 
-    usbd_setup_vendor(urb, flags, transfer->Request(), USB_TYPE_VENDOR,
-                      transfer->Value(), transfer->Index(), buf,
+    usbd_setup_vendor(urb,
+                      flags,
+                      transfer->Request(),
+                      USB_TYPE_VENDOR,
+                      transfer->Value(),
+                      transfer->Index(),
+                      buf,
                       transfer->Length());
     const int io_rc = usbd_io(urb, usb_pipe, 0, 0, USBD_TIME_DEFAULT);
 
@@ -211,7 +221,8 @@ void UsbHandler::StartControlTransferSequence(
     }
     usbd_free(buf);
     usbd_free_urb(urb);
-    if (!submit_next) break;
+    if (!submit_next)
+      break;
   }
   usbd_close_pipe(usb_pipe);
 
@@ -220,56 +231,66 @@ void UsbHandler::StartControlTransferSequence(
 
 void ArrivedCallback(usbd_connection* connection,
                      usbd_device_instance_t* instance) {
-  if (kAoaVid == instance->ident.vendor) return;
-  LOG4CXX_INFO(logger_, "USB device arrived (path "
-                            << static_cast<int>(instance->path) << ", devno "
-                            << static_cast<int>(instance->devno) << ", config "
-                            << static_cast<int>(instance->config) << ", iface "
-                            << static_cast<int>(instance->iface) << ")");
+  if (kAoaVid == instance->ident.vendor)
+    return;
+  LOG4CXX_INFO(logger_,
+               "USB device arrived (path "
+                   << static_cast<int>(instance->path) << ", devno "
+                   << static_cast<int>(instance->devno) << ", config "
+                   << static_cast<int>(instance->config) << ", iface "
+                   << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceArrived(connection, instance);
 }
 
 void ArrivedAoaCallback(usbd_connection* connection,
                         usbd_device_instance_t* instance) {
-  if (kAoaVid != instance->ident.vendor) return;
-  LOG4CXX_INFO(logger_, "USB AOA device arrived (path "
-                            << static_cast<int>(instance->path) << ", devno "
-                            << static_cast<int>(instance->devno) << ", config "
-                            << static_cast<int>(instance->config) << ", iface "
-                            << static_cast<int>(instance->iface) << ")");
+  if (kAoaVid != instance->ident.vendor)
+    return;
+  LOG4CXX_INFO(logger_,
+               "USB AOA device arrived (path "
+                   << static_cast<int>(instance->path) << ", devno "
+                   << static_cast<int>(instance->devno) << ", config "
+                   << static_cast<int>(instance->config) << ", iface "
+                   << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceArrived(connection, instance);
 }
 
 void LeftCallback(usbd_connection* connection,
                   usbd_device_instance_t* instance) {
-  if (kAoaVid == instance->ident.vendor) return;
-  LOG4CXX_INFO(logger_, "USB device left (path "
-                            << static_cast<int>(instance->path) << ", devno "
-                            << static_cast<int>(instance->devno) << ", config "
-                            << static_cast<int>(instance->config) << ", iface "
-                            << static_cast<int>(instance->iface) << ")");
+  if (kAoaVid == instance->ident.vendor)
+    return;
+  LOG4CXX_INFO(logger_,
+               "USB device left (path "
+                   << static_cast<int>(instance->path) << ", devno "
+                   << static_cast<int>(instance->devno) << ", config "
+                   << static_cast<int>(instance->config) << ", iface "
+                   << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceLeft(instance);
 }
 
 void LeftAoaCallback(usbd_connection* connection,
                      usbd_device_instance_t* instance) {
-  if (kAoaVid != instance->ident.vendor) return;
-  LOG4CXX_INFO(logger_, "USB AOA device left (path "
-                            << static_cast<int>(instance->path) << ", devno "
-                            << static_cast<int>(instance->devno) << ", config "
-                            << static_cast<int>(instance->config) << ", iface "
-                            << static_cast<int>(instance->iface) << ")");
+  if (kAoaVid != instance->ident.vendor)
+    return;
+  LOG4CXX_INFO(logger_,
+               "USB AOA device left (path "
+                   << static_cast<int>(instance->path) << ", devno "
+                   << static_cast<int>(instance->devno) << ", config "
+                   << static_cast<int>(instance->config) << ", iface "
+                   << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceLeft(instance);
 }
 
 TransportAdapter::Error UsbHandler::Init() {
   {
-    usbd_device_ident_t interest = {
-        USBD_CONNECT_WILDCARD, USBD_CONNECT_WILDCARD, kAoaInterfaceSubclass,
-        USBD_CONNECT_WILDCARD, USBD_CONNECT_WILDCARD};
+    usbd_device_ident_t interest = {USBD_CONNECT_WILDCARD,
+                                    USBD_CONNECT_WILDCARD,
+                                    kAoaInterfaceSubclass,
+                                    USBD_CONNECT_WILDCARD,
+                                    USBD_CONNECT_WILDCARD};
     usbd_funcs_t funcs = {_USBDI_NFUNCS, ArrivedCallback, LeftCallback, NULL};
-    usbd_connect_parm_t cparms = {NULL, USB_VERSION, USBD_VERSION, 0,     0,
-                                  NULL, 0,           &interest,    &funcs};
+    usbd_connect_parm_t cparms = {
+        NULL, USB_VERSION, USBD_VERSION, 0, 0, NULL, 0, &interest, &funcs};
 
     const int connect_rc = usbd_connect(&cparms, &usbd_general_connection_);
 
@@ -279,13 +300,15 @@ TransportAdapter::Error UsbHandler::Init() {
     }
   }
   {
-    usbd_device_ident_t interest = {
-        kAoaVid,               USBD_CONNECT_WILDCARD, USBD_CONNECT_WILDCARD,
-        kAoaInterfaceSubclass, USBD_CONNECT_WILDCARD};
-    usbd_funcs_t funcs = {_USBDI_NFUNCS,   ArrivedAoaCallback,
-                          LeftAoaCallback, NULL};
-    usbd_connect_parm_t cparms = {NULL, USB_VERSION, USBD_VERSION, 0,     0,
-                                  NULL, 0,           &interest,    &funcs};
+    usbd_device_ident_t interest = {kAoaVid,
+                                    USBD_CONNECT_WILDCARD,
+                                    USBD_CONNECT_WILDCARD,
+                                    kAoaInterfaceSubclass,
+                                    USBD_CONNECT_WILDCARD};
+    usbd_funcs_t funcs = {
+        _USBDI_NFUNCS, ArrivedAoaCallback, LeftAoaCallback, NULL};
+    usbd_connect_parm_t cparms = {
+        NULL, USB_VERSION, USBD_VERSION, 0, 0, NULL, 0, &interest, &funcs};
 
     const int connect_rc = usbd_connect(&cparms, &usbd_aoa_connection_);
 

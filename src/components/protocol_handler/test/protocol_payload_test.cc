@@ -49,7 +49,8 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
   uint8_t offset = 0;
 
   uint32_t function_id = message.header.rpc_function_id;
-  data_for_sending[offset++] = ((rpc_type_flag << 4) & 0xF0) | (function_id >> 24);
+  data_for_sending[offset++] =
+      ((rpc_type_flag << 4) & 0xF0) | (function_id >> 24);
   data_for_sending[offset++] = function_id >> 16;
   data_for_sending[offset++] = function_id >> 8;
   data_for_sending[offset++] = function_id;
@@ -67,12 +68,13 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
   data_for_sending[offset++] = jsonSize;
 
   if (message.json.length() != 0) {
-    memcpy(data_for_sending + offset, message.json.c_str(),
-           message.json.size());
+    memcpy(
+        data_for_sending + offset, message.json.c_str(), message.json.size());
   }
 
   if (message.data.size() != 0) {
-    uint8_t* current_pointer = data_for_sending + offset + message.json.length();
+    uint8_t* current_pointer =
+        data_for_sending + offset + message.json.length();
     u_int32_t binarySize = message.data.size();
     for (uint32_t i = 0; i < binarySize; ++i) {
       current_pointer[i] = message.data[i];
@@ -163,7 +165,7 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithoutDataWithJSON) {
   const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
                                        prot_payload_test.data.size() +
                                        prot_payload_test.json.length();
-  uint8_t *data_for_sending = new uint8_t[data_for_sending_size];
+  uint8_t* data_for_sending = new uint8_t[data_for_sending_size];
   prepare_data(data_for_sending, prot_payload_test);
 
   BitStream bs(data_for_sending, data_for_sending_size);

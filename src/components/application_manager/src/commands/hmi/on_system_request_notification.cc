@@ -31,25 +31,23 @@
  */
 
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/commands/hmi/on_system_request_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-using policy::PolicyHandler;
+using policy::PolicyHandlerInterface;
 
 namespace application_manager {
 
 namespace commands {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-  const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemRequestNotification::~OnSystemRequestNotification() {
-}
+OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,26 +56,31 @@ void OnSystemRequestNotification::Run() {
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   params[strings::function_id] =
-    static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
+  // According to HMI API, this should be HMI unique id, but during processing
+  // messages from HMI this param is replaced by connection key, so below it
+  // will be treated as connection key
   ApplicationSharedPtr app;
-  if (!msg_params.keyExists(strings::app_id)) {
+  if (msg_params.keyExists(strings::app_id)) {
+    const uint32_t app_id = msg_params[strings::app_id].asUInt();
+    LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
+    LOG4CXX_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
+    app = application_manager_.application(app_id);
+  } else {
     LOG4CXX_DEBUG(logger_,
-                  "No application specified, trying to choose automatically.");
-    PolicyHandler* policy_handler = PolicyHandler::instance();
-    uint32_t selected_app_id = policy_handler->GetAppIdForSending();
+                  "Received OnSystemRequest without appID."
+                  " One of registered apps will be used.");
+    LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
+    const PolicyHandlerInterface& policy_handler =
+        application_manager_.GetPolicyHandler();
+    const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
                    "Can't select application to forward OnSystemRequest.");
       return;
     }
-    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-    app = app_mgr->application(selected_app_id);
-  } else {
-    const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOG4CXX_WARN(logger_, "Looking for application with connection key "
-                 << app_id);
-    app = ApplicationManagerImpl::instance()->application(app_id);
+    app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {
@@ -86,8 +89,24 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
+  std::string device_mac;
+  application_manager_.connection_handler()
+      .get_session_observer()
+      .GetDataOnDeviceID(app->device(), NULL, NULL, &device_mac, NULL);
+
+  if (policy::kDeviceAllowed !=
+      application_manager_.GetPolicyHandler().GetUserConsentForDevice(
+          device_mac)) {
+    LOG4CXX_WARN(logger_,
+                 "Application "
+                     << app->policy_app_id()
+                     << " is registered from non-consented device."
+                        "Can't forward notification to application.");
+    return;
+  }
+
   LOG4CXX_DEBUG(logger_,
-                "Sending request with application id " << app->mobile_app_id());
+                "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);
@@ -96,4 +115,3 @@ void OnSystemRequestNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

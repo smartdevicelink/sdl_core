@@ -31,7 +31,8 @@
  */
 
 #include "application_manager/commands/command_impl.h"
-#include "config_profile/profile.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
@@ -42,17 +43,18 @@ const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;
 const int32_t CommandImpl::protocol_version_ = 3;
 
-CommandImpl::CommandImpl(const MessageSharedPtr& message)
-    : message_(message),
-      default_timeout_(profile::Profile::instance()->default_timeout()),
-      allowed_to_terminate_(true) {
-}
+CommandImpl::CommandImpl(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager)
+    : message_(message)
+    , default_timeout_(application_manager.get_settings().default_timeout())
+    , allowed_to_terminate_(true)
+    , application_manager_(application_manager) {}
 
 CommandImpl::~CommandImpl() {
   CleanUp();
 }
 
-bool CommandImpl::CheckPermissions(){
+bool CommandImpl::CheckPermissions() {
   return true;
 }
 
@@ -64,8 +66,7 @@ bool CommandImpl::CleanUp() {
   return true;
 }
 
-void CommandImpl::Run() {
-}
+void CommandImpl::Run() {}
 
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
@@ -83,8 +84,87 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
-void CommandImpl::onTimeOut() {
+void CommandImpl::onTimeOut() {}
 
+bool CommandImpl::AllowedToTerminate() {
+  return allowed_to_terminate_;
+}
+
+void CommandImpl::SetAllowedToTerminate(const bool allowed) {
+  allowed_to_terminate_ = allowed;
+}
+
+void CommandImpl::ReplaceMobileByHMIAppId(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+        application_manager_.application(message[strings::app_id].asUInt());
+    if (application.valid()) {
+      LOG4CXX_DEBUG(logger_,
+                    "ReplaceMobileByHMIAppId from "
+                        << message[strings::app_id].asInt() << " to "
+                        << application->hmi_app_id());
+      message[strings::app_id] = application->hmi_app_id();
+    }
+  } else {
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for (; it != message_array->end(); ++it) {
+          ReplaceMobileByHMIAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          std::string k = *key;
+          ReplaceMobileByHMIAppId(message[*key]);
+        }
+        break;
+      }
+      default: { break; }
+    }
+  }
+}
+
+void CommandImpl::ReplaceHMIByMobileAppId(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+        application_manager_.application_by_hmi_app(
+            message[strings::app_id].asUInt());
+
+    if (application.valid()) {
+      LOG4CXX_DEBUG(logger_,
+                    "ReplaceHMIByMobileAppId from "
+                        << message[strings::app_id].asInt() << " to "
+                        << application->app_id());
+      message[strings::app_id] = application->app_id();
+    }
+  } else {
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for (; it != message_array->end(); ++it) {
+          ReplaceHMIByMobileAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          ReplaceHMIByMobileAppId(message[*key]);
+        }
+        break;
+      }
+      default: { break; }
+    }
+  }
 }
 
 }  // namespace commands

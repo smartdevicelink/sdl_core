@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnSDLConsentNeededNotification::OnSDLConsentNeededNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnSDLConsentNeededNotification::~OnSDLConsentNeededNotification() {
-}
+OnSDLConsentNeededNotification::~OnSDLConsentNeededNotification() {}
 
 void OnSDLConsentNeededNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void OnSDLConsentNeededNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

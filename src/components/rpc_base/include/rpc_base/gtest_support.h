@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RPC_BASE_GTEST_SUPPORT_H_
-#define RPC_BASE_GTEST_SUPPORT_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_GTEST_SUPPORT_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_GTEST_SUPPORT_H_
 
 #include <gtest/gtest.h>
 
@@ -39,9 +39,9 @@
 
 // A predicate-formatter for asserting that intergen generated
 // object is valid
-template<typename T>
+template <typename T>
 ::testing::AssertionResult AssertRpcObjValid(const char* obj_expr,
-                                               const T& obj) {
+                                             const T& obj) {
   if (obj.is_valid())
     return ::testing::AssertionSuccess();
 
@@ -49,8 +49,8 @@ template<typename T>
   obj.ReportErrors(&report);
 
   return ::testing::AssertionFailure()
-      << obj_expr << " failed validation. Violations are:\n"
-      << rpc::PrettyFormat(report);
+         << obj_expr << " failed validation. Violations are:\n"
+         << rpc::PrettyFormat(report);
 }
 
 #define ASSERT_RPCTYPE_VALID(object) \
@@ -59,4 +59,4 @@ template<typename T>
 #define EXPECT_RPCTYPE_VALID(object) \
   EXPECT_PRED_FORMAT1(AssertRpcObjValid, object)
 
-#endif /* RPC_BASE_GTEST_SUPPORT_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_GTEST_SUPPORT_H_

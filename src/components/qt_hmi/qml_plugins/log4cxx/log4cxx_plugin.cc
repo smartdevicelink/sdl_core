@@ -37,58 +37,58 @@
 #include <log4cxx/log4cxx.h>
 #include <log4cxx/propertyconfigurator.h>
 
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("Log4cxxPlugin"));
+log4cxx::LoggerPtr logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Log4cxxPlugin"));
 
 #if QT_4
-void smartLogger(QtMsgType type, const char *msg) {
+void smartLogger(QtMsgType type, const char* msg) {
   log4cxx::spi::LocationInfo location("", "", -1);
 
   switch (type) {
-  case QtDebugMsg:
-    (*logger_).debug(msg, location);
-    break;
-  case QtWarningMsg:
-    (*logger_).warn(msg, location);
-    break;
-  case QtCriticalMsg:
-    (*logger_).error(msg, location);
-    break;
-  case QtFatalMsg:
-    (*logger_).fatal(msg, location);
-    break;
-  default:
-    (*logger_).info(msg, location);
-    break;
+    case QtDebugMsg:
+      (*logger_).debug(msg, location);
+      break;
+    case QtWarningMsg:
+      (*logger_).warn(msg, location);
+      break;
+    case QtCriticalMsg:
+      (*logger_).error(msg, location);
+      break;
+    case QtFatalMsg:
+      (*logger_).fatal(msg, location);
+      break;
+    default:
+      (*logger_).info(msg, location);
+      break;
   }
 }
 #elif QT_5
-void smartLogger(QtMsgType type, const QMessageLogContext &context,
-                 const QString &msg) {
-  log4cxx::spi::LocationInfo location(context.file,
-                                      context.function ? context.function : "",
-                                      context.line);
+void smartLogger(QtMsgType type,
+                 const QMessageLogContext& context,
+                 const QString& msg) {
+  log4cxx::spi::LocationInfo location(
+      context.file, context.function ? context.function : "", context.line);
   switch (type) {
-  case QtDebugMsg:
-    (*logger_).debug(msg.toStdString(), location);
-    break;
-  case QtWarningMsg:
-    (*logger_).warn(msg.toStdString(), location);
-    break;
-  case QtCriticalMsg:
-    (*logger_).error(msg.toStdString(), location);
-    break;
-  case QtFatalMsg:
-    (*logger_).fatal(msg.toStdString(), location);
-    break;
-  default:
-    (*logger_).info(msg.toStdString(), location);
-    break;
+    case QtDebugMsg:
+      (*logger_).debug(msg.toStdString(), location);
+      break;
+    case QtWarningMsg:
+      (*logger_).warn(msg.toStdString(), location);
+      break;
+    case QtCriticalMsg:
+      (*logger_).error(msg.toStdString(), location);
+      break;
+    case QtFatalMsg:
+      (*logger_).fatal(msg.toStdString(), location);
+      break;
+    default:
+      (*logger_).info(msg.toStdString(), location);
+      break;
   }
 }
 #endif  // QT_VERSION
 
-void Log4cxxPlugin::registerTypes(const char *uri) {
+void Log4cxxPlugin::registerTypes(const char* uri) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
 #if QT_4

@@ -26,6 +26,7 @@ import generator.parsers.SDLRPCV2
 import generator.parsers.JSONRPC
 import generator.generators.SmartFactorySDLRPC
 import generator.generators.SmartFactoryJSONRPC
+import MsgVersionGenerate
 
 from generator.parsers.RPCBase import ParseError
 from generator.generators.SmartFactoryBase import GenerateError
@@ -71,7 +72,6 @@ def _handle_fatal_error(error):
     print
     sys.exit(errno.EINVAL)
 
-
 def main():
     """Main function of the generator that does actual work."""
 
@@ -100,6 +100,13 @@ Generating interface source code with following parameters:
         interface = parser.parse(args["source-xml"])
     except ParseError as error:
         _handle_fatal_error(error)
+
+    # Parse sdl version from MOBILE_API.xml and create source file with this version
+    if src_xml_name == "MOBILE_API":
+        try:
+            MsgVersionGenerate.generate_msg_version(src_xml, output_dir)
+        except ParseError as error:
+            _handle_fatal_error(error)
 
     # Generate SmartFactory source code from internal model
     try:

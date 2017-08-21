@@ -38,12 +38,10 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+#include "smart_objects/smart_object.h"
 
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
+namespace application_manager {
+class ApplicationManager;
 }
 
 namespace media_manager {
@@ -62,68 +60,67 @@ typedef enum {
   ACQ_16_BIT = 1
 } AudioCaptureQuality;
 
-typedef enum {
-  AT_INVALID = -1,
-  AT_PCM = 0
-} AudioType;
+typedef enum { AT_INVALID = -1, AT_PCM = 0 } AudioType;
 
 /*
- * @brief AudioStreamSenderThread class used to read binary data written from microphone
+ * @brief AudioStreamSenderThread class used to read binary data written from
+ * microphone
  * and send it every 1 second to mobile device.
  */
 class AudioStreamSenderThread : public threads::ThreadDelegate {
-  public:
-    /*
-     * @brief AudioStreamSenderThread class constructor
-     *
-     * @param session_key     Session key of connection for Mobile side
-     * @param correlation_id  Correlation id for response for Mobile side
-     */
-    AudioStreamSenderThread(const std::string fileName,
-                            uint32_t session_key);
+ public:
+  /*
+   * @brief AudioStreamSenderThread class constructor
+   *
+   * @param session_key     Session key of connection for Mobile side
+   * @param correlation_id  Correlation id for response for Mobile side
+   */
+  AudioStreamSenderThread(const std::string& fileName,
+                          uint32_t session_key,
+                          application_manager::ApplicationManager& app_mngr);
 
-    /*
-     * @brief AudioStreamSenderThread class destructor
-     */
-    ~AudioStreamSenderThread();
+  /*
+   * @brief AudioStreamSenderThread class destructor
+   */
+  ~AudioStreamSenderThread();
 
-    /**
-     * @brief Thread procedure.
-     */
-    void threadMain();
+  /**
+   * @brief Thread procedure.
+   */
+  void threadMain();
 
-    /*
-     * @brief Retrieve session key
-     *
-     * @return Stored session key
-     */
-    uint32_t session_key() const;
+  /*
+   * @brief Retrieve session key
+   *
+   * @return Stored session key
+   */
+  uint32_t session_key() const;
 
-    void exitThreadMain();
+  void exitThreadMain();
 
-  private:
-    /*
-     * @brief Sends AudioPassThru request
-     */
-    bool SendEndAudioPassThru();
+ private:
+  /*
+   * @brief Sends AudioPassThru request
+   */
+  bool SendEndAudioPassThru();
 
-    void sendAudioChunkToMobile();
+  void sendAudioChunkToMobile();
 
+  bool getShouldBeStopped();
+  void setShouldBeStopped(bool should_stop);
 
-    bool getShouldBeStopped();
-    void setShouldBeStopped(bool should_stop);
+  uint32_t session_key_;
+  const std::string fileName_;
+  int32_t offset_;
+  volatile bool shouldBeStoped_;
+  sync_primitives::Lock shouldBeStoped_lock_;
+  sync_primitives::ConditionalVariable shouldBeStoped_cv_;
 
-    uint32_t                              session_key_;
-    const std::string                     fileName_;
-    int32_t                               offset_;
-    volatile bool                         shouldBeStoped_;
-    sync_primitives::Lock                 shouldBeStoped_lock_;
-    sync_primitives::ConditionalVariable  shouldBeStoped_cv_;
+  static const int32_t kAudioPassThruTimeout;
 
-    static const int32_t                  kAudioPassThruTimeout;
+  application_manager::ApplicationManager& application_manager_;
 
-
-    DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
+  DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };
 }  // namespace media_manager
 

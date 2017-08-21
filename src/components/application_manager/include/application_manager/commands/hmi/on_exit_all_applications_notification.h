@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_ALL_APPLICATIONS_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_ALL_APPLICATIONS_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -49,7 +49,8 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnExitAllApplicationsNotification(const MessageSharedPtr& message);
+  OnExitAllApplicationsNotification(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief OnExitAllApplicationsNotification class destructor
@@ -62,7 +63,6 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   /**
    * @brief Notify's HMI that SDL stored all data required for resumption
    **/
@@ -75,4 +75,4 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_ALL_APPLICATIONS_NOTIFICATION_H_

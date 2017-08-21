@@ -49,7 +49,8 @@ class NaviAlertManeuverResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviAlertManeuverResponse(const MessageSharedPtr& message);
+  NaviAlertManeuverResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief NaviAlertManeuverResponse class destructor

@@ -49,7 +49,8 @@ class UIGetSupportedLanguagesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetSupportedLanguagesRequest(const MessageSharedPtr& message);
+  UIGetSupportedLanguagesRequest(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief UIGetSupportedLanguagesRequest class destructor

@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONTROL_TRANSFER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONTROL_TRANSFER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONTROL_TRANSFER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONTROL_TRANSFER_H_
 
 namespace transport_manager {
 
@@ -46,14 +46,9 @@ class UsbControlOutTransfer;
 
 class UsbControlTransfer {
  public:
-  enum TransferDirection {
-    IN,
-    OUT
-  };
+  enum TransferDirection { IN, OUT };
 
-  enum RequestType {
-    VENDOR
-  };
+  enum RequestType { VENDOR };
 
   virtual ~UsbControlTransfer() {}
   virtual TransferDirection Direction() const = 0;
@@ -67,21 +62,27 @@ class UsbControlTransfer {
 class UsbControlInTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlInTransfer() {}
-  virtual TransferDirection Direction() const { return IN; }
+  virtual TransferDirection Direction() const {
+    return IN;
+  }
   virtual bool OnCompleted(unsigned char* data) const = 0;
 };
 
 class UsbControlOutTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlOutTransfer() {}
-  virtual TransferDirection Direction() const { return OUT; }
+  virtual TransferDirection Direction() const {
+    return OUT;
+  }
   virtual const char* Data() const = 0;
 };
 
 class UsbControlTransferSequence {
  public:
   typedef std::list<UsbControlTransfer*> Transfers;
-  const Transfers& transfers() const { return transfers_; }
+  const Transfers& transfers() const {
+    return transfers_;
+  }
 
   virtual ~UsbControlTransferSequence() {
     for (Transfers::iterator it = transfers_.begin(); it != transfers_.end();
@@ -102,4 +103,4 @@ class UsbControlTransferSequence {
 }  // namespace
 }  // namespace
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONTROL_TRANSFER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONTROL_TRANSFER_H_

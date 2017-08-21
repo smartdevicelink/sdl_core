@@ -36,11 +36,11 @@
 #include "interfaces/QT_HMI_API.h"
 #include <QtDBus/QDBusConnection>
 
-DBusController::DBusController(QObject *parent)
-    : QObject(parent),
-      message(NULL) {}
+DBusController::DBusController(QObject* parent)
+    : QObject(parent), message(NULL) {}
 
-void DBusController::addMessage(const QDBusMessage& message, fillRoutine fill,
+void DBusController::addMessage(const QDBusMessage& message,
+                                fillRoutine fill,
                                 int async_uid) {
   delayedReply reply;
   reply.message = message;
@@ -54,11 +54,11 @@ void DBusController::sendReply(QVariant asyncObject, QVariant data) {
   if (it != replies_.end()) {
     QDBusMessage msg = it->second.message.createReply();
     if (!it->second.fill(msg, data.toMap())) {
-        QDBusConnection::sessionBus()
-            .send(it->second.message.createErrorReply(QDBusError::InternalError,
-                QString::number(hmi_apis::Common_Result::INVALID_DATA)));
+      QDBusConnection::sessionBus().send(it->second.message.createErrorReply(
+          QDBusError::InternalError,
+          QString::number(hmi_apis::Common_Result::INVALID_DATA)));
     } else {
-        QDBusConnection::sessionBus().send(msg);
+      QDBusConnection::sessionBus().send(msg);
     }
     replies_.erase(it);
   }
@@ -69,15 +69,17 @@ void DBusController::sendReply(QVariant data) {
     return;
   QDBusMessage msg = message->createReply();
   if (!fill(msg, data.toMap())) {
-    QDBusConnection::sessionBus()
-        .send(message->createErrorReply(QDBusError::InternalError,
-             QString::number(hmi_apis::Common_Result::INVALID_DATA)));
+    QDBusConnection::sessionBus().send(message->createErrorReply(
+        QDBusError::InternalError,
+        QString::number(hmi_apis::Common_Result::INVALID_DATA)));
   } else {
     QDBusConnection::sessionBus().send(msg);
   }
 }
 
-void DBusController::sendError(QVariant asyncObject, QVariant code, QVariant message) {
+void DBusController::sendError(QVariant asyncObject,
+                               QVariant code,
+                               QVariant message) {
   int uid = asyncObject.toMap()["__async_uid"].toInt();
   std::map<int, delayedReply>::iterator it = replies_.find(uid);
   if (it != replies_.end()) {

@@ -49,7 +49,8 @@ class AddStatisticsInfoNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddStatisticsInfoNotification(const MessageSharedPtr& message);
+  AddStatisticsInfoNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief AddStatisticsInfoNotification class destructor

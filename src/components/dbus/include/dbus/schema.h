@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_DBUS_SCHEMA_INCLUDE_DBUS_SCHEMA_SCHEMA_H_
-#define SRC_COMPONENTS_DBUS_SCHEMA_INCLUDE_DBUS_SCHEMA_SCHEMA_H_
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_SCHEMA_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_SCHEMA_H_
 
 #include <string>
 #include <vector>
@@ -48,7 +48,7 @@ struct Description;
 
 typedef hmi_apis::FunctionID::eType MessageId;
 typedef hmi_apis::messageType::eType MessageType;
-typedef std::pair<std::string, std::string> MessageName; // interface, message
+typedef std::pair<std::string, std::string> MessageName;  // interface, message
 typedef std::vector<const ParameterDescription*> ListArgs;
 typedef std::vector<const Description*> Messages;
 
@@ -95,4 +95,4 @@ class DBusSchema {
 
 }  // namespace dbus
 
-#endif  // SRC_COMPONENTS_DBUS_SCHEMA_INCLUDE_DBUS_SCHEMA_SCHEMA_H_
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_SCHEMA_H_

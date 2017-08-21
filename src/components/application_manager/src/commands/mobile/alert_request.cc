@@ -37,30 +37,30 @@
 
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
 
+#include "application_manager/policies/policy_handler.h"
+#include "utils/helpers.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
-AlertRequest::AlertRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      awaiting_ui_alert_response_(false),
-      awaiting_tts_speak_response_(false),
-      awaiting_tts_stop_speaking_response_(false),
-      response_success_(false),
-      flag_other_component_sent_(false),
-      response_result_(mobile_apis::Result::INVALID_ENUM),
-      tts_speak_response_(mobile_apis::Result::INVALID_ENUM) {
+AlertRequest::AlertRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
+    , awaiting_ui_alert_response_(false)
+    , awaiting_tts_speak_response_(false)
+    , awaiting_tts_stop_speaking_response_(false)
+    , is_alert_succeeded_(false)
+    , is_ui_alert_sent_(false)
+    , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
-AlertRequest::~AlertRequest() {
-}
+AlertRequest::~AlertRequest() {}
 
 bool AlertRequest::Init() {
   /* Timeout in milliseconds.
@@ -73,9 +73,11 @@ bool AlertRequest::Init() {
     default_timeout_ = def_value;
   }
 
-  // If soft buttons are present, SDL will not use initiate timeout tracking for response.
+  // If soft buttons are present, SDL will not use initiate timeout tracking for
+  // response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    LOG4CXX_INFO(logger_, "Request contains soft buttons - request timeout "
+    LOG4CXX_INFO(logger_,
+                 "Request contains soft buttons - request timeout "
                  "will be set to 0.");
     default_timeout_ = 0;
   }
@@ -86,33 +88,44 @@ bool AlertRequest::Init() {
 void AlertRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asInt();
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asInt();
 
   if (!Validate(app_id)) {
     // Invalid command, abort execution
     return;
   }
+  bool tts_chunks_exists =
+      (*message_)[strings::msg_params].keyExists(strings::tts_chunks);
+  size_t length_tts_chunks = 0;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
-      awaiting_tts_speak_response_ = true;
-    }
+  if (tts_chunks_exists) {
+    length_tts_chunks =
+        (*message_)[strings::msg_params][strings::tts_chunks].length();
   }
+
+  if ((tts_chunks_exists && length_tts_chunks) ||
+      ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
+       (*message_)[strings::msg_params][strings::play_tone].asBool())) {
+    awaiting_tts_speak_response_ = true;
+  }
+
   SendAlertRequest(app_id);
-  SendPlayToneNotification(app_id);
   if (awaiting_tts_speak_response_) {
-    SendSpeakRequest(app_id);
+    SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
   }
 }
 
 void AlertRequest::onTimeOut() {
-  if (false == (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (false ==
+      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     CommandRequestImpl::onTimeOut();
     return;
   }
-  LOG4CXX_INFO(logger_, "default timeout ignored. "
-                        "AlertRequest with soft buttons wait timeout on HMI side");
+  LOG4CXX_INFO(logger_,
+               "Default timeout ignored. "
+               "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
@@ -122,12 +135,13 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout:
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event"
-                   << awaiting_tts_speak_response_ << " "
-                   << awaiting_tts_stop_speaking_response_ << " "
-                   << awaiting_ui_alert_response_);
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      LOG4CXX_INFO(logger_,
+                   "Received UI_OnResetTimeout event "
+                   " or TTS_OnResetTimeout event"
+                       << awaiting_tts_speak_response_ << " "
+                       << awaiting_tts_stop_speaking_response_ << " "
+                       << awaiting_ui_alert_response_);
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
@@ -136,20 +150,21 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
+      HmiInterfaces::InterfaceState ui_interface_state =
+          application_manager_.hmi_interfaces().GetInterfaceState(
+              HmiInterfaces::HMI_INTERFACE_UI);
 
-      if (awaiting_tts_speak_response_) {
+      if (awaiting_tts_speak_response_ &&
+          HmiInterfaces::STATE_NOT_AVAILABLE != ui_interface_state) {
         awaiting_tts_stop_speaking_response_ = true;
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
       }
+      alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
 
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
       // Mobile Alert request is successful when UI_Alert is successful
-      response_success_ = (mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code);
-      response_result_ = result_code;
-      response_params_ = message[strings::msg_params];
+      alert_response_params_ = message[strings::msg_params];
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -157,8 +172,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
-      tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
+      tts_speak_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, tts_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
@@ -169,62 +185,70 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
-  if (!HasHmiResponsesToWait()) {
-    std::string response_info("");
-    if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_) &&
-        (!flag_other_component_sent_)) {
-      response_success_ = false;
-      response_result_ = mobile_apis::Result::WARNINGS;
-      response_info = "Unsupported phoneme type sent in a prompt";
-    } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-        tts_speak_response_) && (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-            response_result_)) {
-      response_result_ = mobile_apis::Result::WARNINGS;
-      response_info = "Unsupported phoneme type sent in a prompt and "
-          "unsupported image sent in soft buttons";
-    } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-        tts_speak_response_) && (mobile_apis::Result::SUCCESS ==
-            response_result_)) {
-      response_result_ = mobile_apis::Result::WARNINGS;
-      response_info = "Unsupported phoneme type sent in a prompt";
-    } else if ((mobile_apis::Result::SUCCESS == tts_speak_response_) &&
-              ((mobile_apis::Result::INVALID_ENUM == response_result_) &&
-              (!flag_other_component_sent_))) {
-      response_result_ = mobile_apis::Result::SUCCESS;
-      response_success_ = true;
-    }
 
-    if (((mobile_apis::Result::ABORTED == tts_speak_response_ )||
-        (mobile_apis::Result::REJECTED == tts_speak_response_)) &&
-        (!flag_other_component_sent_)) {
-      response_success_ = false;
-      response_result_ = tts_speak_response_;
-    }
-    SendResponse(response_success_, response_result_,
-                 response_info.empty() ? NULL : response_info.c_str(),
-                     &response_params_);
+  if (HasHmiResponsesToWait()) {
+    return;
   }
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  std::string info;
+  const bool result = PrepareResponseParameters(result_code, info);
+  SendResponse(result,
+               result_code,
+               info.empty() ? NULL : info.c_str(),
+               &alert_response_params_);
+}
+
+bool AlertRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& info) {
+  ResponseInfo ui_alert_info(alert_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo tts_alert_info(tts_speak_result_,
+                              HmiInterfaces::HMI_INTERFACE_TTS);
+
+  bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
+
+  /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
+   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
+   * TTS.IsReady.
+   */
+  if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
+    result = false;
+  }
+  result_code = mobile_apis::Result::WARNINGS;
+  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
+      tts_alert_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
+    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
+    info = MergeInfos(
+        ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+    return result;
+  }
+  result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
+  info = MergeInfos(
+      ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+  return result;
 }
 
 bool AlertRequest::Validate(uint32_t app_id) {
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
 
   if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
-      app->IsCommandLimitsExceeded(
-        static_cast<mobile_apis::FunctionID::eType>(function_id()),
-        application_manager::TLimitSource::POLICY_TABLE)) {
+      app->AreCommandLimitsExceeded(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::POLICY_TABLE)) {
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);    
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return false;
   }
 
@@ -233,10 +257,13 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+                                        app,
+                                        application_manager_.GetPolicyHandler(),
+                                        application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -245,13 +272,13 @@ bool AlertRequest::Validate(uint32_t app_id) {
   }
 
   // check if mandatory params(alertText1 and TTSChunk) specified
-  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1))
-      && (!(*message_)[strings::msg_params].keyExists(strings::alert_text2))
-      && (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks)
-          && (1 > (*message_)[strings::msg_params]
-                              [strings::tts_chunks].length()))) {
-    LOG4CXX_ERROR_EXT(logger_, "Mandatory parameters are missing");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
+       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
+    LOG4CXX_ERROR(logger_, "Mandatory parameters are missing");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
                  "Mandatory parameters are missing");
     return false;
   }
@@ -260,21 +287,22 @@ bool AlertRequest::Validate(uint32_t app_id) {
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+  msg_params[hmi_request::alert_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText1;
-     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-         (*message_)[strings::msg_params][strings::alert_text1];
-     index++;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+        (*message_)[strings::msg_params][strings::alert_text1];
+    index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
@@ -287,7 +315,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText3;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-         (*message_)[strings::msg_params][strings::alert_text3];
+        (*message_)[strings::msg_params][strings::alert_text3];
   }
 
   // softButtons
@@ -304,7 +332,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
     msg_params[strings::progress_indicator] =
-      (*message_)[strings::msg_params][strings::progress_indicator];
+        (*message_)[strings::msg_params][strings::progress_indicator];
   }
 
   // PASA Alert type
@@ -316,42 +344,33 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // check out if there are alert strings or soft buttons
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
-
     awaiting_ui_alert_response_ = true;
-    flag_other_component_sent_ = true;
+    is_ui_alert_sent_ = true;
     SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
 }
 
-void AlertRequest::SendSpeakRequest(int32_t app_id) {
+void AlertRequest::SendSpeakRequest(int32_t app_id,
+                                    bool tts_chunks_exists,
+                                    size_t length_tts_chunks) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis;
   using namespace smart_objects;
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
-
-  msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(SmartType_Array);
-  msg_params[hmi_request::tts_chunks] =
-    (*message_)[strings::msg_params][strings::tts_chunks];
+  if (tts_chunks_exists && length_tts_chunks) {
+    msg_params[hmi_request::tts_chunks] =
+        smart_objects::SmartObject(SmartType_Array);
+    msg_params[hmi_request::tts_chunks] =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
+      (*message_)[strings::msg_params][strings::play_tone].asBool()) {
+    msg_params[strings::play_tone] = true;
+  }
   msg_params[strings::app_id] = app_id;
   msg_params[hmi_request::speak_type] = Common_MethodName::ALERT;
   SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
-}
-
-void AlertRequest::SendPlayToneNotification(int32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace hmi_apis;
-  using namespace smart_objects;
-
-  // check playtone parameter
-  if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
-    if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
-      // crate HMI basic communication playtone request
-      SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
-      msg_params[strings::app_id] = app_id;
-      msg_params[strings::method_name] = Common_MethodName::ALERT;
-      CreateHMINotification(FunctionID::BasicCommunication_PlayTone, msg_params);
-    }
-  }
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
@@ -362,7 +381,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
-      return  false;
+      return false;
     }
   }
 
@@ -370,7 +389,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
-      return  false;
+      return false;
     }
   }
 
@@ -378,7 +397,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
-      return  false;
+      return false;
     }
   }
 
@@ -397,8 +416,9 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 }
 
 bool AlertRequest::HasHmiResponsesToWait() {
-  return awaiting_ui_alert_response_ || awaiting_tts_speak_response_
-      || awaiting_tts_stop_speaking_response_;
+  LOG4CXX_AUTO_TRACE(logger_);
+  return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
+         awaiting_tts_stop_speaking_response_;
 }
 
 }  // namespace commands

@@ -49,7 +49,8 @@ class UIAlertResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAlertResponse(const MessageSharedPtr& message);
+  UIAlertResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief UIAlertResponse class destructor

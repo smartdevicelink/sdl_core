@@ -31,18 +31,16 @@
  */
 
 #include "application_manager/commands/hmi/basic_communication_system_request.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 BasicCommunicationSystemRequest::BasicCommunicationSystemRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-BasicCommunicationSystemRequest::~BasicCommunicationSystemRequest() {
-}
+BasicCommunicationSystemRequest::~BasicCommunicationSystemRequest() {}
 
 void BasicCommunicationSystemRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void BasicCommunicationSystemRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

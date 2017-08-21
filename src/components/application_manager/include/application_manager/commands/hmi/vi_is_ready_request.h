@@ -42,14 +42,16 @@ namespace commands {
 /**
  * @brief VIIsReadyRequest command class
  **/
-class VIIsReadyRequest : public RequestToHMI {
+class VIIsReadyRequest : public RequestToHMI,
+                         public event_engine::EventObserver {
  public:
   /**
    * @brief VIIsReadyRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIIsReadyRequest(const MessageSharedPtr& message);
+  VIIsReadyRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VIIsReadyRequest class destructor
@@ -59,7 +61,22 @@ class VIIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief On event callback
+   **/
+  void on_event(const event_engine::Event& event) OVERRIDE;
+
+  /**
+   * @brief onTimeOut from requrst Controller
+   */
+  void onTimeOut() OVERRIDE;
+
+  /**
+   * @brief Send request to HMI for fetching of cappabilities
+   */
+  void SendMessageToHMI();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIIsReadyRequest);

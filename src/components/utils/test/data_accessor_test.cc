@@ -36,34 +36,31 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 TEST(DataAccessorTest, CreateDataAccessor) {
-
-  //arrange
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   DataAccessor<int> testdata(test_value, testSet_lock_);
   int data_from_testdata = testdata.GetData();
 
-  //assert
+  // assert
   EXPECT_EQ(test_value, data_from_testdata);
 }
 
 TEST(DataAccessorTest, CreateDataAccessor_MutexIsLocked_CannotLockItAgain) {
-
-  //arrange
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   DataAccessor<int> testdata(test_value, testSet_lock_);
 
-  //assert
+  // assert
   EXPECT_FALSE(testSet_lock_.Try());
 }
 
 TEST(DataAccessorTest, CopyDataAccessor_GetDataFromDataAccessors) {
-
-  //arrange
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   DataAccessor<int> testdata(test_value, testSet_lock_);
@@ -72,15 +69,15 @@ TEST(DataAccessorTest, CopyDataAccessor_GetDataFromDataAccessors) {
   int data_from_testdata = testdata.GetData();
   int data_from_testdata_copy = testdata_copy.GetData();
 
-  //assert
+  // assert
   EXPECT_EQ(data_from_testdata, data_from_testdata_copy);
 
   EXPECT_FALSE(testSet_lock_.Try());
 }
 
-TEST(DataAccessorTest,ChangedDataInDataAccessor_ChangeData_DataInDataAccessorIsChanged) {
-
-  //arrange
+TEST(DataAccessorTest,
+     ChangedDataInDataAccessor_ChangeData_DataInDataAccessorIsChanged) {
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   DataAccessor<int> testdata(test_value, testSet_lock_);
@@ -88,32 +85,31 @@ TEST(DataAccessorTest,ChangedDataInDataAccessor_ChangeData_DataInDataAccessorIsC
 
   int data_from_testdata_after_change = testdata.GetData();
 
-  //assert
+  // assert
   EXPECT_EQ(test_value, data_from_testdata_after_change);
 }
 
-TEST(DataAccessorTest, DeleteDataAccessor_CreatedOneDeleteOneThread_MutexIsUnlocked) {
-
-  //arrange
+TEST(DataAccessorTest,
+     DeleteDataAccessor_CreatedOneDeleteOneThread_MutexIsUnlocked) {
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   {
     DataAccessor<int> testdata(test_value, testSet_lock_);
 
-    //assert
+    // assert
     EXPECT_FALSE(testSet_lock_.Try());
   }
-  //assert
+  // assert
 
   EXPECT_TRUE(testSet_lock_.Try());
 
   testSet_lock_.Release();
-
 }
 
-TEST(DataAccessorTest, DeleteDataAccessor_CreatedThreadAndCopyDeleteBothThreads_MutexIsUnlocked) {
-
-  //arrange
+TEST(DataAccessorTest,
+     DeleteDataAccessor_CreatedThreadAndCopyDeleteBothThreads_MutexIsUnlocked) {
+  // arrange
   int test_value = 10;
   sync_primitives::Lock testSet_lock_;
   {
@@ -121,20 +117,18 @@ TEST(DataAccessorTest, DeleteDataAccessor_CreatedThreadAndCopyDeleteBothThreads_
     {
       DataAccessor<int> testdata_copy(testdata);
 
-      //assert
+      // assert
       EXPECT_FALSE(testSet_lock_.Try());
     }
-    //assert
+    // assert
     EXPECT_FALSE(testSet_lock_.Try());
-
   }
 
-  //assert
+  // assert
   EXPECT_TRUE(testSet_lock_.Try());
   testSet_lock_.Release();
-
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

@@ -57,8 +57,10 @@ class CArraySchemaItem : public ISchemaItem {
    **/
   static utils::SharedPtr<CArraySchemaItem> create(
       const ISchemaItemPtr ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
-      const TSchemaItemParameter<size_t>& MinSize = TSchemaItemParameter<size_t>(),
-      const TSchemaItemParameter<size_t>& MaxSize = TSchemaItemParameter<size_t>());
+      const TSchemaItemParameter<size_t>& MinSize =
+          TSchemaItemParameter<size_t>(),
+      const TSchemaItemParameter<size_t>& MaxSize =
+          TSchemaItemParameter<size_t>());
 
   /**
    * @brief Validate smart object.
@@ -77,7 +79,8 @@ class CArraySchemaItem : public ISchemaItem {
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object, const bool RemoveFakeParameters) OVERRIDE;
+  void applySchema(SmartObject& Object,
+                   const bool RemoveFakeParameters) OVERRIDE;
 
   /**
    * @brief Unapply schema.

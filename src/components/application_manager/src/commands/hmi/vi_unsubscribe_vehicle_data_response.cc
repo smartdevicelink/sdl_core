@@ -37,20 +37,17 @@ namespace application_manager {
 namespace commands {
 
 VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {
-}
+VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {}
 
 void VIUnsubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData
-      );
+      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

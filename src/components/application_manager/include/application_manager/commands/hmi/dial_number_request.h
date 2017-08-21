@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,23 +50,24 @@ class DialNumberRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  DialNumberRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberRequest class destructor
    **/
-  ~DialNumberRequest() OVERRIDE;
+  virtual ~DialNumberRequest();
 
   /**
    * @brief Execute command
    **/
-  void Run() OVERRIDE;
+  virtual void Run();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

@@ -51,7 +51,8 @@ class SetDisplayLayoutRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetDisplayLayoutRequest(const MessageSharedPtr& message);
+  SetDisplayLayoutRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief SetDisplayLayoutRequest class destructor

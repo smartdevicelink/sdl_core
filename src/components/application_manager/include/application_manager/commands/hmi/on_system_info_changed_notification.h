@@ -43,30 +43,31 @@ namespace commands {
  * @brief OnSystemInfoChangedNotification command class
  **/
 class OnSystemInfoChangedNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnSystemInfoChangedNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnSystemInfoChangedNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnSystemInfoChangedNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnSystemInfoChangedNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
-    /**
-     * @brief OnSystemInfoChangedNotification class destructor
-     **/
-    virtual ~OnSystemInfoChangedNotification();
+  /**
+   * @brief OnSystemInfoChangedNotification class destructor
+   **/
+  virtual ~OnSystemInfoChangedNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnSystemInfoChangedNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnSystemInfoChangedNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_

@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_ICON_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application_manager.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -49,17 +50,15 @@ class SetIconRequest : public CommandRequestImpl {
   /**
    * @brief Contains information about the type of image
    */
-  typedef enum {
-    STATIC = 0,
-    DYNAMIC
-  } ImageType;
+  typedef enum { STATIC = 0, DYNAMIC } ImageType;
 
   /**
    * @brief SetIconRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetIconRequest(const MessageSharedPtr& message);
+  SetIconRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor

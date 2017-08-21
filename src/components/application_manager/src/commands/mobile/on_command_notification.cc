@@ -32,37 +32,35 @@
  */
 
 #include "application_manager/commands/mobile/on_command_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+OnCommandNotification::OnCommandNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnCommandNotification::~OnCommandNotification() {
-}
+OnCommandNotification::~OnCommandNotification() {}
 
 void OnCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }
 
-  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-      .asUInt();
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
-    LOG4CXX_ERROR_EXT(logger_,
-                      " No applications found for the command " << cmd_id);
+    LOG4CXX_ERROR(logger_, " No applications found for the command " << cmd_id);
     return;
   }
 

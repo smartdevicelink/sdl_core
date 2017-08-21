@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_DEVICE_STATUS_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnVIDeviceStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIDeviceStatusNotification(const MessageSharedPtr& message);
+  OnVIDeviceStatusNotification(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief OnVIDeviceStatusNotification class destructor

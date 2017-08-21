@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-VIGetDTCsRequest::VIGetDTCsRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VIGetDTCsRequest::VIGetDTCsRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VIGetDTCsRequest::~VIGetDTCsRequest() {
-}
+VIGetDTCsRequest::~VIGetDTCsRequest() {}
 
 void VIGetDTCsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void VIGetDTCsRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

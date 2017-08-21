@@ -31,9 +31,12 @@
  */
 #include "smart_objects/smart_object.h"
 #include "smart_objects/string_schema_item.h"
+#include "utils/custom_string.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+namespace custom_str = utils::custom_string;
 
 utils::SharedPtr<CStringSchemaItem> CStringSchemaItem::create(
     const TSchemaItemParameter<size_t>& MinLength,
@@ -47,7 +50,7 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
     return Errors::INVALID_VALUE;
   }
 
-  const std::string value = Object.asString();
+  const custom_str::CustomString value = Object.asCustomString();
   size_t length;
 
   if (mMinLength.getValue(length) && (value.size() < length)) {
@@ -71,10 +74,9 @@ CStringSchemaItem::CStringSchemaItem(
     const TSchemaItemParameter<size_t>& MinLength,
     const TSchemaItemParameter<size_t>& MaxLength,
     const TSchemaItemParameter<std::string>& DefaultValue)
-    : CDefaultSchemaItem<std::string>(DefaultValue),
-      mMinLength(MinLength),
-      mMaxLength(MaxLength) {
-}
+    : CDefaultSchemaItem<std::string>(DefaultValue)
+    , mMinLength(MinLength)
+    , mMaxLength(MaxLength) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

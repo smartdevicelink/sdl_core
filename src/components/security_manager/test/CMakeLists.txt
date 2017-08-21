@@ -28,39 +28,39 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (BUILD_TESTS)
-  
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/transport_manager/test/include
   ${COMPONENTS_DIR}/security_manager/include
-  include
+  ${COMPONENTS_DIR}/resumption/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-  #${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  #${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
-  #${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
- )
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   gmock
   ${SecurityManagerLibrary}
 )
 
+create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
+
 set(CERT_LIST 
   ${CMAKE_SOURCE_DIR}/mycert.pem
   ${CMAKE_SOURCE_DIR}/mykey.pem   
 )
 
-foreach( file_i ${CERT_LIST})
-  file(COPY ${file_i} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach( file_i )
+add_custom_target(generate_certificates
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/generate_test_certificates.py
+          -d=${CMAKE_CURRENT_BINARY_DIR} -s
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
 
-add_library (test_security_manager ${SOURCES})
-target_link_libraries (test_security_manager ${LIBRARIES} )
-create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
+foreach(CERT_ENTRY ${CERT_LIST})
+  file(COPY ${CERT_ENTRY} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 
-endif ()
+add_dependencies(security_manager_test generate_certificates)

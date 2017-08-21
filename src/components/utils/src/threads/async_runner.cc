@@ -38,13 +38,12 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AsyncRunner");
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-AsyncRunner::AsyncRunner(const std::string &thread_name)
-  : executor_(new AsyncRunnerDelegate) {
+AsyncRunner::AsyncRunner(const std::string& thread_name)
+    : executor_(new AsyncRunnerDelegate) {
   LOG4CXX_AUTO_TRACE(logger_);
-  thread_ = threads::CreateThread(thread_name.c_str(),
-                                  executor_);
+  thread_ = threads::CreateThread(thread_name.c_str(), executor_);
   thread_->start();
 }
 
@@ -65,9 +64,7 @@ AsyncRunner::~AsyncRunner() {
   threads::DeleteThread(thread_);
 }
 
-AsyncRunner::AsyncRunnerDelegate::AsyncRunnerDelegate()
-  : stop_flag_(false) {
-}
+AsyncRunner::AsyncRunnerDelegate::AsyncRunnerDelegate() : stop_flag_(false) {}
 
 void AsyncRunner::AsyncRunnerDelegate::processDelegate() {
   if (!delegates_queue_.empty()) {
@@ -113,4 +110,4 @@ void AsyncRunner::AsyncRunnerDelegate::runDelegate(ThreadDelegate* delegate) {
   delegate_notifier_.NotifyOne();
 }
 
-} // namespace policy.
+}  // namespace policy.

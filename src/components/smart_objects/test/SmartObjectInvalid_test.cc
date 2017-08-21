@@ -38,8 +38,8 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SmartObjectInvalidTest {
+namespace smart_object_test {
+
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
 TEST(test_SmartObjectInvalidTest, simple_type_can_be_set_in_constructor) {
@@ -171,7 +171,7 @@ TEST(test_SmartObjectInvalidTest, invalid_object_remains_invalid) {
   ASSERT_EQ(invalid_bool_value,
             obj["we"]["need"]["to"]["go"]["deeper"].asBool());
 }
-}  // namespace SmartObjectInvalidTest
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

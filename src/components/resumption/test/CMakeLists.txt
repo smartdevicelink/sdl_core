@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -41,6 +41,8 @@ include_directories(
   ${CMAKE_BINARY_DIR}
 )
 
+collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
+
 set(LIBRARIES
     gmock 
     ConfigProfile 
@@ -49,13 +51,4 @@ set(LIBRARIES
     jsoncpp
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/resumption/test/last_state_test.cc
-)          
-
-#file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-#file(COPY app_info.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
-
-create_test("resumption_test" "${SOURCES}" "${LIBRARIES}")
-
-endif()
+create_test(resumption_test "${SOURCES}" "${LIBRARIES}")

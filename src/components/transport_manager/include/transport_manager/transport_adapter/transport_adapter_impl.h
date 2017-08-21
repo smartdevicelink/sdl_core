@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,13 +41,16 @@
 
 #include "utils/lock.h"
 #include "utils/rwlock.h"
+
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_manager_settings.h"
+#include "resumption/last_state.h"
 
-#ifdef TIME_TESTER
-#include "transport_manager/time_metric_observer.h"
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+#include "transport_manager/telemetry_observer.h"
+#endif  // TELEMETRY_MONITOR
 
 namespace transport_manager {
 
@@ -75,7 +78,9 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener);
+                       ClientConnectionListener* client_connection_listener,
+                       resumption::LastState& last_state,
+                       const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -88,7 +93,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return true if initialized.
    * @return false if not initialized.
    */
-  virtual bool IsInitialised() const;
+  bool IsInitialised() const OVERRIDE;
 
  public:
   /**
@@ -98,20 +103,20 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of failure.
    **/
-  virtual TransportAdapter::Error Init();
+  TransportAdapter::Error Init() OVERRIDE;
 
   /**
    * @brief Stops device adapter
    * Called from transport manager to stop device adapter
    */
-  virtual void Terminate();
+  void Terminate() OVERRIDE;
 
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
    * @param listener Pointer to the device adapter listener.
    */
-  virtual void AddListener(TransportAdapterListener* listener);
+  void AddListener(TransportAdapterListener* listener) OVERRIDE;
 
   /**
    * @brief Start scanning for new devices.
@@ -120,7 +125,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of search devices failure.
    **/
-  virtual TransportAdapter::Error SearchDevices();
+  TransportAdapter::Error SearchDevices() OVERRIDE;
 
   /**
    * @brief Connect to the specified application discovered on device.
@@ -130,15 +135,16 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of failure.
    **/
-  virtual TransportAdapter::Error Connect(const DeviceUID& device_handle,
-                                          const ApplicationHandle& app_handle);
+  TransportAdapter::Error Connect(const DeviceUID& device_handle,
+                                  const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Connect to all applications discovered on device
    * @param device_handle Handle of device
    * @return Error information about connecting applications on device
    */
-  virtual TransportAdapter::Error ConnectDevice(const DeviceUID& device_handle);
+  TransportAdapter::Error ConnectDevice(
+      const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Disconnect from specified session.
@@ -148,8 +154,9 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of disconnecting failure.
    **/
-  virtual TransportAdapter::Error Disconnect(
-      const DeviceUID& device_handle, const ApplicationHandle& app_handle);
+  TransportAdapter::Error Disconnect(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -159,8 +166,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about possible reason of disconnecting from
    *specified device failure.
    **/
-  virtual TransportAdapter::Error DisconnectDevice(
-      const DeviceUID& device_handle);
+  TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Send frame of data.
@@ -171,51 +178,52 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of sending data failure
    **/
-  virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle,
-                                           const ::protocol_handler::RawMessagePtr data);
+  TransportAdapter::Error SendData(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle,
+      const ::protocol_handler::RawMessagePtr data) OVERRIDE;
 
   /**
    * @brief Start client listener.
    *
    * @return Error information about possible reason of failure.
    */
-  virtual TransportAdapter::Error StartClientListening();
+  TransportAdapter::Error StartClientListening() OVERRIDE;
 
   /**
    * @brief Stop client listener.
    *
    * @return Error information about possible reason of failure.
    */
-  virtual TransportAdapter::Error StopClientListening();
+  TransportAdapter::Error StopClientListening() OVERRIDE;
 
   /**
    * @brief Notify that device scanner is available.
    *
    * @return True - available, false - not available.
    */
-  virtual bool IsSearchDevicesSupported() const;
+  bool IsSearchDevicesSupported() const OVERRIDE;
 
   /**
    * @brief Notify that server connection factory is available.
    *
    * @return True - available, false - not available.
    */
-  virtual bool IsServerOriginatedConnectSupported() const;
+  bool IsServerOriginatedConnectSupported() const OVERRIDE;
 
   /**
    * @brief Notify that listener of client connection is available.
    *
    * @return True - available, false - not available.
    */
-  virtual bool IsClientOriginatedConnectSupported() const;
+  bool IsClientOriginatedConnectSupported() const OVERRIDE;
 
   /**
    * @brief Create container(vector) of device unique identifiers.
    *
    * @return Container(vector) of device unique identifiers.
    */
-  virtual DeviceList GetDeviceList() const;
+  DeviceList GetDeviceList() const OVERRIDE;
 
   /**
    * @brief Get container(vector) of application unique identifiers that
@@ -225,8 +233,8 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
-      const;
+  ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const OVERRIDE;
 
   /**
    * @brief Find device in the internal container(map).
@@ -235,7 +243,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Smart pointer to device.
    */
-  virtual DeviceSptr FindDevice(const DeviceUID& device_handle) const;
+  DeviceSptr FindDevice(const DeviceUID& device_handle) const OVERRIDE;
 
   /**
    * @brief Search for device in container of devices, if it is not there - adds
@@ -243,18 +251,18 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @param devices Container(vector) of smart pointers to devices.
    */
-  virtual void SearchDeviceDone(const DeviceVector& devices);
+  void SearchDeviceDone(const DeviceVector& devices) OVERRIDE;
 
-  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+  void ApplicationListUpdated(const DeviceUID& device_handle) OVERRIDE;
 
-  virtual void FindNewApplicationsRequest();
+  void FindNewApplicationsRequest() OVERRIDE;
 
   /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
    *
    * @param error Error class that contains details of this error situation.
    */
-  virtual void SearchDeviceFailed(const SearchDeviceError& error);
+  void SearchDeviceFailed(const SearchDeviceError& error) OVERRIDE;
 
   /**
    * @brief Add device to the container(map), if container doesn't hold it yet.
@@ -263,7 +271,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Smart pointer to the device.
    */
-  virtual DeviceSptr AddDevice(DeviceSptr device);
+  DeviceSptr AddDevice(DeviceSptr device) OVERRIDE;
 
   /**
    * @brief Create connection and fill its parameters.
@@ -272,30 +280,30 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionCreated(ConnectionSPtr connection,
-                                 const DeviceUID& device_handle,
-                                 const ApplicationHandle& app_handle);
+  void ConnectionCreated(ConnectionSPtr connection,
+                         const DeviceUID& device_handle,
+                         const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
-   * @brief Set state of specified connection - FINILIZING.
+   * @brief Set state of specified connection - FINALISING.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionFinished(const DeviceUID& device_handle,
-                                  const ApplicationHandle& app_handle);
+  void ConnectionFinished(const DeviceUID& device_handle,
+                          const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
-   * @brief Set specified connection state to FINILIZING and launch
+   * @brief Set specified connection state to FINALISING and launch
    *OnUnexpectedDisconnect event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    * @param error Error class that contains details of this error situation.
    */
-  virtual void ConnectionAborted(const DeviceUID& device_handle,
-                                 const ApplicationHandle& app_handle,
-                                 const CommunicationError& error);
+  void ConnectionAborted(const DeviceUID& device_handle,
+                         const ApplicationHandle& app_handle,
+                         const CommunicationError& error) OVERRIDE;
 
   /**
    * @brief Set state of specified connection - ESTABLISHED and launch
@@ -304,8 +312,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param devcie_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectDone(const DeviceUID& device_handle,
-                           const ApplicationHandle& app_handle);
+  void ConnectDone(const DeviceUID& device_handle,
+                   const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Delete connection from the container of connections and launch
@@ -314,17 +322,26 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectFailed(const DeviceUID& device_handle,
-                             const ApplicationHandle& app_handle,
-                             const ConnectError& error);
+  void ConnectFailed(const DeviceUID& device_handle,
+                     const ApplicationHandle& app_handle,
+                     const ConnectError& error) OVERRIDE;
+
+  /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void RemoveFinalizedConnection(const DeviceUID& device_handle,
+                                 const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Remove specified device and all its connections
    * @param device_handle Device unique identifier.
    * @param error Error class that contains details of this error situation.
    */
-  virtual void DeviceDisconnected(const DeviceUID& device_handle,
-                                  const DisconnectDeviceError& error);
+  void DeviceDisconnected(const DeviceUID& device_handle,
+                          const DisconnectDeviceError& error) OVERRIDE;
 
   /**
    * @brief Delete specified connection from the container(map) of connections
@@ -333,8 +350,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void DisconnectDone(const DeviceUID& device_handle,
-                              const ApplicationHandle& app_handle);
+  void DisconnectDone(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Launch OnDataReceiveDone event in the device adapter listener.
@@ -343,9 +360,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param app_handle Handle of application.
    * @param message Smart pointer to the raw message.
    */
-  virtual void DataReceiveDone(const DeviceUID& device_handle,
-                               const ApplicationHandle& app_handle,
-                               ::protocol_handler::RawMessagePtr message);
+  void DataReceiveDone(const DeviceUID& device_handle,
+                       const ApplicationHandle& app_handle,
+                       ::protocol_handler::RawMessagePtr message) OVERRIDE;
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -354,9 +371,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param app_handle Handle of application.
    * @param error Class that contains details of this error situation.
    */
-  virtual void DataReceiveFailed(const DeviceUID& device_handle,
-                                 const ApplicationHandle& app_handle,
-                                 const DataReceiveError& error);
+  void DataReceiveFailed(const DeviceUID& device_handle,
+                         const ApplicationHandle& app_handle,
+                         const DataReceiveError& error) OVERRIDE;
 
   /**
    * @brief Launch OnDataSendDone event in the device adapter listener.
@@ -365,9 +382,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param app_handle Handle of application.
    * @param message Smart pointer to raw message.
    */
-  virtual void DataSendDone(const DeviceUID& device_handle,
-                            const ApplicationHandle& app_handle,
-                            ::protocol_handler::RawMessagePtr message);
+  void DataSendDone(const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    ::protocol_handler::RawMessagePtr message) OVERRIDE;
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -377,10 +394,10 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param message Smart pointer to raw message.
    * @param error Class that contains details of this error situation.
    */
-  virtual void DataSendFailed(const DeviceUID& device_handle,
-                              const ApplicationHandle& app_handle,
-                              ::protocol_handler::RawMessagePtr message,
-                              const DataSendError& error);
+  void DataSendFailed(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle,
+                      ::protocol_handler::RawMessagePtr message,
+                      const DataSendError& error) OVERRIDE;
 
   /**
    * @brief Return name of device.
@@ -389,29 +406,41 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return String with name.
    */
-  virtual std::string DeviceName(const DeviceUID& device_id) const;
+  std::string DeviceName(const DeviceUID& device_id) const OVERRIDE;
 
   /**
    * @brief Allows to obtain connection type used by device.
    * @return connection type.
    */
-  virtual std::string GetConnectionType() const;
+  std::string GetConnectionType() const OVERRIDE;
 
-#ifdef TIME_TESTER
+  /**
+   * @brief RunAppOnDevice allows run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param bundle_id application id also known as bundle id on some devices to
+   *run.
+   */
+  void RunAppOnDevice(const DeviceUID& device_uid,
+                      const std::string& bundle_id) OVERRIDE;
+
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
    *
    * @param observer - pointer to observer
    */
-  void SetTimeMetricObserver(TMMetricObserver* observer);
+  void SetTelemetryObserver(TMTelemetryObserver* observer);
 
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
-  virtual TMMetricObserver* GetTimeMetricObserver();
-#endif  // TIME_TESTER
+  TMTelemetryObserver* GetTelemetryObserver() OVERRIDE;
+#endif  // TELEMETRY_MONITOR
 
  protected:
   /**
@@ -431,7 +460,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
-
   /**
    * @brief Returns true if \a device is to be disconnected automatically when
    * all applications will be closed
@@ -446,8 +474,13 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return pointer to the connection.
    */
-  ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle) const;
+  virtual ConnectionSPtr FindEstablishedConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const;
+
+  const TransportManagerSettings& get_settings() const {
+    return settings_;
+  }
 
  private:
   /**
@@ -489,11 +522,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    enum {
-      NEW,
-      ESTABLISHED,
-      FINALISING
-    } state;
+    enum { NEW, ESTABLISHED, FINALISING } state;
   };
 
   /**
@@ -528,12 +557,16 @@ class TransportAdapterImpl : public TransportAdapter,
   mutable sync_primitives::RWLock connections_lock_;
 
  protected:
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Pointer to time metric observer
    */
-  TMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
+  TMTelemetryObserver* metric_observer_;
+#endif  // TELEMETRY_MONITOR
+
+  resumption::LastState& last_state() const {
+    return last_state_;
+  }
 
   /**
    * @brief Pointer to the device scanner.
@@ -549,9 +582,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Pointer to the factory of connections initiated from client.
    */
   ClientConnectionListener* client_connection_listener_;
+
+  resumption::LastState& last_state_;
+  const TransportManagerSettings& settings_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,82 +34,35 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
 
 #include <string>
-#include "media_manager/media_adapter_impl.h"
-#include "utils/shared_ptr.h"
-#include "utils/message_queue.h"
-#include "utils/threads/thread.h"
+#include "media_manager/streamer_adapter.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
 
-using ::utils::MessageQueue;
+class PipeStreamerAdapter : public StreamerAdapter {
+ public:
+  PipeStreamerAdapter(const std::string& named_pipe_path,
+                      const std::string& app_storage_folder);
+  virtual ~PipeStreamerAdapter();
 
-class PipeStreamerAdapter : public MediaAdapterImpl {
-  public:
-    PipeStreamerAdapter();
-    virtual ~PipeStreamerAdapter();
-    virtual void SendData(int32_t application_key,
-                          const ::protocol_handler::RawMessagePtr message);
-    virtual void StartActivity(int32_t application_key);
-    virtual void StopActivity(int32_t application_key);
-    virtual bool is_app_performing_activity(int32_t application_key);
+ protected:
+  class PipeStreamer : public StreamerAdapter::Streamer {
+   public:
+    PipeStreamer(PipeStreamerAdapter* const adapter,
+                 const std::string& named_pipe_path,
+                 const std::string& app_storage_folder);
+    virtual ~PipeStreamer();
 
-  protected:
+   protected:
+    virtual bool Connect();
+    virtual void Disconnect();
+    virtual bool Send(protocol_handler::RawMessagePtr msg);
+
+   private:
     std::string named_pipe_path_;
-
-    /*
-     * @brief Start streamer thread
-     */
-    virtual void Init();
-
-  private:
-    class Streamer : public threads::ThreadDelegate {
-      public:
-        /*
-         * Default constructor
-         *
-         * @param server  Server pointer
-         */
-        explicit Streamer(PipeStreamerAdapter* server);
-
-        /*
-         * Destructor
-         */
-        ~Streamer();
-
-        /*
-         * @brief Function called by thread on start
-         */
-        void threadMain();
-
-        /*
-         * @brief Function called by thread on exit
-         */
-        void exitThreadMain();
-
-        /*
-         * @brief Opens pipe
-         */
-        void open();
-
-        /*
-         * @brief Closes pipe
-         */
-        void close();
-
-      private:
-        PipeStreamerAdapter*        server_;
-        int32_t                     pipe_fd_;
-        volatile bool               stop_flag_;
-
-        DISALLOW_COPY_AND_ASSIGN(Streamer);
-    };
-
-    bool                                          is_ready_;
-    threads::Thread*                              thread_;
-    MessageQueue<protocol_handler::RawMessagePtr> messages_;
-
-    DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);
+    std::string app_storage_folder_;
+    int32_t pipe_fd_;
+  };
 };
 
 }  //  namespace media_manager

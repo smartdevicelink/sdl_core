@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_button_press_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 #include "application_manager/event_engine/event.h"
@@ -43,14 +43,14 @@ namespace commands {
 namespace hmi {
 
 OnButtonPressNotification::OnButtonPressNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 void OnButtonPressNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
   (*message_)[strings::params][strings::function_id] =
       static_cast<int>(mobile_apis::FunctionID::eType::OnButtonPressID);
   SendNotificationToMobile(message_);
@@ -61,4 +61,3 @@ void OnButtonPressNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

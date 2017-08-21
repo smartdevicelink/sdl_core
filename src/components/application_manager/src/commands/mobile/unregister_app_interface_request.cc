@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -42,19 +42,19 @@ namespace commands {
 void UnregisterAppInterfaceRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
-
-  if (!app_manager->application(connection_key())) {
+  if (!application_manager_.application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key(),
-      mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM);
-  app_manager->UnregisterApplication(connection_key(),
-                                     mobile_apis::Result::SUCCESS);
+  application_manager_.ManageMobileCommand(
+      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+          connection_key(),
+          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
+      commands::Command::ORIGIN_SDL);
+  application_manager_.UnregisterApplication(connection_key(),
+                                             mobile_apis::Result::SUCCESS);
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

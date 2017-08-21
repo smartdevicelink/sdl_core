@@ -37,9 +37,8 @@
 #include "utils/macro.h"
 
 namespace application_manager {
-
 typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
-
+class ApplicationManager;
 /**
  * @brief Factory class for command creation
  **/
@@ -51,7 +50,9 @@ class HMICommandFactory {
    * @param  smartObject SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
-  static CommandSharedPtr CreateCommand(const commands::MessageSharedPtr& message);
+  static CommandSharedPtr CreateCommand(
+      const commands::MessageSharedPtr& message,
+      ApplicationManager& application_manager);
 
  private:
   HMICommandFactory();

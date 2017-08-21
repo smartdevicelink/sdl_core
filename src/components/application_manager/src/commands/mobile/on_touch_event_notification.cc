@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -42,18 +42,16 @@ namespace commands {
 namespace mobile {
 
 OnTouchEventNotification::OnTouchEventNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnTouchEventNotification::~OnTouchEventNotification() {
-}
+OnTouchEventNotification::~OnTouchEventNotification() {}
 
 void OnTouchEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::vector<ApplicationSharedPtr>& applications =
-      ApplicationManagerImpl::instance()->applications_with_navi();
+      application_manager_.applications_with_navi();
 
   std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {

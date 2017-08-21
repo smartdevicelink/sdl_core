@@ -49,7 +49,8 @@ class VIGetVehicleDataRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataRequest(const MessageSharedPtr& message);
+  VIGetVehicleDataRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleDataRequest class destructor

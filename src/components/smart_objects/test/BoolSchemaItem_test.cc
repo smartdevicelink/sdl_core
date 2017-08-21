@@ -41,21 +41,24 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
+
 using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
 
 /**
  * Test BoolSchemaItem no default value
  *
- * Create SchemaItem without default value. Method setDefaultValue should always return false
+ * Create SchemaItem without default value. Method setDefaultValue should always
+ *return false
  * and leave SmartObject in previous state.
  **/
 TEST(test_no_default_value, test_BoolSchemaItemTest) {
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
   ISchemaItemPtr item =
-      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();  // No default value
+      NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();  // No
+                                                                     // default
+                                                                     // value
 
   obj = 5;
   ASSERT_EQ(5, obj.asInt());
@@ -89,16 +92,19 @@ TEST(test_no_default_value, test_BoolSchemaItemTest) {
 /**
  * Test BoolSchemaItem with default value
  *
- * Create SchemaItem with default value. Method setDefaultValue should return true,
+ * Create SchemaItem with default value. Method setDefaultValue should return
+ *true,
  * Bool SmartObject should contain default value.
- * Not bool SmartObject should converted to BoolObject and setted up by default value.
+ * Not bool SmartObject should converted to BoolObject and setted up by default
+ *value.
  **/
 TEST(test_item_with_default_value, test_BoolSchemaItemTest) {
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
   ISchemaItemPtr item =
       NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
-          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false));  // Default value = false
+          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(
+              false));  // Default value = false
 
   obj = 5;
   ASSERT_EQ(5, obj.asInt());
@@ -135,7 +141,8 @@ TEST(test_map_validate, test_BoolSchemaItemTest) {
   NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
   ISchemaItemPtr item =
       NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
-          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false));  // Default value = false
+          NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(
+              false));  // Default value = false
 
   obj["aa"] = true;
   ASSERT_TRUE(obj["aa"].asBool());
@@ -202,7 +209,7 @@ TEST(test_array_validate, test_BoolSchemaItemTest) {
   resultType = item->validate(obj);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 }
-}  // namespace SchemaItem"
-}  // namespace SmartObjects"
-}  // namespace components"
-}  // namespace test"
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test

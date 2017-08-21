@@ -47,6 +47,7 @@ namespace transport_adapter {
 
 class UsbConnection : public Connection {
   static const uint32_t kInBufferSize = 2048;
+
  public:
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
@@ -57,9 +58,12 @@ class UsbConnection : public Connection {
   bool Init();
 
   virtual ~UsbConnection();
+
  protected:
-  virtual TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
+  virtual TransportAdapter::Error SendData(
+      ::protocol_handler::RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
+
  private:
   friend void InTransferCallback(usbd_urb* urb, usbd_pipe*, void*);
   friend void OutTransferCallback(usbd_urb* urb, usbd_pipe*, void*);

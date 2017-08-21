@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnVIOdometerNotification::OnVIOdometerNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIOdometerNotification::~OnVIOdometerNotification() {
-}
+OnVIOdometerNotification::~OnVIOdometerNotification() {}
 
 void OnVIOdometerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIOdometerNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

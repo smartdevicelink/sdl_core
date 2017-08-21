@@ -49,7 +49,8 @@ class UIScrollableMessageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIScrollableMessageResponse(const MessageSharedPtr& message);
+  UIScrollableMessageResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIScrollableMessageResponse class destructor

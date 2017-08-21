@@ -58,7 +58,8 @@ class Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  virtual TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message) = 0;
+  virtual TransportAdapter::Error SendData(
+      ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Disconnect the current connection.
@@ -70,4 +71,4 @@ typedef utils::SharedPtr<Connection> ConnectionSPtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_

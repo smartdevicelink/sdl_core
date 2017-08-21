@@ -31,21 +31,20 @@
  */
 
 #include "application_manager/commands/hmi/notification_to_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message)
-    : CommandImpl(message) {
-
+NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {
   // Replace Mobile connection id with HMI app id
-  ApplicationManagerImpl::instance()->ReplaceMobileByHMIAppId(*(message.get()));
+  ReplaceMobileByHMIAppId(*(message.get()));
 }
 
-NotificationToHMI::~NotificationToHMI() {
-}
+NotificationToHMI::~NotificationToHMI() {}
 
 bool NotificationToHMI::Init() {
   return true;
@@ -55,13 +54,12 @@ bool NotificationToHMI::CleanUp() {
   return true;
 }
 
-void NotificationToHMI::Run() {
-}
+void NotificationToHMI::Run() {}
 
 void NotificationToHMI::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

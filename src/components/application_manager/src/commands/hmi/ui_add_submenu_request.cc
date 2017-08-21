@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddSubmenuRequest::UIAddSubmenuRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+UIAddSubmenuRequest::UIAddSubmenuRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UIAddSubmenuRequest::~UIAddSubmenuRequest() {
-}
+UIAddSubmenuRequest::~UIAddSubmenuRequest() {}
 
 void UIAddSubmenuRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void UIAddSubmenuRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

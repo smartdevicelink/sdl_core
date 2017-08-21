@@ -37,13 +37,9 @@ namespace application_manager {
 
 namespace commands {
 
+Pending::Pending() : last_(hmi_apis::FunctionID::INVALID_ENUM) {}
 
-Pending::Pending()
-: last_(hmi_apis::FunctionID::INVALID_ENUM) {
-}
-
-Pending::~Pending() {
-}
+Pending::~Pending() {}
 
 void Pending::Add(hmi_apis::FunctionID::eType id) {
   sync_primitives::AutoLock L(lock_);

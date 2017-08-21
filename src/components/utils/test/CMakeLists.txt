@@ -28,86 +28,73 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${COMPONENTS_DIR}/utils/include/utils
-  ${COMPONENTS_DIR}/include/utils
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/test/include
+  ${POLICY_PATH}/include
 )
 
-set(testSources
-  messagemeter_test.cc
-  file_system_test.cc
-  #date_time_test.cc
-  system_test.cc
-  signals_linux_test.cc
-  thread_validator_test.cc
-  conditional_variable_test.cc
-  #message_queue_test.cc
-  resource_usage_test.cc
-  bitstream_test.cc
-  prioritized_queue_test.cc
-  data_accessor_test.cc
-  lock_posix_test.cc
-  singleton_test.cc
-  #posix_thread_test.cc
-  stl_utils_test.cc
-  #timer_thread_test.cc
-  rwlock_posix_test.cc
-  async_runner_test.cc
-  #shared_ptr_test.cc
-  #scope_guard_test.cc
-  #atomic_object_test.cc
+set(EXCLUDE_PATHS
+  qdb_wrapper
+  test_generator
 )
 
-set(testLibraries
-  gmock
-  Utils
-  Policy
-)
+if(NOT ENABLE_LOG)
+  list(APPEND EXCLUDE_PATHS
+    auto_trace_test.cc
+    log_message_loop_thread_test.cc
+  )
+endif()
 
-include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext)
+if(NOT BUILD_BACKTRACE_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    back_trace_test.cc
+  )
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  # --- Tests for QDB Wrapper
-  list (APPEND testSources
-  #  ./qdb_wrapper/sql_database_test.cc
-  #  ./qdb_wrapper/sql_query_test.cc
+  # exclude tests for SQLite wrapper
+  list (APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/sqlite_wrapper
   )
   file(COPY qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY policy.sql DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else ()
-  # --- Tests for SQLite Wrapper
   find_package(Sqlite3 REQUIRED)
-  list (APPEND testSources
-   # ./sqlite_wrapper/sql_database_test.cc
-   # ./sqlite_wrapper/sql_query_test.cc
-   # generated_code_with_sqlite_test.cc
-
-    # TODO{ALeshin} APPLINK-11132 AssertTrue in SetUpTestCase() return false
-    #policy_manager_impl_stress_test.cc
+  # exclude tests for QDB wrapper
+  list (APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/qdb_wrapper
   )
   list (APPEND testLibraries sqlite3)
 endif()
 
-if (ENABLE_LOG)
-  list(APPEND testSources auto_trace_test.cc)
-  list(APPEND testSources log_message_loop_thread_test.cc)
-endif()
+# exclude some tests
+list(APPEND EXCLUDE_PATHS
+  generated_code_with_sqlite_test.cc
+  posix_thread_test.cc
+  resource_usage_test.cc
+)
 
-if (BUILD_BACKTRACE_SUPPORT)
-  list(APPEND testSources back_trace_test.cc)
-endif()
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
+  gmock
+  Utils
+  Policy
+  ConfigProfile
+)
+
+create_test(utils_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-create_test("utils_test" "${testSources}" "${testLibraries}")
-
-endif()
+add_subdirectory(test_generator)

@@ -32,28 +32,30 @@
  */
 
 #include "application_manager/commands/mobile/slider_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 #include "config_profile/profile.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SliderRequest::SliderRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+SliderRequest::SliderRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
-SliderRequest::~SliderRequest() {
-}
+SliderRequest::~SliderRequest() {}
 
 bool SliderRequest::Init() {
-
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ = profile::Profile::instance()->default_timeout() +
+    default_timeout_ =
+        application_manager_.get_settings().default_timeout() +
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 
@@ -63,9 +65,8 @@ bool SliderRequest::Init() {
 void SliderRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr application =
-      application_manager::ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr application = application_manager_.application(
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -73,8 +74,8 @@ void SliderRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::num_ticks].asInt()
-      < (*message_)[strings::msg_params][strings::position].asInt()) {
+  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
+      (*message_)[strings::msg_params][strings::position].asInt()) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -82,9 +83,8 @@ void SliderRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
     if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
-      if ((*message_)[strings::msg_params][strings::num_ticks].asUInt()
-          != (*message_)[strings::msg_params]
-                         [strings::slider_footer].length()) {
+      if ((*message_)[strings::msg_params][strings::num_ticks].asUInt() !=
+          (*message_)[strings::msg_params][strings::slider_footer].length()) {
         LOG4CXX_ERROR(logger_, "INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
@@ -98,8 +98,8 @@ void SliderRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->app_id();
 
@@ -112,45 +112,61 @@ void SliderRequest::Run() {
 
 void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& message = event.smart_object();
+  using namespace helpers;
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
+  if (event_id == FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-      correlation_id(),
-      default_timeout());
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout());
     return;
   }
-  if (event_id != hmi_apis::FunctionID::UI_Slider) {
+
+  if (event_id != FunctionID::UI_Slider) {
     LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
     return;
   }
 
-  //event_id == hmi_apis::FunctionID::UI_Slider:
-  LOG4CXX_INFO(logger_, "Received UI_Slider event");
+  LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
 
-  const int response_code =
-      message[strings::params][hmi_response::code].asInt();
-  smart_objects::SmartObject response_msg_params = message[strings::msg_params];
-  if (response_code == hmi_apis::Common_Result::ABORTED &&
-      message[strings::params][strings::data].keyExists(strings::slider_position)) {
-    //Copy slider_position info to msg_params section
-	response_msg_params[strings::slider_position] =
-        message[strings::params][strings::data][strings::slider_position];
+  const Common_Result::eType response_code = static_cast<Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
+
+  SmartObject response_msg_params = message[strings::msg_params];
+
+  const bool is_timeout_aborted = Compare<Common_Result::eType, EQ, ONE>(
+      response_code, Common_Result::TIMED_OUT, Common_Result::ABORTED);
+
+  if (is_timeout_aborted) {
+    if (message[strings::params][strings::data].keyExists(
+            strings::slider_position)) {
+      // Copy slider_position info to msg_params section
+      response_msg_params[strings::slider_position] =
+          message[strings::params][strings::data][strings::slider_position];
+    } else {
+      LOG4CXX_ERROR(logger_,
+                    strings::slider_position << " field is absent"
+                                                " in response.");
+      response_msg_params[strings::slider_position] = 0;
+    }
   }
-
-  const bool is_response_success =
-      (mobile_apis::Result::SUCCESS == response_code);
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool is_response_success = PrepareResultForMobileResponse(
+      response_code, HmiInterfaces::HMI_INTERFACE_UI);
 
   SendResponse(is_response_success,
-               mobile_apis::Result::eType(response_code),
-               0,
+               MessageHelper::HMIToMobileResult(response_code),
+               response_info.empty() ? NULL : response_info.c_str(),
                &response_msg_params);
 }
 
 bool SliderRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
@@ -179,4 +195,3 @@ bool SliderRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 }  // namespace application_manager
-

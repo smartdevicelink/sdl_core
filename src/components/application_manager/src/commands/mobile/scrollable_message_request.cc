@@ -33,27 +33,27 @@
 
 #include <string.h>
 #include "application_manager/commands/mobile/scrollable_message_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
 namespace commands {
 
 ScrollableMessageRequest::ScrollableMessageRequest(
-    const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
-ScrollableMessageRequest::~ScrollableMessageRequest() {
-}
+ScrollableMessageRequest::~ScrollableMessageRequest() {}
 
 bool ScrollableMessageRequest::Init() {
-
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -70,8 +70,7 @@ bool ScrollableMessageRequest::Init() {
 void ScrollableMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application((*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -79,10 +78,13 @@ void ScrollableMessageRequest::Run() {
     return;
   }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+                                        app,
+                                        application_manager_.GetPolicyHandler(),
+                                        application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
@@ -90,13 +92,12 @@ void ScrollableMessageRequest::Run() {
     return;
   }
 
-
-
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[hmi_request::message_text][hmi_request::field_name] =
-    static_cast<int32_t>(hmi_apis::Common_TextFieldName::scrollableMessageBody);
+      static_cast<int32_t>(
+          hmi_apis::Common_TextFieldName::scrollableMessageBody);
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
@@ -119,31 +120,30 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-          correlation_id(),
-          default_timeout());
+      application_manager_.updateRequestTimeout(
+          connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
       LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
 
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>
-          (message[strings::params][hmi_response::code].asInt());
-      HMICapabilities& hmi_capabilities =
-          ApplicationManagerImpl::instance()->hmi_capabilities();
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code) {
-        result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
-        result = true;
-      }
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      std::string response_info;
+      GetInfo(message, response_info);
+
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -151,4 +151,3 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 }  // namespace application_manager
-

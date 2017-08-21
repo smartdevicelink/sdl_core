@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class DiagnosticMessageRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DiagnosticMessageRequest(const MessageSharedPtr& message);
+  DiagnosticMessageRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief DiagnosticMessageRequest class destructor
@@ -77,4 +78,4 @@ class DiagnosticMessageRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_REQUEST_H_

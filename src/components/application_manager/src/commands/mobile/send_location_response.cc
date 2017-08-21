@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/send_location_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -40,17 +40,16 @@ namespace application_manager {
 
 namespace commands {
 
-SendLocationResponse::SendLocationResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+SendLocationResponse::SendLocationResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SendLocationResponse::~SendLocationResponse() {
-}
+SendLocationResponse::~SendLocationResponse() {}
 
 void SendLocationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

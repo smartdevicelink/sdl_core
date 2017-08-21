@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GENERIC_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GENERIC_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GENERIC_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GENERIC_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
@@ -45,15 +45,14 @@ class GenericResponse : public CommandResponseImpl {
   /**
    * \brief GenericResponse class constructor
    **/
-  explicit GenericResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-  }
+  GenericResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager)
+      : CommandResponseImpl(message, application_manager) {}
 
   /**
    * \brief GenericResponse class destructor
    **/
-  virtual ~GenericResponse() {
-  }
+  virtual ~GenericResponse() {}
 
   /**
    * @brief Execute command
@@ -67,4 +66,4 @@ class GenericResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GENERIC_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GENERIC_RESPONSE_H_

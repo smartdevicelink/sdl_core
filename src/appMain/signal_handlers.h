@@ -35,18 +35,6 @@
 
 #include <stdint.h>
 
-namespace main_namespace {
-
-// This is dummy signal handler
-// which returns immediately
-// to unblock pause()
-void dummy_signal_handler(int32_t signal);
-
-// This is legacy signal handler
-// used in some tests
-// to stop components
-void legacy_signal_handler(int32_t signal);
-
-}  // namespace main_namespace
+namespace main_namespace {}  // namespace main_namespace
 
 #endif  // SRC_APPMAIN_SIGNAL_HANDLERS_H_

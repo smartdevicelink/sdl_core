@@ -37,17 +37,18 @@
 #include "smart_objects/smart_object.h"
 
 namespace policy {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
 class PolicyHandler;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
-PolicyEventObserver::PolicyEventObserver(PolicyHandler* const policy_handler)
-  : policy_handler_(policy_handler) {
-}
+PolicyEventObserver::PolicyEventObserver(
+    policy::PolicyHandlerInterface* const policy_handler,
+    application_manager::event_engine::EventDispatcher& event_dispatcher)
+    : EventObserver(event_dispatcher), policy_handler_(policy_handler) {}
 
-void PolicyEventObserver::set_policy_handler(policy::PolicyHandler* const policy_handler) {
+void PolicyEventObserver::set_policy_handler(
+    PolicyHandlerInterface* const policy_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
   LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
@@ -67,10 +68,8 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       ProcessOdometerEvent(message);
       break;
     }
-    default: {
-      break;
-    }
-  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+    default: { break; }
+      unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
 #else
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       ProcessOdometerEvent(message);
@@ -82,27 +81,21 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       break;
     }
-    default: {
-      break;
-    }
+    default: { break; }
 #endif
   }
 }
 
-void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject& message) {
-  if (hmi_apis::Common_Result::SUCCESS
-      == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-        .asInt())) {
-
+void PolicyEventObserver::ProcessOdometerEvent(
+    const smart_objects::SmartObject& message) {
+  if (hmi_apis::Common_Result::SUCCESS ==
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt())) {
     if (message[strings::msg_params].keyExists(strings::odometer)) {
-      TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-      const int kSecondsInDay = 60 * 60 * 24;
-      int days_after_epoch = current_time.tv_sec / kSecondsInDay;
-
       if (policy_handler_) {
         policy_handler_->PTUpdatedAt(
-              message[strings::msg_params][strings::odometer].asInt(),
-            days_after_epoch);
+            Counters::KILOMETERS,
+            message[strings::msg_params][strings::odometer].asInt());
       }
     }
   }

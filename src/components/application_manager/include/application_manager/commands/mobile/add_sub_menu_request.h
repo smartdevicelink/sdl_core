@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class AddSubMenuRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddSubMenuRequest(const MessageSharedPtr& message);
+  AddSubMenuRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief AddSubMenuRequest class destructor
@@ -71,7 +72,6 @@ class AddSubMenuRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if submenu name is valid
    *
@@ -85,4 +85,4 @@ class AddSubMenuRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_

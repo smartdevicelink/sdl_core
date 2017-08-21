@@ -30,18 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
-#define HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
 /**
  * @brief VISubscriveVehicleDataResponseTemplate command class
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
@@ -49,24 +50,24 @@ class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VISubscribeVehicleDataResponseTemplate(
-      const MessageSharedPtr& message)
-      : ResponseFromHMI(message) {
-  }
+  VISubscribeVehicleDataResponseTemplate(
+      const MessageSharedPtr& message, ApplicationManager& application_manager)
+      : ResponseFromHMI(message, application_manager) {}
 
   /**
    * @brief Execute command
    **/
   virtual void Run() {
-    LOG4CXX_INFO(logger_, "VISubscribeVehicleDataResponse::Run");
+    LOG4CXX_AUTO_TRACE(logger_);
     event_engine::Event event(eventID);
     event.set_smart_object(*message_);
-    event.raise();
+    event.raise(application_manager_.event_dispatcher());
   }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(VISubscribeVehicleDataResponseTemplate<eventID>);
 };
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_

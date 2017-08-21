@@ -55,13 +55,13 @@ class ProtocolObserver {
    */
   virtual void OnMessageReceived(const RawMessagePtr message) = 0;
 
-  virtual void OnMobileMessageSent(const RawMessagePtr message)  = 0;
+  virtual void OnMobileMessageSent(const RawMessagePtr message) = 0;
+
  protected:
   /**
    * \brief Destructor
    */
-  virtual ~ProtocolObserver() {
-  }
+  virtual ~ProtocolObserver() {}
 };
 }  // namespace protocol_handler
 

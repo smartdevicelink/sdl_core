@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/activate_app_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -38,17 +38,17 @@ namespace application_manager {
 namespace commands {
 
 ActivateAppResponse::ActivateAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-ActivateAppResponse::~ActivateAppResponse() {
-}
+ActivateAppResponse::~ActivateAppResponse() {}
 
 void ActivateAppResponse::Run() {
   LOG4CXX_TRACE(logger_, "enter");
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_ActivateApp);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_ActivateApp);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
   LOG4CXX_TRACE(logger_, "exit");
 }
 

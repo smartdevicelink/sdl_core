@@ -33,15 +33,16 @@
 #include <algorithm>
 #include <string>
 #include "application_manager/commands/mobile/dial_number_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 DialNumberRequest::~DialNumberRequest() {}
 
@@ -57,13 +58,14 @@ void DialNumberRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
   std::string number =
       (*message_)[strings::msg_params][strings::number].asString();
   if (!CheckSyntax(number)) {
@@ -71,10 +73,11 @@ void DialNumberRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
   StripNumberParam(number);
   if (number.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "After strip number param is empty. Invalid incoming data");
+    LOG4CXX_ERROR(logger_,
+                  "After strip number param is empty. Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -89,8 +92,9 @@ void DialNumberRequest::Run() {
 }
 
 void DialNumberRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -130,7 +134,7 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
 void DialNumberRequest::StripNumberParam(std::string& number) {
   std::size_t found = 0;
   while (std::string::npos !=
-         (found = number.find_first_not_of("+*#,;0123456789"))) {
+         (found = number.find_first_not_of("0123456789*#,;+"))) {
     number.erase(number.begin() + found);
   }
   (*message_)[strings::msg_params][strings::number] = number;

@@ -35,9 +35,7 @@
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
-
 namespace transport_manager {
-
 
 namespace transport_adapter {
 
@@ -49,7 +47,8 @@ class ClientConnectionListener {
   /**
    * @brief Run client connection listener.
    *
-   * @return Error information about possible reason of starting client listener failure.
+   * @return Error information about possible reason of starting client listener
+   *failure.
    */
   virtual TransportAdapter::Error Init() = 0;
 
@@ -79,11 +78,10 @@ class ClientConnectionListener {
   /**
    * @brief Destructor.
    */
-  virtual ~ClientConnectionListener() {
-  }
+  virtual ~ClientConnectionListener() {}
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* CLIENT_CONNECTION_LISTENER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CLIENT_CONNECTION_LISTENER_H_

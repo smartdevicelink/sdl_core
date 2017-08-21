@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,17 +42,18 @@
 #include <sys/sysctl.h>
 #include <sys/socket.h>
 #ifdef __linux__
-#  include <linux/tcp.h>
+#include <linux/tcp.h>
 #else  // __linux__
-#  include <sys/time.h>
-#  include <netinet/in.h>
-#  include <netinet/tcp.h>
-#  include <netinet/tcp_var.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netinet/tcp_var.h>
 #endif  // __linux__
 
 #include <sstream>
 
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -66,12 +67,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
                                      const bool enable_keepalive)
-    : port_(port),
-      enable_keepalive_(enable_keepalive),
-      controller_(controller),
-      thread_(0),
-      socket_(-1),
-      thread_stop_requested_(false) {
+    : port_(port)
+    , enable_keepalive_(enable_keepalive)
+    , controller_(controller)
+    , thread_(0)
+    , socket_(-1)
+    , thread_stop_requested_(false) {
   thread_ = threads::CreateThread("TcpClientListener",
                                   new ListeningThreadDelegate(this));
 }
@@ -86,15 +87,19 @@ TransportAdapter::Error TcpClientListener::Init() {
     return TransportAdapter::FAIL;
   }
 
-  sockaddr_in server_address = { 0 };
+  sockaddr_in server_address = {0};
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
 
   int optval = 1;
-  setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+  if (0 !=
+      setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt SO_REUSEADDR failed");
+  }
 
-  if (bind(socket_, reinterpret_cast<sockaddr*>(&server_address),
+  if (bind(socket_,
+           reinterpret_cast<sockaddr*>(&server_address),
            sizeof(server_address)) != 0) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "bind() failed");
     return TransportAdapter::FAIL;
@@ -144,12 +149,28 @@ void SetKeepaliveOptions(const int fd) {
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds
-  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
-  setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
-             sizeof(user_timeout));
+  if (0 != setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt SO_KEEPALIVE failed");
+  }
+  if (0 !=
+      setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPIDLE failed");
+  }
+  if (0 !=
+      setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPCNT failed");
+  }
+  if (0 != setsockopt(
+               fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPINTVL failed");
+  }
+  if (0 != setsockopt(fd,
+                      IPPROTO_TCP,
+                      TCP_USER_TIMEOUT,
+                      &user_timeout,
+                      sizeof(user_timeout))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_USER_TIMEOUT failed");
+  }
 #elif defined(__QNX__)  // __linux__
   // TODO(KKolodiy): Out of order!
   const int kMidLength = 4;
@@ -177,7 +198,7 @@ void SetKeepaliveOptions(const int fd) {
   tval.tv_sec = keepidle;
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
-#endif  // __QNX__
+#endif                  // __QNX__
 }
 
 void TcpClientListener::Loop() {
@@ -185,9 +206,8 @@ void TcpClientListener::Loop() {
   while (!thread_stop_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
-    const int connection_fd = accept(socket_,
-                                     (struct sockaddr*) &client_address,
-                                     &client_address_size);
+    const int connection_fd = accept(
+        socket_, (struct sockaddr*)&client_address, &client_address_size);
     if (thread_stop_requested_) {
       LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
       close(connection_fd);
@@ -206,7 +226,8 @@ void TcpClientListener::Loop() {
     }
 
     char device_name[32];
-    strncpy(device_name, inet_ntoa(client_address.sin_addr),
+    strncpy(device_name,
+            inet_ntoa(client_address.sin_addr),
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
@@ -214,20 +235,23 @@ void TcpClientListener::Loop() {
       SetKeepaliveOptions(connection_fd);
     }
 
-    TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr,
-                                          device_name);
+    TcpDevice* tcp_device =
+        new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
-    const ApplicationHandle app_handle = tcp_device->AddIncomingApplication(
-        connection_fd);
+    const ApplicationHandle app_handle =
+        tcp_device->AddIncomingApplication(connection_fd);
 
-    TcpSocketConnection* connection(
-        new TcpSocketConnection(device->unique_device_id(), app_handle,
-                                controller_));
+    utils::SharedPtr<TcpSocketConnection> connection =
+        utils::MakeShared<TcpSocketConnection>(
+            device->unique_device_id(), app_handle, controller_);
+    controller_->ConnectionCreated(
+        connection, device->unique_device_id(), app_handle);
     connection->set_socket(connection_fd);
     const TransportAdapter::Error error = connection->Start();
-    if (error != TransportAdapter::OK) {
-      delete connection;
+    if (TransportAdapter::OK != error) {
+      LOG4CXX_ERROR(logger_,
+                    "TCP connection::Start() failed with error: " << error);
     }
   }
 }
@@ -237,21 +261,29 @@ void TcpClientListener::StopLoop() {
   thread_stop_requested_ = true;
   // We need to connect to the listening socket to unblock accept() call
   int byesocket = socket(AF_INET, SOCK_STREAM, 0);
-  sockaddr_in server_address = { 0 };
+  sockaddr_in server_address = {0};
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
-  connect(byesocket, reinterpret_cast<sockaddr*>(&server_address),
-          sizeof(server_address));
-  shutdown(byesocket, SHUT_RDWR);
+  if (0 != connect(byesocket,
+                   reinterpret_cast<sockaddr*>(&server_address),
+                   sizeof(server_address))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Failed to connect byesocket");
+  } else {
+    // Can only shutdown socket if connected
+    if (0 != shutdown(byesocket, SHUT_RDWR)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Failed to shutdown byesocket");
+    }
+  }
   close(byesocket);
 }
 
 TransportAdapter::Error TcpClientListener::StartListening() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_->is_running()) {
-    LOG4CXX_WARN(logger_,
-                 "TransportAdapter::BAD_STATE. Listener has already been started");
+    LOG4CXX_WARN(
+        logger_,
+        "TransportAdapter::BAD_STATE. Listener has already been started");
     return TransportAdapter::BAD_STATE;
   }
 
@@ -273,8 +305,7 @@ void TcpClientListener::ListeningThreadDelegate::threadMain() {
 
 TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
     TcpClientListener* parent)
-    : parent_(parent) {
-}
+    : parent_(parent) {}
 
 TransportAdapter::Error TcpClientListener::StopListening() {
   LOG4CXX_AUTO_TRACE(logger_);

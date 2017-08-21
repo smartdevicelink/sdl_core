@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_ACC_PEDAL_POSITION_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnVIAccPedalPositionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIAccPedalPositionNotification(const MessageSharedPtr& message);
+  OnVIAccPedalPositionNotification(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief OnVIAccPedalPositionNotification class destructor

@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_APPLICATION_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_APPLICATION_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -49,7 +49,8 @@ class OnExitApplicationNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnExitApplicationNotification(const MessageSharedPtr& message);
+  OnExitApplicationNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief OnExitApplicationNotification class destructor
@@ -69,4 +70,4 @@ class OnExitApplicationNotification : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_APPLICATION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EXIT_APPLICATION_NOTIFICATION_H_

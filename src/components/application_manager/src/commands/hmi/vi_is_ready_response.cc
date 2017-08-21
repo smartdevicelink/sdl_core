@@ -30,34 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIIsReadyResponse::~VIIsReadyResponse() {
-}
+VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
-
-  bool is_available = false;
-  if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available = object[strings::msg_params][strings::available].asBool();
-  }
-
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-  hmi_capabilities.set_is_ivi_cooperating(is_available);
-
-  policy::PolicyHandler::instance()->OnVIIsReady();
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

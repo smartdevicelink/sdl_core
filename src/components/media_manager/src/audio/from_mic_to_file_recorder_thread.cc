@@ -37,19 +37,19 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicToFileRecorderThread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
-  const std::string& output_file, int32_t duration)
-  : threads::ThreadDelegate(),
-    argc_(5),
-    argv_(NULL),
-    oKey_("-o"),
-    tKey_("-t"),
-    sleepThread_(NULL),
-    outputFileName_(output_file) {
+    const std::string& output_file, int32_t duration)
+    : threads::ThreadDelegate()
+    , argc_(5)
+    , argv_(NULL)
+    , oKey_("-o")
+    , tKey_("-t")
+    , sleepThread_(NULL)
+    , outputFileName_(output_file) {
   LOG4CXX_AUTO_TRACE(logger_);
   set_record_duration(duration);
 }
@@ -64,7 +64,7 @@ FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
 }
 
 void FromMicToFileRecorderThread::set_output_file(
-  const std::string& output_file) {
+    const std::string& output_file) {
   LOG4CXX_AUTO_TRACE(logger_);
   outputFileName_ = output_file;
 }
@@ -80,7 +80,7 @@ void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
 void FromMicToFileRecorderThread::initArgs() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  argv_ = new gchar*[argc_];
+  argv_ = new gchar* [argc_];
 
   argv_[0] = new gchar[14];
   argv_[1] = new gchar[3];
@@ -114,20 +114,29 @@ void FromMicToFileRecorderThread::threadMain() {
   gint duration = -1;
   GOptionContext* context = NULL;
   GError* err = NULL;
-  GOptionEntry entries[] = { {
-      "device", 'd', 0, G_OPTION_ARG_FILENAME, &device,
-      "device file (Default: hw:0,0)", "SRC"
-    }, {
-      "output", 'o', 0, G_OPTION_ARG_FILENAME, &outfile,
-      "save output of the stream to DEST", "DEST"
-    }, {
-      "duration", 't', 0, G_OPTION_ARG_INT, &duration,
-      "length of time in seconds to capture", "int32_t"
-    }, {
-        NULL
-    }
-  };
-#ifndef GLIB_VERSION_2_32 // g_thread_init() does nothing since 2.32
+  GOptionEntry entries[] = {{"device",
+                             'd',
+                             0,
+                             G_OPTION_ARG_FILENAME,
+                             &device,
+                             "device file (Default: hw:0,0)",
+                             "SRC"},
+                            {"output",
+                             'o',
+                             0,
+                             G_OPTION_ARG_FILENAME,
+                             &outfile,
+                             "save output of the stream to DEST",
+                             "DEST"},
+                            {"duration",
+                             't',
+                             0,
+                             G_OPTION_ARG_INT,
+                             &duration,
+                             "length of time in seconds to capture",
+                             "int32_t"},
+                            {NULL}};
+#ifndef GLIB_VERSION_2_32  // g_thread_init() does nothing since 2.32
   if (!g_thread_supported()) {
     g_thread_init(NULL);
   }
@@ -156,10 +165,10 @@ void FromMicToFileRecorderThread::threadMain() {
 
   // Set up error handling
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-  gst_bus_add_watch(bus,
-                    reinterpret_cast<int32_t (*)(_GstBus*, _GstMessage*, void*)>
-                    (recvmsg),
-                    NULL);
+  gst_bus_add_watch(
+      bus,
+      reinterpret_cast<int32_t (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
+      NULL);
   gst_object_unref(bus);
 
   // Create all of the elements to be added to the pipeline
@@ -199,7 +208,7 @@ void FromMicToFileRecorderThread::threadMain() {
       g_option_context_free(context);
 
       if (argv_) {
-        delete [] argv_;
+        delete[] argv_;
         argv_ = NULL;
       }
       return;
@@ -213,7 +222,8 @@ void FromMicToFileRecorderThread::threadMain() {
     timeout.pipeline = pipeline;
     timeout.duration = duration;
 
-    sleepThread_ = threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
+    sleepThread_ =
+        threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
     sleepThread_->start();
   }
 
@@ -229,18 +239,16 @@ void FromMicToFileRecorderThread::threadMain() {
   g_option_context_free(context);
 
   if (argv_) {
-    delete [] argv_;
+    delete[] argv_;
     argv_ = NULL;
   }
 
   loop = NULL;
 }
 
-FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout
-                                                                      timeout)
-  : threads::ThreadDelegate(),
-    timeout_(timeout) {
-}
+FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(
+    GstTimeout timeout)
+    : threads::ThreadDelegate(), timeout_(timeout) {}
 
 void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
   LOG4CXX_TRACE(logger_, "Sleep for " << timeout_.duration << " seconds");

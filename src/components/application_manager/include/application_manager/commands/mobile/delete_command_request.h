@@ -31,8 +31,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+
+#include <string>
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -51,7 +53,8 @@ class DeleteCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteCommandRequest(const MessageSharedPtr& message);
+  DeleteCommandRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandRequest class destructor
@@ -71,7 +74,6 @@ class DeleteCommandRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
 
   /*
@@ -81,6 +83,15 @@ class DeleteCommandRequest : public CommandRequestImpl {
    */
   bool IsPendingResponseExist();
 
+  /*
+   * @brief Prepare result code and result for sending to mobile application
+   * @param result_code contains result code for sending to mobile application
+   * @param info contains info for mobile app.
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& info);
+
   bool is_ui_send_;
   bool is_vr_send_;
 
@@ -89,9 +100,11 @@ class DeleteCommandRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
+  std::string ui_info_;
+  std::string vr_info_;
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_

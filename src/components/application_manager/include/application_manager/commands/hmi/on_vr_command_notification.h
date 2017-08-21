@@ -50,7 +50,8 @@ class OnVRCommandNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRCommandNotification(const MessageSharedPtr& message);
+  OnVRCommandNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnVRCommandNotification class destructor
@@ -63,7 +64,6 @@ class OnVRCommandNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
 };
 

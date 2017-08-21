@@ -36,16 +36,18 @@ namespace application_manager {
 namespace commands {
 
 AudioStopStreamRequest::AudioStopStreamRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-AudioStopStreamRequest::~AudioStopStreamRequest() {
-}
+AudioStopStreamRequest::~AudioStopStreamRequest() {}
 
 void AudioStopStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if (!CheckAvailabilityHMIInterfaces(
+          application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    return;
+  }
   SendRequest();
 }
 

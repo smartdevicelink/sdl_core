@@ -30,25 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/update_sdl_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLResponse::UpdateSDLResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+UpdateSDLResponse::UpdateSDLResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UpdateSDLResponse::~UpdateSDLResponse() {
-}
+UpdateSDLResponse::~UpdateSDLResponse() {}
 
 void UpdateSDLResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

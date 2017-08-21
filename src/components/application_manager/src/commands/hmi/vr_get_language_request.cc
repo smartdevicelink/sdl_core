@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-VRGetLanguageRequest::VRGetLanguageRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VRGetLanguageRequest::VRGetLanguageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VRGetLanguageRequest::~VRGetLanguageRequest() {
-}
+VRGetLanguageRequest::~VRGetLanguageRequest() {}
 
 void VRGetLanguageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void VRGetLanguageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

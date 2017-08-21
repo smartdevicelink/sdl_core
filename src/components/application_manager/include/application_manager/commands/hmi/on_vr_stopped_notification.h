@@ -49,7 +49,8 @@ class OnVRStoppedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRStoppedNotification(const MessageSharedPtr& message);
+  OnVRStoppedNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnVRStoppedNotification class destructor

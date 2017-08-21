@@ -39,11 +39,10 @@ namespace commands {
 namespace hmi {
 
 OnButtonSubscriptionNotification::OnButtonSubscriptionNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnButtonSubscriptionNotification::~OnButtonSubscriptionNotification() {
-}
+OnButtonSubscriptionNotification::~OnButtonSubscriptionNotification() {}
 
 void OnButtonSubscriptionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,4 +55,3 @@ void OnButtonSubscriptionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

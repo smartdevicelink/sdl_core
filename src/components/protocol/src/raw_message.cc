@@ -36,16 +36,19 @@
 
 namespace protocol_handler {
 
-RawMessage::RawMessage(uint32_t connection_key, uint32_t protocol_version,
-                       const uint8_t *const data_param, uint32_t data_sz,
-                       uint8_t type, uint32_t payload_size)
-  : connection_key_(connection_key),
-    data_(NULL),
-    data_size_(data_sz),
-    protocol_version_(protocol_version),
-    service_type_(ServiceTypeFromByte(type)),
-    payload_size_(payload_size),
-    waiting_(false) {
+RawMessage::RawMessage(uint32_t connection_key,
+                       uint32_t protocol_version,
+                       const uint8_t* const data_param,
+                       uint32_t data_sz,
+                       uint8_t type,
+                       uint32_t payload_size)
+    : connection_key_(connection_key)
+    , data_(NULL)
+    , data_size_(data_sz)
+    , protocol_version_(protocol_version)
+    , service_type_(ServiceTypeFromByte(type))
+    , payload_size_(payload_size)
+    , waiting_(false) {
   if (data_param && data_sz > 0) {
     data_ = new uint8_t[data_sz];
     memcpy(data_, data_param, sizeof(*data_) * data_sz);
@@ -64,7 +67,7 @@ void RawMessage::set_connection_key(uint32_t key) {
   connection_key_ = key;
 }
 
-uint8_t *RawMessage::data() const {
+uint8_t* RawMessage::data() const {
   return data_;
 }
 

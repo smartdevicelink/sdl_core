@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class CreateInteractionChoiceSetResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit CreateInteractionChoiceSetResponse(const MessageSharedPtr& message);
+  CreateInteractionChoiceSetResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
   /**
    * @brief CreateInteractionChoiceSetResponse class destructor
@@ -70,4 +71,4 @@ class CreateInteractionChoiceSetResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CREATE_INTERACTION_CHOICE_SET_RESPONSE_H_

@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/speak_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -40,17 +40,16 @@ namespace application_manager {
 
 namespace commands {
 
-SpeakResponse::SpeakResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+SpeakResponse::SpeakResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SpeakResponse::~SpeakResponse() {
-}
+SpeakResponse::~SpeakResponse() {}
 
 void SpeakResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

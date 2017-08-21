@@ -30,20 +30,21 @@
 
 if(BUILD_TESTS)
 
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
-
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/application_manager/test/state_controller/include
+    ${COMPONENTS_DIR}/application_manager/test/include
+    ${POLICY_MOCK_INCLUDE_PATH}
 )
 
 set(LIBRARIES
   gmock
   ApplicationManager
+  connectionHandler
 )
 
 set(SOURCES
-    state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/state_controller/state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 
 create_test("state_controller_test" "${SOURCES}" "${LIBRARIES}")

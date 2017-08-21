@@ -32,9 +32,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "config_profile/profile.h"
-
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "utils/logger.h"
@@ -43,65 +40,67 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-
 #if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
 
-
-
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-int TransportManagerDefault::Init() {
+TransportManagerDefault::TransportManagerDefault(
+    const TransportManagerSettings& settings)
+    : TransportManagerImpl(settings) {}
+
+int TransportManagerDefault::Init(resumption::LastState& last_state) {
   LOG4CXX_TRACE(logger_, "enter");
-  if (E_SUCCESS != TransportManagerImpl::Init()) {
-    LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
+  if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
+    LOG4CXX_TRACE(logger_,
+                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+                  "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
-  transport_adapter::TransportAdapterImpl* ta;
+
 #ifdef BLUETOOTH_SUPPORT
-
-  ta = new transport_adapter::BluetoothTransportAdapter;
-
-#ifdef TIME_TESTER
+  transport_adapter::TransportAdapterImpl* ta_bluetooth =
+      new transport_adapter::BluetoothTransportAdapter(last_state,
+                                                       get_settings());
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta_bluetooth->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
-  AddTransportAdapter(ta);
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_bluetooth);
+  ta_bluetooth = NULL;
 #endif
 
-
-  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  ta = new transport_adapter::TcpTransportAdapter(port);
-#ifdef TIME_TESTER
+  const uint16_t port = get_settings().transport_manager_tcp_adapter_port();
+  transport_adapter::TransportAdapterImpl* ta_tcp =
+      new transport_adapter::TcpTransportAdapter(
+          port, last_state, get_settings());
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta_tcp->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
-  AddTransportAdapter(ta);
-
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_tcp);
+  ta_tcp = NULL;
 
 #if defined(USB_SUPPORT)
-  ta = new transport_adapter::UsbAoaAdapter();
-#ifdef TIME_TESTER
+  transport_adapter::TransportAdapterImpl* ta_usb =
+      new transport_adapter::UsbAoaAdapter(last_state, get_settings());
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta_usb->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
-  AddTransportAdapter(ta);
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_usb);
+  ta_usb = NULL;
 #endif  // USB_SUPPORT
-
-
 
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
 
 }  //  namespace transport_manager

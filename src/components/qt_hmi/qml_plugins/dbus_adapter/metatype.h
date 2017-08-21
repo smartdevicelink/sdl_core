@@ -35,25 +35,25 @@
 
 #include <QMetaType>
 
-template<typename T>
+template <typename T>
 QMetaType::Type metatype();
 
-template<>
+template <>
 inline QMetaType::Type metatype<int>() {
   return QMetaType::Int;
 }
 
-template<>
+template <>
 inline QMetaType::Type metatype<QString>() {
   return QMetaType::QString;
 }
 
-template<>
+template <>
 inline QMetaType::Type metatype<bool>() {
   return QMetaType::Bool;
 }
 
-template<>
+template <>
 inline QMetaType::Type metatype<double>() {
   return QMetaType::Double;
 }

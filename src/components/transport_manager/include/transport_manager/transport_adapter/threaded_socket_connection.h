@@ -1,7 +1,7 @@
 /*
  * \file threaded_socket_connection.h
  * \brief Header for classes responsible for communication over sockets.
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
+#include "utils/atomic_object.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
 
@@ -88,6 +89,15 @@ class ThreadedSocketConnection : public Connection {
   bool IsFramesToSendQueueEmpty() const;
 
   /**
+   * @brief Check if connection has been terminated.
+   *
+   * @return Information which states that connection was marked as terminated.
+   */
+  bool IsConnectionTerminated() const {
+    return terminate_flag_;
+  }
+
+  /**
    * @brief Set variable that hold socket No.
    */
   void set_socket(int socket) {
@@ -111,6 +121,15 @@ class ThreadedSocketConnection : public Connection {
    */
   virtual ~ThreadedSocketConnection();
 
+  /**
+   * @brief Check if we can start the connection attempt and establish
+   *connection status.
+   *
+   * @param error contains information of any error that occurred during
+   *connection attempt.
+   *
+   * @return result that states whether we successfully connected or not.
+   */
   virtual bool Establish(ConnectError** error) = 0;
 
   /**
@@ -134,12 +153,32 @@ class ThreadedSocketConnection : public Connection {
     return app_handle_;
   }
 
+  /**
+   * @brief Get variable that hold socket No.
+   */
+  int get_socket() const {
+    return socket_;
+  }
+
+  /**
+   * @brief Checks current socket value, sends shutdown and close commands for
+   * this socket and clear current socket value.
+   */
+  void ShutdownAndCloseSocket();
+
+  /**
+   * @brief This method will ensure that thread has finished running and then it
+   * will delete this thread.
+   */
+  void StopAndJoinThread();
+
  private:
   class SocketConnectionDelegate : public threads::ThreadDelegate {
    public:
     explicit SocketConnectionDelegate(ThreadedSocketConnection* connection);
     void threadMain() OVERRIDE;
     void exitThreadMain() OVERRIDE;
+
    private:
     ThreadedSocketConnection* connection_;
   };
@@ -162,7 +201,7 @@ class ThreadedSocketConnection : public Connection {
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
 
-  int socket_;
+  sync_primitives::atomic_int socket_;
   bool terminate_flag_;
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;

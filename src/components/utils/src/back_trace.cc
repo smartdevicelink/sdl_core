@@ -67,16 +67,16 @@ string demangle(const char* symbol) {
 
 Backtrace::Backtrace(int32_t count, int32_t skip_top)
     : thread_id_(threads::Thread::CurrentId()) {
-  int32_t skip = skip_top + 1; // Skip this constructor
-  vector<void*> full_trace (count + skip);
+  int32_t skip = skip_top + 1;  // Skip this constructor
+  vector<void*> full_trace(count + skip);
   int32_t captured = backtrace(&full_trace.front(), count + skip);
   int32_t first_call = std::min(captured, skip);
   int32_t last_call = std::min(first_call + count, captured);
-  backtrace_.assign(full_trace.begin() + first_call, full_trace.begin() + last_call);
+  backtrace_.assign(full_trace.begin() + first_call,
+                    full_trace.begin() + last_call);
 }
 
-Backtrace::~Backtrace() {
-}
+Backtrace::~Backtrace() {}
 
 vector<string> Backtrace::CallStack() const {
   vector<string> callstack;
@@ -93,15 +93,16 @@ threads::PlatformThreadHandle Backtrace::ThreadId() const {
   return thread_id_;
 }
 
-ostream& operator<< (ostream& os, const Backtrace& bt) {
+ostream& operator<<(ostream& os, const Backtrace& bt) {
   const vector<string> symbols = bt.CallStack();
-  os<<"Stack trace ("<<bt.ThreadId()<<")\n";
+  os << "Stack trace (" << bt.ThreadId() << ")\n";
   if (symbols.empty()) {
-    os<<"Not available"<<std::endl;
-  } else for (size_t i = 0; i < symbols.size(); ++i) {
-    os<<symbols[i]<<std::endl;
-  }
+    os << "Not available" << std::endl;
+  } else
+    for (size_t i = 0; i < symbols.size(); ++i) {
+      os << symbols[i] << std::endl;
+    }
   return os;
 }
 
-} // namespace utils
+}  // namespace utils

@@ -31,26 +31,23 @@
  */
 
 #include "application_manager/commands/hmi/on_start_device_discovery.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnStartDeviceDiscovery::OnStartDeviceDiscovery(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnStartDeviceDiscovery::OnStartDeviceDiscovery(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {
-}
+OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {}
 
 void OnStartDeviceDiscovery::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->StartDevicesDiscovery();
+  application_manager_.StartDevicesDiscovery();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

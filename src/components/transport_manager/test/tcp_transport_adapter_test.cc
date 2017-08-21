@@ -32,13 +32,16 @@
 
 #include "gtest/gtest.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-#include "transport_manager/transport_adapter/connection.h"
-#include "config_profile/profile.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "protocol/raw_message.h"
-#include "include/transport_adapter_listener_mock.h"
-#include "include/device_mock.h"
-#include "include/connection_mock.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
+#include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_connection.h"
+#include "transport_manager/tcp/mock_tcp_transport_adapter.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -51,45 +54,21 @@ using namespace ::protocol_handler;
 using namespace ::transport_manager;
 using namespace transport_manager::transport_adapter;
 
-class TestTCPTransportAdapter : public TcpTransportAdapter {
- public:
-  TestTCPTransportAdapter(uint16_t port) : TcpTransportAdapter(port) {
-    ::profile::Profile::instance()->config_file_name(
-        "smartDeviceLink_test.ini");
-  }
-  MOCK_CONST_METHOD2(FindEstablishedConnection,
-                     ConnectionSPtr(const DeviceUID& device_handle,
-                                    const ApplicationHandle& app_handle));
-
-  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
-  MOCK_METHOD2(Connect,
-               TransportAdapter::Error(const DeviceUID& device_handle,
-                                       const ApplicationHandle& app_handle));
-  void CallStore() { Store(); }
-  bool CallRestore() { return Restore(); }
-};
-
 class TcpAdapterTest : public ::testing::Test {
  protected:
-  static void SetUpTestCase() {
-    ::profile::Profile::instance()->config_file_name(
-        "smartDeviceLink_test.ini");
-  }
-   virtual void SetUp() {
-       resumption::LastState::instance()->dictionary = Json::Value();
-  }
-
-  virtual void TearDown() { resumption::LastState::destroy(); }
-
+  TcpAdapterTest() : last_state_("app_storage_folder", "app_info_storage") {}
+  MockTransportManagerSettings transport_manager_settings;
+  resumption::LastStateImpl last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
 };
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
+TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   // Prepare
-  TestTCPTransportAdapter transport_adapter(port);
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
-  utils::SharedPtr<TCPDeviceMock> mockdev = new TCPDeviceMock(port, uniq_id);
+  utils::SharedPtr<MockTCPDevice> mockdev = new MockTCPDevice(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -100,7 +79,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
   std::vector<int> intList = {app_handle};
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
-  ConnectionSPtr mock_connection = new ConnectionMock();
+  ConnectionSPtr mock_connection = new MockConnection();
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   EXPECT_CALL(transport_adapter, FindEstablishedConnection(uniq_id, app_handle))
       .WillOnce(Return(mock_connection));
@@ -110,8 +89,8 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict = resumption::LastState::instance()
-                              ->dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -123,17 +102,18 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
   EXPECT_EQ(uniq_id, tcp_dict["devices"][0]["name"].asString());
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   // Prepare
-  TestTCPTransportAdapter transport_adapter(port);
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   const uint32_t count_dev = 10;
-  utils::SharedPtr<TCPDeviceMock> mockdev[count_dev];
+  utils::SharedPtr<MockTCPDevice> mockdev[count_dev];
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
     uniq_id[i] = "unique_device_name" + std::string(numb);
-    mockdev[i] = new TCPDeviceMock(port, uniq_id[i]);
+    mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));
     transport_adapter.AddDevice(mockdev[i]);
   }
@@ -145,7 +125,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
   const int app_handle = 1;
   std::vector<int> intList = {app_handle};
 
-  ConnectionSPtr mock_connection = new ConnectionMock();
+  ConnectionSPtr mock_connection = new MockConnection();
   for (uint32_t i = 0; i < count_dev; i++) {
     EXPECT_CALL(transport_adapter, FindDevice(uniq_id[i]))
         .WillOnce(Return(mockdev[i]));
@@ -161,8 +141,9 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that values are saved
-  Json::Value& tcp_dict = resumption::LastState::instance()
-                              ->dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
   for (uint32_t i = 0; i < count_dev; i++) {
@@ -175,18 +156,19 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
   }
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndSeveralApplications) {
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   // Prepare
-  TestTCPTransportAdapter transport_adapter(port);
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   const uint32_t count_dev = 10;
 
-  utils::SharedPtr<TCPDeviceMock> mockdev[count_dev];
+  utils::SharedPtr<MockTCPDevice> mockdev[count_dev];
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
     uniq_id[i] = "unique_device_name" + std::string(numb);
-    mockdev[i] = new TCPDeviceMock(port, uniq_id[i]);
+    mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));
     transport_adapter.AddDevice(mockdev[i]);
   }
@@ -200,7 +182,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndSeveralApplication
   std::vector<int> intList = {app_handle[0], app_handle[1], app_handle[2]};
   const std::string ports[connection_count] = {"11111", "67890", "98765"};
   const int int_port[connection_count] = {11111, 67890, 98765};
-  ConnectionSPtr mock_connection = new ConnectionMock();
+  ConnectionSPtr mock_connection = new MockConnection();
   for (uint32_t i = 0; i < count_dev; i++) {
     EXPECT_CALL(transport_adapter, FindDevice(uniq_id[i]))
         .WillOnce(Return(mockdev[i]));
@@ -217,8 +199,8 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndSeveralApplication
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict = resumption::LastState::instance()
-                              ->dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -235,9 +217,10 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndSeveralApplication
 
 TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
   // Prepare
-  TestTCPTransportAdapter transport_adapter(port);
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
-  utils::SharedPtr<TCPDeviceMock> mockdev = new TCPDeviceMock(port, uniq_id);
+  utils::SharedPtr<MockTCPDevice> mockdev = new MockTCPDevice(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -254,25 +237,27 @@ TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
 
   // Check that value is not saved
   Json::Value& tcp_dict =
-      resumption::LastState::instance()
-          ->dictionary["TransportManager"]["TcpAdapter"]["devices"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"]["devices"];
+
   ASSERT_TRUE(tcp_dict.isNull());
 }
 
 TEST_F(TcpAdapterTest, RestoreData_DataNotStored) {
   Json::Value& tcp_adapter_dictionary =
-      resumption::LastState::instance()
-          ->dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+
   tcp_adapter_dictionary = Json::Value();
-  TestTCPTransportAdapter transport_adapter(port);
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   EXPECT_CALL(transport_adapter, Connect(_, _)).Times(0);
   EXPECT_TRUE(transport_adapter.CallRestore());
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDevice_RestoreData) {
-  TestTCPTransportAdapter transport_adapter(port);
+TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
-  utils::SharedPtr<TCPDeviceMock> mockdev = new TCPDeviceMock(port, uniq_id);
+  utils::SharedPtr<MockTCPDevice> mockdev = new MockTCPDevice(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -283,7 +268,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDevice_RestoreData) {
   std::vector<int> intList = {app_handle};
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
 
-  ConnectionSPtr mock_connection = new ConnectionMock();
+  ConnectionSPtr mock_connection = new MockConnection();
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   EXPECT_CALL(transport_adapter, FindEstablishedConnection(uniq_id, app_handle))
       .WillOnce(Return(mock_connection));
@@ -302,17 +287,18 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDevice_RestoreData) {
   EXPECT_EQ(uniq_id, devList[0]);
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevices_RestoreData) {
-  TestTCPTransportAdapter transport_adapter(port);
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
   const uint32_t count_dev = 10;
 
-  utils::SharedPtr<TCPDeviceMock> mockdev[count_dev];
+  utils::SharedPtr<MockTCPDevice> mockdev[count_dev];
   std::string uniq_id[count_dev];
   for (uint32_t i = 0; i < count_dev; i++) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
     uniq_id[i] = "unique_device_name" + std::string(numb);
-    mockdev[i] = new TCPDeviceMock(port, uniq_id[i]);
+    mockdev[i] = new MockTCPDevice(port, uniq_id[i]);
     EXPECT_CALL(*(mockdev[i]), IsSameAs(_)).WillRepeatedly(Return(false));
     transport_adapter.AddDevice(mockdev[i]);
   }
@@ -324,7 +310,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevices_RestoreData) {
   const int app_handle = 1;
   std::vector<int> intList = {app_handle};
 
-  ConnectionSPtr mock_connection = new ConnectionMock();
+  ConnectionSPtr mock_connection = new MockConnection();
   for (uint32_t i = 0; i < count_dev; i++) {
     EXPECT_CALL(transport_adapter, FindDevice(uniq_id[i]))
         .WillOnce(Return(mockdev[i]));

@@ -33,8 +33,7 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem() {
-}
+CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem() {}
 
 utils::SharedPtr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
   return new CAlwaysTrueSchemaItem();

@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnLanguageChangeNotification::OnLanguageChangeNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnLanguageChangeNotification::~OnLanguageChangeNotification() {
-}
+OnLanguageChangeNotification::~OnLanguageChangeNotification() {}
 
 void OnLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

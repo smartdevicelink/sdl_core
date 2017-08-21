@@ -43,30 +43,31 @@ namespace commands {
  * @brief UiSetDisplayLayoutResponse command class
  **/
 class UiSetDisplayLayoutResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief UiSetDisplayLayoutResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit UiSetDisplayLayoutResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief UiSetDisplayLayoutResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  UiSetDisplayLayoutResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
-    /**
-     * @brief UiSetDisplayLayoutResponse class destructor
-     **/
-    virtual ~UiSetDisplayLayoutResponse();
+  /**
+   * @brief UiSetDisplayLayoutResponse class destructor
+   **/
+  virtual ~UiSetDisplayLayoutResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(UiSetDisplayLayoutResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UiSetDisplayLayoutResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_DISPLAY_LAYOUT_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_DISPLAY_LAYOUT_RESPONSE_H_

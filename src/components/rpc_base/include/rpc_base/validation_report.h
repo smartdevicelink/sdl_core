@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RPC_BASE_VALIDATION_REPORT_H_
-#define RPC_BASE_VALIDATION_REPORT_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
 
 #include <string>
 #include <list>
@@ -49,7 +49,8 @@ class ValidationReport {
   void set_validation_info(const std::string& info);
   const ValidationReports& subobject_reports() const;
   ValidationReport& ReportSubobject(const std::string& object_name);
-private:
+
+ private:
   std::string object_name_;
   std::string validation_info_;
   ValidationReports subobject_reports_;
@@ -61,8 +62,8 @@ std::string PrettyFormat(const ValidationReport& report);
 
 namespace impl {
 inline void PrettyFormat(const ValidationReport& report,
-                  const std::string& parent_path,
-                  std::string* result) {
+                         const std::string& parent_path,
+                         std::string* result) {
   std::string object_path = parent_path;
   if (!object_path.empty() && report.object_name()[0] != '[') {
     object_path.append(".");
@@ -76,15 +77,16 @@ inline void PrettyFormat(const ValidationReport& report,
   }
   const ValidationReports& subreports = report.subobject_reports();
   for (ValidationReports::const_iterator i = subreports.begin(),
-       end = subreports.end(); i != end; ++i) {
+                                         end = subreports.end();
+       i != end;
+       ++i) {
     PrettyFormat(*i, object_path, result);
   }
 }
 }  // namespace impl
 
 inline ValidationReport::ValidationReport(const std::string& object_name)
-  : object_name_(object_name) {
-}
+    : object_name_(object_name) {}
 
 inline const std::string& ValidationReport::object_name() const {
   return object_name_;
@@ -98,7 +100,8 @@ inline void ValidationReport::set_validation_info(const std::string& info) {
   validation_info_ = info;
 }
 
-inline const std::list<ValidationReport>& ValidationReport::subobject_reports() const {
+inline const std::list<ValidationReport>& ValidationReport::subobject_reports()
+    const {
   return subobject_reports_;
 }
 
@@ -116,4 +119,4 @@ inline std::string PrettyFormat(const ValidationReport& report) {
 
 }  // namespace rpc
 
-#endif /* RPC_BASE_VALIDATION_REPORT_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_

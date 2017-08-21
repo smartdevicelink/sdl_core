@@ -31,28 +31,24 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
 namespace commands {
 
 SDLGetUserFriendlyMessageRequest::SDLGetUserFriendlyMessageRequest(
-    const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {
-}
+SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {}
 
 void SDLGetUserFriendlyMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
     LOG4CXX_WARN(logger_,
-                 "Mandatory parameter '"+messageCodes+"'' is missing");
+                 "Mandatory parameter '" + messageCodes + "'' is missing");
     return;
   }
   smart_objects::SmartArray* msg =
@@ -68,26 +64,24 @@ void SDLGetUserFriendlyMessageRequest::Run() {
 
   std::string required_language;
   if ((*message_)[strings::msg_params].keyExists(strings::language)) {
-    uint32_t lang_code = (*message_)[strings::msg_params][strings::language]
-                         .asUInt();
+    uint32_t lang_code =
+        (*message_)[strings::msg_params][strings::language].asUInt();
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(
-          static_cast<hmi_apis::Common_Language::eType>(lang_code));
+            static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
-        application_manager::ApplicationManagerImpl::instance()
-        ->hmi_capabilities().active_ui_language();
+        application_manager_.hmi_capabilities().active_ui_language();
 
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(ui_language);
   }
 
-  policy::PolicyHandler::instance()->OnGetUserFriendlyMessage(
-        msg_codes, required_language,
-        (*message_)[strings::params][strings::correlation_id].asInt());
+  application_manager_.GetPolicyHandler().OnGetUserFriendlyMessage(
+      msg_codes,
+      required_language,
+      (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
-
-

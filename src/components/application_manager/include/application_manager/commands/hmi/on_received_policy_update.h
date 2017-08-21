@@ -46,7 +46,8 @@ class OnReceivedPolicyUpdate : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-  explicit OnReceivedPolicyUpdate(const MessageSharedPtr& message);
+  OnReceivedPolicyUpdate(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnReceivedPolicyUpdate class destructor
@@ -66,4 +67,4 @@ class OnReceivedPolicyUpdate : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RECEIVED_POLICY_UPDATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RECEIVED_POLICY_UPDATE_H_

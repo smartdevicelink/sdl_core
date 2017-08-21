@@ -36,21 +36,17 @@
 namespace application_manager {
 namespace event_engine {
 
-Event::Event(const EventID& id)
-: id_(id)
-, response_so_() {
-}
+Event::Event(const EventID& id) : id_(id), response_so_() {}
 
-Event::~Event() {
-}
+Event::~Event() {}
 
-void Event::raise() {
-  EventDispatcher::instance()->raise_event(*this);
+void Event::raise(EventDispatcher& event_dispatcher) {
+  event_dispatcher.raise_event(*this);
 }
 
 void Event::set_smart_object(const smart_objects::SmartObject& so) {
   response_so_ = so;
 }
 
-}
-}
+}  // namespace event_engine
+}  // namespace application_manager

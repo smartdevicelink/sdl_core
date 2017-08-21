@@ -49,7 +49,8 @@ class UIAddCommandRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAddCommandRequest(const MessageSharedPtr& message);
+  UIAddCommandRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief UIAddCommandRequest class destructor

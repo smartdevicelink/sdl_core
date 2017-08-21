@@ -42,9 +42,11 @@ namespace threads {
 /**
  * @brief This ThreadDelegate derivative is designed
  * to implement threads waiting for QNX Pulse messages
- * When constucted, an instance of this class creates QNX channel and connects to it
+ * When constucted, an instance of this class creates QNX channel and connects
+ * to it
  * In exitThreadMain() channel is disconnected and destroyed
- * In threadMain() endless loop event is armed via pure virtual method ArmEvent()
+ * In threadMain() endless loop event is armed via pure virtual method
+ * ArmEvent()
  * and thread blocks on MsgReceivePulse() waiting for Pulse
  * When Pulse comes, OnPulse() pure virtual method is invoked
  * Subclassed must implement ArmEvent() for events of interest
@@ -52,39 +54,42 @@ namespace threads {
  */
 class PulseThreadDelegate : public ThreadDelegate {
  public:
-/**
-  * @brief default constructor
-  */
+  /**
+    * @brief default constructor
+    */
   PulseThreadDelegate();
   virtual void threadMain();
   virtual void exitThreadMain();
 
  protected:
-/**
-  * @brief This method is to be implemented to arm events of interest
-  * @param event pointer to structure sigevent
-  * @return If this method returns true, thread is blocked on MsgReceivePulse() waiting for Pulse
-  */
+  /**
+    * @brief This method is to be implemented to arm events of interest
+    * @param event pointer to structure sigevent
+    * @return If this method returns true, thread is blocked on
+   * MsgReceivePulse() waiting for Pulse
+    */
   virtual bool ArmEvent(struct sigevent* event) = 0;
-/**
-  * @brief This method is invoked from threadMain() when Pulse comes
-  */
+  /**
+    * @brief This method is invoked from threadMain() when Pulse comes
+    */
   virtual void OnPulse() = 0;
 
   /**
    * This method is to be initialize child class
    * @return If this method returns false, thread will be stopped
    */
-  virtual bool Init() { return true; }
+  virtual bool Init() {
+    return true;
+  }
 
-/**
-  * Finalizes thread
-  * Can free resources
-  */
+  /**
+    * Finalizes thread
+    * Can free resources
+    */
   virtual void Finalize() {}
 
  private:
-  enum {PULSE_CODE = _PULSE_CODE_MINAVAIL + 1};
+  enum { PULSE_CODE = _PULSE_CODE_MINAVAIL + 1 };
 
   volatile bool run_;
   int chid_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,15 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_PIPE_AUDIO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_PIPE_AUDIO_STREAMER_ADAPTER_H_
 
-#include <string>
 #include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
-class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
-  public:
-    PipeAudioStreamerAdapter();
-    ~PipeAudioStreamerAdapter();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(PipeAudioStreamerAdapter);
+class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
+ public:
+  PipeAudioStreamerAdapter(const std::string& named_audio_pipe_path,
+                           const std::string& app_storage_folder);
+  ~PipeAudioStreamerAdapter();
 };
 
 }  //  namespace media_manager

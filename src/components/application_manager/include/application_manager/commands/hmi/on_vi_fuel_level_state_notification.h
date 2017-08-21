@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_FUEL_LEVEL_STATE_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnVIFuelLevelStateNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIFuelLevelStateNotification(const MessageSharedPtr& message);
+  OnVIFuelLevelStateNotification(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief OnVIFuelLevelStateNotification class destructor

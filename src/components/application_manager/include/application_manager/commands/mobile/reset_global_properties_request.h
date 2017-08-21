@@ -52,7 +52,8 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  ResetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesRequest class destructor
@@ -103,7 +104,18 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitleItems(application_manager::ApplicationSharedPtr const app);
+  bool ResetVrHelpTitleItems(
+      application_manager::ApplicationSharedPtr const app);
+
+  /*
+   * @brief Prepare result for sending to mobile application
+   * @param out_result_code contains result code for sending to mobile
+   * application
+   * @param out_response_info contains info for sending to mobile applicaion
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& out_result_code,
+                                 std::string& out_response_info);
 
   /*
    * @brief Check if there some not delivered hmi responses exist
@@ -122,6 +134,8 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  std::string ui_response_info_;
+  std::string tts_response_info_;
 };
 
 }  // namespace commands

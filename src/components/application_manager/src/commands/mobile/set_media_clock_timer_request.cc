@@ -32,7 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -41,18 +42,16 @@ namespace application_manager {
 
 namespace commands {
 
-SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+SetMediaClockRequest::SetMediaClockRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-SetMediaClockRequest::~SetMediaClockRequest() {
-}
+SetMediaClockRequest::~SetMediaClockRequest() {}
 
 void SetMediaClockRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -67,14 +66,14 @@ void SetMediaClockRequest::Run() {
   }
 
   if (isDataValid()) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     // copy entirely msg
     msg_params = (*message_)[strings::msg_params];
     msg_params[strings::app_id] = app->app_id();
 
-    SendHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
-                   &msg_params, true);
+    SendHMIRequest(
+        hmi_apis::FunctionID::UI_SetMediaClockTimer, &msg_params, true);
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
@@ -86,13 +85,18 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetMediaClockTimer: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+      std::string response_info;
+      GetInfo(message, response_info);
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -110,7 +114,6 @@ bool SetMediaClockRequest::isDataValid() {
 
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
-
     if (!msg_params.keyExists(strings::start_time)) {
       LOG4CXX_INFO(logger_, "Invalid data");
       return false;
@@ -134,9 +137,9 @@ bool SetMediaClockRequest::isDataValid() {
           (msg_params[strings::end_time][strings::seconds].asUInt());
 
       if (((end_time_in_seconds > start_time_in_seconds) &&
-          (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
+           (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
-          (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
+           (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
         LOG4CXX_INFO(logger_, "Invalid data");
         return false;
       }

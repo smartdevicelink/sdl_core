@@ -49,7 +49,8 @@ class UIPerformInteractionResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIPerformInteractionResponse(const MessageSharedPtr& message);
+  UIPerformInteractionResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformInteractionResponse class destructor

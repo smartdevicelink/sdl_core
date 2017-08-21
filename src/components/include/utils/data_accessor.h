@@ -36,26 +36,24 @@
 #include "utils/shared_ptr.h"
 
 // This class is for thread-safe access to data
-template<class T>
+template <class T>
 class DataAccessor {
  public:
   DataAccessor(const T& data, const sync_primitives::Lock& lock)
-      : data_(data),
-        lock_(const_cast<sync_primitives::Lock&>(lock)),
-        counter_( new uint32_t(0)) {
+      : data_(data)
+      , lock_(const_cast<sync_primitives::Lock&>(lock))
+      , counter_(new uint32_t(0)) {
     lock_.Acquire();
   }
 
   DataAccessor(const DataAccessor<T>& other)
-      : data_(other.data_),
-        lock_(other.lock_),
-        counter_(other.counter_) {
+      : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
     ++(*counter_);
   }
 
   ~DataAccessor() {
     if (0 == *counter_) {
-          lock_.Release();
+      lock_.Release();
     } else {
       --(*counter_);
     }
@@ -63,9 +61,9 @@ class DataAccessor {
   const T& GetData() const {
     return data_;
   }
- private:
 
-  void *operator new(size_t size);
+ private:
+  void* operator new(size_t size);
   const T& data_;
   sync_primitives::Lock& lock_;
   utils::SharedPtr<uint32_t> counter_;

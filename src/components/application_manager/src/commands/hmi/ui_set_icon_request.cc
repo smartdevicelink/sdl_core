@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-UISetIconRequest::UISetIconRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+UISetIconRequest::UISetIconRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UISetIconRequest::~UISetIconRequest() {
-}
+UISetIconRequest::~UISetIconRequest() {}
 
 void UISetIconRequest::Run() {
-  LOG4CXX_INFO(logger_, "UISetIconRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void UISetIconRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

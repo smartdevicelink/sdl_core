@@ -31,18 +31,17 @@
  */
 
 #include "application_manager/commands/command_response_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-CommandResponseImpl::CommandResponseImpl(const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+CommandResponseImpl::CommandResponseImpl(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {}
 
-CommandResponseImpl::~CommandResponseImpl() {
-}
+CommandResponseImpl::~CommandResponseImpl() {}
 
 bool CommandResponseImpl::Init() {
   return true;
@@ -52,11 +51,12 @@ bool CommandResponseImpl::CleanUp() {
   return true;
 }
 
-void CommandResponseImpl::Run() {
-}
+void CommandResponseImpl::Run() {}
 
 void CommandResponseImpl::SendResponse(
-    bool success, const mobile_apis::Result::eType& result_code, bool final_message) {
+    bool success,
+    const mobile_apis::Result::eType& result_code,
+    bool final_message) {
   LOG4CXX_INFO(logger_, "Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
@@ -80,7 +80,7 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_, final_message);
+  application_manager_.SendMessageToMobile(message_, final_message);
 }
 
 }  // namespace commands

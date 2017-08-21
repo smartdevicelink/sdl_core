@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,33 +34,43 @@
 #include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/change_registration_request.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
+
+namespace {
+namespace custom_str = utils::custom_string;
+struct IsSameNickname {
+  IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
+  bool operator()(const policy::StringArray::value_type& nickname) const {
+    return app_id_.CompareIgnoreCase(nickname.c_str());
+  }
+
+ private:
+  const custom_str::CustomString& app_id_;
+};
+}
 
 namespace application_manager {
 
 namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      vr_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
+    , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
-ChangeRegistrationRequest::~ChangeRegistrationRequest() {
-}
+ChangeRegistrationRequest::~ChangeRegistrationRequest() {}
 
 void ChangeRegistrationRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace smart_objects;
 
-  ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
-  const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
-
-  ApplicationSharedPtr app = instance->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -79,30 +89,25 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
-  if (!hmi_capabilities.is_ui_cooperating()) {
-    ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
-
-  if (!hmi_capabilities.is_vr_cooperating()) {
-    vr_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
-
-  if (!hmi_capabilities.is_tts_cooperating()) {
-    tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
+  SmartObject& msg_params = (*message_)[strings::msg_params];
 
   const int32_t hmi_language =
-      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
+      msg_params[strings::hmi_display_language].asInt();
 
-  const int32_t language =
-      (*message_)[strings::msg_params][strings::language].asInt();
+  const int32_t language = msg_params[strings::language].asInt();
 
-  if (false ==
-      (IsLanguageSupportedByUI(hmi_language) &&
-       IsLanguageSupportedByVR(language) &&
-       IsLanguageSupportedByTTS(language))) {
+  if (false == (IsLanguageSupportedByUI(hmi_language) &&
+                IsLanguageSupportedByVR(language) &&
+                IsLanguageSupportedByTTS(language))) {
     LOG4CXX_ERROR(logger_, "Language is not supported");
     SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
+  if (msg_params.keyExists(strings::app_name) &&
+      !IsNicknameAllowed(msg_params[strings::app_name].asCustomString())) {
+    LOG4CXX_ERROR(logger_, "Nickname is not allowed.");
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
 
@@ -111,70 +116,48 @@ void ChangeRegistrationRequest::Run() {
   pending_requests_.Add(hmi_apis::FunctionID::TTS_ChangeRegistration);
 
   // UI processing
-  smart_objects::SmartObject ui_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  SmartObject ui_params = SmartObject(SmartType_Map);
 
   ui_params[strings::language] = hmi_language;
   ui_params[strings::app_id] = app->app_id();
-  if ((*message_)[strings::msg_params].keyExists(strings::app_name)) {
-    ui_params[strings::app_name] =
-        (*message_)[strings::msg_params][strings::app_name];
-    app->set_name((*message_)[strings::msg_params][strings::app_name].asString());
+  if (msg_params.keyExists(strings::app_name)) {
+    ui_params[strings::app_name] = msg_params[strings::app_name];
+    app->set_name(msg_params[strings::app_name].asCustomString());
   }
-  if ((*message_)[strings::msg_params].keyExists(
-      strings::ngn_media_screen_app_name)) {
+  if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
     ui_params[strings::ngn_media_screen_app_name] =
-        (*message_)[strings::msg_params][strings::ngn_media_screen_app_name];
-    app->set_ngn_media_screen_name((*message_)[strings::msg_params]
-                                        [strings::ngn_media_screen_app_name]);
+        msg_params[strings::ngn_media_screen_app_name];
+    app->set_ngn_media_screen_name(
+        msg_params[strings::ngn_media_screen_app_name]);
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
-                 &ui_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration, &ui_params, true);
 
   // VR processing
-  smart_objects::SmartObject vr_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  SmartObject vr_params = SmartObject(SmartType_Map);
 
-  vr_params[strings::language] =
-      (*message_)[strings::msg_params][strings::language];
+  vr_params[strings::language] = msg_params[strings::language];
 
   vr_params[strings::app_id] = app->app_id();
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
-    vr_params[strings::vr_synonyms] = (*message_)[strings::msg_params]
-                                                  [strings::vr_synonyms];
-    app -> set_vr_synonyms((*message_)[strings::msg_params][strings::vr_synonyms]);
+  if (msg_params.keyExists(strings::vr_synonyms)) {
+    vr_params[strings::vr_synonyms] = msg_params[strings::vr_synonyms];
+    app->set_vr_synonyms(msg_params[strings::vr_synonyms]);
   }
-  SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
-                 &vr_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration, &vr_params, true);
 
   // TTS processing
-  smart_objects::SmartObject tts_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  SmartObject tts_params = SmartObject(SmartType_Map);
 
-  tts_params[strings::language] =
-      (*message_)[strings::msg_params][strings::language];
+  tts_params[strings::language] = msg_params[strings::language];
 
   tts_params[strings::app_id] = app->app_id();
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-    tts_params[strings::tts_name] = (*message_)[strings::msg_params]
-                                                [strings::tts_name];
-    app->set_tts_name((*message_)[strings::msg_params][strings::tts_name]);
+  if (msg_params.keyExists(strings::tts_name)) {
+    tts_params[strings::tts_name] = msg_params[strings::tts_name];
+    app->set_tts_name(msg_params[strings::tts_name]);
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
-                 &tts_params, true);
-}
-
-bool ChangeRegistrationRequest::AllHmiResponsesSuccess(
-      const hmi_apis::Common_Result::eType ui,
-      const hmi_apis::Common_Result::eType vr,
-      const hmi_apis::Common_Result::eType tts) {
-
-  return
-      hmi_apis::Common_Result::SUCCESS == ui &&
-      hmi_apis::Common_Result::SUCCESS == vr &&
-      hmi_apis::Common_Result::SUCCESS == tts;
+  SendHMIRequest(
+      hmi_apis::FunctionID::TTS_ChangeRegistration, &tts_params, true);
 }
 
 void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
@@ -189,6 +172,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
@@ -196,6 +180,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, vr_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
@@ -203,6 +188,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, tts_response_info_);
       break;
     }
     default: {
@@ -213,7 +199,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
   if (pending_requests_.IsFinal(event_id)) {
     ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
+        application_manager_.application(connection_key());
 
     if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -222,36 +208,168 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
     if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
       application->set_ui_language(static_cast<mobile_api::Language::eType>(
-      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()));
+          (*message_)[strings::msg_params][strings::hmi_display_language]
+              .asInt()));
     }
 
-    if (hmi_apis::Common_Result::SUCCESS == vr_result_
-        || hmi_apis::Common_Result::SUCCESS == tts_result_) {
+    if (hmi_apis::Common_Result::SUCCESS == vr_result_ ||
+        hmi_apis::Common_Result::SUCCESS == tts_result_) {
       application->set_language(static_cast<mobile_api::Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
     }
-
-    int32_t greates_result_code = std::max(std::max(ui_result_, vr_result_),
-                                       tts_result_);
+    mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+    std::string response_info;
+    const bool result = PrepareResponseParameters(result_code, response_info);
 
     (*message_)[strings::params][strings::function_id] =
-          mobile_apis::FunctionID::eType::ChangeRegistrationID;
+        mobile_apis::FunctionID::eType::ChangeRegistrationID;
 
-    SendResponse(AllHmiResponsesSuccess(ui_result_, vr_result_, tts_result_),
-                 static_cast<mobile_apis::Result::eType>(greates_result_code),
-                 NULL, &(message[strings::msg_params]));
+    SendResponse(result,
+                 result_code,
+                 response_info.empty() ? NULL : response_info.c_str(),
+                 &(message[strings::msg_params]));
   } else {
     LOG4CXX_INFO(logger_,
-                "There are some pending responses from HMI."
-                "ChangeRegistrationRequest still waiting.");
+                 "There are some pending responses from HMI."
+                 "ChangeRegistrationRequest still waiting.");
   }
+}
+
+namespace {
+void CheckInfo(std::string& str) {
+  if (std::string::npos != str.find("is not supported by system")) {
+    str.clear();
+  }
+}
+}  // namespace
+
+bool ChangeRegistrationRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& response_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  const bool is_tts_succeeded_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          tts_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_ui_succeeded_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          ui_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_vr_succeeded_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          vr_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_tts_ui_vr_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          tts_result_,
+          ui_result_,
+          vr_result_);
+
+  const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  const HmiInterfaces::InterfaceState tts_state =
+      hmi_interfaces.GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
+  const HmiInterfaces::InterfaceState vr_state =
+      hmi_interfaces.GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
+  const HmiInterfaces::InterfaceState ui_state =
+      hmi_interfaces.GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
+
+  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+
+  ResponseInfo tts_properties_info(tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS);
+
+  ResponseInfo vr_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_VR);
+
+  bool result = ((!is_tts_ui_vr_unsupported) && is_tts_succeeded_unsupported &&
+                 is_ui_succeeded_unsupported && is_vr_succeeded_unsupported);
+
+  const bool is_tts_or_ui_or_vr_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          tts_result_,
+          ui_result_,
+          vr_result_);
+
+  if ((result && is_tts_or_ui_or_vr_unsupported)) {
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+    result =
+        PrepareResultForMobileResponse(ui_properties_info,
+                                       tts_properties_info) &&
+        PrepareResultForMobileResponse(tts_properties_info, vr_properties_info);
+  } else {
+    // If response contains erroneous result code SDL need return erroneus
+    // result code.
+    hmi_apis::Common_Result::eType ui_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    hmi_apis::Common_Result::eType vr_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    hmi_apis::Common_Result::eType tts_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != ui_result_) {
+      ui_result = ui_result_;
+    }
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != vr_result_) {
+      vr_result = vr_result_;
+    }
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != tts_result_) {
+      tts_result = tts_result_;
+    }
+    result_code = MessageHelper::HMIToMobileResult(
+        std::max(std::max(ui_result, vr_result), tts_result));
+  }
+
+  const bool is_tts_state_available =
+      tts_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_vr_state_available = vr_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_ui_state_available = ui_state == HmiInterfaces::STATE_AVAILABLE;
+
+  const bool is_tts_hmi_info =
+      is_tts_state_available && !tts_response_info_.empty();
+  const bool is_vr_hmi_info =
+      is_vr_state_available && !vr_response_info_.empty();
+  const bool is_ui_hmi_info =
+      is_ui_state_available && !ui_response_info_.empty();
+
+  if (is_tts_hmi_info || is_vr_hmi_info || is_ui_hmi_info) {
+    if (!is_tts_hmi_info)
+      CheckInfo(tts_response_info_);
+    if (!is_vr_hmi_info)
+      CheckInfo(ui_response_info_);
+    if (!is_ui_hmi_info)
+      CheckInfo(vr_response_info_);
+  }
+
+  response_info =
+      MergeInfos(ui_response_info_, vr_response_info_, tts_response_info_);
+  return result;
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int32_t& hmi_display_lang) {
-
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* ui_languages =
       hmi_capabilities.ui_supported_languages();
 
@@ -274,7 +392,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* vr_languages =
       hmi_capabilities.vr_supported_languages();
 
@@ -297,7 +415,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* tts_languages =
       hmi_capabilities.tts_supported_languages();
 
@@ -344,10 +462,10 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
     }
   }
 
-  if ((*message_)[strings::msg_params].
-      keyExists(strings::ngn_media_screen_app_name)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::ngn_media_screen_app_name].asCharArray();
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::ngn_media_screen_app_name)) {
+    str = (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]
+              .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid ngn_media_screen_app_name syntax check failed");
@@ -379,22 +497,22 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  std::string app_name;
+  ApplicationSet accessor = application_manager_.applications().GetData();
+  custom_str::CustomString app_name;
   uint32_t app_id = connection_key();
   if (msg_params.keyExists(strings::app_name)) {
-    app_name = msg_params[strings::app_name].asString();
+    app_name = msg_params[strings::app_name].asCustomString();
   }
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it; ++it) {
     if (app_id == (*it)->app_id()) {
       continue;
     }
 
-    const std::string& cur_name = (*it)->name();
+    const custom_str::CustomString& cur_name = (*it)->name();
     if (msg_params.keyExists(strings::app_name)) {
-      if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
+      if (app_name.CompareIgnoreCase(cur_name)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
@@ -423,8 +541,55 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
         return mobile_apis::Result::DUPLICATE_NAME;
       }
     }  // end vr check
-  }  // application for end
+  }    // application for end
   return mobile_apis::Result::SUCCESS;
+}
+
+bool ChangeRegistrationRequest::IsNicknameAllowed(
+    const custom_str::CustomString& app_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_,
+                  "Can't find appication with connection key "
+                      << connection_key());
+    return false;
+  }
+
+  const std::string policy_app_id = app->policy_app_id();
+
+  policy::StringArray app_nicknames;
+  policy::StringArray app_hmi_types;
+
+  bool init_result = application_manager_.GetPolicyHandler().GetInitialAppData(
+      policy_app_id, &app_nicknames, &app_hmi_types);
+
+  if (!init_result) {
+    LOG4CXX_ERROR(logger_,
+                  "Error during getting of nickname list for application "
+                      << policy_app_id);
+    return false;
+  }
+
+  if (!app_nicknames.empty()) {
+    IsSameNickname compare(app_name);
+    policy::StringArray::const_iterator it =
+        std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
+    if (app_nicknames.end() == it) {
+      LOG4CXX_WARN(logger_,
+                   "Application name was not found in nicknames list.");
+
+      usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
+          application_manager_.GetPolicyHandler().GetStatisticManager(),
+          policy_app_id,
+          usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
+      ++count_of_rejections_nickname_mismatch;
+
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

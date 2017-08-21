@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_APP_ICON_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_APP_ICON_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
 
@@ -49,7 +49,8 @@ class UISetAppIconRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetAppIconRequest(const MessageSharedPtr& message);
+  UISetAppIconRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief UISetIconRequest class destructor
@@ -69,4 +70,4 @@ class UISetAppIconRequest : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_ICON_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_SET_APP_ICON_REQUEST_H_

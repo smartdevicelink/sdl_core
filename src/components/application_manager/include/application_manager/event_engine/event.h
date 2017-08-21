@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_
 
 #include <interfaces/HMI_API.h>
 
@@ -41,11 +41,10 @@
 namespace application_manager {
 namespace event_engine {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+class EventDispatcher;
 
 class Event {
  public:
-
   // Typedef for possible Event ID's from mobile_apis functionID enum
   typedef hmi_apis::FunctionID::eType EventID;
 
@@ -65,7 +64,7 @@ class Event {
    * @brief Sends synchronously event to all subscribers.
    *
    */
-  void raise();
+  void raise(EventDispatcher& event_dispatcher);
 
   /*
    * @brief Provides event ID
@@ -102,11 +101,9 @@ class Event {
   inline int32_t smart_object_type() const;
 
  protected:
-
  private:
-
-  EventID                        id_;
-  smart_objects::SmartObject     response_so_;
+  EventID id_;
+  smart_objects::SmartObject response_so_;
 
   /*
    * @brief Default constructor
@@ -127,21 +124,24 @@ const smart_objects::SmartObject& Event::smart_object() const {
 }
 
 int32_t Event::smart_object_function_id() const {
-  return response_so_.getElement(
-      strings::params).getElement(strings::function_id).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::function_id)
+      .asInt();
 }
 
 int32_t Event::smart_object_correlation_id() const {
-  return response_so_.getElement(
-      strings::params).getElement(strings::correlation_id).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::correlation_id)
+      .asInt();
 }
 
 int32_t Event::smart_object_type() const {
-  return response_so_.getElement(
-        strings::params).getElement(strings::message_type).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::message_type)
+      .asInt();
 }
 
-}
-}
+}  // namespace event_engine
+}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_

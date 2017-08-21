@@ -40,8 +40,8 @@ namespace protocol_handler {
 
 // AppLink protocol 4.1.3 RpcType field
 enum RpcType {
-  kRpcTypeRequest      = 0x0,
-  kRpcTypeResponse     = 0x1,
+  kRpcTypeRequest = 0x0,
+  kRpcTypeResponse = 0x1,
   kRpcTypeNotification = 0x2,
   kRpcTypeReserved
 };
@@ -51,8 +51,8 @@ RpcType RpcTypeFromByte(uint8_t byte);
 // Check and convert RpcType to byte value ready to be transmitted
 uint8_t RpcTypeToByte(RpcType type);
 
-const char *RpcTypeToString(RpcType type);
+const char* RpcTypeToString(RpcType type);
 
-std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
+std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_

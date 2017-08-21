@@ -31,11 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
+#include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -43,17 +45,16 @@ namespace application_manager {
 
 namespace commands {
 
-ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
-}
+ShowConstantTBTRequest::ShowConstantTBTRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-ShowConstantTBTRequest::~ShowConstantTBTRequest() {
-}
+ShowConstantTBTRequest::~ShowConstantTBTRequest() {}
 
 void ShowConstantTBTRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -68,8 +69,8 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   if (IsWhiteSpaceExist()) {
@@ -79,10 +80,13 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params, app);
+      MessageHelper::ProcessSoftButtons(msg_params,
+                                        app,
+                                        application_manager_.GetPolicyHandler(),
+                                        application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -90,12 +94,10 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-
-  mobile_apis::Result::eType verification_result =
-      mobile_apis::Result::SUCCESS;
+  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
   if (msg_params.keyExists(strings::turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        msg_params[strings::turn_icon], app);
+        msg_params[strings::turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -105,7 +107,7 @@ void ShowConstantTBTRequest::Run() {
 
   if (msg_params.keyExists(strings::next_turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        msg_params[strings::next_turn_icon], app);
+        msg_params[strings::next_turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -115,8 +117,8 @@ void ShowConstantTBTRequest::Run() {
 
   msg_params[strings::app_id] = app->app_id();
 
-  msg_params[hmi_request::navi_texts] = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+  msg_params[hmi_request::navi_texts] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   int32_t index = 0;
   if (msg_params.keyExists(strings::navigation_text_1)) {
@@ -156,50 +158,47 @@ void ShowConstantTBTRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::time_to_destination)) {
-      // erase useless param
-      msg_params.erase(strings::time_to_destination);
-      msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-          static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
-      msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
-          (*message_)[strings::msg_params][strings::time_to_destination];
+    // erase useless param
+    msg_params.erase(strings::time_to_destination);
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
+    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+        (*message_)[strings::msg_params][strings::time_to_destination];
   }
 
   if (msg_params.keyExists(strings::soft_buttons)) {
-    MessageHelper::SubscribeApplicationToSoftButton(msg_params, app, function_id());
+    MessageHelper::SubscribeApplicationToSoftButton(
+        msg_params, app, function_id());
   }
 
   app->set_tbt_show_command(msg_params);
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
-                 true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params, true);
 }
-
 
 void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace hmi_apis;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
-
-      mobile_apis::Result::eType result_code =
-          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt()));
-      HMICapabilities& hmi_capabilities =
-                ApplicationManagerImpl::instance()->hmi_capabilities();
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code) {
-        result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
-        result = true;
-      }
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const Common_Result::eType result_code =
+          static_cast<Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      std::string response_info;
+      GetInfo(message, response_info);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -210,8 +209,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_icon)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::turn_icon][strings::value].asCharArray();
+    str = (*message_)[strings::msg_params][strings::turn_icon][strings::value]
+              .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid turn_icon value syntax check failed");
       return true;
@@ -219,8 +218,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::next_turn_icon)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::next_turn_icon][strings::value].asCharArray();
+    str = (*message_)[strings::msg_params][strings::next_turn_icon]
+                     [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid next_turn_icon value syntax check failed");
@@ -229,8 +228,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_1)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::navigation_text_1].asCharArray();
+    str = (*message_)[strings::msg_params][strings::navigation_text_1]
+              .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid navigation_text_1 value syntax check failed");
@@ -239,8 +238,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_2)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::navigation_text_2].asCharArray();
+    str = (*message_)[strings::msg_params][strings::navigation_text_2]
+              .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid navigation_text_2 value syntax check failed");
@@ -257,8 +256,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::total_distance)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::total_distance].asCharArray();
+    str =
+        (*message_)[strings::msg_params][strings::total_distance].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid total_distance value syntax check failed");
@@ -266,9 +265,10 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::time_to_destination)) {
-    str = (*message_)[strings::msg_params]
-                      [strings::time_to_destination].asCharArray();
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::time_to_destination)) {
+    str = (*message_)[strings::msg_params][strings::time_to_destination]
+              .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid time_to_destination value syntax check failed");

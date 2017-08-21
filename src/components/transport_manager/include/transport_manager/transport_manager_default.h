@@ -36,36 +36,35 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
-#include "utils/singleton.h"
-
 #include "transport_manager/transport_manager_impl.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace transport_manager {
 
 /**
  * @brief Default realization of transport_manager_impl class.
  */
-class TransportManagerDefault : public TransportManagerImpl,
-  public utils::Singleton<TransportManagerDefault> {
+class TransportManagerDefault : public TransportManagerImpl {
+ public:
+  explicit TransportManagerDefault(const TransportManagerSettings& settings);
 
   /**
    * @brief Initialize transport manager.
    *
    * @return Code error.
    */
-  virtual int Init();
+  int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
    * @brief Destructor.
    */
   virtual ~TransportManagerDefault();
 
-  TransportManagerDefault();
-
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
-
-  FRIEND_BASE_SINGLETON_CLASS(TransportManagerDefault);
 };
 }
 
-#endif /* TRANSPORT_MANAGER_DEFAULT_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_

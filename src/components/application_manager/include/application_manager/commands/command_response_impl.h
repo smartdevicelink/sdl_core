@@ -35,12 +35,7 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -48,7 +43,8 @@ namespace commands {
 
 class CommandResponseImpl : public CommandImpl {
  public:
-  explicit CommandResponseImpl(const MessageSharedPtr& message);
+  CommandResponseImpl(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
   virtual ~CommandResponseImpl();
   virtual bool Init();
   virtual bool CleanUp();
@@ -57,6 +53,7 @@ class CommandResponseImpl : public CommandImpl {
                     const mobile_apis::Result::eType& result_code =
                         mobile_apis::Result::INVALID_ENUM,
                     bool final_message = false);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandResponseImpl);
 };

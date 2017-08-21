@@ -32,23 +32,21 @@
  */
 
 #include "application_manager/commands/mobile/set_app_icon_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SetAppIconResponse::SetAppIconResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+SetAppIconResponse::SetAppIconResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SetAppIconResponse::~SetAppIconResponse() {
-}
+SetAppIconResponse::~SetAppIconResponse() {}
 
 void SetAppIconResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

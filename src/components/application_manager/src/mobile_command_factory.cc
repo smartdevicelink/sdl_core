@@ -51,7 +51,6 @@
 #include "application_manager/commands/mobile/delete_interaction_choice_set_response.h"
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
 #include "application_manager/commands/mobile/delete_sub_menu_response.h"
-#include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/end_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/generic_response.h"
@@ -59,6 +58,8 @@
 #include "application_manager/commands/mobile/get_dtcs_response.h"
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
+#include "application_manager/commands/mobile/get_way_points_request.h"
+#include "application_manager/commands/mobile/get_way_points_response.h"
 #include "application_manager/commands/mobile/list_files_request.h"
 #include "application_manager/commands/mobile/list_files_response.h"
 #include "application_manager/commands/mobile/on_app_interface_unregistered_notification.h"
@@ -74,6 +75,7 @@
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
+#include "application_manager/commands/mobile/on_way_point_change_notification.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/perform_interaction_request.h"
@@ -108,6 +110,10 @@
 #include "application_manager/commands/mobile/subscribe_button_response.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
+#include "application_manager/commands/mobile/subscribe_way_points_request.h"
+#include "application_manager/commands/mobile/subscribe_way_points_response.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_response.h"
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/commands/mobile/unregister_app_interface_response.h"
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
@@ -128,438 +134,569 @@
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/make_shared.h"
 
 namespace application_manager {
 
-commands::Command *MobileCommandFactory::CreateCommand(
+CommandSharedPtr MobileCommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message,
-    commands::Command::CommandOrigin origin) {
+    commands::Command::CommandOrigin origin,
+    ApplicationManager& application_manager) {
+  CommandSharedPtr command;
 
   switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kRequest)) {
-        return new commands::RegisterAppInterfaceRequest(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command.reset(new commands::RegisterAppInterfaceRequest(
+            message, application_manager));
+
       } else {
-        return new commands::RegisterAppInterfaceResponse(message);
+        command.reset(new commands::RegisterAppInterfaceResponse(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::UnregisterAppInterfaceID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kRequest)) {
-        return new commands::UnregisterAppInterfaceRequest(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command.reset(new commands::UnregisterAppInterfaceRequest(
+            message, application_manager));
       } else {
-        return new commands::UnregisterAppInterfaceResponse(message);
+        command.reset(new commands::UnregisterAppInterfaceResponse(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SetGlobalPropertiesResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SetGlobalPropertiesResponse(
+            message, application_manager));
       } else {
-        return new commands::SetGlobalPropertiesRequest(message);
+        command.reset(new commands::SetGlobalPropertiesRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ResetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ResetGlobalPropertiesResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::ResetGlobalPropertiesResponse(
+            message, application_manager));
       } else {
-        return new commands::ResetGlobalPropertiesRequest(message);
+        command.reset(new commands::ResetGlobalPropertiesRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::AddCommandID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::AddCommandResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::AddCommandResponse(message, application_manager));
       } else {
-        return new commands::AddCommandRequest(message);
+        command.reset(
+            new commands::AddCommandRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DeleteCommandID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::DeleteCommandResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::DeleteCommandResponse(message, application_manager));
       } else {
-        return new commands::DeleteCommandRequest(message);
+        command.reset(
+            new commands::DeleteCommandRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::AddSubMenuID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::AddSubMenuResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::AddSubMenuResponse(message, application_manager));
       } else {
-        return new commands::AddSubMenuRequest(message);
+        command.reset(
+            new commands::AddSubMenuRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DeleteSubMenuID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::DeleteSubMenuResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::DeleteSubMenuResponse(message, application_manager));
       } else {
-        return new commands::DeleteSubMenuRequest(message);
+        command.reset(
+            new commands::DeleteSubMenuRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return
-            new commands::DeleteInteractionChoiceSetResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::DeleteInteractionChoiceSetResponse(
+            message, application_manager));
       } else {
-        return new commands::DeleteInteractionChoiceSetRequest(message);
+        command.reset(new commands::DeleteInteractionChoiceSetRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::AlertID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::AlertResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::AlertResponse(message, application_manager));
       } else {
-        return new commands::AlertRequest(message);
+        command.reset(new commands::AlertRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SpeakID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SpeakResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SpeakResponse(message, application_manager));
       } else {
-        return new commands::SpeakRequest(message);
+        command.reset(new commands::SpeakRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SliderID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SliderResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SliderResponse(message, application_manager));
       } else {
-        return new commands::SliderRequest(message);
+        command.reset(
+            new commands::SliderRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::PerformAudioPassThruID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::PerformAudioPassThruResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::PerformAudioPassThruResponse(
+            message, application_manager));
       } else {
-        return new commands::PerformAudioPassThruRequest(message);
+        command.reset(new commands::PerformAudioPassThruRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return
-            new commands::CreateInteractionChoiceSetResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::CreateInteractionChoiceSetResponse(
+            message, application_manager));
       } else {
-        return new commands::CreateInteractionChoiceSetRequest(message);
+        command.reset(new commands::CreateInteractionChoiceSetRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::PerformInteractionID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::PerformInteractionResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::PerformInteractionResponse(
+            message, application_manager));
       } else {
-        return new commands::PerformInteractionRequest(message);
+        command.reset(new commands::PerformInteractionRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::EndAudioPassThruID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::EndAudioPassThruResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::EndAudioPassThruResponse(
+            message, application_manager));
       } else {
-        return new commands::EndAudioPassThruRequest(message);
+        command.reset(new commands::EndAudioPassThruRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::PutFileID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::PutFileResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::PutFileResponse(message, application_manager));
       } else {
-        return new commands::PutFileRequest(message);
+        command.reset(
+            new commands::PutFileRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DeleteFileID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::DeleteFileResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::DeleteFileResponse(message, application_manager));
       } else {
-        return new commands::DeleteFileRequest(message);
+        command.reset(
+            new commands::DeleteFileRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ListFilesID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ListFilesResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::ListFilesResponse(message, application_manager));
       } else {
-        return new commands::ListFilesRequest(message);
+        command.reset(
+            new commands::ListFilesRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SubscribeButtonID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SubscribeButtonResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SubscribeButtonResponse(
+            message, application_manager));
       } else {
-        return new commands::SubscribeButtonRequest(message);
+        command.reset(
+            new commands::SubscribeButtonRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::UnsubscribeButtonID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::UnsubscribeButtonResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::UnsubscribeButtonResponse(
+            message, application_manager));
       } else {
-        return new commands::UnsubscribeButtonRequest(message);
+        command.reset(new commands::UnsubscribeButtonRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ShowConstantTBTID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ShowConstantTBTResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::ShowConstantTBTResponse(
+            message, application_manager));
       } else {
-        return new commands::ShowConstantTBTRequest(message);
+        command.reset(
+            new commands::ShowConstantTBTRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ShowID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ShowResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::ShowResponse(message, application_manager));
       } else {
-        return new commands::ShowRequest(message);
+        command.reset(new commands::ShowRequest(message, application_manager));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::GetWayPointsID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::GetWayPointsResponse>(
+            message, application_manager);
+      } else {
+        command = utils::MakeShared<commands::GetWayPointsRequest>(
+            message, application_manager);
       }
       break;
     }
     case mobile_apis::FunctionID::SubscribeVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SubscribeVehicleDataResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SubscribeVehicleDataResponse(
+            message, application_manager));
       } else {
-        return new commands::SubscribeVehicleDataRequest(message);
+        command.reset(new commands::SubscribeVehicleDataRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::UnsubscribeVehicleDataResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::UnsubscribeVehicleDataResponse(
+            message, application_manager));
       } else {
-        return new commands::UnsubscribeVehicleDataRequest(message);
+        command.reset(new commands::UnsubscribeVehicleDataRequest(
+            message, application_manager));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::SubscribeWayPointsResponse>(
+            message, application_manager);
+      } else {
+        command = utils::MakeShared<commands::SubscribeWayPointsRequest>(
+            message, application_manager);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::UnsubscribeWayPointsResponse>(
+            message, application_manager);
+      } else {
+        command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(
+            message, application_manager);
       }
       break;
     }
     case mobile_apis::FunctionID::ReadDIDID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ReadDIDResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::ReadDIDResponse(message, application_manager));
       } else {
-        return new commands::ReadDIDRequest(message);
+        command.reset(
+            new commands::ReadDIDRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::GetVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::GetVehicleDataResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::GetVehicleDataResponse(message, application_manager));
       } else {
-        return new commands::GetVehicleDataRequest(message);
+        command.reset(
+            new commands::GetVehicleDataRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ScrollableMessageID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ScrollableMessageResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::ScrollableMessageResponse(
+            message, application_manager));
       } else {
-        return new commands::ScrollableMessageRequest(message);
+        command.reset(new commands::ScrollableMessageRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::AlertManeuverID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::AlertManeuverResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::AlertManeuverResponse(message, application_manager));
       } else {
-        return new commands::AlertManeuverRequest(message);
+        command.reset(
+            new commands::AlertManeuverRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SetAppIconID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SetAppIconResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SetAppIconResponse(message, application_manager));
       } else {
-        return new commands::SetAppIconRequest(message);
+        command.reset(
+            new commands::SetAppIconRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SetDisplayLayoutID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SetDisplayLayoutResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SetDisplayLayoutResponse(
+            message, application_manager));
       } else {
-        return new commands::SetDisplayLayoutRequest(message);
+        command.reset(new commands::SetDisplayLayoutRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::UpdateTurnListID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::UpdateTurnListResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::UpdateTurnListResponse(message, application_manager));
       } else {
-        return new commands::UpdateTurnListRequest(message);
+        command.reset(
+            new commands::UpdateTurnListRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::ChangeRegistrationID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ChangeRegistrationResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::ChangeRegistrationResponse(
+            message, application_manager));
       } else {
-        return new commands::ChangeRegistrationRequest(message);
+        command.reset(new commands::ChangeRegistrationRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::GetDTCsID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::GetDTCsResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::GetDTCsResponse(message, application_manager));
       } else {
-        return new commands::GetDTCsRequest(message);
+        command.reset(
+            new commands::GetDTCsRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DiagnosticMessageID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::DiagnosticMessageResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::DiagnosticMessageResponse(
+            message, application_manager));
       } else {
-        return new commands::DiagnosticMessageRequest(message);
+        command.reset(new commands::DiagnosticMessageRequest(
+            message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SetMediaClockTimerID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SetMediaClockTimerResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SetMediaClockTimerResponse(
+            message, application_manager));
       } else {
-        return new commands::SetMediaClockRequest(message);
+        command.reset(
+            new commands::SetMediaClockRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SystemRequestID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SystemResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SystemResponse(message, application_manager));
       } else {
-        return new commands::SystemRequest(message);
+        command.reset(
+            new commands::SystemRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::SendLocationID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SendLocationResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SendLocationResponse(message, application_manager));
       } else {
-        return new commands::SendLocationRequest(message);
+        command.reset(
+            new commands::SendLocationRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::DialNumberID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return  new commands::DialNumberResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::DialNumberResponse(message, application_manager));
       } else {
-        return new commands::DialNumberRequest(message);
+        command.reset(
+            new commands::DialNumberRequest(message, application_manager));
       }
       break;
     }
     case mobile_apis::FunctionID::OnButtonEventID: {
-      return new commands::mobile::OnButtonEventNotification(message);
+      command.reset(new commands::mobile::OnButtonEventNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnButtonPressID: {
-      return new commands::mobile::OnButtonPressNotification(message);
+      command.reset(new commands::mobile::OnButtonPressNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
-      return new commands::OnAudioPassThruNotification(message);
+      command.reset(new commands::OnAudioPassThruNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnVehicleDataID: {
-      return new commands::OnVehicleDataNotification(message);
+      command.reset(new commands::OnVehicleDataNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
-      return
-          new commands::OnAppInterfaceUnregisteredNotification(message);
+      command.reset(new commands::OnAppInterfaceUnregisteredNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnCommandID: {
-      return new commands::OnCommandNotification(message);
+      command.reset(
+          new commands::OnCommandNotification(message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnTBTClientStateID: {
-      return new commands::OnTBTClientStateNotification(message);
+      command.reset(new commands::OnTBTClientStateNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnDriverDistractionID: {
-      return
-          new commands::mobile::OnDriverDistractionNotification(message);
+      command.reset(new commands::mobile::OnDriverDistractionNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnLanguageChangeID: {
-      return new commands::OnLanguageChangeNotification(message);
+      command.reset(new commands::OnLanguageChangeNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnPermissionsChangeID: {
-      return new commands::OnPermissionsChangeNotification(message);
+      command.reset(new commands::OnPermissionsChangeNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnHMIStatusID: {
-      if (origin == commands::Command::ORIGIN_MOBILE) {
-        return new commands::OnHMIStatusNotificationFromMobile(message);
+      if (commands::Command::ORIGIN_SDL == origin) {
+        command.reset(new commands::OnHMIStatusNotification(
+            message, application_manager));
+      } else {
+        command.reset(new commands::OnHMIStatusNotificationFromMobile(
+            message, application_manager));
       }
-      return new commands::OnHMIStatusNotification(message);
       break;
     }
     case mobile_apis::FunctionID::OnKeyboardInputID: {
-      return new commands::mobile::OnKeyBoardInputNotification(message);
+      command.reset(new commands::mobile::OnKeyBoardInputNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnTouchEventID: {
-      return new commands::mobile::OnTouchEventNotification(message);
+      command.reset(new commands::mobile::OnTouchEventNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnSystemRequestID: {
-      return new commands::mobile::OnSystemRequestNotification(message);
+      command.reset(new commands::mobile::OnSystemRequestNotification(
+          message, application_manager));
       break;
     }
     case mobile_apis::FunctionID::OnHashChangeID: {
-      return new commands::mobile::OnHashChangeNotification(message);
+      command.reset(new commands::mobile::OnHashChangeNotification(
+          message, application_manager));
+      break;
+    }
+    case mobile_apis::FunctionID::OnWayPointChangeID: {
+      command = utils::MakeShared<commands::OnWayPointChangeNotification>(
+          message, application_manager);
       break;
     }
     default: {
       (*message)[strings::params][strings::function_id] =
           static_cast<int32_t>(mobile_apis::FunctionID::GenericResponseID);
-      return new commands::GenericResponse(message);
+      command.reset(
+          new commands::GenericResponse(message, application_manager));
     }
   }
+  return command;
 }
 
 }  // namespace application_manager

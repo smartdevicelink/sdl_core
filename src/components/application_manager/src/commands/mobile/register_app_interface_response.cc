@@ -33,9 +33,10 @@
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/connection_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
@@ -44,7 +45,7 @@ namespace commands {
 void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
   bool last_message = !success;
   // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is
@@ -60,46 +61,39 @@ void RegisterAppInterfaceResponse::Run() {
 
   SendResponse(success, result_code, last_message);
 
-  // Add registered application to the policy db right after response sent to
-  // mobile to be able to check all other API according to app permissions
-  application_manager::ApplicationSharedPtr application =
-      application_manager::ApplicationManagerImpl::instance()->application(
-          connection_key());
-
-  if (!application) {
-    LOG4CXX_ERROR(logger_, "Application with connection key "
-                               << connection_key() << " is not registered.");
+  if (mobile_apis::Result::SUCCESS != result_code) {
     return;
   }
 
-  SetHeartBeatTimeout(connection_key(), application->mobile_app_id());
+  // Add registered application to the policy db right after response sent to
+  // mobile to be able to check all other API according to app permissions
+  application_manager::ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key " << connection_key()
+                                                     << " is not registered.");
+    return;
+  }
 
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  ApplicationManagerImpl::instance()->OnApplicationRegistered(application);
-
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
-      application->mobile_app_id());
+  SetHeartBeatTimeout(connection_key(), application->policy_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
-    uint32_t connection_key, const std::string &mobile_app_id) {
+    uint32_t connection_key, const std::string& mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
-  if (policy_handler->PolicyEnabled()) {
-    const int32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id) /
-                            date_time::DateTime::MILLISECONDS_IN_SECOND;
+  policy::PolicyHandlerInterface& policy_handler =
+      application_manager_.GetPolicyHandler();
+  if (policy_handler.PolicyEnabled()) {
+    const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
-      application_manager::ApplicationManagerImpl::instance()
-          ->connection_handler()
-          ->SetHeartBeatTimeout(connection_key, timeout);
+      application_manager_.connection_handler().SetHeartBeatTimeout(
+          connection_key, timeout);
     }
   } else {
     LOG4CXX_INFO(logger_, "Policy is turn off");
   }
 }
 
-} // namespace commands
-} // namespace application_manager
+}  // namespace commands
+}  // namespace application_manager

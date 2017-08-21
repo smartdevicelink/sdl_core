@@ -51,7 +51,8 @@ class OnSystemContextNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSystemContextNotification(const MessageSharedPtr& message);
+  OnSystemContextNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemContextNotification class destructor
@@ -64,9 +65,6 @@ class OnSystemContextNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-  void SendSystemContextNotification(ApplicationSharedPtr app,
-                                     mobile_api::SystemContext::eType system_context);
-
   DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
 };
 

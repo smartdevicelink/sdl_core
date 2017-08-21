@@ -37,8 +37,7 @@
 
 ApiAdaptors HmiProxy::api_adaptors_;
 
-HmiProxy::HmiProxy(Item *parent)
-    : Item(parent) {}
+HmiProxy::HmiProxy(Item* parent) : Item(parent) {}
 
 void HmiProxy::componentComplete() {
   Item::componentComplete();

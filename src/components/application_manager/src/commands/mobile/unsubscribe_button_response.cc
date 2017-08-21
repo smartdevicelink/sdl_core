@@ -32,24 +32,20 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_button_response.h"
-#include "application_manager/application_manager_impl.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace commands {
 
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {
-}
+UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
 void UnsubscribeButtonResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {

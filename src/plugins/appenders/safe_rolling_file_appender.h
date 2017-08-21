@@ -41,7 +41,8 @@ class SafeRollingFileAppender : public RollingFileAppender {
  public:
   DECLARE_LOG4CXX_OBJECT(SafeRollingFileAppender)
  protected:
-  virtual void subAppend(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p);
+  virtual void subAppend(const spi::LoggingEventPtr& event,
+                         log4cxx::helpers::Pool& p);
 };
 
 }  // namespace log4cxx

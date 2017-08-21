@@ -34,15 +34,37 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_TO_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
+/**
+ * @brief Check if HMI's interface is available.
+ * @param application_manager contains application manager component
+ * @param interface contains name of HMI's interface
+ * @return true if interface is available otherwise return fasle.
+ */
+bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
+                                    HmiInterfaces::InterfaceID interface);
+
+/**
+ * @brief Change interface state
+ * @param application_manager contains ApplicationManager instance
+ * @param response_from_hmi contains response from HMI
+ * @param interface contanins InterfaceID whose state is changed.
+ * @return true if field available exist and contains true in response params
+ * otherwise return false.
+ */
+bool ChangeInterfaceState(ApplicationManager& application_manager,
+                          const smart_objects::SmartObject& response_from_hmi,
+                          HmiInterfaces::InterfaceID interface);
 
 class RequestToHMI : public CommandImpl {
  public:
-  explicit RequestToHMI(const MessageSharedPtr& message);
+  RequestToHMI(const MessageSharedPtr& message,
+               ApplicationManager& application_manager);
   virtual ~RequestToHMI();
   virtual bool Init();
   virtual bool CleanUp();

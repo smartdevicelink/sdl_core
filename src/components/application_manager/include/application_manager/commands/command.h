@@ -32,18 +32,11 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
-
-#include "utils/shared_ptr.h"
+#include <stdint.h>
 #include "smart_objects/smart_object.h"
-#include "application_manager/event_engine/event_observer.h"
-#include "application_manager/smart_object_keys.h"
+#include "utils/shared_ptr.h"
 
 namespace application_manager {
-/**
- * @brief SmartObject type
- **/
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace commands {
 
@@ -114,21 +107,16 @@ class Command {
  */
   virtual bool AllowedToTerminate() = 0;
 
-    /**
-   * @brief SetAllowedToTerminate set up allowed to terminate flag.
-   * If true, request controller will terminate request on response
-   */
-  virtual void SetAllowedToTerminate(bool allowed) = 0;
+  /**
+ * @brief SetAllowedToTerminate set up allowed to terminate flag.
+ * If true, request controller will terminate request on response
+ */
+  virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
-
-  enum CommandOrigin {
-    ORIGIN_SDL,
-    ORIGIN_MOBILE
-  };
+  enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
-
 }  // namespace commands
 
 }  // namespace application_manager

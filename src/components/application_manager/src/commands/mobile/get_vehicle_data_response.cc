@@ -32,24 +32,23 @@
  */
 
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetVehicleDataResponse::GetVehicleDataResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+GetVehicleDataResponse::GetVehicleDataResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-GetVehicleDataResponse::~GetVehicleDataResponse() {
-}
+GetVehicleDataResponse::~GetVehicleDataResponse() {}
 
 void GetVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

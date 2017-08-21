@@ -47,8 +47,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
   AoaInitSequence();
-  virtual ~AoaInitSequence() {
-  }
+  virtual ~AoaInitSequence() {}
 
  private:
   class AoaGetProtocolRequest;
@@ -88,15 +87,12 @@ void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
-    : controller_(controller) {
-}
+    : controller_(controller) {}
 
-UsbDeviceScanner::~UsbDeviceScanner() {
-}
+UsbDeviceScanner::~UsbDeviceScanner() {}
 
 class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
-  virtual ~AoaGetProtocolRequest() {
-  }
+  virtual ~AoaGetProtocolRequest() {}
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -126,14 +122,10 @@ class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
 class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
  public:
   AoaSendIdString(uint16_t index, const char* string, uint16_t length)
-      : index_(index),
-        string_(string),
-        length_(length) {
-  }
+      : index_(index), string_(string), length_(length) {}
 
  private:
-  virtual ~AoaSendIdString() {
-  }
+  virtual ~AoaSendIdString() {}
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -158,8 +150,7 @@ class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
 };
 
 class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
-  virtual ~AoaTurnIntoAccessoryMode() {
-  }
+  virtual ~AoaTurnIntoAccessoryMode() {}
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -187,8 +178,7 @@ static char version[] = "1.0";
 static char uri[] = "http://www.smartdevicelink.org";
 static char serial_num[] = "N000000";
 
-AoaInitSequence::AoaInitSequence()
-    : UsbControlTransferSequence() {
+AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
   AddTransfer(new AoaGetProtocolRequest);
   AddTransfer(new AoaSendIdString(0, manufacturer, sizeof(manufacturer)));
   AddTransfer(new AoaSendIdString(1, model_name, sizeof(model_name)));
@@ -212,13 +202,13 @@ void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
   devices_mutex_.Acquire();
   devices_.push_back(device);
   devices_mutex_.Release();
-  LOG4CXX_DEBUG(
-      logger_,
-      "USB device (bus number " << static_cast<int>(device->bus_number())
-      << ", address " << static_cast<int>(device->address())
-      << ") identified as: " << device->GetManufacturer()
-      << ", " << device->GetProductName()
-      << ", serial: " << device->GetSerialNumber());
+  LOG4CXX_DEBUG(logger_,
+                "USB device (bus number "
+                    << static_cast<int>(device->bus_number()) << ", address "
+                    << static_cast<int>(device->address())
+                    << ") identified as: " << device->GetManufacturer() << ", "
+                    << device->GetProductName()
+                    << ", serial: " << device->GetSerialNumber());
   UpdateList();
 }
 
@@ -235,9 +225,9 @@ void UsbDeviceScanner::UpdateList() {
   DeviceVector device_vector;
   devices_mutex_.Acquire();
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
-      ++it) {
-    const std::string device_name = (*it)->GetManufacturer() + " "
-        + (*it)->GetProductName();
+       ++it) {
+    const std::string device_name =
+        (*it)->GetManufacturer() + " " + (*it)->GetProductName();
     std::ostringstream oss;
     oss << (*it)->GetManufacturer() << ":" << (*it)->GetProductName() << ":"
         << (*it)->GetSerialNumber();
@@ -251,8 +241,7 @@ void UsbDeviceScanner::UpdateList() {
   controller_->SearchDeviceDone(device_vector);
 }
 
-void UsbDeviceScanner::Terminate() {
-}
+void UsbDeviceScanner::Terminate() {}
 
 bool UsbDeviceScanner::IsInitialised() const {
   return true;

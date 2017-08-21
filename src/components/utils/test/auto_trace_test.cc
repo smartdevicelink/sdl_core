@@ -30,73 +30,116 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <fstream>
+#include <ctime>
+
 #include "gtest/gtest.h"
 #include "utils/auto_trace.h"
-#include "logger.h"
-#include <fstream>
+#include "utils/logger.h"
+#include "utils/log_message_loop_thread.h"
+#include "utils/threads/message_loop_thread.h"
+#include "utils/file_system.h"
+#include "utils/threads/thread.h"
+#include "utils/date_time.h"
+#include "utils/logger_status.h"
+#include "utils/helpers.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::logger;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
+CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog")
+
+namespace {
+const std::string kFileName =
+    file_system::CurrentWorkingDirectory() + "/AutoTraceTestLogFile.log";
+}  // namespace
 
 void Preconditions() {
-  //delete file with previous logs
-  const char* file_name = "AutoTraceTestLogFile.log";
-  std::remove(file_name);
+  // Delete file with previous logs
+  if (file_system::FileExists(kFileName)) {
+    // If logger is active now deleting log file cause undefined befaviour.
+    DEINIT_LOGGER();
+    ASSERT_TRUE(file_system::DeleteFile(kFileName))
+        << "Can't delete AutoTraceTestLogFile.log";
+  }
 }
 
 void InitLogger() {
-  INIT_LOGGER("log4cxx.properties");
+  // Set enabled logs
+  INIT_LOGGER("log4cxx.properties", true);
+  // DEINIT_LOGGER will be called in test_main.cc
 }
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
+void CreateDeleteAutoTrace(const std::string& testlog) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, testlog);
 }
 
-bool CheckTraceInFile(const std::string & testlog) {
+/**
+ * @brief IsLogLineContains cheks if log line contains debug message with
+ * specified debug message
+ * @param log_line line to search in
+ * @param debug_level expected debug level
+ * @param debug_log_message expected debug message
+ * @return true if debug_message exist in log_line with debug_level
+ */
+bool IsLogLineContains(const std::string& log_line,
+                       const std::string& debug_level,
+                       const std::string& debug_message) {
+  return log_line.find(debug_level) != std::string::npos &&
+         log_line.find(debug_message) != std::string::npos;
+}
 
-  bool isLogFound = false;
-  std::string line;
-
-  std::ifstream file_log("AutoTraceTestLogFile.log");
-
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
+/**
+ * @brief CheckAutoTraceDebugInFile chacks if logfile contains autotrace and
+ * debug for test AutoTrace_WriteToFile_ReadCorrectString
+ * @param debug_message message that should be logged with DEBUG level
+ * @return true if trace enter, trace exit, debug message exist in log file
+ */
+bool CheckAutoTraceDebugInFile(const std::string& debug_message) {
+  using namespace helpers;
+  const std::string debug_log_level = "DEBUG";
+  const std::string trace_log_level = "TRACE";
+  const std::string enter_message = ": Enter";
+  const std::string exit_message = ": Exit";
+  std::ifstream file_log(kFileName);
+  if (!file_log.is_open()) {
+    return false;
   }
-  return isLogFound;
-}
 
-void DeinitLogger() {
-  DEINIT_LOGGER();
+  bool debug_found = false;
+  bool trace_enter = false;
+  bool trace_exit = false;
+  for (std::string line;
+       Compare<bool, EQ, ONE>(false, debug_found, trace_enter, trace_exit) &&
+           getline(file_log, line);) {
+    debug_found = debug_found
+                      ? debug_found
+                      : IsLogLineContains(line, debug_log_level, debug_message);
+    trace_enter = trace_enter
+                      ? trace_enter
+                      : IsLogLineContains(line, trace_log_level, enter_message);
+    trace_exit = trace_exit
+                     ? trace_exit
+                     : IsLogLineContains(line, trace_log_level, exit_message);
+  }
+  file_log.close();
+  return Compare<bool, EQ, ALL>(true, debug_found, trace_enter, trace_exit);
 }
-
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
-TEST(AutoTraceTest, DISABLED_Basic) {
-  const std::string testlog =
-      "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+// TODO(DTrunov) : Enable after APPLINK-25006 will be resolved
+TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
+  const std::string testlog = "Test trace is working!";
   Preconditions();
   InitLogger();
   CreateDeleteAutoTrace(testlog);
-  DeinitLogger();
 
-  ASSERT_TRUE(CheckTraceInFile(testlog));
+  FLUSH_LOGGER();
+  ASSERT_TRUE(CheckAutoTraceDebugInFile(testlog));
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

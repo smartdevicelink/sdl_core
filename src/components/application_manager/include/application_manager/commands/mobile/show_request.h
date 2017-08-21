@@ -50,7 +50,8 @@ class ShowRequest : public CommandRequestImpl {
   /**
    * \brief ShowRequest class constructor
    **/
-  explicit ShowRequest(const MessageSharedPtr& message);
+  ShowRequest(const MessageSharedPtr& message,
+              ApplicationManager& application_manager);
 
   /**
    * \brief ShowRequest class destructor
@@ -70,7 +71,6 @@ class ShowRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if all strings have valid syntax in request
    *

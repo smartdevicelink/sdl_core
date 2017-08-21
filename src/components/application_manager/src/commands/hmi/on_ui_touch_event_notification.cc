@@ -40,18 +40,17 @@ namespace commands {
 namespace hmi {
 
 OnUITouchEventNotification::OnUITouchEventNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUITouchEventNotification::~OnUITouchEventNotification() {
-}
+OnUITouchEventNotification::~OnUITouchEventNotification() {}
 
 void OnUITouchEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  //prepare SmartObject for mobile factory
+  // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-  mobile_apis::FunctionID::OnTouchEventID;
+      mobile_apis::FunctionID::OnTouchEventID;
   SendNotificationToMobile(message_);
 }
 
@@ -60,4 +59,3 @@ void OnUITouchEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

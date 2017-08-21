@@ -30,21 +30,24 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
-#define TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
 
 #include <pthread.h>
 #include "hmi_message_handler/dbus_message_controller.h"
 
-class MockDBusMessageController :
-    public ::hmi_message_handler::DBusMessageController {
+namespace test {
+namespace components {
+namespace hmi_message_handler_test {
+
+class MockDBusMessageController
+    : public ::hmi_message_handler::DBusMessageController {
  public:
   MOCK_METHOD1(Recv, void(std::string&));
 
   MockDBusMessageController(const std::string& serviceName,
                             const std::string& path)
-    : DBusMessageController(serviceName, path),
-      thread_() {}
+      : DBusMessageController(serviceName, path), thread_() {}
 
   virtual void processResponse(std::string method, Json::Value& root) {}
   virtual void processRequest(Json::Value& root) {}
@@ -52,17 +55,22 @@ class MockDBusMessageController :
 
   bool Init() {
     return ::hmi_message_handler::DBusMessageController::Init() &&
-        pthread_create(&thread_, 0, &Run, this) == 0;
+           pthread_create(&thread_, 0, &Run, this) == 0;
   }
+
  private:
   pthread_t thread_;
   static void* Run(void* data) {
     if (NULL != data) {
-        static_cast<MockDBusMessageController*>(data)->MethodForReceiverThread(nullptr);
+      static_cast<MockDBusMessageController*>(data)
+          ->MethodForReceiverThread(nullptr);
     }
     return 0;
   }
 };
 
+}  // namespace hmi_message_handler_test
+}  // namespace components
+}  // namespace test
 
-#endif  // TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_

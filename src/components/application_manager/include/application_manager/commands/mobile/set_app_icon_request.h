@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_ICON_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_ICON_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_APP_ICON_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_APP_ICON_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -49,17 +49,15 @@ class SetAppIconRequest : public CommandRequestImpl {
   /**
    * @brief Contains information about the type of image
    */
-  typedef enum {
-    STATIC = 0,
-    DYNAMIC
-  } ImageType;
+  typedef enum { STATIC = 0, DYNAMIC } ImageType;
 
   /**
    * @brief SetIconRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetAppIconRequest(const MessageSharedPtr& message);
+  SetAppIconRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor
@@ -101,14 +99,14 @@ class SetAppIconRequest : public CommandRequestImpl {
   bool IsEnoughSpaceForIcon(const uint64_t icon_size) const;
   DISALLOW_COPY_AND_ASSIGN(SetAppIconRequest);
 
-private:
+ private:
   /**
    * @brief Checks, if icons saving to configured folder is enabled
    */
-  static int8_t is_icons_saving_enabled_;
+  bool is_icons_saving_enabled_;
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_ICON_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_APP_ICON_REQUEST_H_

@@ -39,29 +39,30 @@ namespace application_manager {
 namespace commands {
 
 class GetUrlsResponse : public ResponseToHMI {
-  public:
-    /**
-     * @brief GetUrlsResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetUrlsResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetUrlsResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetUrlsResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
-    /**
-     * @brief GetUrlsResponse class destructor
-     **/
-    virtual ~GetUrlsResponse();
+  /**
+   * @brief GetUrlsResponse class destructor
+   **/
+  virtual ~GetUrlsResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GetUrlsResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetUrlsResponse);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_RESPONSE_H_

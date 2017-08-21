@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnVIVehicleDataNotification::OnVIVehicleDataNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {
-}
+OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {}
 
 void OnVIVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,10 +50,16 @@ void OnVIVehicleDataNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnVehicleDataID);
 
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  if (msg_params.keyExists(strings::odometer)) {
+    application_manager_.IviInfoUpdated(ODOMETER,
+                                        msg_params[strings::odometer].asInt());
+  }
+
   SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -38,19 +39,17 @@ namespace application_manager {
 namespace commands {
 
 UIEndAudioPassThruResponse::UIEndAudioPassThruResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {
-}
+UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {}
 
 void UIEndAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

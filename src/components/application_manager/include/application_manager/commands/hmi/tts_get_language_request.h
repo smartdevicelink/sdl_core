@@ -49,7 +49,8 @@ class TTSGetLanguageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSGetLanguageRequest(const MessageSharedPtr& message);
+  TTSGetLanguageRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetLanguageRequest class destructor

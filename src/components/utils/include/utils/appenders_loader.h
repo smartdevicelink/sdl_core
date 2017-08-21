@@ -40,6 +40,7 @@ class AppendersLoader {
   AppendersLoader();
   ~AppendersLoader();
   bool Loaded() const;
+
  private:
   void* handle_;
 };

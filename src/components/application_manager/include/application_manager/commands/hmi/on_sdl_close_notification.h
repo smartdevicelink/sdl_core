@@ -49,7 +49,8 @@ class OnSDLCloseNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSDLCloseNotification(const MessageSharedPtr& message);
+  OnSDLCloseNotification(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnSdlCloseNotification class destructor

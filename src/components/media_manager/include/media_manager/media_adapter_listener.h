@@ -40,17 +40,14 @@ namespace media_manager {
 typedef int32_t DataForListener;
 
 class MediaAdapterListener {
-  public:
-    virtual ~MediaAdapterListener() {
-    }
-    virtual void OnDataReceived(
-      int32_t application_key,
-      const DataForListener& data) = 0;
-    virtual void OnErrorReceived(
-      int32_t application_key,
-      const DataForListener& data) = 0;
-    virtual void OnActivityStarted(int32_t application_key) = 0;
-    virtual void OnActivityEnded(int32_t application_key) = 0;
+ public:
+  virtual ~MediaAdapterListener() {}
+  virtual void OnDataReceived(int32_t application_key,
+                              const DataForListener& data) = 0;
+  virtual void OnErrorReceived(int32_t application_key,
+                               const DataForListener& data) = 0;
+  virtual void OnActivityStarted(int32_t application_key) = 0;
+  virtual void OnActivityEnded(int32_t application_key) = 0;
 };
 }  //  namespace media_manager
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_

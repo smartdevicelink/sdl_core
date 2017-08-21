@@ -37,12 +37,10 @@ namespace application_manager {
 namespace commands {
 
 UISetMediaClockTimerRequest::UISetMediaClockTimerRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UISetMediaClockTimerRequest::~UISetMediaClockTimerRequest() {
-}
+UISetMediaClockTimerRequest::~UISetMediaClockTimerRequest() {}
 
 void UISetMediaClockTimerRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UISetMediaClockTimerRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

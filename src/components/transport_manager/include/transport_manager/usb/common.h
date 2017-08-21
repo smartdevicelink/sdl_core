@@ -53,14 +53,14 @@ static const uint16_t kAoaPid2 = 0x2d01;
 static const uint8_t kAoaInterfaceSubclass = 0xff;
 
 static const uint16_t kAppleVid = 0x05ac;
-static const uint16_t kApplePid1 = 0x1290; // iPhone
-static const uint16_t kApplePid2 = 0x1292; // iPhone 3G
-static const uint16_t kApplePid3 = 0x1294; // iPhone 3GS
-static const uint16_t kApplePid4 = 0x1297; // iPhone 4
-static const uint16_t kApplePid5 = 0x129a; // iPad
-static const uint16_t kApplePid6 = 0x129f; // iPad 2
-static const uint16_t kApplePid7 = 0x12a0; // iPhone 4S
-static const uint16_t kApplePid8 = 0x12a8; // iPhone 5
+static const uint16_t kApplePid1 = 0x1290;  // iPhone
+static const uint16_t kApplePid2 = 0x1292;  // iPhone 3G
+static const uint16_t kApplePid3 = 0x1294;  // iPhone 3GS
+static const uint16_t kApplePid4 = 0x1297;  // iPhone 4
+static const uint16_t kApplePid5 = 0x129a;  // iPad
+static const uint16_t kApplePid6 = 0x129f;  // iPad 2
+static const uint16_t kApplePid7 = 0x12a0;  // iPhone 4S
+static const uint16_t kApplePid8 = 0x12a8;  // iPhone 5
 
 static const int kUsbConfiguration = 1;
 
@@ -70,7 +70,9 @@ class UsbDeviceListener {
  public:
   virtual ~UsbDeviceListener() {}
 
-  UsbHandlerSptr GetUsbHandler() { return usb_handler_; }
+  UsbHandlerSptr GetUsbHandler() {
+    return usb_handler_;
+  }
 
   void SetUsbHandler(UsbHandlerSptr usb_handler) {
     usb_handler_ = usb_handler;
@@ -86,23 +88,24 @@ class UsbDeviceListener {
 
 inline bool IsGoogleAccessory(const PlatformUsbDevice* device) {
   return (kAoaVid == device->vendor_id()) &&
-    ((kAoaPid1 == device->product_id()) || (kAoaPid2 == device->product_id()));
+         ((kAoaPid1 == device->product_id()) ||
+          (kAoaPid2 == device->product_id()));
 }
 
 inline bool IsAppleIAPDevice(const PlatformUsbDevice* device) {
   return (kAppleVid == device->vendor_id()) &&
-    ((kApplePid1 == device->product_id()) ||
-     (kApplePid2 == device->product_id()) ||
-     (kApplePid3 == device->product_id()) ||
-     (kApplePid4 == device->product_id()) ||
-     (kApplePid5 == device->product_id()) ||
-     (kApplePid6 == device->product_id()) ||
-     (kApplePid7 == device->product_id()));
+         ((kApplePid1 == device->product_id()) ||
+          (kApplePid2 == device->product_id()) ||
+          (kApplePid3 == device->product_id()) ||
+          (kApplePid4 == device->product_id()) ||
+          (kApplePid5 == device->product_id()) ||
+          (kApplePid6 == device->product_id()) ||
+          (kApplePid7 == device->product_id()));
 }
 
 inline bool IsAppleIAP2Device(const PlatformUsbDevice* device) {
   return (kAppleVid == device->vendor_id()) &&
-    (kApplePid8 == device->product_id());
+         (kApplePid8 == device->product_id());
 }
 
 inline bool IsAppleDevice(const PlatformUsbDevice* device) {

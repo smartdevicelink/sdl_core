@@ -43,26 +43,27 @@ namespace commands {
  * @brief VRGetCapabilitiesResponse command class
  **/
 class VRGetCapabilitiesResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief VRGetCapabilitiesResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit VRGetCapabilitiesResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief VRGetCapabilitiesResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  VRGetCapabilitiesResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
-    /**
-     * @brief VRGetCapabilitiesResponse class destructor
-     **/
-    virtual ~VRGetCapabilitiesResponse();
+  /**
+   * @brief VRGetCapabilitiesResponse class destructor
+   **/
+  virtual ~VRGetCapabilitiesResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(VRGetCapabilitiesResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VRGetCapabilitiesResponse);
 };
 
 }  // namespace commands

@@ -35,57 +35,58 @@
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 namespace commands {
-
 /**
  * @brief GetUrls command class
  **/
 class GetUrls : public RequestFromHMI {
-  public:
-    /**
-     * @brief GetUrls class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetUrls(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetUrls class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetUrls(const MessageSharedPtr& message,
+          ApplicationManager& application_manager);
 
-    /**
-     * @brief GetUrls class destructor
-     **/
-    virtual ~GetUrls();
+  /**
+   * @brief GetUrls class destructor
+   **/
+  virtual ~GetUrls();
 
-    /**
-     * @brief Execute command
-     **/
-    void Run() OVERRIDE;
+  /**
+   * @brief Execute command
+   **/
+  void Run() OVERRIDE;
 
-  private:
-#ifdef EXTENDED_POLICY
-    /**
-     * @brief Processes URLs collecting for policy service
-     * @param endpoints Endpoints section of policy table
-     */
-    void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
-#endif
+ private:
+#ifdef PROPRIETARY_MODE
+  /**
+   * @brief Processes URLs collecting for policy service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
+#endif  // PROPRIETARY_MODE
 
-    /**
-     * @brief Process URLs collecting for service
-     * @param endpoints Endpoints section of policy table
-     */
-    void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
+  /**
+   * @brief Process URLs collecting for service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
 
-    /**
-     * @brief Sends response to HMI
-     * @param result Result code
-     */
-    void SendResponseToHMI(hmi_apis::Common_Result::eType result);
+  /**
+   * @brief Sends response to HMI
+   * @param result Result code
+   */
+  void SendResponseToHMI(hmi_apis::Common_Result::eType result);
 
-    DISALLOW_COPY_AND_ASSIGN(GetUrls);
+  DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_

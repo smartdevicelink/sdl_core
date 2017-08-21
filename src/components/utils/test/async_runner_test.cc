@@ -30,17 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
 #include <ctime>
-#include "lock.h"
-#include "threads/async_runner.h"
-#include "utils/conditional_variable.h"
+#include <stdlib.h>
 
 #include "gtest/gtest.h"
 
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
+#include "utils/threads/async_runner.h"
+
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace sync_primitives;
 using namespace threads;
@@ -59,9 +60,7 @@ class TestThreadDelegate : public ThreadDelegate {
 
 class AsyncRunnerTest : public ::testing::Test {
  public:
-  AsyncRunnerTest()
-      : kDelegatesNum_(1),
-        asr_pt_(NULL) {
+  AsyncRunnerTest() : kDelegatesNum_(1), asr_pt_(NULL) {
     CreateAsyncRunner();
     CreateThreadsArray();
   }
@@ -75,13 +74,13 @@ class AsyncRunnerTest : public ::testing::Test {
   Lock test_lock_;
   uint32_t kDelegatesNum_;
   ConditionalVariable cond_var_;
-  TestThreadDelegate **delegates_;
-  AsyncRunner *asr_pt_;
+  TestThreadDelegate** delegates_;
+  AsyncRunner* asr_pt_;
 
   void CreateThreadsArray() {
     srand(std::time(NULL));
     kDelegatesNum_ = (rand() % 20 + 1);
-    delegates_ = new TestThreadDelegate*[kDelegatesNum_];
+    delegates_ = new TestThreadDelegate* [kDelegatesNum_];
   }
 
   void DeleteThreadsArray() {
@@ -111,8 +110,9 @@ TEST_F(AsyncRunnerTest, ASyncRunManyDelegates_ExpectSuccessfulAllDelegatesRun) {
   EXPECT_EQ(kDelegatesNum_, check_value);
 }
 
-//TODO(VVeremjova) APPLINK-12834 Sometimes delegates do not run
-TEST_F(AsyncRunnerTest, DISABLED_RunManyDelegatesAndStop_ExpectSuccessfulDelegatesStop) {
+// TODO(VVeremjova) APPLINK-12834 Sometimes delegates do not run
+TEST_F(AsyncRunnerTest,
+       DISABLED_RunManyDelegatesAndStop_ExpectSuccessfulDelegatesStop) {
   AutoLock lock(test_lock_);
   // Clear global value before test
   check_value = 0;
@@ -135,7 +135,6 @@ TEST_F(AsyncRunnerTest, DISABLED_RunManyDelegatesAndStop_ExpectSuccessfulDelegat
   EXPECT_EQ(kDelegatesNum_ / 2, check_value);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
-

@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
@@ -52,7 +52,8 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message);
+  DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
@@ -65,7 +66,6 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-
   /*
    * @brief Check if requested choice set ID in use by perform interaction
    *
@@ -81,4 +81,4 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_

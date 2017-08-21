@@ -31,25 +31,44 @@
  */
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 
 namespace policy {
-  CREATE_LOGGERPTR_GLOBAL(logger_, "AppPermissionDelegate")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
-  AppPermissionDelegate::AppPermissionDelegate(
-      const uint32_t connection_key, const PermissionConsent& permissions)
-    : connection_key_(connection_key),
-      permissions_(permissions) {
-  }
+#ifdef EXTERNAL_PROPRIETARY_MODE
+AppPermissionDelegate::AppPermissionDelegate(
+    const uint32_t connection_key,
+    const PermissionConsent& permissions,
+    const ExternalConsentStatus& external_consent_status,
+    policy::PolicyHandlerInterface& policy_handler)
+    : connection_key_(connection_key)
+    , permissions_(permissions)
+    , external_consent_status_(external_consent_status)
+    , policy_handler_(policy_handler) {}
+#else
+AppPermissionDelegate::AppPermissionDelegate(
+    const uint32_t connection_key,
+    const PermissionConsent& permissions,
+    policy::PolicyHandlerInterface& policy_handler)
+    : connection_key_(connection_key)
+    , permissions_(permissions)
+    , policy_handler_(policy_handler) {}
+#endif
 
-  void AppPermissionDelegate::threadMain() {
+void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  PolicyHandler::instance()->OnAppPermissionConsentInternal(connection_key_,
-                                                            permissions_);
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy_handler_.OnAppPermissionConsentInternal(
+      connection_key_, external_consent_status_, permissions_);
+#else
+  policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
+#endif
 }
 
 void AppPermissionDelegate::exitThreadMain() {
   // Do nothing
 }
 
-} // namespace policy
+}  // namespace policy

@@ -33,7 +33,7 @@
  */
 
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include <string>
@@ -45,12 +45,10 @@ namespace commands {
 namespace mobile {
 
 OnHashChangeNotification::OnHashChangeNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnHashChangeNotification::~OnHashChangeNotification() {
-}
+OnHashChangeNotification::~OnHashChangeNotification() {}
 
 void OnHashChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -60,17 +58,17 @@ void OnHashChangeNotification::Run() {
 
   int32_t app_id;
   app_id = (*message_)[strings::params][strings::connection_key].asInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
   if (app) {
     (*message_)[strings::msg_params][strings::hash_id] = app->curHash();
     SendNotification();
   } else {
-    LOG4CXX_WARN(logger_, "Application with app_id " << app_id << " does not exist");
+    LOG4CXX_WARN(logger_,
+                 "Application with app_id " << app_id << " does not exist");
   }
-
 }
 
-}  //namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

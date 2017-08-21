@@ -45,7 +45,9 @@ class TestDevice : public Device {
  public:
   TestDevice(const uint32_t& in_addr, const std::string& name)
       : Device(name, name), in_addr_(in_addr) {}
-  bool IsSameAs(const Device* other_device) const { return true; }
+  bool IsSameAs(const Device* other_device) const {
+    return true;
+  }
   ApplicationList GetApplicationList() const {
     ApplicationList app_list;
     return app_list;

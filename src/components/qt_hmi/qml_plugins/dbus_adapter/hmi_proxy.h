@@ -39,10 +39,10 @@
 #include "qml_dbus.h"
 
 #if QT_4
-#  include <QtDeclarative/QDeclarativeItem>
+#include <QtDeclarative/QDeclarativeItem>
 typedef QDeclarativeItem Item;
 #elif QT_5
-#  include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickItem>
 typedef QQuickItem Item;
 #endif  // QT_VERSION
 
@@ -51,7 +51,7 @@ class HmiProxy : public Item {
   Q_DISABLE_COPY(HmiProxy)
 
  public:
-  explicit HmiProxy(Item *parent = 0);
+  explicit HmiProxy(Item* parent = 0);
   static ApiAdaptors api_adaptors_;
 
  protected:
@@ -61,4 +61,3 @@ class HmiProxy : public Item {
 QML_DECLARE_TYPE(HmiProxy)
 
 #endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
-

@@ -33,6 +33,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/formatter_json_rpc.h"
+#include "utils/convert_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
@@ -40,23 +41,23 @@ namespace Formatters {
 
 namespace strings = NsJSONHandler::strings;
 
-const char *FormatterJsonRpc::kRequest = "request";
-const char *FormatterJsonRpc::kResponse = "response";
-const char *FormatterJsonRpc::kNotification = "notification";
-const char *FormatterJsonRpc::kErrorResponse = "error_response";
-const char *FormatterJsonRpc::kJsonRpc = "jsonrpc";
-const char *FormatterJsonRpc::kJsonRpcExpectedValue = "2.0";
-const char *FormatterJsonRpc::kId = "id";
-const char *FormatterJsonRpc::kMethod = "method";
-const char *FormatterJsonRpc::kParams = "params";
-const char *FormatterJsonRpc::kResult = "result";
-const char *FormatterJsonRpc::kError = "error";
-const char *FormatterJsonRpc::kCode = "code";
-const char *FormatterJsonRpc::kData = "data";
-const char *FormatterJsonRpc::kMessage = "message";
+const char* FormatterJsonRpc::kRequest = "request";
+const char* FormatterJsonRpc::kResponse = "response";
+const char* FormatterJsonRpc::kNotification = "notification";
+const char* FormatterJsonRpc::kErrorResponse = "error_response";
+const char* FormatterJsonRpc::kJsonRpc = "jsonrpc";
+const char* FormatterJsonRpc::kJsonRpcExpectedValue = "2.0";
+const char* FormatterJsonRpc::kId = "id";
+const char* FormatterJsonRpc::kMethod = "method";
+const char* FormatterJsonRpc::kParams = "params";
+const char* FormatterJsonRpc::kResult = "result";
+const char* FormatterJsonRpc::kError = "error";
+const char* FormatterJsonRpc::kCode = "code";
+const char* FormatterJsonRpc::kData = "data";
+const char* FormatterJsonRpc::kMessage = "message";
 
-bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
-                                std::string &out_str) {
+bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject& obj,
+                                std::string& out_str) {
   bool result = true;
   try {
     Json::Value root(Json::objectValue);
@@ -70,8 +71,8 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
     bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
     bool empty_message_params = true;
     if (true == is_message_params) {
-      const NsSmartObjects::SmartObject &msg_params = formatted_object
-          .getElement(strings::S_MSG_PARAMS);
+      const NsSmartObjects::SmartObject& msg_params =
+          formatted_object.getElement(strings::S_MSG_PARAMS);
 
       result = (NsSmartObjects::SmartType_Map == msg_params.getType());
       if (true == result) {
@@ -85,13 +86,13 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
     if (false == formatted_object.keyExists(strings::S_PARAMS)) {
       result = false;
     } else {
-      const NsSmartObjects::SmartObject &params = formatted_object.getElement(
-          strings::S_PARAMS);
+      const NsSmartObjects::SmartObject& params =
+          formatted_object.getElement(strings::S_PARAMS);
       if (NsSmartObjects::SmartType_Map != params.getType()) {
         result = false;
       } else {
-        const NsSmartObjects::SmartObject &message_type_object = params
-            .getElement(strings::S_MESSAGE_TYPE);
+        const NsSmartObjects::SmartObject& message_type_object =
+            params.getElement(strings::S_MESSAGE_TYPE);
 
         if (NsSmartObjects::SmartType_String != message_type_object.getType()) {
           result = false;
@@ -112,13 +113,14 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
             if (false == params.keyExists(strings::kCode)) {
               result = false;
             } else {
-              const NsSmartObjects::SmartObject &code = params.getElement(
-                  strings::kCode);
+              const NsSmartObjects::SmartObject& code =
+                  params.getElement(strings::kCode);
 
               if (NsSmartObjects::SmartType_Integer != code.getType()) {
                 result = false;
               } else {
-                root[kResult][kCode] = code.asInt();
+                root[kResult][kCode] =
+                    utils::ConvertInt64ToLongLongInt(code.asInt());
               }
             }
           } else if (kNotification == message_type) {
@@ -129,12 +131,13 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
             result = result && SetMethod(params, root[kError][kData]);
             result = result && SetMessage(params, root[kError]);
 
-            const NsSmartObjects::SmartObject &code = params.getElement(
-                strings::kCode);
+            const NsSmartObjects::SmartObject& code =
+                params.getElement(strings::kCode);
             if (NsSmartObjects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kError][kCode] = code.asInt();
+              root[kError][kCode] =
+                  utils::ConvertInt64ToLongLongInt(code.asInt());
             }
           }
         }
@@ -148,12 +151,12 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
   return result;
 }
 
-bool FormatterJsonRpc::SetMethod(const NsSmartObjects::SmartObject &params,
-                                 Json::Value &method_container) {
+bool FormatterJsonRpc::SetMethod(const NsSmartObjects::SmartObject& params,
+                                 Json::Value& method_container) {
   bool result = false;
 
   if (true == params.keyExists(strings::S_FUNCTION_ID)) {
-    const NsSmartObjects::SmartObject &function_id =
+    const NsSmartObjects::SmartObject& function_id =
         params.getElement(strings::S_FUNCTION_ID);
 
     if (NsSmartObjects::SmartType_String == function_id.getType()) {
@@ -165,16 +168,16 @@ bool FormatterJsonRpc::SetMethod(const NsSmartObjects::SmartObject &params,
   return result;
 }
 
-bool FormatterJsonRpc::SetId(const NsSmartObjects::SmartObject &params,
-                             Json::Value &id_container) {
+bool FormatterJsonRpc::SetId(const NsSmartObjects::SmartObject& params,
+                             Json::Value& id_container) {
   bool result = false;
 
   if (true == params.keyExists(strings::S_CORRELATION_ID)) {
-    const NsSmartObjects::SmartObject &id = params.getElement(
-        strings::S_CORRELATION_ID);
+    const NsSmartObjects::SmartObject& id =
+        params.getElement(strings::S_CORRELATION_ID);
 
     if (NsSmartObjects::SmartType_Integer == id.getType()) {
-      id_container[kId] = id.asUInt();
+      id_container[kId] = utils::ConvertUInt64ToLongLongUInt(id.asUInt());
       result = true;
     }
   }
@@ -182,16 +185,16 @@ bool FormatterJsonRpc::SetId(const NsSmartObjects::SmartObject &params,
   return result;
 }
 
-bool FormatterJsonRpc::SetMessage(const NsSmartObjects::SmartObject &params,
-                                  Json::Value &message_container) {
+bool FormatterJsonRpc::SetMessage(const NsSmartObjects::SmartObject& params,
+                                  Json::Value& message_container) {
   bool result = false;
 
   if (true == params.keyExists(strings::kMessage)) {
-    const NsSmartObjects::SmartObject &message = params.getElement(
-        strings::kMessage);
+    const NsSmartObjects::SmartObject& message =
+        params.getElement(strings::kMessage);
 
     if (NsSmartObjects::SmartType_String == message.getType()) {
-       message_container[kMessage] = message.asString();
+      message_container[kMessage] = message.asString();
       result = true;
     }
   }

@@ -56,7 +56,6 @@ typedef std::vector<uint8_t> RfcommChannelVector;
  */
 class BluetoothDevice : public Device {
  public:
-
   /**
    * @brief Return device unique identifier.
    *
@@ -69,9 +68,11 @@ class BluetoothDevice : public Device {
    *
    * @param address Bluetooth address.
    * @param name Human-readable device name.
-   * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink
+   *service has been discovered.
    **/
-  BluetoothDevice(const bdaddr_t& device_address, const char* device_name,
+  BluetoothDevice(const bdaddr_t& device_address,
+                  const char* device_name,
                   const RfcommChannelVector& rfcomm_channels);
 
   /**
@@ -112,7 +113,8 @@ class BluetoothDevice : public Device {
   bdaddr_t address_;
 
   /**
-   * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   * @brief List of RFCOMM channels where SmartDeviceLink service has been
+   *discovered.
    **/
   RfcommChannelVector rfcomm_channels_;
 };
@@ -120,4 +122,4 @@ class BluetoothDevice : public Device {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_

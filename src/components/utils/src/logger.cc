@@ -32,20 +32,25 @@
 
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
+#include "utils/logger_status.h"
 #include <apr_time.h>
 
-void deinit_logger () {
-  CREATE_LOGGERPTR_LOCAL (logger_, "Logger");
+void deinit_logger() {
+  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::LogMessageLoopThread::destroy();
+  logger::set_logs_enabled(false);
+  logger::delete_log_message_loop_thread();
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
+  log4cxx::spi::LoggerRepositoryPtr repository =
+      rootLogger->getLoggerRepository();
   log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end(); ++i) {
+  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();
+       ++i) {
     log4cxx::LoggerPtr logger = *i;
     logger->removeAllAppenders();
   }
   rootLogger->removeAllAppenders();
+  logger::logger_status = logger::LoggerThreadNotCreated;
 }
 
 log4cxx_time_t time_now() {

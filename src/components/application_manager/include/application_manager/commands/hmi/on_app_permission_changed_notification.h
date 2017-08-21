@@ -43,30 +43,31 @@ namespace commands {
  * @brief OnAppPermissionChangedNotification command class
  **/
 class OnAppPermissionChangedNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnAppPermissionChangedNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnAppPermissionChangedNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnAppPermissionChangedNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnAppPermissionChangedNotification(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
-    /**
-     * @brief OnAppPermissionChangedNotification class destructor
-     **/
-    virtual ~OnAppPermissionChangedNotification();
+  /**
+   * @brief OnAppPermissionChangedNotification class destructor
+   **/
+  virtual ~OnAppPermissionChangedNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAppPermissionChangedNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAppPermissionChangedNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_PERMISSION_CHANGED_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_PERMISSION_CHANGED_NOTIFICATION_H_

@@ -49,7 +49,8 @@ class UISetGlobalPropertiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  UISetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UIShowRequest class destructor

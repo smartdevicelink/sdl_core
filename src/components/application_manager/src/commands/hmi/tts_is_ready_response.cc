@@ -30,31 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSIsReadyResponse::TTSIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+TTSIsReadyResponse::TTSIsReadyResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSIsReadyResponse::~TTSIsReadyResponse() {
-}
+TTSIsReadyResponse::~TTSIsReadyResponse() {}
 
 void TTSIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
-
-  bool is_available = false;
-  if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available = object[strings::msg_params][strings::available].asBool();
-  }
-
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-  hmi_capabilities.set_is_tts_cooperating(is_available);
+  event_engine::Event event(hmi_apis::FunctionID::TTS_IsReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

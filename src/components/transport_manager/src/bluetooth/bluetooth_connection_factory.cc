@@ -2,7 +2,7 @@
  * \file bluetooth_connection_factory.cc
  * \brief BluetoothConnectionFactory class source file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
-
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -45,38 +45,35 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothConnectionFactory::BluetoothConnectionFactory(
-  TransportAdapterController* controller)
-  : controller_(controller) {
-}
+    TransportAdapterController* controller)
+    : controller_(controller) {}
 
 TransportAdapter::Error BluetoothConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
 TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
-  const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_, "enter. device_uid: " << &device_uid << ", app_handle: " <<
-                &app_handle);
-  BluetoothSocketConnection* connection(
-    new BluetoothSocketConnection(device_uid, app_handle, controller_));
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::SharedPtr<BluetoothSocketConnection> connection =
+      utils::MakeShared<BluetoothSocketConnection>(
+          device_uid, app_handle, controller_);
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_, "connection::Start() failed");
-    delete connection;
+    LOG4CXX_ERROR(logger_,
+                  "Bluetooth connection::Start() failed with error: " << error);
   }
-  LOG4CXX_TRACE(logger_, "exit with error: " << error);
   return error;
 }
 
-void BluetoothConnectionFactory::Terminate() {
-}
+void BluetoothConnectionFactory::Terminate() {}
 
 bool BluetoothConnectionFactory::IsInitialised() const {
   return true;
 }
 
-BluetoothConnectionFactory::~BluetoothConnectionFactory() {
-}
+BluetoothConnectionFactory::~BluetoothConnectionFactory() {}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

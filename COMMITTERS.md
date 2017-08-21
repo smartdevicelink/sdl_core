@@ -18,6 +18,11 @@ set in the form of a pull request.
 
 **develop branch** - [The branch](https://github.com/LuxoftSDL/sdl_core/tree/develop) where bug fixes against the latest release or release candidate are merged.
 
+## Pre-commit hook installation
+* Go to tools/infrastructure/
+* Run install-hooks.py
+* or : Just run "python tools/infrastructure/install-hooks.py"
+
 ##Pull request checklist
 * Add Unit tests.
 * All tests pass (see Run all tests section).
@@ -36,7 +41,7 @@ set in the form of a pull request.
    there must be comment which explains: When method will be called by thread? Which thread calls the method? e.g.)
 * Do you have specific realization code comments?
 * Add log messages.
-* There are no Google code style errors. (You can download Google [cppint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py))
+* There are no Google code style errors. (You can download Google [cpplint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py))
 * Check branch naming.
 * Check correct commit messages in commits (see Pull request message section).
 * Check correct pull request target (`master` or `develop`)

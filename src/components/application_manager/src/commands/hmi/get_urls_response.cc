@@ -31,24 +31,22 @@
  */
 
 #include "application_manager/commands/hmi/get_urls_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrlsResponse::GetUrlsResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+GetUrlsResponse::GetUrlsResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-GetUrlsResponse::~GetUrlsResponse() {
-}
+GetUrlsResponse::~GetUrlsResponse() {}
 
 void GetUrlsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

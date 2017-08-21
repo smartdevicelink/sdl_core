@@ -28,12 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/dbus/include/
 )
+
+#FIXME: exclude some tests
+set (EXCLUDE_PATHS
+	test_dbus_message_controller.cc
+)
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" ${EXCLUDE_PATHS})
 
 set (LIBRARIES
     gmock
@@ -42,12 +49,4 @@ set (LIBRARIES
     SmartObjects
 )
 
-set(testSources
-    ${COMPONENTS_DIR}/dbus/test/test_schema.cc
-    ${COMPONENTS_DIR}/dbus/test/test_dbus_adapter.cc
-)
-
-create_test("test_DBus_test" "${testSources}" "${LIBRARIES}")
-
-endif()
-
+create_test(test_DBus_test "${SOURCES}" "${LIBRARIES}")
