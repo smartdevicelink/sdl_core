@@ -279,9 +279,6 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
   EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
               HMIToMobileResult(hmi_result)).WillOnce(Return(mob_result));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
-
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

@@ -61,12 +61,18 @@ using am::commands::MessageSharedPtr;
 using am::commands::GetDTCsRequest;
 using am::event_engine::Event;
 using am::MockMessageHelper;
+using testing::Mock;
 namespace mobile_result = mobile_apis::Result;
 
 typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+public:
+      GetDTCsRequestTest():CommandRequestTest<CommandsTestMocks::kIsNice>() {
+          Mock::VerifyAndClearExpectations(message_helper_mock_);
+      }
+};
 
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
