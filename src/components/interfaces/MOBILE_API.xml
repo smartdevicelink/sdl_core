@@ -2562,6 +2562,25 @@
       </param>
   </struct>
 
+  <struct name="SpatialStruct">
+    <description>Defines spatial for each user control object for video streaming application</description>
+    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>A user control spatial identifier</description>
+    </param>
+    <param name="x" type="Float" mandatory="true">
+      <description>The X-coordinate of the user control</description>
+    </param>
+    <param name="y" type="Float" mandatory="true">
+      <description>The Y-coordinate of the user control</description>
+    </param>
+    <param name="width" type="Float" mandatory="true">
+      <description>The width of the user control's bounding rectangle</description>
+    </param>
+    <param name="height" type="Float" mandatory="true">
+      <description>The height of the user control's bounding rectangle</description>
+    </param>
+  </struct>
+
   <!-- Requests/Responses -->
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -5003,25 +5022,6 @@
       <element name="IGNORED"/>
     </param> 
   </function>
-
-  <struct name="SpatialStruct">
-    <description>Defines spatial for each user control object for video streaming application</description>
-    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-      <description>A user control spatial identifier</description>
-    </param>
-    <param name="x" type="Float" mandatory="true">
-      <description>The X-coordinate of the user control</description>
-    </param>
-    <param name="y" type="Float" mandatory="true">
-      <description>The Y-coordinate of the user control</description>
-    </param>
-    <param name="width" type="Float" mandatory="true">
-      <description>The width of the user control's bounding rectangle</description>
-    </param>
-    <param name="height" type="Float" mandatory="true">
-      <description>The height of the user control's bounding rectangle</description>
-    </param>
-  </struct>
 
   <function name="SendHapticData" functionID="SendHapticDataID" messagetype="request" >
     <description>
