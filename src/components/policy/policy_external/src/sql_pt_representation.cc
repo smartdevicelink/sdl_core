@@ -766,9 +766,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     }
 
 #ifdef SDL_REMOTE_CONTROL
-    if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
-      return false;
-    }
     bool denied = false;
     if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
@@ -1063,9 +1060,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
-    return false;
-  }
 
   bool denied = !app.second.moduleType->is_initialized();
   if (!SaveRemoteControlDenied(app.first, denied) ||
@@ -1988,12 +1982,6 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   policy_table::Strings default_groups;
   bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
               SaveAppGroup(app_id, default_groups));
-#ifdef SDL_REMOTE_CONTROL
-  policy_table::Strings groups_primary;
-  ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary) &&
-                SaveAppGroupPrimary(app_id, groups_primary));
-#endif  // SDL_REMOTE_CONTROL
-
   if (ret) {
     return SetIsDefault(app_id, true);
   }

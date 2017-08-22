@@ -143,7 +143,6 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;
 #ifdef SDL_REMOTE_CONTROL
-  Optional<Strings> groups_primaryRC;
   mutable Optional<ModuleTypes> moduleType;
 #endif  // SDL_REMOTE_CONTROL
 

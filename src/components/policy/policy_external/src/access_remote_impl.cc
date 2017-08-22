@@ -203,10 +203,6 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 
 const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (IsAppRemoteControl(who)) {
-    return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
-                .groups_primaryRC;
-  }
   return cache_->GetGroups(who.app_id);
 }
 
