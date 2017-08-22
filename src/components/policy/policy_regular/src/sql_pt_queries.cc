@@ -318,25 +318,6 @@ const std::string kCreateSchema =
     "    REFERENCES `message_type`(`name`) "
     "); "
 
-    "CREATE TABLE IF NOT EXISTS `app_group_primary`( "
-    "  `application_id` VARCHAR(45) NOT NULL, "
-    "  `functional_group_id` INTEGER NOT NULL, "
-    "  PRIMARY KEY(`application_id`,`functional_group_id`), "
-    "  CONSTRAINT `fk_application_has_functional_group_application1` "
-    "    FOREIGN KEY(`application_id`) "
-    "    REFERENCES `application`(`id`), "
-    "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
-    "    FOREIGN KEY(`functional_group_id`) "
-    "    REFERENCES `functional_group`(`id`) "
-    "); "
-    "CREATE INDEX IF NOT EXISTS "
-    "`app_group_primary.fk_application_has_functional_group_functional_group1_"
-    "idx` "
-    "  ON `app_group_primary`(`functional_group_id`); "
-    "CREATE INDEX IF NOT EXISTS "
-    "`app_group_primary.fk_application_has_functional_group_application1_idx` "
-    "  ON `app_group_primary`(`application_id`); "
-
     /* access_module */
     "CREATE TABLE `access_module`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -406,24 +387,12 @@ const std::string kInsertInitData =
     "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
     "";
 
-const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
-
 const std::string kDeleteModuleTypes = "DELETE FROM `module_type`";
 
 const std::string kDeleteAllDevices = "DELETE FROM `device`;";
 
-const std::string kSelectAppGroupsPrimary =
-    "SELECT `f`.`name` FROM `app_group_primary` AS `a`"
-    "  LEFT JOIN `functional_group` AS `f` "
-    "    ON (`f`.`id` = `a`.`functional_group_id`)"
-    "  WHERE `a`.`application_id` = ?";
-
 const std::string kSelectRemoteControlDenied =
     "SELECT `remote_control_denied` FROM `application` WHERE `id` = ? LIMIT 1";
-
-const std::string kInsertAppGroupPrimary =
-    "INSERT INTO `app_group_primary` (`application_id`, `functional_group_id`)"
-    "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
 
 const std::string kUpdateRemoteControlDenied =
     "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
@@ -435,9 +404,6 @@ const std::string kDeleteRemoteRpc = "DELETE FROM `remote_rpc`";
 const std::string kInsertAccessModule =
     "INSERT INTO `access_module` (`name`, `user_consent_needed`) "
     "  VALUES(?, ?, ?)";
-
-const std::string kDeleteAppGroupPrimaryByApplicationId =
-    "DELETE FROM `app_group_primary` WHERE `application_id` = ?";
 
 const std::string kSelectAccessModules =
     "SELECT `id`, `name` FROM `access_module` "
@@ -494,12 +460,6 @@ const std::string kDropSchema =
     "`preconsented_group.fk_application_has_functional_group_functional_group2_"
     "idx`; "
     "DROP TABLE IF EXISTS `preconsented_group`; "
-    "DROP INDEX IF EXISTS "
-    "`app_group_primary.fk_application_has_functional_group_application1_idx`; "
-    "DROP INDEX IF EXISTS "
-    "`app_group_primary.fk_application_has_functional_group_functional_group1_"
-    "idx`; "
-    "DROP TABLE IF EXISTS `app_group_primary`; "
     "DROP TABLE IF EXISTS `access_module`; "
     "DROP INDEX IF EXISTS `access_module.fk_module_1_idx`; "
     "DROP INDEX IF EXISTS "
@@ -548,7 +508,6 @@ const std::string kDeleteData =
     "DELETE FROM `app_group`; "
     "DELETE FROM `application`; "
     "DELETE FROM `rpc`; "
-    "DELETE FROM `app_group_primary`; "
     "DELETE FROM `access_module`; "
     "DELETE FROM `version`; "
     "DELETE FROM `message_type`; "
