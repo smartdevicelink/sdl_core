@@ -235,6 +235,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
+  command->Init();
   command->Run();
 
   am::event_engine::Event test_event(

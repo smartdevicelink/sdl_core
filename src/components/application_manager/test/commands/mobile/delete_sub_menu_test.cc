@@ -289,6 +289,7 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   DeleteSubMenuRequestPtr command =
       CreateCommand<DeleteSubMenuRequest>(message_);
 
+  command->Init();
   command->on_event(event);
 }
 

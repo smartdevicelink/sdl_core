@@ -189,9 +189,6 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
-  MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
-
   command->on_event(event);
 }
 
