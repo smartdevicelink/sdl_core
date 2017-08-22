@@ -420,7 +420,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
-  const int32_t total_tables_number = 29;
+  const int32_t total_tables_number = 28;
   ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";

@@ -241,7 +241,6 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
 #ifdef SDL_REMOTE_CONTROL
-    , groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
 #endif  // SDL_REMOTE_CONTROL
 {
@@ -256,7 +255,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
 #ifdef SDL_REMOTE_CONTROL
-  impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
 #endif  // SDL_REMOTE_CONTROL
   return result__;
@@ -281,9 +279,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
 #ifdef SDL_REMOTE_CONTROL
-  if (!groups_primaryRC.is_valid()) {
-    return false;
-  }
   if (!moduleType.is_valid()) {
     return false;
   }
@@ -315,9 +310,6 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
 #ifdef SDL_REMOTE_CONTROL
-  if (groups_primaryRC.is_initialized()) {
-    return false;
-  }
   if (moduleType.is_initialized()) {
     return false;
   }
@@ -366,10 +358,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  if (!groups_primaryRC.is_valid()) {
-    groups_primaryRC.ReportErrors(
-        &report__->ReportSubobject("groups_primaryRC"));
-  }
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
@@ -383,7 +371,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
 #ifdef SDL_REMOTE_CONTROL
-  groups_primaryRC.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
 #endif  // SDL_REMOTE_CONTROL
 }

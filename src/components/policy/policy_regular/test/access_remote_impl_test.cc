@@ -85,17 +85,11 @@ TEST(AccessRemoteImplTest, GetGroups) {
   policy_table::ApplicationPolicies& apps =
       access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"].groups.push_back("group_default");
-  apps["1234"].groups_primaryRC->push_back("group_primary");
   apps["1234"].AppHMIType->push_back(policy_table::AHT_MEDIA);
 
   // Default groups
   const policy_table::Strings& groups1 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_default"), std::string(groups1[0]));
-
-  // Primary groups
-  apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups2 = access_remote.GetGroups(who);
-  EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
 }
 
 }  // namespace policy

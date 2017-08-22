@@ -896,15 +896,6 @@ void ProccessAppGroups::operator()(
   if (i == new_apps_.end() && default_ != new_apps_.end()) {
     i = default_;
   }
-  if (i != new_apps_.end()) {
-    if (HaveGroupsChanged(i->second.groups_primaryRC,
-                          app.second.groups_primaryRC)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Primary groups for " << app.first << " have changed");
-
-      pm_->OnPrimaryGroupsChanged(app.first);
-    }
-  }
 }
 
 #endif  // SDL_REMOTE_CONTROL
