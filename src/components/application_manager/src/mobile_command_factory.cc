@@ -619,6 +619,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SendHapticDataID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SendHapticDataResponse(message, application_manager));
+      } else {
+        command.reset(
+            new commands::SendHapticDataRequest(message, application_manager));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::mobile::OnButtonEventNotification(
           message, application_manager));
@@ -702,17 +713,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       command = utils::MakeShared<commands::OnWayPointChangeNotification>(
           message, application_manager);
-      break;
-    }
-    case mobile_apis::FunctionID::SendHapticDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SendHapticDataResponse(message, application_manager));
-      } else {
-        command.reset(
-            new commands::SendHapticDataRequest(message, application_manager));
-      }
       break;
     }
     default: {
