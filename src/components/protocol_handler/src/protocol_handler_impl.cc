@@ -243,6 +243,17 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
+  const bool proxy_supports_v5_protocol =
+      protocol_version >= PROTOCOL_VERSION_5 ||
+      (ServiceTypeFromByte(service_type) == kRpc &&
+       full_version.majorVersion >= PROTOCOL_VERSION_5);
+
+  // We can't send a V5+ packet if the proxy doesn't support it,
+  // so we manually set a maximum of V4 in that case
+  if (!proxy_supports_v5_protocol && maxProtocolVersion >= PROTOCOL_VERSION_5) {
+    maxProtocolVersion = PROTOCOL_VERSION_4;
+  }
+
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
                                            maxProtocolVersion,
@@ -254,13 +265,8 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                            0u,
                                            message_counters_[session_id]++));
 
-  const bool proxy_supports_v5_protocol =
-      protocol_version >= PROTOCOL_VERSION_5 ||
-      (ServiceTypeFromByte(service_type) == kRpc &&
-       full_version.majorVersion >= PROTOCOL_VERSION_5);
-
   // Cannot include a constructed payload if either side doesn't support it
-  if (proxy_supports_v5_protocol && maxProtocolVersion >= PROTOCOL_VERSION_5) {
+  if (maxProtocolVersion >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
     bson_object_put_int64(
