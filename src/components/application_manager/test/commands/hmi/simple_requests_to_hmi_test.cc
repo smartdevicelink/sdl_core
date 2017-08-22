@@ -114,6 +114,7 @@
 #include "application_manager/commands/hmi/sdl_policy_update.h"
 #include "application_manager/commands/hmi/ui_set_icon_request.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_request.h"
 
 #include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
 
@@ -217,7 +218,8 @@ typedef Types<am_commands::VIGetVehicleTypeRequest,
               am_commands::NaviAlertManeuverRequest,
               am_commands::AudioStopStreamRequest,
               am_commands::NaviGetWayPointsRequest,
-              am_commands::UISetGlobalPropertiesRequest> RequestCommandsList;
+              am_commands::UISetGlobalPropertiesRequest,
+              am_commands::UISendHapticDataRequest> RequestCommandsList;
 
 typedef Types<am_commands::UIScrollableMessageRequest,
               am_commands::VRGetCapabilitiesRequest,

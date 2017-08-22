@@ -102,6 +102,7 @@
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_response.h"
 #include "hmi/notification_from_hmi.h"
+#include "hmi/ui_send_haptic_data_response.h"
 
 namespace test {
 namespace components {
@@ -232,7 +233,9 @@ typedef Types<
     CommandData<commands::VRPerformInteractionResponse,
                 hmi_apis::FunctionID::VR_PerformInteraction>,
     CommandData<commands::UIScrollableMessageResponse,
-                hmi_apis::FunctionID::UI_ScrollableMessage> >
+                hmi_apis::FunctionID::UI_ScrollableMessage>,
+    CommandData<commands::UISendHapticDataResponse,
+                hmi_apis::FunctionID::UI_SendHapticData> >
     ResponseCommandsList;
 
 typedef Types<commands::AudioStopStreamResponse,
