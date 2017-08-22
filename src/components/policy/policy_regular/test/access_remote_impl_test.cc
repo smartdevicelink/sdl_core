@@ -90,11 +90,6 @@ TEST(AccessRemoteImplTest, GetGroups) {
   // Default groups
   const policy_table::Strings& groups1 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_default"), std::string(groups1[0]));
-
-  // Primary groups
-  apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups2 = access_remote.GetGroups(who);
-  EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
 }
 
 }  // namespace policy
