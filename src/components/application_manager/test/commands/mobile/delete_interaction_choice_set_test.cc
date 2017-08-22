@@ -211,6 +211,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
 
+  command->Init();
   command->Run();
 }
 
@@ -247,6 +248,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
 
+  command->Init();
   command->Run();
 }
 

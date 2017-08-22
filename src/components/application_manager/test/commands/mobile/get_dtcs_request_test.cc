@@ -68,10 +68,10 @@ typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
-public:
-      GetDTCsRequestTest():CommandRequestTest<CommandsTestMocks::kIsNice>() {
-          Mock::VerifyAndClearExpectations(message_helper_mock_);
-      }
+ public:
+  GetDTCsRequestTest() : CommandRequestTest<CommandsTestMocks::kIsNice>() {
+    Mock::VerifyAndClearExpectations(message_helper_mock_);
+  }
 };
 
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {

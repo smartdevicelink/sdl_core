@@ -300,19 +300,22 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     return false;
   }
 
-  BIO* bio_cert = BIO_new_mem_buf(const_cast<char*>(cert_data.c_str()), cert_data.length());
+  BIO* bio_cert =
+      BIO_new_mem_buf(const_cast<char*>(cert_data.c_str()), cert_data.length());
 
   utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
   UNUSED(bio_guard)
 
   X509* cert = NULL;
-  PEM_read_bio_X509(bio_cert, &cert,0, 0);
+  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
 
   EVP_PKEY* pkey = NULL;
   if (1 == BIO_reset(bio_cert)) {
-    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0,0);
+    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
   } else {
-    LOG4CXX_WARN(logger_, "Unabled to reset BIO in order to read private key, " << LastError());
+    LOG4CXX_WARN(logger_,
+                 "Unabled to reset BIO in order to read private key, "
+                     << LastError());
   }
 
   if (NULL == cert || NULL == pkey) {

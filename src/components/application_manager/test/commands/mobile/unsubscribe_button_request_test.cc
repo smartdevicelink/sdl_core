@@ -145,7 +145,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   EXPECT_CALL(*mock_app, UpdateHash());
-
+  command->Init();
   command->Run();
 }
 

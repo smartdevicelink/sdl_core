@@ -383,11 +383,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_))
-      .WillOnce(Return(invalid_app));
-
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
 
   ResetGlobalPropertiesRequestPtr command =
