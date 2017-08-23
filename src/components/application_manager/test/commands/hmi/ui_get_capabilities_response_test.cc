@@ -322,6 +322,8 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   video_streaming_capability[strings::supported_formats][0][strings::codec] =
       hmi_apis::Common_VideoStreamingCodec::H264;
 
+  video_streaming_capability[strings::haptic_spatial_data_supported] = true;
+
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 

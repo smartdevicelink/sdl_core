@@ -2548,6 +2548,9 @@
         Each object will contain a VideoStreamingFormat that describes what can be expected.
       </description>
     </param>
+    <param name="hapticSpatialDataSupported" type="Boolean" mandatory="false">
+      <description>True if the system can utilize the haptic spatial data from the source being streamed.</description>
+    </param>
   </struct>
 
   <struct name="SystemCapability">

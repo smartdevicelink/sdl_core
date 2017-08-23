@@ -351,6 +351,7 @@ extern const char* const resolution_width;
 extern const char* const resolution_height;
 extern const char* const max_bitrate;
 extern const char* const supported_formats;
+extern const char* const haptic_spatial_data_supported;
 }  // namespace strings
 
 namespace json {

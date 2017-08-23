@@ -312,6 +312,7 @@ const char* const resolution_width = "resolutionWidth";
 const char* const resolution_height = "resolutionHeight";
 const char* const max_bitrate = "maxBitrate";
 const char* const supported_formats = "supportedFormats";
+const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
 }  // namespace strings
 
 namespace json {
