@@ -283,6 +283,9 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
 bool PolicyManagerImpl::LoadPT(const std::string& file,
                                const BinaryMessage& pt_content) {
   LOG4CXX_INFO(logger_, "LoadPT of size " << pt_content.size());
+  LOG4CXX_DEBUG(
+      logger_,
+      "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
