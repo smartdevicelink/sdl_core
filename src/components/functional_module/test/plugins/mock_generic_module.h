@@ -61,6 +61,9 @@ class MockGenericModule : public GenericModule {
                void(application_manager::ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType old_level));
   MOCK_METHOD1(OnUnregisterApplication, void(const uint32_t app_id));
+  MOCK_METHOD2(OnSDLEvent,
+               void(functional_modules::SDLEvent event,
+                    const uint32_t application_id));
   MOCK_METHOD0(RemoveAppExtensions, void());
 };
 

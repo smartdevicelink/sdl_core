@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "functional_module/plugin_manager.h"
 
 namespace application_manager {
 
@@ -61,6 +62,11 @@ void OnExitApplicationNotification::Run() {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  application_manager_.GetPluginManager().OnSDLEvent(
+      functional_modules::SDLEvent::kApplicationExit, app_id);
+#endif  // SDL_REMOTE_CONTROL
 
   Common_ApplicationExitReason::eType reason;
   reason = static_cast<Common_ApplicationExitReason::eType>(

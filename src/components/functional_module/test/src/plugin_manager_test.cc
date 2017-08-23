@@ -43,37 +43,6 @@ TEST_F(PluginManagerTest, ChangePluginsState) {
   manager->OnServiceStateChanged(kState);
 }
 
-TEST_F(PluginManagerTest, IsMessageForPluginFail) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
-  EXPECT_FALSE(manager->IsMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsMessageForPluginPass) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_3);
-  msg->set_function_id(101);  // see MockGenericModule
-  EXPECT_TRUE(manager->IsMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsHMIMessageForPluginFail) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
-  EXPECT_FALSE(manager->IsHMIMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsHMIMessageForPluginPass) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_HMI);
-  std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
-  msg->set_json_message(json);
-  EXPECT_TRUE(manager->IsHMIMessageForPlugin(msg));
-}
-
 TEST_F(PluginManagerTest, RemoveAppExtension) {
   const uint32_t kAppId = 2;
   EXPECT_CALL(*module, RemoveAppExtension(kAppId)).Times(1);
@@ -99,6 +68,21 @@ TEST_F(PluginManagerTest, ProcessMessagePass) {
       .Times(1)
       .WillOnce(Return(ProcessResult::PROCESSED));
   manager->ProcessMessage(message);
+}
+
+TEST_F(PluginManagerTest, SDL_events_triggers_module) {
+  using namespace functional_modules;
+  std::vector<SDLEvent> events;
+  events.push_back(SDLEvent::kApplicationExit);
+  events.push_back(SDLEvent::kApplicationPolicyUpdated);
+  events.push_back(SDLEvent::kApplicationUnregistered);
+  events.push_back(SDLEvent::kApplicationsDisabled);
+
+  std::vector<SDLEvent>::const_iterator ev = events.begin();
+  for (; events.end() != ev; ++ev) {
+    EXPECT_CALL(*module, OnSDLEvent(*ev, _));
+    manager->OnSDLEvent(*ev);
+  }
 }
 
 TEST_F(PluginManagerTest, ProcessHMIMessageFail) {

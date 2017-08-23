@@ -95,6 +95,49 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   }
 }
 
+bool ResourceAllocationManagerImpl::ReleaseResource(
+    const std::string& module_type, const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Release " << module_type << " by " << application_id);
+  AllocatedResources::const_iterator allocation =
+      allocated_resources_.find(module_type);
+  if (allocated_resources_.end() == allocation) {
+    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
+    return false;
+  }
+
+  if (application_id != allocation->second) {
+    LOG4CXX_DEBUG(logger_,
+                  "Resource " << module_type
+                              << " is allocated by different application "
+                              << allocation->second);
+    return false;
+  }
+
+  allocated_resources_.erase(allocation);
+  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
+  return true;
+}
+
+std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
+    const uint32_t application_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Resources allocated_resources;
+  AllocatedResources::const_iterator allocation = allocated_resources_.begin();
+  for (; allocated_resources_.end() != allocation; ++allocation) {
+    if (application_id == allocation->second) {
+      allocated_resources.push_back(allocation->first);
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Application " << application_id << " acquired "
+                               << allocated_resources.size()
+                               << " resource(s).");
+
+  return allocated_resources;
+}
+
 void ResourceAllocationManagerImpl::SetResourceState(
     const std::string& module_type,
     const uint32_t app_id,
@@ -194,32 +237,6 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
   std::vector<std::string>& list_of_rejected_resources =
       rejected_resources_for_application_[app_id];
   list_of_rejected_resources.push_back(module_type);
-}
-
-void ResourceAllocationManagerImpl::OnUnregisterApplication(
-    const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  {
-    sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
-    rejected_resources_for_application_.erase(app_id);
-  }
-
-  sync_primitives::AutoLock lock_allocated(allocated_resources_lock_);
-  for (AllocatedResources::const_iterator it = allocated_resources_.begin();
-       it != allocated_resources_.end();) {
-    if (app_id == it->second) {
-      LOG4CXX_INFO(logger_,
-                   "Application " << app_id
-                                  << " is unregistered. Releasing resource "
-                                  << it->first);
-      sync_primitives::AutoLock lock_state(resources_state_lock_);
-      resources_state_.erase(it->first);
-      it = allocated_resources_.erase(it);
-    } else {
-      ++it;
-    }
-  }
 }
 
 void ResourceAllocationManagerImpl::ResetAllAllocations() {

@@ -48,15 +48,27 @@ class PluginManager : public ModuleObserver {
   typedef std::map<ModuleID, ModulePtr> Modules;
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
-  void ProcessMessage(application_manager::MessagePtr msg);
+
+  /**
+   * @brief ProcessMessage forwards modules message to modules if any is
+   * subsribed for the message.
+   * @param msg Mobile message to process
+   * @return Result of processing
+   */
+  ProcessResult ProcessMessage(application_manager::MessagePtr msg);
+
+  /**
+   * @brief ProcessHMIMessage forwards HMI message to modules if any is
+   * subscribed for the message
+   * @param msg HMI message to process
+   * @return Result of processing
+   */
   ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg);
   void SetServiceHandler(application_manager::ServicePtr service) {
     service_ = service;
   }
-  bool IsMessageForPlugin(application_manager::MessagePtr msg);
-  bool IsHMIMessageForPlugin(application_manager::MessagePtr msg);
   void OnServiceStateChanged(ServiceState state);
-  void OnError(ModuleObserver::Errors error, ModuleID module_id);
+  void OnError(ModuleObserver::Errors error, ModuleID module_id) FINAL;
 
   /**
    * @brief Remove extension created for specified application
@@ -90,10 +102,13 @@ class PluginManager : public ModuleObserver {
                             mobile_apis::HMILevel::eType old_level);
 
   /**
-   * @brief OnUnregisterApplication handles application unregistering event
-   * @param app_id application id which was unregistered
+   * @brief OnSDLEvent Notifies modules about certain event happened in SDL
+   * @param event Event
+   * @param application_id Application id of particular application or zero if
+   * event is common for all applications
    */
-  void OnUnregisterApplication(const uint32_t app_id);
+  void OnSDLEvent(functional_modules::SDLEvent event,
+                  const uint32_t application_id = 0);
 
   Modules& plugins();
 

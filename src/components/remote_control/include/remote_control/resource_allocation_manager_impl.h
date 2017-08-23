@@ -19,6 +19,24 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   AcquireResult::eType AcquireResource(const std::string& module_type,
                                        const uint32_t app_id) OVERRIDE FINAL;
 
+  /**
+   * @brief ReleaseResource Releases resource acquired by application
+   * @param module_type Module name
+   * @param application_id Application id
+   * @return True if resource is acquired by application and has been released,
+   * otherwise - false
+   */
+  bool ReleaseResource(const std::string& module_type,
+                       const uint32_t application_id) OVERRIDE;
+
+  /**
+   * @brief GetAcquiredResources Provides resources acquired by particular
+   * application currently
+   * @param application_id Application id
+   * @return List of acquired resources by specific application
+   */
+  Resources GetAcquiredResources(const uint32_t application_id) const FINAL;
+
   void SetResourceState(const std::string& module_type,
                         const uint32_t app_id,
                         const ResourceState::eType state) FINAL;
@@ -35,8 +53,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void OnDriverDisallowed(const std::string& module_type,
                           const uint32_t app_id) OVERRIDE FINAL;
-
-  void OnUnregisterApplication(const uint32_t app_id) FINAL;
 
   void ResetAllAllocations() FINAL;
 

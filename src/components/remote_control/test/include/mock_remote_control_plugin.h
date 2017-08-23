@@ -41,6 +41,9 @@ class MockRemotePluginInterface : public remote_control::RemotePluginInterface {
   MOCK_CONST_METHOD0(GetModuleID, functional_modules::ModuleID());
   MOCK_METHOD0(resource_allocation_manager,
                remote_control::ResourceAllocationManager&());
+  MOCK_METHOD2(OnSDLEvent,
+               void(functional_modules::SDLEvent event,
+                    const uint32_t application_id));
 };
 
 }  // namespace remote_control_test

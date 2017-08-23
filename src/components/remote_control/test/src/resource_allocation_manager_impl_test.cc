@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include "gtest/gtest.h"
+#include <algorithm>
 #include "remote_control/resource_allocation_manager_impl.h"
 #include "mock_resource_allocation_manager.h"
 #include "mock_remote_control_plugin.h"
@@ -233,8 +234,7 @@ TEST_F(RAManagerTest,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
-TEST_F(RAManagerTest,
-       AcquireResource_App1OccupiedResourceAndDisconnected_ExpectApp2Allowed) {
+TEST_F(RAManagerTest, ReleaseResource_Success) {
   // Arrange
   ResourceAllocationManagerImpl ra_manager(mock_module_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
@@ -245,13 +245,61 @@ TEST_F(RAManagerTest,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
   // Act
-  ra_manager.OnUnregisterApplication(kAppId1);
+  EXPECT_TRUE(ra_manager.ReleaseResource(kModuleType1, kAppId1));
+}
 
-  // Assert
-  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
-      .WillOnce(Return(mock_app_2_));
+TEST_F(RAManagerTest, ReleaseResource_AnotherApp_Fail) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillOnce(Return(mock_app_1_));
   EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
-            ra_manager.AcquireResource(kModuleType1, kAppId2));
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  // Act
+  EXPECT_FALSE(ra_manager.ReleaseResource(kModuleType1, kAppId2));
+}
+
+TEST_F(RAManagerTest, ReleaseResource_AnotherModule_Fail) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillOnce(Return(mock_app_1_));
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  // Act
+  EXPECT_FALSE(ra_manager.ReleaseResource(kModuleType2, kAppId1));
+}
+
+TEST_F(RAManagerTest, GetAcquiredResources_Success) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  remote_control::Resources resources;
+  resources.push_back(kModuleType1);
+  resources.push_back(kModuleType2);
+
+  ON_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillByDefault(Return(mock_app_1_));
+
+  remote_control::Resources::const_iterator res = resources.begin();
+  for (; resources.end() != res; ++res) {
+    EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+              ra_manager.AcquireResource(*res, kAppId1));
+  }
+
+  // Act
+  remote_control::Resources acquired_resources =
+      ra_manager.GetAcquiredResources(kAppId1);
+
+  EXPECT_TRUE(std::equal(
+      resources.begin(), resources.end(), acquired_resources.begin()));
 }
 
 TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {

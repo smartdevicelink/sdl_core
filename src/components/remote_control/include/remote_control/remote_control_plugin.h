@@ -92,12 +92,6 @@ class RemoteControlPlugin : public RemotePluginInterface {
                             mobile_apis::HMILevel::eType old_level);
 
   /**
-   * @brief OnUnregisterApplication handles application unregistering event
-   * @param app_id application id which was unregistered
-   */
-  void OnUnregisterApplication(const uint32_t app_id) OVERRIDE;
-
-  /**
    * @brief Sends HMI status notification to mobile
    * @param app application with changed HMI status
    **/
@@ -122,6 +116,15 @@ class RemoteControlPlugin : public RemotePluginInterface {
    */
   void set_service(application_manager::ServicePtr service) OVERRIDE;
 
+  /*
+   * @brief OnSDLEvent Processed defined events coming from SDL
+   * @param event Event
+   * @param application_id Application id or zero if event is common for all
+   * applications
+   */
+  void OnSDLEvent(functional_modules::SDLEvent event,
+                  const uint32_t application_id = 0) OVERRIDE;
+
  protected:
   /**
    * @brief Remove extension for all applications
@@ -139,6 +142,13 @@ class RemoteControlPlugin : public RemotePluginInterface {
    * @brief Subscribes on all RC related functions
    */
   void SubscribeOnFunctions();
+
+  /**
+   * @brief ProcessApplicationPolicyUpdate Checks if allowed modules list is
+   * changed for registered RC applications and releases in case some modules
+   * now out of the list
+   */
+  void ProcessApplicationPolicyUpdate();
 
   functional_modules::PluginInfo plugin_info_;
   bool is_scan_started_;

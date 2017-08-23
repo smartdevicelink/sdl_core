@@ -22,6 +22,11 @@ namespace ResourceState {
 enum eType { FREE = 0, BUSY };
 }
 
+/**
+ * @brief Resources defines list of resources
+ */
+typedef std::vector<std::string> Resources;
+
 class ResourceAllocationManager {
  public:
   /**
@@ -34,6 +39,24 @@ class ResourceAllocationManager {
    */
   virtual AcquireResult::eType AcquireResource(const std::string& module_type,
                                                const uint32_t app_id) = 0;
+
+  /**
+   * @brief ReleaseResource Releases resource acquired by application
+   * @param module_type Module name
+   * @param application_id Application id
+   * @return True if resource has been released
+   */
+  virtual bool ReleaseResource(const std::string& module_type,
+                               const uint32_t application_id) = 0;
+
+  /**
+   * @brief GetAcquiredResources Provides resources acquired by particular
+   * application currently
+   * @param application_id Application id
+   * @return List of acquired resources by specific application
+   */
+  virtual Resources GetAcquiredResources(
+      const uint32_t application_id) const = 0;
 
   /**
    * @brief SetResourceState changes resource state. Resource must be acquired
@@ -52,12 +75,6 @@ class ResourceAllocationManager {
    * @return True if free, otherwise - false
    */
   virtual bool IsResourceFree(const std::string& module_type) const = 0;
-
-  /**
-   * @brief OnUnregisterApplication handles application unregistering event
-   * @param app_id application id which was unregistered
-   */
-  virtual void OnUnregisterApplication(const uint32_t app_id) = 0;
 
   /**
    * @brief AcquireResource forces acquiring resource by application

@@ -55,6 +55,7 @@
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
 #include "policy/policy_manager.h"
+#include "functional_module/plugin_manager.h"
 
 namespace policy {
 
@@ -1184,6 +1185,10 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             accessor.GetData().end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
+#ifdef SDL_REMOTE_CONTROL
+        application_manager_.GetPluginManager().OnSDLEvent(
+            functional_modules::SDLEvent::kApplicationsDisabled);
+#endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(
             accessor.GetData().begin(),
@@ -1192,7 +1197,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));
       }
-
 #endif  // EXTERNAL_PROPRIETARY_MODE
     }
   }

@@ -44,6 +44,7 @@ set (SOURCES
 )
 set (LIBRARIES
     ApplicationManager
+    jsoncpp
 )
 
 add_library("FunctionalModule" ${SOURCES})

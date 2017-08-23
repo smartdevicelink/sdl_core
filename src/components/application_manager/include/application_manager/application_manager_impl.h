@@ -735,6 +735,12 @@ class ApplicationManagerImpl
   void OnUpdateHMIAppType(
       std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
 
+  /**
+   * @brief OnPTUFinished is called on policy table update coming
+   * @param ptu_result True if PTU is succeeded, otherwise - false
+   */
+  void OnPTUFinished(const bool ptu_result) FINAL;
+
   /*
    * @brief Starts audio pass thru thread
    *
