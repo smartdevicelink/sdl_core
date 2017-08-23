@@ -233,6 +233,8 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
   for (; iter != iter_end; ++iter) {
     if (iter->second.is_null()) {
+      pt_->policy_table.app_policies_section.apps[iter->first] =
+          policy_table::ApplicationParams();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");

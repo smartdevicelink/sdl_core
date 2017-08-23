@@ -247,6 +247,11 @@ void RemoteControlPlugin::ProcessApplicationPolicyUpdate() {
     service()->GetModuleTypes((*app)->policy_app_id(), &allowed_modules);
     std::sort(allowed_modules.begin(), allowed_modules.end());
 
+    LOG4CXX_DEBUG(logger_,
+                  "Acquired modules: " << acquired_modules.size()
+                                       << " , allowed modules: "
+                                       << allowed_modules.size());
+
     Resources disallowed_modules;
     std::set_difference(acquired_modules.begin(),
                         acquired_modules.end(),
