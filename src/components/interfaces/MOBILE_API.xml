@@ -1500,22 +1500,26 @@
     <param name="band" type="RadioBand" mandatory="false">
     </param>
     <param name="rdsData" type="RdsData" mandatory="false">
+      <description> Read only parameter.</description>
     </param>
     <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
-      <description>number of HD sub-channels if available</description>
+      <description>number of HD sub-channels if available. Read only parameter.</description>
     </param>
     <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
       <description>Current HD sub-channel if available</description>
     </param>
     <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description> Read only parameter.</description>
     </param>
     <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-      <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+      <description>If the signal strength falls below the set value for this parameter,
+                   the radio will tune to an alternative frequency. Read only parameter.</description>
     </param>
     <param name="radioEnable" type="Boolean" mandatory="false">
-      <description> True if the radio is on, false is the radio is off</description>
+      <description> True if the radio is on, false is the radio is off.</description>
     </param>
     <param name="state" type="RadioState" mandatory="false">
+      <description> Read only parameter.</description>
     </param>
   </struct>
 
@@ -1612,6 +1616,7 @@
     <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
     </param>
     <param name="currentTemperature" type="Temperature" mandatory="false">
+      <description> Read only parameter.</description>
     </param>
     <param name="desiredTemperature" type="Temperature" mandatory="false">
     </param>
