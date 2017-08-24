@@ -2565,22 +2565,28 @@
       </param>
   </struct>
 
-  <struct name="SpatialStruct">
-    <description>Defines spatial for each user control object for video streaming application</description>
+  <struct name="Rectangle">
+    <param name="x" type="Float" mandatory="true">
+      <description>The upper left X-coordinate of the rectangle</description>
+    </param>
+    <param name="y" type="Float" mandatory="true">
+      <description>The upper left Y-coordinate of the rectangle</description>
+    </param>
+    <param name="width" type="Float" mandatory="true">
+      <description>The width of the rectangle</description>
+    </param>
+    <param name="height" type="Float" mandatory="true">
+      <description>The height of the rectangle</description>
+    </param>
+  </struct>
+
+  <struct name="HapticRect">
+    <description>Defines haptic data for each user control object for video streaming application</description>
     <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>A user control spatial identifier</description>
     </param>
-    <param name="x" type="Float" mandatory="true">
-      <description>The X-coordinate of the user control</description>
-    </param>
-    <param name="y" type="Float" mandatory="true">
-      <description>The Y-coordinate of the user control</description>
-    </param>
-    <param name="width" type="Float" mandatory="true">
-      <description>The width of the user control's bounding rectangle</description>
-    </param>
-    <param name="height" type="Float" mandatory="true">
-      <description>The height of the user control's bounding rectangle</description>
+    <param name="rect" type="Rectangle" mandatory="true">
+      <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
     </param>
   </struct>
 
@@ -5031,12 +5037,12 @@
       Send the spatial data gathered from SDLCarWindow or VirtualDisplayEncoder to the HMI.
       This data will be utilized by the HMI to determine how and when haptic events should occur
     </description>
-    <param name="HapticSpatialData" type="SpatialStruct" minsize="0" maxsize="1000" mandatory="false" array="true">
+    <param name="hapticRectData" type="HapticRect" minsize="0" maxsize="1000" mandatory="false" array="true">
       <description>
-        Array of spatial data structures that represent the locations of all user controls present on the HMI.
+        Array of rectangle data structures that represent the locations of all user controls present on the HMI.
         This data should be updated if/when the application presents a new screen.
-        When a request is sent, if successful, it will replace all spatial data previously sent through RPC.
-        If an empty array is sent, the existing spatial data will be cleared
+        When a request is sent, if successful, it will replace all rectangle data previously sent through RPC.
+        If an empty array is sent, the existing rectangle data will be cleared
       </description>
     </param>
   </function>

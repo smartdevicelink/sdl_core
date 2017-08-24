@@ -1,7 +1,10 @@
 <?xml version="1.0" standalone="yes"?>
 
 <!--
-* Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
+ * All rights reserved.
+ *
+ * Copyright (c) 2017 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2270,11 +2273,7 @@
       </param>
   </struct>
 
-  <struct name="SpatialStruct">
-    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-      <description>A user control's identifier.
-      </description>
-    </param>
+  <struct name="Rectangle">
     <param name="x" type="Float" mandatory="true">
       <description>The X-coordinate of the user control</description>
     </param>
@@ -2286,6 +2285,16 @@
     </param>
     <param name="height" type="Float" mandatory="true">
       <description>The height of the user control's bounding rectangle</description>
+    </param>
+  </struct>
+
+  <struct name="HapticRect">
+    <description>Defines haptic rectangle data for each user control object for video streaming application</description>
+    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>A user control spatial identifier</description>
+    </param>
+    <param name="rect" type="Common.Rectangle" mandatory="true">
+      <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
     </param>
   </struct>
 
@@ -3463,12 +3472,12 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>Internal ID of the application that requested this RPC.</description>
     </param>
-    <param name="HapticSpatialData" type="Common.SpatialStruct" minsize="0" maxsize="1000" mandatory="false" array="true">
+    <param name="hapticRectData" type="Common.HapticRect" minsize="0" maxsize="1000" mandatory="false" array="true">
       <description>
-        Array of spatial data structures that represent the locations of all user controls present on the HMI.
+        Array of rectangle data structures that represent the locations of all user controls present on the HMI.
         This data should be updated if/when the application presents a new screen.
-        When a request is sent, if successful, it will replace all spatial data previously sent through RPC.
-        Avoidance of doubt, when an empty HapticSpatialData, it will be clear all spatial data previously sent through RPC.
+        When a request is sent, if successful, it will replace all rectangle data previously sent through RPC.
+        Avoidance of doubt, when an empty hapticRectData, it will be clear all rectangle data previously sent through RPC.
       </description>
     </param>
   </function>
