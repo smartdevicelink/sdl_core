@@ -81,9 +81,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      application_manager::ApplicationSharedPtr(
                          const std::string& device_id,
                          const std::string& policy_app_id));
-  MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
-  MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
-  MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
   MOCK_METHOD2(ChangeAppsHMILevel,
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
   MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
