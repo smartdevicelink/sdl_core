@@ -56,7 +56,6 @@ const std::string ExtractMethodName(application_manager::MessagePtr msg) {
 
   if (value.isMember(kMethod)) {
     return value.get(kMethod, "").asCString();
-    // Response from HMI
   }
   if (value.isMember(kResult)) {
     const Json::Value& result = value.get(kResult, Json::Value());
@@ -67,10 +66,7 @@ const std::string ExtractMethodName(application_manager::MessagePtr msg) {
     const Json::Value& data = error.get(kData, Json::Value());
     return data.get(kMethod, "").asCString();
   }
-  LOG4CXX_WARN(logger_,
-               "Message with HMI protocol version can not be handled by "
-               "plugin manager, because required 'method' field was not "
-               "found, or was containing an invalid string.");
+
   return std::string();
 }
 }  // namespace
@@ -208,6 +204,10 @@ ProcessResult PluginManager::ProcessHMIMessage(
 
   const std::string& msg_method = ExtractMethodName(msg);
   if (msg_method.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "Message with HMI protocol version can not be handled by "
+                 "plugin manager, because required 'method' field was not "
+                 "found, or was containing an invalid string.");
     return ProcessResult::CANNOT_PROCESS;
   }
 

@@ -50,7 +50,7 @@ class PluginManager : public ModuleObserver {
   void UnloadPlugins();
 
   /**
-   * @brief ProcessMessage forwards modules message to modules if any is
+   * @brief ProcessMessage forwards mobile message to modules if any is
    * subsribed for the message.
    * @param msg Mobile message to process
    * @return Result of processing
