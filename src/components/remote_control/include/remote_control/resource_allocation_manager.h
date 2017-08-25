@@ -5,6 +5,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/HMI_API.h"
 #include "remote_control/event_engine/event.h"
+#include "functional_module/generic_module.h"
 
 namespace remote_control {
 
@@ -41,24 +42,6 @@ class ResourceAllocationManager {
                                                const uint32_t app_id) = 0;
 
   /**
-   * @brief ReleaseResource Releases resource acquired by application
-   * @param module_type Module name
-   * @param application_id Application id
-   * @return True if resource has been released
-   */
-  virtual bool ReleaseResource(const std::string& module_type,
-                               const uint32_t application_id) = 0;
-
-  /**
-   * @brief GetAcquiredResources Provides resources acquired by particular
-   * application currently
-   * @param application_id Application id
-   * @return List of acquired resources by specific application
-   */
-  virtual Resources GetAcquiredResources(
-      const uint32_t application_id) const = 0;
-
-  /**
    * @brief SetResourceState changes resource state. Resource must be acquired
    * beforehand.
    * @param module_type Resource to change its state
@@ -91,6 +74,15 @@ class ResourceAllocationManager {
    */
   virtual void OnDriverDisallowed(const std::string& module_type,
                                   const uint32_t app_id) = 0;
+
+  /**
+   * @brief OnSDLEvent Processes defined events coming from SDL
+   * @param event Event
+   * @param application_id Application id
+   */
+  virtual void OnSDLEvent(functional_modules::SDLEvent event,
+                          const uint32_t application_id) = 0;
+
   /**
    * @brief Set current access mode for acquiring resource
    * @param access_mode

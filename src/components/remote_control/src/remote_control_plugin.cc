@@ -357,20 +357,7 @@ ResourceAllocationManager& RemoteControlPlugin::resource_allocation_manager() {
 void RemoteControlPlugin::OnSDLEvent(functional_modules::SDLEvent event,
                                      const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
-
-  if (functional_modules::SDLEvent::kApplicationPolicyUpdated == event) {
-    ProcessApplicationPolicyUpdate();
-    return;
-  }
-
-  Resources acquired_modules =
-      resource_allocation_manager_.GetAcquiredResources(application_id);
-
-  Resources::const_iterator module = acquired_modules.begin();
-  for (; acquired_modules.end() != module; ++module) {
-    resource_allocation_manager_.ReleaseResource(*module, application_id);
-  }
+  resource_allocation_manager_.OnSDLEvent(event, application_id);
 }
 
 }  //  namespace remote_control

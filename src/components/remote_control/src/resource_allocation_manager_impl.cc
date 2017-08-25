@@ -119,6 +119,40 @@ bool ResourceAllocationManagerImpl::ReleaseResource(
   return true;
 }
 
+void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+  Apps app_list =
+      rc_plugin_.service()->GetApplications(rc_plugin_.GetModuleID());
+  Apps::const_iterator app = app_list.begin();
+  for (; app_list.end() != app; ++app) {
+    const uint32_t application_id = (*app)->app_id();
+    Resources acquired_modules = GetAcquiredResources(application_id);
+    std::sort(acquired_modules.begin(), acquired_modules.end());
+
+    Resources allowed_modules;
+    rc_plugin_.service()->GetModuleTypes((*app)->policy_app_id(),
+                                         &allowed_modules);
+    std::sort(allowed_modules.begin(), allowed_modules.end());
+
+    LOG4CXX_DEBUG(logger_,
+                  "Acquired modules: " << acquired_modules.size()
+                                       << " , allowed modules: "
+                                       << allowed_modules.size());
+
+    Resources disallowed_modules;
+    std::set_difference(acquired_modules.begin(),
+                        acquired_modules.end(),
+                        allowed_modules.begin(),
+                        allowed_modules.end(),
+                        std::back_inserter(disallowed_modules));
+
+    Resources::const_iterator module = disallowed_modules.begin();
+    for (; disallowed_modules.end() != module; ++module) {
+      ReleaseResource(*module, application_id);
+    }
+  }
+}
+
 std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
     const uint32_t application_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -237,6 +271,28 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
   std::vector<std::string>& list_of_rejected_resources =
       rejected_resources_for_application_[app_id];
   list_of_rejected_resources.push_back(module_type);
+}
+
+void ResourceAllocationManagerImpl::OnSDLEvent(
+    functional_modules::SDLEvent event, const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
+
+  if (functional_modules::SDLEvent::kApplicationPolicyUpdated == event) {
+    ProcessApplicationPolicyUpdate();
+    return;
+  }
+
+  if (functional_modules::SDLEvent::kApplicationsDisabled == event) {
+    ResetAllAllocations();
+    return;
+  }
+
+  Resources acquired_modules = GetAcquiredResources(application_id);
+  Resources::const_iterator module = acquired_modules.begin();
+  for (; acquired_modules.end() != module; ++module) {
+    ReleaseResource(*module, application_id);
+  }
 }
 
 void ResourceAllocationManagerImpl::ResetAllAllocations() {

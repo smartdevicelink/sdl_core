@@ -143,13 +143,6 @@ class RemoteControlPlugin : public RemotePluginInterface {
    */
   void SubscribeOnFunctions();
 
-  /**
-   * @brief ProcessApplicationPolicyUpdate Checks if allowed modules list is
-   * changed for registered RC applications and releases in case some modules
-   * now out of the list
-   */
-  void ProcessApplicationPolicyUpdate();
-
   functional_modules::PluginInfo plugin_info_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;

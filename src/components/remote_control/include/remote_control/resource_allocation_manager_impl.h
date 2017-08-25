@@ -19,24 +19,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   AcquireResult::eType AcquireResource(const std::string& module_type,
                                        const uint32_t app_id) OVERRIDE FINAL;
 
-  /**
-   * @brief ReleaseResource Releases resource acquired by application
-   * @param module_type Module name
-   * @param application_id Application id
-   * @return True if resource is acquired by application and has been released,
-   * otherwise - false
-   */
-  bool ReleaseResource(const std::string& module_type,
-                       const uint32_t application_id) OVERRIDE;
-
-  /**
-   * @brief GetAcquiredResources Provides resources acquired by particular
-   * application currently
-   * @param application_id Application id
-   * @return List of acquired resources by specific application
-   */
-  Resources GetAcquiredResources(const uint32_t application_id) const FINAL;
-
   void SetResourceState(const std::string& module_type,
                         const uint32_t app_id,
                         const ResourceState::eType state) FINAL;
@@ -49,10 +31,18 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
 
   void ForceAcquireResource(const std::string& module_type,
-                            const uint32_t app_id) OVERRIDE FINAL;
+                            const uint32_t app_id) FINAL;
 
   void OnDriverDisallowed(const std::string& module_type,
-                          const uint32_t app_id) OVERRIDE FINAL;
+                          const uint32_t app_id) FINAL;
+
+  /**
+   * @brief OnSDLEvent Processes defined events coming from SDL
+   * @param event Event
+   * @param application_id Application id
+   */
+  void OnSDLEvent(functional_modules::SDLEvent event,
+                  const uint32_t application_id) FINAL;
 
   void ResetAllAllocations() FINAL;
 
@@ -67,6 +57,31 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   bool IsModuleTypeRejected(const std::string& module_type,
                             const uint32_t app_id);
+
+  /**
+   * @brief ReleaseResource Releases resource acquired by application
+   * @param module_type Module name
+   * @param application_id Application id
+   * @return True if resource is acquired by application and has been released,
+   * otherwise - false
+   */
+  bool ReleaseResource(const std::string& module_type,
+                       const uint32_t application_id);
+
+  /**
+   * @brief GetAcquiredResources Provides resources acquired by particular
+   * application currently
+   * @param application_id Application id
+   * @return List of acquired resources by specific application
+   */
+  Resources GetAcquiredResources(const uint32_t application_id) const;
+
+  /**
+   * @brief ProcessApplicationPolicyUpdate Checks if allowed modules list is
+   * changed for registered RC applications and releases in case some modules
+   * now out of the list
+   */
+  void ProcessApplicationPolicyUpdate();
 
   /**
    * @brief AllocatedResources contains link between resource and application
