@@ -107,16 +107,16 @@ bool Message::operator==(const Message& message) const {
   bool version = version_ == message.version_;
   bool data_size = data_size_ == message.data_size_;
   bool payload_size = payload_size_ == message.payload_size_;
-  bool binary_data = true;
+  bool binary_data_available = true;
   if (binary_data_) {
-    binary_data = std::equal(binary_data_->begin(),
+    binary_data_available = std::equal(binary_data_->begin(),
                              binary_data_->end(),
                              message.binary_data_->begin(),
                              BinaryDataPredicate);
   }
 
   return function_id && correlation_id && connection_key && type &&
-         binary_data && json_message && version && data_size && payload_size;
+         binary_data_available && json_message && version && data_size && payload_size;
 }
 
 Message::~Message() {
