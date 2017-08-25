@@ -991,26 +991,6 @@
                     }
                 }
             },
-            "pre_BaseRC-1": {
-                "rpcs": {
-                    "OnHMIStatus": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
-                    },
-                    "OnPermissionsChange": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED",
-                            "NONE"
-                        ]
-                    }
-                }
-            },
             "BackgroundAPT": {
                 "rpcs": {
                     "EndAudioPassThru": {
