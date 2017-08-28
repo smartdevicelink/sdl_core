@@ -322,22 +322,6 @@
                     }
                 }
             },
-            "pre_BaseRC-1": {
-                "rpcs": {
-                    "OnPermissionsChange": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED",
-                        "NONE"]
-                    },
-                    "OnHMIStatus": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED",
-                        "NONE"]
-                    }
-                }
-            },
             "DrivingCharacteristics-3": {
                 "user_consent_prompt": "DrivingCharacteristics",
                 "rpcs": {
