@@ -218,18 +218,11 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
-if (REMOTE_CONTROL)
-  install(
-    FILES "${CMAKE_SOURCE_DIR}/src/components/remote_control/remote_sdl_pt.json"
-    DESTINATION ${CMAKE_BINARY_DIR}/bin
-    RENAME sdl_preloaded_pt.json
-  )
-else ()
-  install(
+
+install(
     FILES sdl_preloaded_pt.json
     DESTINATION bin
-  )
-endif ()
+)
 
 if (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
