@@ -73,10 +73,6 @@ install(TARGETS ${target}
     WORLD_READ WORLD_EXECUTE
 )
 
-set(FILES_FOR_COPY
-${CMAKE_CURRENT_SOURCE_DIR}/InteriorVehicleDataCapabilities.json
-)
-
 install(
   FILES ${FILES_FOR_COPY}
   DESTINATION ${install_destination}
