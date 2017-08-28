@@ -140,7 +140,6 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
-const char* haptic_spatial_data = "HapticSpatialData";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -313,6 +312,10 @@ const char* const resolution_height = "resolutionHeight";
 const char* const max_bitrate = "maxBitrate";
 const char* const supported_formats = "supportedFormats";
 const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
+const char* const haptic_rect_data = "hapticRectData";
+const char* const rect = "rect";
+const char* const x = "x";
+const char* const y = "y";
 }  // namespace strings
 
 namespace json {

@@ -176,7 +176,6 @@ extern const char* system_capabilities;
 extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
-extern const char* haptic_spatial_data;
 
 // PutFile
 extern const char* sync_file_name;
@@ -355,6 +354,10 @@ extern const char* const resolution_height;
 extern const char* const max_bitrate;
 extern const char* const supported_formats;
 extern const char* const haptic_spatial_data_supported;
+extern const char* const haptic_rect_data;
+extern const char* const rect;
+extern const char* const x;
+extern const char* const y;
 }  // namespace strings
 
 namespace json {
