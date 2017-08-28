@@ -657,6 +657,31 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_TRUE(app_impl->is_application_data_changed());
 }
 
+TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingNotApproved) {
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _));
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
+}
+
+TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
+  app_impl->set_video_streaming_approved(true);
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
+}
+
+TEST_F(ApplicationImplTest, SetVideoConfig_NotMobileNavi) {
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+
+  smart_objects::SmartObject params;
+  app_impl->SetVideoConfig(protocol_handler::ServiceType::kAudio, params);
+}
+
 TEST_F(ApplicationImplTest, StartStreaming_MobileNavi_StreamingNotApproved) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendNaviStartStream(app_id, _));

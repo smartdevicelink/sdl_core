@@ -56,7 +56,6 @@ using am::commands::ShowRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
@@ -177,13 +176,6 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
-      .WillByDefault(
-          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -770,6 +762,8 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
 
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
+
   command->on_event(event);
 }
 
@@ -786,6 +780,8 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
+
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
 
   command->on_event(event);
 }

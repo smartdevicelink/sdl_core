@@ -53,7 +53,6 @@ namespace am = ::application_manager;
 using am::commands::SetMediaClockRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using am::MockHmiInterfaces;
 using am::MockMessageHelper;
 using ::testing::_;
 using ::testing::Mock;
@@ -84,8 +83,6 @@ class SetMediaClockRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
   void TearDown() OVERRIDE {
@@ -117,7 +114,6 @@ class SetMediaClockRequestTest
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
   }
 
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
@@ -140,7 +136,7 @@ TEST_F(SetMediaClockRequestTest,
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*ev_msg);
 
-  EXPECT_CALL(hmi_interfaces_,
+  EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
@@ -183,10 +179,10 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetMediaClockTimer))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
@@ -218,10 +214,10 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetMediaClockTimer))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
@@ -339,6 +335,9 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
       CreateCommand<SetMediaClockRequest>(msg));
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*msg);

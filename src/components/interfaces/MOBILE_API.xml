@@ -249,6 +249,36 @@
      <element name="SK-SK" internal_name="SK_SK">
       <description>Slovak - Slovakia</description>
      </element>
+     <element name="EN-IN" internal_name="EN_IN">
+      <description>English - India</description>
+     </element>
+     <element name="TH-TH" internal_name="TH_TH">
+      <description>Thai - Thailand</description>
+     </element>
+     <element name="EN-SA" internal_name="EN_SA">
+      <description>English - Middle East</description>
+     </element>
+     <element name="HE-IL" internal_name="HE_IL">
+      <description>Hebrew - Israel</description>
+     </element>
+     <element name="RO-RO" internal_name="RO_RO">
+      <description>Romanian - Romania</description>
+     </element>
+     <element name="UK-UA" internal_name="UK_UA">
+      <description>Ukrainian - Ukraine</description>
+     </element>
+     <element name="ID-ID" internal_name="ID_ID">
+      <description>Indonesian - Indonesia</description>
+     </element>
+     <element name="VI-VN" internal_name="VI_VN">
+      <description>Vietnamese - Vietnam</description>
+     </element>
+     <element name="MS-MY" internal_name="MS_MY">
+      <description>Malay - Malaysia</description>
+     </element>
+     <element name="HI-IN" internal_name="HI_IN">
+      <description>Hindi - India</description>
+     </element>
 </enum>
 
   <enum name="UpdateMode">
@@ -806,6 +836,86 @@
     <element name="PROMPT" />
     <element name="DESTINATION" />
     <element name="QUEUE" />
+  </enum>
+
+  <enum name="VideoStreamingProtocol">
+    <description>Enum for each type of video streaming protocol type.</description>
+    <element name="RAW">
+      <description>
+        Raw stream bytes that contains no timestamp data and is the lowest supported video streaming
+      </description>
+    </element>
+    <element name="RTP">
+      <description>
+        RTP facilitates the transfer of real-time data. Information provided by this protocol include
+        timestamps (for synchronization), sequence numbers (for packet loss and reordering detection)
+        and the payload format which indicates the encoded format of the data.
+      </description>
+    </element>
+    <element name="RTSP">
+      <description>
+        The transmission of streaming data itself is not a task of RTSP. Most RTSP servers use the
+        Real-time Transport Protocol (RTP) in conjunction with Real-time Control Protocol (RTCP)
+        for media stream delivery. However, some vendors implement proprietary transport protocols.
+      </description>
+    </element>
+    <element name="RTMP">
+      <description>
+        Real-Time Messaging Protocol (RTMP) was initially a proprietary protocol developed by
+        Macromedia for streaming audio, video and data over the Internet, between a Flash player
+        and a server. Macromedia is now owned by Adobe, which has released an incomplete version
+        of the specification of the protocol for public use.
+      </description>
+    </element>
+    <element name="WEBM">
+      <description>
+        The WebM container is based on a profile of Matroska. WebM initially supported VP8 video and
+        Vorbis audio streams. In 2013 it was updated to accommodate VP9 video and Opus audio.
+      </description>
+    </element>
+  </enum>
+
+  <enum name="VideoStreamingCodec">
+    <description>Enum for each type of video streaming codec.</description>
+    <element name="H264">
+      <description>
+        A block-oriented motion-compensation-based video compression standard.
+        As of 2014 it is one of the most commonly used formats for the recording, compression, and
+        distribution of video content.
+      </description>
+    </element>
+    <element name="H265">
+      <description>
+        High Efficiency Video Coding (HEVC), also known as H.265 and MPEG-H Part 2, is a video
+        compression standard, one of several potential successors to the widely used AVC (H.264 or
+        MPEG-4 Part 10). In comparison to AVC, HEVC offers about double the data compression ratio
+        at the same level of video quality, or substantially improved video quality at the same
+        bit rate. It supports resolutions up to 8192x4320, including 8K UHD.
+      </description>
+    </element>
+    <element name="Theora">
+      <description>
+        Theora is derived from the formerly proprietary VP3 codec, released into the public domain
+        by On2 Technologies. It is broadly comparable in design and bitrate efficiency to
+        MPEG-4 Part 2, early versions of Windows Media Video, and RealVideo while lacking some of
+        the features present in some of these other codecs. It is comparable in open standards
+        philosophy to the BBC's Dirac codec.
+      </description>
+    </element>
+    <element name="VP8">
+      <description>
+        VP8 can be multiplexed into the Matroska-based container format WebM along with Vorbis and
+        Opus audio. The image format WebP is based on VP8's intra-frame coding. VP8's direct
+        successor, VP9, and the emerging royalty-free internet video format AV1 from the Alliance for
+        Open Media (AOMedia) are based on VP8.
+      </description>
+    </element>
+    <element name="VP9">
+      <description>
+        Similar to VP8, but VP9 is customized for video resolutions beyond high-definition video (UHD)
+        and also enables lossless compression.
+      </description>
+    </element>
   </enum>
 
   <struct name="Image">
@@ -1703,6 +1813,7 @@
     <element name="BEGIN"/>
     <element name="MOVE"/>
     <element name="END"/>
+    <element name="CANCEL"/>
   </enum>
 
   <struct name="TouchEvent">
@@ -1776,6 +1887,16 @@
     <param name="hmiPermissions" type="HMIPermissions"  mandatory="true"/>
     <param name="parameterPermissions" type="ParameterPermissions"  mandatory="true"/>
  </struct>
+
+  <struct name="VideoStreamingFormat">
+    <description>Video streaming formats and their specifications.</description>
+    <param name="protocol" type="VideoStreamingProtocol" mandatory="true">
+      <description>Protocol type, see VideoStreamingProtocol</description>
+    </param>
+    <param name="codec" type="VideoStreamingCodec" mandatory="true">
+      <description>Codec type, see VideoStreamingCodec</description>
+    </param>
+  </struct>
 
   <struct name="DisplayCapabilities">
     <description>Contains information about the display capabilities.</description>
@@ -1872,6 +1993,9 @@
     </param>
     <param name="phoneCall" type="Boolean" mandatory="false">
       <description>Availability of build in phone. True: Available, False: Not Available </description>
+    </param>
+    <param name="videoStreaming" type="Boolean" mandatory="false">
+      <description>Availability of video streaming. True: Available, False: Not Available</description>
     </param>
   </struct>
 
@@ -2408,6 +2532,23 @@
     </param>
   </struct>
 
+  <struct name="VideoStreamingCapability">
+    <description>Contains information about this system's video streaming capabilities.</description>
+    <param name="preferredResolution" type="ImageResolution" mandatory="false">
+      <description>The preferred resolution of a video stream for decoding and rendering on HMI.</description>
+    </param>
+    <param name="maxBitrate" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
+      <description>The maximum bitrate of video stream that is supported, in kbps.</description>
+    </param>
+    <param name="supportedFormats" type="VideoStreamingFormat" array="true" mandatory="false">
+      <description>
+        Detailed information on each format supported by this system, in its preferred order
+        (i.e. the first element in the array is most preferable to the system).
+        Each object will contain a VideoStreamingFormat that describes what can be expected.
+      </description>
+    </param>
+  </struct>
+
   <struct name="SystemCapability">
       <description>The systemCapabilityType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the SystemCapability Type is NAVIGATION then a "navigationCapability" should exist</description>
       <param name="systemCapabilityType" type="SystemCapabilityType" mandatory="true">
@@ -2415,6 +2556,8 @@
       <param name="navigationCapability" type="NavigationCapability" mandatory="false">
       </param>
       <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      </param>
+      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
       </param>
   </struct>
 

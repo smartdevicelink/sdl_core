@@ -68,7 +68,7 @@ TEST_F(ProtocolHeaderValidatorTest, MaxPayloadSizeSetGet) {
 }
 
 TEST_F(ProtocolHeaderValidatorTest, MaxControlPayloadSizeSetGet) {
-  EXPECT_EQ(0, header_validator.max_control_payload_size());
+  EXPECT_EQ(0u, header_validator.max_control_payload_size());
   for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
     header_validator.set_max_control_payload_size(value);
     EXPECT_EQ(value, header_validator.max_control_payload_size());
@@ -76,7 +76,7 @@ TEST_F(ProtocolHeaderValidatorTest, MaxControlPayloadSizeSetGet) {
 }
 
 TEST_F(ProtocolHeaderValidatorTest, MaxRpcPayloadSizeSetGet) {
-  EXPECT_EQ(0, header_validator.max_rpc_payload_size());
+  EXPECT_EQ(0u, header_validator.max_rpc_payload_size());
   for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
     header_validator.set_max_rpc_payload_size(value);
     EXPECT_EQ(value, header_validator.max_rpc_payload_size());
@@ -84,7 +84,7 @@ TEST_F(ProtocolHeaderValidatorTest, MaxRpcPayloadSizeSetGet) {
 }
 
 TEST_F(ProtocolHeaderValidatorTest, MaxAudioPayloadSizeSetGet) {
-  EXPECT_EQ(0, header_validator.max_audio_payload_size());
+  EXPECT_EQ(0u, header_validator.max_audio_payload_size());
   for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
     header_validator.set_max_audio_payload_size(value);
     EXPECT_EQ(value, header_validator.max_audio_payload_size());
@@ -92,7 +92,7 @@ TEST_F(ProtocolHeaderValidatorTest, MaxAudioPayloadSizeSetGet) {
 }
 
 TEST_F(ProtocolHeaderValidatorTest, MaxVideoPayloadSizeSetGet) {
-  EXPECT_EQ(0, header_validator.max_video_payload_size());
+  EXPECT_EQ(0u, header_validator.max_video_payload_size());
   for (size_t value = 0; value < MAXIMUM_FRAME_DATA_V3_SIZE * 2; ++value) {
     header_validator.set_max_video_payload_size(value);
     EXPECT_EQ(value, header_validator.max_video_payload_size());

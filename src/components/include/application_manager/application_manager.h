@@ -592,6 +592,20 @@ class ApplicationManager {
    */
   virtual void ForbidStreaming(uint32_t app_id) = 0;
 
+  /**
+   * @brief Called when application completes streaming configuration
+   * @param app_id Streaming application id
+   * @param service_type Streaming service type
+   * @param result true if configuration is successful, false otherwise
+   * @param rejected_params list of rejected parameters' name. Valid
+   *                        only when result is false.
+   */
+  virtual void OnStreamingConfigured(
+      uint32_t app_id,
+      protocol_handler::ServiceType service_type,
+      bool result,
+      std::vector<std::string>& rejected_params) = 0;
+
   virtual const ApplicationManagerSettings& get_settings() const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;

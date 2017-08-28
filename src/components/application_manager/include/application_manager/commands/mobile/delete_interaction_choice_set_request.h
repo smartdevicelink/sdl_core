@@ -58,12 +58,17 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
    **/
-  virtual ~DeleteInteractionChoiceSetRequest();
+  ~DeleteInteractionChoiceSetRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*

@@ -101,11 +101,9 @@ const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
 const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
-const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
-const char* kEnableProtocol5Key = "EnableProtocol5";
 const char* kMaximumControlPayloadSizeKey = "MaximumControlPayloadSize";
 const char* kMaximumRpcPayloadSizeKey = "MaximumRpcPayloadSize";
 const char* kMaximumAudioPayloadSizeKey = "MaximumAudioPayloadSize";
@@ -244,7 +242,7 @@ const uint32_t kDefaultBeforeUpdateHours = 24;
 
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
-const uint16_t kDefaultMaxSupportedProtocolVersion = 3;
+const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
@@ -323,11 +321,9 @@ Profile::Profile()
     app_config_folder_()
     , app_storage_folder_()
     , app_resource_folder_()
-    , enable_protocol_4_(false)
     , app_icons_folder_()
     , app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize)
     , app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove)
-    , enable_protocol_5_(false)
     , maximum_control_payload_size_(kDefaultMaximumControlPayloadSize)
     , maximum_rpc_payload_size_(kDefaultMaximumRpcPayloadSize)
     , maximum_audio_payload_size_(kDefaultMaximumAudioPayloadSize)
@@ -454,7 +450,7 @@ const std::string& Profile::app_resource_folder() const {
 }
 
 bool Profile::enable_protocol_4() const {
-  return enable_protocol_4_;
+  return max_supported_protocol_version_ >= 4;
 }
 
 const std::string& Profile::app_icons_folder() const {
@@ -467,10 +463,6 @@ const uint32_t& Profile::app_icons_folder_max_size() const {
 
 const uint32_t& Profile::app_icons_amount_to_remove() const {
   return app_icons_amount_to_remove_;
-}
-
-bool Profile::enable_protocol_5() const {
-  return enable_protocol_5_;
 }
 
 size_t Profile::maximum_control_payload_size() const {
@@ -1043,17 +1035,6 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(app_resource_folder_, kAppResourseFolderKey, kMainSection);
 
-  // Enable protocol ver.4 parameter
-  std::string enable_protocol_4_value;
-  if (ReadValue(&enable_protocol_4_value, kSDL4Section, kEnableProtocol4Key) &&
-      0 == strcmp("true", enable_protocol_4_value.c_str())) {
-    enable_protocol_4_ = true;
-  } else {
-    enable_protocol_4_ = false;
-  }
-
-  LOG_UPDATED_BOOL_VALUE(enable_protocol_4_, kEnableProtocol4Key, kSDL4Section);
-
   // Application icon folder
   ReadStringValue(&app_icons_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
@@ -1087,17 +1068,6 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(
       app_icons_amount_to_remove_, kAppIconsAmountToRemoveKey, kSDL4Section);
-
-  // Enable protocol ver.5 parameter
-  std::string enable_protocol_5_value;
-  if (ReadValue(&enable_protocol_5_value, kSDL5Section, kEnableProtocol5Key) &&
-      0 == strcmp("true", enable_protocol_5_value.c_str())) {
-    enable_protocol_5_ = true;
-  } else {
-    enable_protocol_5_ = false;
-  }
-
-  LOG_UPDATED_BOOL_VALUE(enable_protocol_5_, kEnableProtocol5Key, kSDL5Section);
 
   ReadUIntValue(&maximum_control_payload_size_,
                 kDefaultMaximumControlPayloadSize,
@@ -1712,10 +1682,11 @@ void Profile::UpdateValues() {
                 kProtocolHandlerSection,
                 kMaxSupportedProtocolVersionKey);
 
-  // if .ini file contains protocol version less than 2 or more than 3
-  // max_supported_protocol_version_ = 3
-  if (max_supported_protocol_version_ < 2) {
-    max_supported_protocol_version_ = 3;
+  if (max_supported_protocol_version_ < 1) {
+    max_supported_protocol_version_ = 1;
+  } else if (max_supported_protocol_version_ >
+             kDefaultMaxSupportedProtocolVersion) {
+    max_supported_protocol_version_ = kDefaultMaxSupportedProtocolVersion;
   }
 
   LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);

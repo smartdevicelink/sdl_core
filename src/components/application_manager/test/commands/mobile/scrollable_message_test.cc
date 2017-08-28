@@ -61,7 +61,6 @@ using am::commands::ScrollableMessageRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Eq;
@@ -146,11 +145,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       .WillByDefault(Return(mock_app));
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MockHMICapabilities hmi_capabilities;
   ON_CALL(app_mngr_, hmi_capabilities())
@@ -297,11 +291,6 @@ TEST_F(ScrollableMessageRequestTest,
 
   EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   EXPECT_CALL(
       app_mngr_,

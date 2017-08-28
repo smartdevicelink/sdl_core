@@ -151,7 +151,6 @@ class UIIsReadyRequestTest
   }
 
   UIIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;

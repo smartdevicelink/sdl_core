@@ -261,6 +261,11 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
+  MOCK_METHOD4(OnStreamingConfigured,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type,
+                    bool result,
+                    std::vector<std::string>& rejected_params));
 };
 
 }  // namespace application_manager_test

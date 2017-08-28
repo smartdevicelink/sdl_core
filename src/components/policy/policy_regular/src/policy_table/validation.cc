@@ -115,8 +115,13 @@ bool ApplicationPoliciesSection::Validate() const {
 }
 
 bool ApplicationParams::Validate() const {
+  // Check for empty "groups" sub-sections
+  if (groups.empty()) {
+    return false;
+  }
   return true;
 }
+
 bool RpcParameters::Validate() const {
   return true;
 }
@@ -136,6 +141,19 @@ bool ModuleConfig::Validate() const {
       return false;
     }
   }
+
+  for (ServiceEndpoints::const_iterator it_endpoints = endpoints.begin();
+       it_endpoints != endpoints.end();
+       ++it_endpoints) {
+    const URLList& endpoint_list = it_endpoints->second;
+    if (endpoint_list.end() == endpoint_list.find(kDefaultApp)) {
+      LOG4CXX_ERROR(logger_,
+                    "Endpoint " << it_endpoints->first
+                                << "does not contain default group");
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -178,20 +196,40 @@ bool UsageAndErrorCounts::Validate() const {
   }
   return true;
 }
+
 bool DeviceParams::Validate() const {
   return true;
 }
+
 bool PolicyTable::Validate() const {
-  if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_UPDATE == GetPolicyTableType()) {
+  const PolicyTableType policy_table_type = GetPolicyTableType();
+
+  if (PT_PRELOADED == policy_table_type || PT_UPDATE == policy_table_type) {
     if (device_data.is_initialized()) {
       return false;
     }
   }
+
+  if (PT_PRELOADED == policy_table_type || PT_SNAPSHOT == policy_table_type) {
+    // Check upper bound of each "groups" sub section in the app policies
+    const FunctionalGroupings::size_type functional_groupings_count =
+        functional_groupings.size();
+    for (ApplicationPolicies::const_iterator app_policiies_it =
+             app_policies_section.apps.begin();
+         app_policies_section.apps.end() != app_policiies_it;
+         ++app_policiies_it) {
+      if (app_policiies_it->second.groups.size() > functional_groupings_count) {
+        return false;
+      }
+    }
+  }
+
   return true;
 }
+
 bool Table::Validate() const {
   return true;
 }
+
 }  // namespace policy_table_interface_base
 }  // namespace rpc

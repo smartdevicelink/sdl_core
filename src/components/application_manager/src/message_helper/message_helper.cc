@@ -619,8 +619,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
   (*response)[strings::params][strings::connection_key] = connection_key;
   (*response)[strings::params][strings::protocol_type] =
       commands::CommandImpl::mobile_protocol_type_;
-  (*response)[strings::params][strings::protocol_version] =
-      static_cast<int>(kV2);
+  (*response)[strings::params][strings::protocol_version] = static_cast<int>(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2);
   return response;
 }
 
@@ -1743,6 +1743,26 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   response_data[strings::params][strings::connection_key] = connection_key;
 
   return utils::MakeShared<smart_objects::SmartObject>(response_data);
+}
+
+void MessageHelper::SendNaviSetVideoConfig(
+    int32_t app_id,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& video_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr request =
+      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  if (!request) {
+    return;
+  }
+
+  (*request)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::Navigation_SetVideoConfig;
+
+  (*request)[strings::msg_params][strings::app_id] = app_id;
+  (*request)[strings::msg_params][strings::config] = video_params;
+
+  app_mngr.ManageHMICommand(request);
 }
 
 void MessageHelper::SendNaviStartStream(const int32_t app_id,

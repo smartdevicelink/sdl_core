@@ -80,6 +80,15 @@ class CryptoManagerImpl : public CryptoManager {
 
    private:
     void PrintCertInfo();
+
+    /**
+     * @brief Removes disallowed for printing certificate information from input
+     * data
+     * @param in_data input data with certificate information
+     * @return filtered string with allowed for printing information
+     */
+    const std::string RemoveDisallowedInfo(X509_NAME* in_data) const;
+
     HandshakeResult CheckCertContext();
     bool ReadHandshakeData(const uint8_t** const out_data,
                            size_t* out_data_size);

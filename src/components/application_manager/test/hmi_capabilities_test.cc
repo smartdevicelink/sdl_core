@@ -104,7 +104,8 @@ const char* const cstring_values_[] = {
     "EN_US", "ES_MX", "FR_CA", "DE_DE", "ES_ES", "EN_GB", "RU_RU", "TR_TR",
     "PL_PL", "FR_FR", "IT_IT", "SV_SE", "PT_PT", "NL_NL", "EN_AU", "ZH_CN",
     "ZH_TW", "JA_JP", "AR_SA", "KO_KR", "PT_BR", "CS_CZ", "DA_DK", "NO_NO",
-    "NL_BE", "EL_GR", "HU_HU", "FI_FI", "SK_SK"};
+    "NL_BE", "EL_GR", "HU_HU", "FI_FI", "SK_SK", "EN_IN", "TH_TH", "EN_SA",
+    "HE_IL", "RO_RO", "UK_UA", "ID_ID", "VI_VN", "MS_MY", "HI_IN"};
 
 const hmi_apis::Common_Language::eType enum_values_[] = {
     hmi_apis::Common_Language::EN_US, hmi_apis::Common_Language::ES_MX,
@@ -121,7 +122,12 @@ const hmi_apis::Common_Language::eType enum_values_[] = {
     hmi_apis::Common_Language::DA_DK, hmi_apis::Common_Language::NO_NO,
     hmi_apis::Common_Language::NL_BE, hmi_apis::Common_Language::EL_GR,
     hmi_apis::Common_Language::HU_HU, hmi_apis::Common_Language::FI_FI,
-    hmi_apis::Common_Language::SK_SK};
+    hmi_apis::Common_Language::SK_SK, hmi_apis::Common_Language::EN_IN,
+    hmi_apis::Common_Language::TH_TH, hmi_apis::Common_Language::EN_SA,
+    hmi_apis::Common_Language::HE_IL, hmi_apis::Common_Language::RO_RO,
+    hmi_apis::Common_Language::UK_UA, hmi_apis::Common_Language::ID_ID,
+    hmi_apis::Common_Language::VI_VN, hmi_apis::Common_Language::MS_MY,
+    hmi_apis::Common_Language::HI_IN};
 
 struct CStringComparator {
   bool operator()(const char* a, const char* b) {
@@ -371,6 +377,48 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+
+  const smart_objects::SmartObject vs_capability_so =
+      *(hmi_capabilities_test->video_streaming_capability());
+
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_resolution));
+  EXPECT_TRUE(vs_capability_so[strings::preferred_resolution].keyExists(
+      strings::resolution_width));
+  EXPECT_TRUE(vs_capability_so[strings::preferred_resolution].keyExists(
+      strings::resolution_height));
+  EXPECT_EQ(
+      800,
+      vs_capability_so[strings::preferred_resolution][strings::resolution_width]
+          .asInt());
+  EXPECT_EQ(350,
+            vs_capability_so[strings::preferred_resolution]
+                            [strings::resolution_height].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
+  EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
+  const uint32_t supported_formats_len =
+      vs_capability_so[strings::supported_formats].length();
+  EXPECT_EQ(2u, supported_formats_len);
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
+      strings::protocol));
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
+      strings::codec));
+  EXPECT_EQ(0,
+            vs_capability_so[strings::supported_formats][0][strings::protocol]
+                .asInt());
+  EXPECT_EQ(
+      0,
+      vs_capability_so[strings::supported_formats][0][strings::codec].asInt());
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
+      strings::protocol));
+  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
+      strings::codec));
+  EXPECT_EQ(1,
+            vs_capability_so[strings::supported_formats][1][strings::protocol]
+                .asInt());
+  EXPECT_EQ(
+      2,
+      vs_capability_so[strings::supported_formats][1][strings::codec].asInt());
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

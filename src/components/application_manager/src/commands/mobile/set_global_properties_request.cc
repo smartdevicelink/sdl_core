@@ -265,15 +265,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                result_code,
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
+}
 
-  if (!application) {
-    LOG4CXX_DEBUG(logger_, "NULL pointer.");
-    return;
-  }
-
-  if (result) {
-    application->UpdateHash();
-  }
+bool SetGlobalPropertiesRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool SetGlobalPropertiesRequest::PrepareResponseParameters(

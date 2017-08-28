@@ -280,7 +280,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());
-
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   smart_objects::SmartObjectSPtr vr_help =
@@ -297,7 +296,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
                   am::commands::Command::ORIGIN_SDL));
-  EXPECT_CALL(*mock_app_, UpdateHash());
 
   command_->on_event(event);
 }
@@ -344,7 +342,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::WARNINGS),
                           am::commands::Command::ORIGIN_SDL));
-  EXPECT_CALL(*mock_app_, UpdateHash());
 
   command_->on_event(event);
 }
@@ -368,8 +365,7 @@ TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
   command->Run();
 }
 
-TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
+TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::eType::SUCCESS;
 
@@ -387,22 +383,28 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
-  command_->Run();
+  MockAppPtr invalid_app;
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_))
+      .WillOnce(Return(invalid_app));
 
-  event.set_smart_object(*msg_);
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
+
+  ResetGlobalPropertiesRequestPtr command =
+      CreateCommand<ResetGlobalPropertiesRequest>(msg_);
+  command->Run();
+
+  EXPECT_CALL(*mock_message_helper_, HMIToMobileResult(_))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
                   am::commands::Command::ORIGIN_SDL));
 
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(invalid_app));
-
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
-
-  command_->on_event(event);
+  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
+  event.set_smart_object(*msg_);
+  command->on_event(event);
 }
 
 }  // namespace reset_global_properties

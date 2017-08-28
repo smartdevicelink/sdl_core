@@ -57,19 +57,24 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
   /**
    * @brief SetGlobalPropertiesRequest class destructor
    **/
-  virtual ~SetGlobalPropertiesRequest();
+  ~SetGlobalPropertiesRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   // Verify correctness VrHelptitle value

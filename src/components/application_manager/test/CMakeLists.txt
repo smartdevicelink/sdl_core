@@ -51,6 +51,7 @@ include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/policy/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 set(testSources
@@ -68,7 +69,7 @@ set(testSources
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
- #${AM_TEST_DIR}/application_manager_impl_test.cc
+  ${AM_TEST_DIR}/application_manager_impl_test.cc
 
 )
 
@@ -97,6 +98,8 @@ set(LIBRARIES
   Resumption
   ProtocolHandler
   SecurityManager
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
@@ -123,6 +126,7 @@ set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
+add_dependencies("application_manager_test" libbson)
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
 # TODO [AKozoriz] : Fix not buildable tests

@@ -112,8 +112,6 @@ TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 }
 
 TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
-
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::msg_params] = 0;
   (*event_msg)[am::strings::params][am::hmi_response::code] =
@@ -130,6 +128,10 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
   command->on_event(event);
 }
 

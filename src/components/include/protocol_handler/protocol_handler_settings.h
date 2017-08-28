@@ -29,12 +29,13 @@ class ProtocolHandlerSettings {
    */
   virtual uint32_t heart_beat_timeout() const = 0;
 
-  virtual uint16_t max_supported_protocol_version() const = 0;
   /*
    * @brief Protocol version, from .ini file.
    */
+  virtual uint16_t max_supported_protocol_version() const = 0;
+
+  // DEPRECATED
   virtual bool enable_protocol_4() const = 0;
-  virtual bool enable_protocol_5() const = 0;
 
   virtual uint32_t multiframe_waiting_timeout() const = 0;
 #ifdef ENABLE_SECURITY
