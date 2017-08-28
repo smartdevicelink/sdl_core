@@ -56,12 +56,12 @@ class UISendHapticDataRequest : public RequestToHMI {
   /**
    * @brief UISendHapticDataRequest class destructor
    **/
-  virtual ~UISendHapticDataRequest();
+  ~UISendHapticDataRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UISendHapticDataRequest);

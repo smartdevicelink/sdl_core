@@ -57,12 +57,12 @@ class SendHapticDataResponse : public CommandResponseImpl {
   /**
    * @brief SendHapticDataResponse class destructor
    **/
-  virtual ~SendHapticDataResponse();
+  ~SendHapticDataResponse() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SendHapticDataResponse);
