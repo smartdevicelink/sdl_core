@@ -55,7 +55,9 @@
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
 #include "policy/policy_manager.h"
+#ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 

@@ -62,10 +62,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @brief ReleaseResource Releases resource acquired by application
    * @param module_type Module name
    * @param application_id Application id
-   * @return True if resource is acquired by application and has been released,
-   * otherwise - false
    */
-  bool ReleaseResource(const std::string& module_type,
+  void ReleaseResource(const std::string& module_type,
                        const uint32_t application_id);
 
   /**

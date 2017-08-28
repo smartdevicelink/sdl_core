@@ -45,6 +45,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
 
 namespace {
 const std::string ExtractMethodName(application_manager::MessagePtr msg) {
+  DCHECK_OR_RETURN(msg, "");
   Json::Value value;
   Json::Reader reader;
   reader.parse(msg->json_message(), value);

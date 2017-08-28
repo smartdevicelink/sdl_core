@@ -37,7 +37,9 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace application_manager {
 
