@@ -103,6 +103,7 @@ TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
 
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
 
+  command->Init();
   command->Run();
 }
 
@@ -119,6 +120,7 @@ TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*msg_);
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
 
+  command->Init();
   command->on_event(event);
 }
 
@@ -132,6 +134,7 @@ TEST_F(SendHapticDataResponseTest, Run_Success) {
     SendMessageToMobile(
       MobileResultCodeIs(mobile_apis::Result::SUCCESS),
       _));
+  command_sptr_->Init();
   command_sptr_->Run();
 }
 
