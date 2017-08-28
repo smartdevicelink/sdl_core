@@ -2358,7 +2358,7 @@
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
     <element name="GetSystemCapabilityID" value="48" hexvalue="30"/>
-    <element name="SendHapticDataID" value="49" hexvalue="30" />
+    <element name="SendHapticDataID" value="49" hexvalue="31" />
 
 <!--
 	Base Notifications
