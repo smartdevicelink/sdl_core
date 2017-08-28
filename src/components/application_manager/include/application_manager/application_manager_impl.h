@@ -271,7 +271,6 @@ class ApplicationManagerImpl
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
 
-  uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
   /**
    * @brief ChangeAppsHMILevel the function that will change application's
    * hmi level.
@@ -281,32 +280,6 @@ class ApplicationManagerImpl
    * @param level new hmi level for certain application.
    */
   void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
-  /**
-   * @brief MakeAppNotAudible allows to make certain application not audible.
-   *
-   * @param app_id applicatin's id whose audible state should be changed.
-   */
-  void MakeAppNotAudible(uint32_t app_id);
-
-  /**
-   * @brief MakeAppFullScreen allows ti change application's properties
-   * in order to make it full screen.
-   *
-   * @param app_id the id of application which should be in full screen  mode.
-   *
-   * @return true if operation was success, false otherwise.
-   */
-  bool MakeAppFullScreen(uint32_t app_id);
-
-  /**
-   * @brief Checks HMI level and returns true if audio streaming is allowed
-   */
-  bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
-
-  /**
-   * @brief Checks HMI level and returns true if video streaming is allowed
-   */
-  bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 
   void Erase(ApplicationSharedPtr app_to_remove) {
     DCHECK(app_to_remove);

@@ -4076,35 +4076,6 @@ std::vector<std::string> ApplicationManagerImpl::devices(
   return devices;
 }
 
-bool ApplicationManagerImpl::IsAudioStreamingAllowed(
-    uint32_t application_key) const {
-  ApplicationSharedPtr app = application(application_key);
-
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-  if (!app) {
-    LOG4CXX_WARN(logger_, "An application is not registered.");
-    return false;
-  }
-
-  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
-}
-
-bool ApplicationManagerImpl::IsVideoStreamingAllowed(
-    uint32_t application_key) const {
-  ApplicationSharedPtr app = application(application_key);
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-
-  if (!app) {
-    LOG4CXX_WARN(logger_, "An application is not registered.");
-    return false;
-  }
-
-  LOG4CXX_DEBUG(logger_, "HMILevel: " << app->hmi_level());
-  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
-}
-
 void ApplicationManagerImpl::ChangeAppsHMILevel(
     uint32_t app_id, mobile_apis::HMILevel::eType level) {
   using namespace mobile_apis::HMILevel;
@@ -4124,46 +4095,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
   } else {
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
-}
-
-void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
-  using namespace mobile_apis;
-  ApplicationSharedPtr app = application(app_id);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
-    return;
-  }
-  ChangeAppsHMILevel(app_id, HMILevel::HMI_BACKGROUND);
-  app->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
-}
-
-bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
-  using namespace mobile_apis;
-  ApplicationSharedPtr app = application(app_id);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
-    return false;
-  }
-
-  ChangeAppsHMILevel(app_id, HMILevel::HMI_FULL);
-  if (app->is_media_application() || app->is_navi()) {
-    app->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
-  }
-  app->set_system_context(SystemContext::SYSCTXT_MAIN);
-
-  if (!app->has_been_activated()) {
-    app->set_activated(true);
-  }
-
-  return true;
-}
-
-uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
-  using namespace connection_handler;
-  uint32_t device_handle = 0;
-  connection_handler().GetDataOnSessionKey(
-      connection_key, 0, NULL, &device_handle);
-  return device_handle;
 }
 
 void ApplicationManagerImpl::SendPostMessageToMobile(

@@ -82,10 +82,9 @@ void GetSystemCapabilityRequest::Run() {
     case mobile_apis::SystemCapabilityType::AUDIO_STREAMING:
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
-      break;
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
-      break;
+      return;
   }
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
 }
