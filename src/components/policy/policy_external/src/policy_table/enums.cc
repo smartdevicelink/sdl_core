@@ -467,6 +467,10 @@ const char* EnumToJsonString(AppHMIType val) {
       return "TESTING";
     case AHT_SYSTEM:
       return "SYSTEM";
+    case AHT_PROJECTION:
+      return "PROJECTION";
+    case AHT_REMOTE_CONTROL:
+      return "REMOTE_CONTROL";
     default:
       return "";
   }
@@ -684,10 +688,6 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
     *result = RT_DRIVER_PROFILE;
     return true;
   }
-}
-else if ("REMOTE_CONTROL" == literal) {
-  *result = AHT_REMOTE_CONTROL;
-  return true;
   if ("VOICE_SEARCH" == literal) {
     *result = RT_VOICE_SEARCH;
     return true;

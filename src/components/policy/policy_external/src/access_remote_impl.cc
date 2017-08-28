@@ -155,30 +155,6 @@ bool AccessRemoteImpl::CompareParameters(
   return input->empty();
 }
 
-void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_[what][who] = TypeAccess::kAllowed;
-}
-
-void AccessRemoteImpl::Deny(const Subject& who, const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_[what][who] = TypeAccess::kDisallowed;
-}
-
-void AccessRemoteImpl::Reset(const Subject& who) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(acl_.begin(), acl_.end(), Erase(who));
-}
-
-void AccessRemoteImpl::Reset(const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  acl_.erase(what);
-}
-
-void AccessRemoteImpl::Reset() {
-  acl_.clear();
-}
-
 void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
