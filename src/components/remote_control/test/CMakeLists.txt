@@ -40,11 +40,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCOV_FLAGS}")
 
-configure_file(lc.awk lc.awk COPYONLY)
-configure_file(run_calc_comments.sh run_calc_comments.sh COPYONLY)
-configure_file(run_mem_check.sh run_mem_check.sh COPYONLY)
 configure_file(smartDeviceLink.ini smartDeviceLink.ini COPYONLY)
-configure_file(../InteriorVehicleDataCapabilities.json InteriorVehicleDataCapabilities.json COPYONLY)
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
