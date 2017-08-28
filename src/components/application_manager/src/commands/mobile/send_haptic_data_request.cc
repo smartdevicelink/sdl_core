@@ -49,7 +49,6 @@ void SendHapticDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = application->hmi_app_id();
   SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData,
                  &msg_params,
                  true);
