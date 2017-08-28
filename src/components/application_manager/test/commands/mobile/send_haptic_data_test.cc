@@ -106,43 +106,11 @@ TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SendHapticDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-    .WillOnce(Return(ApplicationSharedPtr()));
-  EXPECT_CALL(app_mngr_,
-    ManageMobileCommand(
-      MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
-      am::commands::Command::ORIGIN_SDL));
-
-  SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
-
-  command->Run();
-}
-
 TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(app_mngr_,
     ManageMobileCommand(
       MobileResultCodeIs(mobile_apis::Result::SUCCESS),
       am::commands::Command::ORIGIN_SDL));
-
-  (*msg_)[am::strings::msg_params] = 0;
-  (*msg_)[am::strings::params][am::hmi_response::code] =
-    hmi_apis::Common_Result::eType::SUCCESS;
-  Event event(hmi_apis::FunctionID::UI_SendHapticData);
-  event.set_smart_object(*msg_);
-  SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
-
-  command->on_event(event);
-}
-
-TEST_F(SendHapticDataRequestTest,
-  OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-    .WillOnce(Return(ApplicationSharedPtr()));
-  EXPECT_CALL(app_mngr_,
-    ManageMobileCommand(
-      MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-      am::commands::Command::ORIGIN_SDL)).Times(0);
 
   (*msg_)[am::strings::msg_params] = 0;
   (*msg_)[am::strings::params][am::hmi_response::code] =

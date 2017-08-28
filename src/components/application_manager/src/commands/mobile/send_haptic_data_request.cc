@@ -48,15 +48,6 @@ SendHapticDataRequest::~SendHapticDataRequest() {}
 void SendHapticDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-
-  if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->hmi_app_id();
   SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData,
@@ -80,14 +71,6 @@ void SendHapticDataRequest::on_event(const event_engine::Event& event) {
           result_code,
           mobile_api::Result::SUCCESS,
           mobile_api::Result::WARNINGS);
-
-      ApplicationSharedPtr application =
-          application_manager_.application(connection_key());
-
-      if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        return;
-      }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
