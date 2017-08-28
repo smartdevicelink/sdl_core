@@ -458,6 +458,11 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObject* video_streaming_capability()
       const = 0;
+
+  /**
+   * @brief Sets available RC capabilities for further usage by RC functionality
+   * @param rc_capability capabilities to set
+   */
   virtual void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) = 0;
 
