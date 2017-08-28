@@ -48,6 +48,7 @@ class UISendHapticDataResponse : public ResponseFromHMI {
    * @brief UISendHapticDataResponse class constructor
    *
    * @param message Incoming SmartObject message
+   * @param application_manager Reference of application manager
    **/
   UISendHapticDataResponse(const MessageSharedPtr& message,
                                    ApplicationManager& application_manager);

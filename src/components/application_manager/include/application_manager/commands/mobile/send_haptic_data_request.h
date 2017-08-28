@@ -53,6 +53,7 @@ class SendHapticDataRequest : public CommandRequestImpl {
    * @brief SendHapticDataRequest class constructor
    *
    * @param message Incoming SmartObject message
+   * @param application_manager Reference of application manager
    **/
   SendHapticDataRequest(const MessageSharedPtr& message,
                 ApplicationManager& application_manager);

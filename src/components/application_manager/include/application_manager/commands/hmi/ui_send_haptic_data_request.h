@@ -48,6 +48,7 @@ class UISendHapticDataRequest : public RequestToHMI {
    * @brief UISendHapticDataRequest class constructor
    *
    * @param message Incoming SmartObject message
+   * @param application_manager Reference of application manager
    **/
   UISendHapticDataRequest(const MessageSharedPtr& message,
                                   ApplicationManager& application_manager);

@@ -49,6 +49,7 @@ class SendHapticDataResponse : public CommandResponseImpl {
    * @brief SendHapticDataResponse class constructor
    *
    * @param message Incoming SmartObject message
+   * @param application_manager Reference of application manager
    **/
   SendHapticDataResponse(const MessageSharedPtr& message,
                  ApplicationManager& application_manager);
