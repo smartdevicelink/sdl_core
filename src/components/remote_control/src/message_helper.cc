@@ -104,13 +104,13 @@ application_manager::MessagePtr MessageHelper::CreateHmiRequest(
 
   msg[json_keys::kId] = rc_module.service()->GetNextCorrelationID();
 
-  msg[kJsonrpc] = "2.0";
-  msg[kMethod] = function_id;
+  msg[json_keys::kJsonrpc] = "2.0";
+  msg[json_keys::kMethod] = function_id;
   if (!message_params.isNull()) {
-    msg[kParams] = message_params;
+    msg[json_keys::kParams] = message_params;
   }
 
-  msg[kParams][json_keys::kAppId] = hmi_app_id;
+  msg[json_keys::kParams][json_keys::kAppId] = hmi_app_id;
 
   Json::FastWriter writer;
   application_manager::MessagePtr message_to_send =
@@ -120,7 +120,7 @@ application_manager::MessagePtr MessageHelper::CreateHmiRequest(
   message_to_send->set_protocol_version(
       protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   message_to_send->set_correlation_id(msg[json_keys::kId].asInt());
-  message_to_send->set_function_name(msg[kMethod].asString());
+  message_to_send->set_function_name(msg[json_keys::kMethod].asString());
   std::string json_msg = writer.write(msg);
   message_to_send->set_json_message(json_msg);
   message_to_send->set_message_type(application_manager::MessageType::kRequest);

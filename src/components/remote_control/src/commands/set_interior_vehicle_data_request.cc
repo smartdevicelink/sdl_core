@@ -314,7 +314,8 @@ void SetInteriorVehicleDataRequest::OnEvent(
   const bool is_response_successful = ParseResultCode(value, result_code, info);
 
   if (is_response_successful) {
-    response_params_[kModuleData] = value[kResult][kModuleData];
+    response_params_[message_params::kModuleData] =
+        value[json_keys::kResult][message_params::kModuleData];
   }
 
   SendResponse(is_response_successful, result_code.c_str(), info);
