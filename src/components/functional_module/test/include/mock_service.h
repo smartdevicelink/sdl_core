@@ -68,6 +68,7 @@ class MockService : public Service {
   MOCK_METHOD1(ValidateMessageBySchema,
                application_manager::MessageValidationResult(
                    const application_manager::Message& message));
+  MOCK_CONST_METHOD0(GetSettings, const ApplicationManagerSettings&());
 };
 }
 // namespace application_manager

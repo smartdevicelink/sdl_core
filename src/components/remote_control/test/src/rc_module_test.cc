@@ -41,6 +41,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_application_manager_settings.h"
 
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;
@@ -50,6 +51,8 @@ using application_manager::ServicePtr;
 using application_manager::MockService;
 using application_manager::MockMessageHelper;
 using test::components::application_manager_test::MockApplication;
+using test::components::application_manager_test::
+    MockApplicationManagerSettings;
 
 using ::testing::_;
 using ::testing::Mock;
@@ -67,6 +70,7 @@ namespace {
 const bool kDeviceHandle = 1u;
 const std::string kDeviceId = "1";
 const std::string kDeviceName = "1";
+const uint32_t kDefaultTimeout = 10000;
 }
 
 namespace remote_control {
@@ -75,6 +79,8 @@ class RCModuleTest : public ::testing::Test {
  public:
   RCModuleTest()
       : mock_service_(utils::MakeShared<NiceMock<MockService> >())
+      , mock_settings_(
+            utils::MakeShared<NiceMock<MockApplicationManagerSettings> >())
       , mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , app0_(utils::MakeShared<NiceMock<MockApplication> >())
       , app1_(utils::MakeShared<NiceMock<MockApplication> >())
@@ -90,6 +96,7 @@ class RCModuleTest : public ::testing::Test {
  protected:
   RemoteControlPlugin module_;
   utils::SharedPtr<NiceMock<MockService> > mock_service_;
+  utils::SharedPtr<NiceMock<MockApplicationManagerSettings> > mock_settings_;
   MockMessageHelper& mock_message_helper_;
   std::vector<ApplicationSharedPtr> apps_;
   utils::SharedPtr<NiceMock<MockApplication> > app0_;
@@ -99,6 +106,10 @@ class RCModuleTest : public ::testing::Test {
 
   void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    ON_CALL(*mock_service_, GetSettings())
+        .WillByDefault(ReturnRef(*mock_settings_));
+    ON_CALL(*mock_settings_, default_timeout())
+        .WillByDefault(ReturnRef(kDefaultTimeout));
     ServicePtr exp_service(mock_service_);
     module_.set_service(exp_service);
     ServicePtr out_service = module_.service();
