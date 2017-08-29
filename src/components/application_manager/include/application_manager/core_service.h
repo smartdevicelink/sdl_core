@@ -166,8 +166,13 @@ class CoreService : public Service {
    * @param message Message to check
    * @return Check result
    */
-  MessageValidationResult ValidateMessageBySchema(
-      const Message& message) OVERRIDE;
+  MessageValidationResult ValidateMessageBySchema(const Message& message) FINAL;
+
+  /**
+   * @brief Gets application manager settings structure
+   * @return reference to application manager settings structure
+   */
+  const ApplicationManagerSettings& GetSettings() const FINAL;
 
  private:
   /**

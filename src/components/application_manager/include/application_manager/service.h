@@ -37,6 +37,7 @@
 #include <sstream>
 #include <vector>
 #include "application_manager/application.h"
+#include "application_manager/application_manager_settings.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_interfaces.h"
 
@@ -167,6 +168,12 @@ class Service {
    */
   virtual MessageValidationResult ValidateMessageBySchema(
       const Message& message) = 0;
+
+  /**
+   * @brief Gets application manager settings structure
+   * @return reference to application manager settings structure
+   */
+  virtual const ApplicationManagerSettings& GetSettings() const = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;
