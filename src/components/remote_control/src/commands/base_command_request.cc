@@ -45,8 +45,6 @@ namespace commands {
 
 using rc_event_engine::EventDispatcher;
 
-using namespace json_keys;
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 BaseCommandRequest::BaseCommandRequest(
@@ -83,10 +81,10 @@ void BaseCommandRequest::PrepareResponse(const bool success,
     msg_params = response_params_;
   }
 
-  msg_params[kSuccess] = success;
-  msg_params[kResultCode] = result_code;
+  msg_params[json_keys::kSuccess] = success;
+  msg_params[json_keys::kResultCode] = result_code;
   if (!info.empty()) {
-    msg_params[kInfo] = info;
+    msg_params[json_keys::kInfo] = info;
   }
 
   Json::FastWriter writer;
@@ -290,17 +288,19 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
   result_code = result_codes::kInvalidData;
   info = "";
 
-  if (IsMember(value, kResult) && IsMember(value[kResult], kCode)) {
+  if (IsMember(value, json_keys::kResult) &&
+      IsMember(value[json_keys::kResult], json_keys::kCode)) {
     result_code =
         GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-            value[kResult][kCode].asInt()));
-  } else if (IsMember(value, kError) && IsMember(value[kError], kCode)) {
+            value[json_keys::kResult][json_keys::kCode].asInt()));
+  } else if (IsMember(value, json_keys::kError) &&
+             IsMember(value[json_keys::kError], json_keys::kCode)) {
     result_code =
         GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-            value[kError][kCode].asInt()));
+            value[json_keys::kError][json_keys::kCode].asInt()));
 
-    if (IsMember(value[kError], kMessage)) {
-      info = value[kError][kMessage].asCString();
+    if (IsMember(value[json_keys::kError], json_keys::kMessage)) {
+      info = value[json_keys::kError][json_keys::kMessage].asCString();
     }
   }
 
@@ -523,9 +523,9 @@ void BaseCommandRequest::ProcessAccessResponse(
 
   bool is_allowed = false;
   if (is_succeeded) {
-    if (IsMember(value[kResult], message_params::kAllowed) &&
-        value[kResult][message_params::kAllowed].isBool()) {
-      is_allowed = value[kResult][message_params::kAllowed].asBool();
+    if (IsMember(value[json_keys::kResult], message_params::kAllowed) &&
+        value[json_keys::kResult][message_params::kAllowed].isBool()) {
+      is_allowed = value[json_keys::kResult][message_params::kAllowed].asBool();
     }
 
     const std::string module = ModuleType(msg_json_);
