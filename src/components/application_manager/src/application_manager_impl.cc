@@ -1598,11 +1598,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
-#ifdef SDL_REMOTE_CONTROL
-  mobile_apis::FunctionID::eType function_id =
-      static_cast<mobile_apis::FunctionID::eType>(
-          (*message)[strings::params][strings::function_id].asUInt());
-#endif
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
@@ -1610,16 +1605,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::correlation_id].asUInt(),
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
-#ifdef SDL_REMOTE_CONTROL
-    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
-        (*message)[strings::msg_params][strings::success].asBool()) {
-      bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
-      LOG4CXX_INFO(logger_,
-                   "Registered app " << app->app_id() << " is "
-                                     << (is_for_plugin ? "" : "not ")
-                                     << "for plugins.");
-    }
-#endif
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
