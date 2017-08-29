@@ -221,4 +221,8 @@ MessageValidationResult CoreService::ValidateMessageBySchema(
   return result;
 }
 
+const ApplicationManagerSettings& CoreService::GetSettings() const {
+  return application_manager_.get_settings();
+}
+
 }  // namespace application_manager
