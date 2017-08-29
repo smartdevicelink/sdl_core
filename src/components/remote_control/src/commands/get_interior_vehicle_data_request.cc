@@ -123,7 +123,8 @@ void GetInteriorVehicleDataRequest::OnEvent(
 
   if (success) {
     ProccessSubscription(value);
-    response_params_[kModuleData] = value[kResult][kModuleData];
+    response_params_[kModuleData] =
+        value[json_keys::kResult][message_params::kModuleData];
   }
   SendResponse(success, result_code.c_str(), info);
 }
@@ -138,7 +139,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   const bool is_subscribe_present_in_request =
       IsMember(request_params, kSubscribe);
   const bool isSubscribed_present_in_response =
-      IsMember(hmi_response[kResult], kIsSubscribed);
+      IsMember(hmi_response[json_keys::kResult], message_params::kIsSubscribed);
 
   if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     return;
@@ -157,14 +158,17 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 
   if (!is_subscribe_present_in_request && isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
-                 "Parameter " << kIsSubscribed << " is ignored due to absence '"
-                              << kSubscribe << "' parameter in request");
+                 "Parameter " << message_params::kIsSubscribed
+                              << " is ignored due to absence '"
+                              << message_params::kSubscribe
+                              << "' parameter in request");
     return;
   }
 
   const bool request_subscribe = request_params[kSubscribe].asBool();
-  const bool response_subscribe = hmi_response[kResult][kIsSubscribed].asBool();
-  response_params_[kIsSubscribed] = response_subscribe;
+  const bool response_subscribe =
+      hmi_response[json_keys::kResult][message_params::kIsSubscribed].asBool();
+  response_params_[message_params::kIsSubscribed] = response_subscribe;
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
