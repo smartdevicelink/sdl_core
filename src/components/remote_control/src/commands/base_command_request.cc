@@ -331,10 +331,10 @@ void BaseCommandRequest::Run() {
   }
   LOG4CXX_TRACE(logger_, "RC interface is available!");
   if (CheckPolicyPermissions() && CheckDriverConsent()) {
-    if (AqcuireResources()) {
+    if (AcquireResources()) {
       Execute();  // run child's logic
     }
-    // If resource is not aqcuired, AqcuireResources method will either
+    // If resource is not aqcuired, AcquireResources method will either
     // send response to mobile or
     // send additional request to HMI to ask driver consent
   }
@@ -392,7 +392,7 @@ bool BaseCommandRequest::CheckDriverConsent() {
   return false;
 }
 
-bool BaseCommandRequest::AqcuireResources() {
+bool BaseCommandRequest::AcquireResources() {
   LOG4CXX_AUTO_TRACE(logger_);
   const Json::Value message_params =
       MessageHelper::StringToValue(message_->json_message());

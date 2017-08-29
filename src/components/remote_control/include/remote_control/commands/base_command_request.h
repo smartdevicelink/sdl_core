@@ -266,13 +266,13 @@ class BaseCommandRequest
   bool CheckDriverConsent();
 
   /**
-   * @brief AqcuireResources checks whether resource status is busy or not and
+   * @brief AcquireResources checks whether resource status is busy or not and
    * then tries to acquire this resource. In case driver consent is required -
    * sends consent request to HMI.
    * @return True in case of resource is free and successfully acquired,
    * otherwise false
    */
-  bool AqcuireResources();
+  bool AcquireResources();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
   void SendDisallowed(application_manager::TypeAccess access);
   void SendGetUserConsent(const Json::Value& value);
