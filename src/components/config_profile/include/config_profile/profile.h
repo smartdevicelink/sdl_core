@@ -214,7 +214,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
     * @brief Returns folder containing all plugins
     */
-  const std::string& plugins_folder() const;
+  const std::string& plugins_folder() const OVERRIDE;
 
   /**
    * @brief Maximum command id available for mobile app
