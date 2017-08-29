@@ -110,13 +110,14 @@ bool Message::operator==(const Message& message) const {
   bool binary_data_available = true;
   if (binary_data_) {
     binary_data_available = std::equal(binary_data_->begin(),
-                             binary_data_->end(),
-                             message.binary_data_->begin(),
-                             BinaryDataPredicate);
+                                       binary_data_->end(),
+                                       message.binary_data_->begin(),
+                                       BinaryDataPredicate);
   }
 
   return function_id && correlation_id && connection_key && type &&
-         binary_data_available && json_message && version && data_size && payload_size;
+         binary_data_available && json_message && version && data_size &&
+         payload_size;
 }
 
 Message::~Message() {
