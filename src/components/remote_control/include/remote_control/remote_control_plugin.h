@@ -97,12 +97,30 @@ class RemoteControlPlugin : public RemotePluginInterface {
    */
   void OnUnregisterApplication(const uint32_t app_id) OVERRIDE;
 
+  /**
+   * @brief Sends HMI status notification to mobile
+   * @param app application with changed HMI status
+   **/
   void SendHmiStatusNotification(
       application_manager::ApplicationSharedPtr app) OVERRIDE;
 
+  /**
+   * @brief Getter for event_dispatcher
+   * @return reference to RCEventDispatcher instance
+   */
   RCEventDispatcher& event_dispatcher() OVERRIDE;
 
+  /**
+   * @brief Getter for resource_allocation_manager
+   * @return reference to ResourceAllocationManager instance
+   */
   ResourceAllocationManager& resource_allocation_manager() OVERRIDE;
+
+  /**
+   * @brief Overriden setter for service
+   * @param service pointer to new service instance
+   */
+  void set_service(application_manager::ServicePtr service) OVERRIDE;
 
  protected:
   /**
@@ -111,11 +129,16 @@ class RemoteControlPlugin : public RemotePluginInterface {
   virtual void RemoveAppExtensions() OVERRIDE;
 
  private:
-  void SubscribeOnFunctions();
-  void NotifyMobiles(application_manager::MessagePtr msg);
+  /**
+   * @brief Trigger actions which should be done after plugin service instance
+   * have been changed
+   */
+  void OnPluginServiceChanged();
 
-  functional_modules::ProcessResult HandleMessage(
-      application_manager::MessagePtr msg);
+  /**
+   * @brief Subscribes on all RC related functions
+   */
+  void SubscribeOnFunctions();
 
   functional_modules::PluginInfo plugin_info_;
   bool is_scan_started_;

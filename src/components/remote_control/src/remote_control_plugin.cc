@@ -233,16 +233,6 @@ void RemoteControlPlugin::SendHmiStatusNotification(
   service()->SendMessageToMobile(msg);
 }
 
-void RemoteControlPlugin::NotifyMobiles(
-    application_manager::MessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  request_controller::MobileRequestPtr command =
-      RCCommandFactory::CreateCommand(message, *this);
-  if (command) {
-    command->Run();
-  }
-}
-
 void RemoteControlPlugin::SendResponseToMobile(
     application_manager::MessagePtr msg) {
   LOG4CXX_DEBUG(logger_, "Response to mobile: " << msg->json_message());
@@ -313,6 +303,18 @@ void RemoteControlPlugin::OnAppHMILevelChanged(
 void RemoteControlPlugin::OnUnregisterApplication(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   resource_allocation_manager_.OnUnregisterApplication(app_id);
+}
+
+void RemoteControlPlugin::OnPluginServiceChanged() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const functional_modules::TimeUnit timeout_msec =
+      service()->GetSettings().default_timeout();
+  request_controller_.SetRequestTimeout(timeout_msec / 1000);
+}
+
+void RemoteControlPlugin::set_service(application_manager::ServicePtr service) {
+  RemotePluginInterface::set_service(service);
+  OnPluginServiceChanged();
 }
 
 RCEventDispatcher& RemoteControlPlugin::event_dispatcher() {

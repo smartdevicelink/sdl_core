@@ -33,7 +33,6 @@
 #include "remote_control/request_controller.h"
 #include "json/json.h"
 #include "utils/logger.h"
-#include "functional_module/settings.h"
 
 namespace remote_control {
 namespace request_controller {
@@ -41,12 +40,6 @@ namespace request_controller {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RCRequestController")
 
 RequestController::RequestController() {
-  functional_modules::TimeUnit timeout_seconds = 100;
-  functional_modules::Settings settings;
-  settings.ReadParameter(
-      "Remote Control", "timeout_period_seconds", &timeout_seconds);
-  timer_.set_period(timeout_seconds);
-  LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);
   time_director_.RegisterTimer(timer_);
 }
@@ -91,6 +84,12 @@ void RequestController::OnTimeoutTriggered(const TrackableMessage& expired) {
   }
   it->second->OnTimeout();
   mobile_request_list_.erase(it);
+}
+
+void RequestController::SetRequestTimeout(
+    const functional_modules::TimeUnit timeout_seconds) {
+  LOG4CXX_DEBUG(logger_, "RC request timeout is set to " << timeout_seconds);
+  timer_.set_period(timeout_seconds);
 }
 
 }  //  namespace request_controller

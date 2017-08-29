@@ -83,7 +83,17 @@ class RequestController
    */
   void DeleteRequest(const uint32_t& mobile_correlation_id);
 
-  void OnTimeoutTriggered(const TrackableMessage& expired);
+  /**
+   * @brief Sets timeout value for RC requests
+   * @param timeout_seconds new timeout value in seconds
+   */
+  void SetRequestTimeout(const functional_modules::TimeUnit timeout_seconds);
+
+  /**
+   * @brief Triggers actions when timeout for some request is expired
+   * @param expired reference to request which timeout was expired
+   */
+  void OnTimeoutTriggered(const TrackableMessage& expired) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestController);
