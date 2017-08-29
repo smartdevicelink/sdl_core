@@ -3,6 +3,8 @@
 #include "remote_control/resource_allocation_manager.h"
 #include "remote_control/remote_plugin_interface.h"
 #include "utils/macro.h"
+#include "utils/lock.h"
+
 namespace remote_control {
 
 typedef rc_event_engine::EventDispatcher<application_manager::MessagePtr,
@@ -56,12 +58,14 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   typedef std::map<std::string, uint32_t> AllocatedResources;
   AllocatedResources allocated_resources_;
+  mutable sync_primitives::Lock allocated_resources_lock_;
 
   /**
    * @brief ResourcesState contains states of ALLOCATED resources
    */
   typedef std::map<std::string, ResourceState::eType> ResourcesState;
   ResourcesState resources_state_;
+  mutable sync_primitives::Lock resources_state_lock_;
 
   /**
    * @brief RejectedResources type for connecting list of resources rejected by
@@ -70,6 +74,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    */
   typedef std::map<uint32_t, std::vector<std::string> > RejectedResources;
   RejectedResources rejected_resources_for_application_;
+  mutable sync_primitives::Lock rejected_resources_for_application_lock_;
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   RemotePluginInterface& rc_plugin_;

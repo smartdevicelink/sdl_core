@@ -28,6 +28,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
     return AcquireResult::IN_USE;
   }
 
+  sync_primitives::AutoLock lock(allocated_resources_lock_);
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module_type);
   if (allocated_resources_.end() == allocated_it) {
@@ -102,19 +103,23 @@ void ResourceAllocationManagerImpl::SetResourceState(
   LOG4CXX_DEBUG(logger_,
                 "Setting state for " << module_type << " by app_id " << app_id
                                      << " to state " << state);
-  const AllocatedResources::const_iterator allocated_it =
-      allocated_resources_.find(module_type);
+  {
+    sync_primitives::AutoLock lock(allocated_resources_lock_);
+    const AllocatedResources::const_iterator allocated_it =
+        allocated_resources_.find(module_type);
 
-  const std::string status = allocated_resources_.end() != allocated_it
-                                 ? " acquired "
-                                 : " not acquired ";
-  UNUSED(status);
-  LOG4CXX_DEBUG(logger_,
-                "Resource " << module_type << " is " << status
-                            << " Owner application id is "
-                            << allocated_it->second
-                            << " Changing application id is " << app_id);
+    const std::string status = allocated_resources_.end() != allocated_it
+                                   ? " acquired "
+                                   : " not acquired ";
+    UNUSED(status);
+    LOG4CXX_DEBUG(logger_,
+                  "Resource " << module_type << " is " << status
+                              << " Owner application id is "
+                              << allocated_it->second
+                              << " Changing application id is " << app_id);
+  }
 
+  sync_primitives::AutoLock lock(resources_state_lock_);
   resources_state_[module_type] = state;
   LOG4CXX_DEBUG(logger_, "Resource " << module_type << " got state " << state);
 }
@@ -122,6 +127,8 @@ void ResourceAllocationManagerImpl::SetResourceState(
 bool ResourceAllocationManagerImpl::IsResourceFree(
     const std::string& module_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(resources_state_lock_);
   const ResourcesState::const_iterator resource =
       resources_state_.find(module_type);
 
@@ -139,6 +146,7 @@ bool ResourceAllocationManagerImpl::IsResourceFree(
 void ResourceAllocationManagerImpl::SetAccessMode(
     const hmi_apis::Common_RCAccessMode::eType access_mode) {
   if (hmi_apis::Common_RCAccessMode::ASK_DRIVER != access_mode) {
+    sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
     rejected_resources_for_application_.clear();
   }
   current_access_mode_ = access_mode;
@@ -152,12 +160,14 @@ ResourceAllocationManagerImpl::GetAccessMode() const {
 void ResourceAllocationManagerImpl::ForceAcquireResource(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Force " << app_id << " acquiring " << module_type);
+  sync_primitives::AutoLock lock(allocated_resources_lock_);
   allocated_resources_[module_type] = app_id;
 }
 
 bool ResourceAllocationManagerImpl::IsModuleTypeRejected(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
   RejectedResources::iterator it =
       rejected_resources_for_application_.find(app_id);
 
@@ -174,6 +184,7 @@ bool ResourceAllocationManagerImpl::IsModuleTypeRejected(
 void ResourceAllocationManagerImpl::OnDriverDisallowed(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
   RejectedResources::iterator it =
       rejected_resources_for_application_.find(app_id);
 
@@ -189,7 +200,12 @@ void ResourceAllocationManagerImpl::OnUnregisterApplication(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  rejected_resources_for_application_.erase(app_id);
+  {
+    sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
+    rejected_resources_for_application_.erase(app_id);
+  }
+
+  sync_primitives::AutoLock lock_allocated(allocated_resources_lock_);
   for (AllocatedResources::const_iterator it = allocated_resources_.begin();
        it != allocated_resources_.end();) {
     if (app_id == it->second) {
@@ -197,6 +213,7 @@ void ResourceAllocationManagerImpl::OnUnregisterApplication(
                    "Application " << app_id
                                   << " is unregistered. Releasing resource "
                                   << it->first);
+      sync_primitives::AutoLock lock_state(resources_state_lock_);
       resources_state_.erase(it->first);
       it = allocated_resources_.erase(it);
     } else {
@@ -207,9 +224,18 @@ void ResourceAllocationManagerImpl::OnUnregisterApplication(
 
 void ResourceAllocationManagerImpl::ResetAllAllocations() {
   LOG4CXX_AUTO_TRACE(logger_);
-  allocated_resources_.clear();
-  rejected_resources_for_application_.clear();
-  resources_state_.clear();
+  {
+    sync_primitives::AutoLock lock(resources_state_lock_);
+    resources_state_.clear();
+  }
+  {
+    sync_primitives::AutoLock lock(allocated_resources_lock_);
+    allocated_resources_.clear();
+  }
+  {
+    sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
+    rejected_resources_for_application_.clear();
+  }
 }
 
 }  // namespace remote_control
