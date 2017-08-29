@@ -56,20 +56,6 @@ inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
   return output;
 }
 
-struct Object {
-  policy_table::ModuleType module;
-};
-inline bool operator<(const Object& x, const Object& y) {
-  return x.module < y.module;
-}
-inline bool operator==(const Object& x, const Object& y) {
-  return x.module == y.module;
-}
-inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(module:" << EnumToJsonString(what.module) << ")";
-  return output;
-}
-
 typedef std::vector<PTString> RemoteControlParams;
 
 class AccessRemote {
