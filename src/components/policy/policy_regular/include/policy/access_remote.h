@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
-#define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_ACCESS_REMOTE_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
 #include <vector>
 #include <ostream>
@@ -53,20 +53,6 @@ inline bool operator==(const Subject& x, const Subject& y) {
 }
 inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
   output << "Subject(dev:" << who.dev_id << ", app:" << who.app_id << ")";
-  return output;
-}
-
-struct Object {
-  policy_table::ModuleType module;
-};
-inline bool operator<(const Object& x, const Object& y) {
-  return x.module < y.module;
-}
-inline bool operator==(const Object& x, const Object& y) {
-  return x.module == y.module;
-}
-inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(module:" << EnumToJsonString(what.module) << ")";
   return output;
 }
 
@@ -129,4 +115,4 @@ class AccessRemote {
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_ACCESS_REMOTE_H_

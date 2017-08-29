@@ -47,30 +47,97 @@ class AccessRemoteImpl : public AccessRemote {
  public:
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
-  virtual bool CheckModuleType(const PTString& app_id,
-                               policy_table::ModuleType module) const;
-  virtual void SetDefaultHmiTypes(const Subject& who,
-                                  const std::vector<int>& hmi_types);
-  virtual const policy_table::Strings& GetGroups(const Subject& who);
-  virtual bool GetPermissionsForApp(const std::string& device_id,
-                                    const std::string& app_id,
-                                    FunctionalIdType& group_types);
-  virtual bool IsAppRemoteControl(const Subject& who);
-  virtual bool GetModuleTypes(const std::string& policy_app_id,
-                              std::vector<std::string>* modules);
+  /**
+   * @brief CheckModuleType check if module type is allowed for application
+   * @param app_id application id
+   * @param module module
+   * @return true if allowed, if not - false
+   */
+  bool CheckModuleType(const PTString& app_id,
+                       policy_table::ModuleType module) const OVERRIDE;
+
+  /**
+   * @brief SetDefaultHmiTypes setup default hmi typed for application
+   * @param who application on specific device
+   * @param hmi_types hmi types list
+   */
+  void SetDefaultHmiTypes(const Subject& who,
+                          const std::vector<int>& hmi_types) OVERRIDE;
+
+  /**
+   * @brief GetGroups return list of groups for applicaiton
+   * @param who application on specific device
+   * @return list of groups
+   */
+  const policy_table::Strings& GetGroups(const Subject& who) OVERRIDE;
+
+  /**
+   * @brief GetPermissionsForApp read list of permissions for application
+   * @param device_id device
+   * @param app_id application
+   * @param group_types output parameter for permissions
+   * @return true
+   */
+  bool GetPermissionsForApp(const std::string& device_id,
+                            const std::string& app_id,
+                            FunctionalIdType& group_types) OVERRIDE;
+
+  /**
+   * @brief IsAppRemoteControl check is app is remote controll
+   * @param who application on specific device
+   * @return true is remote controll aotherwise return false
+   */
+  bool IsAppRemoteControl(const Subject& who) OVERRIDE;
+
+  /**
+   * @brief GetModuleTypes get list of module types of application
+   * @param policy_app_id application id
+   * @param modules output parameter for module types
+   * @return true on success otherwise false
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) OVERRIDE;
 
  private:
   typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
   inline bool country_consent() const;
+  /**
+   * @brief HmiTypes get list of hmi types for application
+   * @param who  application on specific device
+   * @return list of hmi types
+   */
   const policy_table::AppHMITypes& HmiTypes(const Subject& who);
+
+  /**
+   * @brief GetGroupsIds get list of groups for application
+   * @param device_id device id
+   * @param app_id application id
+   * @param grops_ids output parameter for group ids storing
+   */
   void GetGroupsIds(const std::string& device_id,
                     const std::string& app_id,
                     FunctionalGroupIDs& grops_ids);
+
+  /**
+   * @brief IsAllowed check if modulename and rpc is allowed for application
+   * @param modules list of access modules
+   * @param module_name module name to check
+   * @param rpc_name rpc name to check
+   * @param input list of rpc parameters
+   * @return true if allowed otherwise return false
+   */
   bool IsAllowed(const policy_table::AccessModules& modules,
                  const std::string& module_name,
                  const std::string& rpc_name,
                  RemoteControlParams* input) const;
+
+  /**
+   * @brief CompareParameters check if app parameters allowed
+   * @param parameters list of allowed parameters
+   * @param input list of parameters to check
+   * @return true if allowed otherwise return false
+   */
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;
   utils::SharedPtr<CacheManager> cache_;

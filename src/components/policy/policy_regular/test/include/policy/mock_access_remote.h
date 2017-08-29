@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
-#define SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_POLICY_MOCK_ACCESS_REMOTE_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_POLICY_MOCK_ACCESS_REMOTE_H_
 
 #include "gmock/gmock.h"
 #include "policy/access_remote.h"
@@ -40,10 +40,6 @@ namespace components {
 namespace access_remote_test {
 
 class MockSubject : public policy::Subject {
- public:
-};
-
-class MockObject : public policy::Object {
  public:
 };
 
@@ -76,4 +72,4 @@ class MockAccessRemote : public policy::AccessRemote {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_POLICY_MOCK_ACCESS_REMOTE_H_

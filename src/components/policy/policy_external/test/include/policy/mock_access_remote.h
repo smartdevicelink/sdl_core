@@ -43,10 +43,6 @@ class MockSubject : public policy::Subject {
  public:
 };
 
-class MockObject : public policy::Object {
- public:
-};
-
 class MockAccessRemote : public policy::AccessRemote {
  public:
   MOCK_CONST_METHOD3(
