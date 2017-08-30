@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include "gtest/gtest.h"
+#include <algorithm>
 #include "remote_control/resource_allocation_manager_impl.h"
 #include "mock_resource_allocation_manager.h"
 #include "mock_remote_control_plugin.h"
@@ -42,6 +43,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;
@@ -60,6 +62,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SaveArg;
 using ::testing::Eq;
+using ::testing::DoAll;
+using ::testing::SetArgPointee;
 using ::application_manager::Message;
 using ::application_manager::MessageType;
 using ::application_manager::ApplicationSharedPtr;
@@ -71,9 +75,10 @@ const std::string kModuleType1 = "CLIMATE";
 const std::string kModuleType2 = "RADIO";
 const int32_t kConnectionKey = 5;
 const int32_t kCorrelationId = 5;
-const int kModuleId = 153;
 const uint32_t kAppId1 = 11u;
 const uint32_t kAppId2 = 22u;
+const std::string policy_app_id_1_ = "policy_id_1";
+const functional_modules::ModuleID kDefaultModuleID = 0;
 }
 
 namespace remote_control {
@@ -87,6 +92,8 @@ class RAManagerTest : public ::testing::Test {
       , message_(utils::MakeShared<Message>(MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kRpc))) {
     EXPECT_CALL(mock_module_, service()).WillRepeatedly(Return(mock_service_));
+    EXPECT_CALL(mock_module_, GetModuleID())
+        .WillRepeatedly(Return(kDefaultModuleID));
   }
 
   void CheckResultWithHMILevelAndAccessMode(
@@ -233,8 +240,95 @@ TEST_F(RAManagerTest,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
-TEST_F(RAManagerTest,
-       AcquireResource_App1OccupiedResourceAndDisconnected_ExpectApp2Allowed) {
+TEST_F(RAManagerTest, AppExit_ReleaseResource) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillRepeatedly(Return(mock_app_1_));
+
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  // Act
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationExit, kAppId1);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillRepeatedly(Return(mock_app_2_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId2));
+}
+
+TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillOnce(Return(mock_app_1_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillRepeatedly(Return(mock_app_2_));
+
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  // Act
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationExit, kAppId2);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillOnce(Return(mock_app_2_));
+  EXPECT_CALL(*mock_app_2_, hmi_level())
+      .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(remote_control::AcquireResult::IN_USE,
+            ra_manager.AcquireResource(kModuleType1, kAppId2));
+}
+
+TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillRepeatedly(Return(mock_app_1_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  // Act
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId1);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillOnce(Return(mock_app_2_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId2));
+}
+
+TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
   // Arrange
   ResourceAllocationManagerImpl ra_manager(mock_module_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
@@ -244,14 +338,113 @@ TEST_F(RAManagerTest,
   EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
-  // Act
-  ra_manager.OnUnregisterApplication(kAppId1);
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillRepeatedly(Return(mock_app_2_));
 
-  // Assert
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_2_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  // Act
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId2);
+
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
+  EXPECT_CALL(*mock_app_2_, hmi_level())
+      .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(remote_control::AcquireResult::IN_USE,
+            ra_manager.AcquireResource(kModuleType1, kAppId2));
+}
+
+TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillRepeatedly(Return(mock_app_1_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType2, kAppId1));
+
+  std::vector<ApplicationSharedPtr> apps;
+  apps.push_back(mock_app_1_);
+  EXPECT_CALL(*mock_service_, GetApplications(_)).WillRepeatedly(Return(apps));
+
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  // Act
+  ra_manager.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationsDisabled);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillRepeatedly(Return(mock_app_2_));
+  EXPECT_CALL(*mock_app_2_, hmi_level())
+      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kAppId2));
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType2, kAppId2));
+}
+
+TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_module_);
+  ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillRepeatedly(Return(mock_app_1_));
+
+  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+      application_manager::AppExtensionUID(kDefaultModuleID));
+
+  EXPECT_CALL(*mock_app_1_, QueryInterface(_))
+      .WillOnce(Return(rc_extention_ptr));
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
+      .WillRepeatedly(Return(mock_app_1_));
+
+  EXPECT_CALL(*mock_app_1_, app_id()).WillRepeatedly(Return(kAppId1));
+
+  EXPECT_CALL(*mock_app_1_, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_1_));
+
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType2, kAppId1));
+
+  std::vector<application_manager::ApplicationSharedPtr> apps;
+  apps.push_back(mock_app_1_);
+  EXPECT_CALL(*mock_service_, GetApplications(_)).WillOnce(Return(apps));
+
+  Resources allowed_modules;
+  allowed_modules.push_back(kModuleType1);
+
+  EXPECT_CALL(*mock_service_, GetModuleTypes(policy_app_id_1_, _))
+      .WillOnce(DoAll(SetArgPointee<1>(allowed_modules), Return(true)));
+
+  // Act
+  ra_manager.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
+
+  EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
+      .WillRepeatedly(Return(mock_app_2_));
+  EXPECT_CALL(*mock_app_2_, hmi_level())
+      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  EXPECT_EQ(remote_control::AcquireResult::IN_USE,
+            ra_manager.AcquireResource(kModuleType1, kAppId2));
+  EXPECT_EQ(remote_control::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType2, kAppId2));
 }
 
 TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {

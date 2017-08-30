@@ -6,6 +6,7 @@
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
 #include "remote_control/message_helper.h"
+#include "remote_control/rc_app_extension.h"
 
 namespace remote_control {
 
@@ -93,6 +94,123 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
     }
     default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
   }
+}
+
+void ResourceAllocationManagerImpl::ReleaseResource(
+    const std::string& module_type, const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Release " << module_type << " by " << application_id);
+  AllocatedResources::const_iterator allocation =
+      allocated_resources_.find(module_type);
+  if (allocated_resources_.end() == allocation) {
+    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
+    return;
+  }
+
+  if (application_id != allocation->second) {
+    LOG4CXX_DEBUG(logger_,
+                  "Resource " << module_type
+                              << " is allocated by different application "
+                              << allocation->second);
+    return;
+  }
+
+  allocated_resources_.erase(allocation);
+  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
+  return;
+}
+
+void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+  Apps app_list =
+      rc_plugin_.service()->GetApplications(rc_plugin_.GetModuleID());
+  Apps::const_iterator app = app_list.begin();
+  for (; app_list.end() != app; ++app) {
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    const uint32_t application_id = app_ptr->app_id();
+    Resources acquired_modules = GetAcquiredResources(application_id);
+    std::sort(acquired_modules.begin(), acquired_modules.end());
+
+    Resources allowed_modules;
+    rc_plugin_.service()->GetModuleTypes((*app)->policy_app_id(),
+                                         &allowed_modules);
+    std::sort(allowed_modules.begin(), allowed_modules.end());
+
+    LOG4CXX_DEBUG(logger_,
+                  "Acquired modules: " << acquired_modules.size()
+                                       << " , allowed modules: "
+                                       << allowed_modules.size());
+
+    Resources disallowed_modules;
+    std::set_difference(acquired_modules.begin(),
+                        acquired_modules.end(),
+                        allowed_modules.begin(),
+                        allowed_modules.end(),
+                        std::back_inserter(disallowed_modules));
+
+    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
+    Resources::const_iterator module = disallowed_modules.begin();
+    for (; disallowed_modules.end() != module; ++module) {
+      ReleaseResource(*module, application_id);
+      if (rc_extention) {
+        rc_extention->UnsubscribeFromInteriorVehicleData(Json::Value(*module));
+      }
+    }
+  }
+}
+
+RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
+    application_manager::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!application) {
+    return NULL;
+  }
+
+  RCAppExtensionPtr rc_app_extension;
+  application_manager::AppExtensionPtr app_extension =
+      application->QueryInterface(rc_plugin_.GetModuleID());
+  if (!app_extension) {
+    return NULL;
+  }
+
+  rc_app_extension =
+      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+          app_extension);
+
+  return rc_app_extension;
+}
+
+void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
+  Apps::const_iterator app = apps.begin();
+  for (; apps.end() != app; ++app) {
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    if (!app_ptr) {
+      continue;
+    }
+    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
+    if (rc_extention) {
+      rc_extention->UnsubscribeFromInteriorVehicleData();
+    }
+  }
+}
+
+std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
+    const uint32_t application_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Resources allocated_resources;
+  AllocatedResources::const_iterator allocation = allocated_resources_.begin();
+  for (; allocated_resources_.end() != allocation; ++allocation) {
+    if (application_id == allocation->second) {
+      allocated_resources.push_back(allocation->first);
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Application " << application_id << " acquired "
+                               << allocated_resources.size()
+                               << " resource(s).");
+
+  return allocated_resources;
 }
 
 void ResourceAllocationManagerImpl::SetResourceState(
@@ -196,29 +314,41 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
   list_of_rejected_resources.push_back(module_type);
 }
 
-void ResourceAllocationManagerImpl::OnUnregisterApplication(
-    const uint32_t app_id) {
+void ResourceAllocationManagerImpl::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
 
-  {
-    sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
-    rejected_resources_for_application_.erase(app_id);
+  if (functional_modules::ApplicationEvent::kApplicationExit == event ||
+      functional_modules::ApplicationEvent::kApplicationUnregistered == event) {
+    Resources acquired_modules = GetAcquiredResources(application_id);
+    Resources::const_iterator module = acquired_modules.begin();
+    for (; acquired_modules.end() != module; ++module) {
+      ReleaseResource(*module, application_id);
+    }
+
+    Apps app_list;
+    app_list.push_back(rc_plugin_.service()->GetApplication(application_id));
+    RemoveAppsSubscriptions(app_list);
+  }
+}
+
+void ResourceAllocationManagerImpl::OnPolicyEvent(
+    functional_modules::PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Event " << event);
+
+  if (functional_modules::PolicyEvent::kApplicationPolicyUpdated == event) {
+    ProcessApplicationPolicyUpdate();
+    return;
   }
 
-  sync_primitives::AutoLock lock_allocated(allocated_resources_lock_);
-  for (AllocatedResources::const_iterator it = allocated_resources_.begin();
-       it != allocated_resources_.end();) {
-    if (app_id == it->second) {
-      LOG4CXX_INFO(logger_,
-                   "Application " << app_id
-                                  << " is unregistered. Releasing resource "
-                                  << it->first);
-      sync_primitives::AutoLock lock_state(resources_state_lock_);
-      resources_state_.erase(it->first);
-      it = allocated_resources_.erase(it);
-    } else {
-      ++it;
-    }
+  if (functional_modules::PolicyEvent::kApplicationsDisabled == event) {
+    ResetAllAllocations();
+    application_manager::ServicePtr s = rc_plugin_.service();
+    Apps app_list = s->GetApplications(rc_plugin_.GetModuleID());
+    RemoveAppsSubscriptions(app_list);
+    return;
   }
 }
 

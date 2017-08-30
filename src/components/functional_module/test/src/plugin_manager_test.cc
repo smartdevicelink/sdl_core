@@ -43,37 +43,6 @@ TEST_F(PluginManagerTest, ChangePluginsState) {
   manager->OnServiceStateChanged(kState);
 }
 
-TEST_F(PluginManagerTest, IsMessageForPluginFail) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
-  EXPECT_FALSE(manager->IsMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsMessageForPluginPass) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_3);
-  msg->set_function_id(101);  // see MockGenericModule
-  EXPECT_TRUE(manager->IsMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsHMIMessageForPluginFail) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN);
-  EXPECT_FALSE(manager->IsHMIMessageForPlugin(msg));
-}
-
-TEST_F(PluginManagerTest, IsHMIMessageForPluginPass) {
-  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  msg->set_protocol_version(MajorProtocolVersion::PROTOCOL_VERSION_HMI);
-  std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
-  msg->set_json_message(json);
-  EXPECT_TRUE(manager->IsHMIMessageForPlugin(msg));
-}
-
 TEST_F(PluginManagerTest, RemoveAppExtension) {
   const uint32_t kAppId = 2;
   EXPECT_CALL(*module, RemoveAppExtension(kAppId)).Times(1);
@@ -99,6 +68,30 @@ TEST_F(PluginManagerTest, ProcessMessagePass) {
       .Times(1)
       .WillOnce(Return(ProcessResult::PROCESSED));
   manager->ProcessMessage(message);
+}
+
+TEST_F(PluginManagerTest, SDL_events_triggers_module) {
+  using namespace functional_modules;
+  std::vector<ApplicationEvent> app_events;
+  app_events.push_back(ApplicationEvent::kApplicationExit);
+  app_events.push_back(ApplicationEvent::kApplicationUnregistered);
+
+  std::vector<ApplicationEvent>::const_iterator ev = app_events.begin();
+  const uint32_t kDummyAppId = 1;
+  for (; app_events.end() != ev; ++ev) {
+    EXPECT_CALL(*module, OnApplicationEvent(*ev, kDummyAppId));
+    manager->OnApplicationEvent(*ev, kDummyAppId);
+  }
+
+  std::vector<PolicyEvent> policy_events;
+  policy_events.push_back(PolicyEvent::kApplicationPolicyUpdated);
+  policy_events.push_back(PolicyEvent::kApplicationsDisabled);
+
+  std::vector<PolicyEvent>::const_iterator ev_policy = policy_events.begin();
+  for (; policy_events.end() != ev_policy; ++ev_policy) {
+    EXPECT_CALL(*module, OnPolicyEvent(*ev_policy));
+    manager->OnPolicyEvent(*ev_policy);
+  }
 }
 
 TEST_F(PluginManagerTest, ProcessHMIMessageFail) {

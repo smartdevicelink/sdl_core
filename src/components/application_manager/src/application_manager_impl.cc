@@ -2954,7 +2954,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  plugin_manager_.OnUnregisterApplication(app_id);
+  plugin_manager_.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, app_id);
 #endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
@@ -2982,9 +2983,11 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
   }
 #ifdef SDL_REMOTE_CONTROL
   if (plugin_manager_.IsMessageForPlugin(message)) {
-    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
-    plugin_manager_.ProcessMessage(message);
-    return;
+    if (functional_modules::ProcessResult::PROCESSED ==
+        plugin_manager_.ProcessMessage(message)) {
+      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
+      return;
+    }
   }
 #endif
   ProcessMessageFromMobile(message);
@@ -3034,11 +3037,11 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
 
 #ifdef SDL_REMOTE_CONTROL
   if (plugin_manager_.IsHMIMessageForPlugin(message)) {
-    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
     functional_modules::ProcessResult result =
         plugin_manager_.ProcessHMIMessage(message);
     if (functional_modules::ProcessResult::PROCESSED == result ||
         functional_modules::ProcessResult::FAILED == result) {
+      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
       return;
     }
   }
@@ -3807,6 +3810,16 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       }
     }
   }
+}
+
+void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
+#ifdef SDL_REMOTE_CONTROL
+  if (!ptu_result) {
+    return;
+  }
+  plugin_manager_.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 protocol_handler::MajorProtocolVersion

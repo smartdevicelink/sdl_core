@@ -46,6 +46,10 @@ void RCAppExtension::UnsubscribeFromInteriorVehicleData(
   subscribed_interior_vehicle_data_.erase(module_type);
 }
 
+void RCAppExtension::UnsubscribeFromInteriorVehicleData() {
+  subscribed_interior_vehicle_data_.clear();
+}
+
 bool RCAppExtension::IsSubscibedToInteriorVehicleData(
     const Json::Value& module_type) {
   std::set<Json::Value>::iterator it =

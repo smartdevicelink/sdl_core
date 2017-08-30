@@ -5,6 +5,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/HMI_API.h"
 #include "remote_control/event_engine/event.h"
+#include "functional_module/generic_module.h"
 
 namespace remote_control {
 
@@ -21,6 +22,11 @@ enum eType { ALLOWED = 0, IN_USE, ASK_DRIVER, REJECTED };
 namespace ResourceState {
 enum eType { FREE = 0, BUSY };
 }
+
+/**
+ * @brief Resources defines list of resources
+ */
+typedef std::vector<std::string> Resources;
 
 class ResourceAllocationManager {
  public:
@@ -54,12 +60,6 @@ class ResourceAllocationManager {
   virtual bool IsResourceFree(const std::string& module_type) const = 0;
 
   /**
-   * @brief OnUnregisterApplication handles application unregistering event
-   * @param app_id application id which was unregistered
-   */
-  virtual void OnUnregisterApplication(const uint32_t app_id) = 0;
-
-  /**
    * @brief AcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
    * @param app_id application that acquire resource
@@ -74,6 +74,21 @@ class ResourceAllocationManager {
    */
   virtual void OnDriverDisallowed(const std::string& module_type,
                                   const uint32_t app_id) = 0;
+
+  /**
+   * @brief OnApplicationEvent Processes application related events
+   * @param event Event
+   * @param application_id Application id
+   */
+  virtual void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                                  const uint32_t application_id) = 0;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  virtual void OnPolicyEvent(functional_modules::PolicyEvent event) = 0;
+
   /**
    * @brief Set current access mode for acquiring resource
    * @param access_mode

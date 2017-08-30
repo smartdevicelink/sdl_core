@@ -300,11 +300,6 @@ void RemoteControlPlugin::OnAppHMILevelChanged(
   service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
 }
 
-void RemoteControlPlugin::OnUnregisterApplication(const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  resource_allocation_manager_.OnUnregisterApplication(app_id);
-}
-
 void RemoteControlPlugin::OnPluginServiceChanged() {
   LOG4CXX_AUTO_TRACE(logger_);
   const functional_modules::TimeUnit timeout_msec =
@@ -323,6 +318,17 @@ RCEventDispatcher& RemoteControlPlugin::event_dispatcher() {
 
 ResourceAllocationManager& RemoteControlPlugin::resource_allocation_manager() {
   return resource_allocation_manager_;
+}
+
+void RemoteControlPlugin::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resource_allocation_manager_.OnApplicationEvent(event, application_id);
+}
+
+void RemoteControlPlugin::OnPolicyEvent(functional_modules::PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resource_allocation_manager_.OnPolicyEvent(event);
 }
 
 }  //  namespace remote_control

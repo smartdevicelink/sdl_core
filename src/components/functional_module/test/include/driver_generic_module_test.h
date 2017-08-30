@@ -67,6 +67,11 @@ class DriverGenericModuleTest : public GenericModule {
     return observers_;
   }
 
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id) {}
+
+  void OnPolicyEvent(functional_modules::PolicyEvent event) {}
+
   void OnUnregisterApplication(const uint32_t app_id) {}
 };
 

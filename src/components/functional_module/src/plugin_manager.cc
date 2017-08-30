@@ -43,6 +43,35 @@ namespace functional_modules {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
 
+namespace {
+const std::string ExtractMethodName(application_manager::MessagePtr msg) {
+  DCHECK_OR_RETURN(msg, "");
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(msg->json_message(), value);
+
+  const char* kMethod = "method";
+  const char* kResult = "result";
+  const char* kError = "error";
+  const char* kData = "data";
+
+  if (value.isMember(kMethod)) {
+    return value.get(kMethod, "").asCString();
+  }
+  if (value.isMember(kResult)) {
+    const Json::Value& result = value.get(kResult, Json::Value());
+    return result.get(kMethod, "").asCString();
+  }
+  if (value.isMember(kError)) {
+    const Json::Value& error = value.get(kError, Json::Value());
+    const Json::Value& data = error.get(kData, Json::Value());
+    return data.get(kMethod, "").asCString();
+  }
+
+  return std::string();
+}
+}  // namespace
+
 typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<RCFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
 typedef std::map<HMIFunctionID, ModulePtr>::iterator PluginHMIFunctionsIterator;
@@ -137,81 +166,6 @@ void PluginManager::UnloadPlugins() {
   dlls_.clear();
 }
 
-void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
-  DCHECK(msg);
-  if (!msg) {
-    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
-    return;
-  }
-  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
-          msg->protocol_version() &&
-      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI !=
-          msg->protocol_version()) {
-    PluginFunctionsIterator subscribed_plugin_itr =
-        mobile_subscribers_.find(static_cast<RCFunctionID>(msg->function_id()));
-    if (mobile_subscribers_.end() != subscribed_plugin_itr) {
-      if (subscribed_plugin_itr->second->ProcessMessage(msg) !=
-          ProcessResult::PROCESSED) {
-        LOG4CXX_ERROR(logger_, "Failed process message!");
-      }
-    }
-  }
-}
-
-const std::string ExtractMethodName(const Json::Value& value) {
-  const char* kMethod = "method";
-  const char* kResult = "result";
-  const char* kError = "error";
-  const char* kData = "data";
-
-  if (value.isMember(kMethod)) {
-    return value.get(kMethod, "").asCString();
-    // Response from HMI
-  }
-  if (value.isMember(kResult)) {
-    const Json::Value& result = value.get(kResult, Json::Value());
-    return result.get(kMethod, "").asCString();
-  }
-  if (value.isMember(kError)) {
-    const Json::Value& error = value.get(kError, Json::Value());
-    const Json::Value& data = error.get(kData, Json::Value());
-    return data.get(kMethod, "").asCString();
-  }
-  LOG4CXX_WARN(logger_,
-               "Message with HMI protocol version can not be handled by "
-               "plugin manager, because required 'method' field was not "
-               "found, or was containing an invalid string.");
-  return std::string();
-}
-
-ProcessResult PluginManager::ProcessHMIMessage(
-    application_manager::MessagePtr msg) {
-  DCHECK(msg);
-  if (!msg) {
-    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
-    return ProcessResult::CANNOT_PROCESS;
-  }
-
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(msg->json_message(), value);
-
-  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI ==
-      msg->protocol_version()) {
-    const std::string& msg_method = ExtractMethodName(value);
-    if (msg_method.empty()) {
-      return ProcessResult::CANNOT_PROCESS;
-    }
-    PluginHMIFunctionsIterator subscribed_plugin_itr =
-        hmi_subscribers_.find(msg_method);
-    if (hmi_subscribers_.end() != subscribed_plugin_itr) {
-      return subscribed_plugin_itr->second->ProcessHMIMessage(msg);
-    }
-  }
-
-  return ProcessResult::CANNOT_PROCESS;
-}
-
 bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
@@ -266,6 +220,64 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   }
 
   return false;
+}
+
+ProcessResult PluginManager::ProcessMessage(
+    application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return ProcessResult::CANNOT_PROCESS;
+  }
+
+  protocol_handler::MajorProtocolVersion version = msg->protocol_version();
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN ==
+          version ||
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI == version) {
+    return ProcessResult::CANNOT_PROCESS;
+  }
+
+  ProcessResult result = ProcessResult::CANNOT_PROCESS;
+  PluginFunctionsIterator subscribed_plugin_itr =
+      mobile_subscribers_.find(static_cast<RCFunctionID>(msg->function_id()));
+  if (mobile_subscribers_.end() != subscribed_plugin_itr) {
+    result = subscribed_plugin_itr->second->ProcessMessage(msg);
+    if (ProcessResult::PROCESSED != result) {
+      LOG4CXX_ERROR(logger_, "Plugin failed to process message.");
+    }
+  }
+
+  return result;
+}
+
+ProcessResult PluginManager::ProcessHMIMessage(
+    application_manager::MessagePtr msg) {
+  DCHECK_OR_RETURN(msg, ProcessResult::CANNOT_PROCESS);
+
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI !=
+      msg->protocol_version()) {
+    return ProcessResult::CANNOT_PROCESS;
+  }
+
+  const std::string& msg_method = ExtractMethodName(msg);
+  if (msg_method.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "Message with HMI protocol version can not be handled by "
+                 "plugin manager, because required 'method' field was not "
+                 "found, or was containing an invalid string.");
+    return ProcessResult::CANNOT_PROCESS;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Parsed method name is " << msg_method);
+
+  ProcessResult result = ProcessResult::CANNOT_PROCESS;
+  PluginHMIFunctionsIterator subscribed_plugin_itr =
+      hmi_subscribers_.find(msg_method);
+  if (hmi_subscribers_.end() != subscribed_plugin_itr) {
+    result = subscribed_plugin_itr->second->ProcessHMIMessage(msg);
+  }
+
+  return result;
 }
 
 void PluginManager::OnServiceStateChanged(ServiceState state) {
@@ -336,22 +348,42 @@ void PluginManager::OnAppHMILevelChanged(
 
 typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
 
-struct HandleApplicationUnregistered {
+struct HandleApplicationEvent {
  private:
+  const functional_modules::ApplicationEvent event_;
   const uint32_t app_id_;
 
  public:
-  explicit HandleApplicationUnregistered(const uint32_t app_id)
-      : app_id_(app_id) {}
-  void operator()(PluginsValueType& x) {
-    x.second->OnUnregisterApplication(app_id_);
+  HandleApplicationEvent(functional_modules::ApplicationEvent e,
+                         const uint32_t app_id)
+      : event_(e), app_id_(app_id) {}
+  void operator()(PluginsValueType& p) {
+    p.second->OnApplicationEvent(event_, app_id_);
   }
 };
 
-void PluginManager::OnUnregisterApplication(const uint32_t app_id) {
+struct HandlePolicyEvent {
+ private:
+  const functional_modules::PolicyEvent event_;
+
+ public:
+  HandlePolicyEvent(functional_modules::PolicyEvent e) : event_(e) {}
+  void operator()(PluginsValueType& p) {
+    p.second->OnPolicyEvent(event_);
+  }
+};
+
+void PluginManager::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(
-      plugins_.begin(), plugins_.end(), HandleApplicationUnregistered(app_id));
+  std::for_each(plugins_.begin(),
+                plugins_.end(),
+                HandleApplicationEvent(event, application_id));
+}
+
+void PluginManager::OnPolicyEvent(PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::for_each(plugins_.begin(), plugins_.end(), HandlePolicyEvent(event));
 }
 
 PluginManager::Modules& PluginManager::plugins() {

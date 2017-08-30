@@ -92,12 +92,6 @@ class RemoteControlPlugin : public RemotePluginInterface {
                             mobile_apis::HMILevel::eType old_level);
 
   /**
-   * @brief OnUnregisterApplication handles application unregistering event
-   * @param app_id application id which was unregistered
-   */
-  void OnUnregisterApplication(const uint32_t app_id) OVERRIDE;
-
-  /**
    * @brief Sends HMI status notification to mobile
    * @param app application with changed HMI status
    **/
@@ -121,6 +115,20 @@ class RemoteControlPlugin : public RemotePluginInterface {
    * @param service pointer to new service instance
    */
   void set_service(application_manager::ServicePtr service) OVERRIDE;
+
+  /*
+   * @brief OnApplicationEvent Processes application related events
+   * @param event Event
+   * @param application_id Application id
+   */
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id) OVERRIDE;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  void OnPolicyEvent(functional_modules::PolicyEvent event) OVERRIDE;
 
  protected:
   /**
