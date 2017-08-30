@@ -62,52 +62,52 @@ class AccessRemote {
  public:
   virtual ~AccessRemote() {}
   /**
-   * Checks permissions for module
-   * @param app_id application ID
-   * @param module type
-   * @return true if allowed
+   * @brief CheckModuleType check if module type is allowed for application
+   * @param app_id application id
+   * @param module module
+   * @return true if allowed, if not - false
    */
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const = 0;
 
   /**
-   * Sets HMI types if application has default policy permissions
-   * @param who subject
-   * @param hmi_types list of HMI types
+   * @brief SetDefaultHmiTypes setup default hmi typed for application
+   * @param who application on specific device
+   * @param hmi_types hmi types list
    */
   virtual void SetDefaultHmiTypes(const Subject& who,
                                   const std::vector<int>& hmi_types) = 0;
 
   /**
-   * Gets groups
-   * @param who subject
+   * @brief GetGroups return list of groups for applicaiton
+   * @param who application on specific device
    * @return list of groups
    */
   virtual const policy_table::Strings& GetGroups(const Subject& who) = 0;
 
   /**
-   * Gets permissions for application
-   * @param device_id
-   * @param app_id
-   * @param group_types
-   * @return true if success
+   * @brief GetPermissionsForApp read list of permissions for application
+   * @param device_id device
+   * @param app_id application
+   * @param group_types output parameter for permissions
+   * @return true
    */
   virtual bool GetPermissionsForApp(const std::string& device_id,
                                     const std::string& app_id,
                                     FunctionalIdType& group_types) = 0;
 
   /**
-   * Checks if application has remote functionality
-   * @param who subject
-   * @return true if application uses remote control
+   * @brief IsAppRemoteControl check is app is remote controll
+   * @param who application on specific device
+   * @return true is remote controll aotherwise return false
    */
   virtual bool IsAppRemoteControl(const Subject& who) = 0;
 
   /**
-   * Gets all allowed module types
-   * @param app_id unique identifier of application
-   * @param list of allowed module types
-   * @return true if application has allowed modules
+   * @brief GetModuleTypes get list of module types of application
+   * @param policy_app_id application id
+   * @param modules output parameter for module types
+   * @return true on success otherwise false
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) = 0;
