@@ -482,7 +482,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Sends notification about application HMI level changed
    * @param who application information structure
    */
-  void SendHMILevelChanged(const Subject& who);
+  void SendHMILevelChanged(const ApplicationOnDevice& who);
 
   /**
    * @brief Sends notification if application permissions were changed

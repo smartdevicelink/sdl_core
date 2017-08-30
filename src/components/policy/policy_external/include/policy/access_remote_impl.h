@@ -61,7 +61,7 @@ class AccessRemoteImpl : public AccessRemote {
    * @param who application on specific device
    * @param hmi_types hmi types list
    */
-  void SetDefaultHmiTypes(const Subject& who,
+  void SetDefaultHmiTypes(const ApplicationOnDevice& who,
                           const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
@@ -69,7 +69,8 @@ class AccessRemoteImpl : public AccessRemote {
    * @param who application on specific device
    * @return list of groups
    */
-  const policy_table::Strings& GetGroups(const Subject& who) OVERRIDE;
+  const policy_table::Strings& GetGroups(
+      const ApplicationOnDevice& who) OVERRIDE;
 
   /**
    * @brief GetPermissionsForApp read list of permissions for application
@@ -87,7 +88,7 @@ class AccessRemoteImpl : public AccessRemote {
    * @param who application on specific device
    * @return true is remote controll aotherwise return false
    */
-  bool IsAppRemoteControl(const Subject& who) OVERRIDE;
+  bool IsAppRemoteControl(const ApplicationOnDevice& who) OVERRIDE;
 
   /**
    * @brief GetModuleTypes get list of module types of application
@@ -106,7 +107,7 @@ class AccessRemoteImpl : public AccessRemote {
    * @param who  application on specific device
    * @return list of hmi types
    */
-  const policy_table::AppHMITypes& HmiTypes(const Subject& who);
+  const policy_table::AppHMITypes& HmiTypes(const ApplicationOnDevice& who);
 
   /**
    * @brief GetGroupsIds get list of groups for application
@@ -148,7 +149,7 @@ class AccessRemoteImpl : public AccessRemote {
   /**
    * @brief hmi_types_ contains list of default HMI types for applications
    */
-  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
+  typedef std::map<ApplicationOnDevice, policy_table::AppHMITypes> HMIList;
   HMIList hmi_types_;
 
 #ifdef BUILD_TESTS
