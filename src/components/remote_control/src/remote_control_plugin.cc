@@ -354,10 +354,15 @@ ResourceAllocationManager& RemoteControlPlugin::resource_allocation_manager() {
   return resource_allocation_manager_;
 }
 
-void RemoteControlPlugin::OnSDLEvent(functional_modules::SDLEvent event,
-                                     const uint32_t application_id) {
+void RemoteControlPlugin::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  resource_allocation_manager_.OnSDLEvent(event, application_id);
+  resource_allocation_manager_.OnApplicationEvent(event, application_id);
+}
+
+void RemoteControlPlugin::OnPolicyEvent(functional_modules::PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resource_allocation_manager_.OnPolicyEvent(event);
 }
 
 }  //  namespace remote_control

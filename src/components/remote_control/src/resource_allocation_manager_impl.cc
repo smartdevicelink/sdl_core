@@ -314,26 +314,13 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
   list_of_rejected_resources.push_back(module_type);
 }
 
-void ResourceAllocationManagerImpl::OnSDLEvent(
-    functional_modules::SDLEvent event, const uint32_t application_id) {
+void ResourceAllocationManagerImpl::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
 
-  if (functional_modules::SDLEvent::kApplicationPolicyUpdated == event) {
-    ProcessApplicationPolicyUpdate();
-    return;
-  }
-
-  if (functional_modules::SDLEvent::kApplicationsDisabled == event) {
-    ResetAllAllocations();
-    application_manager::ServicePtr s = rc_plugin_.service();
-    Apps app_list = s->GetApplications(rc_plugin_.GetModuleID());
-    RemoveAppsSubscriptions(app_list);
-    return;
-  }
-
-  if (functional_modules::SDLEvent::kApplicationExit == event ||
-      functional_modules::SDLEvent::kApplicationUnregistered == event) {
+  if (functional_modules::ApplicationEvent::kApplicationExit == event ||
+      functional_modules::ApplicationEvent::kApplicationUnregistered == event) {
     Resources acquired_modules = GetAcquiredResources(application_id);
     Resources::const_iterator module = acquired_modules.begin();
     for (; acquired_modules.end() != module; ++module) {
@@ -343,6 +330,25 @@ void ResourceAllocationManagerImpl::OnSDLEvent(
     Apps app_list;
     app_list.push_back(rc_plugin_.service()->GetApplication(application_id));
     RemoveAppsSubscriptions(app_list);
+  }
+}
+
+void ResourceAllocationManagerImpl::OnPolicyEvent(
+    functional_modules::PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Event " << event);
+
+  if (functional_modules::PolicyEvent::kApplicationPolicyUpdated == event) {
+    ProcessApplicationPolicyUpdate();
+    return;
+  }
+
+  if (functional_modules::PolicyEvent::kApplicationsDisabled == event) {
+    ResetAllAllocations();
+    application_manager::ServicePtr s = rc_plugin_.service();
+    Apps app_list = s->GetApplications(rc_plugin_.GetModuleID());
+    RemoveAppsSubscriptions(app_list);
+    return;
   }
 }
 

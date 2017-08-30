@@ -2954,8 +2954,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  plugin_manager_.OnSDLEvent(
-      functional_modules::SDLEvent::kApplicationUnregistered, app_id);
+  plugin_manager_.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, app_id);
 #endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
@@ -3817,8 +3817,8 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   if (!ptu_result) {
     return;
   }
-  plugin_manager_.OnSDLEvent(
-      functional_modules::SDLEvent::kApplicationPolicyUpdated);
+  plugin_manager_.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
 #endif  // SDL_REMOTE_CONTROL
 }
 

@@ -348,23 +348,42 @@ void PluginManager::OnAppHMILevelChanged(
 
 typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
 
-struct HandleSDLEvent {
+struct HandleApplicationEvent {
  private:
-  const functional_modules::SDLEvent event_;
+  const functional_modules::ApplicationEvent event_;
   const uint32_t app_id_;
 
  public:
-  HandleSDLEvent(functional_modules::SDLEvent e, const uint32_t app_id)
+  HandleApplicationEvent(functional_modules::ApplicationEvent e,
+                         const uint32_t app_id)
       : event_(e), app_id_(app_id) {}
   void operator()(PluginsValueType& p) {
-    p.second->OnSDLEvent(event_, app_id_);
+    p.second->OnApplicationEvent(event_, app_id_);
   }
 };
 
-void PluginManager::OnSDLEvent(SDLEvent event, const uint32_t application_id) {
+struct HandlePolicyEvent {
+ private:
+  const functional_modules::PolicyEvent event_;
+
+ public:
+  HandlePolicyEvent(functional_modules::PolicyEvent e) : event_(e) {}
+  void operator()(PluginsValueType& p) {
+    p.second->OnPolicyEvent(event_);
+  }
+};
+
+void PluginManager::OnApplicationEvent(
+    functional_modules::ApplicationEvent event, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(
-      plugins_.begin(), plugins_.end(), HandleSDLEvent(event, application_id));
+  std::for_each(plugins_.begin(),
+                plugins_.end(),
+                HandleApplicationEvent(event, application_id));
+}
+
+void PluginManager::OnPolicyEvent(PolicyEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::for_each(plugins_.begin(), plugins_.end(), HandlePolicyEvent(event));
 }
 
 PluginManager::Modules& PluginManager::plugins() {

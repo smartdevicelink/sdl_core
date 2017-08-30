@@ -18,9 +18,10 @@ class MockResourceAllocationManager
                void(const std::string& module_type, const uint32_t app_id));
   MOCK_METHOD2(OnDriverDisallowed,
                void(const std::string& module_type, const uint32_t app_id));
-  MOCK_METHOD2(OnSDLEvent,
-               void(functional_modules::SDLEvent event,
+  MOCK_METHOD2(OnApplicationEvent,
+               void(functional_modules::ApplicationEvent event,
                     const uint32_t application_id));
+  MOCK_METHOD1(OnPolicyEvent, void(functional_modules::PolicyEvent event));
   MOCK_METHOD1(SetAccessMode,
                void(const hmi_apis::Common_RCAccessMode::eType access_mode));
   MOCK_CONST_METHOD0(GetAccessMode, hmi_apis::Common_RCAccessMode::eType());

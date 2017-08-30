@@ -118,13 +118,18 @@ class PluginManager : public ModuleObserver {
                             mobile_apis::HMILevel::eType old_level);
 
   /**
-   * @brief OnSDLEvent Notifies modules about certain event happened in SDL
+   * @brief OnApplicationEvent Notifies modules on certain application events
    * @param event Event
-   * @param application_id Application id of particular application or zero if
-   * event is common for all applications
+   * @param application_id Application id of particular application
    */
-  void OnSDLEvent(functional_modules::SDLEvent event,
-                  const uint32_t application_id = 0);
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id);
+
+  /**
+   * @brief OnPolicyEvent Notifies modules on certain events from policy
+   * @param event Policy event
+   */
+  void OnPolicyEvent(functional_modules::PolicyEvent event);
 
   Modules& plugins();
 

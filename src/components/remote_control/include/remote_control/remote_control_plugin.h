@@ -117,13 +117,18 @@ class RemoteControlPlugin : public RemotePluginInterface {
   void set_service(application_manager::ServicePtr service) OVERRIDE;
 
   /*
-   * @brief OnSDLEvent Processed defined events coming from SDL
+   * @brief OnApplicationEvent Processes application related events
    * @param event Event
-   * @param application_id Application id or zero if event is common for all
-   * applications
+   * @param application_id Application id
    */
-  void OnSDLEvent(functional_modules::SDLEvent event,
-                  const uint32_t application_id = 0) OVERRIDE;
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id) OVERRIDE;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  void OnPolicyEvent(functional_modules::PolicyEvent event) OVERRIDE;
 
  protected:
   /**

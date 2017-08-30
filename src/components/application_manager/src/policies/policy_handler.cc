@@ -1188,8 +1188,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
 #ifdef SDL_REMOTE_CONTROL
-        application_manager_.GetPluginManager().OnSDLEvent(
-            functional_modules::SDLEvent::kApplicationsDisabled);
+        application_manager_.GetPluginManager().OnPolicyEvent(
+            functional_modules::PolicyEvent::kApplicationsDisabled);
 #endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(

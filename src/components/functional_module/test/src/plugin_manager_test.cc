@@ -72,16 +72,25 @@ TEST_F(PluginManagerTest, ProcessMessagePass) {
 
 TEST_F(PluginManagerTest, SDL_events_triggers_module) {
   using namespace functional_modules;
-  std::vector<SDLEvent> events;
-  events.push_back(SDLEvent::kApplicationExit);
-  events.push_back(SDLEvent::kApplicationPolicyUpdated);
-  events.push_back(SDLEvent::kApplicationUnregistered);
-  events.push_back(SDLEvent::kApplicationsDisabled);
+  std::vector<ApplicationEvent> app_events;
+  app_events.push_back(ApplicationEvent::kApplicationExit);
+  app_events.push_back(ApplicationEvent::kApplicationUnregistered);
 
-  std::vector<SDLEvent>::const_iterator ev = events.begin();
-  for (; events.end() != ev; ++ev) {
-    EXPECT_CALL(*module, OnSDLEvent(*ev, _));
-    manager->OnSDLEvent(*ev);
+  std::vector<ApplicationEvent>::const_iterator ev = app_events.begin();
+  const uint32_t kDummyAppId = 1;
+  for (; app_events.end() != ev; ++ev) {
+    EXPECT_CALL(*module, OnApplicationEvent(*ev, kDummyAppId));
+    manager->OnApplicationEvent(*ev, kDummyAppId);
+  }
+
+  std::vector<PolicyEvent> policy_events;
+  policy_events.push_back(PolicyEvent::kApplicationPolicyUpdated);
+  policy_events.push_back(PolicyEvent::kApplicationsDisabled);
+
+  std::vector<PolicyEvent>::const_iterator ev_policy = policy_events.begin();
+  for (; policy_events.end() != ev_policy; ++ev_policy) {
+    EXPECT_CALL(*module, OnPolicyEvent(*ev_policy));
+    manager->OnPolicyEvent(*ev_policy);
   }
 }
 

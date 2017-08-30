@@ -67,8 +67,10 @@ class DriverGenericModuleTest : public GenericModule {
     return observers_;
   }
 
-  void OnSDLEvent(functional_modules::SDLEvent event,
-                  const uint32_t application_id) {}
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id) {}
+
+  void OnPolicyEvent(functional_modules::PolicyEvent event) {}
 
   void OnUnregisterApplication(const uint32_t app_id) {}
 };

@@ -76,12 +76,18 @@ class ResourceAllocationManager {
                                   const uint32_t app_id) = 0;
 
   /**
-   * @brief OnSDLEvent Processes defined events coming from SDL
+   * @brief OnApplicationEvent Processes application related events
    * @param event Event
    * @param application_id Application id
    */
-  virtual void OnSDLEvent(functional_modules::SDLEvent event,
-                          const uint32_t application_id) = 0;
+  virtual void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                                  const uint32_t application_id) = 0;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  virtual void OnPolicyEvent(functional_modules::PolicyEvent event) = 0;
 
   /**
    * @brief Set current access mode for acquiring resource

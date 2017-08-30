@@ -258,8 +258,8 @@ TEST_F(RAManagerTest, AppExit_ReleaseResource) {
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationExit,
-                        kAppId1);
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationExit, kAppId1);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
@@ -289,8 +289,8 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
       .WillOnce(Return(rc_extention_ptr));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationExit,
-                        kAppId2);
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationExit, kAppId2);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
@@ -318,8 +318,8 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationUnregistered,
-                        kAppId1);
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId1);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
@@ -348,8 +348,8 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
       .WillOnce(Return(rc_extention_ptr));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationUnregistered,
-                        kAppId2);
+  ra_manager.OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId2);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
@@ -383,7 +383,8 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
       .WillOnce(Return(rc_extention_ptr));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationsDisabled, 0);
+  ra_manager.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationsDisabled);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
@@ -433,8 +434,8 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
       .WillOnce(DoAll(SetArgPointee<1>(allowed_modules), Return(true)));
 
   // Act
-  ra_manager.OnSDLEvent(functional_modules::SDLEvent::kApplicationPolicyUpdated,
-                        kAppId1);
+  ra_manager.OnPolicyEvent(
+      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));

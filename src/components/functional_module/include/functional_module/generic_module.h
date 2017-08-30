@@ -43,14 +43,14 @@
 namespace functional_modules {
 
 /**
- * @brief The SDLEvent enum defines SDL event that module can react on
+ * @brief The PolicyEvent enum defines events related to policy
  */
-enum SDLEvent {
-  kApplicationExit = 0,
-  kApplicationUnregistered,
-  kApplicationPolicyUpdated,
-  kApplicationsDisabled
-};
+enum PolicyEvent { kApplicationPolicyUpdated = 0, kApplicationsDisabled };
+
+/**
+ * @brief The ApplicationEvent enum defines events related to single application
+ */
+enum ApplicationEvent { kApplicationExit = 0, kApplicationUnregistered };
 
 enum ProcessResult {
   NONE = -1,
@@ -137,11 +137,18 @@ class GenericModule {
       mobile_apis::HMILevel::eType old_level) = 0;
 
   /**
-   * @brief OnSDLEvent Processes defined events coming from SDL
+   * @brief OnApplicationEvent Processes application related events
    * @param event Event
    * @param application_id Application id
    */
-  virtual void OnSDLEvent(SDLEvent event, const uint32_t application_id) = 0;
+  virtual void OnApplicationEvent(ApplicationEvent event,
+                                  const uint32_t application_id) = 0;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  virtual void OnPolicyEvent(PolicyEvent event) = 0;
 
  protected:
   explicit GenericModule(ModuleID module_id);

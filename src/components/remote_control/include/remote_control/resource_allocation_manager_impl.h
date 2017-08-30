@@ -37,12 +37,18 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
                           const uint32_t app_id) FINAL;
 
   /**
-   * @brief OnSDLEvent Processes defined events coming from SDL
+   * @brief OnApplicationEvent Processes application related events
    * @param event Event
    * @param application_id Application id
    */
-  void OnSDLEvent(functional_modules::SDLEvent event,
-                  const uint32_t application_id) FINAL;
+  void OnApplicationEvent(functional_modules::ApplicationEvent event,
+                          const uint32_t application_id) FINAL;
+
+  /**
+   * @brief OnPolicyEvent Processes policy related events
+   * @param event Policy event
+   */
+  void OnPolicyEvent(functional_modules::PolicyEvent event) FINAL;
 
   void ResetAllAllocations() FINAL;
 
