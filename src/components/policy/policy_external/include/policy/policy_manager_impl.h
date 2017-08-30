@@ -192,14 +192,6 @@ class PolicyManagerImpl : public PolicyManager {
   virtual bool GetHMITypes(const std::string& application_id,
                            std::vector<int>* app_types) OVERRIDE;
   virtual void set_access_remote(utils::SharedPtr<AccessRemote> access_remote);
-  void CheckPTUUpdatesChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-
-  void CheckRemoteGroupsChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-
   void SendHMILevelChanged(const Subject& who);
 
   void OnPrimaryGroupsChanged(const std::string& application_id);
