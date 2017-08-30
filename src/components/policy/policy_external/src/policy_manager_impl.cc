@@ -340,9 +340,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
     listener_->OnCertificateUpdated(
         *(pt_update->policy_table.module_config.certificate));
-#ifdef SDL_REMOTE_CONTROL
-    CheckPTUUpdatesChange(pt_update, policy_table_snapshot);
-#endif  // SDL_REMOTE_CONTROL
 
     std::map<std::string, StringArray> app_hmi_types;
     cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
@@ -2012,25 +2009,6 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
   listener()->OnPermissionsUpdated(application_id, notification_data);
-}
-
-void PolicyManagerImpl::CheckPTUUpdatesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  CheckRemoteGroupsChange(pt_update, snapshot);
-}
-
-void PolicyManagerImpl::CheckRemoteGroupsChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  policy_table::ApplicationPolicies& new_apps =
-      pt_update->policy_table.app_policies_section.apps;
-  policy_table::ApplicationPolicies& old_apps =
-      snapshot->policy_table.app_policies_section.apps;
-  std::for_each(
-      old_apps.begin(), old_apps.end(), ProccessAppGroups(new_apps, this));
 }
 
 void PolicyManagerImpl::OnPrimaryGroupsChanged(

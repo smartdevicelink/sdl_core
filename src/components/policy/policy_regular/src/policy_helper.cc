@@ -826,14 +826,5 @@ bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
                     Compare);
 }
 
-void ProccessAppGroups::operator()(
-    const policy_table::ApplicationPolicies::value_type& app) {
-  policy_table::ApplicationPolicies::const_iterator i =
-      new_apps_.find(app.first);
-  if (i == new_apps_.end() && default_ != new_apps_.end()) {
-    i = default_;
-  }
-}
-
 #endif  // SDL_REMOTE_CONTROL
 }
