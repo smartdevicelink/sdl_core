@@ -172,14 +172,6 @@ bool CustomString::CompareIgnoreCase(const char* str) const {
   return CompareIgnoreCase(CustomString(str));
 }
 
-bool CustomString::Compare(const CustomString& str) const {
-  return mb_string_ == str.mb_string_;
-}
-
-bool CustomString::Compare(const char* str) const {
-  return Compare(CustomString(str));
-}
-
 const char* CustomString::c_str() const {
   return mb_string_.c_str();
 }
