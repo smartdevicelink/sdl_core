@@ -180,20 +180,6 @@ class CustomString {
   bool CompareIgnoreCase(const char* str) const;
 
   /**
-   * @brief Compares the value of the string (case sensitive).
-   * @param Contains string for comparing
-   * @return Returns TRUE if strings is equal otherwise returns FALSE.
-   */
-  bool Compare(const CustomString& str) const;
-
-  /**
-   * @brief Compares the value of the string (case sensitive).
-   * @param Contains string for comparing
-   * @return Returns TRUE if strings is equal otherwise returns FALSE.
-   */
-  bool Compare(const char* str) const;
-
-  /**
    * @brief Returns a pointer to string from CustomString.
    */
   const char* c_str() const;
