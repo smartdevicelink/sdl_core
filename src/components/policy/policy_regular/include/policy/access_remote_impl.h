@@ -45,8 +45,6 @@ namespace policy {
 
 class AccessRemoteImpl : public AccessRemote {
  public:
-  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
-
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
   /**
@@ -136,13 +134,19 @@ class AccessRemoteImpl : public AccessRemote {
    */
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;
+
+  /**
+   * @brief cache_ contains pointer to cache manager instance
+   */
   utils::SharedPtr<CacheManager> cache_;
+
+  /**
+   * @brief hmi_types_ contains list of default HMI types for applications
+   */
+  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
   HMIList hmi_types_;
 
 #ifdef BUILD_TESTS
-  friend struct Erase;
-  friend struct IsTypeAccess;
-
   FRIEND_TEST(AccessRemoteImplTest, KeyMapTest);
   FRIEND_TEST(AccessRemoteImplTest, Allow);
   FRIEND_TEST(AccessRemoteImplTest, Deny);

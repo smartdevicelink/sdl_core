@@ -99,7 +99,6 @@ class AccessRemoteImpl : public AccessRemote {
                       std::vector<std::string>* modules) OVERRIDE;
 
  private:
-  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
   inline bool country_consent() const;
   /**
@@ -140,12 +139,17 @@ class AccessRemoteImpl : public AccessRemote {
    */
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;
-  utils::SharedPtr<CacheManager> cache_;
-  bool enabled_;
-  HMIList hmi_types_;
 
-  friend struct Erase;
-  friend struct IsTypeAccess;
+  /**
+   * @brief cache_ contains pointer to cache manager instance
+   */
+  utils::SharedPtr<CacheManager> cache_;
+
+  /**
+   * @brief hmi_types_ contains list of default HMI types for applications
+   */
+  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
+  HMIList hmi_types_;
 
 #ifdef BUILD_TESTS
   FRIEND_TEST(AccessRemoteImplTest, KeyMapTest);
