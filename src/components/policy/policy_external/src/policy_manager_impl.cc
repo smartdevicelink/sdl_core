@@ -597,7 +597,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     cache_->GetFunctionalGroupings(functional_groupings);
 
 #ifdef SDL_REMOTE_CONTROL
-    Subject who = {device_id, app_id};
+    ApplicationOnDevice who = {device_id, app_id};
     const policy_table::Strings app_groups = access_remote_->GetGroups(who);
 #else   // SDL_REMOTE_CONTROL
     const policy_table::Strings app_groups =
@@ -782,7 +782,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
                "Send notification for application_id:" << application_id);
 
 #ifdef SDL_REMOTE_CONTROL
-  const Subject who = {device_id, application_id};
+  const ApplicationOnDevice who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
@@ -1937,7 +1937,7 @@ void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
   const std::string device_id = GetCurrentDeviceId(application_id);
-  Subject who = {device_id, application_id};
+  ApplicationOnDevice who = {device_id, application_id};
   access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
 
@@ -1972,7 +1972,7 @@ bool PolicyManagerImpl::CheckModule(const PTString& app_id,
          access_remote_->CheckModuleType(app_id, module_type);
 }
 
-void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
+void PolicyManagerImpl::SendHMILevelChanged(const ApplicationOnDevice& who) {
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
@@ -2021,7 +2021,7 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
   for (std::vector<std::string>::const_iterator i = devices.begin();
        i != devices.end();
        ++i) {
-    const Subject who = {*i, application_id};
+    const ApplicationOnDevice who = {*i, application_id};
     if (access_remote_->IsAppRemoteControl(who)) {
       SendAppPermissionsChanged(who.dev_id, who.app_id);
     }

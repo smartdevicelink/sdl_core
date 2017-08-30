@@ -58,17 +58,20 @@ inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   return output;
 }
 
-struct Subject {
+struct ApplicationOnDevice {
   PTString dev_id;
   PTString app_id;
 };
-inline bool operator<(const Subject& x, const Subject& y) {
+inline bool operator<(const ApplicationOnDevice& x,
+                      const ApplicationOnDevice& y) {
   return x.dev_id < y.dev_id || (x.dev_id == y.dev_id && x.app_id < y.app_id);
 }
-inline bool operator==(const Subject& x, const Subject& y) {
+inline bool operator==(const ApplicationOnDevice& x,
+                       const ApplicationOnDevice& y) {
   return x.dev_id == y.dev_id && x.app_id == y.app_id;
 }
-inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
+inline std::ostream& operator<<(std::ostream& output,
+                                const ApplicationOnDevice& who) {
   output << "Subject(dev:" << who.dev_id << ", app:" << who.app_id << ")";
   return output;
 }
@@ -92,7 +95,7 @@ class AccessRemote {
    * @param who application on specific device
    * @param hmi_types hmi types list
    */
-  virtual void SetDefaultHmiTypes(const Subject& who,
+  virtual void SetDefaultHmiTypes(const ApplicationOnDevice& who,
                                   const std::vector<int>& hmi_types) = 0;
 
   /**
@@ -100,7 +103,8 @@ class AccessRemote {
    * @param who application on specific device
    * @return list of groups
    */
-  virtual const policy_table::Strings& GetGroups(const Subject& who) = 0;
+  virtual const policy_table::Strings& GetGroups(
+      const ApplicationOnDevice& who) = 0;
 
   /**
    * @brief GetPermissionsForApp read list of permissions for application
@@ -118,7 +122,7 @@ class AccessRemote {
    * @param who application on specific device
    * @return true is remote controll aotherwise return false
    */
-  virtual bool IsAppRemoteControl(const Subject& who) = 0;
+  virtual bool IsAppRemoteControl(const ApplicationOnDevice& who) = 0;
 
   /**
    * @brief GetModuleTypes get list of module types of application

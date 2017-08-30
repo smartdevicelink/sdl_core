@@ -155,7 +155,7 @@ bool AccessRemoteImpl::CompareParameters(
   return input->empty();
 }
 
-void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
+void AccessRemoteImpl::SetDefaultHmiTypes(const ApplicationOnDevice& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
@@ -167,7 +167,7 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
 }
 
 const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
-    const Subject& who) {
+    const ApplicationOnDevice& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (cache_->IsDefaultPolicy(who.app_id)) {
     return hmi_types_[who];
@@ -178,12 +178,13 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
   }
 }
 
-const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
+const policy_table::Strings& AccessRemoteImpl::GetGroups(
+    const ApplicationOnDevice& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   return cache_->GetGroups(who.app_id);
 }
 
-bool AccessRemoteImpl::IsAppRemoteControl(const Subject& who) {
+bool AccessRemoteImpl::IsAppRemoteControl(const ApplicationOnDevice& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(),
@@ -213,7 +214,7 @@ std::ostream& operator<<(std::ostream& output,
 void AccessRemoteImpl::GetGroupsIds(const std::string& device_id,
                                     const std::string& app_id,
                                     FunctionalGroupIDs& groups_ids) {
-  Subject who = {device_id, app_id};
+  ApplicationOnDevice who = {device_id, app_id};
   const policy_table::Strings& groups = GetGroups(who);
   groups_ids.resize(groups.size());
   std::transform(groups.begin(),
