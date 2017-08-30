@@ -166,6 +166,62 @@ void PluginManager::UnloadPlugins() {
   dlls_.clear();
 }
 
+bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return false;
+  }
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
+          msg->protocol_version() &&
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI !=
+          msg->protocol_version()) {
+    RCFunctionID id = static_cast<RCFunctionID>(msg->function_id());
+    return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
+  } else {
+    return false;
+  }
+}
+
+bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return false;
+  }
+
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(msg->json_message(), value);
+  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI ==
+      msg->protocol_version()) {
+    std::string msg_method;
+    // Request or notification from HMI
+    if (value.isMember("method") && value["method"].isString()) {
+      msg_method = value["method"].asCString();
+      // Response from HMI
+    } else if (value.isMember("result") && value["result"].isMember("method") &&
+               value["result"]["method"].isString()) {
+      msg_method = value["result"]["method"].asCString();
+      // Error response from HMI
+    } else if (value.isMember("error") && value["error"].isMember("data") &&
+               value["error"]["data"].isMember("method") &&
+               value["error"]["data"]["method"].isString()) {
+      msg_method = value["error"]["data"]["method"].asCString();
+    } else {
+      LOG4CXX_WARN(logger_,
+                   "Message with HMI protocol version can not be handled by "
+                   "plugin manager, because required 'method' field was not "
+                   "found, or was containing an invalid string.");
+      return false;
+    }
+
+    return (hmi_subscribers_.find(msg_method) != hmi_subscribers_.end());
+  }
+
+  return false;
+}
+
 ProcessResult PluginManager::ProcessMessage(
     application_manager::MessagePtr msg) {
   DCHECK(msg);

@@ -50,6 +50,22 @@ class PluginManager : public ModuleObserver {
   void UnloadPlugins();
 
   /**
+   * @brief IsMessageForPlugin Verifies whether mobile message will be processed
+   * by plugins
+   * @param msg Mobile message
+   * @return True if any of plugins will process the message, otherwise - false
+   */
+  bool IsMessageForPlugin(application_manager::MessagePtr msg);
+
+  /**
+   * @brief IsHMIMessageForPlugin Verifies whether HMI message will be processed
+   * by plugins
+   * @param msg HMI message
+   * @return True if any of plugins will process the message, otherwise - false
+   */
+  bool IsHMIMessageForPlugin(application_manager::MessagePtr msg);
+
+  /**
    * @brief ProcessMessage forwards mobile message to modules if any is
    * subsribed for the message.
    * @param msg Mobile message to process

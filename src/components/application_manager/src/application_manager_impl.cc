@@ -2982,10 +2982,12 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     return;
   }
 #ifdef SDL_REMOTE_CONTROL
-  if (functional_modules::ProcessResult::PROCESSED ==
-      plugin_manager_.ProcessMessage(message)) {
-    LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-    return;
+  if (plugin_manager_.IsMessageForPlugin(message)) {
+    if (functional_modules::ProcessResult::PROCESSED ==
+        plugin_manager_.ProcessMessage(message)) {
+      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
+      return;
+    }
   }
 #endif
   ProcessMessageFromMobile(message);
@@ -3034,12 +3036,14 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  functional_modules::ProcessResult result =
-      plugin_manager_.ProcessHMIMessage(message);
-  if (functional_modules::ProcessResult::PROCESSED == result ||
-      functional_modules::ProcessResult::FAILED == result) {
-    LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-    return;
+  if (plugin_manager_.IsHMIMessageForPlugin(message)) {
+    functional_modules::ProcessResult result =
+        plugin_manager_.ProcessHMIMessage(message);
+    if (functional_modules::ProcessResult::PROCESSED == result ||
+        functional_modules::ProcessResult::FAILED == result) {
+      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
+      return;
+    }
   }
 #endif
 
