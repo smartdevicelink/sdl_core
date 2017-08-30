@@ -6,6 +6,7 @@
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
 #include "remote_control/message_helper.h"
+#include "remote_control/rc_app_extension.h"
 
 namespace remote_control {
 
@@ -125,7 +126,8 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
       rc_plugin_.service()->GetApplications(rc_plugin_.GetModuleID());
   Apps::const_iterator app = app_list.begin();
   for (; app_list.end() != app; ++app) {
-    const uint32_t application_id = (*app)->app_id();
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    const uint32_t application_id = app_ptr->app_id();
     Resources acquired_modules = GetAcquiredResources(application_id);
     std::sort(acquired_modules.begin(), acquired_modules.end());
 
@@ -146,9 +148,48 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                         allowed_modules.end(),
                         std::back_inserter(disallowed_modules));
 
+    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
     Resources::const_iterator module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
+      if (rc_extention) {
+        rc_extention->UnsubscribeFromInteriorVehicleData(Json::Value(*module));
+      }
+    }
+  }
+}
+
+RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
+    application_manager::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!application) {
+    return NULL;
+  }
+
+  RCAppExtensionPtr rc_app_extension;
+  application_manager::AppExtensionPtr app_extension =
+      application->QueryInterface(rc_plugin_.GetModuleID());
+  if (!app_extension) {
+    return NULL;
+  }
+
+  rc_app_extension =
+      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+          app_extension);
+
+  return rc_app_extension;
+}
+
+void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
+  Apps::const_iterator app = apps.begin();
+  for (; apps.end() != app; ++app) {
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    if (!app_ptr) {
+      continue;
+    }
+    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
+    if (rc_extention) {
+      rc_extention->UnsubscribeFromInteriorVehicleData();
     }
   }
 }
@@ -285,13 +326,23 @@ void ResourceAllocationManagerImpl::OnSDLEvent(
 
   if (functional_modules::SDLEvent::kApplicationsDisabled == event) {
     ResetAllAllocations();
+    application_manager::ServicePtr s = rc_plugin_.service();
+    Apps app_list = s->GetApplications(rc_plugin_.GetModuleID());
+    RemoveAppsSubscriptions(app_list);
     return;
   }
 
-  Resources acquired_modules = GetAcquiredResources(application_id);
-  Resources::const_iterator module = acquired_modules.begin();
-  for (; acquired_modules.end() != module; ++module) {
-    ReleaseResource(*module, application_id);
+  if (functional_modules::SDLEvent::kApplicationExit == event ||
+      functional_modules::SDLEvent::kApplicationUnregistered == event) {
+    Resources acquired_modules = GetAcquiredResources(application_id);
+    Resources::const_iterator module = acquired_modules.begin();
+    for (; acquired_modules.end() != module; ++module) {
+      ReleaseResource(*module, application_id);
+    }
+
+    Apps app_list;
+    app_list.push_back(rc_plugin_.service()->GetApplication(application_id));
+    RemoveAppsSubscriptions(app_list);
   }
 }
 

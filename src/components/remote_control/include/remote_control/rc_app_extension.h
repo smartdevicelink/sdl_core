@@ -60,6 +60,12 @@ class RCAppExtension : public application_manager::AppExtension {
   void UnsubscribeFromInteriorVehicleData(const Json::Value& module_type);
 
   /**
+   * @brief UnsubscribeFromInteriorVehicleData removes all subscriptions for
+   * interior data
+   */
+  void UnsubscribeFromInteriorVehicleData();
+
+  /**
    * @brief Check if application subscribed to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */

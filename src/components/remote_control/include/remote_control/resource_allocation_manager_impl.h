@@ -47,6 +47,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void ResetAllAllocations() FINAL;
 
  private:
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
@@ -80,6 +82,21 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * now out of the list
    */
   void ProcessApplicationPolicyUpdate();
+
+  /**
+   * @brief GetApplicationExtention Provides access to application RC extention
+   * @param application Application
+   * @return Pointer to RC extention of application or NULL if not available
+   */
+  RCAppExtensionPtr GetApplicationExtention(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief RemoveAppsSubscriptions Removes subscriptions for interior data for
+   * applications in the list
+   * @param apps Application list
+   */
+  void RemoveAppsSubscriptions(const Apps& apps);
 
   /**
    * @brief AllocatedResources contains link between resource and application
