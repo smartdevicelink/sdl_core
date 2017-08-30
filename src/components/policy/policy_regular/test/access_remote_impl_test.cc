@@ -66,7 +66,7 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   std::vector<int> hmi_expected;
   hmi_expected.push_back(2);
   hmi_expected.push_back(6);
-  Subject who = {"dev1", "1234"};
+  ApplicationOnDevice who = {"dev1", "1234"};
   access_remote.SetDefaultHmiTypes(who, hmi_expected);
 
   EXPECT_NE(access_remote.hmi_types_.end(), access_remote.hmi_types_.find(who));
@@ -78,7 +78,7 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
 
 TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
-  Subject who = {"dev1", "1234"};
+  ApplicationOnDevice who = {"dev1", "1234"};
   access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
 
   access_remote.cache_->pt_ = new policy_table::Table();
