@@ -1109,9 +1109,12 @@ TEST_F(HMICommandsNotificationsTest,
     (*notification)[am::strings::msg_params][am::strings::reason] =
         static_cast<int32_t>(*it_mobile_reason);
 
+#ifdef SDL_REMOTE_CONTROL
     functional_modules::PluginManager plugin_mng;
     EXPECT_CALL(app_mngr_, GetPluginManager())
         .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
+
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
     EXPECT_CALL(*message_helper_mock_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1136,9 +1139,12 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
+#ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager plugin_mng;
   EXPECT_CALL(app_mngr_, GetPluginManager())
       .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
+
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
@@ -1193,9 +1199,12 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
+#ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager plugin_mng;
   EXPECT_CALL(app_mngr_, GetPluginManager())
       .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
+
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
