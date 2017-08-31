@@ -39,10 +39,6 @@ namespace test {
 namespace components {
 namespace access_remote_test {
 
-class MockSubject : public policy::ApplicationOnDevice {
- public:
-};
-
 class MockAccessRemote : public policy::AccessRemote {
  public:
   MOCK_CONST_METHOD3(
