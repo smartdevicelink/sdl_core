@@ -332,16 +332,16 @@ std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
     const Json::Value& message) {
   Json::Value data =
       message.get(message_params::kModuleData, Json::Value(Json::objectValue));
-  const char* name_control_data;
   std::string module = ModuleType(message);
+  Json::Value params;
   if (module == enums_value::kRadio) {
-    name_control_data = message_params::kRadioControlData;
+    params = data.get(message_params::kRadioControlData,
+                      Json::Value(Json::objectValue));
   }
   if (module == enums_value::kClimate) {
-    name_control_data = message_params::kClimateControlData;
+    params = data.get(message_params::kClimateControlData,
+                      Json::Value(Json::objectValue));
   }
-  Json::Value params =
-      data.get(name_control_data, Json::Value(Json::objectValue));
   return params.getMemberNames();
 }
 

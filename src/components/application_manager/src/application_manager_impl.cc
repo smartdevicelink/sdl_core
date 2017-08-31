@@ -4051,7 +4051,10 @@ struct TakeDeviceHandle {
 ApplicationSharedPtr ApplicationManagerImpl::application(
     const std::string& device_id, const std::string& policy_app_id) const {
   connection_handler::DeviceHandle device_handle;
-  connection_handler().GetDeviceID(device_id, &device_handle);
+  if (!connection_handler().GetDeviceID(device_id, &device_handle)) {
+    LOG4CXX_DEBUG(logger_, "No such device : " << device_id);
+    return ApplicationSharedPtr();
+  }
 
   DataAccessor<ApplicationSet> accessor = applications();
   ApplicationSharedPtr app =
