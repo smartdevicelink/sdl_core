@@ -155,7 +155,7 @@ bool AccessRemoteImpl::CompareParameters(
   return input->empty();
 }
 
-void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
+void AccessRemoteImpl::SetDefaultHmiTypes(const ApplicationOnDevice& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
