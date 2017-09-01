@@ -226,15 +226,17 @@ void ResourceAllocationManagerImpl::SetResourceState(
     const AllocatedResources::const_iterator allocated_it =
         allocated_resources_.find(module_type);
 
-    const std::string status = allocated_resources_.end() != allocated_it
-                                   ? " acquired "
-                                   : " not acquired ";
-    UNUSED(status);
-    LOG4CXX_DEBUG(logger_,
-                  "Resource " << module_type << " is " << status
-                              << " Owner application id is "
-                              << allocated_it->second
-                              << " Changing application id is " << app_id);
+    const bool acquired = allocated_resources_.end() != allocated_it;
+    if (acquired) {
+      LOG4CXX_DEBUG(logger_,
+                    "Resource " << module_type << " is already acquired."
+                                << " Owner application id is "
+                                << allocated_it->second
+                                << " Changing application id is " << app_id);
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "Resource " << module_type << " is not acquired yet");
+    }
   }
 
   sync_primitives::AutoLock lock(resources_state_lock_);
