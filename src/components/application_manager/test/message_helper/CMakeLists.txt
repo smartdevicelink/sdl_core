@@ -37,6 +37,7 @@ include_directories(
 
 set(LIBRARIES
     gmock
+    FunctionalModule
     ApplicationManager
     MessageHelper
     jsoncpp
