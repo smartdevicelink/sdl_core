@@ -106,6 +106,8 @@ class OnRemoteControlSettingsNotificationTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_allocation_manager_));
     ON_CALL(*mock_service_, IsInterfaceAvailable(_))
         .WillByDefault(Return(true));
+    ON_CALL(*mock_service_, IsRemoteControlApplication(_))
+        .WillByDefault(Return(true));
     apps_.push_back(mock_app_);
   }
 
