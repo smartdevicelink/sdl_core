@@ -2,6 +2,9 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2017 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of their contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -102,6 +105,7 @@
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_response.h"
 #include "hmi/notification_from_hmi.h"
+#include "hmi/ui_send_haptic_data_response.h"
 
 namespace test {
 namespace components {
@@ -232,7 +236,9 @@ typedef Types<
     CommandData<commands::VRPerformInteractionResponse,
                 hmi_apis::FunctionID::VR_PerformInteraction>,
     CommandData<commands::UIScrollableMessageResponse,
-                hmi_apis::FunctionID::UI_ScrollableMessage> >
+                hmi_apis::FunctionID::UI_ScrollableMessage>,
+    CommandData<commands::UISendHapticDataResponse,
+                hmi_apis::FunctionID::UI_SendHapticData> >
     ResponseCommandsList;
 
 typedef Types<commands::AudioStopStreamResponse,

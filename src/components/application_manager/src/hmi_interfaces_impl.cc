@@ -2,6 +2,9 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2017 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of their contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -155,6 +158,7 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_IsReady] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ClosePopUp] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnResetTimeout] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_SendHapticData] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[Navigation_IsReady] = HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_SendLocation] =
       HmiInterfaces::HMI_INTERFACE_Navigation;

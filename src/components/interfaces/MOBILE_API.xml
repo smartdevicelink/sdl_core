@@ -2358,6 +2358,7 @@
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
     <element name="GetSystemCapabilityID" value="48" hexvalue="30"/>
+    <element name="SendHapticDataID" value="49" hexvalue="31" />
 
 <!--
 	Base Notifications
@@ -2547,6 +2548,9 @@
         Each object will contain a VideoStreamingFormat that describes what can be expected.
       </description>
     </param>
+    <param name="hapticSpatialDataSupported" type="Boolean" mandatory="false">
+      <description>True if the system can utilize the haptic spatial data from the source being streamed.</description>
+    </param>
   </struct>
 
   <struct name="SystemCapability">
@@ -2559,6 +2563,31 @@
       </param>
       <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
       </param>
+  </struct>
+
+  <struct name="Rectangle">
+    <param name="x" type="Float" mandatory="true">
+      <description>The upper left X-coordinate of the rectangle</description>
+    </param>
+    <param name="y" type="Float" mandatory="true">
+      <description>The upper left Y-coordinate of the rectangle</description>
+    </param>
+    <param name="width" type="Float" mandatory="true">
+      <description>The width of the rectangle</description>
+    </param>
+    <param name="height" type="Float" mandatory="true">
+      <description>The height of the rectangle</description>
+    </param>
+  </struct>
+
+  <struct name="HapticRect">
+    <description>Defines haptic data for each user control object for video streaming application</description>
+    <param name="id" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>A user control spatial identifier</description>
+    </param>
+    <param name="rect" type="Rectangle" mandatory="true">
+      <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
+    </param>
   </struct>
 
   <!-- Requests/Responses -->
@@ -5000,6 +5029,36 @@
       <element name="WARNINGS"/>
       <element name="TIMED_OUT"/>
       <element name="IGNORED"/>
+    </param> 
+  </function>
+
+  <function name="SendHapticData" functionID="SendHapticDataID" messagetype="request" >
+    <description>
+      Send the spatial data gathered from SDLCarWindow or VirtualDisplayEncoder to the HMI.
+      This data will be utilized by the HMI to determine how and when haptic events should occur
+    </description>
+    <param name="hapticRectData" type="HapticRect" minsize="0" maxsize="1000" mandatory="false" array="true">
+      <description>
+        Array of rectangle data structures that represent the locations of all user controls present on the HMI.
+        This data should be updated if/when the application presents a new screen.
+        When a request is sent, if successful, it will replace all rectangle data previously sent through RPC.
+        If an empty array is sent, the existing rectangle data will be cleared
+      </description>
+    </param>
+  </function>
+
+  <function name="SendHapticData" functionID="SendHapticDataID" messagetype="response" >
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
+      <description> true, if successful; false, if failed </description>
+    </param>
+
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="DISALLOWED"/>
     </param> 
   </function>
 
