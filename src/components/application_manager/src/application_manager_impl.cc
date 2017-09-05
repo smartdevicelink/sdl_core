@@ -1605,6 +1605,19 @@ void ApplicationManagerImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::correlation_id].asUInt(),
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
+#ifdef SDL_REMOTE_CONTROL
+    const mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asUInt());
+    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
+        (*message)[strings::msg_params][strings::success].asBool()) {
+      const bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
+      LOG4CXX_INFO(logger_,
+                   "Registered app " << app->app_id() << " is "
+                                     << (is_for_plugin ? "" : "not ")
+                                     << "for plugins.");
+    }
+#endif  // SDL_REMOTE_CONTROL
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
