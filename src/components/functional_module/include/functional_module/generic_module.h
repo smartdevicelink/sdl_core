@@ -84,6 +84,10 @@ class GenericModule {
   }
   virtual PluginInfo GetPluginInfo() const = 0;
 
+  /**
+   * @brief Setter for service (interface for plugin t access SDL functionality)
+   * @param service pointer to new service instance
+   */
   virtual void set_service(application_manager::ServicePtr service);
 
   /**

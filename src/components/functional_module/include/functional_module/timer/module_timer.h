@@ -47,12 +47,27 @@ class Trackable {
  public:
   Trackable() : start_time_(0) {}
   virtual ~Trackable() {}
+
+  /**
+   * @brief custom_interval getter for custom interval
+   * @return return timer interval for trackable message
+   */
   virtual TimeUnit custom_interval() const {
     return 0;
   }
+
+  /**
+   * @brief start_time getter for start time of message
+   * @return start time of message
+   */
   virtual TimeUnit start_time() const {
     return start_time_;
   }
+
+  /**
+   * @brief set_start_time setting start time of message
+   * @param start_time start time
+   */
   virtual void set_start_time(TimeUnit start_time) {
     start_time_ = start_time;
   }

@@ -46,7 +46,17 @@ class PluginManager : public ModuleObserver {
   PluginManager();
   ~PluginManager();
   typedef std::map<ModuleID, ModulePtr> Modules;
+
+  /**
+   * @brief LoadPlugins initialize loading plugins
+   * @param plugin_path path to search to plugin shared libraries
+   * @return count of loaded plugins
+   */
   int LoadPlugins(const std::string& plugin_path);
+
+  /**
+   * @brief UnloadPlugins unload from memory all plugins
+   */
   void UnloadPlugins();
 
   /**
