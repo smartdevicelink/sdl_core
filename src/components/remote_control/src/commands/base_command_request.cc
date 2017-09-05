@@ -348,6 +348,12 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
     return false;
   }
 
+  if (!service_->IsRemoteControlApplication(app_)) {
+    LOG4CXX_WARN(logger_, "Application has no remote control functions");
+    SendResponse(false, result_codes::kDisallowed, "");
+    return false;
+  }
+
   mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     LOG4CXX_WARN(logger_,

@@ -148,6 +148,8 @@ class ButtonPressRequestTest : public ::testing::Test {
         .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(*mock_service_, IsInterfaceAvailable(_))
         .WillByDefault(Return(true));
+    ON_CALL(*mock_service_, IsRemoteControlApplication(_))
+        .WillByDefault(Return(true));
   }
 
   remote_control::request_controller::MobileRequestPtr CreateCommand(
