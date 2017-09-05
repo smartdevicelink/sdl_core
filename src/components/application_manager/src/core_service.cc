@@ -96,6 +96,7 @@ bool CoreService::CheckModule(const ApplicationId& app_id,
 
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
+  DCHECK_OR_RETURN(app, false);
   return application_manager_.GetPolicyHandler().CheckHMIType(
       app->policy_app_id(),
       mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
@@ -154,6 +155,7 @@ std::vector<ApplicationSharedPtr> CoreService::GetApplications(
 
 void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
                                        mobile_apis::HMILevel::eType level) {
+  DCHECK_OR_RETURN_VOID(app);
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
 }
 
@@ -163,6 +165,7 @@ const smart_objects::SmartObject* CoreService::GetRCCapabilities() const {
 
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
                                          mobile_apis::HMILevel::eType level) {
+  DCHECK_OR_RETURN_VOID(app);
   if (app->hmi_level() != mobile_apis::HMILevel::eType::HMI_FULL) {
     MessageHelper::SendActivateAppToHMI(
         app->app_id(),

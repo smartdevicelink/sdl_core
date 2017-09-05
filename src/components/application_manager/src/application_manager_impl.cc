@@ -4053,6 +4053,7 @@ struct TakeDeviceHandle {
  public:
   TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
+    DCHECK_OR_RETURN(app, "");
     return MessageHelper::GetDeviceMacAddressForHandle(app->device(),
                                                        app_mngr_);
   }
