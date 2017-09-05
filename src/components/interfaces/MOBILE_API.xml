@@ -1463,7 +1463,7 @@
     <param name="RT" type="String" minlength="0" maxlength="64" mandatory="false" >
       <description>Radio Text</description>
     </param>
-    <param name="CT" type="String" minlength="22" maxlength="28" mandatory="false">
+    <param name="CT" type="String" minlength="24" maxlength="24" mandatory="false">
       <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
     </param>
     <param name="PI" type="String" minlength="0" maxlength="6" mandatory="false" >
@@ -1525,7 +1525,7 @@
 
   <struct name="RadioControlCapabilities">
     <description>Contains information about a radio control module's capabilities.</description>
-    <param name="moduleName" type="String" maxlength="50" mandatory="true" >
+    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
       <description>The short name or a short description of the radio control module.</description>
     </param>
     <param name="radioEnableAvailable" type="Boolean" mandatory="false">
@@ -1638,7 +1638,7 @@
 
 <struct name="ClimateControlCapabilities">
   <description>Contains information about a climate control module's capabilities.</description>
-  <param name="moduleName" type="String" maxlength="50" mandatory="true" >
+  <param name="moduleName" type="String" maxlength="100" mandatory="true" >
     <description>The short name or a short description of the climate control module.</description>
   </param>
   <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
@@ -5982,7 +5982,10 @@
               </description>
         </param>
         <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
-                <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the moduleDescription</description>
+              <description>
+                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
+                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
+              </description>
         </param>
 </function>
 
