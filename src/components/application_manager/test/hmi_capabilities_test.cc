@@ -422,9 +422,11 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ(
       2,
       vs_capability_so[strings::supported_formats][1][strings::codec].asInt());
-  
-  EXPECT_TRUE(vs_capability_so.keyExists(strings::haptic_spatial_data_supported));
-  EXPECT_TRUE(vs_capability_so[strings::haptic_spatial_data_supported].asBool());
+
+  EXPECT_TRUE(
+      vs_capability_so.keyExists(strings::haptic_spatial_data_supported));
+  EXPECT_TRUE(
+      vs_capability_so[strings::haptic_spatial_data_supported].asBool());
 
   // Check remote control capabilites
   const smart_objects::SmartObject rc_capability_so =
