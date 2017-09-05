@@ -866,28 +866,4 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
-                       const rpc::Optional<policy_table::Strings>& new_groups) {
-  if (!old_groups.is_initialized() && !new_groups.is_initialized()) {
-    return false;
-  }
-  if (!old_groups.is_initialized() || !new_groups.is_initialized()) {
-    return true;
-  }
-  policy_table::Strings old_groups_abs = *old_groups;
-  policy_table::Strings new_groups_abs = *new_groups;
-  if (old_groups_abs.size() != new_groups_abs.size()) {
-    return true;
-  }
-  std::sort(new_groups_abs.begin(), new_groups_abs.end(), Compare);
-  std::sort(old_groups_abs.begin(), old_groups_abs.end(), Compare);
-
-  return std::equal(new_groups_abs.begin(),
-                    new_groups_abs.end(),
-                    old_groups_abs.begin(),
-                    Compare);
-}
-
-#endif  // SDL_REMOTE_CONTROL
 }  // namespace policy
