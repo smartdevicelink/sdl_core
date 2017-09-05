@@ -116,7 +116,6 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
-  MessageBrokerController::subscribeTo("VehicleInfo.OnReverseAppsAllowing");
   MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   MessageBrokerController::subscribeTo("Navigation.OnWayPointChange");
   MessageBrokerController::subscribeTo("TTS.Started");
