@@ -31,7 +31,6 @@ set(SOURCES
   ./src/generic_module_test.cc
   ./src/plugin_manager_test.cc
   ./src/module_timer_test.cc
-  ./src/settings_test.cc
 )
 
 # use, i.e. don't skip the full RPATH for the build tree
@@ -48,8 +47,6 @@ SET(RPATH_DIRECTORIES
 )
 
 SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
-
-configure_file("test.ini" "test.ini" COPYONLY)
 
 add_subdirectory(plugins)
 
