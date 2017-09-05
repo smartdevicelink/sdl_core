@@ -39,8 +39,8 @@ namespace commands {
 
 namespace custom_str = utils::custom_string;
 
-SendHapticDataRequest::SendHapticDataRequest(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager)
+SendHapticDataRequest::SendHapticDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SendHapticDataRequest::~SendHapticDataRequest() {}
@@ -49,9 +49,7 @@ void SendHapticDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
-  SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData,
-                 &msg_params,
-                 true);
+  SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData, &msg_params, true);
 }
 
 void SendHapticDataRequest::on_event(const event_engine::Event& event) {

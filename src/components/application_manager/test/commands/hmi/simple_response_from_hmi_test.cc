@@ -238,8 +238,7 @@ typedef Types<
     CommandData<commands::UIScrollableMessageResponse,
                 hmi_apis::FunctionID::UI_ScrollableMessage>,
     CommandData<commands::UISendHapticDataResponse,
-                hmi_apis::FunctionID::UI_SendHapticData> >
-    ResponseCommandsList;
+                hmi_apis::FunctionID::UI_SendHapticData> > ResponseCommandsList;
 
 typedef Types<commands::AudioStopStreamResponse,
               commands::NaviStopStreamResponse,

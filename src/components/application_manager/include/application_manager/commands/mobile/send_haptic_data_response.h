@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_HAPTIC_DATA_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_HAPTIC_DATA_RESPONSE_H_
 
-
 #include "application_manager/commands/command_response_impl.h"
 
 namespace application_manager {
@@ -52,7 +51,7 @@ class SendHapticDataResponse : public CommandResponseImpl {
    * @param application_manager Reference of application manager
    **/
   SendHapticDataResponse(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+                         ApplicationManager& application_manager);
 
   /**
    * @brief SendHapticDataResponse class destructor
