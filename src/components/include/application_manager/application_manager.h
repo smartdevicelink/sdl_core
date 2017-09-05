@@ -161,6 +161,13 @@ class ApplicationManager {
   virtual AppSharedPtrs applications_with_navi() = 0;
 
 #ifdef SDL_REMOTE_CONTROL
+  /**
+ * @brief application find application by device and policy identifier
+ * @param device_id device id
+ * @param policy_app_id poilcy identifier
+ * @return pointer to application in case if application exist, in other case
+ * return empty shared pointer
+ */
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
 
