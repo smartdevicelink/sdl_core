@@ -310,7 +310,8 @@
                 "supportedFormats": [{
                     "protocol": "RAW",
                     "codec": "H264"
-                }]
+                }],
+                "hapticSpatialDataSupported": false
             },
             "remoteControlCapability": {
                 "buttonCapabilities": [

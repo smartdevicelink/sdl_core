@@ -525,9 +525,10 @@
             "protocol": "RTP",
             "codec": "Theora"
           }
-        ]
-            }
+        ],
+        "hapticSpatialDataSupported": true
         }
+      }
     },
     "VR": {
     "capabilities": [

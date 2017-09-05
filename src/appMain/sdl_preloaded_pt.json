@@ -1003,6 +1003,16 @@
                         "hmi_levels": ["BACKGROUND"]
                     }
                 }
+            },
+            "HapticGroup": {
+                "rpcs": {
+                    "OnTouchEvent": {
+                        "hmi_levels": ["FULL"]
+                    },
+                    "SendHapticData": {
+                        "hmi_levels": ["FULL"]
+                    }
+                }
             }
         },
         "consumer_friendly_messages": {
