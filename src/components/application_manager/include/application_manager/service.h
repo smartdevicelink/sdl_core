@@ -87,7 +87,7 @@ class Service {
   virtual ApplicationSharedPtr GetApplication(ApplicationId app_id) = 0;
 
   /**
-   * Removes fake parameters from request to HMI
+   * Removes parameters not listed in HMI API from HMI request
    * @param message message to handle
    */
   virtual void RemoveHMIFakeParameters(
