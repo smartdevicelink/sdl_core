@@ -560,30 +560,5 @@ void BaseCommandRequest::ProcessAccessResponse(
   }
 }
 
-void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
-                                       bool user_consented) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (access) {
-    case application_manager::kAllowed:
-      if (user_consented) {
-        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
-          LOG4CXX_DEBUG(logger_,
-                        "RSDL functionality for "
-                            << app_->name().c_str()
-                            << " is auto allowed; setting BACKGROUND level.");
-          service_->ChangeNotifyHMILevel(
-              app_, mobile_apis::HMILevel::eType::HMI_BACKGROUND);
-        }
-      }
-      break;
-    case application_manager::kDisallowed:
-    default:
-      LOG4CXX_DEBUG(logger_,
-                    "No access information or disallowed: "
-                        << "do nothing about hmi levels");
-      break;
-  }
-}
-
 }  // namespace commands
 }  // namespace remote_control

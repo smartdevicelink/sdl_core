@@ -249,9 +249,6 @@ class BaseCommandRequest
   }
 
  private:
-  void CheckHMILevel(application_manager::TypeAccess access,
-                     bool hmi_consented = false);
-
   /**
    * @brief CheckPolicyPermissions checks RPC permissions defined in policy
    * table
