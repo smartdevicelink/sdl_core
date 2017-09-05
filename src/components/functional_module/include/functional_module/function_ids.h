@@ -32,16 +32,18 @@
 
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace functional_modules {
 
 enum RCFunctionID {
   // Remote SDL functions ids
-  BUTTON_PRESS = 41,
-  GET_INTERIOR_VEHICLE_DATA = 43,
-  SET_INTERIOR_VEHICLE_DATA = 44,
-  ON_INTERIOR_VEHICLE_DATA = 32783,
-  ON_REMOTE_CONTROL_SETTINGS,
+  BUTTON_PRESS = mobile_apis::FunctionID::ButtonPressID,
+  GET_INTERIOR_VEHICLE_DATA = mobile_apis::FunctionID::GetInteriorVehicleDataID,
+  SET_INTERIOR_VEHICLE_DATA = mobile_apis::FunctionID::SetInteriorVehicleDataID,
+  ON_INTERIOR_VEHICLE_DATA = mobile_apis::FunctionID::OnInteriorVehicleDataID,
+  ON_REMOTE_CONTROL_SETTINGS = hmi_apis::FunctionID::RC_OnRemoteControlSettings,
 };
 
 namespace hmi_api {
