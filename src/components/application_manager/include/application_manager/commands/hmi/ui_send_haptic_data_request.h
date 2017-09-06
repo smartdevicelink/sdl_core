@@ -51,7 +51,7 @@ class UISendHapticDataRequest : public RequestToHMI {
    * @param application_manager Reference of application manager
    **/
   UISendHapticDataRequest(const MessageSharedPtr& message,
-                                  ApplicationManager& application_manager);
+                          ApplicationManager& application_manager);
 
   /**
    * @brief UISendHapticDataRequest class destructor

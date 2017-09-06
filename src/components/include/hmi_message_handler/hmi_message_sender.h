@@ -40,6 +40,7 @@ typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
 
 class HMIMessageSender {
  public:
+  virtual ~HMIMessageSender() {}
   virtual void SendMessageToHMI(MessageSharedPointer message) = 0;
 };
 }

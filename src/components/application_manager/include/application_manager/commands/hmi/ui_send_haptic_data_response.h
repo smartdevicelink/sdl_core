@@ -51,7 +51,7 @@ class UISendHapticDataResponse : public ResponseFromHMI {
    * @param application_manager Reference of application manager
    **/
   UISendHapticDataResponse(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager);
+                           ApplicationManager& application_manager);
 
   /**
    * @brief UISendHapticDataResponse class destructor

@@ -312,6 +312,159 @@
                     "codec": "H264"
                 }],
                 "hapticSpatialDataSupported": false
+            },
+            "remoteControlCapability": {
+                "buttonCapabilities": [
+                    {
+                        "longPressAvailable": true,
+                        "name": "AC_MAX",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "AC",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "RECIRCULATE",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "FAN_UP",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "FAN_DOWN",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "TEMP_UP",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "TEMP_DOWN",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "DEFROST_MAX",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "DEFROST",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "DEFROST_REAR",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "UPPER_VENT",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "LOWER_VENT",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "VOLUME_UP",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "VOLUME_DOWN",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "EJECT",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "SOURCE",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "SHUFFLE",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    },
+                    {
+                        "longPressAvailable": true,
+                        "name": "REPEAT",
+                        "shortPressAvailable": true,
+                        "upDownAvailable": false
+                    }
+                ],
+                "climateControlCapabilities": [
+                    {
+                        "acEnableAvailable": true,
+                        "acMaxEnableAvailable": true,
+                        "autoModeEnableAvailable": true,
+                        "circulateAirEnableAvailable": true,
+                        "currentTemperatureAvailable": true,
+                        "defrostZone": [
+                            "FRONT",
+                            "REAR",
+                            "ALL",
+                            "NONE"
+                        ],
+                        "defrostZoneAvailable": true,
+                        "desiredTemperatureAvailable": true,
+                        "dualModeEnableAvailable": true,
+                        "fanSpeedAvailable": true,
+                        "moduleName": "primary_climate",
+                        "ventilationMode": [
+                            "UPPER",
+                            "LOWER",
+                            "BOTH",
+                            "NONE"
+                        ],
+                        "ventilationModeAvailable": true
+                    }
+                ],
+                "radioControlCapabilities": [
+                    {
+                        "availableHDsAvailable": true,
+                        "hdChannelAvailable": true,
+                        "moduleName": "radio",
+                        "radioBandAvailable": true,
+                        "radioEnableAvailable": true,
+                        "radioFrequencyAvailable": true,
+                        "rdsDataAvailable": true,
+                        "signalChangeThresholdAvailable": true,
+                        "signalStrengthAvailable": true,
+                        "stateAvailable": true
+                    }
+                ]
             }
         }
     },

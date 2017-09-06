@@ -1,15 +1,49 @@
 {
-    "UI":
-    {
+  "UI": {
         "language":"EN_US",
         "languages":[
-          "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
-"JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO","NL_BE","EL_GR","HU_HU","FI_FI","SK_SK","EN_IN","TH_TH","EN_SA","HE_IL",
-"RO_RO","UK_UA","ID_ID","VI_VN","MS_MY","HI_IN"
+      "EN_US",
+      "ES_MX",
+      "FR_CA",
+      "DE_DE",
+      "ES_ES",
+      "EN_GB",
+      "RU_RU",
+      "TR_TR",
+      "PL_PL",
+      "FR_FR",
+      "IT_IT",
+      "SV_SE",
+      "PT_PT",
+      "NL_NL",
+      "ZH_TW",
+      "JA_JP",
+      "AR_SA",
+      "KO_KR",
+      "PT_BR",
+      "CS_CZ",
+      "DA_DK",
+      "NO_NO",
+      "NL_BE",
+      "EL_GR",
+      "HU_HU",
+      "FI_FI",
+      "SK_SK",
+      "EN_IN",
+      "TH_TH",
+      "EN_SA",
+      "HE_IL",
+      "RO_RO",
+      "UK_UA",
+      "ID_ID",
+      "VI_VN",
+      "MS_MY",
+      "HI_IN"
         ],
         "displayCapabilities": {
             "displayType": "GEN2_8_DMA",
-            "textFields": [{
+      "textFields": [
+        {
                     "name": "mainField1",
                     "characterSet": "TYPE2SET",
                     "width": 500,
@@ -178,7 +212,8 @@
                     "rows": 1
                 }
             ],
-            "imageFields": [{
+      "imageFields": [
+        {
                     "name": "softButtonImage",
                     "imageTypeSupported": [],
                     "imageResolution": {
@@ -228,9 +263,7 @@
                 },
                 {
                     "name": "graphic",
-                    "imageTypeSupported": [
-
-                    ],
+          "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -249,17 +282,36 @@
 
             ],
             "mediaClockFormats": [
-                "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
+        "CLOCK1",
+        "CLOCK2",
+        "CLOCK3",
+        "CLOCKTEXT1",
+        "CLOCKTEXT2",
+        "CLOCKTEXT3",
+        "CLOCKTEXT4"
             ],
             "graphicSupported": true,
             "templatesAvailable": [
 
-                "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
-                "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
-                "GRAPHIC_WITH_TILES", "TILES_WITH_GRAPHIC", "GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
-                "TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC", "GRAPHIC_WITH_TEXTBUTTONS",
-                "TEXTBUTTONS_WITH_GRAPHIC", "LARGE_GRAPHIC_WITH_SOFTBUTTONS",
-                "DOUBLE_GRAPHIC_WITH_SOFTBUTTONS", "LARGE_GRAPHIC_ONLY"
+        "DEFAULT",
+        "MEDIA",
+        "NON-MEDIA",
+        "ONSCREEN_PRESETS",
+        "NAV_FULLSCREEN_MAP",
+        "NAV_KEYBOARD",
+        "GRAPHIC_WITH_TEXT",
+        "TEXT_WITH_GRAPHIC",
+        "TILES_ONLY",
+        "TEXTBUTTONS_ONLY",
+        "GRAPHIC_WITH_TILES",
+        "TILES_WITH_GRAPHIC",
+        "GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
+        "TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC",
+        "GRAPHIC_WITH_TEXTBUTTONS",
+        "TEXTBUTTONS_WITH_GRAPHIC",
+        "LARGE_GRAPHIC_WITH_SOFTBUTTONS",
+        "DOUBLE_GRAPHIC_WITH_SOFTBUTTONS",
+        "LARGE_GRAPHIC_ONLY"
             ],
             "screenParams": {
                 "resolution": {
@@ -289,12 +341,14 @@
             "audioType": "PCM"
         },
         "hmiZoneCapabilities": "FRONT",
-        "softButtonCapabilities": [{
+    "softButtonCapabilities": [
+      {
             "shortPressAvailable": true,
             "longPressAvailable": true,
             "upDownAvailable": true,
             "imageSupported": true
-        }],
+      }
+    ],
         "systemCapabilities": {
             "navigationCapability": {
                 "sendLocationEnabled": true,
@@ -303,42 +357,242 @@
             "phoneCapability": {
                 "dialNumberEnabled": true
             },
-            "videoStreamingCapability": {
-                "preferredResolution": {
-                    "resolutionWidth": 800,
-                    "resolutionHeight": 350
-                },
-                "maxBitrate": 10000,
-                "supportedFormats": [{
-                    "protocol": "RAW",
-                    "codec": "H264"
+
+            "remoteControlCapability":{
+        "climateControlCapabilities": [
+          {
+                    "moduleName": "primary_climate",
+                    "fanSpeedAvailable": true,
+                    "desiredTemperatureAvailable": true,
+                    "acEnableAvailable": true,
+                    "acMaxEnableAvailable": true,
+                    "circulateAirEnableAvailable": true,
+                    "autoModeEnableAvailable": true,
+                    "dualModeEnableAvailable": true,
+                    "defrostZoneAvailable": true,
+                    "ventilationModeAvailable": true,
+            "defrostZone": [
+              "FRONT",
+                    "REAR",
+                    "ALL",
+              "NONE"
+            ],
+            "ventilationMode": [
+              "UPPER",
+                    "LOWER",
+                    "BOTH",
+              "NONE"
+            ]
+          }
+        ],
+        "radioControlCapabilities": [
+          {
+                    "moduleName": "radio",
+                    "radioEnableAvailable": true,
+                    "radioBandAvailable": true,
+                    "radioFrequencyAvailable": true,
+                    "hdChannelAvailable": true,
+                    "rdsDataAvailable": true,
+                    "availableHDsAvailable": true,
+                    "stateAvailable": true,
+                    "signalStrengthAvailable": true,
+                    "signalChangeThresholdAvailable": true
+          }
+        ],
+        "buttonCapabilities": [
+          {
+                    "name": "AC_MAX",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
                 },
                 {
-                    "protocol": "RTP",
-                    "codec": "Theora"
-                }],
-                "hapticSpatialDataSupported": true
-            }
+                    "name": "AC",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "RECIRCULATE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "FAN_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "FAN_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "TEMP_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "TEMP_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST_MAX",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "DEFROST_REAR",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "UPPER_VENT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "LOWER_VENT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "VOLUME_UP",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "VOLUME_DOWN",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "EJECT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "SOURCE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "SHUFFLE",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+                },
+                {
+                    "name": "REPEAT",
+                    "shortPressAvailable": true,
+                    "longPressAvailable": true,
+                    "upDownAvailable": false
+          }
+        ]
+      },
+      "videoStreamingCapability": {
+        "preferredResolution": {
+          "resolutionWidth": 800,
+          "resolutionHeight": 350
+        },
+        "maxBitrate": 10000,
+        "supportedFormats": [
+          {
+            "protocol": "RAW",
+            "codec": "H264"
+          },
+          {
+            "protocol": "RTP",
+            "codec": "Theora"
+          }
+        ],
+        "hapticSpatialDataSupported": true
         }
+      }
     },
     "VR": {
-        "capabilities": ["TEXT"],
+    "capabilities": [
+      "TEXT"
+    ],
         "language": "ES_MX",
         "languages": [
-            "AR_SA", "EN_US", "ES_MX", "FR_CA", "DE_DE", "ES_ES", "EN_GB", "RU_RU", "TR_TR", "PL_PL", "FR_FR", "IT_IT", "SV_SE", "PT_PT", "NL_NL", "ZH_TW",
-            "JA_JP", "KO_KR", "PT_BR", "CS_CZ", "DA_DK", "NO_NO"
+      "AR_SA",
+      "EN_US",
+      "ES_MX",
+      "FR_CA",
+      "DE_DE",
+      "ES_ES",
+      "EN_GB",
+      "RU_RU",
+      "TR_TR",
+      "PL_PL",
+      "FR_FR",
+      "IT_IT",
+      "SV_SE",
+      "PT_PT",
+      "NL_NL",
+      "ZH_TW",
+      "JA_JP",
+      "KO_KR",
+      "PT_BR",
+      "CS_CZ",
+      "DA_DK",
+      "NO_NO"
         ]
     },
     "TTS": {
-        "capabilities": ["TEXT"],
+    "capabilities": [
+      "TEXT"
+    ],
         "language": "DE_DE",
         "languages": [
-            "DA_DK", "CS_CZ", "KO_KR", "EN_US", "ES_MX", "FR_CA", "DE_DE", "ES_ES", "EN_GB", "RU_RU", "TR_TR", "PL_PL", "FR_FR", "IT_IT", "SV_SE", "PT_PT", "NL_NL", "ZH_TW",
-            "JA_JP", "AR_SA", "PT_BR", "NO_NO"
+      "DA_DK",
+      "CS_CZ",
+      "KO_KR",
+      "EN_US",
+      "ES_MX",
+      "FR_CA",
+      "DE_DE",
+      "ES_ES",
+      "EN_GB",
+      "RU_RU",
+      "TR_TR",
+      "PL_PL",
+      "FR_FR",
+      "IT_IT",
+      "SV_SE",
+      "PT_PT",
+      "NL_NL",
+      "ZH_TW",
+      "JA_JP",
+      "AR_SA",
+      "PT_BR",
+      "NO_NO"
         ]
     },
     "Buttons": {
-        "capabilities": [{
+    "capabilities": [
+      {
                 "name": "PRESET_0",
                 "shortPressAvailable": true,
                 "longPressAvailable": true,

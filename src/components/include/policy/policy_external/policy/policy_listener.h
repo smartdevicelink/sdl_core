@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_
-#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_
 
 #include <queue>
 
@@ -52,12 +52,13 @@ class PolicyListener {
                                     const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
+
   /**
-   * Gets device ID
-   * @param policy_app_id
-   * @return device ID
-   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
-   */
+ * Gets device ID
+ * @param policy_app_id
+ * @return device ID
+ * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
+ */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
@@ -67,12 +68,12 @@ class PolicyListener {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   /**
- * @brief CanUpdate allows to find active application
- * and check whether related device consented.
- *
- * @return true if there are at least one application has been registered
- * with consented device.
- */
+   * @brief CanUpdate allows to find active application
+   * and check whether related device consented.
+   *
+   * @return true if there are at least one application has been registered
+   * with consented device.
+   */
   virtual bool CanUpdate() = 0;
 
   /**
@@ -129,12 +130,51 @@ class PolicyListener {
   virtual void OnPTUFinished(const bool ptu_result) = 0;
 
   /**
- * @brief Collects currently registered applications ids linked to their
- * device id
- * @return Collection of device_id-to-app_id links
- */
+   * @brief Collects currently registered applications ids linked to their
+   * device id
+   * @return Collection of device_id-to-app_id links
+   */
   virtual void GetRegisteredLinks(
       std::map<std::string, std::string>& out_links) const = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  virtual std::vector<std::string> GetDevicesIds(
+      const std::string& policy_app_id) = 0;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
+
+  /**
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void OnRemoteAppPermissionsChanged(
+      const std::string& device_id, const std::string& application_id) = 0;
+
+  /**
+   * Notifies about changing HMI status
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level) = 0;
+
+#endif  // SDL_REMOTE_CONTROL
 };
-}  //  namespace policy
-#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_
+}  // namespace policy
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_

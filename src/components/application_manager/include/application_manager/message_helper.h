@@ -702,6 +702,31 @@ class MessageHelper {
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sends HMI status notification to mobile
+   * @param application_impl application with changed HMI status
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager);
+
+  /**
+   * @brief SendActivateAppToHMI Sends BasicCommunication.ActivateApp request to
+   * HMI
+   * @param app_id Application id
+   * @param application_manager Application manager
+   * @param level Application HMI level
+   * @param send_policy_priority Defines whether to send "priority" field with
+   * request
+   */
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
+#endif  // SDL_REMOTE_CONTROL
+
  private:
   /**
    * @brief Creates new request object and fill its header

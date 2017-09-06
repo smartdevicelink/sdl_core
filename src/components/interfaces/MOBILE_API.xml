@@ -135,6 +135,9 @@
     <element name="DATA_NOT_AVAILABLE">
       <description>The requested data is not available on this vehicle or is not published for the connected app </description>
     </element>
+    <element name="READ_ONLY">
+          <description>The value being set is read only</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -538,6 +541,28 @@
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
     <element name="SEARCH" />
+
+    <!-- Climate Buttons -->
+    <element name="AC_MAX" />
+    <element name="AC" />
+    <element name="RECIRCULATE" />
+    <element name="FAN_UP" />
+    <element name="FAN_DOWN" />
+    <element name="TEMP_UP" />
+    <element name="TEMP_DOWN" />
+    <element name="DEFROST_MAX" />
+    <element name="DEFROST" />
+    <element name="DEFROST_REAR" />
+    <element name="UPPER_VENT" />
+    <element name="LOWER_VENT" />
+
+    <!-- Radio Buttons -->
+    <element name="VOLUME_UP" />
+    <element name="VOLUME_DOWN" />
+    <element name="EJECT" />
+    <element name="SOURCE" />
+    <element name="SHUFFLE" />
+    <element name="REPEAT" />
   </enum>
 
   <enum name="MediaClockFormat">
@@ -1420,6 +1445,284 @@
     </param>
   </struct>
 
+  <enum name="ModuleType">
+    <element name="CLIMATE"/>
+    <element name="RADIO"/>
+  </enum>
+
+  <enum name="RadioBand">
+    <element name="AM"/>
+    <element name="FM"/>
+    <element name="XM"/>
+  </enum>
+
+  <struct name="RdsData">
+    <param name="PS" type="String" minlength="0" maxlength="8" mandatory="false" >
+      <description>Program Service Name</description>
+    </param>
+    <param name="RT" type="String" minlength="0" maxlength="64" mandatory="false" >
+      <description>Radio Text</description>
+    </param>
+    <param name="CT" type="String" minlength="24" maxlength="24" mandatory="false">
+      <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+    </param>
+    <param name="PI" type="String" minlength="0" maxlength="6" mandatory="false" >
+      <description>Program Identification - the call sign for the radio station</description>
+    </param>
+    <param name="PTY" type="Integer" minvalue="0" maxvalue="31" mandatory="false" >
+      <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+    </param>
+    <param name="TP" type="Boolean" mandatory="false" >
+      <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+    </param>
+    <param name="TA" type="Boolean" mandatory="false" >
+      <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+    </param>
+    <param name="REG" type="String" mandatory="false" >
+      <description>Region</description>
+    </param>
+  </struct>
+
+  <enum name="RadioState">
+    <element name="ACQUIRING"/>
+    <element name="ACQUIRED"/>
+    <element name="MULTICAST"/>
+    <element name="NOT_FOUND"/>
+  </enum>
+
+  <struct name="RadioControlData">
+    <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+      <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+    </param>
+    <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+      <description>The fractional part of the frequency for 101.7 is 7</description>
+    </param>
+    <param name="band" type="RadioBand" mandatory="false">
+    </param>
+    <param name="rdsData" type="RdsData" mandatory="false">
+      <description> Read only parameter.</description>
+    </param>
+    <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>number of HD sub-channels if available. Read only parameter.</description>
+    </param>
+    <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>Current HD sub-channel if available</description>
+    </param>
+    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description> Read only parameter.</description>
+    </param>
+    <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description>If the signal strength falls below the set value for this parameter,
+                   the radio will tune to an alternative frequency. Read only parameter.</description>
+    </param>
+    <param name="radioEnable" type="Boolean" mandatory="false">
+      <description> True if the radio is on, false is the radio is off.</description>
+    </param>
+    <param name="state" type="RadioState" mandatory="false">
+      <description> Read only parameter.</description>
+    </param>
+  </struct>
+
+  <struct name="RadioControlCapabilities">
+    <description>Contains information about a radio control module's capabilities.</description>
+    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
+      <description>The short name or a short description of the radio control module.</description>
+    </param>
+    <param name="radioEnableAvailable" type="Boolean" mandatory="false">
+      <description>
+        Availability of the control of enable/disable radio.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="radioBandAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the control of radio band.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="radioFrequencyAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the control of radio frequency.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="hdChannelAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the control of HD radio channel.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="rdsDataAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the getting Radio Data System (RDS) data.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="availableHDsAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the getting the number of available HD channels.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="stateAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the getting the Radio state.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="signalStrengthAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the getting the signal strength.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+    <param name="signalChangeThresholdAvailable" type="Boolean" mandatory="false" >
+      <description>
+        Availability of the getting the signal Change Threshold.
+        True: Available, False: Not Available, Not present: Not Available.
+      </description>
+    </param>
+  </struct>
+
+  <enum name="DefrostZone">
+    <element name="FRONT"/>
+    <element name="REAR"/>
+    <element name="ALL"/>
+    <element name="NONE"/>
+  </enum>
+
+  <enum name="VentilationMode">
+    <element name="UPPER"/>
+    <element name="LOWER"/>
+    <element name="BOTH"/>
+    <element name="NONE"/>
+  </enum>
+
+  <enum name="TemperatureUnit">
+    <element name="FAHRENHEIT"/>
+    <element name="CELSIUS"/>
+  </enum>
+
+  <struct name="Temperature">
+    <param name="unit" type="TemperatureUnit" mandatory="true" >
+      <description>Temperature Unit</description>
+    </param>
+    <param name="value" type="Float" mandatory="true" >
+      <description>Temperature Value in TemperatureUnit specified unit. Range depends on OEM and is not checked by SDL.</description>
+    </param>
+  </struct>
+
+   <struct name="ClimateControlData">
+    <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="currentTemperature" type="Temperature" mandatory="false">
+      <description> Read only parameter.</description>
+    </param>
+    <param name="desiredTemperature" type="Temperature" mandatory="false">
+    </param>
+    <param name="acEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="circulateAirEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="autoModeEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="defrostZone" type="DefrostZone" mandatory="false">
+    </param>
+    <param name="dualModeEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="acMaxEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="ventilationMode" type="VentilationMode" mandatory="false">
+    </param>
+  </struct>
+
+<struct name="ClimateControlCapabilities">
+  <description>Contains information about a climate control module's capabilities.</description>
+  <param name="moduleName" type="String" maxlength="100" mandatory="true" >
+    <description>The short name or a short description of the climate control module.</description>
+  </param>
+  <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the reading of current temperature.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="fanSpeedAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of fan speed.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="desiredTemperatureAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of desired temperature.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="acEnableAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of turn on/off AC.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="acMaxEnableAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of enable/disable air conditioning is ON on the maximum level.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="circulateAirEnableAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of enable/disable circulate Air mode.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="autoModeEnableAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of enable/disable auto mode.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="dualModeEnableAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of enable/disable dual mode.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="defrostZoneAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of defrost zones.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="defrostZone" type="DefrostZone" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>
+      A set of all defrost zones that are controllable.
+    </description>
+  </param>
+  <param name="ventilationModeAvailable" type="Boolean" mandatory="false">
+    <description>
+      Availability of the control of air ventilation mode.
+      True: Available, False: Not Available, Not present: Not Available.
+    </description>
+  </param>
+  <param name="ventilationMode" type="VentilationMode" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>
+      A set of all ventilation modes that are controllable.
+    </description>
+  </param>
+</struct>
+
+  <struct name="ModuleData">
+    <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+    <param name="moduleType" type="ModuleType" mandatory="true" >
+    </param>
+    <param name="radioControlData" type="RadioControlData" mandatory="false">
+    </param>
+    <param name="climateControlData" type="ClimateControlData" mandatory="false">
+    </param>
+  </struct>
+
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
 <!-- Ford Specific Data Items -->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
@@ -1954,6 +2257,24 @@
     </param>
   </struct>
 
+  <struct name="RemoteControlCapabilities">
+    <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+      <description>
+        If included, the platform supports RC climate controls.
+        For this baseline version, maxsize=1. i.e. only one climate control module is supported.
+      </description >
+    </param>
+    <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+      <description>
+        If included, the platform supports RC radio controls.
+        For this baseline version, maxsize=1. i.e. only one radio control module is supported.
+      </description >
+    </param>
+    <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
+      <description>If included, the platform supports RC button controls with the included button names.</description >
+    </param>
+  </struct>
+
   <struct name="SoftButtonCapabilities">
     <description>Contains information about a SoftButton's capabilities.</description>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
@@ -2179,6 +2500,7 @@
     <element name="TESTING" />
     <element name="SYSTEM" />
     <element name="PROJECTION" />
+    <element name="REMOTE_CONTROL" />
   </enum>
 
   <enum name="PredefinedLayout" platform="documentation">
@@ -2354,6 +2676,9 @@
     <element name="SystemRequestID" value="38" hexvalue="26" />
     <element name="SendLocationID" value="39" hexvalue="27" />
     <element name="DialNumberID" value="40" hexvalue="28" />
+    <element name="ButtonPressID" value="41" hexvalue="29" />
+    <element name="GetInteriorVehicleDataID" value="43" hexvalue="2B" />
+    <element name="SetInteriorVehicleDataID" value="44" hexvalue="2C" />
     <element name="GetWayPointsID" value="45" hexvalue="2D" />
     <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
     <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
@@ -2380,6 +2705,7 @@
     <element name="OnTouchEventID" value="32780" hexvalue="800C" />
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
+    <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" />
     <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
 
 <!--
@@ -2397,7 +2723,6 @@
 
     <element name="OnEncodedSyncPDataID" value="98304" hexvalue="18000" />
     <element name="OnSyncPDataID" value="98305" hexvalue="18001" />
-
   </enum>
 
   <enum name="messageType">
@@ -2514,6 +2839,7 @@
     <element name="PHONE_CALL"/>
     <element name="VIDEO_STREAMING"/>
     <element name="AUDIO_STREAMING"/>
+    <element name="REMOTE_CONTROL"/>
   </enum>
 
   <struct name="NavigationCapability">
@@ -2562,6 +2888,8 @@
       <param name="phoneCapability" type="PhoneCapability" mandatory="false">
       </param>
       <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      </param>
+      <param name="remoteControlCapability" type="RemoteControlCapabilities" mandatory="false">
       </param>
   </struct>
 
@@ -5274,7 +5602,6 @@
     </param>
   </function>
 
-
   <!-- Notifications -->
 
   <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification">
@@ -5614,6 +5941,123 @@
     </param>  
   </function>
 
+<function name="ButtonPress" functionID="ButtonPressID" messagetype="request">
+  <param name="moduleType" type="ModuleType" mandatory="true" >
+    <description>The module where the button should be pressed</description>
+  </param>
+  <param name="buttonName" type="ButtonName" mandatory="true" >
+    <description>The name of supported RC climate or radio button.</description>
+  </param>
+  <param name="buttonPressMode" type="ButtonPressMode" mandatory="true" >
+    <description>Indicates whether this is a LONG or SHORT button press event.</description>
+  </param>
+</function>
+
+<function name="ButtonPress" functionID="ButtonPressID" messagetype="response">
+  <param name="resultCode" type="Result" platform="documentation" mandatory="true" >
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="IN_USE"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true" >
+    <description> true if successful; false, if failed </description>
+  </param>
+</function>
+
+<function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
+        <param name="moduleType" type="ModuleType" mandatory="true" >
+              <description>
+                The type of a RC module to retrieve module data from the vehicle.
+                In the future, this should be the Identification of a module.
+              </description>
+        </param>
+        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+              <description>
+                If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
+                If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
+              </description>
+        </param>
+</function>
+
+ <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response">
+    <param name="moduleData" type="ModuleData" mandatory="true" >
+    </param>
+      <param name="resultCode" type="Result" platform="documentation" mandatory="true" >
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true" >
+        <description> true if successful; false, if failed </description>
+    </param>
+    <param name="isSubscribed" type="Boolean" mandatory="false" >
+      <description>
+       It is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
+       if "true" - the "moduleType" from request is successfully subscribed and the head unit will send onInteriorVehicleData notifications for the moduleType.
+       if "false" - the "moduleType" from request is either unsubscribed or failed to subscribe.
+     </description>
+   </param>
+
+  </function>
+
+  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
+    <param name="moduleData" type="ModuleData" mandatory="true" >
+      <description>The module data to set for the requested RC module.</description>
+    </param>
+  </function>
+
+  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response">
+    <description>Used to set the values of one remote control module </description>
+    <param name="moduleData" type="ModuleData" mandatory="true" >
+    </param>
+    <param name="resultCode" type="Result" platform="documentation" mandatory="true" >
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="READ_ONLY"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true" >
+        <description> true if successful; false, if failed </description>
+    </param>
+  </function>
+
+
+  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+    <param name="moduleData" type="ModuleData" mandatory="true">
+    </param>
+  </function>
 
 <!-- Deprecating - covered by OnSystemRequest
   <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification" >

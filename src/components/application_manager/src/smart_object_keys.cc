@@ -140,6 +140,7 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
+const char* rc_capability = "remoteControlCapability";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

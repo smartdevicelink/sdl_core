@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-SendHapticDataResponse::SendHapticDataResponse(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager)
+SendHapticDataResponse::SendHapticDataResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 SendHapticDataResponse::~SendHapticDataResponse() {}

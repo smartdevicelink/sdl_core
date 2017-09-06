@@ -90,6 +90,9 @@ class HMICapabilities {
   virtual bool is_ivi_cooperating() const = 0;
   virtual void set_is_ivi_cooperating(const bool value) = 0;
 
+  virtual bool is_rc_cooperating() const = 0;
+  virtual void set_is_rc_cooperating(const bool value) = 0;
+
   /*
    * @brief Interface used to store information about software version of the
    *target
@@ -472,6 +475,15 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObject* video_streaming_capability()
       const = 0;
+
+  /**
+   * @brief Sets available RC capabilities for further usage by RC functionality
+   * @param rc_capability capabilities to set
+   */
+  virtual void set_rc_capability(
+      const smart_objects::SmartObject& rc_capability) = 0;
+
+  virtual const smart_objects::SmartObject* rc_capability() const = 0;
 
   virtual void Init(resumption::LastState* last_state) = 0;
 

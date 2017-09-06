@@ -68,22 +68,23 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+using policy_handler_test::MockPolicySettings;
+
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
-  static DBMS* dbms;
-  static SQLPTRepresentation* reps;
+  DBMS* dbms;
+  SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
   static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
-      policy_settings_;
+  std::auto_ptr<NiceMock<MockPolicySettings> > policy_settings_;
 
-  static void SetUpTestCase() {
-    file_system::DeleteFile(kAppStorageFolder + "/policy.sqlite");
+  void SetUp() OVERRIDE {
+    file_system::CreateDirectory(kAppStorageFolder);
     reps = new SQLPTRepresentation;
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
-        new policy_handler_test::MockPolicySettings());
+    policy_settings_ = std::auto_ptr<NiceMock<MockPolicySettings> >(
+        new NiceMock<MockPolicySettings>());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
@@ -93,15 +94,13 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 
   void TearDown() OVERRIDE {
     EXPECT_TRUE(reps->Clear());
-  }
-
-  static void TearDownTestCase() {
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
     reps->RemoveDB();
     delete reps;
     dbms->Close();
-    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::remove_directory_content(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
     policy_settings_.reset();
   }
 
@@ -346,12 +345,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-DBMS* SQLPTRepresentationTest::dbms = 0;
-SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-const std::string SQLPTRepresentationTest::kAppStorageFolder = "storage1";
-std::auto_ptr<policy_handler_test::MockPolicySettings>
-    SQLPTRepresentationTest::policy_settings_;
+const std::string SQLPTRepresentationTest::kAppStorageFolder =
+    "storage_SQLPTRepresentationTest";
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
@@ -378,7 +374,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
   const uint16_t kOpenAttemptTimeoutMs;
   const uint16_t kAttemptsToOpenPolicyDB;
@@ -399,7 +395,7 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
 };
 
@@ -424,7 +420,8 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
-  ASSERT_EQ(25, dbms->FetchOneInt(query_select));
+  const int32_t total_tables_number = 28;
+  ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
   const char* query_select_count_sync_out_of_memory =
@@ -1102,7 +1099,7 @@ TEST_F(SQLPTRepresentationTest,
        GetInitialAppData_SetData_ExpectCorrectValuesReceived) {
   // Arrange
   const char* query_insert =
-      "INSERT INTO `nickname` (`application_id`, `name`)"
+      "INSERT INTO `nickname` (`application_id`, `name`) "
       "VALUES ('1111', 'first_app') , "
       "('2222', 'second_app'), ('3333', 'third_app')";
   ASSERT_TRUE(dbms->Exec(query_insert));

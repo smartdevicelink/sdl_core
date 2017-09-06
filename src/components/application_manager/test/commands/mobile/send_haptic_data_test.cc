@@ -68,13 +68,13 @@ class SendHapticDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SendHapticDataRequestTest()
-    : msg_(CreateMessage(::smart_objects::SmartType_Map))
-    , mock_app_(CreateMockApp()) {}
+      : msg_(CreateMessage(::smart_objects::SmartType_Map))
+      , mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app_));
+        .WillByDefault(Return(mock_app_));
   }
 
   MessageSharedPtr msg_;
@@ -82,7 +82,7 @@ class SendHapticDataRequestTest
 };
 
 class SendHapticDataResponseTest
-  : public CommandsTest<CommandsTestMocks::kIsNice> {
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   SendHapticDataResponseTest() : message_(CreateMessage()) {}
 
@@ -95,11 +95,10 @@ class SendHapticDataResponseTest
 };
 
 TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
-  EXPECT_CALL(
-    app_mngr_,
-    ManageHMICommand(HMIResultCodeIs(
-      hmi_apis::FunctionID::UI_SendHapticData)))
-    .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_SendHapticData)))
+      .WillOnce(Return(true));
 
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
 
@@ -108,14 +107,14 @@ TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
 }
 
 TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
-  EXPECT_CALL(app_mngr_,
-    ManageMobileCommand(
-      MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-      am::commands::Command::ORIGIN_SDL));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+                          am::commands::Command::ORIGIN_SDL));
 
   (*msg_)[am::strings::msg_params] = 0;
   (*msg_)[am::strings::params][am::hmi_response::code] =
-    hmi_apis::Common_Result::eType::SUCCESS;
+      hmi_apis::Common_Result::eType::SUCCESS;
   Event event(hmi_apis::FunctionID::UI_SendHapticData);
   event.set_smart_object(*msg_);
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
@@ -127,13 +126,11 @@ TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
 TEST_F(SendHapticDataResponseTest, Run_Success) {
   ::smart_objects::SmartObject& message_ref = *message_;
   message_ref[am::strings::msg_params][am::strings::result_code] =
-    mobile_apis::Result::SUCCESS;
+      mobile_apis::Result::SUCCESS;
 
   EXPECT_CALL(
-    app_mngr_,
-    SendMessageToMobile(
-      MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-      _));
+      app_mngr_,
+      SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Init();
   command_sptr_->Run();
 }

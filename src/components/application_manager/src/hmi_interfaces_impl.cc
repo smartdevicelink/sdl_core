@@ -220,6 +220,8 @@ generate_function_to_interface_convert_map() {
   convert_map[SDL_OnSystemError] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[SDL_AddStatisticsInfo] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[SDL_GetURLS] = HmiInterfaces::HMI_INTERFACE_SDL;
+  convert_map[RC_IsReady] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_RC;
   return convert_map;
 }
 
@@ -240,6 +242,8 @@ HmiInterfacesImpl::HmiInterfacesImpl() {
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_VehicleInfo] =
       HmiInterfaces::STATE_NOT_RESPONSE;
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_VR] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_RC] =
       HmiInterfaces::STATE_NOT_RESPONSE;
 }
 

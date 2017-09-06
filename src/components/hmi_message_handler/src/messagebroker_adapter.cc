@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,6 +135,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
   MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
   MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
+  MessageBrokerController::subscribeTo("RC.OnInteriorVehicleData");
+  MessageBrokerController::subscribeTo("RC.OnRemoteControlSettings");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }

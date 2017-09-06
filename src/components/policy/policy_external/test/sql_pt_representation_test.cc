@@ -85,7 +85,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
+    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
@@ -407,7 +407,7 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  const int policy_tables_number = 35;
+  const int policy_tables_number = 32;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
