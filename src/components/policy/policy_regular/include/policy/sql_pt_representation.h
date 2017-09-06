@@ -99,8 +99,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
  protected:
 #ifdef SDL_REMOTE_CONTROL
   enum TypeAccess { kAllowed, kManual };
-  bool GatherAppGroupPrimary(const std::string& app_id,
-                             policy_table::Strings* app_groups) const;
   bool GatherModuleType(const std::string& app_id,
                         policy_table::ModuleTypes* module_types) const;
   bool GatherRemoteControlDenied(const std::string& app_id, bool* denied) const;
