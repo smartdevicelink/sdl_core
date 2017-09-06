@@ -161,6 +161,28 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_ECALLINFO:
       return true;
+    case P_LONGTITUDE_DEGREES:
+      return true;
+    case P_LATITUDE_DEGREES:
+      return true;
+    case P_LOCATION_NAME:
+      return true;
+    case P_LOCATION_DESCRIPTION:
+      return true;
+    case P_ADDRESS_LINES:
+      return true;
+    case P_PHONE_NUMBER:
+      return true;
+    case P_LOCATION_IMAGE:
+      return true;
+    case P_DELIVERY_MODE:
+      return true;
+    case P_TIMESTAMP:
+      return true;
+    case P_ADDRESS:
+      return true;
+    case P_EMPTY:
+      return true;
     default:
       return false;
   }
@@ -217,6 +239,28 @@ const char* EnumToJsonString(Parameter val) {
       return "emergencyEvent";
     case P_ECALLINFO:
       return "eCallInfo";
+    case P_LONGTITUDE_DEGREES:
+      return "longitudeDegrees";
+    case P_LATITUDE_DEGREES:
+      return "latitudeDegrees";
+    case P_LOCATION_NAME:
+      return "locationName";
+    case P_LOCATION_DESCRIPTION:
+      return "locationDescription";
+    case P_ADDRESS_LINES:
+      return "addressLines";
+    case P_PHONE_NUMBER:
+      return "phoneNumber";
+    case P_LOCATION_IMAGE:
+      return "locationImage";
+    case P_DELIVERY_MODE:
+      return "deliveryMode";
+    case P_TIMESTAMP:
+      return "timeStamp";
+    case P_ADDRESS:
+      return "address";
+    case P_EMPTY:
+      return "EMPTY";
     default:
       return "";
   }
@@ -296,6 +340,39 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("eCallInfo" == literal) {
     *result = P_ECALLINFO;
+    return true;
+  } else if ("longitudeDegrees" == literal) {
+    *result = P_LONGTITUDE_DEGREES;
+    return true;
+  } else if ("latitudeDegrees" == literal) {
+    *result = P_LATITUDE_DEGREES;
+    return true;
+  } else if ("locationName" == literal) {
+    *result = P_LOCATION_NAME;
+    return true;
+  } else if ("locationDescription" == literal) {
+    *result = P_LOCATION_DESCRIPTION;
+    return true;
+  } else if ("addressLines" == literal) {
+    *result = P_ADDRESS_LINES;
+    return true;
+  } else if ("phoneNumber" == literal) {
+    *result = P_PHONE_NUMBER;
+    return true;
+  } else if ("locationImage" == literal) {
+    *result = P_LOCATION_IMAGE;
+    return true;
+  } else if ("deliveryMode" == literal) {
+    *result = P_DELIVERY_MODE;
+    return true;
+  } else if ("timeStamp" == literal) {
+    *result = P_TIMESTAMP;
+    return true;
+  } else if ("address" == literal) {
+    *result = P_ADDRESS;
+    return true;
+  } else if ("EMPTY" == literal) {
+    *result = P_EMPTY;
     return true;
   } else {
     return false;
