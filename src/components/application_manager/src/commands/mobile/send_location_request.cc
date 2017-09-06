@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -62,11 +62,24 @@ void SendLocationRequest::Run() {
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
   if (msg_params.keyExists(strings::delivery_mode)) {
-    const RPCParams& allowed_params = parameters_permissions().allowed_params;
+    const policy::RPCParams& allowed_params =
+        parameters_permissions().allowed_params;
 
     if (helpers::in_range(allowed_params, strings::delivery_mode)) {
       msg_params.erase(strings::delivery_mode);
     }
+  }
+
+  if (!AreMandatoryParamsAllowedByUser()) {
+    LOG4CXX_ERROR(logger_, "All parameters are disallowed by user.");
+    SendResponse(false, mobile_api::Result::USER_DISALLOWED);
+    return;
+  }
+
+  if (!AreMandatoryParamsAllowedByPolicy()) {
+    LOG4CXX_ERROR(logger_, "Mandatory parameters are disallowed by policy.");
+    SendResponse(false, mobile_api::Result::DISALLOWED);
+    return;
   }
 
   std::vector<Common_TextFieldName::eType> fields_to_check;
@@ -94,14 +107,11 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  if (msg_params.keyExists(strings::address)) {
-    const utils::custom_string::CustomString& address =
-        msg_params[strings::address].asCustomString();
-    if (address.empty()) {
-      msg_params.erase(strings::address);
-    }
+  if (msg_params.keyExists(strings::address) &&
+      msg_params[strings::address].empty()) {
+    msg_params.erase(strings::address);
   }
-
+  
   if (!CheckFieldsCompatibility()) {
     LOG4CXX_ERROR(logger_, "CheckFieldsCompatibility failed");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -122,12 +132,11 @@ void SendLocationRequest::Run() {
     }
   }
 
-  SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
-  request_msg_params = msg_params;
-  request_msg_params[strings::app_id] = app->hmi_app_id();
-  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
-  SendHMIRequest(
-      hmi_apis::FunctionID::Navigation_SendLocation, &request_msg_params, true);
+  SmartObject hmi_request_msg_params = msg_params;
+  hmi_request_msg_params[strings::app_id] = app->hmi_app_id();
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
+                 &hmi_request_msg_params,
+                 true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
@@ -207,15 +216,25 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
 
   if (msg_params.keyExists(strings::address)) {
     const smart_objects::SmartObject& address_so = msg_params[strings::address];
-    insert_if_contains(address_so, strings::country_name, fields_to_check);
-    insert_if_contains(address_so, strings::country_code, fields_to_check);
-    insert_if_contains(address_so, strings::postal_code, fields_to_check);
-    insert_if_contains(
-        address_so, strings::administrative_area, fields_to_check);
-    insert_if_contains(address_so, strings::locality, fields_to_check);
-    insert_if_contains(address_so, strings::sub_locality, fields_to_check);
-    insert_if_contains(address_so, strings::thoroughfare, fields_to_check);
-    insert_if_contains(address_so, strings::sub_thoroughfare, fields_to_check);
+    const std::set<std::string> keys = msg_params[strings::address].enumerate();
+
+    std::set<std::string>::const_iterator keys_it = keys.begin();
+
+    while (keys.end() != keys_it) {
+      const utils::custom_string::CustomString& field_value =
+          address_so[*keys_it].asCustomString();
+      if (!field_value.empty()) {
+        fields_to_check.push_back(field_value);
+      }
+      ++keys_it;
+    }
+  }
+
+  if (msg_params.keyExists(strings::location_image)) {
+    if (msg_params[strings::location_image].keyExists(strings::value)) {
+      fields_to_check.push_back(
+          msg_params[strings::location_image][strings::value].asCustomString());
+    }
   }
 
   std::vector<utils::custom_string::CustomString>::iterator it =
@@ -245,30 +264,57 @@ bool SendLocationRequest::CheckHMICapabilities(
     LOG4CXX_ERROR(logger_, "UI is not supported.");
     return false;
   }
-
-  if (hmi_capabilities.display_capabilities()) {
-    const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
-    const SmartObject& text_fields =
-        disp_cap.getElement(hmi_response::text_fields);
-    const size_t len = text_fields.length();
-    for (size_t i = 0; i < len; ++i) {
-      const SmartObject& text_field = text_fields[i];
-      const Common_TextFieldName::eType filed_name =
-          static_cast<Common_TextFieldName::eType>(
-              text_field.getElement(strings::name).asInt());
-      const std::vector<Common_TextFieldName::eType>::iterator it =
-          std::find(fields_names.begin(), fields_names.end(), filed_name);
-      if (it != fields_names.end()) {
-        fields_names.erase(it);
-      }
-    }
-  }
-
-  if (!fields_names.empty()) {
-    LOG4CXX_ERROR(logger_, "Some fields are not supported by capabilities");
+  if (!hmi_capabilities.is_navi_cooperating()) {
+    LOG4CXX_ERROR(logger_, "NAVI is not supported.");
     return false;
   }
+  if (!fields_names.empty()) {
+    if (hmi_capabilities.display_capabilities()) {
+      const SmartObject& disp_cap = (*hmi_capabilities.display_capabilities());
+      const SmartObject& text_fields =
+          disp_cap.getElement(hmi_response::text_fields);
+      const size_t len = text_fields.length();
+      for (size_t i = 0; i < len; ++i) {
+        const SmartObject& text_field = text_fields[i];
+        const Common_TextFieldName::eType field_name =
+            static_cast<Common_TextFieldName::eType>(
+                text_field.getElement(strings::name).asInt());
+        const std::vector<Common_TextFieldName::eType>::iterator it =
+            std::find(fields_names.begin(), fields_names.end(), field_name);
+        if (it != fields_names.end()) {
+          fields_names.erase(it);
+        }
+      }
+    }
+
+    if (!fields_names.empty()) {
+      LOG4CXX_ERROR(logger_, "Some fields are not supported by capabilities");
+      return false;
+    }
+  }
   return true;
+}
+
+bool SendLocationRequest::AreMandatoryParamsAllowedByUser() const {
+  const policy::RPCParams& disallowed_params =
+      parameters_permissions().disallowed_params;
+  const bool latitude_degrees_disallowed =
+      helpers::in_range(disallowed_params, strings::latitude_degrees);
+  const bool longitude_degrees_disallowed =
+      helpers::in_range(disallowed_params, strings::longitude_degrees);
+
+  return !latitude_degrees_disallowed && !longitude_degrees_disallowed;
+}
+
+bool SendLocationRequest::AreMandatoryParamsAllowedByPolicy() const {
+  const policy::RPCParams& allowed_params =
+      parameters_permissions().allowed_params;
+  const bool latitude_degrees_allowed =
+      helpers::in_range(allowed_params, strings::latitude_degrees);
+  const bool longitude_degrees_allowed =
+      helpers::in_range(allowed_params, strings::longitude_degrees);
+
+  return latitude_degrees_allowed && longitude_degrees_allowed;
 }
 
 }  // namespace commands
