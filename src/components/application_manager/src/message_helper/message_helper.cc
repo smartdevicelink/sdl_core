@@ -726,9 +726,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
 
-  int32_t index = 0;
+  uint32_t index = 0;
+  // According to requirements, SDL should send info about 100 devices at
+  // maximum, even if SDL has more devices connected.
+  const uint32_t max_device_count = 100;
   for (connection_handler::DeviceMap::const_iterator it = devices.begin();
-       devices.end() != it;
+       devices.end() != it && index < max_device_count;
        ++it) {
     const connection_handler::Device& d =
         static_cast<connection_handler::Device>(it->second);
