@@ -2438,10 +2438,10 @@
         <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
             <description>Name of the country (localized)</description>
         </param>
-        <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+        <param name="countryCode" minlength="0" maxlength="200" type="String" mandatory="false">
             <description>Name of country (ISO 3166-2)</description>
         </param>
-        <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+        <param name="postalCode" minlength="0" maxlength="200" type="String" mandatory="false">
             <description>(PLZ, ZIP, PIN, CAP etc.)</description>
         </param>
         <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
@@ -5331,9 +5331,9 @@
     </function>
     
     <function name="SendLocation" functionID="SendLocationID" messagetype="request">
-        <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
+        <param name="longitudeDegrees" type="Double" minvalue="-180" maxvalue="180" mandatory="true">
         </param>
-        <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
+        <param name="latitudeDegrees" type="Double" minvalue="-90" maxvalue="90" mandatory="true">
         </param>
         <param name="locationName" type="String" maxlength="500" mandatory="false">
             <description>
@@ -5370,8 +5370,12 @@
         <param name="address" type="OASISAddress" mandatory="false">
             <description>Address to be used for setting destination</description>
         </param>
-        <param name="deliveryMode" type="DeliveryMode" mandatory="false">
-            <description>Defines the mode of prompt for user</description>
+        <param name="deliveryMode" type="DeliveryMode" defvalue="PROMPT" mandatory="false">
+            <description>
+            Prompt =>User should be prompted on HMI.
+            Destination => Set the location as destination.
+            Queue =>Add the current location to navigation queue.
+            </description>
         </param>
     </function>
     
@@ -5390,7 +5394,10 @@
             <element name="GENERIC_ERROR"/>
             <element name="REJECTED"/>
             <element name="UNSUPPORTED_RESOURCE"/>
+            <element name="USER_DISALLOWED"/>
             <element name="DISALLOWED"/>
+            <element name="ABORTED"/>
+            <element name="SAVED"/>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">

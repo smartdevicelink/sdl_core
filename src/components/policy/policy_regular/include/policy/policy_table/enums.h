@@ -87,6 +87,17 @@ enum Parameter {
   P_DEVICESTATUS,
   P_EMERGENCYEVENT,
   P_ECALLINFO,
+  P_LONGTITUDE_DEGREES,
+  P_LATITUDE_DEGREES,
+  P_LOCATION_NAME,
+  P_LOCATION_DESCRIPTION,
+  P_ADDRESS_LINES,
+  P_PHONE_NUMBER,
+  P_LOCATION_IMAGE,
+  P_DELIVERY_MODE,
+  P_TIMESTAMP,
+  P_ADDRESS,
+  P_EMPTY  // Added to allow empty parameters handling
 };
 
 bool IsValidEnum(Parameter val);

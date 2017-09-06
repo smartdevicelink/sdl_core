@@ -258,7 +258,8 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
     if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID) ||
+        (id == mobile_apis::FunctionID::SendLocationID)) {
       AddDisallowedParameters(response);
       AddDisallowedParametersToInfo(response);
     } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
