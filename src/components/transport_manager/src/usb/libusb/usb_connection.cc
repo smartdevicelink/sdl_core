@@ -126,7 +126,7 @@ std::string hex_data(const unsigned char* const buffer,
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with Libusb_transfer*: " << transfer);
-  if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
+  if (transfer->status == LIBUSB_TRANSFER_COMPLETED && transfer->actual_length > 0) {
     LOG4CXX_DEBUG(logger_,
                   "USB incoming transfer, size:"
                       << transfer->actual_length << ", data:"
@@ -202,28 +202,41 @@ bool UsbConnection::PostOutTransfer() {
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
   sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    bytes_sent_ += transfer->actual_length;
-    if (bytes_sent_ == current_out_message_->data_size()) {
-      LOG4CXX_DEBUG(
+  
+  if(current_out_message_.valid()) {
+    if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
+      bytes_sent_ += transfer->actual_length;
+      if (bytes_sent_ == current_out_message_->data_size()) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "USB out transfer, data sent: " << current_out_message_.get());
+        controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
+        PopOutMessage();
+      }
+    } else {
+      LOG4CXX_ERROR(
           logger_,
-          "USB out transfer, data sent: " << current_out_message_.get());
-      controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
+          "USB out transfer failed: " << libusb_error_name(transfer->status));
+      controller_->DataSendFailed(
+          device_uid_, app_handle_, current_out_message_, DataSendError());
       PopOutMessage();
     }
   } else {
-    LOG4CXX_ERROR(
-        logger_,
-        "USB out transfer failed: " << libusb_error_name(transfer->status));
-    controller_->DataSendFailed(
-        device_uid_, app_handle_, current_out_message_, DataSendError());
-    PopOutMessage();
-  }
-  if (!current_out_message_.valid()) {
     libusb_free_transfer(transfer);
     out_transfer_ = NULL;
     waiting_out_transfer_cancel_ = false;
   }
+  if(disconnecting_) {
+    waiting_out_transfer_cancel_ = false;
+  } else {
+    if(!PostOutTransfer()) {
+	  LOG4CXX_ERROR(logger_,
+		 "USB out transfer failed with " 
+		    << "LIBUSB_TRANSFER_STALL. Abort connection.");
+	  AbortConnection();
+	}
+  }
+
   LOG4CXX_TRACE(logger_, "exit");
 }
 
