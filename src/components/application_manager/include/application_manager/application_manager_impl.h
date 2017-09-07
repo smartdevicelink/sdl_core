@@ -481,14 +481,31 @@ class ApplicationManagerImpl
    *
    * @return true on success, false if passthru is already in process
    */
+  // DEPRECATED
   bool BeginAudioPassThrough() OVERRIDE;
+
+  /**
+   * @brief Starts AudioPassThru process by given application
+   * @param session_key Session key of connection for Mobile side
+   * @return true if AudioPassThru can be started, false otherwise
+   */
+  bool BeginAudioPassThru(int32_t session_key) OVERRIDE;
 
   /*
    * @brief Finishes already started audio passthru process
    *
    * @return true on success, false if passthru is not active
    */
+  // DEPRECATED
   bool EndAudioPassThrough() OVERRIDE;
+
+  /**
+   * @brief Finishes already started AudioPassThru process by given application
+   * @param application_key ID of the application which started the process
+   * @return true if AudioPassThru process has been started with given
+   * application and thus it can be stopped, false otherwise
+   */
+  bool EndAudioPassThru(int32_t application_key) OVERRIDE;
 
   /*
    * @brief Retrieves driver distraction state
@@ -1702,6 +1719,7 @@ class ApplicationManagerImpl
   std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
 
   bool audio_pass_thru_active_;
+  int32_t audio_pass_thru_app_key_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;

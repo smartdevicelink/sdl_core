@@ -393,14 +393,31 @@ class ApplicationManager {
    *
    * @return true on success, false if passthru is already in process
    */
+  // DEPRECATED
   virtual bool BeginAudioPassThrough() = 0;
+
+  /**
+   * @brief Starts AudioPassThru process by given application
+   * @param session_key Session key of connection for Mobile side
+   * @return true if AudioPassThru can be started, false otherwise
+   */
+  virtual bool BeginAudioPassThru(int32_t session_key) = 0;
 
   /*
    * @brief Finishes already started audio passthru process
    *
    * @return true on success, false if passthru is not active
    */
+  // DEPRECATED
   virtual bool EndAudioPassThrough() = 0;
+
+  /**
+   * @brief Finishes already started AudioPassThru process by given application
+   * @param application_key ID of the application which started the process
+   * @return true if AudioPassThru process has been started with given
+   * application and thus it can be stopped, false otherwise
+   */
+  virtual bool EndAudioPassThru(int32_t application_key) = 0;
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
