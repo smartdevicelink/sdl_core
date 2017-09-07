@@ -190,7 +190,17 @@ class PolicyHandler : public PolicyHandlerInterface,
                      EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in seconds
+   */
   uint32_t TimeoutExchangeSec() const OVERRIDE;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in miliseconds
+   */
   uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;

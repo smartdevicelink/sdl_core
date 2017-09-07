@@ -106,7 +106,17 @@ class PolicyHandlerInterface {
                              EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in seconds
+   */
   virtual uint32_t TimeoutExchangeSec() const = 0;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in miliseconds
+   */
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
