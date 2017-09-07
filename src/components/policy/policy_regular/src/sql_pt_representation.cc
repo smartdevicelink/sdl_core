@@ -1198,43 +1198,48 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // According CRS-2419  If there is no “consumer_friendly_messages” key,
   // the current local consumer_friendly_messages section shall be maintained in
   // the policy table. So it won't be changed/updated
-  if (messages.messages.is_initialized()) {
-    utils::dbms::SQLQuery query(db());
-    if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+  if (!messages.messages.is_initialized()) {
+    LOG4CXX_INFO(logger_, "ConsumerFriendlyMessages messages list is empty");
+    return true;
+  }
+
+  utils::dbms::SQLQuery query(db());
+  bool delete_query_exec_result = true;
+  if (!messages.messages->empty()) {
+    delete_query_exec_result = query.Exec(sql_pt::kDeleteMessageString);
+  }
+
+  if (!delete_query_exec_result) {
+    LOG4CXX_WARN(logger_, "Failed to delete messages from DB.");
+    return false;
+  }
+
+  if (!query.Prepare(sql_pt::kUpdateVersion)) {
+    LOG4CXX_WARN(logger_, "Invalid update messages version statement.");
+    return false;
+  }
+
+  query.Bind(0, messages.version);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to update messages version number in DB.");
+    return false;
+  }
+
+  policy_table::Messages::const_iterator it;
+  for (it = messages.messages->begin(); it != messages.messages->end(); ++it) {
+    if (!SaveMessageType(it->first)) {
       return false;
     }
-
-    if (query.Prepare(sql_pt::kUpdateVersion)) {
-      query.Bind(0, messages.version);
-      if (!query.Exec()) {
-        LOG4CXX_WARN(logger_, "Incorrect update into version.");
+    const policy_table::Languages& langs = it->second.languages;
+    policy_table::Languages::const_iterator lang_it;
+    for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
+      if (!SaveLanguage(lang_it->first)) {
         return false;
       }
-    } else {
-      LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
-      return false;
-    }
-
-    policy_table::Messages::const_iterator it;
-    for (it = messages.messages->begin(); it != messages.messages->end();
-         ++it) {
-      if (!SaveMessageType(it->first)) {
+      if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
         return false;
       }
-      const policy_table::Languages& langs = it->second.languages;
-      policy_table::Languages::const_iterator lang_it;
-      for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
-        if (!SaveLanguage(lang_it->first)) {
-          return false;
-        }
-        if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
-          return false;
-        }
-      }
     }
-  } else {
-    LOG4CXX_INFO(logger_, "Messages list is empty");
   }
 
   return true;
