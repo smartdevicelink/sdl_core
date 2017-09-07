@@ -349,7 +349,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /*
    * @brief Returns file name for storing applications data
    */
-  const std::string& app_info_storage() const;
+  const std::string& app_info_storage() const OVERRIDE;
 
   /*
    * @brief Path to preloaded policy file

@@ -1218,6 +1218,11 @@ class ApplicationManagerImpl
     return is_stopping_;
   }
 
+  /**
+   * @brief Clears all applications' persistent data
+   */
+  void ClearAppsPersistentData();
+
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;

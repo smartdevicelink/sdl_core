@@ -414,9 +414,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
-  bool result = true;
-
-  return result;
+  return cache_->ResetUserConsent();
 }
 
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(

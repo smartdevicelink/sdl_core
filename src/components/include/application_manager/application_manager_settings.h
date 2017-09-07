@@ -63,6 +63,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual bool launch_hmi() const = 0;
   virtual const uint32_t& delete_file_in_none() const = 0;
   virtual const std::vector<uint32_t>& supported_diag_modes() const = 0;
+  virtual const std::string& app_info_storage() const = 0;
   virtual const uint32_t& list_files_in_none() const = 0;
   virtual const std::string& tts_delimiter() const = 0;
   virtual const uint32_t& put_file_in_none() const = 0;
