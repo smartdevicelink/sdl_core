@@ -93,6 +93,7 @@ extern const char* main_field_1;
 extern const char* main_field_2;
 extern const char* main_field_3;
 extern const char* main_field_4;
+extern const char* metadata_tags;
 extern const char* eta;
 extern const char* time_to_destination;
 extern const char* total_distance;
@@ -410,6 +411,7 @@ namespace hmi_request {
 extern const char* parent_id;
 extern const char* field_name;
 extern const char* field_text;
+extern const char* field_types;
 extern const char* alert_strings;
 extern const char* duration;
 extern const char* soft_buttons;
