@@ -190,7 +190,7 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
 
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
-                                              uint8_t protocol_version,
+                                              uint8_t input_protocol_version,
                                               uint32_t hash_id,
                                               uint8_t service_type,
                                               bool protection) {
@@ -198,7 +198,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   ProtocolPacket::ProtocolVersion fullVersion;
   SendStartSessionAck(connection_id,
                       session_id,
-                      protocol_version,
+                      input_protocol_version,
                       hash_id,
                       service_type,
                       protection,
@@ -208,7 +208,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
 void ProtocolHandlerImpl::SendStartSessionAck(
     ConnectionID connection_id,
     uint8_t session_id,
-    uint8_t protocol_version,
+    uint8_t input_protocol_version,
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
@@ -220,7 +220,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
   SendStartSessionAck(connection_id,
                       session_id,
-                      protocol_version,
+                      input_protocol_version,
                       hash_id,
                       service_type,
                       protection,
@@ -233,7 +233,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 void ProtocolHandlerImpl::SendStartSessionAck(
     ConnectionID connection_id,
     uint8_t session_id,
-    uint8_t protocol_version,
+    uint8_t input_protocol_version,
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
@@ -241,22 +241,31 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     BsonObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
+  uint8_t ack_protocol_version = SupportedSDLProtocolVersion();
 
   const bool proxy_supports_v5_protocol =
-      protocol_version >= PROTOCOL_VERSION_5 ||
+      input_protocol_version >= PROTOCOL_VERSION_5 ||
       (ServiceTypeFromByte(service_type) == kRpc &&
        full_version.majorVersion >= PROTOCOL_VERSION_5);
 
+  if (kRpc != service_type) {
+    // In case if input protocol version os bigger then supported, SDL should
+    // respond with maximum supported protocol version
+    ack_protocol_version = input_protocol_version < ack_protocol_version
+                               ? input_protocol_version
+                               : ack_protocol_version;
+  }
+
   // We can't send a V5+ packet if the proxy doesn't support it,
   // so we manually set a maximum of V4 in that case
-  if (!proxy_supports_v5_protocol && maxProtocolVersion >= PROTOCOL_VERSION_5) {
-    maxProtocolVersion = PROTOCOL_VERSION_4;
+  if (!proxy_supports_v5_protocol &&
+      ack_protocol_version >= PROTOCOL_VERSION_5) {
+    ack_protocol_version = PROTOCOL_VERSION_4;
   }
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
-                                           maxProtocolVersion,
+                                           ack_protocol_version,
                                            protection,
                                            FRAME_TYPE_CONTROL,
                                            service_type,
@@ -266,7 +275,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                            message_counters_[session_id]++));
 
   // Cannot include a constructed payload if either side doesn't support it
-  if (maxProtocolVersion >= PROTOCOL_VERSION_5) {
+  if (ack_protocol_version >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
     bson_object_put_int64(
