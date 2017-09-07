@@ -83,7 +83,8 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
+      .WillOnce(Return(false));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(

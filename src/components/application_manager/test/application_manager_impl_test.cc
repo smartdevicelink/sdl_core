@@ -848,7 +848,7 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(session_key))
       .WillOnce(Return());
 
-  bool result = app_manager_impl_->BeginAudioPassThrough();
+  bool result = app_manager_impl_->BeginAudioPassThru(session_key);
   EXPECT_TRUE(result);
   if (result) {
     app_manager_impl_->StartAudioPassThruThread(session_key,
@@ -859,7 +859,7 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
                                                 audio_type);
   }
 
-  result = app_manager_impl_->EndAudioPassThrough();
+  result = app_manager_impl_->EndAudioPassThru(session_key);
   EXPECT_TRUE(result);
   if (result) {
     app_manager_impl_->StopAudioPassThru(session_key);
@@ -920,7 +920,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
       .WillOnce(Return());
 
   // app 2 starts Audio Pass Thru
-  bool result = app_manager_impl_->BeginAudioPassThrough();
+  bool result = app_manager_impl_->BeginAudioPassThru(session_key_of_app_2);
   EXPECT_TRUE(result);
   if (result) {
     app_manager_impl_->StartAudioPassThruThread(session_key_of_app_2,
@@ -936,7 +936,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
       session_key_of_app_1, mobile_apis::Result::SUCCESS, false, true);
 
   // confirm that APT is still running
-  result = app_manager_impl_->EndAudioPassThrough();
+  result = app_manager_impl_->EndAudioPassThru(session_key_of_app_2);
   EXPECT_TRUE(result);
   if (result) {
     app_manager_impl_->StopAudioPassThru(session_key_of_app_2);

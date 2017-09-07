@@ -311,7 +311,7 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.BeginAudioPassThrough();
+  application_manager_.BeginAudioPassThru(connection_key());
 
   application_manager_.StartAudioPassThruThread(
       connection_key(),
@@ -370,7 +370,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
 void PerformAudioPassThruRequest::FinishTTSSpeak() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (application_manager_.EndAudioPassThrough()) {
+  if (application_manager_.EndAudioPassThru(connection_key())) {
     LOG4CXX_DEBUG(logger_, "Stop AudioPassThru.");
     application_manager_.StopAudioPassThru(connection_key());
   }

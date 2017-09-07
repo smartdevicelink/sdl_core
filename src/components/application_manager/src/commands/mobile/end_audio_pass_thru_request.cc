@@ -66,7 +66,8 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
       if (result) {
-        bool ended_successfully = application_manager_.EndAudioPassThrough();
+        bool ended_successfully =
+            application_manager_.EndAudioPassThru(connection_key());
         if (ended_successfully) {
           application_manager_.StopAudioPassThru(connection_key());
         }
