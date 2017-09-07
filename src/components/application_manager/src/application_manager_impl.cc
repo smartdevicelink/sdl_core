@@ -3245,9 +3245,8 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   commands_holder_->Clear(app_to_remove);
 
-  if (audio_pass_thru_active_) {
+  if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
-    EndAudioPassThrough();
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru(*this);
   }
