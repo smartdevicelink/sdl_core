@@ -762,6 +762,8 @@ void MessageString::SetPolicyTableType(PolicyTableType pt_type) {
 }
 
 // MessageLanguages methods
+const std::string MessageLanguages::default_language_("en-us");
+
 MessageLanguages::MessageLanguages() : CompositeType(kUninitialized) {}
 MessageLanguages::MessageLanguages(const Languages& languages)
     : CompositeType(kUninitialized), languages(languages) {}
@@ -776,6 +778,10 @@ Json::Value MessageLanguages::ToJsonValue() const {
 }
 bool MessageLanguages::is_valid() const {
   if (!languages.is_valid()) {
+    return false;
+  }
+  // Each RPC must have message in english
+  if (languages.end() == languages.find(default_language_)) {
     return false;
   }
   return Validate();
@@ -805,6 +811,11 @@ void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!languages.is_valid()) {
     languages.ReportErrors(&report__->ReportSubobject("languages"));
+  }
+  if (languages.end() == languages.find(default_language_)) {
+    report__->set_validation_info(
+        "this message does not support the default language '" +
+        default_language_ + "'");
   }
 }
 
