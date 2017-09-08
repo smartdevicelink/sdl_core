@@ -507,12 +507,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
-  std::string policy_app_id = params[strings::app_id].asString();
-  std::transform(policy_app_id.begin(),
-                 policy_app_id.end(),
-                 policy_app_id.begin(),
-                 ::tolower);
-
+  const std::string& policy_app_id = params[strings::app_id].asString();
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
   std::string device_mac = "";
