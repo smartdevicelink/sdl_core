@@ -219,12 +219,12 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
   using smart_objects::SmartArray;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    const SmartArray* tts_chuncks_arr =
+    const SmartArray* tts_chunks_arr =
         (*message_)[strings::msg_params][strings::tts_chunks].asArray();
 
-    SmartArray::const_iterator it_tts_chunk = tts_chuncks_arr->begin();
+    SmartArray::const_iterator it_tts_chunk = tts_chunks_arr->begin();
 
-    for (; it_tts_chunk != tts_chuncks_arr->end(); ++it_tts_chunk) {
+    for (; it_tts_chunk != tts_chunks_arr->end(); ++it_tts_chunk) {
       const char* tts_chunk_text = (*it_tts_chunk)[strings::text].asCharArray();
       if (strlen(tts_chunk_text) && !CheckSyntax(tts_chunk_text)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
