@@ -4441,6 +4441,11 @@ void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   apps_size_ = applications_.size();
   applications_list_lock_.Release();
 }
+
+void ApplicationManagerImpl::SetMockMediaManager(
+    media_manager::MediaManager* mock_media_manager) {
+  media_manager_ = mock_media_manager;
+}
 #endif  // BUILD_TESTS
 #ifdef SDL_REMOTE_CONTROL
 struct MobileAppIdPredicate {

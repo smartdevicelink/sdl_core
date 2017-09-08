@@ -1820,6 +1820,13 @@ class ApplicationManagerImpl
    */
   void AddMockApplication(ApplicationSharedPtr mock_app);
 
+  /**
+   * @brief set a mock media manager without running Init(). Only for unit
+   * testing.
+   * @param mock_app the mock app to be registered
+   */
+  void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
+
  private:
 #endif
 
