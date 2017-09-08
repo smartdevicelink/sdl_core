@@ -47,6 +47,7 @@
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
+#include "media_manager/mock_media_manager.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
@@ -822,6 +823,124 @@ TEST_F(ApplicationManagerImplTest,
   app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
   EXPECT_EQ(new_device_id, app_impl->device());
   EXPECT_EQ(new_application_id, app_impl->app_id());
+}
+
+TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
+  std::string dummy_file_name;
+  ON_CALL(mock_application_manager_settings_, recording_file_name())
+      .WillByDefault(ReturnRef(dummy_file_name));
+
+  NiceMock<test::components::media_manager_test::MockMediaManager>
+      mock_media_manager;
+  app_manager_impl_->SetMockMediaManager(&mock_media_manager);
+
+  const int32_t session_key = 65537;
+  const int32_t max_duration = 1000;
+  // below are not used
+  const int32_t correlation_id = 0;
+  const int32_t sampling_rate = 0;
+  const int32_t bits_per_sample = 0;
+  const int32_t audio_type = 0;
+
+  EXPECT_CALL(mock_media_manager,
+              StartMicrophoneRecording(session_key, _, max_duration))
+      .WillOnce(Return());
+  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(session_key))
+      .WillOnce(Return());
+
+  bool result = app_manager_impl_->BeginAudioPassThrough();
+  EXPECT_TRUE(result);
+  if (result) {
+    app_manager_impl_->StartAudioPassThruThread(session_key,
+                                                correlation_id,
+                                                max_duration,
+                                                sampling_rate,
+                                                bits_per_sample,
+                                                audio_type);
+  }
+
+  result = app_manager_impl_->EndAudioPassThrough();
+  EXPECT_TRUE(result);
+  if (result) {
+    app_manager_impl_->StopAudioPassThru(session_key);
+  }
+}
+
+TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
+  std::string dummy_file_name;
+  ON_CALL(mock_application_manager_settings_, recording_file_name())
+      .WillByDefault(ReturnRef(dummy_file_name));
+
+  const int32_t session_key_of_app_1 = 65537;
+  const int32_t session_key_of_app_2 = 65538;
+
+  std::string dummy_mac_address;
+  utils::SharedPtr<MockApplication> mock_app_1 =
+      utils::SharedPtr<MockApplication>(new MockApplication());
+  EXPECT_CALL(*mock_app_1, app_id())
+      .WillRepeatedly(Return(session_key_of_app_1));
+  EXPECT_CALL(*mock_app_1, device()).WillRepeatedly(Return(0));
+  EXPECT_CALL(*mock_app_1, mac_address())
+      .WillRepeatedly(ReturnRef(dummy_mac_address));
+  EXPECT_CALL(*mock_app_1, policy_app_id()).WillRepeatedly(Return(""));
+  EXPECT_CALL(*mock_app_1, protocol_version())
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
+
+  utils::SharedPtr<MockApplication> mock_app_2 =
+      utils::SharedPtr<MockApplication>(new MockApplication());
+  EXPECT_CALL(*mock_app_2, app_id())
+      .WillRepeatedly(Return(session_key_of_app_2));
+  EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
+  EXPECT_CALL(*mock_app_2, mac_address())
+      .WillRepeatedly(ReturnRef(dummy_mac_address));
+  EXPECT_CALL(*mock_app_2, policy_app_id()).WillRepeatedly(Return(""));
+  EXPECT_CALL(*mock_app_2, protocol_version())
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
+
+  NiceMock<test::components::media_manager_test::MockMediaManager>
+      mock_media_manager;
+  app_manager_impl_->SetMockMediaManager(&mock_media_manager);
+
+  app_manager_impl_->AddMockApplication(mock_app_1);
+  app_manager_impl_->AddMockApplication(mock_app_2);
+
+  const int32_t max_duration = 1000;
+  // below are not used
+  const int32_t correlation_id = 0;
+  const int32_t sampling_rate = 0;
+  const int32_t bits_per_sample = 0;
+  const int32_t audio_type = 0;
+
+  EXPECT_CALL(mock_media_manager,
+              StartMicrophoneRecording(session_key_of_app_2, _, max_duration))
+      .WillOnce(Return());
+  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(session_key_of_app_2))
+      .WillOnce(Return());
+
+  // app 2 starts Audio Pass Thru
+  bool result = app_manager_impl_->BeginAudioPassThrough();
+  EXPECT_TRUE(result);
+  if (result) {
+    app_manager_impl_->StartAudioPassThruThread(session_key_of_app_2,
+                                                correlation_id,
+                                                max_duration,
+                                                sampling_rate,
+                                                bits_per_sample,
+                                                audio_type);
+  }
+
+  // while running APT, app 1 is unregistered
+  app_manager_impl_->UnregisterApplication(
+      session_key_of_app_1, mobile_apis::Result::SUCCESS, false, true);
+
+  // confirm that APT is still running
+  result = app_manager_impl_->EndAudioPassThrough();
+  EXPECT_TRUE(result);
+  if (result) {
+    app_manager_impl_->StopAudioPassThru(session_key_of_app_2);
+  }
 }
 
 }  // application_manager_test
