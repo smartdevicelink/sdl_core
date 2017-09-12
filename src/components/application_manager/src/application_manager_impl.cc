@@ -2920,6 +2920,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
+  EndNaviServices(app_id);
   {
     sync_primitives::AutoLock lock(navi_service_status_lock_);
 
