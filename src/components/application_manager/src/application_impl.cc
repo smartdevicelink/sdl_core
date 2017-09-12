@@ -526,6 +526,10 @@ void ApplicationImpl::WakeUpStreaming(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
+    if (!video_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Video streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
@@ -536,6 +540,10 @@ void ApplicationImpl::WakeUpStreaming(
     video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
                                       timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
+    if (!audio_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Audio streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
