@@ -1068,6 +1068,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       }
       if (check_existing_json_member(ui, "systemCapabilities")) {
         Json::Value system_capabilities = ui.get("systemCapabilities", "");
+        set_navigation_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "navigationCapability")) {
           Json::Value navigation_capability =
@@ -1076,7 +1077,11 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
+          if (!navigation_capability_so.empty()) {
+            set_navigation_supported(true);
+          }
         }
+        set_phone_call_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "phoneCapability")) {
           Json::Value phone_capability =
@@ -1085,7 +1090,11 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
           set_phone_capability(phone_capability_so);
+          if (!phone_capability_so.empty()) {
+            set_phone_call_supported(true);
+          }
         }
+        set_video_streaming_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "videoStreamingCapability")) {
           Json::Value vs_capability =
@@ -1132,6 +1141,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             vs_capability_so["supportedFormats"] = converted_array;
           }
           set_video_streaming_capability(vs_capability_so);
+          if (!vs_capability_so.empty()) {
+            set_video_streaming_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "remoteControlCapability")) {
