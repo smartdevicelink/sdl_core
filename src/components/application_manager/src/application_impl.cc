@@ -521,13 +521,24 @@ void ApplicationImpl::SuspendStreaming(
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
+
+    if (video_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+    } else {
+      LOG4CXX_INFO(logger_, "Do not suspend video streaming because already not approved");
+    }
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
+
+    if (audio_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+    }  else {
+      LOG4CXX_INFO(logger_, "Do not suspend audio streaming because already not approved");
+    }
   }
-  MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
 }
 
 void ApplicationImpl::WakeUpStreaming(
