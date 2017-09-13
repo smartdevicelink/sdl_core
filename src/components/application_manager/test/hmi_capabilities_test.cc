@@ -375,11 +375,16 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
   EXPECT_TRUE(navigation_capability_so["getWayPointsEnabled"].asBool());
 
+  // since we have navigation capabilities, the feature should be supported
+  EXPECT_TRUE(hmi_capabilities_test->navigation_supported());
+
   const smart_objects::SmartObject phone_capability_so =
       *(hmi_capabilities_test->phone_capability());
 
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+
+  EXPECT_TRUE(hmi_capabilities_test->phone_call_supported());
 
   const smart_objects::SmartObject vs_capability_so =
       *(hmi_capabilities_test->video_streaming_capability());
@@ -428,6 +433,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_TRUE(
       vs_capability_so[strings::haptic_spatial_data_supported].asBool());
 
+  EXPECT_TRUE(hmi_capabilities_test->video_streaming_supported());
+
   // Check remote control capabilites
   const smart_objects::SmartObject rc_capability_so =
       *(hmi_capabilities_test->rc_capability());
@@ -467,6 +474,55 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       rc_capability_so["buttonCapabilities"][0]["longPressAvailable"].asBool());
   EXPECT_FALSE(
       rc_capability_so["buttonCapabilities"][0]["upDownAvailable"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFileAndVerifyUnsupportedSystemCapabilities) {
+  const std::string hmi_capabilities_file = "hmi_capabilities_sc1.json";
+  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
+
+  if (file_system::FileExists("./app_info_data")) {
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
+  EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+
+  // Check system capabilities; only phone capability is available
+  EXPECT_FALSE(hmi_capabilities_test->navigation_supported());
+  EXPECT_TRUE(hmi_capabilities_test->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities_test->video_streaming_supported());
+
+  // verify phone capability
+  const smart_objects::SmartObject phone_capability_so =
+      *(hmi_capabilities_test->phone_capability());
+  EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
+  EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFileAndVerifyEmptySystemCapabilities) {
+  const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
+  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
+
+  if (file_system::FileExists("./app_info_data")) {
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
+  EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+
+  // Check system capabilities; only navigation capability is valid, the other
+  // two are empty
+  EXPECT_TRUE(hmi_capabilities_test->navigation_supported());
+  EXPECT_FALSE(hmi_capabilities_test->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities_test->video_streaming_supported());
+
+  // verify navigation capabilities
+  smart_objects::SmartObject navigation_capability_so =
+      *(hmi_capabilities_test->navigation_capability());
+  EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
+  EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
+  EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
+  EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
