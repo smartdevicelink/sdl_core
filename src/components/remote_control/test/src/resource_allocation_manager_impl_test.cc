@@ -258,8 +258,11 @@ TEST_F(RAManagerTest, AppExit_ReleaseResource) {
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
   // Act
+  application_manager::ApplicationSharedPtr app_ptr(mock_app_1_);
+  EXPECT_CALL(*mock_app_1_, app_id()).WillRepeatedly(Return(kAppId1));
+
   ra_manager.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationExit, kAppId1);
+      functional_modules::ApplicationEvent::kApplicationExit, app_ptr);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
@@ -289,8 +292,10 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
       .WillOnce(Return(rc_extention_ptr));
 
   // Act
+  application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
+  EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
   ra_manager.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationExit, kAppId2);
+      functional_modules::ApplicationEvent::kApplicationExit, app_ptr);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
@@ -318,8 +323,11 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
             ra_manager.AcquireResource(kModuleType1, kAppId1));
 
   // Act
+  application_manager::ApplicationSharedPtr app_ptr(mock_app_1_);
+  EXPECT_CALL(*mock_app_1_, app_id()).WillRepeatedly(Return(kAppId1));
+
   ra_manager.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId1);
+      functional_modules::ApplicationEvent::kApplicationUnregistered, app_ptr);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
@@ -348,8 +356,11 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
       .WillOnce(Return(rc_extention_ptr));
 
   // Act
+  application_manager::ApplicationSharedPtr app_ptr(mock_app_2_);
+  EXPECT_CALL(*mock_app_2_, app_id()).WillRepeatedly(Return(kAppId2));
+
   ra_manager.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationUnregistered, kAppId2);
+      functional_modules::ApplicationEvent::kApplicationUnregistered, app_ptr);
 
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillOnce(Return(mock_app_2_));
