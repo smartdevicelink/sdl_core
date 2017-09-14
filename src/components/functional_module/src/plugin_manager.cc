@@ -351,14 +351,14 @@ typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
 struct HandleApplicationEvent {
  private:
   const functional_modules::ApplicationEvent event_;
-  const uint32_t app_id_;
+  application_manager::ApplicationSharedPtr application_;
 
  public:
   HandleApplicationEvent(functional_modules::ApplicationEvent e,
-                         const uint32_t app_id)
-      : event_(e), app_id_(app_id) {}
+                         application_manager::ApplicationSharedPtr application)
+      : event_(e), application_(application) {}
   void operator()(PluginsValueType& p) {
-    p.second->OnApplicationEvent(event_, app_id_);
+    p.second->OnApplicationEvent(event_, application_);
   }
 };
 
@@ -374,11 +374,14 @@ struct HandlePolicyEvent {
 };
 
 void PluginManager::OnApplicationEvent(
-    functional_modules::ApplicationEvent event, const uint32_t application_id) {
+    functional_modules::ApplicationEvent event,
+    application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::for_each(plugins_.begin(),
-                plugins_.end(),
-                HandleApplicationEvent(event, application_id));
+  if (application) {
+    std::for_each(plugins_.begin(),
+                  plugins_.end(),
+                  HandleApplicationEvent(event, application));
+  }
 }
 
 void PluginManager::OnPolicyEvent(PolicyEvent event) {

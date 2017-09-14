@@ -3011,7 +3011,8 @@ void ApplicationManagerImpl::UnregisterApplication(
 
 #ifdef SDL_REMOTE_CONTROL
   plugin_manager_.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationUnregistered, app_id);
+      functional_modules::ApplicationEvent::kApplicationUnregistered,
+      app_to_remove);
 #endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
