@@ -162,15 +162,16 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
 RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
     application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!application) {
-    return NULL;
-  }
 
   RCAppExtensionPtr rc_app_extension;
+  if (!application) {
+    return rc_app_extension;
+  }
+
   application_manager::AppExtensionPtr app_extension =
       application->QueryInterface(rc_plugin_.GetModuleID());
   if (!app_extension) {
-    return NULL;
+    return rc_app_extension;
   }
 
   rc_app_extension =
@@ -181,6 +182,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
 }
 
 void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
+  LOG4CXX_AUTO_TRACE(logger_);
   Apps::const_iterator app = apps.begin();
   for (; apps.end() != app; ++app) {
     application_manager::ApplicationSharedPtr app_ptr = *app;
