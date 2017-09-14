@@ -68,7 +68,7 @@ class DriverGenericModuleTest : public GenericModule {
   }
 
   void OnApplicationEvent(functional_modules::ApplicationEvent event,
-                          const uint32_t application_id) {}
+                          application_manager::ApplicationSharedPtr app) {}
 
   void OnPolicyEvent(functional_modules::PolicyEvent event) {}
 

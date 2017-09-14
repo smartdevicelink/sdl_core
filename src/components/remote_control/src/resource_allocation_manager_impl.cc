@@ -317,20 +317,22 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
 }
 
 void ResourceAllocationManagerImpl::OnApplicationEvent(
-    functional_modules::ApplicationEvent event, const uint32_t application_id) {
+    functional_modules::ApplicationEvent event,
+    application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
+  LOG4CXX_DEBUG(logger_,
+                "Event " << event << " came for " << application->app_id());
 
   if (functional_modules::ApplicationEvent::kApplicationExit == event ||
       functional_modules::ApplicationEvent::kApplicationUnregistered == event) {
-    Resources acquired_modules = GetAcquiredResources(application_id);
+    Resources acquired_modules = GetAcquiredResources(application->app_id());
     Resources::const_iterator module = acquired_modules.begin();
     for (; acquired_modules.end() != module; ++module) {
-      ReleaseResource(*module, application_id);
+      ReleaseResource(*module, application->app_id());
     }
 
     Apps app_list;
-    app_list.push_back(rc_plugin_.service()->GetApplication(application_id));
+    app_list.push_back(application);
     RemoveAppsSubscriptions(app_list);
   }
 }
