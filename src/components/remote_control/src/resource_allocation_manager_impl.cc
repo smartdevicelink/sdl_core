@@ -162,15 +162,16 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
 RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
     application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!application) {
-    return NULL;
-  }
 
   RCAppExtensionPtr rc_app_extension;
+  if (!application) {
+    return rc_app_extension;
+  }
+
   application_manager::AppExtensionPtr app_extension =
       application->QueryInterface(rc_plugin_.GetModuleID());
   if (!app_extension) {
-    return NULL;
+    return rc_app_extension;
   }
 
   rc_app_extension =
@@ -181,6 +182,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
 }
 
 void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
+  LOG4CXX_AUTO_TRACE(logger_);
   Apps::const_iterator app = apps.begin();
   for (; apps.end() != app; ++app) {
     application_manager::ApplicationSharedPtr app_ptr = *app;
@@ -317,20 +319,22 @@ void ResourceAllocationManagerImpl::OnDriverDisallowed(
 }
 
 void ResourceAllocationManagerImpl::OnApplicationEvent(
-    functional_modules::ApplicationEvent event, const uint32_t application_id) {
+    functional_modules::ApplicationEvent event,
+    application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Event " << event << " came for " << application_id);
+  LOG4CXX_DEBUG(logger_,
+                "Event " << event << " came for " << application->app_id());
 
   if (functional_modules::ApplicationEvent::kApplicationExit == event ||
       functional_modules::ApplicationEvent::kApplicationUnregistered == event) {
-    Resources acquired_modules = GetAcquiredResources(application_id);
+    Resources acquired_modules = GetAcquiredResources(application->app_id());
     Resources::const_iterator module = acquired_modules.begin();
     for (; acquired_modules.end() != module; ++module) {
-      ReleaseResource(*module, application_id);
+      ReleaseResource(*module, application->app_id());
     }
 
     Apps app_list;
-    app_list.push_back(rc_plugin_.service()->GetApplication(application_id));
+    app_list.push_back(application);
     RemoveAppsSubscriptions(app_list);
   }
 }
