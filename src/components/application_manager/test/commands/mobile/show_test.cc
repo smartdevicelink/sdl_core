@@ -720,6 +720,7 @@ TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
 }
 
 TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
   MessageSharedPtr msg = CreateMsgParams();
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
@@ -744,6 +745,10 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*ev_msg);
 
+  EXPECT_CALL(mock_message_helper_,
+            HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+    .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -759,6 +764,8 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
       (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(mobile_apis::Result::WARNINGS));
+  
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_MediaClock_SUCCESS) {
