@@ -46,12 +46,13 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 DeviceTypes devicesType = {
-    std::make_pair(AOA, std::string("USB_AOA")),
-    std::make_pair(PASA_AOA, std::string("USB_AOA")),
-    std::make_pair(MME, std::string("USB_IOS")),
-    std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(TCP, std::string("WIFI"))};
+    std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
+    std::make_pair(DeviceType::PASA_AOA, std::string("USB_AOA")),
+    std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
+    std::make_pair(DeviceType::IOS_BT, std::string("IOS_BLUETOOTH")),
+    std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::PASA_BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::TCP, std::string("WIFI"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -389,7 +390,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     for (TransportAdapterListenerList::iterator it = listeners_.begin();
          it != listeners_.end();
          ++it) {
-      (*it)->OnDeviceListUpdated(this);
+      (*it)->OnDeviceAdded(device->unique_device_id());
     }
     if (ToBeAutoConnected(device)) {
       ConnectDevice(device);
@@ -694,6 +695,13 @@ void TransportAdapterImpl::DataSendFailed(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
+void TransportAdapterImpl::DeviceSwitched(const DeviceUID& device_handle) {
+  LOG4CXX_DEBUG(logger_,
+                "Switching is not implemented for that adapter type "
+                    << GetConnectionType().c_str());
+  UNUSED(device_handle);
+}
+
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr ret;
@@ -861,6 +869,14 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
     return device->name();
   } else {
     return "";
+  }
+}
+
+void TransportAdapterImpl::StopDevice(const DeviceUID& device_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DeviceSptr device = FindDevice(device_id);
+  if (device) {
+    device->Stop();
   }
 }
 

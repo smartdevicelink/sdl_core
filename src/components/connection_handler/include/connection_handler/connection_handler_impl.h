@@ -137,6 +137,13 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
+
+  void OnDeviceSwitchFinish(
+      const transport_manager::DeviceUID& device_uid) FINAL;
+
+  void OnDeviceConnectionSwitched(const std::string& device_mac) FINAL;
+
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
@@ -452,10 +459,19 @@ class ConnectionHandlerImpl
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
 
-  int32_t GetDataOnSessionKey(uint32_t key,
-                              uint32_t* app_id,
-                              std::list<int32_t>* sessions_list,
-                              uint32_t* device_id) const OVERRIDE;
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const OVERRIDE;
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 

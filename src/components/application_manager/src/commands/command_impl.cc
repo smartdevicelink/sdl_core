@@ -94,18 +94,20 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
   allowed_to_terminate_ = allowed;
 }
 
-void CommandImpl::ReplaceMobileByHMIAppId(
+bool CommandImpl::ReplaceMobileByHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
         application_manager_.application(message[strings::app_id].asUInt());
-    if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceMobileByHMIAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->hmi_app_id());
-      message[strings::app_id] = application->hmi_app_id();
+    if (!application) {
+      LOG4CXX_ERROR(logger_, "Substitution mobile --> HMI id is failed.");
+      return false;
     }
+    LOG4CXX_DEBUG(logger_,
+                  "ReplaceMobileByHMIAppId from "
+                      << message[strings::app_id].asInt() << " to "
+                      << application->hmi_app_id());
+    message[strings::app_id] = application->hmi_app_id();
   } else {
     switch (message.getType()) {
       case smart_objects::SmartType::SmartType_Array: {
@@ -128,22 +130,26 @@ void CommandImpl::ReplaceMobileByHMIAppId(
       default: { break; }
     }
   }
+
+  return true;
 }
 
-void CommandImpl::ReplaceHMIByMobileAppId(
+bool CommandImpl::ReplaceHMIByMobileAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
         application_manager_.application_by_hmi_app(
             message[strings::app_id].asUInt());
 
-    if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceHMIByMobileAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->app_id());
-      message[strings::app_id] = application->app_id();
+    if (!application) {
+      LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");
+      return false;
     }
+    LOG4CXX_DEBUG(logger_,
+                  "ReplaceHMIByMobileAppId from "
+                      << message[strings::app_id].asInt() << " to "
+                      << application->app_id());
+    message[strings::app_id] = application->app_id();
   } else {
     switch (message.getType()) {
       case smart_objects::SmartType::SmartType_Array: {
@@ -165,6 +171,8 @@ void CommandImpl::ReplaceHMIByMobileAppId(
       default: { break; }
     }
   }
+
+  return true;
 }
 
 }  // namespace commands

@@ -77,15 +77,17 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+ private:
+  enum class AppicationType { kNewApplication, kSwitchedApplication };
+
   /**
    * @brief Sends RegisterAppInterface response to mobile
    *
    *@param application_impl application
    *
    **/
-  void SendRegisterAppInterfaceResponseToMobile();
+  void SendRegisterAppInterfaceResponseToMobile(AppicationType app_type);
 
- private:
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
       const uint32_t connection_key, ApplicationSharedPtr app);
 
@@ -183,6 +185,15 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * to notify HMI that app subscribed on the custom button by default.
    */
   void SendSubscribeCustomButtonNotification();
+
+  /**
+   * @brief IsApplicationSwitched checks whether application is switched from
+   * another transport. If application id is found, but not in reconnection
+   * list, returns 'already registered' code. Otherwise - proceed with
+   * switching.
+   * @return True if application is detected as switched, otherwise false.
+   */
+  bool IsApplicationSwitched();
 
  private:
   std::string response_info_;

@@ -58,7 +58,7 @@ enum {
 /**
  * @brief Type definition for variable that hold handle of device.
  */
-typedef unsigned int DeviceHandle;
+typedef size_t DeviceHandle;
 
 /**
  * @brief Type definition for variable that hold connection unique identifier.

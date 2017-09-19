@@ -39,6 +39,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <tuple>
+#include <functional>
 
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
@@ -63,6 +65,7 @@ typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
     TransportAdapterEventLoopThread;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
 
 /**
  * @brief Implementation of transport manager.s
@@ -94,6 +97,7 @@ class TransportManagerImpl
     bool shutdown_;
     DeviceHandle device_handle_;
     int messages_count;
+    bool active_;
 
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
@@ -191,6 +195,8 @@ class TransportManagerImpl
    */
   void RunAppOnDevice(const DeviceHandle device_handle,
                       const std::string& bundle_id) OVERRIDE;
+
+  void OnDeviceConnectionSwitched(const DeviceHandle handle) FINAL;
 
   /**
    * @brief Post event in the event queue.
@@ -307,44 +313,53 @@ class TransportManagerImpl
 
  private:
   /**
-   * @brief Structure that contains conversion functions (Device ID -> Device
-   * Handle; Device Handle -> Device ID)
-   */
+    * @brief Structure that contains conversion functions (Device ID -> Device
+    * Handle; Device Handle -> Device ID)
+    */
   struct Handle2GUIDConverter {
-    typedef std::vector<DeviceUID> ConversionTable;
+    /**
+     * @brief ConversionTable Records uid/connection type/handle
+     */
+    typedef std::vector<std::tuple<DeviceUID, std::string, DeviceHandle> >
+        ConversionTable;
 
-    DeviceHandle UidToHandle(const DeviceUID& dev_uid) {
-      bool is_new = true;
-      return UidToHandle(dev_uid, is_new);
-    }
+    /**
+     * @brief The HandleFinder struct helper to search for hanlde in coversion
+     * table
+     */
+    struct HandleFinder {
+      explicit HandleFinder(const DeviceHandle& look_for)
+          : look_for_(look_for) {}
 
-    DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
-      {
-        sync_primitives::AutoReadLock lock(conversion_table_lock);
-        ConversionTable::iterator it = std::find(
-            conversion_table_.begin(), conversion_table_.end(), dev_uid);
-        if (it != conversion_table_.end()) {
-          is_new = false;
-          return std::distance(conversion_table_.begin(), it) +
-                 1;  // handle begin since 1 (one)
-        }
+      bool operator()(const ConversionTable::value_type value) const {
+        return look_for_ == std::get<2>(value);
       }
-      is_new = true;
-      sync_primitives::AutoWriteLock lock(conversion_table_lock);
-      conversion_table_.push_back(dev_uid);
-      return conversion_table_.size();  // handle begin since 1 (one)
-    }
 
-    DeviceUID HandleToUid(const DeviceHandle handle) {
-      sync_primitives::AutoReadLock lock(conversion_table_lock);
-      if (handle == 0 || handle > conversion_table_.size()) {
-        return DeviceUID();
-      }
-      return conversion_table_[handle - 1];  // handle begin since 1 (one)
-    }
+      const DeviceHandle look_for_;
+    };
 
+    /**
+     * @brief UidToHandle Converts UID to handle considering connection type as
+     * UID may be the same in case device is connected over Bluetooth/USB (e.g.
+     * for IAP2)
+     * @param dev_uid Device UID
+     * @param connection_type Connection type
+     * @return Device handle
+     */
+    DeviceHandle UidToHandle(const DeviceUID& dev_uid,
+                             const std::string& connection_type);
+
+    /**
+     * @brief HandleToUid Converts handle to device UID
+     * @param handle Device handle
+     * @return Device UID
+     */
+    DeviceUID HandleToUid(const DeviceHandle handle);
+
+   private:
     ConversionTable conversion_table_;
-    sync_primitives::RWLock conversion_table_lock;
+    std::hash<std::string> hash_function_;
+    sync_primitives::RWLock conversion_table_lock_;
   };
 
   /**
@@ -352,6 +367,13 @@ class TransportManagerImpl
    * Device ID)
    */
   Handle2GUIDConverter converter_;
+
+#ifdef BUILD_TESTS
+ public:
+  Handle2GUIDConverter& get_converter() {
+    return converter_;
+  }
+#endif  // BUILD_TESTS
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;
@@ -372,12 +394,61 @@ class TransportManagerImpl
   sync_primitives::RWLock device_list_lock_;
   DeviceInfoList device_list_;
 
+  timer::Timer device_switch_timer_;
+  sync_primitives::Lock device_lock_;
+  DeviceUID device_to_reconnect_;
+
+  /**
+   * @brief Adds new incoming connection to connections list
+   * @param c New connection
+   */
   void AddConnection(const ConnectionInternal& c);
+
+  /**
+     * @brief Removes connection from connections list
+     * @param id Identifier of connection to be removed
+     * @param transport_adapter Pointer to transport adapter
+     * that holds connection
+     */
   void RemoveConnection(const uint32_t id,
                         transport_adapter::TransportAdapter* transport_adapter);
+
+  /**
+     * @brief Deactivates all connections related to certain device
+     * @param device_uid Device unique identifier
+     */
+  void DeactivateDeviceConnections(const DeviceUID& device_uid);
+  /**
+   * @brief Returns connection from connections list by connection identifier
+   * @param id Connection identifier
+   * @return Pointer to connection or NULL if connection could not be found
+   */
   ConnectionInternal* GetConnection(const ConnectionUID id);
+
+  /**
+   * @brief Returns connection from connections list by device unique id
+   * and application handle
+   * @param device Device unique identifier
+   * @param application Application handle
+   * @return Pointer to connection or NULL if connection could not be found
+   */
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);
+
+  /**
+     * @brief Returns active connection from connections list by device unique
+   * id
+     * and application handle
+     * (this method returns only active connections as opposed to previous one)
+     * @param device Device unique identifier
+     * @param application Application handle
+     * @return Pointer to connection or NULL if connection could not be found
+     */
+  ConnectionInternal* GetActiveConnection(const DeviceUID& device,
+                                          const ApplicationHandle& application);
+
+  bool TryDeviceSwitch(TransportAdapter* ta,
+                       DeviceToAdapterMap::iterator value);
 
   void AddDataToContainer(
       ConnectionUID id,
@@ -394,11 +465,21 @@ class TransportManagerImpl
                 unsigned int frame_size,
                 unsigned char** frame);
 
+  void OnDeviceAdded(TransportAdapter* ta);
   void OnDeviceListUpdated(TransportAdapter* ta);
   void DisconnectAllDevices();
   void TerminateAllAdapters();
   int InitAllAdapters();
   static Connection convert(const ConnectionInternal& p);
+  void ReconnectionTimeout();
+
+  /**
+   * @brief UpdateDeviceMapping handles internal device-to-adapter mapping,
+   * performs its update on adding/removal of devices. Also used by IAP2
+   * switching flow to substitute BT with USB transport
+   * @param ta Pointer to transport adapter
+   */
+  void UpdateDeviceMapping(TransportAdapter* ta);
 };  // class TransportManagerImpl
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

@@ -39,15 +39,12 @@ namespace commands {
 
 ResponseToHMI::ResponseToHMI(const MessageSharedPtr& message,
                              ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {
-  // Replace Mobile connection id with HMI app id
-  ReplaceMobileByHMIAppId(*(message.get()));
-}
+    : CommandImpl(message, application_manager) {}
 
 ResponseToHMI::~ResponseToHMI() {}
 
 bool ResponseToHMI::Init() {
-  return true;
+  return ReplaceMobileByHMIAppId(*message_);
 }
 
 bool ResponseToHMI::CleanUp() {

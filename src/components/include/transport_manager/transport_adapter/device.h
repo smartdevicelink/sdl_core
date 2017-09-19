@@ -86,6 +86,14 @@ class Device {
     UNUSED(bundle_id);
   }
 
+  /**
+     * @brief Init allows to initialize device.
+     * Currently overloadded only for iAP devices.
+     */
+  virtual bool Init() {
+    return true;
+  }
+
   virtual void Stop() {}
 
   inline const DeviceUID& unique_device_id() const {

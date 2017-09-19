@@ -408,6 +408,10 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   std::string DeviceName(const DeviceUID& device_id) const OVERRIDE;
 
+  void StopDevice(const DeviceUID& device_id) const FINAL;
+
+  void DeviceSwitched(const DeviceUID& device_handle) FINAL;
+
   /**
    * @brief Allows to obtain connection type used by device.
    * @return connection type.

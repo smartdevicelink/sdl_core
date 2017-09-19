@@ -1170,7 +1170,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
         continue;
       }
       policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
-      uint32_t device_handle = 0;
+      connection_handler::DeviceHandle device_handle = 0;
       if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
         LOG4CXX_WARN(logger_,
                      "Device handle with mac " << device_id
@@ -1204,7 +1204,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
   // Case, when specific device was changed
-  uint32_t device_handle = 0u;
+  connection_handler::DeviceHandle device_handle = 0u;
   if (device_specific) {
     policy_manager_->SetUserConsentForDevice(device_mac, is_allowed);
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
