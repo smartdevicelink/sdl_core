@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
+#include <string>
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
@@ -122,6 +123,10 @@ class ConnectionHandlerObserver {
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) = 0;
+
+  virtual void OnDeviceSwitchingStart(const std::string& device_uid) = 0;
+
+  virtual void OnDeviceSwitchFinish(const std::string& device_uid) = 0;
 
 #ifdef ENABLE_SECURITY
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(

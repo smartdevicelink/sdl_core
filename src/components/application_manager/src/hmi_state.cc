@@ -37,18 +37,19 @@
 
 namespace application_manager {
 
-HmiState::HmiState(uint32_t app_id,
+HmiState::HmiState(utils::SharedPtr<Application> app,
                    const ApplicationManager& app_mngr,
                    StateID state_id)
-    : app_id_(app_id)
+    : app_(app)
     , state_id_(state_id)
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {}
 
-HmiState::HmiState(uint32_t app_id, const ApplicationManager& app_mngr)
-    : app_id_(app_id)
+HmiState::HmiState(utils::SharedPtr<Application> app,
+                   const ApplicationManager& app_mngr)
+    : app_(app)
     , state_id_(STATE_ID_REGULAR)
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
@@ -60,24 +61,20 @@ void HmiState::set_parent(HmiStatePtr parent) {
   parent_ = parent;
 }
 
-bool HmiState::is_navi_app(const uint32_t app_id) const {
-  const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  return app ? app->is_navi() : false;
+bool HmiState::is_navi_app() const {
+  return app_->is_navi();
 }
 
-bool HmiState::is_media_app(const uint32_t app_id) const {
-  const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  return app ? app->is_media_application() : false;
+bool HmiState::is_media_app() const {
+  return app_->is_media_application();
 }
 
-bool HmiState::is_voice_communication_app(const uint32_t app_id) const {
-  const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  return app ? app->is_voice_communication_supported() : false;
+bool HmiState::is_voice_communication_app() const {
+  return app_->is_voice_communication_supported();
 }
 
-bool HmiState::is_mobile_projection_app(const uint32_t app_id) const {
-  const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  return app ? app->mobile_projection_enabled() : false;
+bool HmiState::is_mobile_projection_app() const {
+  return app_->mobile_projection_enabled();
 }
 
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
@@ -86,11 +83,13 @@ mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
   return AudioStreamingState::NOT_AUDIBLE;
 }
 
-VRHmiState::VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_VR_SESSION) {}
+VRHmiState::VRHmiState(utils::SharedPtr<Application> app,
+                       const ApplicationManager& app_mngr)
+    : HmiState(app, app_mngr, STATE_ID_VR_SESSION) {}
 
-TTSHmiState::TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_TTS_SESSION) {}
+TTSHmiState::TTSHmiState(utils::SharedPtr<Application> app,
+                         const ApplicationManager& app_mngr)
+    : HmiState(app, app_mngr, STATE_ID_TTS_SESSION) {}
 
 mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
     const {
@@ -107,9 +106,9 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
   return expected_state;
 }
 
-NaviStreamingHmiState::NaviStreamingHmiState(uint32_t app_id,
+NaviStreamingHmiState::NaviStreamingHmiState(utils::SharedPtr<Application> app,
                                              const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_NAVI_STREAMING) {}
+    : HmiState(app, app_mngr, STATE_ID_NAVI_STREAMING) {}
 
 mobile_apis::AudioStreamingState::eType
 NaviStreamingHmiState::audio_streaming_state() const {
@@ -117,7 +116,7 @@ NaviStreamingHmiState::audio_streaming_state() const {
   using namespace mobile_apis;
 
   AudioStreamingState::eType expected_state = parent()->audio_streaming_state();
-  if (!is_navi_app(app_id_) && AudioStreamingState::AUDIBLE == expected_state) {
+  if (!is_navi_app() && AudioStreamingState::AUDIBLE == expected_state) {
     if (app_mngr_.is_attenuated_supported()) {
       expected_state = AudioStreamingState::ATTENUATED;
     } else {
@@ -127,9 +126,9 @@ NaviStreamingHmiState::audio_streaming_state() const {
   return expected_state;
 }
 
-PhoneCallHmiState::PhoneCallHmiState(uint32_t app_id,
+PhoneCallHmiState::PhoneCallHmiState(utils::SharedPtr<Application> app,
                                      const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_PHONE_CALL) {}
+    : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace helpers;
@@ -139,22 +138,22 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_navi_app(app_id_) || is_mobile_projection_app(app_id_)) {
+  if (is_navi_app() || is_mobile_projection_app()) {
     return HMILevel::HMI_LIMITED;
   }
-  if (!is_media_app(app_id_)) {
+  if (!is_media_app()) {
     return parent()->hmi_level();
   }
   return HMILevel::HMI_BACKGROUND;
 }
 
-SafetyModeHmiState::SafetyModeHmiState(uint32_t app_id,
+SafetyModeHmiState::SafetyModeHmiState(utils::SharedPtr<Application> app,
                                        const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_SAFETY_MODE) {}
+    : HmiState(app, app_mngr, STATE_ID_SAFETY_MODE) {}
 
-DeactivateHMI::DeactivateHMI(uint32_t app_id,
+DeactivateHMI::DeactivateHMI(utils::SharedPtr<Application> app,
                              const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
+    : HmiState(app, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   using namespace helpers;
@@ -167,8 +166,9 @@ mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   return HMILevel::HMI_BACKGROUND;
 }
 
-AudioSource::AudioSource(uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_AUDIO_SOURCE) {}
+AudioSource::AudioSource(utils::SharedPtr<Application> app,
+                         const ApplicationManager& app_mngr)
+    : HmiState(app, app_mngr, STATE_ID_AUDIO_SOURCE) {}
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   using namespace mobile_apis;
@@ -181,14 +181,15 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_navi_app(app_id_) || is_voice_communication_app(app_id_)) {
+  if (is_navi_app() || is_voice_communication_app()) {
     return HMILevel::HMI_LIMITED;
   }
   return HMILevel::HMI_BACKGROUND;
 }
 
-EmbeddedNavi::EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_EMBEDDED_NAVI) {}
+EmbeddedNavi::EmbeddedNavi(utils::SharedPtr<Application> app,
+                           const ApplicationManager& app_mngr)
+    : HmiState(app, app_mngr, STATE_ID_EMBEDDED_NAVI) {}
 
 mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace mobile_apis;
@@ -198,7 +199,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_media_app(app_id_)) {
+  if (is_media_app()) {
     return HMILevel::HMI_LIMITED;
   }
   return HMILevel::HMI_BACKGROUND;

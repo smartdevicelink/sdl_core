@@ -84,6 +84,8 @@ class TransportAdapterListener {
   virtual void OnDeviceListUpdated(
       const TransportAdapter* transport_adapter) = 0;
 
+  virtual void OnDeviceAdded(DeviceUID device_uid) = 0;
+
   /**
    * @brief Reaction to "Find new applications" request
    * @param adapter Current transport adapter
@@ -146,6 +148,7 @@ class TransportAdapterListener {
                                       const DeviceUID& device_handle,
                                       const ApplicationHandle& app_handle,
                                       const CommunicationError& error) = 0;
+
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,

@@ -53,6 +53,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
+#include "application_manager/command_holder.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -500,7 +501,22 @@ class ApplicationManagerImpl
    */
   void SetAllAppsAllowed(const bool allowed) OVERRIDE;
 
+ /**
+   * @brief CreateRegularState create regular HMI state for application
+   * @param app Application
+   * @param hmi_level of returned state
+   * @param audio_state of returned state
+   * @param system_context of returned state
+   * @return new regular HMI state
+   */
+  HmiStatePtr CreateRegularState(
+      utils::SharedPtr<Application> app,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
+
   /**
+   * DEPRECATED
    * @brief CreateRegularState create regular HMI state for application
    * @param app_id
    * @param hmi_level of returned state
@@ -508,7 +524,7 @@ class ApplicationManagerImpl
    * @param system_context of returned state
    * @return new regular HMI state
    */
-  HmiStatePtr CreateRegularState(
+  DEPRECATED HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
@@ -837,6 +853,10 @@ class ApplicationManagerImpl
   void OnFindNewApplicationsRequest() OVERRIDE;
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
+  void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
+
+  void OnDeviceSwitchFinish(const std::string& device_uid) FINAL;
+  
   DEPRECATED bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
@@ -1212,9 +1232,23 @@ class ApplicationManagerImpl
   bool IsAppsQueriedFrom(
       const connection_handler::DeviceHandle handle) const OVERRIDE;
 
+  bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
+
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
   }
+
+  /**
+     * @brief ProcessReconnection handles reconnection flow for application on
+     * transport switch
+     * @param application Pointer to switched application, must be validated
+     * before passing
+     * @param connection_key Connection key from registration request of
+   * switched
+     * application
+     */
+  void ProcessReconnection(ApplicationSharedPtr application,
+                           const uint32_t connection_key) FINAL;
 
   /**
    * @brief Clears all applications' persistent data
@@ -1401,7 +1435,7 @@ class ApplicationManagerImpl
    * @return True on success, false on fail
    */
   DEPRECATED bool StartNaviService(uint32_t app_id,
-                                   protocol_handler::ServiceType service_type);
+                        protocol_handler::ServiceType service_type);
 
   /**
    * @brief Starts specified navi service for application
@@ -1483,6 +1517,26 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle);
 
   void ClearTTSGlobalPropertiesList();
+
+  /**
+   * @brief EraseAppFromReconnectionList drops application from reconnection
+   * list on transport switch success
+   * @param app Pointer to application
+   */
+  void EraseAppFromReconnectionList(const ApplicationSharedPtr& app);
+
+  /**
+   * @brief SwitchApplication updates parameters of switched application and
+   * internal applications list
+   * @param app Pointer to switched application, must be validated before
+   * passing in
+   * @param connection_key Connection key of switched application from its
+   * registration request
+   * @param device_id Device id of switched application
+   */
+  void SwitchApplication(ApplicationSharedPtr app,
+                         const uint32_t connection_key,
+                         const uint32_t device_id);
 
   /**
    * @brief Converts BSON object containing video parameters to
@@ -1616,6 +1670,11 @@ class ApplicationManagerImpl
   StateControllerImpl state_ctrl_;
   std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
+
+  typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
+  ReregisterWaitList reregister_wait_list_;
+
+  mutable sync_primitives::Lock reregister_wait_list_lock_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

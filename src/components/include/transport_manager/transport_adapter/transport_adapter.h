@@ -59,7 +59,16 @@ class TransportAdapterListener;
 // TODO(EZamakhov): cahnge to DeviceUID
 // typedef std::string DeviceType;
 
-enum DeviceType { AOA, PASA_AOA, BLUETOOTH, PASA_BLUETOOTH, MME, TCP, UNKNOWN };
+enum DeviceType {
+  AOA,
+  PASA_AOA,
+  BLUETOOTH,
+  PASA_BLUETOOTH,
+  IOS_BT,
+  IOS_USB,
+  TCP,
+  UNKNOWN
+};
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
@@ -277,6 +286,16 @@ class TransportAdapter {
    * @return string.
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
+
+  /**
+     * @brief StopDevice Allows to stop all activity on devices without
+     * removing one from device list
+     *
+     * @param device_id unique device identifier that has to be stopped.
+     */
+  virtual void StopDevice(const DeviceUID& device_id) const = 0;
+
+  virtual void DeviceSwitched(const DeviceUID& device_handle) = 0;
 
 #ifdef TELEMETRY_MONITOR
   /**

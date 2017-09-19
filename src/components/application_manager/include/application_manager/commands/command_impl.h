@@ -146,14 +146,14 @@ class CommandImpl : public Command {
    *
    * @param message Smartobject to be parsed
    */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
+  bool ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
    * @brief Parse smartObject and replace HMI app ID by mobile app Id
    *
    * @param message Smartobject to be parsed
    */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+  bool ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
 
   MessageSharedPtr message_;
   uint32_t default_timeout_;

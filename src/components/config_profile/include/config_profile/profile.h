@@ -656,6 +656,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const bool enable_app_launch_ios() const OVERRIDE;
 
   /**
+     * @brief Returns the millisecond count before timeout
+     * for transport change feature occures.
+     */
+  uint32_t app_transport_change_timer() const OVERRIDE;
+
+  /**
+   * @brief Returns the millisecond count used as addition
+   * value for transport change timer
+   */
+  uint32_t app_transport_change_timer_addition() const OVERRIDE;
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -914,6 +926,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t max_number_of_ios_device_;
   uint16_t wait_time_between_apps_;
   bool enable_app_launch_ios_;
+  uint32_t app_tranport_change_timer_;
+  uint32_t app_tranport_change_timer_addition_;
   bool error_occured_;
   std::string error_description_;
 

@@ -41,6 +41,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -76,10 +77,21 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
 
+void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                 const uint32_t app_id,
+                                 const uint32_t device_id) {
+  utils::SharedPtr<ApplicationImpl> application =
+      ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);
+  DCHECK_OR_RETURN_VOID(application);
+  application->app_id_ = app_id;
+  application->device_id_ = device_id;
+}
+
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
     const std::string& mobile_app_id,
     const std::string& mac_address,
+    const connection_handler::DeviceHandle device_id,
     const custom_str::CustomString& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
     ApplicationManager& application_manager)
@@ -107,6 +119,7 @@ ApplicationImpl::ApplicationImpl(
     , list_files_in_none_count_(0)
     , device_(0)
     , mac_address_(mac_address)
+    , device_id_(device_id)
     , usage_report_(mobile_app_id, statistics_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
@@ -137,12 +150,6 @@ ApplicationImpl::ApplicationImpl(
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
   // load persistent files
   LoadPersistentFiles();
-  HmiStatePtr initial_state = application_manager_.CreateRegularState(
-      app_id(),
-      mobile_apis::HMILevel::INVALID_ENUM,
-      mobile_apis::AudioStreamingState::INVALID_ENUM,
-      mobile_api::SystemContext::SYSCTXT_MAIN);
-  state_.InitState(initial_state);
 
   video_stream_suspend_timeout_ =
       application_manager_.get_settings().video_data_stopped_timeout();
@@ -347,7 +354,7 @@ const std::string& ApplicationImpl::bundle_id() const {
 }
 
 connection_handler::DeviceHandle ApplicationImpl::device() const {
-  return device_;
+  return device_id_;
 }
 
 const std::string& ApplicationImpl::mac_address() const {
@@ -606,10 +613,6 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
-void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_ = device;
-}
-
 uint32_t ApplicationImpl::get_grammar_id() const {
   return grammar_id_;
 }
@@ -861,6 +864,10 @@ const std::string& ApplicationImpl::curHash() const {
 
 bool ApplicationImpl::is_application_data_changed() const {
   return is_application_data_changed_;
+}
+
+void ApplicationImpl::SetInitialState(HmiStatePtr state) {
+  state_.InitState(state);
 }
 
 void ApplicationImpl::set_is_application_data_changed(

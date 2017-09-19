@@ -313,6 +313,17 @@ class ApplicationManager {
   virtual void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
                                const uint32_t connection_key) = 0;
 
+  /**
+   * @brief ProcessReconnection handles reconnection flow for application on
+   * transport switch
+   * @param application Pointer to switched application, must be validated
+   * before passing
+   * @param connection_key Connection key from registration request of switched
+   * application
+   */
+  virtual void ProcessReconnection(ApplicationSharedPtr application,
+                                   const uint32_t connection_key) = 0;
+
   virtual bool is_attenuated_supported() const = 0;
 
   /**
@@ -534,6 +545,8 @@ class ApplicationManager {
   virtual bool IsApplicationForbidden(
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
+  virtual bool IsAppInReconnectMode(const std::string& policy_app_id) const = 0;
+
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
   /**
@@ -594,14 +607,14 @@ class ApplicationManager {
 
   /**
    * @brief CreateRegularState create regular HMI state for application
-   * @param app_id
+   * @param app Application
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
    * @return new regular HMI state
    */
   virtual HmiStatePtr CreateRegularState(
-      uint32_t app_id,
+      utils::SharedPtr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
