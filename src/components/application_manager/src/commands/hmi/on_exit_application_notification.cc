@@ -67,7 +67,7 @@ void OnExitApplicationNotification::Run() {
 
 #ifdef SDL_REMOTE_CONTROL
   application_manager_.GetPluginManager().OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationExit, app_id);
+      functional_modules::ApplicationEvent::kApplicationExit, app_impl);
 #endif  // SDL_REMOTE_CONTROL
 
   Common_ApplicationExitReason::eType reason;
