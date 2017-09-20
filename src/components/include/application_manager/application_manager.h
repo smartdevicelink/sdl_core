@@ -308,6 +308,18 @@ class ApplicationManager {
    */
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
+  /**
+   * @brief Get current information about waypoints on active route
+   * @return waypoints information if route is set otherwise empty pointer
+   */
+  virtual smart_objects::SmartObjectSPtr GetWaypointsInfo() const = 0;
+
+  /**
+   * @brief Save current waypoint information from smart object
+   * @param obj Smart object with waypoints information
+   */
+  virtual void SetWaypointsInfo(const smart_objects::SmartObject& obj) = 0;
+
   virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
                                    bool final_message = false) = 0;
 

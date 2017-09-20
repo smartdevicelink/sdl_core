@@ -142,6 +142,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
     , applications_list_lock_(true)
+    , way_points_list_(
+          new smart_objects::SmartObject(smart_objects::SmartType_Null))
     , audio_pass_thru_active_(false)
     , is_distracting_driver_(false)
     , is_vr_session_strated_(false)
@@ -4245,6 +4247,23 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
+}
+
+smart_objects::SmartObjectSPtr ApplicationManagerImpl::GetWaypointsInfo()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  return way_points_list_ &&
+                 smart_objects::SmartType_Null != (*way_points_list_).getType()
+             ? way_points_list_
+             : smart_objects::SmartObjectSPtr();
+}
+
+void ApplicationManagerImpl::SetWaypointsInfo(
+    const smart_objects::SmartObject& obj) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  way_points_list_.reset(new smart_objects::SmartObject(obj));
 }
 
 static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(
