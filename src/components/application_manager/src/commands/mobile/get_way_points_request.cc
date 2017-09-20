@@ -26,14 +26,46 @@ void GetWayPointsRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
+  if (!CheckHMIInterfaceAvailability(HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_ERROR(logger_, "Navi interface is not available");
+    SendResponse(false,
+                 mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                 "Navi is not supported by system");
+    return;
+  }
+
+  if (!CheckHMINaviCapabilities()) {
+    LOG4CXX_ERROR(logger_,
+                  "GetWayPoints request is disallowed by hmi capabilities");
+    SendResponse(false,
+                 mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                 "Request is disallowed by HMI capabilities");
+    return;
+  }
+
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
   SendHMIRequest(hmi_apis::FunctionID::Navigation_GetWayPoints,
                  msg_params.empty() ? NULL : &msg_params,
                  true);
+}
+
+bool GetWayPointsRequest::CheckHMINaviCapabilities() {
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
+
+  const smart_objects::SmartObject* navi_capabilities =
+      hmi_capabilities.navigation_capability();
+  if (navi_capabilities) {
+    if (navi_capabilities->keyExists("getWayPointsEnabled")) {
+      return (*navi_capabilities)["getWayPointsEnabled"].asBool();
+    }
+  }
+
+  return true;
 }
 
 void GetWayPointsRequest::on_event(const event_engine::Event& event) {
@@ -48,17 +80,27 @@ void GetWayPointsRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_GetWayPoints event");
+      const bool is_waypoints_valid = ValidateSmartObjectStrings(
+          message[strings::msg_params][strings::way_points]);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+
       std::string response_info;
       GetInfo(message, response_info);
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
-      SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty() ? NULL : response_info.c_str(),
-                   &(message[strings::msg_params]));
+
+      if (is_waypoints_valid) {
+        SendResponse(result,
+                     MessageHelper::HMIToMobileResult(result_code),
+                     response_info.empty() ? NULL : response_info.c_str(),
+                     &(message[strings::msg_params]));
+      } else {
+        SendResponse(false,
+                     mobile_apis::Result::GENERIC_ERROR,
+                     "Invalid message received from vehicle");
+      }
       break;
     }
     default: {
