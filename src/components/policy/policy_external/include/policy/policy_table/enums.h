@@ -102,6 +102,7 @@ enum Parameter {
   P_DELIVERY_MODE,
   P_TIMESTAMP,
   P_ADDRESS,
+  P_ENGINEOILLIFE,
   P_EMPTY  // Added to allow empty parameters handling
 };
 
