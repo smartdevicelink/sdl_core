@@ -143,11 +143,10 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  if (choice_set_id_list_length &&
-      (!CheckChoiceIDFromRequest(
-           app,
-           choice_set_id_list_length,
-           msg_params[strings::interaction_choice_set_id_list]))) {
+  if (!CheckChoiceIDFromRequest(
+          app,
+          choice_set_id_list_length,
+          msg_params[strings::interaction_choice_set_id_list])) {
     LOG4CXX_ERROR(logger_,
                   "PerformInteraction has choice sets with "
                   "duplicated IDs or application does not have choice sets");

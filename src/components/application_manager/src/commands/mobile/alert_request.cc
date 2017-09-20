@@ -230,6 +230,10 @@ bool AlertRequest::PrepareResponseParameters(
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
   info = MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+  // Mobile Alert request is successful when UI_Alert is successful
+  if (is_ui_alert_sent_ && !ui_alert_info.is_ok) {
+    return false;
+  }
   return result;
 }
 

@@ -105,6 +105,10 @@ const std::string CreateInfoForUnsupportedResult(
 }
 
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
+  if (!first.is_ok && !second.is_ok) {
+    return false;
+  }
+
   if (!first.is_ok && second.is_not_used) {
     return false;
   }
