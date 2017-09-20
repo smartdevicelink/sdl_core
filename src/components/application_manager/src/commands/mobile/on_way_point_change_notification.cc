@@ -46,6 +46,15 @@ OnWayPointChangeNotification::~OnWayPointChangeNotification() {}
 void OnWayPointChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (!ValidateSmartObjectStrings(
+          (*message_)[strings::msg_params][strings::way_points])) {
+    LOG4CXX_ERROR(logger_, "Invalid notification. Ignored");
+    return;
+  }
+
+  application_manager_.SetWaypointsInfo(
+      (*message_)[strings::msg_params][strings::way_points]);
+
   std::set<int32_t> subscribed_for_way_points =
       application_manager_.GetAppsSubscribedForWayPoints();
 
