@@ -978,6 +978,7 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_ENGINEOILLIFE" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1389,21 +1390,21 @@
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
-  
+
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
-  
+
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
-  
+
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-  
+
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1416,7 +1417,7 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
-  
+
   <struct name="PermissionItem">
     <param name="name" type="String" mandatory="true">
       <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
@@ -1427,7 +1428,7 @@
     <param name="allowed" type="Boolean" mandatory="false">
       <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
     </param>
-  </struct>  
+  </struct>
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -2492,7 +2493,7 @@
 
 <struct name="DateTime">
   <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
-    <description>Milliseconds </description>     
+    <description>Milliseconds </description>
   </param>
   <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
     <description>Seconds part of time</description>
@@ -3861,7 +3862,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.4.0" date="2017-04-27"> 
+<interface name="Navigation" version="1.4.0" date="2017-04-27">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -4231,6 +4232,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4306,6 +4310,9 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4389,6 +4396,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4464,6 +4474,9 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4545,6 +4558,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4621,6 +4637,9 @@
     </param>
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4699,6 +4718,9 @@
     </param>
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>

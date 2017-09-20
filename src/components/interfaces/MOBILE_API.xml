@@ -493,7 +493,7 @@
   <enum name="VehicleDataType">
     <description>Defines the data types that can be published and subscribed to.</description>
     <element name="VEHICLEDATA_GPS">
-    	<description>Notifies GPSData may be subscribed</description>
+      <description>Notifies GPSData may be subscribed</description>
     </element>
     <element name="VEHICLEDATA_SPEED" />
     <element name="VEHICLEDATA_RPM" />
@@ -520,6 +520,7 @@
     <element name="VEHICLEDATA_ENGINETORQUE" />
     <element name="VEHICLEDATA_ACCPEDAL" />
     <element name="VEHICLEDATA_STEERINGWHEEL" />
+    <element name="VEHICLEDATA_ENGINEOILLIFE" />
   </enum>
 
   <enum name="ButtonName">
@@ -4186,8 +4187,11 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4203,15 +4207,13 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-
-	<!-- / Ford Specific Data Items -->
-
+    <!-- / Ford Specific Data Items -->
   </function>
 
   <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response">
-   <param name="success" type="Boolean" platform="documentation" mandatory="true">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+    <param name="success" type="Boolean" platform="documentation" mandatory="true">
+    <description> true, if successful; false, if failed </description>
+    </param>
 
     <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
@@ -4289,8 +4291,11 @@
     <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4306,8 +4311,7 @@
     <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
-
+    <!-- / Ford Specific Data Items -->
   </function>
 
   <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="request">
@@ -4370,8 +4374,11 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4387,13 +4394,12 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
-
+    <!-- / Ford Specific Data Items -->
   </function>
 
   <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation" mandatory="true">
-		<description> true, if successful; false, if failed </description>
+      <description> true, if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation" mandatory="true">
@@ -4471,8 +4477,11 @@
     <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4488,8 +4497,8 @@
     <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
 
+    <!-- / Ford Specific Data Items -->
   </function>
 
   <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="request">
@@ -4555,8 +4564,11 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4572,15 +4584,13 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
-
+    <!-- / Ford Specific Data Items -->
   </function>
 
   <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response">
-
     <param name="success" type="Boolean" platform="documentation" mandatory="true">
-		<description> true, if successful; false, if failed </description>
-	</param>
+      <description> true, if successful; false, if failed </description>
+    </param>
 
     <param name="resultCode" type="Result" platform="documentation" mandatory="true">
       <description>See Result</description>
@@ -4660,8 +4670,11 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
-	<!-- Ford Specific Data Items -->
+    <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4677,7 +4690,7 @@
     <param name="myKey" type="MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+    <!-- / Ford Specific Data Items -->
 
   </function>
 
@@ -5769,6 +5782,9 @@
     </param>
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
 
     <!-- Ford Specific Vehicle Data -->

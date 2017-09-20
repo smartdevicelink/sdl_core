@@ -87,6 +87,7 @@ enum Parameter {
   P_DEVICESTATUS,
   P_EMERGENCYEVENT,
   P_ECALLINFO,
+  P_ENGINEOILLIFE
 };
 
 bool IsValidEnum(Parameter val);
