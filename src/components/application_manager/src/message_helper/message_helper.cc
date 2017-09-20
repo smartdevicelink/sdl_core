@@ -189,7 +189,7 @@ std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
     std::make_pair(strings::engine_torque, ENGINETORQUE),
     std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
     std::make_pair(strings::steering_wheel_angle, STEERINGWHEEL),
-};
+    std::make_pair(strings::fuel_range, FUELRANGE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,

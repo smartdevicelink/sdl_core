@@ -216,6 +216,7 @@ const char* head_lamp_status = "headLampStatus";
 const char* engine_torque = "engineTorque";
 const char* acc_pedal_pos = "accPedalPosition";
 const char* steering_wheel_angle = "steeringWheelAngle";
+const char* fuel_range = "fuelRange";
 const char* e_call_info = "eCallInfo";
 const char* airbag_status = "airbagStatus";
 const char* emergency_event = "emergencyEvent";
