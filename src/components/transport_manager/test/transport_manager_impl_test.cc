@@ -70,10 +70,15 @@ const uint32_t kAsyncExpectationsTimeout = 10000u;
 class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
-      : device_handle_(1)
+      : mock_adapter_(NULL)
+      , tm_(settings)
       , mac_address_("MA:CA:DR:ES:S")
-      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC")
-      , tm_(settings) {}
+      , connection_type_("BTMAC")
+      , device_name_("TestDeviceName")
+      , device_handle_(
+            tm_.get_converter().UidToHandle(mac_address_, connection_type_))
+      , dev_info_(
+            device_handle_, mac_address_, device_name_, connection_type_) {}
 
   void SetUp() OVERRIDE {
     resumption::LastStateImpl last_state_("app_storage_folder",
@@ -140,7 +145,7 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
         .WillOnce(Return(dev_info_.name()));
     EXPECT_CALL(*mock_adapter_, GetConnectionType())
-        .WillOnce(Return(dev_info_.connection_type()));
+        .WillRepeatedly(Return(dev_info_.connection_type()));
 
     EXPECT_CALL(*tm_listener_,
                 OnConnectionEstablished(dev_info_, connection_key_));
@@ -159,7 +164,7 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
         .WillOnce(Return(dev_info_.name()));
     EXPECT_CALL(*mock_adapter_, GetConnectionType())
-        .WillOnce(Return(dev_info_.connection_type()));
+        .WillRepeatedly(Return(dev_info_.connection_type()));
 
     EXPECT_CALL(*tm_listener_, OnConnectionFailed(dev_info_, _));
 
@@ -288,16 +293,18 @@ class TransportManagerImplTest : public ::testing::Test {
   MockTransportAdapter* mock_adapter_;
 
   utils::SharedPtr<MockTransportManagerListener> tm_listener_;
+  MockTransportManagerImpl tm_;
   const ApplicationHandle application_id_ = 1;
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
-  DeviceHandle device_handle_;
   std::string mac_address_;
+  std::string connection_type_;
+  std::string device_name_;
+  DeviceHandle device_handle_;
 
   const DeviceInfo dev_info_;
   DeviceList device_list_;
   BaseErrorPtr error_;
-  MockTransportManagerImpl tm_;
 };
 
 TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {
@@ -615,7 +622,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_AddNewDevice) {
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
 
   tm_.UpdateDeviceList(mock_adapter_);
@@ -628,7 +635,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
   ::testing::InSequence seq;
   EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
@@ -909,7 +916,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*second_mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
   tm_.UpdateDeviceList(second_mock_adapter);
 
@@ -917,7 +924,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
   tm_.UpdateDeviceList(mock_adapter_);
 
@@ -940,7 +947,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*second_mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
   tm_.UpdateDeviceList(second_mock_adapter);
 
@@ -948,7 +955,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillOnce(Return(dev_info_.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
   tm_.UpdateDeviceList(mock_adapter_);
 

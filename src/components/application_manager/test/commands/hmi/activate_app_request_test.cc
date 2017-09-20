@@ -34,7 +34,6 @@
 #include "application_manager/commands/hmi/activate_app_request.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/commands/command_impl.h"
 #include "commands/commands_test.h"
 
@@ -84,8 +83,6 @@ class ActivateAppRequestTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
 // TODO(OKozlov) Invastigate and fix issue with using log
 #ifdef ENABLE_LOG
   (*msg)[strings::msg_params][strings::activate_app_hmi_level] =
