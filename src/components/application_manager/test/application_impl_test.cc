@@ -102,6 +102,9 @@ class ApplicationImplTest : public ::testing::Test {
                             app_name,
                             utils::MakeShared<MockStatisticsManager>(),
                             mock_application_manager_));
+
+    HmiStatePtr initial_state = CreateTestHmiState();
+    app_impl->SetInitialState(initial_state);
   }
   HmiStatePtr CreateTestHmiState();
 

@@ -112,6 +112,7 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, app_icon_path()).WillByDefault(ReturnRef(kDummyString));
     ON_CALL(*mock_app, language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
+    ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId));
     return mock_app;
   }
 
@@ -212,6 +213,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
@@ -276,6 +279,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));

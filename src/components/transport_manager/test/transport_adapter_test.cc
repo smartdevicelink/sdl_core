@@ -191,7 +191,7 @@ TEST_F(TransportAdapterTest, AddDevice) {
 
   MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
 
-  EXPECT_CALL(mock_listener, OnDeviceListUpdated(_));
+  EXPECT_CALL(mock_listener, OnDeviceAdded(_));
   transport_adapter.AddDevice(mockdev);
 }
 
@@ -456,7 +456,7 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
   transport_adapter.AddListener(&mock_listener);
 
   MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
-  EXPECT_CALL(mock_listener, OnDeviceListUpdated(_));
+  EXPECT_CALL(mock_listener, OnDeviceAdded(_));
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
