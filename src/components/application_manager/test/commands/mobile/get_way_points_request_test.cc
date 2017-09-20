@@ -44,6 +44,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_hmi_capabilities.h"
 
 namespace test {
 namespace components {
@@ -58,6 +59,7 @@ using ::testing::_;
 using application_manager::commands::GetWayPointsRequest;
 using application_manager::MockMessageHelper;
 using application_manager::MockHmiInterfaces;
+using application_manager_test::MockHMICapabilities;
 
 typedef SharedPtr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
@@ -98,6 +100,7 @@ class GetWayPointsRequestTest
 
   MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
+  MockHMICapabilities mock_hmi_capabilities_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
       command_sptr_;
@@ -130,12 +133,6 @@ class GetWayPointsRequestOnEventTest
     }
 
     event.set_smart_object(*event_msg);
-
-    EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-        .WillOnce(Return(ResultCode));
-
-    MockAppPtr app(CreateMockApp());
-    EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
@@ -176,6 +173,58 @@ TEST_F(GetWayPointsRequestTest,
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED, result);
 }
 
+TEST_F(GetWayPointsRequestTest, Run_NaviInterfaceIsNotAvailable_Unsupported) {
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  MockAppPtr application_sptr = CreateMockApp();
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(application_sptr));
+
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
+      .WillOnce(Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+
+  CallRun caller(*command_sptr_);
+
+  MessageSharedPtr result_message = CatchMobileCommandResult(caller);
+
+  const mobile_apis::Result::eType result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_message)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+
+  EXPECT_EQ(mobile_apis::Result::UNSUPPORTED_RESOURCE, result);
+}
+
+TEST_F(GetWayPointsRequestTest, Run_RequestDisallowedByCaps_Unsupported) {
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  MockAppPtr application_sptr = CreateMockApp();
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(application_sptr));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject navi_caps_so(smart_objects::SmartType_Map);
+  navi_caps_so["getWayPointsEnabled"] = false;
+  EXPECT_CALL(mock_hmi_capabilities_, navigation_capability())
+      .WillOnce(Return(&navi_caps_so));
+
+  CallRun caller(*command_sptr_);
+
+  MessageSharedPtr result_message = CatchMobileCommandResult(caller);
+
+  const mobile_apis::Result::eType result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_message)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+
+  EXPECT_EQ(mobile_apis::Result::UNSUPPORTED_RESOURCE, result);
+}
+
 TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
@@ -188,6 +237,14 @@ TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject navi_caps_so(smart_objects::SmartType_Map);
+  navi_caps_so["getWayPointsEnabled"] = true;
+  EXPECT_CALL(mock_hmi_capabilities_, navigation_capability())
+      .WillOnce(Return(&navi_caps_so));
 
   CallRun caller(*command_sptr_);
 
