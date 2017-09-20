@@ -135,6 +135,14 @@ class CommandImpl : public Command {
   */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  /**
+   * @brief Check syntax of string
+   * @param str - string that need to be checked
+   * @param allow_empty_string if true methods allow empty sting
+   * @return true if syntax is correct otherwise return false
+   */
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
@@ -154,6 +162,29 @@ class CommandImpl : public Command {
    * @param message Smartobject to be parsed
    */
   void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+
+  /**
+   * @brief Validate string syntax in smart object
+   * @param obj Smart object to check
+   * @return true if syntax if all object strings is correct otherwise false
+   */
+  bool ValidateSmartObjectStrings(const smart_objects::SmartObject& obj) const;
+
+  /**
+   * @brief Validate string syntax in smart map
+   * @param obj Smart map to check
+   * @param key Map iterator
+   * @return true if syntax if all map strings is correct otherwise false
+   */
+  bool ValidateSmartMapStrings(const smart_objects::SmartObject& obj,
+                               std::set<std::string>::const_iterator key) const;
+
+  /**
+   * @brief Check string syntax
+   * @param obj Smart string object
+   * @return true if syntax of string is correct otherwise false
+   */
+  bool ValidateSmartString(const smart_objects::SmartObject& obj) const;
 
   MessageSharedPtr message_;
   uint32_t default_timeout_;
