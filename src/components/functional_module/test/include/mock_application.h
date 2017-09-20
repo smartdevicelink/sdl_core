@@ -115,6 +115,7 @@ class MockApplication : public Application {
                bool(mobile_apis::FunctionID::eType cmd_id,
                     TLimitSource source));
   MOCK_METHOD0(usage_report, UsageStatistics&());
+  MOCK_METHOD1(SetInitialState, void(HmiStatePtr state));
   MOCK_METHOD2(SubscribeToSoftButtons,
                void(int32_t cmd_id, const SoftButtonID& softbuttons_id));
   MOCK_METHOD1(IsSubscribedToSoftButton, bool(const uint32_t softbutton_id));

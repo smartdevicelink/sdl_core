@@ -245,7 +245,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     bool state));
   MOCK_CONST_METHOD4(CreateRegularState,
                      application_manager::HmiStatePtr(
-                         uint32_t app_id,
+                         application_manager::ApplicationSharedPtr app,
                          mobile_apis::HMILevel::eType hmi_level,
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::SystemContext::eType system_context));
@@ -289,6 +289,11 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(ValidateMessageBySchema,
                application_manager::MessageValidationResult(
                    const application_manager::Message& message));
+  MOCK_METHOD2(ProcessReconnection,
+               void(application_manager::ApplicationSharedPtr application,
+                    const uint32_t connection_key));
+  MOCK_CONST_METHOD1(IsAppInReconnectMode,
+                     bool(const std::string& policy_app_id));
 };
 
 }  // namespace application_manager_test

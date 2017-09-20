@@ -88,9 +88,9 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                      int32_t(uint32_t key,
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
-                             uint32_t* device_id));
+                             transport_manager::DeviceHandle* device_id));
   MOCK_CONST_METHOD5(GetDataOnDeviceID,
-                     int32_t(uint32_t device_handle,
+                     int32_t(transport_manager::DeviceHandle device_handle,
                              std::string* device_name,
                              std::list<uint32_t>* applications_list,
                              std::string* mac_address,

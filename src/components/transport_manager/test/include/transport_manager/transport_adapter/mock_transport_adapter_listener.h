@@ -61,6 +61,7 @@ class MockTransportAdapterListener : public TransportAdapterListener {
                void(const TransportAdapter* adapter));
   MOCK_METHOD1(OnDeviceListUpdated,
                void(const TransportAdapter* transport_adapter));
+  MOCK_METHOD1(OnDeviceAdded, void(DeviceUID device_uid));
   MOCK_METHOD3(OnConnectDone,
                void(const TransportAdapter* transport_adapter,
                     const DeviceUID& device_handle,
