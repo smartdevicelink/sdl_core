@@ -252,6 +252,7 @@ extern const char* head_lamp_status;
 extern const char* engine_torque;
 extern const char* acc_pedal_pos;
 extern const char* steering_wheel_angle;
+extern const char* fuel_range;
 extern const char* e_call_info;
 extern const char* airbag_status;
 extern const char* emergency_event;
