@@ -25,14 +25,24 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (application_manager_.IsAppSubscribedForWayPoints(app)) {
+  if (!CheckHMIInterfaceAvailability(HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_ERROR(logger_, "Navi interface is not available");
+    SendResponse(false,
+                 mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                 "Navi is not supported by system");
+    return;
+  }
+
+  if (application_manager_.IsAppSubscribedForWayPoints(app->app_id())) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
-    application_manager_.SubscribeAppForWayPoints(app);
+    application_manager_.SubscribeAppForWayPoints(app->app_id());
     SendResponse(true, mobile_apis::Result::SUCCESS);
+    MessageHelper::SendOnWaypointChangeNotification(app->app_id(),
+                                                    application_manager_);
     return;
   }
 
@@ -57,7 +67,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
-        application_manager_.SubscribeAppForWayPoints(app);
+        application_manager_.SubscribeAppForWayPoints(app->app_id());
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
