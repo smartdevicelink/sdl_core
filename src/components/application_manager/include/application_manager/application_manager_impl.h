@@ -337,6 +337,18 @@ class ApplicationManagerImpl
   bool IsAnyAppSubscribedForWayPoints() const OVERRIDE;
 
   /**
+   * @brief Get current information about waypoints on active route
+   * @return waypoints information if route is set otherwise empty pointer
+   */
+  smart_objects::SmartObjectSPtr GetWaypointsInfo() const OVERRIDE;
+
+  /**
+   * @brief Save current waypoint information from smart object
+   * @param obj Smart object with waypoints information
+   */
+  void SetWaypointsInfo(const smart_objects::SmartObject& obj) OVERRIDE;
+
+  /**
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
@@ -1528,6 +1540,11 @@ class ApplicationManagerImpl
    * @brief Set AppIDs of subscribed apps for way points
    */
   std::set<int32_t> subscribed_way_points_apps_list_;
+
+  /**
+   * @brief Object with set of current way points
+   */
+  smart_objects::SmartObjectSPtr way_points_list_;
 
   /**
    * @brief Map contains applications which
