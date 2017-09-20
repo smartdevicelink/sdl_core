@@ -78,14 +78,12 @@ class ApplicationImplTest : public ::testing::Test {
     policy_app_id = "policy_app_id";
     app_name = "app_name";
     mac_address = "mac_address";
+    device_handle = 0;
     test_lvl = HMILevel::INVALID_ENUM;
     state_id = HmiState::STATE_ID_REGULAR;
     audiostate = AudioStreamingState::NOT_AUDIBLE;
     syst_context = SystemContext::SYSCTXT_MAIN;
 
-    testHmiState = CreateTestHmiState();
-    EXPECT_CALL(mock_application_manager_, CreateRegularState(app_id, _, _, _))
-        .WillOnce(Return(testHmiState));
     EXPECT_CALL(mock_application_manager_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
@@ -96,15 +94,14 @@ class ApplicationImplTest : public ::testing::Test {
                 audio_data_stopped_timeout()).WillOnce(Return(0));
     EXPECT_CALL(mock_application_manager_settings_,
                 video_data_stopped_timeout()).WillOnce(Return(0));
-    app_impl = new ApplicationImpl(app_id,
-                                   policy_app_id,
-                                   mac_address,
-                                   app_name,
-                                   utils::MakeShared<MockStatisticsManager>(),
-                                   mock_application_manager_);
-  }
-  void TearDown() OVERRIDE {
-    delete app_impl;
+    app_impl.reset(
+        new ApplicationImpl(app_id,
+                            policy_app_id,
+                            mac_address,
+                            device_handle,
+                            app_name,
+                            utils::MakeShared<MockStatisticsManager>(),
+                            mock_application_manager_));
   }
   HmiStatePtr CreateTestHmiState();
 
@@ -115,10 +112,11 @@ class ApplicationImplTest : public ::testing::Test {
   void CheckCurrentHMIState();
   MockApplicationManagerSettings mock_application_manager_settings_;
   MockApplicationManager mock_application_manager_;
-  ApplicationImpl* app_impl;
+  utils::SharedPtr<ApplicationImpl> app_impl;
   uint32_t app_id;
   std::string policy_app_id;
   std::string mac_address;
+  connection_handler::DeviceHandle device_handle;
   custom_str::CustomString app_name;
   const std::string directory_name = "./test_storage";
   HmiState::StateID state_id;
@@ -129,8 +127,8 @@ class ApplicationImplTest : public ::testing::Test {
 };
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
-  HmiStatePtr testState =
-      utils::MakeShared<HmiState>(app_id, mock_application_manager_, state_id);
+  HmiStatePtr testState = utils::MakeShared<HmiState>(
+      app_impl, mock_application_manager_, state_id);
   testState->set_hmi_level(test_lvl);
   testState->set_audio_streaming_state(audiostate);
   testState->set_system_context(syst_context);
@@ -143,7 +141,7 @@ HmiStatePtr ApplicationImplTest::TestAddHmiState(HMILevel::eType hmi_lvl,
   test_lvl = hmi_lvl;
   state_id = id_state;
   HmiStatePtr state = CreateTestHmiState();
-  (app_impl->*hmi_action)(state);
+  ((app_impl.get())->*hmi_action)(state);
   return state;
 }
 
@@ -566,7 +564,7 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   smart_objects::SmartObject type_media;
-  type_media[0] = AppHMIType::MEDIA;
+  type_media[0] = mobile_apis::AppHMIType::MEDIA;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
@@ -582,7 +580,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   smart_objects::SmartObject type_comm;
-  type_comm[0] = AppHMIType::COMMUNICATION;
+  type_comm[0] = mobile_apis::AppHMIType::COMMUNICATION;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
@@ -598,7 +596,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   smart_objects::SmartObject type_navi;
-  type_navi[0] = AppHMIType::NAVIGATION;
+  type_navi[0] = mobile_apis::AppHMIType::NAVIGATION;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
@@ -614,9 +612,9 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   smart_objects::SmartObject app_types;
-  app_types[0] = AppHMIType::NAVIGATION;
-  app_types[1] = AppHMIType::COMMUNICATION;
-  app_types[2] = AppHMIType::MEDIA;
+  app_types[0] = mobile_apis::AppHMIType::NAVIGATION;
+  app_types[1] = mobile_apis::AppHMIType::COMMUNICATION;
+  app_types[2] = mobile_apis::AppHMIType::MEDIA;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
@@ -633,10 +631,10 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
 TEST_F(ApplicationImplTest,
        ChangeSupportingAppHMIType_TypeIsNaviAndVoiceAndProjection) {
   smart_objects::SmartObject app_types;
-  app_types[0] = AppHMIType::NAVIGATION;
-  app_types[1] = AppHMIType::COMMUNICATION;
-  app_types[2] = AppHMIType::MEDIA;
-  app_types[3] = AppHMIType::PROJECTION;
+  app_types[0] = mobile_apis::AppHMIType::NAVIGATION;
+  app_types[1] = mobile_apis::AppHMIType::COMMUNICATION;
+  app_types[2] = mobile_apis::AppHMIType::MEDIA;
+  app_types[3] = mobile_apis::AppHMIType::PROJECTION;
 
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());

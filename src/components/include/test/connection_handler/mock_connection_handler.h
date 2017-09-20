@@ -61,6 +61,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                void(connection_handler::DeviceHandle device_handle));
   MOCK_CONST_METHOD2(RunAppOnDevice,
                      void(const std::string&, const std::string&));
+  MOCK_METHOD1(OnDeviceConnectionSwitched, void(const std::string& device_mac));
   MOCK_METHOD0(ConnectToAllDevices, void());
   MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));

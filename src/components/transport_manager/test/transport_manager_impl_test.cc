@@ -102,10 +102,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleDeviceListUpdated() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_DEVICE_LIST_UPDATED,
                                      mock_adapter_,
                                      dev_info_.mac_address(),
                                      application_id_,
@@ -133,10 +130,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleConnection() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_DONE,
                                      mock_adapter_,
                                      dev_info_.mac_address(),
                                      application_id_,
@@ -155,10 +149,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleConnectionFailed() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_FAIL,
                                      mock_adapter_,
                                      dev_info_.mac_address(),
                                      application_id_,
@@ -176,9 +167,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleSendDone() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE);
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_SEND_DONE,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -193,9 +182,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleReceiveDone() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE);
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_RECEIVED_DONE,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -210,10 +197,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleSendFailed() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_SEND_FAIL,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -226,10 +210,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleSearchDone() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_DONE,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -242,10 +223,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleSearchFail() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_FAIL,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -258,16 +236,13 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleFindNewApplicationsRequest() {
-    const int type =
-        static_cast<int>(TransportAdapterListenerImpl::EventTypeEnum::
-                             ON_FIND_NEW_APPLICATIONS_REQUEST);
-
-    TransportAdapterEvent test_event(type,
-                                     mock_adapter_,
-                                     mac_address_,
-                                     application_id_,
-                                     test_message_,
-                                     error_);
+    TransportAdapterEvent test_event(
+        EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST,
+        mock_adapter_,
+        mac_address_,
+        application_id_,
+        test_message_,
+        error_);
 
     EXPECT_CALL(*tm_listener_, OnFindNewApplicationsRequest());
 
@@ -275,10 +250,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleConnectionClosed() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_DISCONNECT_DONE,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -293,10 +265,7 @@ class TransportManagerImplTest : public ::testing::Test {
   }
 
   void HandleDisconnectionFailed() {
-    const int type = static_cast<int>(
-        TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL);
-
-    TransportAdapterEvent test_event(type,
+    TransportAdapterEvent test_event(EventTypeEnum::ON_DISCONNECT_FAIL,
                                      mock_adapter_,
                                      mac_address_,
                                      application_id_,
@@ -676,11 +645,8 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
  * Tests which check correct handling and receiving events
  */
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
-
   TestAsyncWaiter waiter;
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_DONE,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -696,11 +662,8 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
-
   TestAsyncWaiter waiter;
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_FAIL,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -716,10 +679,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
-
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_DEVICE_LIST_UPDATED,
                                    mock_adapter_,
                                    dev_info_.mac_address(),
                                    application_id_,
@@ -772,10 +732,7 @@ TEST_F(TransportManagerImplTest, CheckReceiveEvent) {
 
 TEST_F(TransportManagerImplTest, CheckReceiveFailedEvent) {
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL);
-
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_RECEIVED_FAIL,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -790,10 +747,7 @@ TEST_F(TransportManagerImplTest, CheckReceiveFailedEvent) {
 
 TEST_F(TransportManagerImplTest, CheckUnexpectedDisconnect) {
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT);
-
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -875,10 +829,12 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_ConnectionNotExist) {
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_TMIsNotInitialized) {
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
-  TransportAdapterEvent test_event(
-      type, NULL, mac_address_, application_id_, test_message_, error_);
+  TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_DONE,
+                                   NULL,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
   // Check before Act
   UninitializeTM();
   // Act and Assert
@@ -1012,10 +968,7 @@ TEST_F(TransportManagerImplTest,
        CheckEventOnDisconnectDone_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE);
-
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_DISCONNECT_DONE,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -1031,10 +984,7 @@ TEST_F(TransportManagerImplTest,
 TEST_F(TransportManagerImplTest, CheckEventOnSendDone_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE);
-
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_SEND_DONE,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -1052,9 +1002,7 @@ TEST_F(TransportManagerImplTest, CheckEventOnSendDone_ConnectionNotExist) {
 TEST_F(TransportManagerImplTest, CheckEventOnReceivedDone_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE);
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_RECEIVED_DONE,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -1071,9 +1019,7 @@ TEST_F(TransportManagerImplTest, CheckEventOnReceivedDone_ConnectionNotExist) {
 TEST_F(TransportManagerImplTest, CheckEventOnReceivedFail_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL);
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_RECEIVED_FAIL,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
@@ -1088,9 +1034,7 @@ TEST_F(TransportManagerImplTest,
        CheckEventOnUnexpectedDisconnect_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
-  const int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT);
-  TransportAdapterEvent test_event(type,
+  TransportAdapterEvent test_event(EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
                                    mock_adapter_,
                                    mac_address_,
                                    application_id_,
