@@ -167,5 +167,92 @@ void CommandImpl::ReplaceHMIByMobileAppId(
   }
 }
 
+bool CommandImpl::CheckSyntax(const std::string& str,
+                              bool allow_empty_line) const {
+  if (std::string::npos != str.find_first_of("\t\n")) {
+    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    return false;
+  }
+  if (std::string::npos != str.find("\\n") ||
+      std::string::npos != str.find("\\t")) {
+    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    return false;
+  }
+  if (!allow_empty_line) {
+    if ((std::string::npos == str.find_first_not_of(' '))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CommandImpl::ValidateSmartString(
+    const smart_objects::SmartObject& obj) const {
+  const char* str = obj.asCharArray();
+  const bool is_str_empty = str && !str[0];
+  return is_str_empty || CheckSyntax(str);
+}
+
+bool CommandImpl::ValidateSmartMapStrings(
+    const smart_objects::SmartObject& obj,
+    std::set<std::string>::const_iterator key) const {
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_Map;
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_Array;
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_String;
+
+  const smart_objects::SmartObject& value = obj[*key];
+  switch (value.getType()) {
+    case SmartType_Array:
+    case SmartType_Map: {
+      return ValidateSmartObjectStrings(value);
+    }
+    case SmartType_String: {
+      return ValidateSmartString(value);
+    }
+    default:
+      // Catch SmartType_Integer or SmartType_Double
+      break;
+  }
+  return true;
+}
+
+bool CommandImpl::ValidateSmartObjectStrings(
+    const smart_objects::SmartObject& obj) const {
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_Map;
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_Array;
+  using NsSmartDeviceLink::NsSmartObjects::SmartType_String;
+
+  switch (obj.getType()) {
+    case SmartType_Array: {
+      for (uint32_t i = 0; i < obj.length(); ++i) {
+        if (!ValidateSmartObjectStrings(obj[i])) {
+          LOG4CXX_WARN(logger_, "Invalid array item value at index: " << i);
+          return false;
+        }
+      }
+      break;
+    }
+    case SmartType_Map: {
+      const std::set<std::string> keys = obj.enumerate();
+      for (std::set<std::string>::const_iterator key = keys.begin();
+           key != keys.end();
+           key++) {
+        if (!ValidateSmartMapStrings(obj, key)) {
+          LOG4CXX_WARN(logger_, "Invalid map value at key: " << *key);
+          return false;
+        }
+      }
+      break;
+    }
+    case SmartType_String: {
+      return ValidateSmartString(obj);
+    }
+    default:
+      // Catch SmartType_Integer or SmartType_Double
+      break;
+  }
+  return true;
+}
+
 }  // namespace commands
 }  // namespace application_manager

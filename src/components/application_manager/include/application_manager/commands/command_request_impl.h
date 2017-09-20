@@ -171,14 +171,6 @@ class CommandRequestImpl : public CommandImpl,
                     const smart_objects::SmartObject* response_params = NULL);
 
   /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
-
-  /*
    * @brief Sends HMI request
    *
    * @param function_id HMI request ID
@@ -209,6 +201,14 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
  protected:
+  /**
+   * @brief Checks is specified HMI interface available
+   * @param interface to check
+   * @return true if HMI interface available false otherwise
+   */
+  bool CheckHMIInterfaceAvailability(
+      const HmiInterfaces::InterfaceID interface) const;
+
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
