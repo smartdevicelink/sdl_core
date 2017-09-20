@@ -935,6 +935,36 @@
   </element>
 </enum>
 
+<enum name="FuelType">
+  <element name="GASOLINE" />
+  <element name="DIESEL" />
+  <element name="CNG">
+    <description>
+      For vehicles using compressed natural gas.
+    </description>
+  </element>
+  <element name="LPG">
+    <description>
+      For vehicles using liquefied petroleum gas.
+    </description>
+  </element>
+  <element name="HYDROGEN">
+    <description>For FCEV (fuel cell electric vehicle).</description>
+  </element>
+  <element name="BATTERY">
+    <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+  </element>
+</enum>
+
+<struct name="FuelRange">
+  <param name="type" type="FuelType" mandatory="false"/>
+  <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+    <description>
+      The estimate range in KM the vehicle can travel based on fuel level and consumption.
+    </description>
+  </param>
+</struct>
+
 <enum name="VehicleDataResultCode">
   <description>Enumeration that describes possible result codes of a vehicle data entry request.</description>
   <element name="SUCCESS" internal_name="VDRC_SUCCESS"/>
@@ -978,6 +1008,7 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_FUELRANGE" />
 </enum>
 
 <enum name="WiperStatus">
@@ -4250,6 +4281,9 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
         <!-- / Ford Specific Data Items -->
   </function>
   <function name="SubscribeVehicleData" messagetype="response">
@@ -4309,6 +4343,9 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4392,6 +4429,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4467,6 +4507,9 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4548,6 +4591,10 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4563,6 +4610,7 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="GetVehicleData" messagetype="response">
     <param name="gps" type="Common.GPSData" mandatory="false">
@@ -4625,6 +4673,10 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4640,6 +4692,7 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="OnVehicleData" messagetype="notification">
     <description>Callback for the periodic and non periodic vehicle data read function.</description>
@@ -4703,6 +4756,10 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4718,6 +4775,7 @@
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
+        <!-- / Ford Specific Data Items -->
   </function>
 </interface>
 
