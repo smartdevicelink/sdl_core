@@ -137,12 +137,20 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  /**
+   * @brief OnDeviceSwitchingStart notifies listeners on device transport
+   * switching start
+   * @param device_uid the id of the device which has to be switched.
+   */
   void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
 
+  /**
+   * @brief OnDeviceSwitchFinish notifies listeners on device transport
+   * switching completion
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
   void OnDeviceSwitchFinish(
       const transport_manager::DeviceUID& device_uid) FINAL;
-
-  void OnDeviceConnectionSwitched(const std::string& device_mac) FINAL;
 
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(

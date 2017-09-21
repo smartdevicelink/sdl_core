@@ -408,8 +408,20 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   std::string DeviceName(const DeviceUID& device_id) const OVERRIDE;
 
+  /**
+   * @brief StopDevice looks for specific device in devices list and calls
+   * Stop() interface of that device
+   * @param device_id unique device identifier that has to be stopped.
+   */
   void StopDevice(const DeviceUID& device_id) const FINAL;
 
+  /**
+   * @brief DeviceSwitched is triggered for adapter to proceed with possible
+   * further switching steps required on device side. E.g. to notify device
+   * on end of switching so it can disconnect transport being switched from.
+   * This is default implemenation does nothing. Must be overloaded if needed.
+   * @param device_handle Device id to notify on event
+   */
   void DeviceSwitched(const DeviceUID& device_handle) FINAL;
 
   /**

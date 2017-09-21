@@ -71,8 +71,20 @@ class HmiState {
     STATE_ID_EMBEDDED_NAVI
   };
 
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   */
   HmiState(utils::SharedPtr<Application> app,
            const ApplicationManager& app_mngr);
+
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   * @param state_id HMI state to assign
+   */
   HmiState(utils::SharedPtr<Application> app,
            const ApplicationManager& app_mngr,
            StateID state_id);
@@ -195,6 +207,11 @@ class HmiState {
    */
   bool is_voice_communication_app() const;
 
+  /**
+   * @brief is_mobile_projection_app checks if application of 'projection'
+   * HMI type
+   * @return True if application is of 'projection' HMI type, otherwise - false
+   */
   bool is_mobile_projection_app() const;
 
  private:

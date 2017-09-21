@@ -69,17 +69,15 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnDeviceRemoved(const DeviceInfo& device_info) OVERRIDE {}
 
   /**
-   * @brief OnDeviceSwitching allows to notify listener that device is going
-   * to switch its connection.
-   *
+   * @brief OnDeviceSwitchingStart allows to notify listener that device is
+   * going to switch its connection. This default implementation does nothing.
    * @param device_uid the id of the device which has to be switched.
    */
   void OnDeviceSwitchingStart(const DeviceUID& device_uid) OVERRIDE {}
 
   /**
    * @brief OnDeviceSwitchFinish notifies listener that device reconnection
-   * fails due to some reason.
-   *
+   * fails due to some reason. This default implementation does nothing.
    * @param device_uid the id for the device which is fails to reconnect.
    */
   void OnDeviceSwitchFinish(const DeviceUID& device_uid) OVERRIDE {}
