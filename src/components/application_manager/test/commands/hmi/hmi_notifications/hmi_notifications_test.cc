@@ -1595,7 +1595,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
@@ -1645,7 +1648,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))

@@ -94,7 +94,7 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
   allowed_to_terminate_ = allowed;
 }
 
-bool CommandImpl::ReplaceMobileByHMIAppId(
+bool CommandImpl::ReplaceMobileWithHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
@@ -104,7 +104,7 @@ bool CommandImpl::ReplaceMobileByHMIAppId(
       return false;
     }
     LOG4CXX_DEBUG(logger_,
-                  "ReplaceMobileByHMIAppId from "
+                  "ReplaceMobileWithHMIAppId from "
                       << message[strings::app_id].asInt() << " to "
                       << application->hmi_app_id());
     message[strings::app_id] = application->hmi_app_id();
@@ -114,7 +114,7 @@ bool CommandImpl::ReplaceMobileByHMIAppId(
         smart_objects::SmartArray* message_array = message.asArray();
         smart_objects::SmartArray::iterator it = message_array->begin();
         for (; it != message_array->end(); ++it) {
-          ReplaceMobileByHMIAppId(*it);
+          ReplaceMobileWithHMIAppId(*it);
         }
         break;
       }
@@ -123,7 +123,7 @@ bool CommandImpl::ReplaceMobileByHMIAppId(
         std::set<std::string>::const_iterator key = keys.begin();
         for (; key != keys.end(); ++key) {
           std::string k = *key;
-          ReplaceMobileByHMIAppId(message[*key]);
+          ReplaceMobileWithHMIAppId(message[*key]);
         }
         break;
       }
@@ -134,7 +134,44 @@ bool CommandImpl::ReplaceMobileByHMIAppId(
   return true;
 }
 
-bool CommandImpl::ReplaceHMIByMobileAppId(
+// DEPRECATED
+void CommandImpl::ReplaceMobileByHMIAppId(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+        application_manager_.application(message[strings::app_id].asUInt());
+    if (application.valid()) {
+      LOG4CXX_DEBUG(logger_,
+                    "ReplaceMobileWithHMIAppId from "
+                        << message[strings::app_id].asInt() << " to "
+                        << application->hmi_app_id());
+      message[strings::app_id] = application->hmi_app_id();
+    }
+  } else {
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for (; it != message_array->end(); ++it) {
+          ReplaceMobileWithHMIAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          std::string k = *key;
+          ReplaceMobileWithHMIAppId(message[*key]);
+        }
+        break;
+      }
+      default: { break; }
+    }
+  }
+}
+
+bool CommandImpl::ReplaceHMIWithMobileAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
@@ -146,10 +183,50 @@ bool CommandImpl::ReplaceHMIByMobileAppId(
       return false;
     }
     LOG4CXX_DEBUG(logger_,
-                  "ReplaceHMIByMobileAppId from "
+                  "ReplaceHMIWithMobileAppId from "
                       << message[strings::app_id].asInt() << " to "
                       << application->app_id());
     message[strings::app_id] = application->app_id();
+  } else {
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for (; it != message_array->end(); ++it) {
+          ReplaceHMIWithMobileAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          ReplaceHMIWithMobileAppId(message[*key]);
+        }
+        break;
+      }
+      default: { break; }
+    }
+  }
+
+  return true;
+}
+
+// DEPRECATED
+void CommandImpl::ReplaceHMIByMobileAppId(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+        application_manager_.application_by_hmi_app(
+            message[strings::app_id].asUInt());
+
+    if (application.valid()) {
+      LOG4CXX_DEBUG(logger_,
+                    "ReplaceHMIByMobileAppId from "
+                        << message[strings::app_id].asInt() << " to "
+                        << application->app_id());
+      message[strings::app_id] = application->app_id();
+    }
   } else {
     switch (message.getType()) {
       case smart_objects::SmartType::SmartType_Array: {
@@ -171,8 +248,6 @@ bool CommandImpl::ReplaceHMIByMobileAppId(
       default: { break; }
     }
   }
-
-  return true;
 }
 
 }  // namespace commands

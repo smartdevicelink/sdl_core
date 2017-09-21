@@ -44,7 +44,7 @@ NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message,
 NotificationToHMI::~NotificationToHMI() {}
 
 bool NotificationToHMI::Init() {
-  return ReplaceMobileByHMIAppId(*message_);
+  return ReplaceMobileWithHMIAppId(*message_);
 }
 
 bool NotificationToHMI::CleanUp() {

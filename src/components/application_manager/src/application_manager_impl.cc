@@ -839,6 +839,18 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   return state;
 }
 
+HmiStatePtr ApplicationManagerImpl::CreateRegularState(
+    uint32_t app_id,
+    mobile_apis::HMILevel::eType hmi_level,
+    mobile_apis::AudioStreamingState::eType audio_state,
+    mobile_apis::SystemContext::eType system_context) const {
+  HmiStatePtr state(new HmiState(app_id, *this));
+  state->set_hmi_level(hmi_level);
+  state->set_audio_streaming_state(audio_state);
+  state->set_system_context(system_context);
+  return state;
+}
+
 bool ApplicationManagerImpl::IsStateActive(HmiState::StateID state_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Checking for active state id " << state_id);

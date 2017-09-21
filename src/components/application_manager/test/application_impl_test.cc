@@ -130,7 +130,9 @@ class ApplicationImplTest : public ::testing::Test {
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
   HmiStatePtr testState = utils::MakeShared<HmiState>(
-      app_impl, mock_application_manager_, state_id);
+      static_cast<utils::SharedPtr<Application> >(app_impl),
+      mock_application_manager_,
+      state_id);
   testState->set_hmi_level(test_lvl);
   testState->set_audio_streaming_state(audiostate);
   testState->set_system_context(syst_context);

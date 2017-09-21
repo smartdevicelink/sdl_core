@@ -610,6 +610,11 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
+// DEPRECATED
+void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
+  device_id_ = device;
+}
+
 uint32_t ApplicationImpl::get_grammar_id() const {
   return grammar_id_;
 }

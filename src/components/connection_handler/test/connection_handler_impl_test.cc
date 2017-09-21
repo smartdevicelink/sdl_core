@@ -342,9 +342,10 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
   uint32_t app_id = 0;
   const uint32_t testid = SessionHash(uid_, start_session_id_);
 
+  connection_handler::DeviceHandle null_handle = 0;
   EXPECT_EQ(0,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, NULL));
+                connection_key_, &app_id, NULL, &null_handle));
   EXPECT_EQ(testid, app_id);
 }
 
@@ -352,9 +353,10 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_SessionNotStarted) {
   AddTestDeviceConnection();
 
   uint32_t app_id = 0;
+  connection_handler::DeviceHandle null_handle = 0;
   EXPECT_EQ(-1,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, NULL));
+                connection_key_, &app_id, NULL, &null_handle));
 }
 
 TEST_F(ConnectionHandlerTest, GetDeviceID) {

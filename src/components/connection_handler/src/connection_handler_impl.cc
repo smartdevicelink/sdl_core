@@ -673,7 +673,56 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key,
     uint32_t* app_id,
     std::list<int32_t>* sessions_list,
-    transport_manager::DeviceHandle* device_id) const {
+    connection_handler::DeviceHandle* device_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const int32_t error_result = -1;
+  transport_manager::ConnectionUID conn_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(key, &conn_handle, &session_id);
+
+  ConnectionList::const_iterator it = connection_list_.find(conn_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Connection not found for key: " << key);
+    return error_result;
+  }
+
+  const Connection& connection = *it->second;
+  const SessionMap session_map = connection.session_map();
+  if (0 == session_id || session_map.end() == session_map.find(session_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Session not found in connection: "
+                      << static_cast<int32_t>(conn_handle));
+    return error_result;
+  }
+
+  if (device_id) {
+    *device_id = connection.connection_device_handle();
+  }
+  if (app_id) {
+    *app_id = KeyFromPair(conn_handle, session_id);
+  }
+  if (sessions_list) {
+    sessions_list->clear();
+
+    SessionMap::const_iterator session_it = session_map.begin();
+    for (; session_map.end() != session_it; ++session_it) {
+      sessions_list->push_back(KeyFromPair(conn_handle, it->first));
+    }
+  }
+
+  LOG4CXX_INFO(logger_,
+               "Connection " << static_cast<int32_t>(conn_handle) << " has "
+                             << session_map.size() << " sessions.");
+  return 0;
+}
+
+// DEPRECATED
+int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
+    uint32_t key,
+    uint32_t* app_id,
+    std::list<int32_t>* sessions_list,
+    uint32_t* device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const int32_t error_result = -1;
