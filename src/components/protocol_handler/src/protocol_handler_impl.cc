@@ -294,7 +294,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
               ? &defaultProtocolVersion
               : ProtocolPacket::ProtocolVersion::min(full_version,
                                                      defaultProtocolVersion);
-      char protocolVersionString[255];
+      char protocolVersionString[256];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
@@ -1214,7 +1214,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       , hash_id_(hash_id)
       , service_type_(service_type)
       , force_protected_service_(force_protected_service)
-      , full_version_() {}
+      , full_version_()
+      , payload_(NULL) {}
   StartSessionHandler(uint32_t connection_key,
                       ProtocolHandlerImpl* protocol_handler,
                       SessionObserver& session_observer,

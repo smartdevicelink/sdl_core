@@ -2268,17 +2268,12 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   }
 
   if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
-    application_manager::BinaryData* binaryData =
-        new application_manager::BinaryData(
-            message.getElement(jhs::S_PARAMS)
-                .getElement(strings::binary_data)
-                .asBinary());
+    application_manager::BinaryData binaryData(
+        message.getElement(jhs::S_PARAMS)
+            .getElement(strings::binary_data)
+            .asBinary());
 
-    if (NULL == binaryData) {
-      LOG4CXX_ERROR(logger_, "Null pointer");
-      return false;
-    }
-    output.set_binary_data(binaryData);
+    output.set_binary_data(&binaryData);
   }
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
