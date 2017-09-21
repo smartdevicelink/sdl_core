@@ -626,6 +626,21 @@ class ApplicationManager {
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
 
+  /**
+   * DEPRECATED
+   * @brief CreateRegularState create regular HMI state for application
+   * @param app_id Application id
+   * @param hmi_level of returned state
+   * @param audio_state of returned state
+   * @param system_context of returned state
+   * @return new regular HMI state
+   */
+  virtual HmiStatePtr CreateRegularState(
+      uint32_t app_id,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::SystemContext::eType system_context) const = 0;
+
   virtual void SendAudioPassThroughNotification(
       uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
 

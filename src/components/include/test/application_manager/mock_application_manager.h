@@ -248,6 +248,14 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::HMILevel::eType hmi_level,
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::SystemContext::eType system_context));
+  // DEPRECATED
+  MOCK_CONST_METHOD4(CreateRegularState,
+                     application_manager::HmiStatePtr(
+                         uint32_t app_id,
+                         mobile_apis::HMILevel::eType hmi_level,
+                         mobile_apis::AudioStreamingState::eType audio_state,
+                         mobile_apis::SystemContext::eType system_context));
+
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
   MOCK_CONST_METHOD2(CanAppStream,
@@ -271,9 +279,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
 
-  MOCK_METHOD1(ReplaceMobileByHMIAppId,
+  MOCK_METHOD1(ReplaceMobileWithHMIAppId,
                void(smart_objects::SmartObject& message));
-  MOCK_METHOD1(ReplaceHMIByMobileAppId,
+  MOCK_METHOD1(ReplaceHMIWithMobileAppId,
                void(smart_objects::SmartObject& message));
   MOCK_METHOD1(GetAvailableSpaceForApp,
                uint32_t(const std::string& folder_name));

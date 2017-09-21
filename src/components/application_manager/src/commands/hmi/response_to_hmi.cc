@@ -44,7 +44,7 @@ ResponseToHMI::ResponseToHMI(const MessageSharedPtr& message,
 ResponseToHMI::~ResponseToHMI() {}
 
 bool ResponseToHMI::Init() {
-  return ReplaceMobileByHMIAppId(*message_);
+  return ReplaceMobileWithHMIAppId(*message_);
 }
 
 bool ResponseToHMI::CleanUp() {

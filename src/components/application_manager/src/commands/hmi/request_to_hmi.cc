@@ -66,7 +66,7 @@ RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
 RequestToHMI::~RequestToHMI() {}
 
 bool RequestToHMI::Init() {
-  return ReplaceMobileByHMIAppId(*message_);
+  return ReplaceMobileWithHMIAppId(*message_);
 }
 
 bool RequestToHMI::CleanUp() {
