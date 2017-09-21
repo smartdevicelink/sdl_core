@@ -458,7 +458,6 @@ class ApplicationImpl : public virtual Application,
   uint32_t delete_file_in_none_count_;
   uint32_t list_files_in_none_count_;
   std::string app_icon_path_;
-  connection_handler::DeviceHandle device_;
   const std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
   std::string bundle_id_;

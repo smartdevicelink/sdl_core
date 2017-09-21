@@ -196,8 +196,6 @@ class TransportManagerImpl
   void RunAppOnDevice(const DeviceHandle device_handle,
                       const std::string& bundle_id) OVERRIDE;
 
-  void OnDeviceConnectionSwitched(const DeviceHandle handle) FINAL;
-
   /**
    * @brief Post event in the event queue.
    *
@@ -447,6 +445,18 @@ class TransportManagerImpl
   ConnectionInternal* GetActiveConnection(const DeviceUID& device,
                                           const ApplicationHandle& application);
 
+  /**
+   * @brief TryDeviceSwitch in case USB device is connected and there is
+   * appropriate Bluetooth device with same UUID stops Bluetooth device and
+   * initiates switching sequence for upper layers. Also starts timer to wait
+   * for sequence to complete.
+   * @param ta Transport adapter having device to try switching sequence
+   * @param value Value from device-to-adapter container having all the data
+   * required
+   * At the moment implementation implies only IAP2-Bluetooth to IAP2-USB
+   * switching
+   * @return True if sequence has been successfully initiated, otherwise - false
+   */
   bool TryDeviceSwitch(TransportAdapter* ta,
                        DeviceToAdapterMap::iterator value);
 
@@ -465,12 +475,22 @@ class TransportManagerImpl
                 unsigned int frame_size,
                 unsigned char** frame);
 
+  /**
+   * @brief OnDeviceAdded processes new device detected by specific transport
+   * adapter
+   * @param ta Pointer to transport adapter
+   */
   void OnDeviceAdded(TransportAdapter* ta);
   void OnDeviceListUpdated(TransportAdapter* ta);
   void DisconnectAllDevices();
   void TerminateAllAdapters();
   int InitAllAdapters();
   static Connection convert(const ConnectionInternal& p);
+
+  /**
+   * @brief ReconnectionTimeout notifies upper layers on switching sequence
+   * timeout expiration
+   */
   void ReconnectionTimeout();
 
   /**

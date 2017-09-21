@@ -74,7 +74,6 @@ class MockTransportManager : public ::transport_manager::TransportManager,
   MOCK_CONST_METHOD1(Visibility, int(const bool&));
   MOCK_METHOD1(SetTelemetryObserver,
                void(transport_manager::TMTelemetryObserver* observer));
-  MOCK_METHOD1(OnDeviceConnectionSwitched, void(const DeviceHandle handle));
 };
 
 }  // namespace transport_manager_test

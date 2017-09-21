@@ -85,6 +85,11 @@ class TransportAdapterListenerImpl
    */
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
 
+  /**
+   * @brief OnDeviceAdded is triggered by transport adapter on new device
+   * coming and sends ON_DEVICE_ADDED event to transport manager
+   * @param device_uid Device id of new device
+   */
   virtual void OnDeviceAdded(DeviceUID device_uid);
 
   virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);

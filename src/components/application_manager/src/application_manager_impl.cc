@@ -98,6 +98,12 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 }
 
+/**
+ * @brief device_id_comparator is predicate to compare application device id
+ * @param device_id Device id to compare with
+ * @param app Application pointer
+ * @return True if device id of application matches to device id passed
+ */
 bool device_id_comparator(const std::string& device_id,
                           ApplicationSharedPtr app) {
   LOG4CXX_DEBUG(logger_,
@@ -107,6 +113,13 @@ bool device_id_comparator(const std::string& device_id,
   return device_id == app->mac_address();
 }
 
+/**
+ * @brief policy_app_id_comparator is predicate to compare policy application
+ * ids
+ * @param policy_app_id Policy id of application
+ * @param app Application pointer
+ * @return True if policy id of application matches to policy id passed
+ */
 bool policy_app_id_comparator(const std::string& policy_app_id,
                               ApplicationSharedPtr app) {
   DCHECK_OR_RETURN(app, false);
@@ -1515,6 +1528,17 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
                 "OnServiceEndedCallback for service "
                     << type << " with reason " << close_reason
                     << " in session 0x" << std::hex << session_key);
+
+  auto app = application(static_cast<uint32_t>(session_key));
+  if (!app) {
+    return;
+  }
+
+  if (IsAppInReconnectMode(app->policy_app_id())) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application is in reconnection list and won't be closed.");
+    return;
+  }
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "Remove application.");
@@ -3681,7 +3705,6 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
   return forbidden_applications.find(name) != forbidden_applications.end();
 }
 
-// TODO: check its usage
 bool ApplicationManagerImpl::IsAppInReconnectMode(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -4013,8 +4036,6 @@ void ApplicationManagerImpl::ProcessReconnection(
   DCHECK_OR_RETURN_VOID(application->mac_address() == device_mac);
 
   EraseAppFromReconnectionList(application);
-
-  connection_handler().OnDeviceConnectionSwitched(device_mac);
 
   SwitchApplication(application, connection_key, new_device_id);
 

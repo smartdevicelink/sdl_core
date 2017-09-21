@@ -501,7 +501,7 @@ class ApplicationManagerImpl
    */
   void SetAllAppsAllowed(const bool allowed) OVERRIDE;
 
- /**
+  /**
    * @brief CreateRegularState create regular HMI state for application
    * @param app Application
    * @param hmi_level of returned state
@@ -853,10 +853,23 @@ class ApplicationManagerImpl
   void OnFindNewApplicationsRequest() OVERRIDE;
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
+
+  /**
+   * @brief OnDeviceSwitchingStart is invoked on device transport switching
+   * start (e.g. from Bluetooth to USB) and creates waiting list of applications
+   * expected to be re-registered after switching is complete
+   * @param device_uid UID of device being switched
+   */
   void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
 
+  /**
+   * @brief OnDeviceSwitchFinish is invoked on device trasport switching end
+   * i.e. timeout for switching is expired, unregisters applications from
+   * waiting list which haven't been re-registered and clears the waiting list
+   * @param device_uid UID of device being switched
+   */
   void OnDeviceSwitchFinish(const std::string& device_uid) FINAL;
-  
+
   DEPRECATED bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
@@ -1232,6 +1245,13 @@ class ApplicationManagerImpl
   bool IsAppsQueriedFrom(
       const connection_handler::DeviceHandle handle) const OVERRIDE;
 
+  /**
+   * @brief IsAppInReconnectMode check if application belongs to session
+   * affected by transport switching at the moment by checking internal
+   * waiting list prepared on switching start
+   * @param policy_app_id Application id
+   * @return True if application is in the waiting list, otherwise - false
+   */
   bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
 
   bool IsStopping() const OVERRIDE {
@@ -1434,7 +1454,8 @@ class ApplicationManagerImpl
    * @param service_type Type of service to start
    * @return True on success, false on fail
    */
-  DEPRECATED bool StartNaviService(uint32_t app_id,
+  // DEPRECATED
+  bool StartNaviService(uint32_t app_id,
                         protocol_handler::ServiceType service_type);
 
   /**
@@ -1671,6 +1692,10 @@ class ApplicationManagerImpl
   std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
 
+  /**
+   * @brief ReregisterWaitList is list of applications expected to be
+   * re-registered after transport switching is complete
+   */
   typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
   ReregisterWaitList reregister_wait_list_;
 

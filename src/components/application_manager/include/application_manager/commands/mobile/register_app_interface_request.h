@@ -78,13 +78,16 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  /**
+   * @brief The AppicationType enum defines whether application is newly
+   * registered or existing and being switched over another transport
+   */
   enum class AppicationType { kNewApplication, kSwitchedApplication };
 
   /**
-   * @brief Sends RegisterAppInterface response to mobile
-   *
-   *@param application_impl application
-   *
+   * @brief Prepares and sends RegisterAppInterface response to mobile
+   * considering application type
+   * @param app_type Type of application
    **/
   void SendRegisterAppInterfaceResponseToMobile(AppicationType app_type);
 

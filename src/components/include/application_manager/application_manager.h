@@ -545,6 +545,13 @@ class ApplicationManager {
   virtual bool IsApplicationForbidden(
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
+  /**
+   * @brief IsAppInReconnectMode check if application belongs to session
+   * affected by transport switching at the moment
+   * @param policy_app_id Application id
+   * @return True if application is registered within session being switched,
+   * otherwise - false
+   */
   virtual bool IsAppInReconnectMode(const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;

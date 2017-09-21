@@ -47,11 +47,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 DeviceTypes devicesType = {
     std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
-    std::make_pair(DeviceType::PASA_AOA, std::string("USB_AOA")),
     std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
     std::make_pair(DeviceType::IOS_BT, std::string("IOS_BLUETOOTH")),
     std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(DeviceType::PASA_BLUETOOTH, std::string("BLUETOOTH")),
     std::make_pair(DeviceType::TCP, std::string("WIFI"))};
 }
 

@@ -132,8 +132,6 @@ class TransportManager {
   virtual void RunAppOnDevice(const DeviceHandle device_handle,
                               const std::string& bundle_id) = 0;
 
-  virtual void OnDeviceConnectionSwitched(const DeviceHandle handle) = 0;
-
   /**
    * @brief Post event in the event queue.
    *

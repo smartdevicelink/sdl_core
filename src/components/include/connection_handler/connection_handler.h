@@ -80,8 +80,6 @@ class ConnectionHandler {
   virtual void RunAppOnDevice(const std::string& device_handle,
                               const std::string& bundle_id) const = 0;
 
-  virtual void OnDeviceConnectionSwitched(const std::string& device_mac) = 0;
-
   virtual void ConnectToAllDevices() = 0;
 
   /**

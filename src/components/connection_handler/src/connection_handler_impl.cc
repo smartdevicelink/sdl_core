@@ -913,19 +913,6 @@ void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
   LOG4CXX_WARN(logger_, "No apps found on device " << device_mac);
 }
 
-void ConnectionHandlerImpl::OnDeviceConnectionSwitched(
-    const std::string& device_mac) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto device_it = device_list_.begin();
-  for (; device_it != device_list_.end(); ++device_it) {
-    const connection_handler::Device& device = device_it->second;
-    if (device.mac_address() == device_mac) {
-      transport_manager_.OnDeviceConnectionSwitched(device.device_handle());
-      return;
-    }
-  }
-}
-
 void ConnectionHandlerImpl::ConnectToAllDevices() {
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end();
        ++i) {

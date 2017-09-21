@@ -379,13 +379,6 @@ void TransportManagerImpl::RunAppOnDevice(const DeviceHandle device_handle,
   return;
 }
 
-void TransportManagerImpl::OnDeviceConnectionSwitched(
-    const DeviceHandle handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  UNUSED(handle);
-  // At the moment does nothing
-}
-
 int TransportManagerImpl::ReceiveEventFromDevice(
     const TransportAdapterEvent& event) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapterEvent: " << &event);

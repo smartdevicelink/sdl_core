@@ -117,7 +117,6 @@ ApplicationImpl::ApplicationImpl(
     , put_file_in_none_count_(0)
     , delete_file_in_none_count_(0)
     , list_files_in_none_count_(0)
-    , device_(0)
     , mac_address_(mac_address)
     , device_id_(device_id)
     , usage_report_(mobile_app_id, statistics_manager)
