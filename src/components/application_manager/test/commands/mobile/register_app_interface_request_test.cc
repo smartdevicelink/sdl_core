@@ -152,6 +152,9 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
+    ON_CALL(app_mngr_, IsAppInReconnectMode(_)).WillByDefault(Return(false));
+    ON_CALL(app_mngr_, application_by_policy_id(_))
+        .WillByDefault(Return(ApplicationSharedPtr()));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
     ON_CALL(
@@ -213,8 +216,6 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
-      .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
@@ -279,8 +280,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
-      .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
@@ -354,6 +353,53 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .Times(2);
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterAppInterfaceRequest_Reregister) {
+  InitBasicMessage();
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
+
+  EXPECT_CALL(mock_policy_handler_, AddApplication(_, _)).Times(0);
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
+      .Times(0);
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
+      .Times(0);
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_ChangeRegistration))).Times(0);
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_ChangeRegistration))).Times(0);
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
 
   command_->Run();
 }
