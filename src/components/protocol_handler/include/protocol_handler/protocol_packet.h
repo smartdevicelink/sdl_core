@@ -81,11 +81,14 @@ class ProtocolPacket {
     uint8_t patchVersion;
     static inline int16_t cmp(const ProtocolVersion& version1,
                               const ProtocolVersion& version2) {
-      int16_t diff = static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
+      int16_t diff =
+          static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
       if (diff == 0) {
-        diff = static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
+        diff =
+            static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
         if (diff == 0) {
-          diff = static_cast<int16_t>(version1.patchVersion - version2.patchVersion);
+          diff = static_cast<int16_t>(version1.patchVersion -
+                                      version2.patchVersion);
         }
       }
       return diff;

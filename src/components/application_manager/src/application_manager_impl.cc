@@ -2269,9 +2269,9 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
     application_manager::BinaryData binaryData(
-            message.getElement(jhs::S_PARAMS)
-                .getElement(strings::binary_data)
-                .asBinary());
+        message.getElement(jhs::S_PARAMS)
+            .getElement(strings::binary_data)
+            .asBinary());
 
     output.set_binary_data(&binaryData);
   }
