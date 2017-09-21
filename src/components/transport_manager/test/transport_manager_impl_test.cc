@@ -71,7 +71,7 @@ class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
       : mock_adapter_(NULL)
-      , tm_(settings)
+      , tm_(mock_transport_manager_settings_)
       , mac_address_("MA:CA:DR:ES:S")
       , connection_type_("BTMAC")
       , device_name_("TestDeviceName")
@@ -286,7 +286,26 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*mock_adapter_, Terminate());
     ASSERT_EQ(E_SUCCESS, tm_.Stop());
   }
-  MockTransportManagerSettings settings;
+
+  void SetAddDeviceExpectations(MockTransportAdapter* mock_adapter,
+                                transport_adapter::DeviceType type) {
+    EXPECT_CALL(*mock_adapter, GetDeviceList())
+        .WillRepeatedly(Return(device_list_));
+
+    EXPECT_CALL(*mock_adapter, DeviceName(dev_info_.mac_address()))
+        .WillRepeatedly(Return(dev_info_.name()));
+
+    EXPECT_CALL(*mock_adapter, GetConnectionType())
+        .WillRepeatedly(Return(dev_info_.connection_type()));
+
+    EXPECT_CALL(*mock_adapter, GetDeviceType()).WillRepeatedly(Return(type));
+
+    EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+    EXPECT_CALL(*tm_listener_, OnDeviceFound(_));
+  }
+
+  MockTransportManagerSettings mock_transport_manager_settings_;
 #ifdef TELEMETRY_MONITOR
   MockTMTelemetryObserver mock_metric_observer_;
 #endif  // TELEMETRY_MONITOR
@@ -901,77 +920,6 @@ TEST_F(TransportManagerImplTest,
 }
 
 TEST_F(TransportManagerImplTest,
-       UpdateDeviceList_AddDevices_TwoTransportAdapters) {
-  // Arrange
-  MockTransportAdapter* second_mock_adapter = new MockTransportAdapter();
-  device_list_.push_back(dev_info_.mac_address());
-  // Check before Act
-  EXPECT_CALL(*second_mock_adapter, AddListener(_));
-  EXPECT_CALL(*second_mock_adapter, IsInitialised()).WillOnce(Return(true));
-  EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(second_mock_adapter));
-
-  // Act and Assert
-  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
-      .WillOnce(Return(device_list_));
-  EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
-      .WillOnce(Return(dev_info_.name()));
-  EXPECT_CALL(*second_mock_adapter, GetConnectionType())
-      .WillRepeatedly(Return(dev_info_.connection_type()));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  tm_.UpdateDeviceList(second_mock_adapter);
-
-  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
-  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
-      .WillOnce(Return(dev_info_.name()));
-  EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillRepeatedly(Return(dev_info_.connection_type()));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  tm_.UpdateDeviceList(mock_adapter_);
-
-  device_list_.pop_back();
-}
-
-TEST_F(TransportManagerImplTest,
-       UpdateDeviceList_RemoveDevices_TwoTransportAdapters) {
-  // Arrange
-  MockTransportAdapter* second_mock_adapter = new MockTransportAdapter();
-  device_list_.push_back(dev_info_.mac_address());
-  // Check before Act
-  EXPECT_CALL(*second_mock_adapter, AddListener(_));
-  EXPECT_CALL(*second_mock_adapter, IsInitialised()).WillOnce(Return(true));
-  EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(second_mock_adapter));
-
-  // Act and Assert
-  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
-      .WillOnce(Return(device_list_));
-  EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
-      .WillOnce(Return(dev_info_.name()));
-  EXPECT_CALL(*second_mock_adapter, GetConnectionType())
-      .WillRepeatedly(Return(dev_info_.connection_type()));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  tm_.UpdateDeviceList(second_mock_adapter);
-
-  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
-  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
-      .WillOnce(Return(dev_info_.name()));
-  EXPECT_CALL(*mock_adapter_, GetConnectionType())
-      .WillRepeatedly(Return(dev_info_.connection_type()));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  tm_.UpdateDeviceList(mock_adapter_);
-
-  device_list_.pop_back();
-
-  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
-      .WillOnce(Return(device_list_));
-  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
-  tm_.UpdateDeviceList(second_mock_adapter);
-
-  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
-  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
-  tm_.UpdateDeviceList(mock_adapter_);
-}
-
-TEST_F(TransportManagerImplTest,
        CheckEventOnDisconnectDone_ConnectionNotExist) {
   // SetUp does not add connections
   // Arrange
@@ -1057,6 +1005,139 @@ TEST_F(TransportManagerImplTest, RunAppOnDevice_TransportAdapterFound_SUCCESS) {
   const std::string bundle_id = "test_bundle_id";
   EXPECT_CALL(*mock_adapter_, RunAppOnDevice(mac_address_, bundle_id));
   tm_.RunAppOnDevice(device_handle_, bundle_id);
+}
+
+TEST_F(TransportManagerImplTest,
+       UpdateDeviceList_AddDevices_TwoTransportAdapters) {
+  // Arrange
+  MockTransportAdapter* second_mock_adapter = new MockTransportAdapter();
+  device_list_.push_back(dev_info_.mac_address());
+  // Check before Act
+  EXPECT_CALL(*second_mock_adapter, AddListener(_));
+  EXPECT_CALL(*second_mock_adapter, IsInitialised()).WillOnce(Return(true));
+  EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(second_mock_adapter));
+
+  // Act and Assert
+  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
+      .WillOnce(Return(device_list_));
+  EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*second_mock_adapter, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  tm_.UpdateDeviceList(second_mock_adapter);
+
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  tm_.UpdateDeviceList(mock_adapter_);
+
+  device_list_.pop_back();
+}
+
+TEST_F(TransportManagerImplTest, OnlyOneDeviceShouldNotTriggerSwitch) {
+  device_list_.push_back(dev_info_.mac_address());
+  EXPECT_CALL(*mock_adapter_, GetDeviceList())
+      .WillRepeatedly(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillRepeatedly(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+
+  tm_.TestHandle(TransportAdapterEvent(EventTypeEnum::ON_DEVICE_ADDED,
+                                       mock_adapter_,
+                                       mac_address_,
+                                       application_id_,
+                                       test_message_,
+                                       error_));
+
+  device_list_.pop_back();
+}
+
+TEST_F(TransportManagerImplTest, TwoTransportAdapterAddSameDeviceTimeout) {
+  device_list_.push_back(dev_info_.mac_address());
+  const uint32_t timeout = 0;
+
+  SetAddDeviceExpectations(mock_adapter_,
+                           transport_adapter::DeviceType::IOS_BT);
+
+  tm_.TestHandle(TransportAdapterEvent(EventTypeEnum::ON_DEVICE_ADDED,
+                                       mock_adapter_,
+                                       mac_address_,
+                                       application_id_,
+                                       test_message_,
+                                       error_));
+
+  auto second_mock_adapter = utils::MakeShared<MockTransportAdapter>();
+
+  SetAddDeviceExpectations(second_mock_adapter.get(),
+                           transport_adapter::DeviceType::IOS_USB);
+
+  EXPECT_CALL(*mock_adapter_, StopDevice(mac_address_));
+  EXPECT_CALL(*mock_adapter_, DeviceSwitched(mac_address_));
+
+  EXPECT_CALL(mock_transport_manager_settings_, app_transport_change_timer())
+      .WillOnce(Return(timeout));
+  EXPECT_CALL(mock_transport_manager_settings_,
+              app_transport_change_timer_addition()).WillOnce(Return(0));
+
+  EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_));
+  EXPECT_CALL(*tm_listener_, OnDeviceSwitchFinish(mac_address_));
+
+  tm_.TestHandle(TransportAdapterEvent(EventTypeEnum::ON_DEVICE_ADDED,
+                                       second_mock_adapter.get(),
+                                       mac_address_,
+                                       application_id_,
+                                       test_message_,
+                                       error_));
+
+  device_list_.pop_back();
+}
+
+TEST_F(TransportManagerImplTest,
+       UpdateDeviceList_RemoveDevices_TwoTransportAdapters) {
+  // Arrange
+  MockTransportAdapter* second_mock_adapter = new MockTransportAdapter();
+  device_list_.push_back(dev_info_.mac_address());
+  // Check before Act
+  EXPECT_CALL(*second_mock_adapter, AddListener(_));
+  EXPECT_CALL(*second_mock_adapter, IsInitialised()).WillOnce(Return(true));
+  EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(second_mock_adapter));
+
+  // Act and Assert
+  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
+      .WillOnce(Return(device_list_));
+  EXPECT_CALL(*second_mock_adapter, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*second_mock_adapter, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  tm_.UpdateDeviceList(second_mock_adapter);
+
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  tm_.UpdateDeviceList(mock_adapter_);
+
+  device_list_.pop_back();
+
+  EXPECT_CALL(*second_mock_adapter, GetDeviceList())
+      .WillOnce(Return(device_list_));
+  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
+  tm_.UpdateDeviceList(second_mock_adapter);
+
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
+  tm_.UpdateDeviceList(mock_adapter_);
 }
 
 }  // namespace transport_manager_test

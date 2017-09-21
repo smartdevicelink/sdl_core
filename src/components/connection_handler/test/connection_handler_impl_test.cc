@@ -1892,6 +1892,31 @@ TEST_F(ConnectionHandlerTest, RunAppOnDevice_AppOnDevice_SUCCESS) {
   connection_handler_->RunAppOnDevice(hash_of_mac_address, bundle_id);
 }
 
+TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  const std::string fake_device_id = "fake_device_id";
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnDeviceSwitchingStart(encryption::MakeHash(fake_device_id)));
+  connection_handler_->OnDeviceSwitchingStart(fake_device_id);
+}
+
+TEST_F(ConnectionHandlerTest, OnDeviceSwitchFinish) {
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  const std::string fake_device_id = "fake_device_id";
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnDeviceSwitchFinish(encryption::MakeHash(fake_device_id)));
+
+  connection_handler_->OnDeviceSwitchFinish(fake_device_id);
+}
+
 }  // namespace connection_handler_test
 }  // namespace components
 }  // namespace test
