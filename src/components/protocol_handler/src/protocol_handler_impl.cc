@@ -1944,33 +1944,34 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   LOG4CXX_DEBUG(
       logger_, "SendFramesNumber MobileNaviAck for session " << connection_key);
 
-  // TODO(EZamakhov): add protocol version check - to avoid send for
-  // PROTOCOL_VERSION_1
   transport_manager::ConnectionUID connection_id = 0;
   uint8_t session_id = 0;
   session_observer_.PairFromKey(connection_key, &connection_id, &session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, session_id, protocol_version)) {
-    ProtocolFramePtr ptr(
-        new protocol_handler::ProtocolPacket(connection_id,
-                                             protocol_version,
-                                             PROTECTION_OFF,
-                                             FRAME_TYPE_CONTROL,
-                                             SERVICE_TYPE_NAVI,
-                                             FRAME_DATA_SERVICE_DATA_ACK,
-                                             session_id,
-                                             0,
-                                             message_counters_[session_id]++));
+    if (protocol_version > PROTOCOL_VERSION_1 &&
+        protocol_version < PROTOCOL_VERSION_5) {
+      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+          connection_id,
+          protocol_version,
+          PROTECTION_OFF,
+          FRAME_TYPE_CONTROL,
+          SERVICE_TYPE_NAVI,
+          FRAME_DATA_SERVICE_DATA_ACK,
+          session_id,
+          0,
+          message_counters_[session_id]++));
 
-    // Flow control data shall be 4 bytes according Ford Protocol
-    DCHECK(sizeof(number_of_frames) == 4);
-    number_of_frames = LE_TO_BE32(number_of_frames);
-    ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
-                  sizeof(number_of_frames));
-    raw_ford_messages_to_mobile_.PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+      // Flow control data shall be 4 bytes according Ford Protocol
+      DCHECK(sizeof(number_of_frames) == 4);
+      number_of_frames = LE_TO_BE32(number_of_frames);
+      ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
+                    sizeof(number_of_frames));
+      raw_ford_messages_to_mobile_.PostMessage(
+          impl::RawFordMessageToMobile(ptr, false));
+      LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+    }
   } else {
     LOG4CXX_WARN(
         logger_,
