@@ -1068,7 +1068,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       }
       if (check_existing_json_member(ui, "systemCapabilities")) {
         Json::Value system_capabilities = ui.get("systemCapabilities", "");
-        set_navigation_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "navigationCapability")) {
           Json::Value navigation_capability =
@@ -1081,7 +1080,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             set_navigation_supported(true);
           }
         }
-        set_phone_call_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "phoneCapability")) {
           Json::Value phone_capability =
@@ -1094,7 +1092,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             set_phone_call_supported(true);
           }
         }
-        set_video_streaming_supported(false);
         if (check_existing_json_member(system_capabilities,
                                        "videoStreamingCapability")) {
           Json::Value vs_capability =

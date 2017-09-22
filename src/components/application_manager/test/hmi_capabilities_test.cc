@@ -478,47 +478,79 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
 TEST_F(HMICapabilitiesTest,
        LoadCapabilitiesFromFileAndVerifyUnsupportedSystemCapabilities) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
   const std::string hmi_capabilities_file = "hmi_capabilities_sc1.json";
-  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
 
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
-  EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+
+  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
+      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only phone capability is available
-  EXPECT_FALSE(hmi_capabilities_test->navigation_supported());
-  EXPECT_TRUE(hmi_capabilities_test->phone_call_supported());
-  EXPECT_FALSE(hmi_capabilities_test->video_streaming_supported());
+  EXPECT_FALSE(hmi_capabilities->navigation_supported());
+  EXPECT_TRUE(hmi_capabilities->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
 
   // verify phone capability
   const smart_objects::SmartObject phone_capability_so =
-      *(hmi_capabilities_test->phone_capability());
+      *(hmi_capabilities->phone_capability());
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
 }
 
 TEST_F(HMICapabilitiesTest,
        LoadCapabilitiesFromFileAndVerifyEmptySystemCapabilities) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
   const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
-  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
 
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
-  EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+
+  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
+      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only navigation capability is valid, the other
   // two are empty
-  EXPECT_TRUE(hmi_capabilities_test->navigation_supported());
-  EXPECT_FALSE(hmi_capabilities_test->phone_call_supported());
-  EXPECT_FALSE(hmi_capabilities_test->video_streaming_supported());
+  EXPECT_TRUE(hmi_capabilities->navigation_supported());
+  EXPECT_FALSE(hmi_capabilities->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
 
   // verify navigation capabilities
   smart_objects::SmartObject navigation_capability_so =
-      *(hmi_capabilities_test->navigation_capability());
+      *(hmi_capabilities->navigation_capability());
   EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
