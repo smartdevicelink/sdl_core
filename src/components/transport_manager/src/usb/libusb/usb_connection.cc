@@ -226,17 +226,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
     out_transfer_ = NULL;
     waiting_out_transfer_cancel_ = false;
   }
-  if(disconnecting_) {
-    waiting_out_transfer_cancel_ = false;
-  } else {
-    if(!PostOutTransfer()) {
-	  LOG4CXX_ERROR(logger_,
-		 "USB out transfer failed with " 
-		    << "LIBUSB_TRANSFER_STALL. Abort connection.");
-	  AbortConnection();
-	}
-  }
-
+  
   LOG4CXX_TRACE(logger_, "exit");
 }
 
