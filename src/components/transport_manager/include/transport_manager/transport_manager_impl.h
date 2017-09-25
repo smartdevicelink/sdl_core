@@ -245,6 +245,8 @@ class TransportManagerImpl
   int Visibility(const bool& on_off) const OVERRIDE;
 
   /**
+   * DEPRECATED
+   * Must be moved under 'private' section
    * @brief Updates total device list with info from specific transport adapter.
    * @param ta Transport adapter
    */
@@ -475,12 +477,6 @@ class TransportManagerImpl
                 unsigned int frame_size,
                 unsigned char** frame);
 
-  /**
-   * @brief OnDeviceAdded processes new device detected by specific transport
-   * adapter
-   * @param ta Pointer to transport adapter
-   */
-  void OnDeviceAdded(TransportAdapter* ta);
   void OnDeviceListUpdated(TransportAdapter* ta);
   void DisconnectAllDevices();
   void TerminateAllAdapters();
@@ -498,8 +494,9 @@ class TransportManagerImpl
    * performs its update on adding/removal of devices. Also used by IAP2
    * switching flow to substitute BT with USB transport
    * @param ta Pointer to transport adapter
+   * @return True if mapping has been updated, otherwise - false
    */
-  void UpdateDeviceMapping(TransportAdapter* ta);
+  bool UpdateDeviceMapping(TransportAdapter* ta);
 };  // class TransportManagerImpl
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

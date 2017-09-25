@@ -748,12 +748,7 @@ bool TransportManagerImpl::TryDeviceSwitch(
   return true;
 }
 
-void TransportManagerImpl::OnDeviceAdded(TransportAdapter* ta) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  OnDeviceListUpdated(ta);
-}
-
-void TransportManagerImpl::UpdateDeviceMapping(
+bool TransportManagerImpl::UpdateDeviceMapping(
     transport_adapter::TransportAdapter* ta) {
   const DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_DEBUG(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
@@ -794,17 +789,27 @@ void TransportManagerImpl::UpdateDeviceMapping(
       DeviceInfo info(
           device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
       RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
+    } else {
+      LOG4CXX_ERROR(
+          logger_,
+          "Same UUID " + *it + "detected, but transport switching failed.");
+      return false;
     }
   }
 
   LOG4CXX_DEBUG(logger_,
                 "After update. Device map size is "
                     << device_to_adapter_map_.size());
+
+  return true;
 }
 
 void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
-  UpdateDeviceMapping(ta);
+  if (!UpdateDeviceMapping(ta)) {
+    LOG4CXX_ERROR(logger_, "Device list update failed.");
+    return;
+  }
   UpdateDeviceList(ta);
   std::vector<DeviceInfo> device_infos;
   device_list_lock_.AcquireForReading();
@@ -836,11 +841,6 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case EventTypeEnum::ON_DEVICE_LIST_UPDATED: {
       OnDeviceListUpdated(event.transport_adapter);
       LOG4CXX_DEBUG(logger_, "event_type = ON_DEVICE_LIST_UPDATED");
-      break;
-    }
-    case EventTypeEnum::ON_DEVICE_ADDED: {
-      OnDeviceAdded(event.transport_adapter);
-      LOG4CXX_DEBUG(logger_, "event_type = ON_ADDED");
       break;
     }
     case EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST: {

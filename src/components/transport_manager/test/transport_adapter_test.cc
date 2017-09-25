@@ -192,7 +192,7 @@ TEST_F(TransportAdapterTest, AddDevice) {
   utils::SharedPtr<MockDevice> mockdev =
       utils::MakeShared<MockDevice>(dev_id, uniq_id);
 
-  EXPECT_CALL(mock_listener, OnDeviceAdded(_));
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   transport_adapter.AddDevice(mockdev);
 }
 
@@ -469,7 +469,7 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
 
   utils::SharedPtr<MockDevice> mockdev =
       utils::MakeShared<MockDevice>(dev_id, uniq_id);
-  EXPECT_CALL(mock_listener, OnDeviceAdded(_));
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -489,6 +489,7 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
       utils::MakeShared<MockConnection>();
   transport_adapter.ConnectionCreated(mock_connection, uniq_id, app_handle);
 
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
   EXPECT_CALL(
       mock_listener,
