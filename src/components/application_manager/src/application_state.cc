@@ -110,7 +110,7 @@ HmiStatePtr ApplicationState::GetState(HmiState::StateID state_id) const {
       LOG4CXX_DEBUG(logger_, "Getting postponed state.");
       return PostponedHmiState();
     default:
-      LOG4CXX_DEBUG(logger_, "Getting current state.");
+      LOG4CXX_TRACE(logger_, "Getting current state.");
       return CurrentHmiState();
   }
 }

@@ -117,7 +117,7 @@ bool PipeStreamerAdapter::PipeStreamer::Send(
                  "Couldn't write all the data to pipe " << named_pipe_path_);
   }
 
-  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+  LOG4CXX_TRACE(logger_, "Streamer::sent " << msg->data_size());
   return true;
 }
 

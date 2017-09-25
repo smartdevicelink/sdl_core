@@ -684,7 +684,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   }
 
   const uint32_t connection_key = tm_message->connection_key();
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "Received data from TM  with connection id "
                     << connection_key << " msg data_size "
                     << tm_message->data_size());
@@ -694,7 +694,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   const ProtocolFramePtrList protocol_frames =
       incoming_data_handler_.ProcessData(
           *tm_message, &result, &malformed_occurs);
-  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
+  LOG4CXX_TRACE(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(logger_,
@@ -992,7 +992,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet, RESULT_UNKNOWN);
-  LOG4CXX_DEBUG(logger_, "Handling message " << packet);
+  LOG4CXX_TRACE(logger_, "Handling message " << packet);
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL:
       LOG4CXX_TRACE(logger_, "FRAME_TYPE_CONTROL");
@@ -1016,7 +1016,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
     const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(
+  LOG4CXX_TRACE(
       logger_,
       "FRAME_TYPE_SINGLE message of size "
           << packet->data_size() << "; message "
@@ -1700,7 +1700,7 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
-    LOG4CXX_DEBUG(logger_,
+    LOG4CXX_TRACE(logger_,
                   "Result frame" << frame << "for connection "
                                  << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
@@ -1784,7 +1784,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
       }
     } break;
   }
-  LOG4CXX_DEBUG(logger_, "Message : " << message.get());
+  LOG4CXX_TRACE(logger_, "Message : " << message.get());
   const uint8_t c_id = message->connection_id();
   const uint32_t m_id = message->session_id();
 
@@ -1796,7 +1796,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||
       FRAME_TYPE_FIRST == message->frame_type()) {
-    LOG4CXX_DEBUG(logger_, "Packet: dataSize " << message->data_size());
+    LOG4CXX_TRACE(logger_, "Packet: dataSize " << message->data_size());
     HandleMessage(message);
     PopValideAndExpirateMultiframes();
   } else {

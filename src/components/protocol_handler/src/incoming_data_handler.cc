@@ -64,9 +64,9 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     *result = RESULT_FAIL;
     return ProtocolFramePtrList();
   }
-  LOG4CXX_INFO(logger_,
-               "Processing incoming data of size "
-                   << tm_message_size << " for connection " << connection_id);
+  LOG4CXX_TRACE(logger_,
+                "Processing incoming data of size "
+                    << tm_message_size << " for connection " << connection_id);
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
     LOG4CXX_WARN(logger_, "ProcessData requested for unknown connection");
@@ -75,19 +75,19 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   }
   std::vector<uint8_t>& connection_data = it->second;
   connection_data.insert(connection_data.end(), data, data + tm_message_size);
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "Total data size for connection " << connection_id << " is "
                                                   << connection_data.size());
   ProtocolFramePtrList out_frames;
   *malformed_occurrence = 0;
   *result = CreateFrame(
       connection_data, out_frames, *malformed_occurrence, connection_id);
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "New data size for connection " << connection_id << " is "
                                                 << connection_data.size());
   if (!out_frames.empty()) {
-    LOG4CXX_INFO(logger_,
-                 "Created and passed " << out_frames.size() << " packets");
+    LOG4CXX_TRACE(logger_,
+                  "Created and passed " << out_frames.size() << " packets");
   } else {
     if (RESULT_DEFERRED == *result) {
       LOG4CXX_DEBUG(
@@ -165,7 +165,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
                         << std::hex << static_cast<const void*>(&*data_it));
       continue;
     }
-    LOG4CXX_DEBUG(logger_, "Payload size " << header_.dataSize);
+    LOG4CXX_TRACE(logger_, "Payload size " << header_.dataSize);
     const uint32_t packet_size = GetPacketSize(header_);
     if (packet_size <= 0) {
       LOG4CXX_WARN(logger_, "Null packet size");
@@ -177,14 +177,14 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       continue;
     }
     if (data_size < packet_size) {
-      LOG4CXX_DEBUG(logger_, "Packet data is not available yet");
+      LOG4CXX_TRACE(logger_, "Packet data is not available yet");
       incoming_data.erase(incoming_data.begin(), data_it);
       return RESULT_DEFERRED;
     }
     ProtocolFramePtr frame(new protocol_handler::ProtocolPacket(connection_id));
     const RESULT_CODE deserialize_result =
         frame->deserializePacket(&*data_it, packet_size);
-    LOG4CXX_DEBUG(logger_, "Deserialized frame " << frame);
+    LOG4CXX_TRACE(logger_, "Deserialized frame " << frame);
     if (deserialize_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet deserialization failed");
       incoming_data.erase(incoming_data.begin(), data_it);
@@ -193,7 +193,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
 
     out_frames.push_back(frame);
     last_portion_of_data_was_malformed_ = false;
-    LOG4CXX_DEBUG(logger_,
+    LOG4CXX_TRACE(logger_,
                   "Frame added. "
                       << "Connection ID " << connection_id);
 

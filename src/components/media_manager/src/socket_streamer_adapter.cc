@@ -142,7 +142,7 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
                  "Couldn't send all the data to socket " << send_socket_fd_);
   }
 
-  LOG4CXX_INFO(logger, "Streamer::sent " << msg->data_size());
+  LOG4CXX_TRACE(logger, "Streamer::sent " << msg->data_size());
   return true;
 }
 

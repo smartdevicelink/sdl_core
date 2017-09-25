@@ -606,7 +606,7 @@ void TransportManagerImpl::PostMessage(
 
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "TransportAdapterEvent: " << &event);
+  LOG4CXX_TRACE(logger_, "TransportAdapterEvent: " << &event);
   event_queue_.PostMessage(event);
 }
 
@@ -650,12 +650,12 @@ void TransportManagerImpl::RemoveConnection(
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const ConnectionUID id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "ConnectionUID: " << &id);
+  LOG4CXX_TRACE(logger_, "ConnectionUID: " << &id);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
     if (it->id == id) {
-      LOG4CXX_DEBUG(logger_, "ConnectionInternal. It's address: " << &*it);
+      LOG4CXX_TRACE(logger_, "ConnectionInternal. It's address: " << &*it);
       return &*it;
     }
   }
@@ -665,14 +665,14 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "DeviceUID: " << &device
                               << "ApplicationHandle: " << &application);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
     if (it->device == device && it->application == application) {
-      LOG4CXX_DEBUG(logger_, "ConnectionInternal. It's address: " << &*it);
+      LOG4CXX_TRACE(logger_, "ConnectionInternal. It's address: " << &*it);
       return &*it;
     }
   }
@@ -875,7 +875,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
 #endif  // TELEMETRY_MONITOR
       RaiseEvent(&TransportManagerListener::OnTMMessageReceived,
                  event.event_data);
-      LOG4CXX_DEBUG(logger_, "event_type = ON_RECEIVED_DONE");
+      LOG4CXX_TRACE(logger_, "event_type = ON_RECEIVED_DONE");
       break;
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {

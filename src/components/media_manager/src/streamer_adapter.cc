@@ -146,7 +146,7 @@ void StreamerAdapter::Streamer::threadMain() {
       static int32_t messages_for_session = 0;
       ++messages_for_session;
 
-      LOG4CXX_DEBUG(logger,
+      LOG4CXX_TRACE(logger,
                     "Handling map streaming message. This is "
                         << messages_for_session << " message for "
                         << adapter_->current_application_);

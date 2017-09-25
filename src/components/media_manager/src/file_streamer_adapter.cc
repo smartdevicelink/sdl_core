@@ -95,7 +95,7 @@ bool FileStreamerAdapter::FileStreamer::Send(
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+  LOG4CXX_TRACE(logger_, "Streamer::sent " << msg->data_size());
   return true;
 }
 

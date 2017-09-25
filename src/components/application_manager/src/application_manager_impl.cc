@@ -203,7 +203,7 @@ ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
     return ApplicationSharedPtr();
   }
   ApplicationSharedPtr app = *it;
-  LOG4CXX_DEBUG(logger_, " Found Application app_id = " << app->app_id());
+  LOG4CXX_TRACE(logger_, " Found Application app_id = " << app->app_id());
   return app;
 }
 
@@ -2345,7 +2345,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
   DCHECK(message);
   utils::SharedPtr<Message> outgoing_message;
 
-  LOG4CXX_DEBUG(logger_, "Service type." << message->service_type());
+  LOG4CXX_TRACE(logger_, "Service type." << message->service_type());
   if (message->service_type() != protocol_handler::kRpc &&
       message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager

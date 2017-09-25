@@ -299,7 +299,7 @@ bool ThreadedSocketConnection::Receive() {
     bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
 
     if (bytes_read > 0) {
-      LOG4CXX_DEBUG(logger_,
+      LOG4CXX_TRACE(logger_,
                     "Received " << bytes_read << " bytes for connection "
                                 << this);
       ::protocol_handler::RawMessagePtr frame(

@@ -617,7 +617,7 @@ uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) const {
   const uint32_t key = connection_handle | (session_id << 16);
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "Key for ConnectionHandle:"
                     << static_cast<uint32_t>(connection_handle)
                     << " Session:" << static_cast<uint32_t>(session_id)
@@ -636,7 +636,7 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  LOG4CXX_DEBUG(
+  LOG4CXX_TRACE(
       logger_,
       "ConnectionHandle:" << static_cast<int32_t>(*connection_handle)
                           << " Session:" << static_cast<int32_t>(*session_id)
