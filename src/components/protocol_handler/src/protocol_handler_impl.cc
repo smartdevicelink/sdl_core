@@ -1538,12 +1538,37 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   }
 
   BsonObject start_session_ack_params;
+  bson_object_initialize_default(&start_session_ack_params);
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
-    start_session_ack_params = bson_object_from_bytes(packet->data());
-  } else {
-    bson_object_initialize_default(&start_session_ack_params);
+    BsonObject req_param = bson_object_from_bytes(packet->data());
+    BsonElement* element = NULL;
+
+    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::height,
+                            bson_object_get_int32(&req_param, strings::height));
+    }
+    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::width,
+                            bson_object_get_int32(&req_param, strings::width));
+    }
+    char* protocol =
+        bson_object_get_string(&req_param, strings::video_protocol);
+    if (protocol != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_protocol, protocol);
+    }
+    char* codec = bson_object_get_string(&req_param, strings::video_codec);
+    if (codec != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_codec, codec);
+    }
+    bson_object_deinitialize(&req_param);
   }
 
   ProtocolPacket::ProtocolVersion* fullVersion;
