@@ -388,7 +388,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     for (TransportAdapterListenerList::iterator it = listeners_.begin();
          it != listeners_.end();
          ++it) {
-      (*it)->OnDeviceAdded(device->unique_device_id());
+      (*it)->OnDeviceListUpdated(this);
     }
     if (ToBeAutoConnected(device)) {
       ConnectDevice(device);

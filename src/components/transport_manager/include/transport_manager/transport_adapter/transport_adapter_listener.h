@@ -85,13 +85,6 @@ class TransportAdapterListener {
       const TransportAdapter* transport_adapter) = 0;
 
   /**
-   * @brief OnDeviceAdded is triggered by transport adapter on new device
-   * coming
-   * @param device_uid Device id of new device
-   */
-  virtual void OnDeviceAdded(DeviceUID device_uid) = 0;
-
-  /**
    * @brief Reaction to "Find new applications" request
    * @param adapter Current transport adapter
    */
