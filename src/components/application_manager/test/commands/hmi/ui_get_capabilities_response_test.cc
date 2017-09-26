@@ -241,6 +241,28 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreaming_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest, SetRemoteControl_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
+                [strings::remote_control] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      set_rc_supported(hmi_capabilities_so[strings::remote_control].asBool()));
+
+  command->Run();
+}
+
 TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::system_capabilities] =
@@ -335,6 +357,92 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_capability(video_streaming_capability));
+
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetRemoteControlCapability_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::rc_capability] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& remote_control_capability =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::rc_capability];
+
+  remote_control_capability["climateControlCapabilities"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability["climateControlCapabilities"][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& climate_control_capability =
+      remote_control_capability["climateControlCapabilities"][0];
+
+  climate_control_capability["moduleName"] = "Climate";
+  climate_control_capability["fanSpeedAvailable"] = true;
+  climate_control_capability["desiredTemperatureAvailable"] = true;
+  climate_control_capability["acEnableAvailable"] = true;
+  climate_control_capability["acMaxEnableAvailable"] = true;
+  climate_control_capability["circulateAirEnableAvailable"] = true;
+  climate_control_capability["autoModeEnableAvailable"] = true;
+  climate_control_capability["dualModeEnableAvailable"] = true;
+
+  climate_control_capability["defrostZoneAvailable"] = true;
+  climate_control_capability["defrostZone"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  climate_control_capability["defrostZone"][0] = "ALL";
+
+  climate_control_capability["ventilationModeAvailable"] = true;
+  climate_control_capability["ventilationMode"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  climate_control_capability["ventilationMode"][0] = "BOTH";
+
+  remote_control_capability["radioControlCapabilities"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability["radioControlCapabilities"][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& radio_control_capability =
+      remote_control_capability["radioControlCapabilities"][0];
+
+  radio_control_capability["moduleName"] = "Radio";
+  radio_control_capability["radioEnableAvailable"] = true;
+  radio_control_capability["radioBandAvailable"] = true;
+  radio_control_capability["radioFrequencyAvailable"] = true;
+  radio_control_capability["hdChannelAvailable"] = true;
+  radio_control_capability["rdsDataAvailable"] = true;
+  radio_control_capability["availableHDsAvailable"] = true;
+  radio_control_capability["stateAvailable"] = true;
+  radio_control_capability["signalStrengthAvailable"] = true;
+  radio_control_capability["signalChangeThresholdAvailable"] = true;
+
+  remote_control_capability[hmi_response::button_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability[hmi_response::button_capabilities][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& button_capability =
+      remote_control_capability[hmi_response::button_capabilities][0];
+
+  button_capability[strings::button_name] = "OK";
+  button_capability["shortPressAvailable"] = true;
+  button_capability["longPressAvailable"] = true;
+  button_capability["upDownAvailable"] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_rc_capability(remote_control_capability));
 
   command->Run();
 }
