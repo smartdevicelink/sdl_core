@@ -639,6 +639,123 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(rejected_params.empty());
 }
 
+TEST_F(ApplicationManagerImplTest,
+       OnDeviceSwitchingStart_ExpectPutAppsInWaitList) {
+  utils::SharedPtr<MockApplication> switching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string switching_device_id = "switching";
+  app_manager_impl_->AddMockApplication(switching_app_ptr);
+  EXPECT_CALL(*switching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(switching_device_id));
+
+  const std::string policy_app_id_switch = "abc";
+  EXPECT_CALL(*switching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_switch));
+
+  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string nonswitching_device_id = "nonswitching";
+  app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
+  EXPECT_CALL(*nonswitching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(nonswitching_device_id));
+
+  const std::string policy_app_id_nonswitch = "efg";
+  EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_nonswitch));
+
+  // Act
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device_id);
+  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+  EXPECT_FALSE(
+      app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
+  utils::SharedPtr<MockApplication> switching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string switching_device_id = "switching";
+  app_manager_impl_->AddMockApplication(switching_app_ptr);
+  EXPECT_CALL(*switching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(switching_device_id));
+
+  const std::string policy_app_id_switch = "abc";
+  EXPECT_CALL(*switching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_switch));
+
+  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string nonswitching_device_id = "nonswitching";
+  app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
+  EXPECT_CALL(*nonswitching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(nonswitching_device_id));
+
+  const std::string policy_app_id_nonswitch = "efg";
+  EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_nonswitch));
+
+  // Act
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device_id);
+  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+
+  app_manager_impl_->OnDeviceSwitchFinish(switching_device_id);
+  EXPECT_FALSE(
+      app_manager_impl_->application_by_policy_id(policy_app_id_switch));
+}
+
+TEST_F(ApplicationManagerImplTest,
+       ProcessReconnection_ExpectChangeAppIdDeviceId) {
+  const uint32_t application_id = 1;
+  const std::string policy_app_id = "p_app_id";
+  const std::string mac_address = "MA:CA:DD:RE:SS";
+  const connection_handler::DeviceHandle device_id = 1;
+  const custom_str::CustomString app_name("");
+
+  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+      application_id,
+      policy_app_id,
+      mac_address,
+      device_id,
+      app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager()),
+      *app_manager_impl_);
+
+  app_manager_impl_->AddMockApplication(app_impl);
+
+  const connection_handler::DeviceHandle new_device_id = 2;
+  const uint32_t new_application_id = 2;
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(new_application_id,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(new_device_id), Return(0)));
+
+  const std::string connection_type = "MyConnectionType";
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          ::testing::Matcher<connection_handler::DeviceHandle>(new_device_id),
+          _,
+          _,
+          _,
+          _))
+      .WillOnce(DoAll(SetArgPointee<3u>(mac_address),
+                      SetArgPointee<4u>(connection_type),
+                      Return(0)));
+
+  // Act
+  app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
+  EXPECT_EQ(new_device_id, app_impl->device());
+  EXPECT_EQ(new_application_id, app_impl->app_id());
+}
+
 }  // application_manager_test
 }  // namespace components
 }  // namespace test
