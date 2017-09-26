@@ -2,6 +2,12 @@
 
 Third party contributions are essential for making SDL great. However, we do have a few guidelines we need contributors to follow.
 
+## Environment
+Currently supported:
+* Ubuntu Linux 14.04 with GCC 4.9.x
+* Ubuntu Linux 16.04 with GCC 5.4.x
+* [C++11 standard](https://github.com/smartdevicelink/sdl_evolution/issues/132)
+
 ### Issues
 If writing a bug report, please make sure <a href="http://yourbugreportneedsmore.info" target="_blank">it has enough info</a>. Include all relevant information.
 

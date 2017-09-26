@@ -59,9 +59,7 @@ Branch name should be:
 
 ##Pull request message
 * Describe the reason why you created pull request and what changes there are.
-* Add related Jira ticket as link.
-   ( EXAMPLE:
-   `Related: [APPLINK-xxxxx](put direct link here)`)
+* Add related GitHub issue id as link.
 * If there was an old pull request, add link. ( EXAMPLE: `Old pull request is [here](put direct link here)`)
 
 ##Adding reviewers:
@@ -87,7 +85,7 @@ Branch name should be:
 * Successfully passed review.
 * Rebase in case of existing conflicts.
 * Contributor can squash commits in case of adding same code in different commits.
-* Contact @AGaliuzov or @anosach-luxoft to merge pull request.
+* Contact [Livio team](https://livio.io/#our-team) and request to merge pull request
 
 ##Additional sources
 * [Google cppint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py)
