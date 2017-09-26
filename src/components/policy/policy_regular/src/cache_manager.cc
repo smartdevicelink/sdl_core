@@ -133,7 +133,10 @@ const policy_table::AppHMITypes* CacheManager::GetHMITypes(
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
   if (i != apps.end()) {
-    return &(*i->second.AppHMIType);
+    const policy_table::AppHMITypes& app_hmi_types = *i->second.AppHMIType;
+    if (app_hmi_types.is_initialized()) {
+      return &app_hmi_types;
+    }
   }
   return NULL;
 }
