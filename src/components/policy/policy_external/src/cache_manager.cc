@@ -630,7 +630,7 @@ void CacheManager::ProcessUpdate(
       *(initial_policy_iter->second.RequestType);
 
   const std::string& app_id = initial_policy_iter->first;
-  RequestTypes merged_pt_request_types;
+  bool update_request_types = true;
 
   if (app_id == kDefaultId || app_id == kPreDataConsentId) {
     if (new_request_types.is_omitted()) {
@@ -638,25 +638,28 @@ void CacheManager::ProcessUpdate(
                    "Application " << app_id
                                   << " has omitted RequestTypes."
                                      " Previous values will be kept.");
-      return;
-    }
-    if (new_request_types.empty()) {
+      update_request_types = false;
+    } else if (new_request_types.empty()) {
       if (new_request_types.is_cleaned_up()) {
         LOG4CXX_INFO(logger_,
                      "Application " << app_id
                                     << " has cleaned up all values."
                                        " Previous values will be kept.");
-        return;
+        update_request_types = false;
+      } else {
+        LOG4CXX_INFO(logger_,
+                     "Application " << app_id
+                                    << " has empty RequestTypes."
+                                       " Any parameter will be allowed.");
       }
-      LOG4CXX_INFO(logger_,
-                   "Application " << app_id
-                                  << " has empty RequestTypes."
-                                     " Any parameter will be allowed.");
     }
-    merged_pt_request_types = new_request_types;
-  } else {
-    merged_pt_request_types = new_request_types;
   }
+
+  const RequestTypes merged_pt_request_types =
+      update_request_types
+          ? new_request_types
+          : *(pt_->policy_table.app_policies_section.apps[app_id].RequestType);
+
   pt_->policy_table.app_policies_section.apps[app_id] =
       initial_policy_iter->second;
   *(pt_->policy_table.app_policies_section.apps[app_id].RequestType) =
@@ -682,15 +685,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      ProcessUpdate(iter_default);
     } else {
       ProcessUpdate(iter);
     }

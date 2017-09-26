@@ -719,14 +719,28 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Processes results from policy table update analysis done by
-   * CheckPermissionsChanges() by sending OnPermissionChange and
-   * OnAppPermissionChanged notifications
+   * CheckPermissionsChanges() by filling ApplicationsPoliciesActions struct
+   * with actions which should be done for every application and passes them to
+   * ProcessActionsForAppPolicies()
    * @param results Collection of per-application results
    * @param app_policies Reference to updated application policies section as
    * a data source for generating notifications data
    */
   void ProcessAppPolicyCheckResults(
       const CheckAppPolicyResults& results,
+      const policy_table::ApplicationPolicies& app_policies);
+
+  /**
+   * @brief Processes actions filled in ProcessAppPolicyCheckResults() for every
+   * application by sending OnPermissionChange and OnAppPermissionChanged
+   * notifications and by checking consent where it needed
+   * @param actions Reference to map with actions to be done or not for every
+   * application
+   * @param app_policies Reference to updated application policies section as
+   * a data source for generating notifications data
+   */
+  void ProcessActionsForAppPolicies(
+      const ApplicationsPoliciesActions& actions,
       const policy_table::ApplicationPolicies& app_policies);
 
   /**
