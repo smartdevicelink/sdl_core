@@ -366,6 +366,10 @@ TEST_F(SendLocationRequestTest, OnEvent_Success) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app));
 
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+
   command_->on_event(event);
 }
 
