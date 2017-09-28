@@ -391,6 +391,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , is_video_streaming_supported_(false)
+    , is_rc_supported_(false)
     , navigation_capability_(NULL)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
@@ -650,6 +651,10 @@ void HMICapabilitiesImpl::set_video_streaming_supported(const bool supported) {
   is_video_streaming_supported_ = supported;
 }
 
+void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
+  is_rc_supported_ = supported;
+}
+
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
   if (navigation_capability_) {
@@ -801,6 +806,10 @@ bool HMICapabilitiesImpl::phone_call_supported() const {
 
 bool HMICapabilitiesImpl::video_streaming_supported() const {
   return is_video_streaming_supported_;
+}
+
+bool HMICapabilitiesImpl::rc_supported() const {
+  return is_rc_supported_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
@@ -1150,6 +1159,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
           set_rc_capability(rc_capability_so);
+          if (!rc_capability_so.empty()) {
+            set_rc_supported(true);
+          }
         }
       }
     }  // UI end

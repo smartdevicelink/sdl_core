@@ -1994,6 +1994,9 @@
         <param name="videoStreaming" type="Boolean" mandatory="false">
             <description>Availability of video streaming. </description>
         </param>
+        <param name="remoteControl" type="Boolean" mandatory="false">
+            <description>Availability of remote control feature. True: Available, False: Not Available</description>
+        </param>
     </struct>         
     <struct name="MenuParams">
         <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
