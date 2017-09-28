@@ -621,24 +621,13 @@ void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
 }
 
-namespace {
-struct ConnectionFinder {
-  const uint32_t id_;
-  ConnectionFinder(const uint32_t id) : id_(id) {}
-  bool operator()(const transport_manager::TransportManagerImpl::Connection&
-                      connection) const {
-    return id_ == connection.id;
-  }
-};
-}
-
 void TransportManagerImpl::RemoveConnection(
     const uint32_t id, transport_adapter::TransportAdapter* transport_adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Id: " << id);
   sync_primitives::AutoWriteLock lock(connections_lock_);
   std::vector<ConnectionInternal>::iterator it = connections_.begin();
-  while (it != connections_.end()){
+  while (it != connections_.end()) {
     if (it->id == id) {
       if (transport_adapter) {
         transport_adapter->RemoveFinalizedConnection(it->device,
@@ -646,8 +635,7 @@ void TransportManagerImpl::RemoveConnection(
       }
       connections_.erase(it++);
       break;
-    }
-    else{
+    } else {
       ++it;
     }
   }
