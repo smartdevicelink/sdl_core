@@ -808,7 +808,9 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
+#ifdef ENABLE_LOG
   const uint32_t app_id = value->app_id();
+#endif
 
   if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(logger_,
