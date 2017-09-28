@@ -146,7 +146,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
     const bool result = PrepareResultForMobileResponse(
         result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
     SendResponse(result,
-                 MessageHelper::HMIToMobileResult(result_code),
+                 GetMobileResultCode(result_code),
                  response_info.empty() ? NULL : response_info.c_str(),
                  &(message[strings::params]));
     return;
