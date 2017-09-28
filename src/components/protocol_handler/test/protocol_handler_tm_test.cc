@@ -65,6 +65,8 @@ using protocol_handler::PROTECTION_OFF;
 using protocol_handler::PROTOCOL_VERSION_1;
 using protocol_handler::PROTOCOL_VERSION_2;
 using protocol_handler::PROTOCOL_VERSION_3;
+using protocol_handler::PROTOCOL_VERSION_4;
+using protocol_handler::PROTOCOL_VERSION_5;
 using protocol_handler::PROTOCOL_VERSION_MAX;
 using protocol_handler::FRAME_TYPE_CONTROL;
 using protocol_handler::FRAME_TYPE_SINGLE;
@@ -79,6 +81,7 @@ using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
 using protocol_handler::FRAME_DATA_END_SERVICE;
 using protocol_handler::FRAME_DATA_HEART_BEAT;
 using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
+using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
 using protocol_handler::FRAME_DATA_SINGLE;
 using protocol_handler::FRAME_DATA_FIRST;
 using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
@@ -2139,6 +2142,59 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
+  ::utils::SharedPtr<TestAsyncWaiter> waiter =
+      utils::MakeShared<TestAsyncWaiter>();
+  uint32_t times = 0;
+
+  AddSession(waiter, times);
+
+  EXPECT_CALL(session_observer_mock, PairFromKey(connection_key, _, _))
+      .WillOnce(
+          DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_4), Return(true)));
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_SERVICE_DATA_ACK,
+                                                  PROTECTION_OFF,
+                                                  kMobileNav)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
+
+  protocol_handler_impl->SendFramesNumber(connection_key, 0);
+
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
+  ::utils::SharedPtr<TestAsyncWaiter> waiter =
+      utils::MakeShared<TestAsyncWaiter>();
+  uint32_t times = 0;
+
+  AddSession(waiter, times);
+
+  EXPECT_CALL(session_observer_mock, PairFromKey(connection_key, _, _))
+      .WillOnce(
+          DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  // It is expected that Service Data ACK is NOT sent for version 5+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_SERVICE_DATA_ACK,
+                                                  PROTECTION_OFF,
+                                                  kMobileNav))).Times(0);
+
+  protocol_handler_impl->SendFramesNumber(connection_key, 0);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
