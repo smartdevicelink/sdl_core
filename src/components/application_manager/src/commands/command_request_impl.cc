@@ -89,6 +89,9 @@ const std::string CreateInfoForUnsupportedResult(
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo): {
       return "VehicleInfo is not supported by system";
     }
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_RC): {
+      return "Remote control is not supported by system";
+    }
     default:
 #ifdef ENABLE_LOG
       CREATE_LOGGERPTR_LOCAL(logger, "Commands");
@@ -147,9 +150,13 @@ CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager)
     : CommandImpl(message, application_manager)
     , EventObserver(application_manager.event_dispatcher())
-    , current_state_(kAwaitingHMIResponse) {}
+    , current_state_(kAwaitingHMIResponse)
+    , hash_update_mode_(kSkipHashUpdate)
+    , is_success_result_(false) {}
 
-CommandRequestImpl::~CommandRequestImpl() {}
+CommandRequestImpl::~CommandRequestImpl() {
+  UpdateHash();
+}
 
 bool CommandRequestImpl::Init() {
   return true;
@@ -249,6 +256,8 @@ void CommandRequestImpl::SendResponse(
   response[strings::msg_params][strings::success] = success;
   response[strings::msg_params][strings::result_code] = result_code;
 
+  is_success_result_ = success;
+
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
@@ -306,6 +315,46 @@ bool CommandRequestImpl::ProcessHMIInterfacesAvailability(
     return false;
   }
   return true;
+}
+
+void CommandRequestImpl::UpdateHash() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (hash_update_mode_ == kSkipHashUpdate) {
+    LOG4CXX_DEBUG(logger_, "Hash update is disabled for " << function_id());
+    return;
+  }
+
+  if (HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE ==
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_UI)) {
+    LOG4CXX_ERROR(logger_,
+                  "UI interface has not responded. Hash won't be updated.");
+    return;
+  }
+
+  if (!is_success_result_) {
+    LOG4CXX_WARN(logger_, "Command is not succeeded. Hash won't be updated.");
+    return;
+  }
+
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key "
+                      << connection_key()
+                      << " not found. Not able to update hash.");
+    return;
+  }
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Updating hash for application with connection key "
+          << connection_key() << " while processing function id "
+          << MessageHelper::StringifiedFunctionID(
+                 static_cast<mobile_api::FunctionID::eType>(function_id())));
+
+  application->UpdateHash();
 }
 
 uint32_t CommandRequestImpl::SendHMIRequest(
@@ -493,61 +542,99 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
-  ApplicationSetConstIt it_app_list = accessor.begin();
-  ApplicationSetConstIt it_app_list_end = accessor.end();
-  for (; it_app_list != it_app_list_end; ++it_app_list) {
-    if (connection_key() == (*it_app_list).get()->app_id()) {
-      RPCParams params;
+  const ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+  if (!app) {
+    LOG4CXX_ERROR(logger_,
+                  "There is no registered application with "
+                  "connection key '"
+                      << connection_key() << "'");
+    return false;
+  }
 
-      const smart_objects::SmartObject& s_map =
-          (*message_)[strings::msg_params];
-      if (smart_objects::SmartType_Map == s_map.getType()) {
-        smart_objects::SmartMap::iterator iter = s_map.map_begin();
-        smart_objects::SmartMap::iterator iter_end = s_map.map_end();
+  RPCParams params;
 
-        for (; iter != iter_end; ++iter) {
-          if (true == iter->second.asBool()) {
-            LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-            params.insert(iter->first);
-          }
-        }
-      }
+  const smart_objects::SmartObject& s_map = (*message_)[strings::msg_params];
+  smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
+  smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
-      mobile_apis::Result::eType check_result =
-          application_manager_.CheckPolicyPermissions(
-              (*it_app_list).get()->policy_app_id(),
-              (*it_app_list).get()->hmi_level(),
-              static_cast<mobile_api::FunctionID::eType>(function_id()),
-              params,
-              &parameters_permissions_);
-
-      // Check, if RPC is allowed by policy
-      if (mobile_apis::Result::SUCCESS != check_result) {
-        smart_objects::SmartObjectSPtr response =
-            MessageHelper::CreateBlockedByPoliciesResponse(
-                static_cast<mobile_api::FunctionID::eType>(function_id()),
-                check_result,
-                correlation_id(),
-                (*it_app_list)->app_id());
-
-        application_manager_.SendMessageToMobile(response);
-        return false;
-      }
-
-      // If no parameters specified in policy table, no restriction will be
-      // applied for parameters
-      if (parameters_permissions_.allowed_params.empty() &&
-          parameters_permissions_.disallowed_params.empty() &&
-          parameters_permissions_.undefined_params.empty()) {
-        return true;
-      }
-
-      RemoveDisallowedParameters();
+  for (; iter != iter_end; ++iter) {
+    if (iter->second.asBool()) {
+      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+      params.insert(iter->first);
     }
   }
+
+  mobile_apis::Result::eType check_result =
+      application_manager_.CheckPolicyPermissions(
+          app,
+          MessageHelper::StringifiedFunctionID(
+              static_cast<mobile_api::FunctionID::eType>(function_id())),
+          params,
+          &parameters_permissions_);
+
+  // Check, if RPC is allowed by policy
+  if (mobile_apis::Result::SUCCESS != check_result) {
+    smart_objects::SmartObjectSPtr response =
+        MessageHelper::CreateBlockedByPoliciesResponse(
+            static_cast<mobile_api::FunctionID::eType>(function_id()),
+            check_result,
+            correlation_id(),
+            app->app_id());
+
+    application_manager_.SendMessageToMobile(response);
+    return false;
+  }
+
+  // If no parameters specified in policy table, no restriction will be
+  // applied for parameters
+  if (parameters_permissions_.allowed_params.empty() &&
+      parameters_permissions_.disallowed_params.empty() &&
+      parameters_permissions_.undefined_params.empty()) {
+    return true;
+  }
+
+  RemoveDisallowedParameters();
+
   return true;
+}
+
+bool CommandRequestImpl::CheckHMICapabilities(
+    const mobile_apis::ButtonName::eType button) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace smart_objects;
+  using namespace mobile_apis;
+
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
+  if (!hmi_capabilities.is_ui_cooperating()) {
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI");
+    return false;
+  }
+
+  const SmartObject* button_capabilities_so =
+      hmi_capabilities.button_capabilities();
+  if (!button_capabilities_so) {
+    LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
+    return false;
+  }
+
+  const SmartObject& button_capabilities = *button_capabilities_so;
+  for (size_t i = 0; i < button_capabilities.length(); ++i) {
+    const SmartObject& capabilities = button_capabilities[i];
+    const ButtonName::eType current_button = static_cast<ButtonName::eType>(
+        capabilities.getElement(hmi_response::button_name).asInt());
+    if (current_button == button) {
+      LOG4CXX_DEBUG(logger_,
+                    "Button capabilities for " << button << " was found");
+      return true;
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Button capabilities for " << button << " was not found");
+  return false;
 }
 
 void CommandRequestImpl::RemoveDisallowedParameters() {

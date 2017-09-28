@@ -39,14 +39,18 @@
 #include <vector>
 #include <queue>
 #include "interfaces/MOBILE_API.h"
-#include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "application_manager/core_service.h"
+#include "application_manager/application.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"
+#include "utils/callable.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
-#include "utils/callable.h"
+#include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 
+using namespace ::rpc::policy_table_interface_base;
 namespace policy {
 typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
@@ -81,11 +85,12 @@ class PolicyHandlerInterface {
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                const RPCParams& rpc_params,
-                                CheckPermissionResult& result) = 0;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) = 0;
+
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -100,10 +105,19 @@ class PolicyHandlerInterface {
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
-  virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual uint32_t TimeoutExchangeSec() = 0;
-  virtual uint32_t TimeoutExchangeMSec() = 0;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in seconds
+   */
+  virtual uint32_t TimeoutExchangeSec() const = 0;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in miliseconds
+   */
+  virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
@@ -178,14 +192,23 @@ class PolicyHandlerInterface {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info) = 0;
 
-  /**
-   * @brief Store user-changed permissions consent to DB
-   * @param connection_key Connection key of application or 0, if permissions
-   * should be applied to all applications
-   * @param permissions User-changed group permissions consent
-   */
+/**
+*@brief Processes data from OnAppPermissionConsent notification with
+*permissions changes and ExternalConsent status changes done by user
+*@param connection_key Connection key of application, 0 if no key has been
+*provided
+*@param permissions Groups permissions changes
+*@param external_consent_status Customer connectivity settings status changes
+*/
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnAppPermissionConsent(
+      const uint32_t connection_key,
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) = 0;
+#else
   virtual void OnAppPermissionConsent(const uint32_t connection_key,
                                       const PermissionConsent& permissions) = 0;
+#endif
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -293,6 +316,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  virtual void OnPTUFinished(const bool ptu_result) = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -311,7 +337,9 @@ class PolicyHandlerInterface {
    * @param application_id The policy aplication id.
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * Checks whether application is revoked
@@ -341,7 +369,7 @@ class PolicyHandlerInterface {
   /**
    * @brief Handler on applications search completed
    */
-  virtual void OnAppsSearchCompleted() = 0;
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -399,9 +427,96 @@ class PolicyHandlerInterface {
   virtual const PolicySettings& get_settings() const = 0;
   virtual const std::string RemoteAppsUrl() const = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sets HMI default type for specified application
+   * @param application_id ID application
+   * @param app_types list of HMI types
+   */
+  virtual void SetDefaultHmiTypes(
+      const std::string& application_id,
+      const smart_objects::SmartObject* app_types) = 0;
+
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
+  virtual bool CheckHMIType(const std::string& application_id,
+                            mobile_apis::AppHMIType::eType hmi,
+                            const smart_objects::SmartObject* app_types) = 0;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
+
+  /**
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
+   */
+  virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
+
+  /**
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void OnRemoteAppPermissionsChanged(
+      const std::string& device_id, const std::string& application_id) = 0;
+
+  /**
+   * @brief Notifies Remote apps about change in HMI status
+   * @param device_id Device on which app is running
+   * @param policy_app_id ID of application
+   * @param hmi_level new HMI level for this application
+   */
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level) = 0;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) const = 0;
+#endif  // SDL_REMOTE_CONTROL
+
  private:
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+*and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+*process
+*@param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsentInternal(
-      const uint32_t connection_key, PermissionConsent& permissions) = 0;
+      const uint32_t connection_key,
+      const ExternalConsentStatus& external_consent_status,
+      PermissionConsent& out_permissions) = 0;
+#else
+  virtual void OnAppPermissionConsentInternal(
+      const uint32_t connection_key, PermissionConsent& out_permissions) = 0;
+#endif
 
   friend class AppPermissionDelegate;
 };

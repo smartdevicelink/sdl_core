@@ -70,10 +70,10 @@ const uint32_t kAsyncExpectationsTimeout = 10000u;
 class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
-      : tm_(settings)
-      , device_handle_(1)
+      : device_handle_(1)
       , mac_address_("MA:CA:DR:ES:S")
-      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
+      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC")
+      , tm_(settings) {}
 
   void SetUp() OVERRIDE {
     resumption::LastStateImpl last_state_("app_storage_folder",
@@ -313,7 +313,6 @@ class TransportManagerImplTest : public ::testing::Test {
     ASSERT_EQ(E_SUCCESS, tm_.Stop());
   }
   MockTransportManagerSettings settings;
-  MockTransportManagerImpl tm_;
 #ifdef TELEMETRY_MONITOR
   MockTMTelemetryObserver mock_metric_observer_;
 #endif  // TELEMETRY_MONITOR
@@ -329,6 +328,7 @@ class TransportManagerImplTest : public ::testing::Test {
   const DeviceInfo dev_info_;
   DeviceList device_list_;
   BaseErrorPtr error_;
+  MockTransportManagerImpl tm_;
 };
 
 TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {

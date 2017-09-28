@@ -73,7 +73,6 @@ class NaviStopStreamRequestsTest
 
   MessageSharedPtr msg_;
   SharedPtr<Command> command_;
-  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
 };
 
 typedef testing::Types<commands::AudioStopStreamRequest,

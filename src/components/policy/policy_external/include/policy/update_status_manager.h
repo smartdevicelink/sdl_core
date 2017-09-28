@@ -151,6 +151,13 @@ class UpdateStatusManager {
   void ScheduleUpdate();
 
   /**
+   * @brief ScheduleUpdate allows to schedule next update.
+   * It will change state to Update_Needed, that's is
+   * and will not send any notifications about updating to HMI
+   */
+  void ScheduleManualUpdate();
+
+  /**
    * @brief StringifiedUpdateStatus allows to obtain update status as a string.
    *
    * @return stringified update status.
@@ -205,6 +212,7 @@ class UpdateStatusManager {
   utils::SharedPtr<Status> postponed_status_;
   sync_primitives::Lock status_lock_;
 
+  UpdateEvent last_processed_event_;
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
   sync_primitives::Lock apps_search_in_progress_lock_;

@@ -65,6 +65,7 @@ class ApplicationManager;
 }
 
 namespace policy {
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
@@ -102,15 +103,82 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
-  void CheckPermissions(const PTString& app_id,
-                        const PTString& hmi_level,
-                        const PTString& rpc,
-                        const RPCParams& rpc_params,
-                        CheckPermissionResult& result) OVERRIDE;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sets HMI default type for specified application
+   * @param application_id ID application
+   * @param app_types list of HMI types
+   */
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const smart_objects::SmartObject* app_types) OVERRIDE;
+
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types) OVERRIDE;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  void OnUpdateHMILevel(const std::string& device_id,
+                        const std::string& policy_app_id,
+                        const std::string& hmi_level) OVERRIDE;
+
+  /**
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
+   */
+  bool CheckModule(const PTString& app_id, const PTString& module) OVERRIDE;
+
+  /**
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  void OnRemoteAppPermissionsChanged(
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
+
+  /**
+   * @brief Notifies Remote apps about change in HMI status
+   * @param device_id Device on which app is running
+   * @param policy_app_id ID of application
+   * @param hmi_level new HMI level for this application
+   */
+  void OnUpdateHMIStatus(const std::string& device_id,
+                         const std::string& policy_app_id,
+                         const std::string& hmi_level) OVERRIDE;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -121,10 +189,19 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetUpdateUrls(const uint32_t service_type,
                      EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
-  void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  uint32_t TimeoutExchangeSec() OVERRIDE;
-  uint32_t TimeoutExchangeMSec() OVERRIDE;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in seconds
+   */
+  uint32_t TimeoutExchangeSec() const OVERRIDE;
+
+  /**
+   * Gets timeout to wait until receive response
+   * @return timeout in miliseconds
+   */
+  uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
@@ -194,14 +271,32 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetDeviceInfo(const std::string& device_id,
                      const DeviceInfo& device_info) OVERRIDE;
 
-  /**
-   * @brief Store user-changed permissions consent to DB
-   * @param connection_key Connection key of application or 0, if permissions
-   * should be applied to all applications
-   * @param permissions User-changed group permissions consent
-   */
+/**
+ * @brief Store user-changed permissions consent to DB
+ * @param connection_key Connection key of application or 0, if permissions
+ * should be applied to all applications
+ * @param permissions User-changed group permissions consent
+ */
+
+/**
+ * @brief Processes permissions changes received from system via
+ * OnAppPermissionConsent notification
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided by notification
+ * @param permissions Structure containing group permissions changes
+ * @param external_consent_status Structure containig customer connectivity
+ * settings
+ * changes
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnAppPermissionConsent(
+      const uint32_t connection_key,
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) OVERRIDE;
+#else
   void OnAppPermissionConsent(const uint32_t connection_key,
                               const PermissionConsent& permissions) OVERRIDE;
+#endif
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -330,9 +425,12 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
-   ** @return function that will notify update manager about new application
+   * @param hmi_types list of hmi types
+   * @return function that will notify update manager about new application
    */
-  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
    * Checks whether application is revoked
@@ -367,7 +465,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Handler on applications search completed
    */
-  void OnAppsSearchCompleted() OVERRIDE;
+  void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -433,6 +531,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
  protected:
   /**
    * Starts next retry exchange policy table
@@ -460,15 +560,41 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool CheckStealFocus(const std::string& policy_app_id) const;
 
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+ * and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+ * process
+ * @param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      const ExternalConsentStatus& external_consent_status,
+      PermissionConsent& out_permissions) OVERRIDE;
+#else
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      PermissionConsent& out_permissions) OVERRIDE;
+#endif
+
+#ifdef SDL_REMOTE_CONTROL
   /**
-   * @brief OnAppPermissionConsentInternal reacts on permission changing
-   *
-   * @param connection_key connection key
-   *
-   * @param permissions new permissions.
+   * @brief Updates HMI level for specified application and send notification
+   * @param app application where HMI level was changed
+   * @param level new HMI level
    */
-  void OnAppPermissionConsentInternal(const uint32_t connection_key,
-                                      PermissionConsent& permissions) OVERRIDE;
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level);
+  std::vector<std::string> GetDevicesIds(
+      const std::string& policy_app_id) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Sets days after epoch on successful policy update
@@ -537,11 +663,38 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnEmptyCertificateArrived() const;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
+
+  /**
+   * @brief Collects permissions for all currently registered applications on
+   * all devices
+   * @return consolidated permissions list or empty list if no
+   * applications/devices currently present
+   */
+  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+
+  /**
+   * @brief Collects permissions for application with certain connection key
+   * @param connection_key Connection key of application to look for
+   * @return list of application permissions or empty list if no such
+   * application found
+   */
+  std::vector<FunctionalGroupPermission> CollectAppPermissions(
+      const uint32_t connection_key);
+
+ private:
   static const std::string kLibrary;
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @param out_links Collection of device_id-to-app_id links
+ */
+  void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
+
+ private:
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
   void* dl_handle_;
-  AppIds last_used_app_ids_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 
@@ -557,8 +710,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   mutable sync_primitives::Lock listeners_lock_;
 
   /**
-   * @brief Application-to-device map is used for getting/setting user consents
-   * for all apps
+   * @brief Application-to-device links are used for collecting their current
+   * consents to provide for HMI request and process response with possible
+   * changes done by user
    */
   std::map<std::string, std::string> app_to_device_link_;
 
@@ -570,6 +724,16 @@ class PolicyHandler : public PolicyHandlerInterface,
   application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;
 
+  /**
+   * @brief Checks if the application with the given policy
+   * application id is registered or it is default id
+   * @param app_idx Application idx from EndpointUrls vector
+   * @param urls EndpointUrls vector
+   * @return TRUE if the vector with URLs with given idx is not empty
+   * and is related to a registered application or these are default URLs,
+   * otherwise FALSE
+   */
+  bool IsUrlAppIdValid(const uint32_t app_idx, const EndpointUrls& urls) const;
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 

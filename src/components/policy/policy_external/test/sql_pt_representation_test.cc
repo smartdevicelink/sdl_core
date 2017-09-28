@@ -62,9 +62,14 @@ using testing::ReturnRef;
 using testing::Return;
 using testing::NiceMock;
 using testing::Mock;
+
 namespace test {
 namespace components {
 namespace policy_test {
+
+namespace {
+const int32_t kPolicyTablesNumber = 27;
+}
 
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
@@ -80,7 +85,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
+    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
@@ -224,6 +229,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     policy_table["app_policies"] = Json::Value(Json::objectValue);
 
     Json::Value& module_config = policy_table["module_config"];
+    module_config["preloaded_date"] = Json::Value("25-04-2015");
     module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
     module_config["exchange_after_x_kilometers"] = Json::Value(100);
     module_config["exchange_after_x_days"] = Json::Value(5);
@@ -400,7 +406,9 @@ TEST_F(SQLPTRepresentationTest,
   // Check PT structure destroyed and tables number is 0
   query.Prepare(query_select);
   query.Next();
-  ASSERT_EQ(25, query.GetInteger(0));
+
+  const int policy_tables_number = 32;
+  ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";

@@ -111,7 +111,8 @@ TEST(MobileMessageHandlerTestV1Test,
       utils::MakeShared<application_manager::Message>(
           protocol_handler::MessagePriority::kDefault);
 
-  message->set_protocol_version(application_manager::ProtocolVersion::kV1);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
   message->set_json_message(data_json);
   message->set_connection_key(connection_key_p1);
 
@@ -121,7 +122,8 @@ TEST(MobileMessageHandlerTestV1Test,
   ASSERT_TRUE(ptr);
 
   EXPECT_EQ(connection_key, ptr->connection_key());
-  EXPECT_EQ(static_cast<uint32_t>(application_manager::ProtocolVersion::kV1),
+  EXPECT_EQ(static_cast<uint32_t>(
+                protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1),
             ptr->protocol_version());
 }
 

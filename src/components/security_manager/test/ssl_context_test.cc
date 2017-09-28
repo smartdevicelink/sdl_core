@@ -88,9 +88,9 @@ struct ProtocolAndCipher {
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
-    SetCertificate("server/spt_credential_unsigned.p12.enc",
+    SetCertificate("server/spt_credential_unsigned.pem",
                    server_certificate_data_base64_);
-    SetCertificate("client/client_credential_unsigned.p12.enc",
+    SetCertificate("client/client_credential_unsigned.pem",
                    client_certificate_data_base64_);
   }
 

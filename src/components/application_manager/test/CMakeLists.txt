@@ -45,12 +45,13 @@ include_directories(
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/utils/include/
   ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/policy/policy_regular/test/include
   ${POLICY_PATH}/policy/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/security_manager/include/
-  ${COMPONENTS_DIR}/policy/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 set(testSources
@@ -68,9 +69,13 @@ set(testSources
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
- #${AM_TEST_DIR}/application_manager_impl_test.cc
+  ${AM_TEST_DIR}/application_manager_impl_test.cc
 
 )
+
+if(REMOTE_CONTROL)
+  list(APPEND testSources ${AM_TEST_DIR}/rc_policy_handler_test.cc)
+endif(REMOTE_CONTROL)
 
 set (RequestController_SOURCES
   ${AM_TEST_DIR}/request_controller/request_controller_test.cc
@@ -97,6 +102,8 @@ set(LIBRARIES
   Resumption
   ProtocolHandler
   SecurityManager
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
@@ -123,6 +130,7 @@ set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
+add_dependencies("application_manager_test" libbson)
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
 # TODO [AKozoriz] : Fix not buildable tests
@@ -135,11 +143,13 @@ set(ResumptionData_SOURCES
 )
 
 file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
-create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${LIBRARIES}")
+create_test("data_resumption_test" "${ResumptionData_SOURCES}" "${LIBRARIES}")
 
 add_subdirectory(state_controller)
 add_subdirectory(app_launch)

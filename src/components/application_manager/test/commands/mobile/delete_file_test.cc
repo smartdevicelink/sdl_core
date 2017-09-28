@@ -159,7 +159,7 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
       kConnectionKey;
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
+      .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 

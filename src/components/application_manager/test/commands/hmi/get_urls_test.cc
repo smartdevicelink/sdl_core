@@ -312,6 +312,9 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
   endpoints_.push_back(data);
   EXPECT_CALL(mock_policy_handler_, GetUpdateUrls(kServiceType, _))
       .WillOnce(SetArgReferee<1>(endpoints_));
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(_))
+      .WillOnce(Return(mock_app));
   request_command_->Run();
 
   EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(

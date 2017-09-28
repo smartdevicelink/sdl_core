@@ -66,6 +66,8 @@ class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
   LogMessageLoopThread();
   ~LogMessageLoopThread();
 
+ private:
+  LogMessageHandler* handler_;
   DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 

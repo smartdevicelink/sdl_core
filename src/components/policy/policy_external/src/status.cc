@@ -43,6 +43,7 @@ void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
     case kOnNewAppRegistered:
     case kOnResetPolicyTableRequireUpdate:
     case kScheduleUpdate:
+    case kScheduleManualUpdate:
     case kOnResetRetrySequence:
       manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
@@ -98,6 +99,7 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
       manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     case kScheduleUpdate:
+    case kScheduleManualUpdate:
     case kOnResetRetrySequence:
       manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;

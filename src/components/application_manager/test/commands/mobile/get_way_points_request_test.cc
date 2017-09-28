@@ -72,6 +72,15 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  GetWayPointsRequestTest()
+      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
+  ~GetWayPointsRequestTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =
@@ -82,8 +91,12 @@ class GetWayPointsRequestTest
             message_);
     mock_app_ = CreateMockApp();
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
+
+    ON_CALL(message_helper_mock_, HMIToMobileResult(_))
+        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   }
 
+  MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
@@ -117,6 +130,12 @@ class GetWayPointsRequestOnEventTest
     }
 
     event.set_smart_object(*event_msg);
+
+    EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
+        .WillOnce(Return(ResultCode));
+
+    MockAppPtr app(CreateMockApp());
+    EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
@@ -186,7 +205,7 @@ TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
 }
 
 TEST_F(GetWayPointsRequestTest,
-       OnEvent_NavigationGetWayPointsEvent_SendResponce) {
+       OnEvent_NavigationGetWayPointsEvent_SendResponse) {
   am::event_engine::Event event(hmi_apis::FunctionID::Navigation_GetWayPoints);
 
   (*message_)[am::strings::params][am::hmi_response::code] =
@@ -239,42 +258,46 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case3) {
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
-  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces_));
-  EXPECT_CALL(hmi_interfaces_,
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::GENERIC_ERROR));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   CheckOnEventResponse("    ", GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
-  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces_));
-  EXPECT_CALL(hmi_interfaces_,
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::GENERIC_ERROR));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   CheckOnEventResponse("test\t", GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
-  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces_));
-  EXPECT_CALL(hmi_interfaces_,
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::GENERIC_ERROR));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   CheckOnEventResponse("test\n", GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
-  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces_));
-  EXPECT_CALL(hmi_interfaces_,
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::GENERIC_ERROR));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   CheckOnEventResponse("test\t\n", GENERIC_ERROR, false);
 }
 

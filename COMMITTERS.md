@@ -41,7 +41,7 @@ set in the form of a pull request.
    there must be comment which explains: When method will be called by thread? Which thread calls the method? e.g.)
 * Do you have specific realization code comments?
 * Add log messages.
-* There are no Google code style errors. (You can download Google [cppint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py))
+* There are no Google code style errors. (You can download Google [cpplint.py](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py))
 * Check branch naming.
 * Check correct commit messages in commits (see Pull request message section).
 * Check correct pull request target (`master` or `develop`)

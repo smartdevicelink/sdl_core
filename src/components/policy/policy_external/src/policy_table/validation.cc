@@ -42,8 +42,13 @@ bool VerifyPredefinedApp(ApplicationPolicies::value_type& app_policies) {
 }
 
 bool PolicyBase::Validate() const {
+  // Check for empty "groups" sub-sections
+  if (groups.empty()) {
+    return false;
+  }
   return true;
 }
+
 bool ApplicationPoliciesSection::Validate() const {
   ApplicationPolicies::iterator it_default_policy = apps.find(kDefaultApp);
   ApplicationPolicies::iterator it_pre_data_policy =
@@ -130,6 +135,39 @@ bool ApplicationPoliciesSection::Validate() const {
 
   return true;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+bool ApplicationParams::ValidateModuleTypes() const {
+  // moduleType is optional so see Optional<T>::is_valid()
+  bool is_initialized = moduleType->is_initialized();
+  if (!is_initialized) {
+    // valid if not initialized
+    return true;
+  }
+  bool is_valid = moduleType->is_valid();
+  if (is_valid) {
+    return true;
+  }
+
+  struct IsInvalid {
+    bool operator()(Enum<ModuleType> item) const {
+      return !item.is_valid();
+    }
+  };
+  // cut invalid items
+  moduleType->erase(
+      std::remove_if(moduleType->begin(), moduleType->end(), IsInvalid()),
+      moduleType->end());
+  bool empty = moduleType->empty();
+  if (empty) {
+    // set non initialized value
+    ModuleTypes non_initialized;
+    moduleType = Optional<ModuleTypes>(non_initialized);
+  }
+  return true;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 bool ApplicationParams::Validate() const {
   if (is_initialized()) {
     if (preconsented_groups.is_initialized()) {
@@ -140,8 +178,13 @@ bool ApplicationParams::Validate() const {
       }
     }
   }
+#ifdef SDL_REMOTE_CONTROL
+  return ValidateModuleTypes();
+#else   // SDL_REMOTE_CONTROL
   return true;
+#endif  // SDL_REMOTE_CONTROL
 }
+
 bool RpcParameters::Validate() const {
   return true;
 }
@@ -172,6 +215,19 @@ bool ModuleConfig::Validate() const {
     default:
       break;
   }
+
+  for (ServiceEndpoints::const_iterator it_endpoints = endpoints.begin();
+       it_endpoints != endpoints.end();
+       ++it_endpoints) {
+    const URLList& endpoint_list = it_endpoints->second;
+    if (endpoint_list.end() == endpoint_list.find(kDefaultApp)) {
+      LOG4CXX_ERROR(logger_,
+                    "Endpoint " << it_endpoints->first
+                                << "does not contain default group");
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -209,18 +265,38 @@ bool UsageAndErrorCounts::Validate() const {
   return true;
 }
 bool ConsentRecords::Validate() const {
+  if (PT_SNAPSHOT != GetPolicyTableType()) {
+    return !external_consent_status_groups->is_initialized();
+  }
+
   return true;
 }
 bool DeviceParams::Validate() const {
   return true;
 }
 bool PolicyTable::Validate() const {
-  if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_UPDATE == GetPolicyTableType()) {
+  PolicyTableType policy_table_type = GetPolicyTableType();
+
+  if (PT_PRELOADED == policy_table_type || PT_UPDATE == policy_table_type) {
     if (device_data.is_initialized()) {
       return false;
     }
   }
+
+  if (PT_PRELOADED == policy_table_type || PT_SNAPSHOT == policy_table_type) {
+    // Check upper bound of each "groups" sub section in the app policies
+    const FunctionalGroupings::size_type functional_groupings_count =
+        functional_groupings.size();
+    for (ApplicationPolicies::const_iterator app_policiies_it =
+             app_policies_section.apps.begin();
+         app_policies_section.apps.end() != app_policiies_it;
+         ++app_policiies_it) {
+      if (app_policiies_it->second.groups.size() > functional_groupings_count) {
+        return false;
+      }
+    }
+  }
+
   return true;
 }
 

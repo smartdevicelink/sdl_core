@@ -6,7 +6,7 @@
 
 #include "mb_controller.hpp"
 
-#include "MBDebugHelper.h" 
+#include "MBDebugHelper.h"
 #include "CMessageBroker.hpp"
 
 namespace NsMessageBroker
@@ -45,7 +45,7 @@ namespace NsMessageBroker
             return recv;
          }
          std::string wmes = m_receiverWriter.write(root);
-         DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
+         DBG_MSG(("Parsed JSON string:%s; length: %zu\n", wmes.c_str(), wmes.length()));
          DBG_MSG(("Buffer is:%s\n", m_receivingBuffer.c_str()));
          ssize_t beginpos = m_receivingBuffer.find(wmes);
          if (-1 != beginpos)
@@ -125,7 +125,7 @@ namespace NsMessageBroker
       }
       int bytesSent = Send(mes);
       bytesSent = bytesSent; // to prevent compiler warnings in case DBG_MSG off
-      DBG_MSG(("Length:%d, Sent: %d bytes\n", mes.length(), bytesSent));
+      DBG_MSG(("Length: %zu, Sent: %d bytes\n", mes.length(), bytesSent));
    }
 
    std::string CMessageBrokerController::findMethodById(std::string id)
@@ -153,7 +153,7 @@ namespace NsMessageBroker
          return mControllersIdCurrent = mControllersIdStart;
       }
    }
-   
+
    void CMessageBrokerController::prepareMessage(Json::Value& root)
    {
       root["jsonrpc"] = "2.0";
@@ -286,11 +286,11 @@ namespace NsMessageBroker
    {
       DBG_MSG(("CMessageBrokerController::checkMessage()\n"));
       Json::Value err;
-   
+
       try
       {
          /* check the JSON-RPC version => 2.0 */
-         if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0") 
+         if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0")
          {
             error["id"] = Json::Value::null;
             error["jsonrpc"] = "2.0";

@@ -67,7 +67,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
@@ -113,10 +112,8 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
     MessageSharedPtr response_to_mobile;
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillOnce(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillRepeatedly(Return(state));
     MockMessageHelper* mock_message_helper =
         MockMessageHelper::message_helper_mock();
     EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))

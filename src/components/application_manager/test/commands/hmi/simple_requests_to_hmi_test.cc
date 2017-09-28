@@ -2,6 +2,9 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2017 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of their contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -114,6 +117,7 @@
 #include "application_manager/commands/hmi/sdl_policy_update.h"
 #include "application_manager/commands/hmi/ui_set_icon_request.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_request.h"
 
 #include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
 
@@ -217,7 +221,8 @@ typedef Types<am_commands::VIGetVehicleTypeRequest,
               am_commands::NaviAlertManeuverRequest,
               am_commands::AudioStopStreamRequest,
               am_commands::NaviGetWayPointsRequest,
-              am_commands::UISetGlobalPropertiesRequest> RequestCommandsList;
+              am_commands::UISetGlobalPropertiesRequest,
+              am_commands::UISendHapticDataRequest> RequestCommandsList;
 
 typedef Types<am_commands::UIScrollableMessageRequest,
               am_commands::VRGetCapabilitiesRequest,

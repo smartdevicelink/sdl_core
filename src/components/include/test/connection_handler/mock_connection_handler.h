@@ -96,6 +96,10 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(get_device_discovery_starter, DevicesDiscoveryStarter&());
   MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
                      void(std::vector<std::string>& macs));
+  MOCK_METHOD3(NotifyServiceStartedResult,
+               void(uint32_t session_key,
+                    bool result,
+                    std::vector<std::string>& rejected_params));
 };
 
 }  // namespace connection_handler_test

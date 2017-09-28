@@ -45,6 +45,8 @@
 #include "application_manager/app_launch/app_launch_ctrl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/policies/policy_handler.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
 
@@ -72,6 +74,12 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::TESTING;
   } else if ("SYSTEM" == str) {
     return mobile_apis::AppHMIType::SYSTEM;
+  } else if ("PROJECTION" == str) {
+    return mobile_apis::AppHMIType::PROJECTION;
+#ifdef SDL_REMOTE_CONTROL
+  } else if ("REMOTE_CONTROL" == str) {
+    return mobile_apis::AppHMIType::REMOTE_CONTROL;
+#endif
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
@@ -80,6 +88,9 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
       {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+#ifdef SDL_REMOTE_CONTROL
+       {mobile_apis::AppHMIType::REMOTE_CONTROL, "REMOTE_CONTROL"},
+#endif  // SDL_REMOTE_CONTROL
        {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
        {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
        {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
@@ -88,7 +99,8 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
        {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
        {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
        {mobile_apis::AppHMIType::TESTING, "TESTING"},
-       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
+       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"},
+       {mobile_apis::AppHMIType::PROJECTION, "PROJECTION"}};
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
@@ -138,6 +150,13 @@ struct CheckMissedTypes {
  private:
   const policy::StringArray& policy_app_types_;
   std::string& log_;
+};
+
+class SmartArrayValueExtractor {
+ public:
+  AppHmiType operator()(const smart_objects::SmartObject& so) const {
+    return static_cast<AppHmiType>(so.asInt());
+  }
 };
 
 struct IsSameNickname {
@@ -310,6 +329,11 @@ void RegisterAppInterfaceRequest::Run() {
               app_type.getElement(i).asUInt())) {
         application->set_voice_communication_supported(true);
       }
+      if (mobile_apis::AppHMIType::PROJECTION ==
+          static_cast<mobile_apis::AppHMIType::eType>(
+              app_type.getElement(i).asUInt())) {
+        application->set_mobile_projection_enabled(true);
+      }
     }
   }
 
@@ -468,6 +492,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::hmi_capabilities][strings::video_streaming] =
+      hmi_capabilities.video_streaming_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
@@ -636,11 +662,30 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
-  policy::StatusNotifier notify_upd_manager =
-      GetPolicyHandler().AddApplication(application->policy_app_id());
+  AppHmiTypes hmi_types;
+  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    smart_objects::SmartArray* hmi_types_ptr =
+        (*message_)[strings::msg_params][strings::app_hmi_type].asArray();
+    DCHECK_OR_RETURN_VOID(hmi_types_ptr);
+    SmartArrayValueExtractor extractor;
+    if (hmi_types_ptr && 0 < hmi_types_ptr->size()) {
+      std::transform(hmi_types_ptr->begin(),
+                     hmi_types_ptr->end(),
+                     std::back_inserter(hmi_types),
+                     extractor);
+    }
+  }
+  policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
+      application->policy_app_id(), hmi_types);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
+#ifdef SDL_REMOTE_CONTROL
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
+                                          &(msg_params[strings::app_hmi_type]));
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
@@ -899,7 +944,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // If AppHMIType is not included in policy - allow any type
   if (!app_hmi_types.empty()) {
     if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
-      // If AppHMITypes are partially same, the system should allow those listed
+      // If AppHmiTypes are partially same, the system should allow those listed
       // in the policy table and send warning info on missed values
       smart_objects::SmartArray app_types =
           *(message[strings::msg_params][strings::app_hmi_type].asArray());
@@ -909,13 +954,13 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       std::for_each(app_types.begin(), app_types.end(), checker);
       if (!log.empty()) {
         response_info_ =
-            "Following AppHMITypes are not present in policy "
+            "Following AppHmiTypes are not present in policy "
             "table:" +
             log;
         result_checking_app_hmi_type_ = mobile_apis::Result::WARNINGS;
       }
     }
-    // Replace AppHMITypes in request with values allowed by policy table
+    // Replace AppHmiTypes in request with values allowed by policy table
     message[strings::msg_params][strings::app_hmi_type] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 

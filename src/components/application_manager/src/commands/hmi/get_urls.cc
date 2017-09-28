@@ -34,6 +34,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 namespace commands {
@@ -67,14 +68,14 @@ void GetUrls::Run() {
     return;
   }
 
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+#ifdef PROPRIETARY_MODE
   const uint32_t policy_service = 7u;
 
   if (policy_service == service_to_check) {
     ProcessPolicyServiceURLs(endpoints);
     return;
   }
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE
 
   ProcessServiceURLs(endpoints);
 }
@@ -88,30 +89,34 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 
   size_t index = 0;
   for (size_t e = 0; e < endpoints.size(); ++e) {
-    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
-      const std::string app_url = endpoints[e].url[u];
+    ApplicationSharedPtr app =
+        application_manager_.application_by_policy_id(endpoints[e].app_id);
 
+#ifndef PROPRIETARY_MODE
+    bool registered_not_default = false;
+    if (policy::kDefaultId != endpoints[e].app_id) {
+      if (!app) {
+        LOG4CXX_ERROR(logger_,
+                      "Can't find application with policy id "
+                          << endpoints[e].app_id
+                          << " URLs adding for this application is skipped.");
+        continue;
+      }
+      registered_not_default = true;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE || HTTP
+    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
+      const std::string& app_url = endpoints[e].url[u];
       SmartObject& service_info = urls[index];
 
       service_info[strings::url] = app_url;
-      if (policy::kDefaultId != endpoints[e].app_id) {
-#ifndef EXTERNAL_PROPRIETARY_MODE
-        service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
-#else   // EXTERNAL_PROPRIETARY_MODE
-        ApplicationSharedPtr app =
-            application_manager_.application_by_policy_id(endpoints[e].app_id);
-
-        if (!app) {
-          LOG4CXX_ERROR(logger_,
-                        "Can't find application with policy id "
-                            << endpoints[e].app_id
-                            << " URLs adding for this appliation is skipped.");
-          continue;
-        }
-
+#ifndef PROPRIETARY_MODE
+      if (registered_not_default) {
         service_info[strings::app_id] = app->hmi_app_id();
-#endif  // EXTERNAL_PROPRIETARY_MODE
       }
+#else  // EXTERNAL_PROPRIETARY_MODE || HTTP
+      service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
+#endif
     }
   }
   SendResponseToHMI(Common_Result::SUCCESS);
@@ -123,7 +128,7 @@ void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   application_manager_.ManageHMICommand(message_);
 }
 
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+#ifdef PROPRIETARY_MODE
 struct PolicyAppIdComparator {
   PolicyAppIdComparator(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
@@ -190,36 +195,29 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
   SmartObject& urls = object[msg_params][hmi_response::urls];
   const std::string mobile_app_id = app->policy_app_id();
-  std::string default_url = "URL is not found";
 
-  // Will use only one URL for particular application if it will be found
-  // Otherwise URL from default section will used
-  SmartObject service_info = SmartObject(SmartType_Map);
+  size_t index = 0;
+  for (size_t i = 0; i < endpoints.size(); ++i) {
+    using namespace helpers;
 
-  for (size_t e = 0; e < endpoints.size(); ++e) {
-    if (mobile_app_id == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        service_info[url] = endpoints[e].url[0];
-        SendResponseToHMI(Common_Result::SUCCESS);
-        return;
-      }
-    }
-    if (policy::kDefaultId == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        default_url = endpoints[e].url[0];
+    const bool to_add = Compare<std::string, EQ, ONE>(
+        endpoints[i].app_id, mobile_app_id, policy::kDefaultId);
+    const bool is_default = policy::kDefaultId == endpoints[i].app_id;
+
+    if (to_add) {
+      for (size_t k = 0; k < endpoints[i].url.size(); ++k) {
+        if (!is_default) {
+          urls[index][strings::app_id] = app_id_to_send_to;
+        }
+        urls[index][strings::url] = endpoints[i].url[k];
+        ++index;
       }
     }
   }
-
-  service_info[strings::app_id] = app->app_id();
-  service_info[strings::url] = default_url;
-  urls[0] = service_info;
-  // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
-  // Possibly related to smart schema
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY
+#endif  // PROPRIETARY_MODE
 
 }  // namespace commands
 }  // namespace application_manager

@@ -78,24 +78,31 @@ void OnSystemRequestNotification::Run() {
   }
 
   if (RequestType::PROPRIETARY == request_type) {
-/* According to requirements:
-   "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
-    If the requestType = HTTP, add to mobile API fileType = BINARY"
-   Also in Genivi SDL we don't save the PT to file - we put it directly in
-   binary_data */
+    /* According to requirements:
+       "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
+        If the requestType = HTTP, add to mobile API fileType = BINARY"
+       Also in Genivi SDL we don't save the PT to file - we put it directly in
+       binary_data */
 
-#ifdef PROPRIETARY_MODE
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
-
     BinaryMessage binary_data;
     file_system::ReadBinaryFile(filename, binary_data);
+#if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
+#endif  // PROPRIETARY_MODE
+
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
     (*message_)[strings::params][strings::binary_data] = binary_data;
 #endif  // PROPRIETARY_MODE
+
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
+    if ((*message_)[strings::msg_params].keyExists(strings::url)) {
+      (*message_)[strings::msg_params][strings::timeout] =
+          policy_handler.TimeoutExchangeSec();
+    }
   }
 
   SendNotification();

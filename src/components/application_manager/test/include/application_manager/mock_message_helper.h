@@ -70,6 +70,10 @@ class MockMessageHelper {
                    const connection_handler::DeviceMap& devices,
                    const policy::PolicyHandlerInterface& policy_handler,
                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendNaviSetVideoConfig,
+               void(int32_t app_id,
+                    ApplicationManager& app_mngr,
+                    const smart_objects::SmartObject& video_params));
   MOCK_METHOD2(SendNaviStartStream,
                void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStopStream,
@@ -109,7 +113,14 @@ class MockMessageHelper {
                     uint32_t correlation_id,
                     ApplicationManager& app_mngr));
   MOCK_METHOD1(SendGetSystemInfoRequest, void(ApplicationManager& app_mngr));
-
+  MOCK_METHOD4(SendActivateAppToHMI,
+               void(uint32_t const app_id,
+                    ApplicationManager& application_manager,
+                    hmi_apis::Common_HMILevel::eType level,
+                    bool send_policy_priority));
+  MOCK_METHOD2(SendHMIStatusNotification,
+               void(const Application& application_impl,
+                    ApplicationManager& application_manager));
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
                     const uint32_t timeout,
@@ -118,11 +129,20 @@ class MockMessageHelper {
   MOCK_METHOD2(SendDecryptCertificateToHMI,
                void(const std::string& file_name,
                     ApplicationManager& app_mngr));
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD4(
+      SendGetListOfPermissionsResponse,
+      void(const std::vector<policy::FunctionalGroupPermission>& permissions,
+           const policy::ExternalConsentStatus& external_consent_status,
+           uint32_t correlation_id,
+           ApplicationManager& app_mngr));
+#else
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
            uint32_t correlation_id,
            ApplicationManager& app_mngr));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions,
@@ -245,6 +265,9 @@ class MockMessageHelper {
                     ApplicationManager& application_manager));
   MOCK_METHOD1(StringifiedHMILevel,
                std::string(const mobile_apis::HMILevel::eType hmi_level));
+  MOCK_METHOD2(GetDeviceMacAddressForHandle,
+               std::string(const uint32_t device_handle,
+                           const ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };

@@ -30,16 +30,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_MANAGER_H_
 
 #include <vector>
 
 #include "utils/callable.h"
 
 #include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 #include "policy/policy_listener.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 class PolicySettings;
@@ -47,14 +52,24 @@ typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
+  /**
+   * @brief The NotificationMode enum defines whether application will be
+   * notified about changes done (e.g. after consents were changed) or not
+   */
+  enum NotificationMode { kSilentMode, kNotifyApplicationMode };
   virtual ~PolicyManager() {}
 
+  /**
+   * @brief set_listener set new policy listener instance
+   * @param listener new policy listener
+   */
   virtual void set_listener(PolicyListener* listener) = 0;
 
   /**
-   * Inits Policy Table
-   * @param file_name Path to preloaded PT file
-   * @return true if successfully
+   * @brief Inits Policy Table
+   * @param file_name path to preloaded PT file
+   * @param settings pointer to policy init settings
+   * @return true if init is successful
    */
   virtual bool InitPT(const std::string& file_name,
                       const PolicySettings* settings) = 0;
@@ -65,24 +80,30 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * sent in snapshot and received Policy Table.
    * @param file name of file with update policy table
    * @param pt_content PTU as binary string
-   * @return bool Success of operation
+   * @return true if successfully
    */
   virtual bool LoadPT(const std::string& file,
                       const BinaryMessage& pt_content) = 0;
 
   /**
-   * Resets Policy Table
+   * @brief Resets Policy Table
    * @param file_name Path to preloaded PT file
    * @return true if successfully
    */
   virtual bool ResetPT(const std::string& file_name) = 0;
 
   /**
+   * @brief Gets last URL for sending PTS to from PT itself
+   * @param service_type Service specifies user of URL
+   * @return last URL or empty string if endpoint entry is empty
+   */
+  virtual std::string GetUpdateUrl(int service_type) = 0;
+
+  /**
    * @brief Gets all URLs for sending PTS to from PT itself.
    * @param service_type Service specifies user of URL
    * @return vector of urls
    */
-
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
   virtual void GetUpdateUrls(const std::string& service_type,
@@ -90,7 +111,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
    * @return url which point to the resourse where lock screen icon could be
    *obtained.
    */
@@ -108,6 +128,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param app_id Id of application provided during registration
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
+   * @param rpc_params List of RPC params
    * @param CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
@@ -130,36 +151,43 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual std::string GetPolicyTableStatus() const = 0;
 
   /**
-   * Checks is PT exceeded kilometers
+   * @brief Checks is PT exceeded kilometers
    * @param kilometers current kilometers at odometer
    * @return true if exceeded
    */
   virtual void KmsChanged(int kilometers) = 0;
 
   /**
-   * Increments counter of ignition cycles
+   * @brief Increments counter of ignition cycles
    */
   virtual void IncrementIgnitionCycles() = 0;
 
   /**
-   * @brief ExchangeByUserRequest
+   * @brief Exchange by hmi or mobile request
+   * @return Current status of policy table
    */
   virtual std::string ForcePTExchange() = 0;
 
   /**
-   * Resets retry sequence
+   * @brief Exchange by user request
+   * @return Current status of policy table
+   */
+  virtual std::string ForcePTExchangeAtUserRequest() = 0;
+
+  /**
+   * @brief Resets retry sequence
    */
   virtual void ResetRetrySequence() = 0;
 
   /**
-   * Gets timeout to wait before next retry updating PT
+   * @brief Gets timeout to wait before next retry updating PT
    * If timeout is less or equal to zero then the retry sequence is not need.
    * @return timeout in seconds
    */
   virtual int NextRetryTimeout() = 0;
 
   /**
-   * Gets timeout to wait until receive response
+   * @brief Gets timeout to wait until receive response
    * @return timeout in seconds
    */
   virtual uint32_t TimeoutExchangeMSec() = 0;
@@ -172,7 +200,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual const std::vector<int> RetrySequenceDelaysSeconds() = 0;
 
   /**
-   * Handler of exceeding timeout of exchanging policy table
+   * @brief Handler of exceeding timeout of exchanging policy table
    */
   virtual void OnExceededTimeout() = 0;
 
@@ -211,21 +239,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
+   * @param app_id Unique application id
+   * @param is_device_allowed true if user allowing device otherwise false
+   * @return true if operation was successful
    */
   virtual bool ReactOnUserDevConsentForApp(const std::string& app_id,
                                            const bool is_device_allowed) = 0;
 
   /**
-   * Sets counter value that passed for receiving PT UPdate.
+   * @brief Sets counter value that passed for receiving PT UPdate.
    */
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
 
   /**
    * @brief Retrieves data from app_policies about app on its registration:
-   * @param app_id - id of registered app
-   * @param app_types Section on HMI where app can appear (Navigation, Phone
-   * etc)
+   * @param application_id - id of registered app
    * @param nicknames Synonyms for application
+   * @param app_hmi_types Section on HMI where app can appear (Navigation, Phone
+   * etc)
    */
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
@@ -254,8 +285,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * The permissions is not const reference because it may contains
    * valid data as well as invalid. So we will remove all invalid data
    * from this structure.
+   * @param mode notification mode
    */
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
+  virtual void SetUserConsentForApp(const PermissionConsent& permissions,
+                                    const NotificationMode mode) = 0;
 
   /**
    * @brief Get default HMI level for application
@@ -280,6 +313,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief Get user friendly messages for given RPC messages and language
    * @param message_codes RPC message codes
    * @param language Language
+   * @param active_hmi_language Currently active language
    * @return Array of structs with appropriate message parameters
    */
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
@@ -288,7 +322,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& active_hmi_language) = 0;
 
   /**
-   * Checks if the application is revoked
+   * @brief Checks if the application is revoked
    * @param app_id application id
    * @return true if application is revoked
    */
@@ -315,11 +349,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual AppPermissions GetAppPermissionsChanges(
       const std::string& policy_app_id) = 0;
 
+  /**
+   * @brief Removes specific application permissions changes
+   * @param app_id Unique application id
+   */
   virtual void RemovePendingPermissionChanges(const std::string& app_id) = 0;
 
   /**
    * @brief Return device id, which hosts specific application
-   * @param Application id, which is required to update device id
+   * @param policy_app_id Application id, which is required to update device id
    */
   virtual std::string& GetCurrentDeviceId(
       const std::string& policy_app_id) const = 0;
@@ -342,13 +380,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
-   * @param application_id
+   * @param application_id Unique application id
    */
   virtual void SendNotificationOnPermissionsUpdated(
       const std::string& application_id) = 0;
 
   /**
-   * Marks device as upaired
+   * @brief Marks device as upaired
    * @param device_id id device
    */
   virtual void MarkUnpairedDevice(const std::string& device_id) = 0;
@@ -356,25 +394,31 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
-   * @param Application id assigned by Ford to the application
+   * @param application_id Unique application id
+   * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * @brief Removes unpaired device records and related records from DB
-   * @param device_ids List of device_id, which should be removed
    * @return true, if succedeed, otherwise - false
    */
   virtual bool CleanupUnpairedDevices() = 0;
 
   /**
    * @brief Check if app can keep context.
+   * @param app_id Unique application id
+   * @return true if app can keep context, otherwise - false
    */
   virtual bool CanAppKeepContext(const std::string& app_id) const = 0;
 
   /**
    * @brief Check if app can steal focus.
+   * @param app_id Unique application id
+   * @return true if app can steal focus, otherwise - false
    */
   virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
@@ -386,9 +430,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void OnSystemReady() = 0;
 
   /**
-   * @brief GetNotificationNumber
-   * @param priority
-   * @return
+   * @brief Get number of notification by priority
+   * @param priority Specified priority
+   * @return notification number
    */
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
@@ -407,7 +451,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual bool IsPredataPolicy(const std::string& policy_app_id) const = 0;
 
   /**
-   * Returns heart beat timeout
+   * @brief Returns heart beat timeout
    * @param app_id application id
    * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
@@ -415,7 +459,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
   /**
-   * @brief SaveUpdateStatusRequired alows to save update status.
+   * @brief SaveUpdateStatusRequired allows to save update status.
+   * @param is_update_needed true if update needed
    */
   virtual void SaveUpdateStatusRequired(bool is_update_needed) = 0;
 
@@ -426,14 +471,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Handler on applications search completed
+   * @param trigger_ptu contains true if PTU should be triggered
    */
-  virtual void OnAppsSearchCompleted() = 0;
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
+   * It will send OnAppPermissionSend notification and will try to start PTU. *
    * @param application_id registered application.
    */
   virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
@@ -441,13 +486,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Gets request types for application
    * @param policy_app_id Unique application id
-   * @return request_types Request types of application
+   * @return request types of application
    */
   virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const = 0;
 
   /**
    * @brief Get information about vehicle
+   * @return vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
 
@@ -460,7 +506,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief RetrieveCertificate Allows to obtain certificate in order
    * to start secure connection.
-   *
    * @return The certificate in PKCS#7 format.
    */
   virtual std::string RetrieveCertificate() const = 0;
@@ -468,7 +513,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief HasCertificate check whether policy table has certificate
    * int module_config section.
-   *
    * @return true in case certificate exists, false otherwise
    */
   virtual bool HasCertificate() const = 0;
@@ -479,17 +523,115 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
+  /**
+   * @brief Getter for policy settings
+   * @return policy settings instance
+   */
   virtual const PolicySettings& get_settings() const = 0;
+
+  /**
+   * @brief Finds the next URL that must be sent on OnSystemRequest retry
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of policy application id and application url id from the
+   * urls vector
+   */
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Assigns new HMI types for specified application
+   * @param application_id Unique application id
+   * @param hmi_types new HMI types list
+   */
+  virtual void SetDefaultHmiTypes(const std::string& application_id,
+                                  const std::vector<int>& hmi_types) = 0;
+  /**
+   * @brief Gets HMI types
+   * @param application_id ID application
+   * @param app_types list to save HMI types
+   * @return true if policy has specific policy for this application
+   */
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) = 0;
+
+  /**
+   * @brief Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is present, otherwise - false
+   */
+  virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
+
+  /**
+   * @brief Send OnPermissionsChange notification to mobile app
+   * when it's permissions are changed.
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void SendAppPermissionsChanged(const std::string& device_id,
+                                         const std::string& application_id) = 0;
+
+  /**
+    * @brief Gets all allowed module types
+    * @param policy_app_id unique identifier of application
+    * @param modules list of allowed module types
+    * @return true if application has allowed modules
+    */
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) const = 0;
+
+  /**
+   * @brief Setter for access_remote instance
+   * @param access_remote pointer to new access_remote instance
+   */
+  virtual void set_access_remote(
+      utils::SharedPtr<AccessRemote> access_remote) = 0;
+#endif  // SDL_REMOTE_CONTROL
+
+  /**
+   * @brief Checks if there is existing URL in the EndpointUrls vector with
+   * index saved in the policy manager and if not, it moves to the next
+   * application index
+   * @param rs contains the application index and url index from the
+   * urls vector that are to be sent on the next OnSystemRequest
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of application index and url index
+   */
+  virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                                    const EndpointUrls& urls) const = 0;
+
+  /**
+   * @brief  Checks, if SDL needs to update it's policy table section
+             "external_consent_status"
+   * @param  ExternalConsent status
+   * @return true if such check is needed, false - if not.
+   */
+  virtual bool IsNeedToUpdateExternalConsentStatus(
+      const ExternalConsentStatus& status) const = 0;
+
+  /**
+   * @brief Saves customer connectivity settings status
+   * @param status ExternalConsent status
+   * @return true if succeeded, otherwise - false
+   */
+  virtual bool SetExternalConsentStatus(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return ExternalConsent status
+   */
+  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
 
  protected:
   /**
-   * Checks is PT exceeded IgnitionCycles
+   * @brief Checks is PT exceeded IgnitionCycles
    * @return true if exceeded
    */
   virtual bool ExceededIgnitionCycles() = 0;
 
   /**
-   * Checks is PT exceeded days
+   * @brief Checks is PT exceeded days
    * @return true if exceeded
    */
   virtual bool ExceededDays() = 0;
@@ -507,4 +649,4 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 extern "C" policy::PolicyManager* CreateManager();
 extern "C" void DeleteManager(policy::PolicyManager*);
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_MANAGER_H_

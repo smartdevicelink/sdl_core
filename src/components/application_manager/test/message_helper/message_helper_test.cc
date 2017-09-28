@@ -46,6 +46,10 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/policy_external/include/policy/policy_types.h"
+#endif
+
 namespace test {
 namespace components {
 namespace application_manager_test {
@@ -64,6 +68,8 @@ using testing::AtLeast;
 using testing::ReturnRefOfCopy;
 using testing::ReturnRef;
 using testing::Return;
+using testing::SaveArg;
+using testing::_;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -90,7 +96,8 @@ TEST(MessageHelperTestCreate,
             obj[strings::params][strings::correlation_id].asUInt());
   EXPECT_EQ(connection_key,
             obj[strings::params][strings::connection_key].asUInt());
-  EXPECT_EQ(kV2, obj[strings::params][strings::protocol_version].asInt());
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            obj[strings::params][strings::protocol_version].asInt());
 }
 
 TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
@@ -442,7 +449,9 @@ class MessageHelperTest : public ::testing::Test {
                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
+                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK", "EN-IN",
+                         "TH-TH", "EN-SA", "HE-IL", "RO-RO", "UK-UA", "ID-ID",
+                         "VI-VN", "MS-MY", "HI-IN"}
       , hmi_result_strings{"SUCCESS",
                            "UNSUPPORTED_REQUEST",
                            "UNSUPPORTED_RESOURCE",
@@ -541,10 +550,7 @@ class MessageHelperTest : public ::testing::Test {
                             "DiagnosticMessage",
                             "SystemRequest",
                             "SendLocation",
-                            "DialNumber",
-                            "GetWayPoints",
-                            "SubscribeWayPoints",
-                            "UnsubscribeWayPoints"}
+                            "DialNumber"}
       , events_id_strings{"OnHMIStatus",
                           "OnAppInterfaceUnregistered",
                           "OnButtonEvent",
@@ -782,6 +788,36 @@ TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "icon.png";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
+  EXPECT_EQ("icon.png", image[strings::value].asString());
+}
+
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
+  // Invalid value
+  image[strings::value] = "   ";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
+}
+
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
   // Creating sharedPtr to MockApplication
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
@@ -904,6 +940,125 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
               SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
+}
+#ifdef EXTERNAL_PROPRIETARY_MODE
+TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+  policy::ExternalConsentStatus external_consent_status;
+  policy::FunctionalGroupPermission permission;
+  permission.state = policy::GroupConsent::kGroupAllowed;
+  permissions.push_back(permission);
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result);
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+  EXPECT_TRUE(msg_params[external_consent_status_key].empty());
+}
+
+TEST_F(MessageHelperTest,
+       SendGetListOfPermissionsResponse_ExternalConsentStatusNonEmpty_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+
+  policy::ExternalConsentStatus external_consent_status;
+  const int32_t entity_type_1 = 1;
+  const int32_t entity_id_1 = 2;
+  const policy::EntityStatus entity_status_1 = policy::kStatusOn;
+  const policy::EntityStatus entity_status_2 = policy::kStatusOff;
+  const int32_t entity_type_2 = 3;
+  const int32_t entity_id_2 = 4;
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_1, entity_id_1, entity_status_1));
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_2, entity_id_2, entity_status_2));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result);
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+
+  smart_objects::SmartArray* status_array =
+      msg_params[external_consent_status_key].asArray();
+  EXPECT_TRUE(external_consent_status.size() == status_array->size());
+
+  const std::string entityType = "entityType";
+  const std::string entityID = "entityID";
+  const std::string status = "status";
+
+  smart_objects::SmartObject item_1_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_1_so[entityType] = entity_type_1;
+  item_1_so[entityID] = entity_id_1;
+  item_1_so[status] = hmi_apis::Common_EntityStatus::ON;
+
+  smart_objects::SmartObject item_2_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_2_so[entityType] = entity_type_2;
+  item_2_so[entityID] = entity_id_2;
+  item_2_so[status] = hmi_apis::Common_EntityStatus::OFF;
+
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_1_so));
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_2_so));
+}
+#endif
+
+TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  int32_t app_id = 123;
+  smart_objects::SmartObject video_params(smart_objects::SmartType_Map);
+  video_params[strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RTP;
+  video_params[strings::codec] = hmi_apis::Common_VideoStreamingCodec::H264;
+  video_params[strings::width] = 640;
+  video_params[strings::height] = 480;
+
+  MessageHelper::SendNaviSetVideoConfig(
+      app_id, mock_application_manager, video_params);
+
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_SetVideoConfig,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  EXPECT_TRUE(msg_params.keyExists(strings::config));
+
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::protocol));
+  EXPECT_EQ(1, msg_params[strings::config][strings::protocol].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::codec));
+  EXPECT_EQ(0, msg_params[strings::config][strings::codec].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::width));
+  EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
+  EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
 }
 
 }  // namespace application_manager_test

@@ -70,7 +70,9 @@ UsageStatistics::UsageStatistics(
           statistics_manager, app_id, RUN_ATTEMPTS_WHILE_REVOKED)
     , count_of_removals_for_bad_behavior_(
           statistics_manager, app_id, REMOVALS_MISBEHAVED)
-    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS) {
+    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS)
+    , count_of_rejections_sync_out_of_memory_(
+          statistics_manager, app_id, REJECTIONS_SYNC_OUT_OF_MEMORY) {
   time_in_hmi_state_sptr_->Start(SECONDS_HMI_NONE);
 }
 
@@ -90,7 +92,9 @@ UsageStatistics::UsageStatistics(
           statistics_manager, app_id, RUN_ATTEMPTS_WHILE_REVOKED)
     , count_of_removals_for_bad_behavior_(
           statistics_manager, app_id, REMOVALS_MISBEHAVED)
-    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS) {
+    , count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS)
+    , count_of_rejections_sync_out_of_memory_(
+          statistics_manager, app_id, REJECTIONS_SYNC_OUT_OF_MEMORY) {
   DCHECK(time_in_hmi_state_sptr_.get());
   time_in_hmi_state_sptr_->Start(SECONDS_HMI_NONE);
 }
@@ -149,6 +153,10 @@ void UsageStatistics::RecordRemovalsForBadBehavior() {
 
 void UsageStatistics::RecordTLSError() {
   ++count_of_tls_error_;
+}
+
+void UsageStatistics::RecordRejectionsSyncOutOfMemory() {
+  ++count_of_rejections_sync_out_of_memory_;
 }
 
 }  // namespace application_manager

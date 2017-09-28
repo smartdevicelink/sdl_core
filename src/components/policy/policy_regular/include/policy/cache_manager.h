@@ -55,6 +55,8 @@ class CacheManager : public CacheManagerInterface {
   CacheManager();
   ~CacheManager();
 
+  const policy_table::Strings& GetGroups(const PTString& app_id);
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -65,7 +67,7 @@ class CacheManager : public CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result);
@@ -215,6 +217,15 @@ class CacheManager : public CacheManagerInterface {
       std::map<std::string, StringArray>& app_hmi_types);
 
   /**
+   * @brief AppHasHMIType checks whether app has been registered with certain
+   *HMI type.
+   *
+   * @return true in case app contains certain HMI type, false otherwise.
+   */
+  virtual bool AppHasHMIType(const std::string& application_id,
+                             policy_table::AppHMIType hmi_type) const OVERRIDE;
+
+  /**
    * Gets flag updateRequired
    * @return true if update is required
    */
@@ -312,6 +323,13 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -593,12 +611,13 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief MergePreloadPT allows to load policy table from certain JSON file,
    * and then decide if merge is needed. The merge is needed in case when
-   *preload
+   * preload
    * JSON date is different than current database.
    *
    * @param file_name the preloaded policy table JSON file.
+   * @return false in case of invalid preloaded_pt
    */
-  void MergePreloadPT(const std::string& file_name);
+  bool MergePreloadPT(const std::string& file_name);
 
   /**
    * @brief MergeMC allows to merge ModuleConfig section by definite rules.
@@ -678,11 +697,9 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
-#ifdef BUILD_TESTS
-  utils::SharedPtr<policy_table::Table> GetPT() const {
+  utils::SharedPtr<policy_table::Table> pt() const {
     return pt_;
   }
-#endif
 
  private:
   std::string currentDateTime();
@@ -755,6 +772,13 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+
+#ifdef BUILD_TESTS
+  friend class AccessRemoteImpl;
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+#endif  // BUILD_TESTS
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_

@@ -45,6 +45,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/message.h"
 #include "resumption/last_state.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/app_launch/app_launch_ctrl.h"
@@ -74,6 +75,23 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
+
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_CONST_METHOD2(application,
+                     application_manager::ApplicationSharedPtr(
+                         const std::string& device_id,
+                         const std::string& policy_app_id));
+  MOCK_METHOD2(ChangeAppsHMILevel,
+               void(uint32_t app_id, mobile_apis::HMILevel::eType level));
+  MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
+  MOCK_CONST_METHOD1(
+      devices, std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD1(SendPostMessageToMobile,
+               void(const application_manager::MessagePtr& message));
+  MOCK_METHOD1(SendPostMessageToHMI,
+               void(const application_manager::MessagePtr& message));
+#endif  // SDL_REMOTE_CONTROL
+
   MOCK_CONST_METHOD1(
       application_by_hmi_app,
       application_manager::ApplicationSharedPtr(uint32_t hmi_app_id));
@@ -85,11 +103,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       std::vector<application_manager::ApplicationSharedPtr>(uint32_t button));
   MOCK_METHOD0(applications_with_navi,
                std::vector<application_manager::ApplicationSharedPtr>());
+  MOCK_METHOD0(applications_with_mobile_projection,
+               std::vector<application_manager::ApplicationSharedPtr>());
   MOCK_CONST_METHOD0(get_limited_media_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application,
+                     application_manager::ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_limited_mobile_projection_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_METHOD1(application_id, uint32_t(const int32_t correlation_id));
   MOCK_METHOD2(set_application_id,
@@ -106,6 +128,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(
       SendMessageToHMI,
       void(const application_manager::commands::MessageSharedPtr message));
+  MOCK_METHOD1(RemoveHMIFakeParameters,
+               void(application_manager::MessagePtr& message));
   MOCK_METHOD1(
       ManageHMICommand,
       bool(const application_manager::commands::MessageSharedPtr message));
@@ -132,6 +156,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
   MOCK_METHOD0(GetPolicyHandler, policy::PolicyHandlerInterface&());
+  MOCK_CONST_METHOD0(GetPolicyHandler, const policy::PolicyHandlerInterface&());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
@@ -191,13 +216,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  MOCK_METHOD5(CheckPolicyPermissions,
+  MOCK_METHOD4(CheckPolicyPermissions,
                mobile_apis::Result::eType(
-                   const std::string&,
-                   mobile_apis::HMILevel::eType,
-                   mobile_apis::FunctionID::eType,
-                   const application_manager::RPCParams&,
-                   application_manager::CommandParametersPermissions*));
+                   const application_manager::ApplicationSharedPtr app,
+                   const std::string& function_id,
+                   const application_manager::RPCParams& rpc_params,
+                   application_manager::CommandParametersPermissions*
+                       params_permissions));
   MOCK_CONST_METHOD2(IsApplicationForbidden,
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));
@@ -246,6 +271,24 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
+
+  MOCK_METHOD1(ReplaceMobileByHMIAppId,
+               void(smart_objects::SmartObject& message));
+  MOCK_METHOD1(ReplaceHMIByMobileAppId,
+               void(smart_objects::SmartObject& message));
+  MOCK_METHOD1(GetAvailableSpaceForApp,
+               uint32_t(const std::string& folder_name));
+  MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
+  MOCK_METHOD0(OnLowVoltage, void());
+  MOCK_METHOD0(OnWakeUp, void());
+  MOCK_METHOD4(OnStreamingConfigured,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type,
+                    bool result,
+                    std::vector<std::string>& rejected_params));
+  MOCK_METHOD1(ValidateMessageBySchema,
+               application_manager::MessageValidationResult(
+                   const application_manager::Message& message));
 };
 
 }  // namespace application_manager_test

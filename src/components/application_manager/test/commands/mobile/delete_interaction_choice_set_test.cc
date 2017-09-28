@@ -191,8 +191,10 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
                    [am::strings::interaction_choice_set_id]);
   smart_objects::SmartObject* invalid_choice_set_id = NULL;
 
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(app_));
+
   InSequence seq;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
 
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
@@ -206,8 +208,11 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
   EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
   EXPECT_CALL(*app_, UpdateHash());
 
-  command_->Run();
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(app_.get()));
+  DeleteInteractionChoiceSetRequestPtr command =
+      CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
+
+  command->Init();
+  command->Run();
 }
 
 TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
@@ -221,8 +226,10 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
   smart_objects::SmartObject* choice_set_id =
       &((*message_)[am::strings::msg_params]);
 
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(app_));
+
   InSequence seq;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
 
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
@@ -238,8 +245,11 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
   EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
   EXPECT_CALL(*app_, UpdateHash());
 
-  command_->Run();
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(app_.get()));
+  DeleteInteractionChoiceSetRequestPtr command =
+      CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
+
+  command->Init();
+  command->Run();
 }
 
 TEST_F(DeleteInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {

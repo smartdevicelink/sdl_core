@@ -173,6 +173,7 @@ void ThreadedSocketConnection::threadMain() {
   if (!Establish(&connect_error)) {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
     delete connect_error;
+    Abort();
   }
   LOG4CXX_DEBUG(logger_, "Connection established");
   controller_->ConnectDone(device_handle(), application_handle());
@@ -267,7 +268,7 @@ void ThreadedSocketConnection::Transmit() {
   const bool is_queue_empty = IsFramesToSendQueueEmpty();
 
   // Send data if possible
-  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
+  if (!is_queue_empty && (poll_fds[0].revents & POLLOUT)) {
     LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
 
     // send data

@@ -52,7 +52,7 @@ const connection_handler::DeviceHandle kHandle = 2u;
 namespace strings = application_manager::strings;
 
 using application_manager::commands::OnHMIStatusNotificationFromMobile;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using application_manager::ApplicationSet;
 using testing::Mock;
 using testing::Return;
@@ -91,7 +91,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillRepeatedly(Return(ProtocolVersion::kV4));
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app, is_foreground()).WillRepeatedly(Return(true));
 
   command->Run();
@@ -144,7 +145,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillRepeatedly(Return(ProtocolVersion::kV4));
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app, is_foreground()).WillRepeatedly(Return(true));
 
   command->Run();
@@ -172,7 +174,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillOnce(Return(ProtocolVersion::kV3));
+      .WillOnce(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3));
   EXPECT_CALL(*mock_app, is_foreground()).Times(0);
 
   command->Run();
@@ -199,7 +202,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillOnce(Return(ProtocolVersion::kV3));
+      .WillOnce(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3));
   EXPECT_CALL(*mock_app, is_foreground()).Times(0);
 
   command->Run();
@@ -224,7 +228,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillOnce(Return(ProtocolVersion::kV4));
+      .WillOnce(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
 
   EXPECT_CALL(app_mngr_, applications()).Times(0);
 
@@ -261,7 +266,8 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
-      .WillRepeatedly(Return(ProtocolVersion::kV4));
+      .WillRepeatedly(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app, is_foreground()).WillRepeatedly(Return(false));
 
   EXPECT_CALL(app_mngr_, MarkAppsGreyOut(kHandle, false));

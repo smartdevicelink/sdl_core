@@ -113,6 +113,13 @@
     return;                                                                   \
   }
 
+#define EXPORT_FUNCTION(TypeName) extern "C" TypeName* Create();
+
+#define EXPORT_FUNCTION_IMPL(TypeName) \
+  extern "C" TypeName* Create() {      \
+    return new TypeName();             \
+  }
+
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
 // Allows to perform static check that virtual function from base class is
@@ -134,6 +141,8 @@
 #ifdef BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name) \
   friend class test_case_name##_##test_name##_Test
-#endif
+#else  // BUILD_TESTS
+#define FRIEND_TEST(test_case_name, test_name)
+#endif  // BUILD_TESTS
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

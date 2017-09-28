@@ -123,8 +123,12 @@ bool operator!=(const policy_table::ApplicationParams& first,
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
     const utils::SharedPtr<policy_table::Table> update,
-    const utils::SharedPtr<policy_table::Table> snapshot)
-    : pm_(pm), update_(update), snapshot_(snapshot) {}
+    const utils::SharedPtr<policy_table::Table> snapshot,
+    CheckAppPolicyResults& out_results)
+    : pm_(pm)
+    , update_(update)
+    , snapshot_(snapshot)
+    , out_results_(out_results) {}
 
 bool policy::CheckAppPolicy::HasRevokedGroups(
     const policy::AppPoliciesValueType& app_policy,
@@ -262,37 +266,6 @@ bool CheckAppPolicy::IsKnownAppication(
   return !(current_policies.end() == current_policies.find(application_id));
 }
 
-void policy::CheckAppPolicy::NotifySystem(
-    const policy::AppPoliciesValueType& app_policy) const {
-  pm_->listener()->OnPendingPermissionChange(app_policy.first);
-}
-
-void CheckAppPolicy::SendPermissionsToApp(
-    const AppPoliciesValueType& app_policy) const {
-  const std::string app_id = app_policy.first;
-
-  const std::string device_id = pm_->GetCurrentDeviceId(app_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id: " << app_id);
-    return;
-  }
-  std::vector<FunctionalGroupPermission> group_permissons;
-  pm_->GetPermissionsForApp(device_id, app_id, group_permissons);
-
-  Permissions notification_data;
-  pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
-                               app_policy.second.groups,
-                               group_permissons,
-                               notification_data);
-
-  LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
-  pm_->listener()->OnPermissionsUpdated(
-      app_id,
-      notification_data,
-      policy_table::EnumToJsonString(app_policy.second.default_hmi));
-}
-
 bool CheckAppPolicy::IsAppRevoked(
     const AppPoliciesValueType& app_policy) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -321,6 +294,11 @@ bool CheckAppPolicy::NicknamesMatch(
   return true;
 }
 
+void CheckAppPolicy::AddResult(const std::string& app_id,
+                               PermissionsCheckResult result) {
+  out_results_.insert(std::make_pair(app_id, result));
+}
+
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
@@ -332,13 +310,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
     SetPendingPermissions(app_policy, RESULT_APP_REVOKED);
-    NotifySystem(app_policy);
+    AddResult(app_id, RESULT_APP_REVOKED);
     return true;
   }
 
   if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_policy)) {
     SetPendingPermissions(app_policy, RESULT_NICKNAME_MISMATCH);
-    NotifySystem(app_policy);
+    AddResult(app_id, RESULT_NICKNAME_MISMATCH);
     return true;
   }
 
@@ -346,13 +324,14 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   if (!IsPredefinedApp(app_policy) && IsRequestTypeChanged(app_policy)) {
     SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
-    NotifySystem(app_policy);
+    AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
   }
 
   if (RESULT_NO_CHANGES == result) {
     LOG4CXX_INFO(logger_,
                  "Permissions for application:" << app_id
                                                 << " wasn't changed.");
+    AddResult(app_id, result);
     return true;
   }
 
@@ -360,15 +339,11 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
                "Permissions for application:" << app_id
                                               << " have been changed.");
 
-  if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
+  if (!IsPredefinedApp(app_policy)) {
     SetPendingPermissions(app_policy, result);
-    NotifySystem(app_policy);
+    AddResult(app_id, result);
   }
 
-  // Don't sent notification for predefined apps (e.g. default, device etc.)
-  if (!IsPredefinedApp(app_policy)) {
-    SendPermissionsToApp(app_policy);
-  }
   return true;
 }
 
@@ -439,8 +414,7 @@ void policy::CheckAppPolicy::SetPendingPermissions(
   pm_->app_permissions_diff_lock_.Release();
 }
 
-policy::CheckAppPolicy::PermissionsCheckResult
-policy::CheckAppPolicy::CheckPermissionsChanges(
+PermissionsCheckResult CheckAppPolicy::CheckPermissionsChanges(
     const policy::AppPoliciesValueType& app_policy) const {
   bool has_revoked_groups = HasRevokedGroups(app_policy);
 
@@ -601,7 +575,6 @@ void FillNotificationData::UpdateParameters(
 }
 
 void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
-  HMIPermissions& rpc_hmi_permissions = rpc.hmi_permissions;
   HMIPermissions::const_iterator it_hmi_allowed =
       rpc.hmi_permissions.find(kAllowedKey);
   HMIPermissions::const_iterator it_hmi_undefined =
@@ -612,29 +585,28 @@ void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
   // There is different logic of processing RPCs with and w/o 'parameters'
   if (RpcParametersEmpty(rpc)) {
     // First, remove disallowed from other types
-    if (rpc_hmi_permissions.end() != it_hmi_user_disallowed) {
-      if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
-                             rpc_hmi_permissions[kUserDisallowedKey]);
+    if (rpc.hmi_permissions.end() != it_hmi_user_disallowed) {
+      if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kAllowedKey],
+                             rpc.hmi_permissions[kUserDisallowedKey]);
       }
-      if (rpc_hmi_permissions.end() != it_hmi_undefined) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
-                             rpc_hmi_permissions[kUserDisallowedKey]);
+      if (rpc.hmi_permissions.end() != it_hmi_undefined) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kUndefinedKey],
+                             rpc.hmi_permissions[kUserDisallowedKey]);
       }
     }
 
     // Then, remove undefined from allowed
-    if (rpc_hmi_permissions.end() != it_hmi_undefined) {
-      if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
-                             rpc_hmi_permissions[kUndefinedKey]);
+    if (rpc.hmi_permissions.end() != it_hmi_undefined) {
+      if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kAllowedKey],
+                             rpc.hmi_permissions[kUndefinedKey]);
       }
     }
 
     return;
   }
 
-  ParameterPermissions& rpc_parameter_permissions = rpc.parameter_permissions;
   ParameterPermissions::const_iterator it_parameter_allowed =
       rpc.parameter_permissions.find(kAllowedKey);
   ParameterPermissions::const_iterator it_parameter_undefined =
@@ -645,34 +617,34 @@ void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
   // First, removing allowed HMI levels from other types, permissions will be
   // dependent on parameters instead of HMI levels since w/o parameters RPC
   // won't passed to HMI
-  if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-    if (rpc_hmi_permissions.end() != it_hmi_user_disallowed) {
-      ExcludeSameHMILevels(rpc_hmi_permissions[kUserDisallowedKey],
-                           rpc_hmi_permissions[kAllowedKey]);
+  if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+    if (rpc.hmi_permissions.end() != it_hmi_user_disallowed) {
+      ExcludeSameHMILevels(rpc.hmi_permissions[kUserDisallowedKey],
+                           rpc.hmi_permissions[kAllowedKey]);
     }
     if (rpc.hmi_permissions.end() != it_hmi_undefined) {
-      ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
-                           rpc_hmi_permissions[kAllowedKey]);
+      ExcludeSameHMILevels(rpc.hmi_permissions[kUndefinedKey],
+                           rpc.hmi_permissions[kAllowedKey]);
     }
   }
 
   // Removing disallowed parameters from allowed and undefined (by user consent)
-  if (rpc_parameter_permissions.end() != it_parameter_user_disallowed) {
-    if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-      ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
-                            rpc_parameter_permissions[kUserDisallowedKey]);
+  if (rpc.parameter_permissions.end() != it_parameter_user_disallowed) {
+    if (rpc.parameter_permissions.end() != it_parameter_allowed) {
+      ExcludeSameParameters(rpc.parameter_permissions[kAllowedKey],
+                            rpc.parameter_permissions[kUserDisallowedKey]);
     }
-    if (rpc_parameter_permissions.end() != it_parameter_undefined) {
-      ExcludeSameParameters(rpc_parameter_permissions[kUndefinedKey],
-                            rpc_parameter_permissions[kUserDisallowedKey]);
+    if (rpc.parameter_permissions.end() != it_parameter_undefined) {
+      ExcludeSameParameters(rpc.parameter_permissions[kUndefinedKey],
+                            rpc.parameter_permissions[kUserDisallowedKey]);
     }
   }
 
   // Removing undefined (by user consent) parameters from allowed
-  if (rpc_parameter_permissions.end() != it_parameter_undefined) {
-    if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-      ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
-                            rpc_parameter_permissions[kUndefinedKey]);
+  if (rpc.parameter_permissions.end() != it_parameter_undefined) {
+    if (rpc.parameter_permissions.end() != it_parameter_allowed) {
+      ExcludeSameParameters(rpc.parameter_permissions[kAllowedKey],
+                            rpc.parameter_permissions[kUndefinedKey]);
     }
   }
 }
@@ -893,4 +865,5 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
-}
+
+}  // namespace policy

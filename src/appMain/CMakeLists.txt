@@ -32,9 +32,19 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 find_package(SDLOpenSSL REQUIRED)
 
+if (EXTENDED_MEDIA_MODE) 
+  set(default_media_inc 
+    ${GSTREAMER_gst_INCLUDE_DIR} 
+    ${GSTREAMER_gstconfig_INCLUDE_DIR} 
+  ) 
+else(EXTENDED_MEDIA_MODE) 
+  set(default_media_inc) 
+endif()
+
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -47,14 +57,18 @@ include_directories(
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/functional_module/include
+  ${POLICY_PATH}/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
+  ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
   ${OPENSSL_INCLUDE_DIRECTORY}
+  ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
 
@@ -73,15 +87,6 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0015 NEW)
 link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
-
-if (EXTENDED_MEDIA_MODE)
-  set(default_media_inc
-    ${GSTREAMER_gst_INCLUDE_DIR}
-    ${GSTREAMER_gstconfig_INCLUDE_DIR}
-  )
-else(EXTENDED_MEDIA_MODE)
-  set(default_media_inc)
-endif()
 
 if (TELEMETRY_MONITOR)
   set(TELEMETRY_MONITOR_LIB
@@ -112,6 +117,12 @@ set(LIBRARIES
   ConfigProfile
   Resumption
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -137,9 +148,8 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
-if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
-endif()
+list(APPEND LIBRARIES bson -L${BSON_LIBS_DIRECTORY})
+list(APPEND LIBRARIES emhashmap -L${EMHASHMAP_LIBS_DIRECTORY})
 
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
@@ -152,6 +162,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINAR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sample_policy_manager.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/start.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/start_external_proprietary.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/init_policy.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
@@ -201,9 +214,14 @@ endif ()
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
-    hmi_capabilities.json sdl_preloaded_pt.json
+    hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
+)
+
+install(
+    FILES sdl_preloaded_pt.json
+    DESTINATION bin
 )
 
 if (${QT_HMI})
@@ -221,3 +239,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif ()
+
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+  install(FILES start_external_proprietary.sh DESTINATION bin
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE RENAME start.sh)
+else()
+  install(FILES start.sh DESTINATION bin
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif()
+

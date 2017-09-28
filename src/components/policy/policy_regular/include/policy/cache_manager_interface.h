@@ -50,6 +50,7 @@ class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
 
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -60,7 +61,7 @@ class CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
@@ -212,6 +213,15 @@ class CacheManagerInterface {
       std::map<std::string, StringArray>& app_hmi_types) = 0;
 
   /**
+   * @brief AppHasHMIType checks whether app has been registered with certain
+   *HMI type.
+   *
+   * @return true in case app contains certain HMI type, false otherwise.
+   */
+  virtual bool AppHasHMIType(const std::string& application_id,
+                             policy_table::AppHMIType hmi_type) const = 0;
+
+  /**
    * Gets flag updateRequired
    * @return true if update is required
    */
@@ -311,6 +321,14 @@ class CacheManagerInterface {
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
                              std::string& default_hmi) const = 0;
+
+  /**
+    * Gets HMI types from specific policy
+    * @param app_id ID application
+    * @return list of HMI types
+    */
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -616,15 +634,13 @@ class CacheManagerInterface {
    */
   virtual std::string GetCertificate() const = 0;
 
-#ifdef BUILD_TESTS
   /**
-   * @brief GetPT allows to obtain SharedPtr to PT.
+   * @brief pt allows to obtain SharedPtr to PT.
    * Used ONLY in Unit tests
    * @return SharedPTR to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
-#endif
+  virtual utils::SharedPtr<policy_table::Table> pt() const = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

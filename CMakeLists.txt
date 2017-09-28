@@ -52,11 +52,11 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
-option(USE_DISTCC "Turn on distributed build_usage" ON)
+option(USE_DISTCC "Turn on distributed build_usage" OFF)
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
@@ -65,7 +65,6 @@ if(EXTENDED_POLICY STREQUAL "")
 endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
-set(DEBUG_OPTION 	"$ENV{DEBUG}")
 set(HMI_TYPE_OPTION 	"$ENV{HMI_TYPE}")
 set(TARGET_OPTION 	"$ENV{TARGET}")
 set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
@@ -110,11 +109,8 @@ if (MEDIA_MODE_OPTION)
   endif()
 endif()
 
-if (DEBUG_OPTION)
-  if (${DEBUG_OPTION} STREQUAL "DBG_OFF")
-    message(STATUS "Jenkins integration: build release version")
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
-  endif()
+if( NOT CMAKE_BUILD_TYPE )
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
 if (HMI_ADAPTER_OPTION)
@@ -162,6 +158,11 @@ if (OS_TYPE_OPTION)
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
   endif()
+endif()
+
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
 endif()
 
 #Jenkins integration section end
@@ -285,6 +286,8 @@ if(ENABLE_LOG)
   set(install-3rd_party_logger "install-3rd_party_logger")
   message(STATUS "Logger enabled")
 endif()
+
+set(install-bson_c_lib "install-bson_c_lib")
 
 if (TELEMETRY_MONITOR)
   add_definitions(-DTELEMETRY_MONITOR)
@@ -410,6 +413,18 @@ set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(RTLIB )
 endif()
+
+SET(RPATH_DIRECTORIES
+  ${CMAKE_INSTALL_PREFIX}/bin/plugins
+  /usr/local/lib
+  /usr/local
+  ${CMAKE_INSTALL_PREFIX}/bin
+)
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Building tests
 if(BUILD_TESTS)

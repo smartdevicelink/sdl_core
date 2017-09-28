@@ -30,57 +30,72 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ctime>
 #include <stdlib.h>
+#include <ctime>
+#include <memory>
+#include "utils/lock.h"
+#include "utils/threads/async_runner.h"
+#include "utils/conditional_variable.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
 #include "gtest/gtest.h"
-
-#include "utils/lock.h"
-#include "utils/conditional_variable.h"
-#include "utils/threads/async_runner.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
-namespace utils_test {
+namespace utils {
 
-using namespace sync_primitives;
 using namespace threads;
 
 namespace {
-uint32_t check_value = 0;
+size_t kCheckValue = 0u;
+const size_t kDelegatesAmount = 4u;
 }
 
 // ThreadDelegate successor
 class TestThreadDelegate : public ThreadDelegate {
  public:
+  TestThreadDelegate(sync_primitives::ConditionalVariable& cond_var,
+                     sync_primitives::Lock& test_lock)
+      : cond_var_(cond_var), test_lock_(test_lock) {}
+
   void threadMain() {
-    ++check_value;
+    sync_primitives::AutoLock lock(test_lock_);
+    ++kCheckValue;
+    cond_var_.NotifyOne();
   }
+
+ protected:
+  sync_primitives::ConditionalVariable& cond_var_;
+  sync_primitives::Lock& test_lock_;
+};
+
+class MockThreadDelegate : public ThreadDelegate {
+ public:
+  MOCK_METHOD0(threadMain, void());
+  MOCK_METHOD0(exitThreadMain, void());
 };
 
 class AsyncRunnerTest : public ::testing::Test {
  public:
-  AsyncRunnerTest() : kDelegatesNum_(1), asr_pt_(NULL) {
+  AsyncRunnerTest() {
+    // Clear global value before test execution
+    kCheckValue = 0;
     CreateAsyncRunner();
     CreateThreadsArray();
   }
 
   ~AsyncRunnerTest() {
-    DeleteAsyncRunner();
     DeleteThreadsArray();
   }
 
  protected:
-  Lock test_lock_;
-  uint32_t kDelegatesNum_;
-  ConditionalVariable cond_var_;
-  TestThreadDelegate** delegates_;
-  AsyncRunner* asr_pt_;
+  ThreadDelegate** delegates_;
+  ::utils::SharedPtr<AsyncRunner> async_runner_;
 
   void CreateThreadsArray() {
-    srand(std::time(NULL));
-    kDelegatesNum_ = (rand() % 20 + 1);
-    delegates_ = new TestThreadDelegate* [kDelegatesNum_];
+    delegates_ = new ThreadDelegate* [kDelegatesAmount];
   }
 
   void DeleteThreadsArray() {
@@ -88,53 +103,38 @@ class AsyncRunnerTest : public ::testing::Test {
   }
 
   void CreateAsyncRunner() {
-    asr_pt_ = new AsyncRunner("test");
-  }
-  void DeleteAsyncRunner() {
-    delete asr_pt_;
+    async_runner_ = ::utils::MakeShared<AsyncRunner>("test");
   }
 };
 
 TEST_F(AsyncRunnerTest, ASyncRunManyDelegates_ExpectSuccessfulAllDelegatesRun) {
-  AutoLock lock(test_lock_);
-  // Clear global value before test
-  check_value = 0;
   // Create Delegates and run
-  for (unsigned int i = 0; i < kDelegatesNum_; ++i) {
-    delegates_[i] = new TestThreadDelegate();
-    asr_pt_->AsyncRun(delegates_[i]);
+  sync_primitives::ConditionalVariable cond_var;
+  sync_primitives::Lock test_lock;
+  for (size_t i = 0; i < kDelegatesAmount; ++i) {
+    sync_primitives::AutoLock lock(test_lock);
+    delegates_[i] = new TestThreadDelegate(cond_var, test_lock);
+    async_runner_->AsyncRun(delegates_[i]);
+    // Wait for delegate to be run
+    cond_var.WaitFor(lock, 1500);
   }
-  // Wait for 2 secs. Give this time to delegates to be run
-  cond_var_.WaitFor(lock, 2000);
-  // Expect all delegates run successfully
-  EXPECT_EQ(kDelegatesNum_, check_value);
+  // Expect all delegates started successfully
+  EXPECT_EQ(kDelegatesAmount, kCheckValue);
 }
 
-// TODO(VVeremjova) APPLINK-12834 Sometimes delegates do not run
-TEST_F(AsyncRunnerTest,
-       DISABLED_RunManyDelegatesAndStop_ExpectSuccessfulDelegatesStop) {
-  AutoLock lock(test_lock_);
-  // Clear global value before test
-  check_value = 0;
-  // Create Delegates
-  for (unsigned int i = 0; i < kDelegatesNum_; ++i) {
-    delegates_[i] = new TestThreadDelegate();
+TEST_F(AsyncRunnerTest, StopThenRun_ExpectDelegateNotStarted) {
+  // Create Delegate mock
+  MockThreadDelegate mock_thread_delegate;
+  // Check that delegate was not started due to Stop() called before AsyncRun()
+  EXPECT_CALL(mock_thread_delegate, threadMain()).Times(0);
+  {
+    ::utils::SharedPtr<AsyncRunner> async_runner =
+        ::utils::MakeShared<AsyncRunner>("test");
+    async_runner->Stop();
+    async_runner->AsyncRun(&mock_thread_delegate);
   }
-  // Wait for 2 secs
-  cond_var_.WaitFor(lock, 2000);
-  // Run created delegates
-  for (unsigned int i = 0; i < kDelegatesNum_; ++i) {
-    if (kDelegatesNum_ > 1) {
-      if (i == kDelegatesNum_ / 2) {
-        asr_pt_->Stop();
-      }
-    }
-    asr_pt_->AsyncRun(delegates_[i]);
-  }
-  // Expect 3 delegates run successlully. The other stopped.
-  EXPECT_EQ(kDelegatesNum_ / 2, check_value);
 }
 
-}  // namespace utils_test
+}  // namespace utils
 }  // namespace components
 }  // namespace test

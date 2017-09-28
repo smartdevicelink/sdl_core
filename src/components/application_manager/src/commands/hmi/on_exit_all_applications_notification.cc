@@ -110,5 +110,4 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

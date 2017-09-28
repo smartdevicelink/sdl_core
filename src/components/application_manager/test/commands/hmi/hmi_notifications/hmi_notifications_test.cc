@@ -130,6 +130,9 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
 #include "protocol_handler/mock_session_observer.h"
+#ifdef SDL_REMOTE_CONTROL
+#include "functional_module/plugin_manager.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace am = application_manager;
 
@@ -685,7 +688,11 @@ TEST_F(HMICommandsNotificationsTest,
 
   int32_t connection_id = -1;
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+#else
   EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+#endif
       .WillOnce(GetArg(&connection_id));
   command->Run();
   EXPECT_EQ(0, connection_id);
@@ -709,7 +716,11 @@ TEST_F(HMICommandsNotificationsTest,
   int32_t connection_id = -1;
   policy::PermissionConsent permission_consent;
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+#else
   EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+#endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
   command->Run();
@@ -743,7 +754,11 @@ TEST_F(HMICommandsNotificationsTest,
   int32_t connection_id = -1;
   policy::PermissionConsent permission_consent;
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+#else
   EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+#endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
   command->Run();
@@ -781,7 +796,11 @@ TEST_F(HMICommandsNotificationsTest,
   int32_t connection_id = -1;
   policy::PermissionConsent permission_consent;
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+#else
   EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+#endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
   command->Run();
@@ -1090,6 +1109,12 @@ TEST_F(HMICommandsNotificationsTest,
     (*notification)[am::strings::msg_params][am::strings::reason] =
         static_cast<int32_t>(*it_mobile_reason);
 
+#ifdef SDL_REMOTE_CONTROL
+    functional_modules::PluginManager plugin_mng;
+    EXPECT_CALL(app_mngr_, GetPluginManager())
+        .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
+
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
     EXPECT_CALL(*message_helper_mock_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1113,6 +1138,12 @@ TEST_F(HMICommandsNotificationsTest,
 
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
+
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager plugin_mng;
+  EXPECT_CALL(app_mngr_, GetPluginManager())
+      .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
 
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
@@ -1167,6 +1198,12 @@ TEST_F(HMICommandsNotificationsTest,
       hmi_apis::Common_ApplicationExitReason::USER_EXIT;
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
+
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager plugin_mng;
+  EXPECT_CALL(app_mngr_, GetPluginManager())
+      .WillRepeatedly(ReturnRef(plugin_mng));
+#endif  // SDL_REMOTE_CONTROL
 
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);

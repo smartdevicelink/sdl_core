@@ -43,9 +43,13 @@ class PolicyHandlerObserver {
  public:
   virtual void OnUpdateHMIAppType(
       std::map<std::string, std::vector<std::string> > app_hmi_types) {}
+
   virtual bool OnCertificateUpdated(const std::string& certificate_data) {
     return false;
   }
+
+  virtual void OnPTUFinished(const bool ptu_result) {}
+
   virtual ~PolicyHandlerObserver() {}
 };
 }  //  namespace policy

@@ -42,26 +42,16 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
     , current_status_(utils::MakeShared<UpToDateStatus>())
+    , last_processed_event_(kNoEvent)
     , apps_search_in_progress_(false)
-    , app_registered_from_non_consented_device_(true) {
-  update_status_thread_delegate_ = new UpdateThreadDelegate(this);
-  thread_ = threads::CreateThread("UpdateStatusThread",
-                                  update_status_thread_delegate_);
-  thread_->start();
-}
+    , app_registered_from_non_consented_device_(true) {}
 
-UpdateStatusManager::~UpdateStatusManager() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(update_status_thread_delegate_);
-  DCHECK(thread_);
-  thread_->join();
-  delete update_status_thread_delegate_;
-  threads::DeleteThread(thread_);
-}
+UpdateStatusManager::~UpdateStatusManager() {}
 
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
+  last_processed_event_ = event;
   DoTransition();
 }
 
@@ -77,29 +67,23 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
   listener_ = listener;
 }
 
-void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
+void UpdateStatusManager::OnUpdateSentOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(update_status_thread_delegate_);
-  update_status_thread_delegate_->updateTimeOut(update_timeout);
   ProcessEvent(kOnUpdateSentOut);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_AUTO_TRACE(logger_);
   ProcessEvent(kOnUpdateTimeout);
-  DCHECK(update_status_thread_delegate_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   ProcessEvent(kOnValidUpdateReceived);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   ProcessEvent(kOnWrongUpdateReceived);
 }
 
@@ -154,6 +138,10 @@ void UpdateStatusManager::ScheduleUpdate() {
   ProcessEvent(kScheduleUpdate);
 }
 
+void UpdateStatusManager::ScheduleManualUpdate() {
+  ProcessEvent(kScheduleManualUpdate);
+}
+
 std::string UpdateStatusManager::StringifiedUpdateStatus() const {
   return current_status_->get_status_string();
 }
@@ -184,68 +172,19 @@ void UpdateStatusManager::DoTransition() {
 
   current_status_ = next_status_;
   next_status_.reset();
-  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
-
+  LOG4CXX_DEBUG(logger_, "last_processed_event_ = " << last_processed_event_);
+  if (last_processed_event_ != kScheduleManualUpdate) {
+    listener_->OnUpdateStatusChanged(current_status_->get_status_string());
+  }
   if (!postponed_status_) {
     return;
   }
 
   current_status_ = postponed_status_;
-  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
-  postponed_status_.reset();
-}
-
-UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
-    UpdateStatusManager* update_status_manager)
-    : timeout_(0)
-    , stop_flag_(false)
-    , state_lock_(true)
-    , update_status_manager_(update_status_manager) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Create UpdateThreadDelegate");
-}
-
-UpdateStatusManager::UpdateThreadDelegate::~UpdateThreadDelegate() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Delete UpdateThreadDelegate");
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "UpdateStatusManager thread started (started normal)");
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  while (false == stop_flag_) {
-    if (timeout_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Timeout is greater then 0");
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          termination_condition_.WaitFor(auto_lock, timeout_);
-      if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
-        if (update_status_manager_) {
-          update_status_manager_->OnUpdateTimeoutOccurs();
-        }
-      }
-    } else {
-      // Time is not active, wait until timeout will be set,
-      // or UpdateStatusManager will be deleted
-      termination_condition_.Wait(auto_lock);
-    }
+  if (last_processed_event_ != kScheduleManualUpdate) {
+    listener_->OnUpdateStatusChanged(current_status_->get_status_string());
   }
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  stop_flag_ = true;
-  LOG4CXX_DEBUG(logger_, "before notify");
-  termination_condition_.NotifyOne();
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::updateTimeOut(
-    const uint32_t timeout_ms) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  timeout_ = timeout_ms;
-  termination_condition_.NotifyOne();
+  postponed_status_.reset();
 }
 
 }  // namespace policy

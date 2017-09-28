@@ -19,7 +19,7 @@
 #include "libMBDebugHelper.h"
 #include "md5.h"
 
-namespace NsMessageBroker 
+namespace NsMessageBroker
 {
 
    unsigned int CWebSocketHandler::parseWebSocketDataLength(
@@ -576,43 +576,43 @@ namespace NsMessageBroker
 
       return 0;
    }
-   
+
    rawBytes CWebSocketHandler::handshake_hybi00(const std::string &key1, const std::string &key2, const rawBytes &key3)
    {
       if (key3.size() < 8)
       {
-         DBG_MSG_ERROR(("key3's size is %d, less than 8 bytes\n", key3.size()));
+         DBG_MSG_ERROR(("key3's size is %zu, less than 8 bytes\n", key3.size()));
          return rawBytes();
       }
-      
+
       unsigned long number1 = extractNumber(key1);
       unsigned long number2 = extractNumber(key2);
       DBG_MSG(("number1 is %ld, number2 is %ld\n", number1, number2));
-      
+
       if ((number1 == 0) || (number2 == 0))
       {
          return rawBytes();
       }
-      
+
       // represent the numbers in big-endian format (network-byte order)
       unsigned long bigEndianNumber1 = htonl(number1);
       unsigned long bigEndianNumber2 = htonl(number2);
-      
+
       // the temporary key consists of bytes of the first and second numbers
       // and the key3
       rawBytes key(8);
       memcpy(&key[0], &bigEndianNumber1, 4);
       memcpy(&key[4], &bigEndianNumber2, 4);
       key.insert(key.end(), key3.begin(), key3.begin() + 8);
-      
+
       MD5 md5(std::string(key.begin(), key.end()));
       char digest[16];
       md5.getdigest(digest);
       rawBytes resultBytes(&digest[0], &digest[16]);
-      
+
       return resultBytes;
    }
-   
+
    unsigned long CWebSocketHandler::extractNumber(const std::string &key) const
    {
       // leave digits only
@@ -631,9 +631,9 @@ namespace NsMessageBroker
             keyDigits += keyChar;
          }
       }
-      
+
       unsigned long result = 0;
-      
+
       // convert string to number
       long long numberKey;
       if (std::stringstream(keyDigits) >> numberKey)
@@ -659,9 +659,9 @@ namespace NsMessageBroker
       {
          // couldn't convert
       }
-      
+
       return result;
    }
-   
+
 } /* namespace NsMessageBroker */
 

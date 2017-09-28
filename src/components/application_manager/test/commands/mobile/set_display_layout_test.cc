@@ -57,7 +57,6 @@ using am::commands::SetDisplayLayoutRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Mock;
@@ -89,8 +88,6 @@ class SetDisplayLayoutRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
   ~SetDisplayLayoutRequestTest() {
@@ -133,7 +130,6 @@ class SetDisplayLayoutRequestTest
   }
 
   sync_primitives::Lock lock_;
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
@@ -164,7 +160,7 @@ TEST_F(SetDisplayLayoutRequestTest,
   Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
   event.set_smart_object(*msg);
 
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
@@ -186,6 +182,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
+
   MockAppPtr invalid_mock_app;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_mock_app));
@@ -209,8 +206,6 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationKey));
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillOnce(ReturnRef(mock_hmi_interfaces_));
   EXPECT_CALL(
       mock_hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetDisplayLayout))
@@ -236,14 +231,13 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
-  CommandPtr command(CreateCommand<SetDisplayLayoutRequest>());
-
   am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
   MessageSharedPtr msg = CreateMessage();
 
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params][am::hmi_response::display_capabilities] = 0;
+  (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
   MockHMICapabilities hmi_capabilities;
@@ -251,17 +245,23 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
   (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
 
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities));
 
   EXPECT_CALL(hmi_capabilities, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));
-
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
+  CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
   command->on_event(event);
 }
 
