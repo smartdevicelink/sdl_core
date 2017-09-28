@@ -944,7 +944,6 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_lock_.AcquireForWriting();
   ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
-    connection_list_lock_.Release();
     LOG4CXX_ERROR(logger_, "Connection not found!");
     return;
   }
