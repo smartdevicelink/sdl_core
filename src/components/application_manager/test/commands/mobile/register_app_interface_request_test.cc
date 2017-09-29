@@ -43,17 +43,19 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "utils/data_accessor.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "utils/data_accessor.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -90,9 +92,20 @@ class RegisterAppInterfaceRequestTest
   RegisterAppInterfaceRequestTest()
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
-      , app_name_("test_app_name_") {
+      , app_name_("test_app_name_")
+      , mock_application_helper_(
+            application_manager_test::MockApplicationHelper::
+                application_helper_mock()) {
     InitGetters();
     InitLanguage();
+  }
+
+  void SetUp() OVERRIDE {
+    testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
+  }
+
+  void TearDown() OVERRIDE {
+    testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
   }
 
   void InitBasicMessage() {
@@ -229,6 +242,7 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   MockHMICapabilities mock_hmi_capabilities_;
+  application_manager_test::MockApplicationHelper& mock_application_helper_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
@@ -420,7 +434,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
 
-  EXPECT_CALL(app_mngr_, RecallApplicationData(_)).Times(0);
+  EXPECT_CALL(mock_application_helper_, RecallApplicationData(_, _)).Times(0);
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
@@ -457,10 +471,11 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   const application_manager::Application>(mock_app)));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_application_helper_,
       RecallApplicationData(
           MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app)));
+              mock_app),
+          _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
 
@@ -489,10 +504,11 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   const application_manager::Application>(mock_app)));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_application_helper_,
       RecallApplicationData(
           MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app)));
+              mock_app),
+          _));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
 

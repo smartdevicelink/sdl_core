@@ -50,6 +50,7 @@
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
+#include "application_manager/helpers/application_helper.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -223,33 +224,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   navi_app_to_end_stream_.clear();
 }
 
-template <class UnaryPredicate>
-ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
-                             UnaryPredicate finder) {
-  ApplicationSet::iterator it = std::find_if(
-      accessor.GetData().begin(), accessor.GetData().end(), finder);
-  if (accessor.GetData().end() == it) {
-    LOG4CXX_DEBUG(logger_, "Unable to find application");
-    return ApplicationSharedPtr();
-  }
-  ApplicationSharedPtr app = *it;
-  LOG4CXX_DEBUG(logger_, " Found Application app_id = " << app->app_id());
-  return app;
-}
-
-template <class UnaryPredicate>
-std::vector<ApplicationSharedPtr> FindAllApps(
-    DataAccessor<ApplicationSet> accessor, UnaryPredicate finder) {
-  std::vector<ApplicationSharedPtr> result;
-  ApplicationSetConstIt it = std::find_if(
-      accessor.GetData().begin(), accessor.GetData().end(), finder);
-  while (it != accessor.GetData().end()) {
-    result.push_back(*it);
-    it = std::find_if(++it, accessor.GetData().end(), finder);
-  }
-  return result;
-}
-
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
   DataAccessor<ApplicationSet> accessor(applications_, applications_list_lock_);
   return accessor;
@@ -360,15 +334,6 @@ ApplicationManagerImpl::applications_by_button(uint32_t button) {
   return FindAllApps(accessor, finder);
 }
 
-struct SubscribedToIVIPredicate {
-  int32_t vehicle_info_;
-  SubscribedToIVIPredicate(int32_t vehicle_info)
-      : vehicle_info_(vehicle_info) {}
-  bool operator()(const ApplicationSharedPtr app) const {
-    return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
-  }
-};
-
 struct IsApplication {
   IsApplication(connection_handler::DeviceHandle device_handle,
                 const std::string& policy_app_id)
@@ -395,7 +360,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
       break;
   }
 
-  SubscribedToIVIPredicate finder(static_cast<int32_t>(vehicle_info));
+  SubscribedToIVIPredicate finder(vehicle_info);
   DataAccessor<ApplicationSet> accessor = applications();
   return FindAllApps(accessor, finder);
 }
@@ -2923,123 +2888,6 @@ void ApplicationManagerImpl::ClearAppsPersistentData() {
   if (storage_folder != apps_icons_folder) {
     file_system::RemoveDirectory(apps_icons_folder, true);
   }
-}
-
-void ApplicationManagerImpl::RecallApplicationData(ApplicationSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(app);
-
-  UnsubscribeAppFromWayPoints(app->app_id());
-  if (!IsAnyAppSubscribedForWayPoints()) {
-    MessageHelper::SendUnsubscribedWayPoints(*this);
-  }
-
-  // Removing commands
-  CommandsMap cmap = app->commands_map().GetData();
-
-  for (auto cmd : cmap) {
-    MessageHelper::SendDeleteCommandRequest(cmd.second, app, *this);
-    app->RemoveCommand(cmd.first);
-  }
-  // End removing commands
-
-  // Removing submenues
-  SubMenuMap smap = app->sub_menu_map().GetData();
-
-  for (auto smenu : smap) {
-    MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, *this);
-    app->RemoveSubMenu(smenu.first);
-  }
-  // End removing submenues
-
-  // Removing choice sets
-  ChoiceSetMap csmap = app->choice_set_map().GetData();
-
-  for (auto choice : csmap) {
-    MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, *this);
-    app->RemoveChoiceSet(choice.first);
-  }
-  // End removing choice sets
-
-  // Reset global properties
-  // Help prompt reset
-  smart_objects::SmartObject empty_so =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  app->set_help_prompt(empty_so);
-
-  // Timeout prompt reset
-  const std::vector<std::string>& time_out_promt =
-      get_settings().time_out_promt();
-
-  smart_objects::SmartObject so_time_out_promt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
-    smart_objects::SmartObject timeoutPrompt =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    timeoutPrompt[strings::text] = time_out_promt[i];
-    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_time_out_promt[i] = timeoutPrompt;
-  }
-
-  app->set_timeout_prompt(so_time_out_promt);
-
-  // VR help title reset
-  app->reset_vr_help_title();
-
-  // VR help reset
-  app->reset_vr_help();
-
-  // Keyboard properties reset
-  app->set_keyboard_props(empty_so);
-
-  // Menu icon reset
-  app->set_menu_icon(empty_so);
-
-  // Menu title reset
-  app->set_menu_title(empty_so);
-
-  MessageHelper::SendResetPropertiesRequest(app, *this);
-  // End reset global properties
-
-  // Removing buttons subscriptions
-  ButtonSubscriptions buttons = app->SubscribedButtons().GetData();
-
-  for (auto button : buttons) {
-    if (mobile_apis::ButtonName::CUSTOM_BUTTON == button) {
-      continue;
-    }
-    MessageHelper::SendUnsubscribeButtonNotification(button, app, *this);
-    app->UnsubscribeFromButton(button);
-  }
-  // End removing buttons subscriptions
-
-  // Removing IVI subscriptions
-  VehicleInfoSubscriptions ivi = app->SubscribedIVI().GetData();
-
-  for (auto i : ivi) {
-    app->UnsubscribeFromIVI(i);
-    SubscribedToIVIPredicate p(static_cast<int32_t>(i));
-    auto app = FindApp(applications(), p);
-    if (!app) {
-      MessageHelper::SendUnsubscribeIVIRequest(i, app, *this);
-    }
-  }
-  // End removing IVI subscriptions
-
-  // Removing files
-  // Except icons folder
-  auto files = app->getAppFiles();
-  const auto icon_file = app->app_icon_path();
-  for (auto file : files) {
-    auto file_name = file.first;
-    if (icon_file == file_name) {
-      continue;
-    }
-    app->DeleteFile(file_name);
-    file_system::DeleteFile(file_name);
-  }
-  // End removing files
 }
 
 void ApplicationManagerImpl::SendOnSDLClose() {

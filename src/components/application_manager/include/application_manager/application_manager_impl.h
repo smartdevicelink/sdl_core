@@ -1215,15 +1215,6 @@ class ApplicationManagerImpl
     }
   };
 
-  struct SubscribedToIVIPredicate {
-    int32_t vehicle_info_;
-    SubscribedToIVIPredicate(int32_t vehicle_info)
-        : vehicle_info_(vehicle_info) {}
-    bool operator()(const ApplicationSharedPtr app) const {
-      return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
-    }
-  };
-
   struct GrammarIdPredicate {
     uint32_t grammar_id_;
     GrammarIdPredicate(uint32_t grammar_id) : grammar_id_(grammar_id) {}
@@ -1289,13 +1280,6 @@ class ApplicationManagerImpl
    * @brief Clears all applications' persistent data
    */
   void ClearAppsPersistentData();
-
-  /**
-   * @brief RecallApplicationData removes application commands, subscriptions,
-   * menues etc. and notifies HMI to remove same on its side
-   * @param app Application to recall data from
-   */
-  void RecallApplicationData(ApplicationSharedPtr app) FINAL;
 
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;

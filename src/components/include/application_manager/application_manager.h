@@ -682,13 +682,6 @@ class ApplicationManager {
   virtual void OnTimerSendTTSGlobalProperties() = 0;
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
-
-  /**
-   * @brief RecallApplicationData removes application commands, subscriptions,
-   * menues etc.
-   * @param app Application to recall data from
-   */
-  virtual void RecallApplicationData(ApplicationSharedPtr app) = 0;
 };
 
 }  // namespace application_manager

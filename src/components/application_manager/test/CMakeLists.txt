@@ -70,6 +70,7 @@ set(testSources
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
+  ${AM_TEST_DIR}/application_helper_test.cc
 
 )
 
