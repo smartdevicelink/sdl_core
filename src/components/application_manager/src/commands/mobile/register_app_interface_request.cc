@@ -46,6 +46,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/helpers/application_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
@@ -674,7 +675,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                   "Application has been switched from another transport.");
 
     if (!resumption || mobile_apis::Result::RESUME_FAILED == result_code) {
-      application_manager_.RecallApplicationData(application);
+      application_manager::RecallApplicationData(application,
+                                                 application_manager_);
       resumer.RemoveApplicationFromSaved(application);
       result_code = mobile_apis::Result::RESUME_FAILED;
     }
