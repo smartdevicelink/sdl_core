@@ -301,6 +301,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     const uint32_t connection_key));
   MOCK_CONST_METHOD1(IsAppInReconnectMode,
                      bool(const std::string& policy_app_id));
+
+  MOCK_METHOD1(RecallApplicationData,
+               void(application_manager::ApplicationSharedPtr));
 };
 
 }  // namespace application_manager_test

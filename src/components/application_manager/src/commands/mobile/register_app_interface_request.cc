@@ -639,14 +639,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     response_params[strings::system_software_version] = ccpu_version;
   }
 
-  if (AppicationType::kSwitchedApplication == app_type) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application has been switched from another transport.");
-
-    SendResponse(true, result_code, NULL, &response_params);
-    return;
-  }
-
   bool resumption =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
 
@@ -675,6 +667,20 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
     add_info += response_info_;
     result_code = result_checking_app_hmi_type_;
+  }
+
+  if (AppicationType::kSwitchedApplication == app_type) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application has been switched from another transport.");
+
+    if (!resumption || mobile_apis::Result::RESUME_FAILED == result_code) {
+      application_manager_.RecallApplicationData(application);
+      resumer.RemoveApplicationFromSaved(application);
+      result_code = mobile_apis::Result::RESUME_FAILED;
+    }
+
+    SendResponse(true, result_code, add_info.c_str(), &response_params);
+    return;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
