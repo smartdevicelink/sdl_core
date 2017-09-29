@@ -148,12 +148,9 @@ int32_t main(int32_t argc, char** argv) {
 
   // Check if no error values were read from config file
   if (profile_instance.ErrorOccured()) {
-#ifdef ENABLE_LOG
-    const std::string& error = profile_instance.ErrorDescription();
-    LOG4CXX_FATAL(logger_, error);
+    LOG4CXX_FATAL(logger_, profile_instance.ErrorDescription());
     FLUSH_LOGGER();
     DEINIT_LOGGER();
-#endif
     exit(EXIT_FAILURE);
   }
 
