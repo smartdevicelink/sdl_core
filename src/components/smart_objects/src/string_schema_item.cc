@@ -45,6 +45,11 @@ utils::SharedPtr<CStringSchemaItem> CStringSchemaItem::create(
   return new CStringSchemaItem(MinLength, MaxLength, DefaultValue);
 }
 
+Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
+  std::string errorMessage;
+  return validate(Object, errorMessage);
+}
+
 Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
                                           std::string& errorMessage) {
   if (SmartType_String != Object.getType()) {

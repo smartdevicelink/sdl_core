@@ -65,9 +65,19 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
           TSchemaItemParameter<NumberType>());
 
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
+   * @return Errors::ERROR
+   **/
+  // DEPRECATED
+  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param errorMessage string reference to be filled with an appropriate error
+   *message if an error occurs
+   * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object,
                          std::string& errorMessage) OVERRIDE;
@@ -124,6 +134,13 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   } else {
     return false;
   }
+}
+
+template <typename NumberType>
+Errors::eType TNumberSchemaItem<NumberType>::validate(
+    const SmartObject& Object) {
+  std::string errorMessage;
+  return validate(Object, errorMessage);
 }
 
 template <typename NumberType>

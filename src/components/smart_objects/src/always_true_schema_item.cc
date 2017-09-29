@@ -39,6 +39,10 @@ utils::SharedPtr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
   return new CAlwaysTrueSchemaItem();
 }
 
+Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
+  return Errors::OK;
+}
+
 Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
                                               std::string& errorMessage) {
   return Errors::OK;

@@ -49,8 +49,18 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    **/
   static utils::SharedPtr<CAlwaysFalseSchemaItem> create();
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
+   * @return Errors::ERROR
+   **/
+  // DEPRECATED
+  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param errorMessage string reference to be filled with an appropriate error
+   *message if an error occurs
    * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object,

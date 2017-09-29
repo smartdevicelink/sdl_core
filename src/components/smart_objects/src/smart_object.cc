@@ -890,6 +890,11 @@ bool SmartObject::isValid() const {
   return (Errors::OK == m_schema.validate(*this, errorMessage));
 }
 
+Errors::eType SmartObject::validate() {
+  std::string errorMessage;
+  return validate(errorMessage);
+}
+
 Errors::eType SmartObject::validate(std::string& errorMessage) {
   return m_schema.validate(*this, errorMessage);
 }

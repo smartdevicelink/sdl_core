@@ -65,9 +65,19 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
+   * @return Errors::ERROR
+   **/
+  // DEPRECATED
+  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param errorMessage string reference to be filled with an appropriate error
+   *message if an error occurs
+   * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object,
                          std::string& errorMessage) OVERRIDE;
@@ -204,6 +214,12 @@ utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
     const std::set<EnumType>& AllowedElements,
     const TSchemaItemParameter<EnumType>& DefaultValue) {
   return new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
+}
+
+template <typename EnumType>
+Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
+  std::string errorMessage;
+  return validate(Object, errorMessage);
 }
 
 template <typename EnumType>

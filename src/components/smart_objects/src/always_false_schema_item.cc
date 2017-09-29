@@ -41,6 +41,11 @@ utils::SharedPtr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
   return new CAlwaysFalseSchemaItem();
 }
 
+Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object) {
+  std::string errorMessage;
+  return validate(object, errorMessage);
+}
+
 Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object,
                                                std::string& errorMessage) {
   errorMessage.assign("Generic error");

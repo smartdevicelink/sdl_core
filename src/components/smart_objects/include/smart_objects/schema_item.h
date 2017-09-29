@@ -47,9 +47,23 @@ class SmartObject;
 class ISchemaItem {
  public:
   /**
-   * @brief Validate object.
+   * @deprecated
+   *
+   * @brief Validate smart object.
    *
    * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  // DEPRECATED
+  virtual Errors::eType validate(const SmartObject& Object);
+
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   * @param errorMessage string reference to be filled with an appropriate error
+   * message if an error occurs
    *
    * @return NsSmartObjects::Errors::eType
    **/

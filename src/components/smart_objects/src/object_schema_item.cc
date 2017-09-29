@@ -56,6 +56,11 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
   return new CObjectSchemaItem(members);
 }
 
+Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
+  std::string errorMessage;
+  return validate(object, errorMessage);
+}
+
 Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
                                           std::string& errorMessage) {
   if (SmartType_Map != object.getType()) {

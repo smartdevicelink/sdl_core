@@ -41,6 +41,11 @@ utils::SharedPtr<CArraySchemaItem> CArraySchemaItem::create(
   return new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
 }
 
+Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
+  std::string errorMessage;
+  return validate(Object, errorMessage);
+}
+
 Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
                                          std::string& errorMessage) {
   if (SmartType_Array != Object.getType()) {
