@@ -1611,11 +1611,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
             (*message)[strings::params][strings::function_id].asUInt());
     if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
         (*message)[strings::msg_params][strings::success].asBool()) {
-      const bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
       LOG4CXX_INFO(logger_,
-                   "Registered app " << app->app_id() << " is "
-                                     << (is_for_plugin ? "" : "not ")
-                                     << "for plugins.");
+                   "Registered app "
+                       << app->app_id() << " is "
+                       << (plugin_manager_.IsAppForPlugins(app) ? "" : "not ")
+                       << "for plugins.");
     }
 #endif  // SDL_REMOTE_CONTROL
   } else if (app) {
