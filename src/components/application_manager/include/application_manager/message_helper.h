@@ -702,6 +702,30 @@ class MessageHelper {
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
+  static void SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
+                                       ApplicationSharedPtr application,
+                                       ApplicationManager& app_mngr);
+
+  static void SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
+                                       ApplicationSharedPtr application,
+                                       ApplicationManager& app_mngr);
+
+  static void SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
+                                         ApplicationSharedPtr application,
+                                         ApplicationManager& app_mngr);
+
+  static void SendResetPropertiesRequest(ApplicationSharedPtr application,
+                                         ApplicationManager& app_mngr);
+
+  static void SendUnsubscribeButtonNotification(
+      mobile_apis::ButtonName::eType button,
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr);
+
+  static void SendUnsubscribeIVIRequest(uint32_t ivi_id,
+                                        ApplicationSharedPtr application,
+                                        ApplicationManager& app_mngr);
+
 #ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sends HMI status notification to mobile
@@ -733,6 +757,10 @@ class MessageHelper {
    * @return New request object
    */
   static smart_objects::SmartObjectSPtr CreateRequestObject(
+      const uint32_t correlation_id);
+
+  // To merge with prior method
+  static smart_objects::SmartObjectSPtr CreateNotificationObject(
       const uint32_t correlation_id);
 
   /**

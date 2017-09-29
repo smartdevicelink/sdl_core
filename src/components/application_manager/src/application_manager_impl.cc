@@ -1106,6 +1106,11 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
                apps_data_accessor.GetData().end(),
                std::back_inserter(reregister_wait_list_),
                std::bind1st(std::ptr_fun(&device_id_comparator), device_uid));
+
+  for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
+       ++i) {
+    resume_ctrl_->SaveApplication(*i);
+  }
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchFinish(
@@ -2916,6 +2921,123 @@ void ApplicationManagerImpl::ClearAppsPersistentData() {
   if (storage_folder != apps_icons_folder) {
     file_system::RemoveDirectory(apps_icons_folder, true);
   }
+}
+
+void ApplicationManagerImpl::RecallApplicationData(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(app);
+
+  UnsubscribeAppFromWayPoints(app->app_id());
+  if (!IsAnyAppSubscribedForWayPoints()) {
+    MessageHelper::SendUnsubscribedWayPoints(*this);
+  }
+
+  // Removing commands
+  CommandsMap cmap = app->commands_map().GetData();
+
+  for (auto cmd : cmap) {
+    MessageHelper::SendDeleteCommandRequest(cmd.second, app, *this);
+    app->RemoveCommand(cmd.first);
+  }
+  // End removing commands
+
+  // Removing submenues
+  SubMenuMap smap = app->sub_menu_map().GetData();
+
+  for (auto smenu : smap) {
+    MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, *this);
+    app->RemoveSubMenu(smenu.first);
+  }
+  // End removing submenues
+
+  // Removing choice sets
+  ChoiceSetMap csmap = app->choice_set_map().GetData();
+
+  for (auto choice : csmap) {
+    MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, *this);
+    app->RemoveChoiceSet(choice.first);
+  }
+  // End removing choice sets
+
+  // Reset global properties
+  // Help prompt reset
+  smart_objects::SmartObject empty_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  app->set_help_prompt(empty_so);
+
+  // Timeout prompt reset
+  const std::vector<std::string>& time_out_promt =
+      get_settings().time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  // VR help title reset
+  app->reset_vr_help_title();
+
+  // VR help reset
+  app->reset_vr_help();
+
+  // Keyboard properties reset
+  app->set_keyboard_props(empty_so);
+
+  // Menu icon reset
+  app->set_menu_icon(empty_so);
+
+  // Menu title reset
+  app->set_menu_title(empty_so);
+
+  MessageHelper::SendResetPropertiesRequest(app, *this);
+  // End reset global properties
+
+  // Removing buttons subscriptions
+  ButtonSubscriptions buttons = app->SubscribedButtons().GetData();
+
+  for (auto button : buttons) {
+    if (mobile_apis::ButtonName::CUSTOM_BUTTON == button) {
+      continue;
+    }
+    MessageHelper::SendUnsubscribeButtonNotification(button, app, *this);
+    app->UnsubscribeFromButton(button);
+  }
+  // End removing buttons subscriptions
+
+  // Removing IVI subscriptions
+  VehicleInfoSubscriptions ivi = app->SubscribedIVI().GetData();
+
+  for (auto i : ivi) {
+    app->UnsubscribeFromIVI(i);
+    SubscribedToIVIPredicate p(static_cast<int32_t>(i));
+    auto app = FindApp(applications(), p);
+    if (!app) {
+      MessageHelper::SendUnsubscribeIVIRequest(i, app, *this);
+    }
+  }
+  // End removing IVI subscriptions
+
+  // Removing files
+  // Except icons folder
+  auto files = app->getAppFiles();
+  const auto icon_file = app->app_icon_path();
+  for (auto file : files) {
+    auto file_name = file.first;
+    if (icon_file == file_name) {
+      continue;
+    }
+    app->DeleteFile(file_name);
+    file_system::DeleteFile(file_name);
+  }
+  // End removing files
 }
 
 void ApplicationManagerImpl::SendOnSDLClose() {

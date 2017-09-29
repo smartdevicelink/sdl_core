@@ -1276,6 +1276,13 @@ class ApplicationManagerImpl
    */
   void ClearAppsPersistentData();
 
+  /**
+   * @brief RecallApplicationData removes application commands, subscriptions,
+   * menues etc. and notifies HMI to remove same on its side
+   * @param app Application to recall data from
+   */
+  void RecallApplicationData(ApplicationSharedPtr app) FINAL;
+
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;

@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 #include <bson_object.h>
 
 #include "gtest/gtest.h"
@@ -83,6 +85,7 @@ ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
 namespace {
 const std::string kDirectoryName = "./test_storage";
 const uint32_t kTimeout = 10000u;
+const std::vector<std::string> kTimeoutPrompt{"timeoutPrompt"};
 sync_primitives::Lock state_lock_;
 sync_primitives::ConditionalVariable state_condition_;
 }  // namespace
@@ -133,6 +136,9 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(Return(stop_streaming_timeout));
     ON_CALL(mock_application_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(kTimeout));
+    ON_CALL(mock_application_manager_settings_, time_out_promt())
+        .WillByDefault(ReturnRef(kTimeoutPrompt));
+
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
@@ -155,7 +161,6 @@ class ApplicationManagerImplTest : public ::testing::Test {
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
-  application_manager::MessageHelper* message_helper_;
   utils::SharedPtr<MockApplication> mock_app_ptr_;
 };
 
@@ -754,6 +759,164 @@ TEST_F(ApplicationManagerImplTest,
   app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
   EXPECT_EQ(new_device_id, app_impl->device());
   EXPECT_EQ(new_application_id, app_impl->app_id());
+}
+
+TEST_F(ApplicationManagerImplTest, RecallApplicationData_ExpectAppDataReset) {
+  const uint32_t application_id = 1;
+  const std::string policy_app_id = "p_app_id";
+  const std::string mac_address = "MA:CA:DD:RE:SS";
+  const connection_handler::DeviceHandle device_id = 1;
+  const custom_str::CustomString app_name("");
+
+  ApplicationSharedPtr app_impl = new ApplicationImpl(
+      application_id,
+      policy_app_id,
+      mac_address,
+      device_id,
+      app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager()),
+      *app_manager_impl_);
+
+  app_manager_impl_->AddMockApplication(app_impl);
+
+  const uint32_t cmd_id = 1;
+  const uint32_t menu_id = 2;
+  const uint32_t choice_set_id = 3;
+  const VehicleDataType vi = VehicleDataType::ACCPEDAL;
+  const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
+
+  smart_objects::SmartObject cmd;
+  cmd[strings::msg_params][strings::cmd_id] = cmd_id;
+  cmd[strings::msg_params][strings::vr_commands][0] = "vrCmd";
+  cmd[strings::msg_params][strings::menu_id] = menu_id;
+  cmd[strings::msg_params][strings::interaction_choice_set_id] = choice_set_id;
+
+  app_impl->AddCommand(cmd_id, cmd[strings::msg_params]);
+  app_impl->AddSubMenu(menu_id, cmd[strings::menu_params]);
+  app_impl->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
+  EXPECT_TRUE(app_impl->SubscribeToIVI(static_cast<uint32_t>(vi)));
+  EXPECT_TRUE(app_impl->SubscribeToButton(button));
+
+  const std::string some_string = "some_string";
+  smart_objects::SmartObject dummy_data =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  dummy_data = some_string;
+  app_impl->set_help_prompt(dummy_data);
+  app_impl->set_timeout_prompt(dummy_data);
+  app_impl->set_vr_help(dummy_data);
+  app_impl->set_vr_help_title(dummy_data);
+  app_impl->set_keyboard_props(dummy_data);
+  app_impl->set_menu_title(dummy_data);
+  app_impl->set_menu_icon(dummy_data);
+
+  const bool persistent = false;
+  const bool downloaded = true;
+  const std::string filename = "filename";
+  AppFile file(filename, persistent, downloaded, mobile_apis::FileType::BINARY);
+
+  app_impl->AddFile(file);
+
+  EXPECT_TRUE(NULL != app_impl->FindCommand(cmd_id));
+  EXPECT_TRUE(NULL != app_impl->FindSubMenu(menu_id));
+  EXPECT_TRUE(NULL != app_impl->FindChoiceSet(choice_set_id));
+  EXPECT_TRUE(app_impl->IsSubscribedToButton(button));
+  EXPECT_TRUE(app_impl->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
+  auto help_prompt = app_impl->help_prompt();
+  EXPECT_TRUE(help_prompt->asString() == some_string);
+  auto timeout_prompt = app_impl->timeout_prompt();
+  EXPECT_TRUE(timeout_prompt->asString() == some_string);
+  auto vr_help = app_impl->vr_help();
+  EXPECT_TRUE(vr_help->asString() == some_string);
+  auto vr_help_title = app_impl->vr_help_title();
+  EXPECT_TRUE(vr_help_title->asString() == some_string);
+  auto kb_properties = app_impl->keyboard_props();
+  EXPECT_TRUE(kb_properties->asString() == some_string);
+  auto menu_title = app_impl->menu_title();
+  EXPECT_TRUE(menu_title->asString() == some_string);
+  auto menu_icon = app_impl->menu_icon();
+  EXPECT_TRUE(menu_icon->asString() == some_string);
+  auto file_ptr = app_impl->GetFile(filename);
+  EXPECT_TRUE(NULL != file_ptr);
+  EXPECT_TRUE(file_ptr->file_name == filename);
+
+  // Act
+  app_manager_impl_->RecallApplicationData(app_impl);
+  EXPECT_FALSE(NULL != app_impl->FindCommand(cmd_id));
+  EXPECT_FALSE(NULL != app_impl->FindSubMenu(menu_id));
+  EXPECT_FALSE(NULL != app_impl->FindChoiceSet(choice_set_id));
+  EXPECT_FALSE(app_impl->IsSubscribedToButton(button));
+  EXPECT_FALSE(app_impl->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
+  help_prompt = app_impl->help_prompt();
+  EXPECT_FALSE(help_prompt->asString() == some_string);
+  timeout_prompt = app_impl->timeout_prompt();
+  EXPECT_FALSE(timeout_prompt->asString() == some_string);
+  vr_help = app_impl->vr_help();
+  EXPECT_TRUE(vr_help == NULL);
+  vr_help_title = app_impl->vr_help_title();
+  EXPECT_TRUE(vr_help_title == NULL);
+  kb_properties = app_impl->keyboard_props();
+  EXPECT_FALSE(kb_properties->asString() == some_string);
+  menu_title = app_impl->menu_title();
+  EXPECT_FALSE(menu_title->asString() == some_string);
+  menu_icon = app_impl->menu_icon();
+  EXPECT_FALSE(menu_icon->asString() == some_string);
+  file_ptr = app_impl->GetFile(filename);
+  EXPECT_TRUE(NULL == file_ptr);
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RecallApplicationData_ExpectHMICleanupRequests) {
+  const uint32_t application_id = 1;
+  const std::string policy_app_id = "p_app_id";
+  const std::string mac_address = "MA:CA:DD:RE:SS";
+  const connection_handler::DeviceHandle device_id = 1;
+  const custom_str::CustomString app_name("");
+
+  ApplicationSharedPtr app_impl = new ApplicationImpl(
+      application_id,
+      policy_app_id,
+      mac_address,
+      device_id,
+      app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager()),
+      *app_manager_impl_);
+
+  app_manager_impl_->AddMockApplication(app_impl);
+
+  const uint32_t cmd_id = 1;
+  const uint32_t menu_id = 2;
+  const uint32_t choice_set_id = 3;
+  smart_objects::SmartObject cmd;
+  cmd[strings::msg_params][strings::cmd_id] = cmd_id;
+  cmd[strings::msg_params][strings::vr_commands][0] = "vrCmd";
+  cmd[strings::msg_params][strings::menu_id] = menu_id;
+  cmd[strings::msg_params][strings::interaction_choice_set_id] = choice_set_id;
+
+  app_impl->AddCommand(cmd_id, cmd[strings::msg_params]);
+  app_impl->AddSubMenu(menu_id, cmd[strings::menu_params]);
+  app_impl->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
+  app_impl->SubscribeToIVI(static_cast<uint32_t>(VehicleDataType::ACCPEDAL));
+  app_impl->SubscribeToButton(mobile_apis::ButtonName::AC);
+
+  EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
+
+  EXPECT_CALL(*mock_message_helper_, SendDeleteCommandRequest(_, _, _));
+
+  EXPECT_CALL(*mock_message_helper_, SendDeleteSubmenuRequest(_, _, _));
+
+  EXPECT_CALL(*mock_message_helper_, SendDeleteChoiceSetRequest(_, _, _));
+
+  EXPECT_CALL(*mock_message_helper_, SendResetPropertiesRequest(_, _));
+
+  EXPECT_CALL(*mock_message_helper_,
+              SendUnsubscribeButtonNotification(_, _, _));
+
+  EXPECT_CALL(*mock_message_helper_, SendUnsubscribeIVIRequest(_, _, _));
+
+  // Act
+  app_manager_impl_->RecallApplicationData(app_impl);
 }
 
 }  // application_manager_test
