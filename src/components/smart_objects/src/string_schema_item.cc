@@ -49,8 +49,7 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
                                           std::string& errorMessage) {
   if (SmartType_String != Object.getType()) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     errorMessage += "Incorrect type, expected: " +
                     SmartObject::typeToString(SmartType_String) + ", got: " +
@@ -63,8 +62,7 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
 
   if (mMinLength.getValue(length) && (value.size() < length)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Got string of size: " << value.size()
@@ -74,8 +72,7 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object,
   }
   if (mMaxLength.getValue(length) && (value.size() > length)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Got string of size: " << value.size()

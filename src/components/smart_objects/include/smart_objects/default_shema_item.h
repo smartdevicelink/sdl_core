@@ -103,8 +103,7 @@ Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object,
                                                  std::string& errorMessage) {
   if (getSmartType() != Object.getType()) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     errorMessage += "Incorrect type, expected: " +
                     SmartObject::typeToString(getSmartType()) + ", got: " +

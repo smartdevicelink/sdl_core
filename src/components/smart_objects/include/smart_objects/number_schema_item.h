@@ -131,8 +131,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object, std::string& errorMessage) {
   if (!isValidNumberType(Object.getType())) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double
@@ -160,8 +159,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   NumberType rangeLimit;
   if (mMinValue.getValue(rangeLimit) && (value < rangeLimit)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Value too small, got: " << value
@@ -172,8 +170,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
   if (mMaxValue.getValue(rangeLimit) && (value > rangeLimit)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Value too large, got: " << value

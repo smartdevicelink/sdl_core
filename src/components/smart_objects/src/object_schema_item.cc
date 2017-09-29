@@ -60,8 +60,7 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
                                           std::string& errorMessage) {
   if (SmartType_Map != object.getType()) {
     if (!object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + object.getKey() + ". ");
     }
     errorMessage += "Incorrect type, expected: " +
                     SmartObject::typeToString(SmartType_Map) + ", got: " +
@@ -80,10 +79,10 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
     if (object_keys.end() == key_it) {
       if (member.mIsMandatory) {
         if (!object.getKey().empty()) {
-          errorMessage.assign("Validation failed for \"" + object.getKey() +
-                              "\". ");
+          errorMessage.assign("Validation failed for " + object.getKey() +
+                              ". ");
         }
-        errorMessage += "Missing mandatory parameter: \"" + key + "\"";
+        errorMessage += "Missing mandatory parameter: " + key;
         return Errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;

@@ -1077,7 +1077,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
               system_capabilities.get("navigationCapability", "");
           smart_objects::SmartObject navigation_capability_so;
           Formatters::CFormatterJsonBase::jsonValueToObj(
-              navigation_capability, navigation_capability_so);
+              navigation_capability,
+              navigation_capability_so,
+              "navigationCapability");
           set_navigation_capability(navigation_capability_so);
           if (!navigation_capability_so.empty()) {
             set_navigation_supported(true);
@@ -1088,8 +1090,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value phone_capability =
               system_capabilities.get("phoneCapability", "");
           smart_objects::SmartObject phone_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
-                                                         phone_capability_so);
+          Formatters::CFormatterJsonBase::jsonValueToObj(
+              phone_capability, phone_capability_so, "phoneCapability");
           set_phone_capability(phone_capability_so);
           if (!phone_capability_so.empty()) {
             set_phone_call_supported(true);
@@ -1100,8 +1102,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value vs_capability =
               system_capabilities.get("videoStreamingCapability", "");
           smart_objects::SmartObject vs_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(vs_capability,
-                                                         vs_capability_so);
+          Formatters::CFormatterJsonBase::jsonValueToObj(
+              vs_capability, vs_capability_so, "videoStreamingCapability");
 
           if (vs_capability_so.keyExists("supportedFormats")) {
             smart_objects::SmartObject& supported_format_array =
@@ -1150,8 +1152,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value rc_capability =
               system_capabilities.get("remoteControlCapability", "");
           smart_objects::SmartObject rc_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
-                                                         rc_capability_so);
+          Formatters::CFormatterJsonBase::jsonValueToObj(
+              rc_capability, rc_capability_so, "remoteControlCapability");
           set_rc_capability(rc_capability_so);
         }
       }

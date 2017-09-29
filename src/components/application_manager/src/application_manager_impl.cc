@@ -2317,8 +2317,10 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
       if (!mobile_so_factory().attachSchema(so, true)) {
         return INVALID_METADATA;
       }
-
-      if (so.validate() != smart_objects::Errors::OK) {
+      std::string errorMessage("");
+      if (so.validate(errorMessage) != smart_objects::Errors::OK) {
+        LOG4CXX_WARN(logger_,
+                     "validate() failed for Mobile message - " << errorMessage);
         return SCHEMA_MISMATCH;
       }
       break;
@@ -2337,7 +2339,10 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
         return INVALID_METADATA;
       }
 
-      if (so.validate() != smart_objects::Errors::OK) {
+      std::string errorMessage("");
+      if (so.validate(errorMessage) != smart_objects::Errors::OK) {
+        LOG4CXX_WARN(logger_,
+                     "validate() failed for HMI message - " << errorMessage);
         return SCHEMA_MISMATCH;
       }
       break;

@@ -211,8 +211,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object,
                                                   std::string& errorMessage) {
   if (SmartType_Integer != Object.getType()) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
 
     if (SmartType_String == Object.getType()) {
@@ -228,8 +227,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object,
   if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
       mAllowedElements.end()) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Invalid enum value: " << Object.asInt();

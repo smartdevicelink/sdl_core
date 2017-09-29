@@ -45,8 +45,7 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
                                          std::string& errorMessage) {
   if (SmartType_Array != Object.getType()) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     errorMessage += "Incorrect type, expected: " +
                     SmartObject::typeToString(SmartType_Array) + ", got: " +
@@ -58,8 +57,7 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
 
   if (mMinSize.getValue(sizeLimit) && (array_len < sizeLimit)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Got array of size: " << array_len
@@ -69,8 +67,7 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
     if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for \"" + Object.getKey() +
-                          "\". ");
+      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
     }
     std::stringstream stream;
     stream << "Got array of size: " << array_len
