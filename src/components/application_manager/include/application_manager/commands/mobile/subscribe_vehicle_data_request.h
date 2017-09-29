@@ -130,7 +130,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * HMI
    * @param result contains result that SDL sends to mobile app.
    */
-  void CheckVISubscribtions(ApplicationSharedPtr app,
+  void CheckVISubscriptions(ApplicationSharedPtr app,
                             std::string& out_info,
                             mobile_apis::Result::eType& out_result_code,
                             smart_objects::SmartObject& out_response_params,
