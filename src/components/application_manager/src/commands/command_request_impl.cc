@@ -748,6 +748,7 @@ void CommandRequestImpl::AddDisallowedParameters(
 }
 
 bool CommandRequestImpl::HasDisallowedParams() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
           (!removed_parameters_permissions_.undefined_params.empty()));
 }
