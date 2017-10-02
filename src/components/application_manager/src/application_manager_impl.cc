@@ -195,6 +195,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
+  commands_holder_.SetCommandsProcessor(this);
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -386,6 +387,10 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
 
   event.set_smart_object(msg);
   event.raise(event_dispatcher());
+}
+
+void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
+  commands_holder_.Release(app->policy_app_id());
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
@@ -1077,7 +1082,9 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
 
   for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
        ++i) {
-    resume_ctrl_->SaveApplication(*i);
+    auto app = *i;
+    request_ctrl_.terminateAppRequests(app->app_id());
+    resume_ctrl_->SaveApplication(app);
   }
 }
 
@@ -1092,7 +1099,9 @@ void ApplicationManagerImpl::OnDeviceSwitchFinish(
   for (auto app_it = reregister_wait_list_.begin();
        app_it != reregister_wait_list_.end();
        ++app_it) {
-    UnregisterApplication((*app_it)->app_id(),
+    auto app = *app_it;
+    commands_holder_.Drop(app->policy_app_id());
+    UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
                           unexpected_disonnect);
@@ -2038,6 +2047,12 @@ bool ApplicationManagerImpl::ManageHMICommand(
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");
     return false;
+  }
+
+  auto app = application(command->connection_key());
+  if (app && IsAppInReconnectMode(app->policy_app_id())) {
+    commands_holder_.Hold(app->policy_app_id(), message);
+    return true;
   }
 
   int32_t message_type =

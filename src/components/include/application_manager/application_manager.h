@@ -345,6 +345,13 @@ class ApplicationManager {
    */
   virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
 
+  /**
+   * @brief OnApplicationSwitched starts activies postponed during application
+   * transport switching
+   * @param app Application
+   */
+  virtual void OnApplicationSwitched(ApplicationSharedPtr app) = 0;
+
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;

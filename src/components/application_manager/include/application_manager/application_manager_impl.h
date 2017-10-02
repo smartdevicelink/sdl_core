@@ -354,6 +354,13 @@ class ApplicationManagerImpl
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
+  /**
+   * @brief OnApplicationSwitched starts processing of commands collected
+   * during device switching process
+   * @param app Application
+   */
+  void OnApplicationSwitched(ApplicationSharedPtr app) OVERRIDE;
+
   HMICapabilities& hmi_capabilities() OVERRIDE;
   const HMICapabilities& hmi_capabilities() const OVERRIDE;
 
@@ -523,28 +530,13 @@ class ApplicationManagerImpl
   /**
    * DEPRECATED
    * @brief CreateRegularState create regular HMI state for application
-   * @param app_id
-   * @param hmi_level of returned state
-   * @param audio_state of returned state
-   * @param system_context of returned state
-   * @return new regular HMI state
-   */
-  DEPRECATED HmiStatePtr CreateRegularState(
-      uint32_t app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
-      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
-
-  /**
-   * DEPRECATED
-   * @brief CreateRegularState create regular HMI state for application
    * @param app_id Application id
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
    * @return new regular HMI state
    */
-  HmiStatePtr CreateRegularState(
+  DEPRECATED HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
@@ -1727,6 +1719,8 @@ class ApplicationManagerImpl
   uint32_t apps_size_;
 
   volatile bool is_stopping_;
+
+  CommandHolderImpl commands_holder_;
 
 #ifdef BUILD_TESTS
  public:

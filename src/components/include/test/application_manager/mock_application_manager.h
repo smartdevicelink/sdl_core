@@ -151,6 +151,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      bool(application_manager::ApplicationConstSharedPtr app));
   MOCK_METHOD1(OnApplicationRegistered,
                void(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD1(OnApplicationSwitched,
+               void(application_manager::ApplicationSharedPtr app));
   MOCK_CONST_METHOD0(connection_handler,
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
