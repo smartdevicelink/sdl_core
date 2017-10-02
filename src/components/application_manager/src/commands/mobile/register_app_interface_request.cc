@@ -1465,6 +1465,8 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   application_manager_.SendHMIStatusNotification(app);
 
+  application_manager_.OnApplicationSwitched(app);
+
   return true;
 }
 
