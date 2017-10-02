@@ -629,10 +629,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
+// DEPRECATED
 bool ApplicationManagerImpl::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
   return true;
 }
 
+// DEPRECATED
 bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
   return true;
 }
@@ -784,6 +786,7 @@ void ApplicationManagerImpl::set_driver_distraction(const bool is_distracting) {
   is_distracting_driver_ = is_distracting;
 }
 
+// DEPRECATED
 void ApplicationManagerImpl::set_vr_session_started(const bool state) {
   is_vr_session_strated_ = state;
 }
