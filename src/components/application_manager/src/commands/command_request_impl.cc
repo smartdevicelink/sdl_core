@@ -625,8 +625,13 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-    params.insert(iter->first);
+    if (helpers::Compare<smart_objects::SmartType, helpers::NEQ, helpers::ALL>(
+            iter->second.getType(),
+            smart_objects::SmartType_Null,
+            smart_objects::SmartType_Invalid)) {
+      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+      params.insert(iter->first);
+    }
   }
 
   mobile_apis::Result::eType check_result =
