@@ -85,8 +85,9 @@ class EventDispatcher;
 
 class Application;
 class StateControllerImpl;
-struct CommandParametersPermissions;
 using policy::RPCParams;
+using policy::PermitResult;
+struct CommandParametersPermissions;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,

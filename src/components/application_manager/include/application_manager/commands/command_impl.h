@@ -46,6 +46,10 @@ namespace application_manager {
  * table
  */
 struct CommandParametersPermissions {
+  CommandParametersPermissions()
+      : permit_result(PermitResult::kRpcDisallowed) {}
+
+  PermitResult permit_result;
   RPCParams allowed_params;
   RPCParams disallowed_params;
   RPCParams undefined_params;
