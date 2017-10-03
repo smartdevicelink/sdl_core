@@ -393,8 +393,14 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*response)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+      .WillOnce(Return(response));
 
   EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _));
   EXPECT_FALSE(command->CheckPermissions());
