@@ -60,29 +60,25 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
-  if (msg_params.keyExists(strings::delivery_mode)) {
-    const policy::RPCParams& allowed_params =
-        parameters_permissions().allowed_params;
-
-    if (helpers::in_range(allowed_params, strings::delivery_mode)) {
-      msg_params.erase(strings::delivery_mode);
-    }
-  }
-
   if (!AreMandatoryParamsAllowedByUser()) {
     LOG4CXX_ERROR(logger_, "All parameters are disallowed by user.");
-    SendResponse(false, mobile_api::Result::USER_DISALLOWED);
+    SendResponse(false,
+                 mobile_api::Result::USER_DISALLOWED,
+                 "Requested parameters are disallowed by User");
     return;
   }
 
   if (!AreMandatoryParamsAllowedByPolicy()) {
     LOG4CXX_ERROR(logger_, "Mandatory parameters are disallowed by policy.");
-    SendResponse(false, mobile_api::Result::DISALLOWED);
+    SendResponse(false,
+                 mobile_api::Result::DISALLOWED,
+                 "Requested parameters are disallowed by Policies");
     return;
   }
 
   std::vector<Common_TextFieldName::eType> fields_to_check;
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
