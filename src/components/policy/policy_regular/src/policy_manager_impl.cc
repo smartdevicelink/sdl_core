@@ -433,6 +433,44 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
 #endif  // SDL_REMOTE_CONTROL
 
   cache_->CheckPermissions(groups, hmi_level, rpc, result);
+
+  if (kRpcDisallowed == result.hmi_level_permitted) {
+    LOG4CXX_DEBUG(logger_, "RPC is not allowed. Stop parameters processing.");
+    return;
+  }
+
+  if (kRpcAllParamsDisallowed == result.hmi_level_permitted) {
+    LOG4CXX_DEBUG(logger_, "All parameters are disallowed by policy.");
+    result.list_of_undefined_params = rpc_params;
+    return;
+  }
+
+  if (kRpcAllowed == result.hmi_level_permitted &&
+      result.list_of_allowed_params.empty()) {
+    LOG4CXX_DEBUG(logger_, "All parameters are allowed.");
+    result.list_of_allowed_params = rpc_params;
+    return;
+  }
+
+  RPCParams::const_iterator parameter = rpc_params.begin();
+  RPCParams::const_iterator end = rpc_params.end();
+  for (; end != parameter; ++parameter) {
+    if (!result.HasParameter(*parameter)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Parameter " << *parameter << " is unknown."
+                                                  " Adding to undefined list.");
+      result.list_of_undefined_params.insert(*parameter);
+    }
+  }
+
+  if (result.DisallowedInclude(rpc_params)) {
+    LOG4CXX_DEBUG(logger_, "All parameters are disallowed by user.");
+    result.hmi_level_permitted = kRpcAllParamsUserDisallowed;
+  } else if (!result.IsAnyAllowed(rpc_params)) {
+    LOG4CXX_DEBUG(logger_, "There are no parameters allowed by policy.");
+    result.hmi_level_permitted = kRpcAllParamsDisallowed;
+  }
+
   if (cache_->IsApplicationRevoked(app_id)) {
     // SDL must be able to notify mobile side with its status after app has
     // been revoked by backend
