@@ -3174,6 +3174,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   GetPolicyHandler().CheckPermissions(app, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
+    params_permissions->permit_result = result.hmi_level_permitted;
     params_permissions->allowed_params = result.list_of_allowed_params;
     params_permissions->disallowed_params = result.list_of_disallowed_params;
     params_permissions->undefined_params = result.list_of_undefined_params;
@@ -3199,8 +3200,10 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
     switch (result.hmi_level_permitted) {
       case policy::kRpcDisallowed:
+      case policy::kRpcAllParamsDisallowed:
         return mobile_apis::Result::DISALLOWED;
       case policy::kRpcUserDisallowed:
+      case policy::kRpcAllParamsUserDisallowed:
         return mobile_apis::Result::USER_DISALLOWED;
       default:
         return mobile_apis::Result::INVALID_ENUM;
