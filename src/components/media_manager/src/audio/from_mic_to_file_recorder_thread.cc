@@ -95,6 +95,18 @@ void FromMicToFileRecorderThread::initArgs() {
   argv_[4] = const_cast<gchar*>(durationString_.c_str());
 }
 
+void FromMicToFileRecorderThread::deinitArgs() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (argv_) {
+    for (int32_t i = 0; i < argc_; i++) {
+      delete[] argv_[i];
+    }
+    delete[] argv_;
+    argv_ = NULL;
+  }
+}
+
 void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -136,6 +148,13 @@ void FromMicToFileRecorderThread::threadMain() {
                              "length of time in seconds to capture",
                              "int32_t"},
                             {NULL}};
+  // g_option_context_parse() modifies params, so keep argc_ and argv_
+  int32_t argc = argc_;
+  gchar** argv = new gchar* [argc];
+  for (int32_t i = 0; i < argc; i++) {
+    argv[i] = argv_[i];
+  }
+
 #ifndef GLIB_VERSION_2_32  // g_thread_init() does nothing since 2.32
   if (!g_thread_supported()) {
     g_thread_init(NULL);
@@ -145,7 +164,7 @@ void FromMicToFileRecorderThread::threadMain() {
   context = g_option_context_new("-- M-AUDIO RAW");
   g_option_context_add_main_entries(context, entries, NULL);
   g_option_context_add_group(context, gst_init_get_option_group());
-  if (!g_option_context_parse(context, &argc_, &argv_, &err)) {
+  if (!g_option_context_parse(context, &argc, &argv, &err)) {
     g_error("%s\n", err->message);
   }
 
@@ -159,7 +178,10 @@ void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_TRACE(logger_, "Duration set to: " << duration);
 
   // Initialize gstreamer and setup the main loop information
-  gst_init(&argc_, &argv_);
+  gst_init(&argc, &argv);
+
+  delete[] argv;
+  argv = NULL;
 
   pipeline = gst_pipeline_new("vga2usb-h264");
 
@@ -207,10 +229,7 @@ void FromMicToFileRecorderThread::threadMain() {
       gst_object_unref(GST_OBJECT(pipeline));
       g_option_context_free(context);
 
-      if (argv_) {
-        delete[] argv_;
-        argv_ = NULL;
-      }
+      deinitArgs();
       return;
     }
   }
@@ -238,10 +257,7 @@ void FromMicToFileRecorderThread::threadMain() {
   g_main_loop_unref(loop);
   g_option_context_free(context);
 
-  if (argv_) {
-    delete[] argv_;
-    argv_ = NULL;
-  }
+  deinitArgs();
 
   loop = NULL;
 }
