@@ -105,6 +105,25 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
+std::string CreateInfoForPolicyPermitResult(const PermitResult value) {
+  switch (value) {
+    case PermitResult::kRpcDisallowed: {
+      return "RPC is disallowed by Policies";
+    }
+    case PermitResult::kRpcUserDisallowed: {
+      return "RPC is disallowed by the User";
+    }
+    case PermitResult::kRpcAllParamsDisallowed: {
+      return "Requested parameters are disallowed by Policies";
+    }
+    case PermitResult::kRpcAllParamsUserDisallowed: {
+      return "Requested parameters are disallowed by User";
+    }
+    default:
+      return std::string();
+  }
+}
+
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
@@ -626,7 +645,11 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             check_result,
             correlation_id(),
             app->app_id());
-
+    std::string info =
+        CreateInfoForPolicyPermitResult(parameters_permissions_.permit_result);
+    if (!info.empty()) {
+      (*response)[strings::msg_params][strings::info] = info;
+    }
     application_manager_.SendMessageToMobile(response);
     return false;
   }
@@ -765,7 +788,11 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   }
 
   if (!info.empty()) {
-    info += " disallowed by policies.";
+    const uint32_t params_count =
+        removed_parameters_permissions_.disallowed_params.size() +
+        removed_parameters_permissions_.undefined_params.size();
+    info += params_count > 1 ? " parameters are " : " parameter is ";
+    info += "disallowed by Policies";
 
     if (!response[strings::msg_params][strings::info].asString().empty()) {
       // If we already have info add info about disallowed params to it
