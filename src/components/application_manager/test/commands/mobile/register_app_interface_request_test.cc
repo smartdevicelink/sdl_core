@@ -185,7 +185,7 @@ class RegisterAppInterfaceRequestTest
   }
 
   void SetCommonExpectionsOnSwitchedApplication(
-      mobile_apis::Result::eType response_result_code) {
+      MockAppPtr mock_app, mobile_apis::Result::eType response_result_code) {
     EXPECT_CALL(mock_policy_handler_, AddApplication(_, _)).Times(0);
 
     EXPECT_CALL(
@@ -213,6 +213,12 @@ class RegisterAppInterfaceRequestTest
     EXPECT_CALL(app_mngr_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
+
+    EXPECT_CALL(
+        app_mngr_,
+        OnApplicationSwitched(
+            MockAppPtr::static_pointer_cast<application_manager::Application>(
+                mock_app)));
   }
 
   MessageSharedPtr msg_;
@@ -439,7 +445,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
 
-  SetCommonExpectionsOnSwitchedApplication(mobile_apis::Result::SUCCESS);
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::SUCCESS);
 
   command_->Run();
 }
@@ -482,7 +489,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
 
-  SetCommonExpectionsOnSwitchedApplication(mobile_apis::Result::RESUME_FAILED);
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::RESUME_FAILED);
 
   command_->Run();
 }
@@ -515,7 +523,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
 
-  SetCommonExpectionsOnSwitchedApplication(mobile_apis::Result::RESUME_FAILED);
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::RESUME_FAILED);
 
   command_->Run();
 }
