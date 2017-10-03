@@ -242,16 +242,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
     }
