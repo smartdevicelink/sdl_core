@@ -69,11 +69,13 @@ TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   std::string return_string = "1234";
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(*mock_app, curHash()).WillOnce(ReturnRef(return_string));
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).WillOnce(SaveArg<0>(&msg));
 
   command->Run();
 

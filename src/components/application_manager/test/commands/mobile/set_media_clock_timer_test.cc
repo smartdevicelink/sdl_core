@@ -319,7 +319,13 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));

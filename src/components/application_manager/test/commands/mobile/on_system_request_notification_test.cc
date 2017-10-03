@@ -97,7 +97,10 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   MockPolicyHandlerInterface mock_policy_handler;
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillRepeatedly(ReturnRef(mock_policy_handler));
@@ -113,9 +116,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, TimeoutExchangeSec()).WillOnce(Return(5u));
 #endif  // PROPRIETARY_MODE
 
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).WillOnce(SaveArg<0>(&msg));
 
   command->Run();
 
@@ -142,7 +143,11 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   MockPolicyHandlerInterface mock_policy_handler;
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler));
@@ -151,9 +156,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).WillOnce(SaveArg<0>(&msg));
 
   command->Run();
 
@@ -267,6 +270,8 @@ TEST_F(OnSystemRequestNotificationTest,
   EXPECT_CALL(mock_policy_handler_,
               IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))
       .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   smart_objects::SmartObjectSPtr result;
   EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
