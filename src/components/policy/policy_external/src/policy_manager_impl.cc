@@ -698,7 +698,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
           .parameter_permissions.any_parameter_disallowed_by_user) {
     LOG4CXX_DEBUG(logger_, "All parameters are disallowed by user.");
     result.list_of_disallowed_params = rpc_params;
-    result.hmi_level_permitted = kRpcUserDisallowed;
+    result.hmi_level_permitted = kRpcAllParamsUserDisallowed;
     return;
   }
 
@@ -706,7 +706,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
           .parameter_permissions.any_parameter_disallowed_by_policy) {
     LOG4CXX_DEBUG(logger_, "All parameters are disallowed by policy.");
     result.list_of_undefined_params = rpc_params;
-    result.hmi_level_permitted = kRpcDisallowed;
+    result.hmi_level_permitted = kRpcAllParamsDisallowed;
     return;
   }
 
@@ -742,11 +742,11 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   }
 
   if (result.DisallowedInclude(rpc_params)) {
-    LOG4CXX_DEBUG(logger_, "All parameters are disallowed.");
-    result.hmi_level_permitted = kRpcUserDisallowed;
+    LOG4CXX_DEBUG(logger_, "All parameters are disallowed by user.");
+    result.hmi_level_permitted = kRpcAllParamsUserDisallowed;
   } else if (!result.IsAnyAllowed(rpc_params)) {
-    LOG4CXX_DEBUG(logger_, "There are no parameters allowed.");
-    result.hmi_level_permitted = kRpcDisallowed;
+    LOG4CXX_DEBUG(logger_, "There are no parameters allowed by policy.");
+    result.hmi_level_permitted = kRpcAllParamsDisallowed;
   }
 }
 
