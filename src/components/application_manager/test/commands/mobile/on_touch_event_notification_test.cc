@@ -133,6 +133,14 @@ TEST_F(OnTouchEventNotificationTest, Run_NotEmptyListOfAppsWithNavi_SUCCESS) {
   EXPECT_CALL(app_mngr_, applications_with_mobile_projection())
       .WillOnce(Return(applications_with_mobile_projection));
 
+  EXPECT_CALL(app_mngr_, application(kAppId))
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .Times(2)
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(*mock_app, IsFullscreen()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));

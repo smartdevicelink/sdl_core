@@ -755,6 +755,10 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   command->on_event(event);
 
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]

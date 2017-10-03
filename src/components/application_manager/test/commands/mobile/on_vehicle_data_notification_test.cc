@@ -130,6 +130,11 @@ TEST_F(OnVehicleDataNotificationTest,
               IviInfoUpdated(am::VehicleDataType::FUELLEVEL, kFuelLevel))
       .WillOnce(Return(applications));
 
+  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
   ::utils::custom_string::CustomString dummy_name("test_app");
   ON_CALL(*mock_app, name()).WillByDefault(ReturnRef(dummy_name));
