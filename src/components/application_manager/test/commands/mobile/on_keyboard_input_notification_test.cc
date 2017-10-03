@@ -64,9 +64,12 @@ class OnKeyBoardInputNotificationTest
   OnKeyBoardInputNotificationTest()
       : message_helper_(*MockMessageHelper::message_helper_mock()) {}
 
-  void SetSendNotificationExpectations(MessageSharedPtr msg) {
+  void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-    EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+    EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
+        .WillOnce(SaveArg<0>(&msg));
   }
 
   void SetSendNotificationVariables(MessageSharedPtr msg) {
@@ -111,8 +114,9 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
   EXPECT_CALL(*mock_app, perform_interaction_layout())
       .WillOnce(Return(mobile_apis::LayoutMode::KEYBOARD));
   EXPECT_CALL(*mock_app, hmi_level()).Times(0);
-
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
 
   SetSendNotificationExpectations(msg);
 
@@ -138,6 +142,9 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionNotActive_SUCCESS) {
       .WillOnce(Return(mobile_apis::HMILevel::eType::HMI_FULL));
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
 
   SetSendNotificationExpectations(msg);
 
