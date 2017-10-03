@@ -94,7 +94,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   ApplicationManagerImplTest()
       : mock_storage_(
             ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
-                app_mngr_))
+                mock_app_mngr_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
       , app_id_(0u) {
@@ -148,13 +148,39 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->AddMockApplication(mock_app_ptr_);
   }
 
+  void SetCommonExpectationOnAppReconnection(
+      const connection_handler::DeviceHandle new_device_id,
+      const uint32_t new_application_id,
+      const std::string& mac_address) {
+    EXPECT_CALL(
+        mock_session_observer_,
+        GetDataOnSessionKey(new_application_id,
+                            _,
+                            _,
+                            testing::An<connection_handler::DeviceHandle*>()))
+        .WillOnce(DoAll(SetArgPointee<3u>(new_device_id), Return(0)));
+
+    const std::string connection_type = "MyConnectionType";
+    EXPECT_CALL(
+        mock_session_observer_,
+        GetDataOnDeviceID(
+            ::testing::Matcher<connection_handler::DeviceHandle>(new_device_id),
+            _,
+            _,
+            _,
+            _))
+        .WillOnce(DoAll(SetArgPointee<3u>(mac_address),
+                        SetArgPointee<4u>(connection_type),
+                        Return(0)));
+  }
+
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager app_mngr_;
+  application_manager_test::MockApplicationManager mock_app_mngr_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
@@ -646,10 +672,10 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string switching_device_id = "switching";
+  const std::string switching_mac_address = "switching";
   app_manager_impl_->AddMockApplication(switching_app_ptr);
   EXPECT_CALL(*switching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(switching_device_id));
+      .WillRepeatedly(ReturnRef(switching_mac_address));
 
   const std::string policy_app_id_switch = "abc";
   EXPECT_CALL(*switching_app_ptr, policy_app_id())
@@ -658,17 +684,17 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> nonswitching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string nonswitching_device_id = "nonswitching";
+  const std::string nonswitching_mac_address = "nonswitching";
   app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
   EXPECT_CALL(*nonswitching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(nonswitching_device_id));
+      .WillRepeatedly(ReturnRef(nonswitching_mac_address));
 
   const std::string policy_app_id_nonswitch = "efg";
   EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
   // Act
-  app_manager_impl_->OnDeviceSwitchingStart(switching_device_id);
+  app_manager_impl_->OnDeviceSwitchingStart(switching_mac_address);
   EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
   EXPECT_FALSE(
       app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
@@ -679,10 +705,18 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string switching_device_id = "switching";
+  const uint32_t switching_app_id = 1u;
+  EXPECT_CALL(*switching_app_ptr, app_id())
+      .WillRepeatedly(Return(switching_app_id));
+
+  const uint32_t switching_device_id = 1u;
+  EXPECT_CALL(*switching_app_ptr, device())
+      .WillRepeatedly(Return(switching_device_id));
+
+  const std::string switching_mac_address = "switching";
   app_manager_impl_->AddMockApplication(switching_app_ptr);
   EXPECT_CALL(*switching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(switching_device_id));
+      .WillRepeatedly(ReturnRef(switching_mac_address));
 
   const std::string policy_app_id_switch = "abc";
   EXPECT_CALL(*switching_app_ptr, policy_app_id())
@@ -691,22 +725,42 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> nonswitching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string nonswitching_device_id = "nonswitching";
+  const uint32_t nonswitching_app_id = 2u;
+  EXPECT_CALL(*nonswitching_app_ptr, app_id())
+      .WillRepeatedly(Return(nonswitching_app_id));
+
+  const uint32_t nonswitching_device_id = 2u;
+  EXPECT_CALL(*nonswitching_app_ptr, device())
+      .WillRepeatedly(Return(nonswitching_device_id));
+
+  const std::string nonswitching_mac_address = "nonswitching";
   app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
   EXPECT_CALL(*nonswitching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(nonswitching_device_id));
+      .WillRepeatedly(ReturnRef(nonswitching_mac_address));
 
   const std::string policy_app_id_nonswitch = "efg";
   EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
   // Act
-  app_manager_impl_->OnDeviceSwitchingStart(switching_device_id);
+  app_manager_impl_->OnDeviceSwitchingStart(switching_mac_address);
   EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+  EXPECT_FALSE(
+      app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
 
-  app_manager_impl_->OnDeviceSwitchFinish(switching_device_id);
+  smart_objects::SmartObjectSPtr sptr =
+      MakeShared<smart_objects::SmartObject>();
+
+  ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
+      .WillByDefault(Return(sptr));
+  ON_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillByDefault(Return(sptr));
+
+  app_manager_impl_->OnDeviceSwitchFinish(switching_mac_address);
   EXPECT_FALSE(
       app_manager_impl_->application_by_policy_id(policy_app_id_switch));
+  EXPECT_TRUE(
+      app_manager_impl_->application_by_policy_id(policy_app_id_nonswitch));
 }
 
 TEST_F(ApplicationManagerImplTest,
@@ -731,26 +785,8 @@ TEST_F(ApplicationManagerImplTest,
 
   const connection_handler::DeviceHandle new_device_id = 2;
   const uint32_t new_application_id = 2;
-  EXPECT_CALL(
-      mock_session_observer_,
-      GetDataOnSessionKey(new_application_id,
-                          _,
-                          _,
-                          testing::An<connection_handler::DeviceHandle*>()))
-      .WillOnce(DoAll(SetArgPointee<3u>(new_device_id), Return(0)));
-
-  const std::string connection_type = "MyConnectionType";
-  EXPECT_CALL(
-      mock_session_observer_,
-      GetDataOnDeviceID(
-          ::testing::Matcher<connection_handler::DeviceHandle>(new_device_id),
-          _,
-          _,
-          _,
-          _))
-      .WillOnce(DoAll(SetArgPointee<3u>(mac_address),
-                      SetArgPointee<4u>(connection_type),
-                      Return(0)));
+  SetCommonExpectationOnAppReconnection(
+      new_device_id, new_application_id, mac_address);
 
   // Act
   app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
