@@ -1155,6 +1155,7 @@ void CacheManager::CheckPermissions(const PTString& app_id,
   policy_table::Strings::const_iterator app_groups_iter_end =
       pt_->policy_table.app_policies_section.apps[app_id].groups.end();
 
+  result.hmi_level_permitted = PermitResult::kRpcDisallowed;
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 
   for (; app_groups_iter != app_groups_iter_end; ++app_groups_iter) {
