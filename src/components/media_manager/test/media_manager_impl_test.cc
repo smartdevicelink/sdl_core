@@ -123,10 +123,12 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(Return(mock_app_));
     EXPECT_CALL(mock_media_manager_settings_, app_storage_folder())
         .WillOnce(ReturnRef(kStorageFolder));
+#ifndef EXTENDED_MEDIA_MODE
     EXPECT_CALL(mock_media_manager_settings_, app_resource_folder())
         .WillOnce(ReturnRef(kResourceFolder));
     EXPECT_CALL(mock_media_manager_settings_, recording_file_source())
         .WillOnce(ReturnRef(kRecordingFileSource));
+#endif
   }
 
   void InitMediaManagerPrecondition(const std::string& server_type) {
