@@ -311,32 +311,14 @@ std::string MessageHelper::CommonLanguageToString(
   return std::string();
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
-    const uint32_t correlation_id) {
-  using namespace smart_objects;
-
-  SmartObjectSPtr request = utils::MakeShared<SmartObject>(SmartType_Map);
-  SmartObject& ref = *request;
-
-  ref[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-  ref[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  ref[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  ref[strings::params][strings::correlation_id] = correlation_id;
-  return request;
-}
-
-smart_objects::SmartObjectSPtr MessageHelper::CreateNotificationObject(
-    const uint32_t correlation_id) {
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
   using namespace smart_objects;
 
   SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
   SmartObject& ref = *message;
 
-  ref[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::notification);
+  ref[strings::params][strings::message_type] = static_cast<int>(message_type);
   ref[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
   ref[strings::params][strings::protocol_type] =
@@ -362,8 +344,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
 void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
                                                 ApplicationManager& app_mngr) {
   using namespace smart_objects;
-  SmartObjectSPtr message =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -430,8 +412,8 @@ void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
   msg_params[strings::app_id] = application->app_id();
 
   if ((*cmd).keyExists(strings::menu_params)) {
-    SmartObjectSPtr message =
-        CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+    SmartObjectSPtr message = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     DCHECK(message);
 
     SmartObject& object = *message;
@@ -447,8 +429,8 @@ void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
     msg_params[strings::grammar_id] = application->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
-    SmartObjectSPtr message =
-        CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+    SmartObjectSPtr message = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     DCHECK(message);
 
     SmartObject& object = *message;
@@ -473,8 +455,8 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
   msg_params[strings::menu_id] = (*cmd)[strings::msg_params][strings::menu_id];
   msg_params[strings::app_id] = application->app_id();
 
-  SmartObjectSPtr message =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -485,7 +467,6 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
 
   app_mngr.ManageHMICommand(message);
 
-  // Same is deleted with SendDeleteCommandRequest?
   const DataAccessor<CommandsMap> accessor = application->commands_map();
   const CommandsMap& commands = accessor.GetData();
   CommandsMap::const_iterator it = commands.begin();
@@ -503,8 +484,8 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
       msg_params[strings::grammar_id] = application->get_grammar_id();
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
-      SmartObjectSPtr message =
-          CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+      SmartObjectSPtr message = CreateMessageForHMI(
+          hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       DCHECK(message);
 
       SmartObject& object = *message;
@@ -536,8 +517,8 @@ void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
   for (uint32_t i = 0; i < (*cmd).length(); ++i) {
     msg_params[strings::cmd_id] = (*cmd)[i][strings::choice_id];
 
-    SmartObjectSPtr message =
-        CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+    SmartObjectSPtr message = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     DCHECK(message);
 
     SmartObject& object = *message;
@@ -573,8 +554,8 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
 
     msg_params[strings::app_id] = application->app_id();
 
-    SmartObjectSPtr message =
-        CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+    SmartObjectSPtr message = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     DCHECK(message);
 
     SmartObject& object = *message;
@@ -593,8 +574,8 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
     msg_params[strings::timeout_prompt] = application->timeout_prompt();
     msg_params[strings::app_id] = application->app_id();
 
-    SmartObjectSPtr message =
-        CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+    SmartObjectSPtr message = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     DCHECK(message);
 
     SmartObject& object = *message;
@@ -619,8 +600,8 @@ void MessageHelper::SendUnsubscribeButtonNotification(
   msg_params[strings::name] = button;
   msg_params[strings::is_suscribed] = false;
 
-  SmartObjectSPtr message =
-      CreateNotificationObject(app_mngr.GetNextHMICorrelationID());
+  SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::notification, app_mngr.GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -653,8 +634,8 @@ void MessageHelper::SendUnsubscribeIVIRequest(uint32_t ivi_id,
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[key_name] = true;
 
-  SmartObjectSPtr message =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -1216,7 +1197,9 @@ void MessageHelper::SendSetAppIcon(
   using namespace smart_objects;
 
   SmartObjectSPtr set_app_icon =
-      CreateRequestObject(application_manager.GetNextHMICorrelationID());
+      CreateMessageForHMI(hmi_apis::messageType::request,
+                          application_manager.GetNextHMICorrelationID());
+
   if (set_app_icon) {
     SmartObject& so_to_send = *set_app_icon;
     so_to_send[strings::params][strings::function_id] =
@@ -1275,7 +1258,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   if (app->vr_help_title() || app->vr_help()) {
     smart_objects::SmartObjectSPtr ui_global_properties =
-        CreateRequestObject(correlation_id);
+        CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!ui_global_properties) {
       return requests;
     }
@@ -1310,7 +1293,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
   // TTS global properties
   if (app->help_prompt() || app->timeout_prompt()) {
     smart_objects::SmartObjectSPtr tts_global_properties =
-        CreateRequestObject(correlation_id);
+        CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!tts_global_properties) {
       return requests;
     }
@@ -1342,8 +1325,9 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
   if (!app) {
     return;
   }
-  smart_objects::SmartObjectSPtr tts_global_properties =
-      CreateRequestObject(app_man.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr tts_global_properties = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_man.GetNextHMICorrelationID());
+
   if (tts_global_properties) {
     smart_objects::SmartObject& so_to_send = *tts_global_properties;
     so_to_send[strings::params][strings::function_id] =
@@ -1421,7 +1405,7 @@ smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
 
   if (app->show_command()) {
     smart_objects::SmartObjectSPtr ui_show =
-        CreateRequestObject(correlation_id);
+        CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     (*ui_show)[strings::params][strings::function_id] =
         static_cast<int>(hmi_apis::FunctionID::UI_Show);
 
@@ -1453,8 +1437,8 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(
   }
 
   if (app->tbt_show_command()) {
-    smart_objects::SmartObjectSPtr navi_show_tbt =
-        CreateRequestObject(app_man.GetNextHMICorrelationID());
+    smart_objects::SmartObjectSPtr navi_show_tbt = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_man.GetNextHMICorrelationID());
     if (!navi_show_tbt) {
       return;
     }
@@ -1494,8 +1478,8 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
   for (; commands.end() != i; ++i) {
     // UI Interface
     if ((*i->second).keyExists(strings::menu_params)) {
-      smart_objects::SmartObjectSPtr ui_command =
-          CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+      smart_objects::SmartObjectSPtr ui_command = CreateMessageForHMI(
+          hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       if (!ui_command) {
         return requests;
       }
@@ -1547,8 +1531,8 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
         (*(it->second))[strings::grammar_id].asUInt();
     const size_t size = (*(it->second))[strings::choice_set].length();
     for (size_t j = 0; j < size; ++j) {
-      smart_objects::SmartObjectSPtr vr_command =
-          CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+      smart_objects::SmartObjectSPtr vr_command = CreateMessageForHMI(
+          hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       if (!vr_command) {
         return requests;
       }
@@ -1581,8 +1565,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
     const uint32_t app_id,
     const smart_objects::SmartObject* app_types,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObjectSPtr command =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr command = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!command) {
     return NULL;
   }
@@ -1638,8 +1622,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
     const smart_objects::SmartObject& vr_commands,
     uint32_t app_id,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObjectSPtr vr_command =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr vr_command = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!vr_command) {
     return NULL;
   }
@@ -1758,7 +1742,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
   SubMenuMap::const_iterator i = sub_menu.begin();
   for (; sub_menu.end() != i; ++i) {
     smart_objects::SmartObjectSPtr ui_sub_menu =
-        CreateRequestObject(correlation_id);
+        CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!ui_sub_menu) {
       return requsets;
     }
@@ -1947,8 +1931,8 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
                                      const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
-  smart_objects::SmartObjectSPtr message =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   smart_objects::SmartObject& object = *message;
   object[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_PolicyUpdate;
@@ -2129,8 +2113,8 @@ void MessageHelper::SendNaviSetVideoConfig(
     ApplicationManager& app_mngr,
     const smart_objects::SmartObject& video_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr request =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr request = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!request) {
     return;
   }
@@ -2147,8 +2131,8 @@ void MessageHelper::SendNaviSetVideoConfig(
 void MessageHelper::SendNaviStartStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr start_stream =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr start_stream = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!start_stream) {
     return;
   }
@@ -2186,8 +2170,8 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
 void MessageHelper::SendNaviStopStream(const int32_t app_id,
                                        ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr stop_stream =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr stop_stream = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!stop_stream) {
     return;
   }
@@ -2203,8 +2187,8 @@ void MessageHelper::SendNaviStopStream(const int32_t app_id,
 void MessageHelper::SendAudioStartStream(const int32_t app_id,
                                          ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr start_stream =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr start_stream = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
   if (!start_stream) {
     return;
@@ -2243,8 +2227,8 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
 void MessageHelper::SendAudioStopStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr stop_stream =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr stop_stream = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
   if (!stop_stream) {
     return;
@@ -2293,8 +2277,8 @@ void MessageHelper::SendOnDataStreaming(
 bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
   LOG4CXX_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
 
-  smart_objects::SmartObjectSPtr result =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr result = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
   (*result)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::UI_EndAudioPassThru;
@@ -2305,8 +2289,8 @@ bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
 bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
   LOG4CXX_INFO(logger_, "MessageHelper::SendUnsubscribedWayPoints");
 
-  smart_objects::SmartObjectSPtr result =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr result = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
   (*result)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
@@ -2665,8 +2649,8 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
 }
 
 void MessageHelper::SendGetSystemInfoRequest(ApplicationManager& app_mngr) {
-  smart_objects::SmartObjectSPtr message =
-      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  smart_objects::SmartObjectSPtr message = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!message) {
     return;
   }
