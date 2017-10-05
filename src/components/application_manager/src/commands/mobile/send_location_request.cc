@@ -35,6 +35,23 @@
 #include "application_manager/message_helper.h"
 #include "utils/custom_string.h"
 
+namespace {
+
+bool IsSendLocationEnabled(
+    const application_manager::HMICapabilities& hmi_capabilities) {
+  const smart_objects::SmartObject* navi_capabilities =
+      hmi_capabilities.navigation_capability();
+  if (navi_capabilities) {
+    if (navi_capabilities->keyExists("sendLocationEnabled")) {
+      return (*navi_capabilities)["sendLocationEnabled"].asBool();
+    }
+  }
+
+  return false;
+}
+
+}  // namespace
+
 namespace application_manager {
 
 namespace commands {
@@ -233,6 +250,11 @@ bool SendLocationRequest::CheckHMICapabilities(
   }
   if (!hmi_capabilities.is_navi_cooperating()) {
     LOG4CXX_ERROR(logger_, "NAVI is not supported.");
+    return false;
+  }
+  if (!IsSendLocationEnabled(hmi_capabilities)) {
+    LOG4CXX_ERROR(logger_,
+                  "SendLocation request is disallowed by hmi capabilities");
     return false;
   }
   if (!fields_names.empty()) {
