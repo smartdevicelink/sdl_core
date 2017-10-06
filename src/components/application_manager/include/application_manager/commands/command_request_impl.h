@@ -42,6 +42,8 @@
 namespace application_manager {
 namespace commands {
 
+typedef std::map<std::string, std::string> CustomInfo;
+
 struct ResponseInfo {
   ResponseInfo()
       : result_code(hmi_apis::Common_Result::INVALID_ENUM)
@@ -290,7 +292,6 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
 
- protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference
@@ -312,12 +313,12 @@ class CommandRequestImpl : public CommandImpl,
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 
   /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
+   * @brief Returns map of parameters and their custom info strings
+   * specified especially for these parameters
+   * Can be overloaded in children classes
+   * @return empty map of parameters and their info strings
    */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
+  virtual CustomInfo CustomInfoMap() const;
 
   /**
    * @brief Adds disallowed parameters to response info
