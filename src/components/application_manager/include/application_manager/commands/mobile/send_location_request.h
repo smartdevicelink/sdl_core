@@ -71,6 +71,13 @@ class SendLocationRequest : public CommandRequestImpl {
 
  private:
   /**
+   * @brief Returns map of parameters and their custom info strings
+   * specified especially for these parameters
+   * @return map of parameters and their info strings
+   */
+  CustomInfo CustomInfoMap() const OVERRIDE;
+
+  /**
  * @brief CheckFieldsCompatibility checks if fields are compatible with each
  * other.
  * @return true if compatible, otherwise return false
