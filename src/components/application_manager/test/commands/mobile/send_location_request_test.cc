@@ -98,6 +98,7 @@ class SendLocationRequestTest
     disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
+    navi_caps_so = SmartObject(smart_objects::SmartType_Map);
   }
 
   void TearDown() OVERRIDE {
@@ -123,6 +124,9 @@ class SendLocationRequestTest
         .WillOnce(Return(true));
     EXPECT_CALL(mock_hmi_capabilities_, is_navi_cooperating())
         .WillOnce(Return(true));
+    navi_caps_so["sendLocationEnabled"] = true;
+    EXPECT_CALL(mock_hmi_capabilities_, navigation_capability())
+        .WillOnce(Return(&navi_caps_so));
   }
 
   void HMICapabilitiesSetupWithArguments(
@@ -164,6 +168,7 @@ class SendLocationRequestTest
   SharedPtr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;
+  smart_objects::SmartObject navi_caps_so;
 };
 
 TEST_F(SendLocationRequestTest, Run_InvalidApp_Success) {
