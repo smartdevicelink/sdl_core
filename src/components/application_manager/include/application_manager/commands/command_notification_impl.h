@@ -44,13 +44,46 @@ class CommandNotificationImpl : public CommandImpl {
  public:
   CommandNotificationImpl(const MessageSharedPtr& message,
                           ApplicationManager& application_manager);
+  /**
+   * @brief CommandNotificationImpl class destructor
+   **/
   virtual ~CommandNotificationImpl();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+
+  /**
+   * @brief Init required by command resources
+   **/
+  bool Init() OVERRIDE;
+
+  /**
+   * @brief Cleanup all resources used by command
+   **/
+  bool CleanUp() OVERRIDE;
+
+  /**
+   * @brief Execute corresponding command by calling the action on reciever
+   **/
+  void Run() OVERRIDE;
+
+  /**
+   * @brief Sends notification message to Mobile
+   */
   void SendNotification();
 
  private:
+  /**
+   * @brief Checks message permissions and parameters according to policy table
+   * permissions
+   */
+  bool CheckAllowedParameters(const MessageSharedPtr message) const;
+
+  /**
+   * @brief Remove from current message parameters disallowed by policy table
+   * @param param_permissions Current message permissions structure
+   */
+  void RemoveDisallowedParameters(
+      const MessageSharedPtr message,
+      const CommandParametersPermissions& param_permissions) const;
+
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationImpl);
 };
 
