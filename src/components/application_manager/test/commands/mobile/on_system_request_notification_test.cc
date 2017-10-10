@@ -61,6 +61,7 @@ using testing::_;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
+const std::string kFileName = "some_file.txt";
 }  // namespace
 
 class OnSystemRequestNotificationTest
@@ -85,6 +86,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::file_name] = kFileName;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -128,6 +130,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::file_name] = kFileName;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
