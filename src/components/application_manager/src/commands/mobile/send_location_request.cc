@@ -156,6 +156,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
         message[strings::params][hmi_response::code].asInt());
     std::string response_info;
     GetInfo(message, response_info);
+    LOG4CXX_INFO(logger_, "Response info : " << response_info);
     const bool result = PrepareResultForMobileResponse(
         result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
     SendResponse(result,
@@ -174,6 +175,14 @@ void insert_if_contains(
   if (msg_params.keyExists(param_key)) {
     output_vector.push_back(msg_params[param_key].asCustomString());
   }
+}
+
+CustomInfo SendLocationRequest::CustomInfoMap() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::map<std::string, std::string> custom_info_map;
+  custom_info_map[strings::delivery_mode] =
+      "default value of delivery mode will be used";
+  return custom_info_map;
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
