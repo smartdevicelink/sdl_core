@@ -252,6 +252,13 @@ class TransportManagerImpl
    */
   void UpdateDeviceList(TransportAdapter* ta);
 
+  /**
+   * @brief OnDeviceListUpdated updates device list and sends appropriate
+   * notifications to listeners in case of something is changed
+   * @param ta Transport adapter to check for updated devices state
+   */
+  void OnDeviceListUpdated(TransportAdapter* ta);
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
@@ -373,6 +380,8 @@ class TransportManagerImpl
   Handle2GUIDConverter& get_converter() {
     return converter_;
   }
+
+ private:
 #endif  // BUILD_TESTS
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
@@ -477,7 +486,6 @@ class TransportManagerImpl
                 unsigned int frame_size,
                 unsigned char** frame);
 
-  void OnDeviceListUpdated(TransportAdapter* ta);
   void DisconnectAllDevices();
   void TerminateAllAdapters();
   int InitAllAdapters();
