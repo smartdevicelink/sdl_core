@@ -949,7 +949,7 @@ void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
                                      ApplicationManager& app_man) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (app) {
-    SendSetAppIcon(app, app->app_icon_path(), app_man);
+    SendSetAppIcon(app->app_id(), app->app_icon_path(), app_man);
     SendGlobalPropertiesToHMI(app, app_man);
     SendShowRequestToHMI(app, app_man);
   }
