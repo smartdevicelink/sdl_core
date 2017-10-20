@@ -84,12 +84,6 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::video_streaming]
               .asBool());
     }
-    if (msg_params[strings::hmi_capabilities].keyExists(
-            strings::remote_control)) {
-      hmi_capabilities.set_rc_supported(
-          msg_params[strings::hmi_capabilities][strings::remote_control]
-              .asBool());
-    }
   }
 
   if (msg_params.keyExists(strings::system_capabilities)) {
@@ -109,11 +103,6 @@ void UIGetCapabilitiesResponse::Run() {
       hmi_capabilities.set_video_streaming_capability(
           msg_params[strings::system_capabilities]
                     [strings::video_streaming_capability]);
-    }
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::rc_capability)) {
-      hmi_capabilities.set_rc_capability(
-          msg_params[strings::system_capabilities][strings::rc_capability]);
     }
   }
 }

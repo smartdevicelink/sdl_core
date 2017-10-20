@@ -2112,6 +2112,9 @@
   <param name="phoneCall" type="Boolean" mandatory="false">
     <description>Availability of build in phone. True: Available, False: Not Available</description>
   </param>
+  <param name="videoStreaming" type="Boolean" mandatory="false">
+    <description>Availability of built-in video streaming. True: Available, False: Not Available</description>
+  </param>
 </struct>
 
 <struct name="AudioPassThruCapabilities">
