@@ -32,6 +32,7 @@
 
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
 #include <unistd.h>
+#include <cstring>
 #include <sstream>
 #include "utils/logger.h"
 
@@ -88,11 +89,11 @@ void FromMicToFileRecorderThread::initArgs() {
   argv_[3] = new gchar[3];
   argv_[4] = new gchar[durationString_.length() + 1];
 
-  argv_[0] = const_cast<gchar*>(std::string("AudioManager").c_str());
-  argv_[1] = const_cast<gchar*>(oKey_.c_str());
-  argv_[2] = const_cast<gchar*>(outputFileName_.c_str());
-  argv_[3] = const_cast<gchar*>(tKey_.c_str());
-  argv_[4] = const_cast<gchar*>(durationString_.c_str());
+  std::strcpy(argv_[0], "AudioManager");
+  std::strcpy(argv_[1], oKey_.c_str());
+  std::strcpy(argv_[2], outputFileName_.c_str());
+  std::strcpy(argv_[3], tKey_.c_str());
+  std::strcpy(argv_[4], durationString_.c_str());
 }
 
 void FromMicToFileRecorderThread::threadMain() {

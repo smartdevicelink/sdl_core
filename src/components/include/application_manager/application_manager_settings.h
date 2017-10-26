@@ -63,6 +63,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual bool launch_hmi() const = 0;
   virtual const uint32_t& delete_file_in_none() const = 0;
   virtual const std::vector<uint32_t>& supported_diag_modes() const = 0;
+  virtual const std::string& app_info_storage() const = 0;
   virtual const uint32_t& list_files_in_none() const = 0;
   virtual const std::string& tts_delimiter() const = 0;
   virtual const uint32_t& put_file_in_none() const = 0;
@@ -93,6 +94,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_icons_folder_max_size() const = 0;
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
+  virtual const std::string& plugins_folder() const = 0;
 };
 
 }  // namespace application_manager

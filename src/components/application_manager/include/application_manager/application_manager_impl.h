@@ -59,6 +59,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
@@ -264,6 +265,40 @@ class ApplicationManagerImpl
 
   void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr application(
+      const std::string& device_id,
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief ChangeAppsHMILevel the function that will change application's
+   * hmi level.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param level new hmi level for certain application.
+   */
+  void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
+
+  void Erase(ApplicationSharedPtr app_to_remove) {
+    DCHECK(app_to_remove);
+    app_to_remove->RemoveExtensions();
+    applications_.erase(app_to_remove);
+  }
+
+  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
+    return plugin_manager_;
+  }
+
+  std::vector<std::string> devices(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  virtual void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
+
+  virtual void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   /**
    * @brief Checks if application with the same HMI type
    *        (media, voice communication or navi) exists
@@ -700,6 +735,12 @@ class ApplicationManagerImpl
   void OnUpdateHMIAppType(
       std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
 
+  /**
+   * @brief OnPTUFinished is called on policy table update coming
+   * @param ptu_result True if PTU is succeeded, otherwise - false
+   */
+  void OnPTUFinished(const bool ptu_result) FINAL;
+
   /*
    * @brief Starts audio pass thru thread
    *
@@ -762,6 +803,9 @@ class ApplicationManagerImpl
                            bool final_message = false) OVERRIDE;
 
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
+
+  void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) OVERRIDE;
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandOrigin origin) OVERRIDE;
@@ -1174,6 +1218,11 @@ class ApplicationManagerImpl
     return is_stopping_;
   }
 
+  /**
+   * @brief Clears all applications' persistent data
+   */
+  void ClearAppsPersistentData();
+
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
@@ -1216,6 +1265,10 @@ class ApplicationManagerImpl
                           smart_objects::SmartObject& output);
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
+
+  MessageValidationResult ValidateMessageBySchema(
+      const Message& message) OVERRIDE;
+
   utils::SharedPtr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
 
@@ -1498,6 +1551,28 @@ class ApplicationManagerImpl
   std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
+
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager plugin_manager_;
+
+  /**
+   * @brief Map contains apps with HMI state before incoming call
+   * After incoming call ends previous HMI state must restore
+   *
+   */
+  struct AppState {
+    AppState(const mobile_apis::HMILevel::eType& level,
+             const mobile_apis::AudioStreamingState::eType& streaming_state,
+             const mobile_apis::SystemContext::eType& context)
+        : hmi_level(level)
+        , audio_streaming_state(streaming_state)
+        , system_context(context) {}
+
+    mobile_apis::HMILevel::eType hmi_level;
+    mobile_apis::AudioStreamingState::eType audio_streaming_state;
+    mobile_apis::SystemContext::eType system_context;
+  };
+#endif  // SDL_REMOTE_CONTROL
 
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;

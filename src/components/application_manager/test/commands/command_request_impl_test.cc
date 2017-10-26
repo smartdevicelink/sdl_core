@@ -466,9 +466,6 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  MockAppPtr mock_app;
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
-
   // Args do not affect on anything in this case;
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
 
@@ -498,9 +495,6 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr result;
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
-
-  MockAppPtr mock_app;
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
 
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
 

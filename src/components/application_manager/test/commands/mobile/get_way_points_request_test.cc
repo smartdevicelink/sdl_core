@@ -57,6 +57,7 @@ using ::testing::Mock;
 using ::testing::_;
 using application_manager::commands::GetWayPointsRequest;
 using application_manager::MockMessageHelper;
+using application_manager::MockHmiInterfaces;
 
 typedef SharedPtr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
@@ -151,6 +152,7 @@ class GetWayPointsRequestOnEventTest
  protected:
   MockMessageHelper& message_helper_mock_;
   MockAppPtr app_;
+  MockHmiInterfaces hmi_interfaces_;
 };
 
 TEST_F(GetWayPointsRequestTest,

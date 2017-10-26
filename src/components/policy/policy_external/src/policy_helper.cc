@@ -865,4 +865,5 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
-}
+
+}  // namespace policy

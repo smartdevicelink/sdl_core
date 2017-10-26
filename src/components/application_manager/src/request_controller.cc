@@ -63,8 +63,11 @@ RequestController::RequestController(const RequestControlerSettings& settings)
 
 RequestController::~RequestController() {
   LOG4CXX_AUTO_TRACE(logger_);
-  timer_stop_flag_ = true;
-  timer_condition_.Broadcast();
+  {
+    sync_primitives::AutoLock auto_lock(timer_lock);
+    timer_stop_flag_ = true;
+    timer_condition_.Broadcast();
+  }
   timer_.Stop();
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
@@ -370,11 +373,11 @@ void RequestController::TimeoutThread() {
   LOG4CXX_DEBUG(
       logger_,
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
+  sync_primitives::AutoLock auto_lock(timer_lock);
   while (!timer_stop_flag_) {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
-      sync_primitives::AutoLock auto_lock(timer_lock);
       timer_condition_.Wait(auto_lock);
       continue;
     }
@@ -388,7 +391,6 @@ void RequestController::TimeoutThread() {
                         << " request id: " << probably_expired->requestId()
                         << " connection_key: " << probably_expired->app_id()
                         << " NOT expired");
-      sync_primitives::AutoLock auto_lock(timer_lock);
       const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
       const TimevalStruct end_time = probably_expired->end_time();
       if (current_time < end_time) {

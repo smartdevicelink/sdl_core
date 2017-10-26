@@ -51,7 +51,7 @@ class HMIMessageAdapterImpl : public HMIMessageAdapter {
   /**
    * \brief Destructor
    */
-  virtual ~HMIMessageAdapterImpl();
+  ~HMIMessageAdapterImpl();
 
  protected:
   virtual HMIMessageHandler* handler() const {

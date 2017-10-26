@@ -96,6 +96,12 @@ typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
+#ifdef SDL_REMOTE_CONTROL
+typedef Map<Strings, 0, 255> RemoteRpcs;
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
+#endif  // SDL_REMOTE_CONTROL
+
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 
@@ -136,6 +142,9 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;
+#ifdef SDL_REMOTE_CONTROL
+  mutable Optional<ModuleTypes> moduleType;
+#endif  // SDL_REMOTE_CONTROL
 
  public:
   ApplicationParams();
@@ -151,6 +160,9 @@ struct ApplicationParams : PolicyBase {
 
  private:
   bool Validate() const;
+#ifdef SDL_REMOTE_CONTROL
+  bool ValidateModuleTypes() const;
+#endif  // SDL_REMOTE_CONTROL
 };
 
 struct ApplicationPoliciesSection : CompositeType {
@@ -298,6 +310,7 @@ struct MessageLanguages : CompositeType {
   virtual void SetPolicyTableType(PolicyTableType pt_type);
 
  private:
+  static const std::string default_language_;
   bool Validate() const;
 };
 

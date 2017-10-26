@@ -90,14 +90,14 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   EXPECT_CALL(am_observeble, SetTelemetryObserver(_));
   EXPECT_CALL(transport_manager_mock, SetTelemetryObserver(_));
   telemetry_monitor::TelemetryMonitor telemetry_monitor(server_address, port);
-  StreamerMock streamer_mock(&telemetry_monitor);
+  StreamerMock* streamer_mock = new StreamerMock(&telemetry_monitor);
+  // streamer_mock will be freed by telemetry_monitor on destruction
   telemetry_monitor.Start();
-
-  telemetry_monitor.set_streamer(&streamer_mock);
+  telemetry_monitor.set_streamer(streamer_mock);
   telemetry_monitor.Init(
       &protocol_handler_mock, &am_observeble, &transport_manager_mock);
   utils::SharedPtr<telemetry_monitor::MetricWrapper> test_metric;
-  EXPECT_CALL(streamer_mock, PushMessage(test_metric));
+  EXPECT_CALL(*streamer_mock, PushMessage(test_metric));
   telemetry_monitor.SendMetric(test_metric);
 }
 

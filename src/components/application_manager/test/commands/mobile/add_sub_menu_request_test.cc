@@ -106,7 +106,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
-
+  command->Init();
   command->on_event(event);
 
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]

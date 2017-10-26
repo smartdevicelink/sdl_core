@@ -57,6 +57,7 @@ const char* main_field_1 = "mainField1";
 const char* main_field_2 = "mainField2";
 const char* main_field_3 = "mainField3";
 const char* main_field_4 = "mainField4";
+const char* metadata_tags = "metadataTags";
 const char* eta = "eta";
 const char* time_to_destination = "timeToDestination";
 const char* total_distance = "totalDistance";
@@ -140,6 +141,7 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
+const char* rc_capability = "remoteControlCapability";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -311,6 +313,11 @@ const char* const resolution_width = "resolutionWidth";
 const char* const resolution_height = "resolutionHeight";
 const char* const max_bitrate = "maxBitrate";
 const char* const supported_formats = "supportedFormats";
+const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
+const char* const haptic_rect_data = "hapticRectData";
+const char* const rect = "rect";
+const char* const x = "x";
+const char* const y = "y";
 }  // namespace strings
 
 namespace json {
@@ -362,6 +369,7 @@ namespace hmi_request {
 const char* parent_id = "parentID";
 const char* field_name = "fieldName";
 const char* field_text = "fieldText";
+const char* field_types = "fieldTypes";
 const char* alert_strings = "alertStrings";
 const char* duration = "duration";
 const char* soft_buttons = "softButtons";

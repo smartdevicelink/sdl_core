@@ -263,6 +263,9 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
+      .WillByDefault(Return(am::mobile_api::Result::UNSUPPORTED_RESOURCE));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))

@@ -325,6 +325,13 @@ class CacheManager : public CacheManagerInterface {
   bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
 
   /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
+
+  /**
    * @brief Reset user consent for device data and applications permissions
    * @return
    */
@@ -690,11 +697,9 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
-#ifdef BUILD_TESTS
-  utils::SharedPtr<policy_table::Table> GetPT() const {
+  utils::SharedPtr<policy_table::Table> pt() const {
     return pt_;
   }
-#endif
 
  private:
   std::string currentDateTime();
@@ -767,6 +772,13 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+
+#ifdef BUILD_TESTS
+  friend class AccessRemoteImpl;
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+#endif  // BUILD_TESTS
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_

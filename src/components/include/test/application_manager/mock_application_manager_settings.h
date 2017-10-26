@@ -57,6 +57,7 @@ class MockApplicationManagerSettings
                      const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(hash_string_size, uint32_t());
   MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
+  MOCK_CONST_METHOD0(app_info_storage, const std::string&());
   MOCK_CONST_METHOD0(app_dir_quota, const uint32_t&());
   MOCK_CONST_METHOD0(stop_streaming_timeout, uint32_t());
   MOCK_CONST_METHOD0(application_list_update_timeout, uint32_t());
@@ -101,6 +102,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(start_stream_retry_amount,
                      const std::pair<uint32_t, int32_t>&());
   MOCK_CONST_METHOD0(app_icons_folder, const std::string&());
+  MOCK_CONST_METHOD0(plugins_folder, const std::string&());
   MOCK_CONST_METHOD0(app_icons_folder_max_size, const uint32_t&());
   MOCK_CONST_METHOD0(app_icons_amount_to_remove, const uint32_t&());
   MOCK_CONST_METHOD0(list_files_response_size, const uint32_t&());

@@ -2,6 +2,9 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2017 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of their contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -321,6 +324,8 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   video_streaming_capability[strings::supported_formats][0][strings::codec] =
       hmi_apis::Common_VideoStreamingCodec::H264;
+
+  video_streaming_capability[strings::haptic_spatial_data_supported] = true;
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));

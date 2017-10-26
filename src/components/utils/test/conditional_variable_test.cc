@@ -123,7 +123,7 @@ TEST_F(
     CheckWaitForWithTimeout1sec_ThreadBlockedForTimeout_ExpectSuccessfulWakeUp) {
   sync_primitives::AutoLock test_lock(test_mutex_);
   sync_primitives::ConditionalVariable::WaitStatus wait_st =
-      cond_var_.WaitFor(test_lock, 1000);
+      cond_var_.WaitFor(test_lock, 10);
   EXPECT_EQ(sync_primitives::ConditionalVariable::kTimeout, wait_st);
 }
 

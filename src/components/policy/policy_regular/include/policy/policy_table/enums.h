@@ -104,8 +104,8 @@ enum AppHMIType {
   AHT_BACKGROUND_PROCESS,
   AHT_TESTING,
   AHT_SYSTEM,
-  AHT_REMOTE_CONTROL,
-  AHT_PROJECTION
+  AHT_PROJECTION,
+  AHT_REMOTE_CONTROL
 };
 bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);

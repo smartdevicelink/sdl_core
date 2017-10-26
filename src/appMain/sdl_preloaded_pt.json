@@ -307,6 +307,34 @@
                     }
                 }
             },
+            "Notifications-RC": {
+                "rpcs": {
+                    "OnHMIStatus": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "OnPermissionsChange": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "OnSystemRequest": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
             "DrivingCharacteristics-3": {
                 "user_consent_prompt": "DrivingCharacteristics",
                 "rpcs": {
@@ -480,6 +508,36 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    }
+                }
+            },
+            "RemoteControl": {
+                "rpcs": {
+                    "ButtonPress": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SystemRequest": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             },
@@ -942,6 +1000,16 @@
                     },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["BACKGROUND"]
+                    }
+                }
+            },
+            "HapticGroup": {
+                "rpcs": {
+                    "OnTouchEvent": {
+                        "hmi_levels": ["FULL"]
+                    },
+                    "SendHapticData": {
+                        "hmi_levels": ["FULL"]
                     }
                 }
             }
@@ -2276,7 +2344,11 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4", "RemoteControl"],
+		"moduleType": [
+			"RADIO",
+			"CLIMATE"
+		]
             },
             "device": {
                 "keep_context": false,

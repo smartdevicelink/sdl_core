@@ -38,6 +38,7 @@
 #include <vector>
 #include <utility>
 #include <list>
+#include <forward_list>
 #include <stdint.h>
 
 #include "utils/date_time.h"
@@ -64,7 +65,8 @@ using namespace timer;
 namespace mobile_api = mobile_apis;
 namespace custom_str = custom_string;
 
-class ApplicationImpl : public virtual InitialApplicationDataImpl,
+class ApplicationImpl : public virtual Application,
+                        public virtual InitialApplicationDataImpl,
                         public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(
@@ -191,7 +193,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
-  virtual void ResetDataInNone();
+  virtual void ResetDataInNone() OVERRIDE;
 
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
@@ -306,6 +308,39 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sets current system context
+   * @param system_context new system context
+   */
+  void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) OVERRIDE;
+  /**
+   * @brief Sets current audio streaming state
+   * @param state new audio streaming state
+   */
+  void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) OVERRIDE;
+  /**
+   * @brief Sets current HMI level
+   * @param hmi_level new HMI level
+   */
+  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+
+  /**
+   * @brief Get list of subscriptions to vehicle info notifications
+   * @return list of subscriptions to vehicle info notifications
+   */
+  const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+#endif
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -334,6 +369,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * Suspends audio streaming process for application
    */
   void OnAudioStreamSuspend();
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention) OVERRIDE;
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
+
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions() OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
 
   std::string hash_val_;
   uint32_t grammar_id_;
@@ -383,6 +439,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t audio_stream_suspend_timeout_;
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
+
+#ifdef SDL_REMOTE_CONTROL
+  std::list<AppExtensionPtr> extensions_;
+#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Defines number per time in seconds limits

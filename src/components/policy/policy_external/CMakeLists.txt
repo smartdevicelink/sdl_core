@@ -58,6 +58,10 @@ set(SOURCES
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 
+if (REMOTE_CONTROL)
+  list(APPEND SOURCES ${POLICY_PATH}/src/access_remote_impl.cc)
+endif()
+
 list(APPEND SOURCES
   ${POLICY_PATH}/src/sql_pt_ext_queries.cc
   ${POLICY_PATH}/src/sql_pt_ext_representation.cc
