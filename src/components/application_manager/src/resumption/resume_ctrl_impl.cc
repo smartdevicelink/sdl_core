@@ -265,8 +265,10 @@ void ResumeCtrlImpl::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
   StopSavePersistentDataTimer();
   SaveAllApplications();
-  resumption_storage_->OnSuspend();
-  resumption_storage_->Persist();
+  if (resumption_storage_) {
+    resumption_storage_->OnSuspend();
+    resumption_storage_->Persist();
+  }
 }
 
 void ResumeCtrlImpl::OnAwake() {
