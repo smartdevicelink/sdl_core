@@ -43,7 +43,7 @@ MockHMICommandFactory* MockHMICommandFactory::mock_hmi_command_factory() {
   return &mock_hmi_command_factory;
 }
 
-}  // application_manager
+}  // application_manager_test
 }  // components
 }  // test
 

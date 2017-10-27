@@ -52,6 +52,6 @@ class MockHMICommandFactory {
   static MockHMICommandFactory* mock_hmi_command_factory();
 };
 
-}  // application_manager
+}  // application_manager_test
 }  // components
 }  // test

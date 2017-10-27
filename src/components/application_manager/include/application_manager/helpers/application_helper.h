@@ -40,7 +40,7 @@
 namespace application_manager {
 
 /**
- * Helper function for lookup through applications list and returing first
+ * Helper function for lookup through applications list and returning first
  * application satisfying predicate logic
  */
 template <class UnaryPredicate>
