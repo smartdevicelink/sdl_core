@@ -756,7 +756,7 @@ TEST_F(ApplicationManagerImplTest,
   ON_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillByDefault(Return(sptr));
 
-  app_manager_impl_->OnDeviceSwitchFinish(switching_mac_address);
+  app_manager_impl_->OnDeviceSwitchingFinish(switching_mac_address);
   EXPECT_FALSE(
       app_manager_impl_->application_by_policy_id(policy_app_id_switch));
   EXPECT_TRUE(

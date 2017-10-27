@@ -114,7 +114,7 @@ TransportManagerImpl::~TransportManagerImpl() {
 
 void TransportManagerImpl::ReconnectionTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  RaiseEvent(&TransportManagerListener::OnDeviceSwitchFinish,
+  RaiseEvent(&TransportManagerListener::OnDeviceSwitchingFinish,
              device_to_reconnect_);
 }
 

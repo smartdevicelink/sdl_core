@@ -1167,7 +1167,7 @@ TEST_F(TransportManagerImplTest,
               app_transport_change_timer_addition()).WillOnce(Return(0));
 
   EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_));
-  EXPECT_CALL(*tm_listener_, OnDeviceSwitchFinish(mac_address_));
+  EXPECT_CALL(*tm_listener_, OnDeviceSwitchingFinish(mac_address_));
 
   tm_.TestHandle(TransportAdapterEvent(EventTypeEnum::ON_DEVICE_LIST_UPDATED,
                                        second_mock_adapter.get(),

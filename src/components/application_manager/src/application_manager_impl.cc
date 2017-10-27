@@ -1091,7 +1091,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
   }
 }
 
-void ApplicationManagerImpl::OnDeviceSwitchFinish(
+void ApplicationManagerImpl::OnDeviceSwitchingFinish(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(device_uid);
