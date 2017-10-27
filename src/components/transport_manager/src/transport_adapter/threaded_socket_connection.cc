@@ -227,13 +227,13 @@ void ThreadedSocketConnection::Transmit() {
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
-  LOG4CXX_DEBUG(logger_, "poll " << this);
+  LOG4CXX_TRACE(logger_, "poll " << this);
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
     return;
   }
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_TRACE(logger_,
                 "poll is ok " << this << " revents0: " << std::hex
                               << poll_fds[0].revents << " revents1:" << std::hex
                               << poll_fds[1].revents);

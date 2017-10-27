@@ -1941,7 +1941,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
 
 void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
                                            int32_t number_of_frames) {
-  LOG4CXX_DEBUG(
+  LOG4CXX_TRACE(
       logger_, "SendFramesNumber MobileNaviAck for session " << connection_key);
 
   // TODO(EZamakhov): add protocol version check - to avoid send for
