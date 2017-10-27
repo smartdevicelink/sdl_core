@@ -53,6 +53,7 @@
 #include "application_manager/helpers/application_helper.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "application_manager/command_holder_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
@@ -195,7 +196,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
-  commands_holder_.SetCommandsProcessor(this);
+  commands_holder_.reset(new CommandHolderImpl(*this));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -390,7 +391,7 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
-  commands_holder_.Release(app->policy_app_id());
+  commands_holder_->Release(app->policy_app_id());
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
@@ -1100,7 +1101,7 @@ void ApplicationManagerImpl::OnDeviceSwitchFinish(
        app_it != reregister_wait_list_.end();
        ++app_it) {
     auto app = *app_it;
-    commands_holder_.Drop(app->policy_app_id());
+    commands_holder_->Drop(app->policy_app_id());
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
@@ -2049,7 +2050,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
   auto app = application(command->connection_key());
   if (app && IsAppInReconnectMode(app->policy_app_id())) {
-    commands_holder_.Hold(app->policy_app_id(), message);
+    commands_holder_->Hold(app->policy_app_id(), message);
     return true;
   }
 

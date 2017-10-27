@@ -38,15 +38,15 @@
 
 namespace application_manager {
 /**
- * @brief The CommandsHolder class should hold commands for particular
+ * @brief The CommandHolder class should hold commands for particular
  * application specified by its id
  */
-class CommandsHolder {
+class CommandHolder {
  public:
   /**
    * @brief ~CommandsHolder destructor
    */
-  virtual ~CommandsHolder() {}
+  virtual ~CommandHolder() {}
 
   /**
    * @brief Hold collects command for specific application policy id internally
@@ -54,7 +54,7 @@ class CommandsHolder {
    * @param command Command
    */
   virtual void Hold(const std::string& policy_app_id,
-                    utils::SharedPtr<smart_objects::SmartObject> command) = 0;
+                    smart_objects::SmartObjectSPtr command) = 0;
 
   /**
    * @brief Release send all collected commands for further processing and
