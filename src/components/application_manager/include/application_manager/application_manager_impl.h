@@ -876,12 +876,12 @@ class ApplicationManagerImpl
   void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
 
   /**
-   * @brief OnDeviceSwitchFinish is invoked on device trasport switching end
+   * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end
    * i.e. timeout for switching is expired, unregisters applications from
    * waiting list which haven't been re-registered and clears the waiting list
    * @param device_uid UID of device being switched
    */
-  void OnDeviceSwitchFinish(const std::string& device_uid) FINAL;
+  void OnDeviceSwitchingFinish(const std::string& device_uid) FINAL;
 
   // DEPRECATED
   bool OnServiceStartedCallback(

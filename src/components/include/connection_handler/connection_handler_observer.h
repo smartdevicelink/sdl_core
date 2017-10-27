@@ -132,11 +132,11 @@ class ConnectionHandlerObserver {
   virtual void OnDeviceSwitchingStart(const std::string& device_uid) = 0;
 
   /**
-   * @brief OnDeviceSwitchFinish is invoked on device trasport switching end
+   * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end
    * i.e. timeout for switching is expired
    * @param device_uid UID of device being switched
    */
-  virtual void OnDeviceSwitchFinish(const std::string& device_uid) = 0;
+  virtual void OnDeviceSwitchingFinish(const std::string& device_uid) = 0;
 
 #ifdef ENABLE_SECURITY
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(

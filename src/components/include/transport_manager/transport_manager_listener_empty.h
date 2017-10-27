@@ -76,11 +76,11 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnDeviceSwitchingStart(const DeviceUID& device_uid) OVERRIDE {}
 
   /**
-   * @brief OnDeviceSwitchFinish notifies listener that device reconnection
+   * @brief OnDeviceSwitchingFinish notifies listener that device reconnection
    * fails due to some reason. This default implementation does nothing.
    * @param device_uid the id for the device which is fails to reconnect.
    */
-  void OnDeviceSwitchFinish(const DeviceUID& device_uid) OVERRIDE {}
+  void OnDeviceSwitchingFinish(const DeviceUID& device_uid) OVERRIDE {}
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.

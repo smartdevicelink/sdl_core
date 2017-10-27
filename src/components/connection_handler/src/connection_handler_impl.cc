@@ -189,11 +189,11 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   device_list_.erase(device_info.device_handle());
 }
 
-void ConnectionHandlerImpl::OnDeviceSwitchFinish(
+void ConnectionHandlerImpl::OnDeviceSwitchingFinish(
     const transport_manager::DeviceUID& device_uid) {
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceSwitchFinish(
+    connection_handler_observer_->OnDeviceSwitchingFinish(
         encryption::MakeHash(device_uid));
   }
 }

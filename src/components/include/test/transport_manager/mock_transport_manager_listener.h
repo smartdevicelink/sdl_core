@@ -82,7 +82,7 @@ class MockTransportManagerListener : public TransportManagerListener {
                void(const DataSendError& error,
                     const ::protocol_handler::RawMessagePtr message));
   MOCK_METHOD1(OnDeviceSwitchingStart, void(const DeviceUID& device_uid));
-  MOCK_METHOD1(OnDeviceSwitchFinish, void(const DeviceUID& device_uid));
+  MOCK_METHOD1(OnDeviceSwitchingFinish, void(const DeviceUID& device_uid));
 };
 
 }  // namespace transport_manager_test

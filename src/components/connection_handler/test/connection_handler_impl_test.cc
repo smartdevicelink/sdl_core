@@ -1906,7 +1906,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
   connection_handler_->OnDeviceSwitchingStart(fake_device_id);
 }
 
-TEST_F(ConnectionHandlerTest, OnDeviceSwitchFinish) {
+TEST_F(ConnectionHandlerTest, OnDeviceSwitchingFinish) {
   connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
@@ -1914,9 +1914,9 @@ TEST_F(ConnectionHandlerTest, OnDeviceSwitchFinish) {
 
   const std::string fake_device_id = "fake_device_id";
   EXPECT_CALL(mock_connection_handler_observer,
-              OnDeviceSwitchFinish(encryption::MakeHash(fake_device_id)));
+              OnDeviceSwitchingFinish(encryption::MakeHash(fake_device_id)));
 
-  connection_handler_->OnDeviceSwitchFinish(fake_device_id);
+  connection_handler_->OnDeviceSwitchingFinish(fake_device_id);
 }
 
 }  // namespace connection_handler_test

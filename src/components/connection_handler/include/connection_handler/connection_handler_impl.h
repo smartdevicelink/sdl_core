@@ -145,11 +145,11 @@ class ConnectionHandlerImpl
   void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
 
   /**
-   * @brief OnDeviceSwitchFinish notifies listeners on device transport
+   * @brief OnDeviceSwitchingFinish notifies listeners on device transport
    * switching completion
    * @param device_uid the id for the device which is fails to reconnect.
    */
-  void OnDeviceSwitchFinish(
+  void OnDeviceSwitchingFinish(
       const transport_manager::DeviceUID& device_uid) FINAL;
 
   void OnScanDevicesFinished() OVERRIDE;
