@@ -1074,12 +1074,14 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-  auto apps_data_accessor = applications();
+  {
+    auto apps_data_accessor = applications();
 
-  std::copy_if(apps_data_accessor.GetData().begin(),
-               apps_data_accessor.GetData().end(),
-               std::back_inserter(reregister_wait_list_),
-               std::bind1st(std::ptr_fun(&device_id_comparator), device_uid));
+    std::copy_if(apps_data_accessor.GetData().begin(),
+                 apps_data_accessor.GetData().end(),
+                 std::back_inserter(reregister_wait_list_),
+                 std::bind1st(std::ptr_fun(&device_id_comparator), device_uid));
+  }
 
   for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
        ++i) {
