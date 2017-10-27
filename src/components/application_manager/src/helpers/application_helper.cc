@@ -24,8 +24,7 @@ void RecallCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   }
 }
 
-void RecallSubmenues(ApplicationSharedPtr app,
-                     ApplicationManager& app_manager) {
+void RecallSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   SubMenuMap smap = app->sub_menu_map().GetData();
 
   for (auto smenu : smap) {
@@ -136,7 +135,7 @@ void RecallApplicationData(ApplicationSharedPtr app,
 
   RecallWayPoints(app, app_manager);
   RecallCommands(app, app_manager);
-  RecallSubmenues(app, app_manager);
+  RecallSubmenus(app, app_manager);
   RecallChoiceSets(app, app_manager);
   RecallGlobalProperties(app, app_manager);
   RecallButtonSubscriptions(app, app_manager);

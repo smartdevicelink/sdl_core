@@ -48,6 +48,6 @@ class MockApplicationHelper {
 
   static MockApplicationHelper& application_helper_mock();
 };
-}
+}  // application_manager_test
 }  // components
 }  // test
