@@ -57,8 +57,7 @@ class CommandHolderImplTest : public testing::Test {
 };
 
 TEST_F(CommandHolderImplTest, HoldOne_ExpectReleaseOne) {
-  am::CommandHolderImpl cmd_holder;
-  cmd_holder.SetCommandsProcessor(&mock_app_manager_);
+  am::CommandHolderImpl cmd_holder(mock_app_manager_);
   cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
 
   // Act
@@ -67,8 +66,7 @@ TEST_F(CommandHolderImplTest, HoldOne_ExpectReleaseOne) {
 }
 
 TEST_F(CommandHolderImplTest, HoldMany_ExpectReleaseSame) {
-  am::CommandHolderImpl cmd_holder;
-  cmd_holder.SetCommandsProcessor(&mock_app_manager_);
+  am::CommandHolderImpl cmd_holder(mock_app_manager_);
 
   int32_t iterations = 0;
   do {
@@ -82,8 +80,7 @@ TEST_F(CommandHolderImplTest, HoldMany_ExpectReleaseSame) {
 }
 
 TEST_F(CommandHolderImplTest, Hold_Drop_ExpectNoReleased) {
-  am::CommandHolderImpl cmd_holder;
-  cmd_holder.SetCommandsProcessor(&mock_app_manager_);
+  am::CommandHolderImpl cmd_holder(mock_app_manager_);
   cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
   cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
 
@@ -94,8 +91,7 @@ TEST_F(CommandHolderImplTest, Hold_Drop_ExpectNoReleased) {
 }
 
 TEST_F(CommandHolderImplTest, Hold_ReleaseAnotherId_ExpectNoReleased) {
-  am::CommandHolderImpl cmd_holder;
-  cmd_holder.SetCommandsProcessor(&mock_app_manager_);
+  am::CommandHolderImpl cmd_holder(mock_app_manager_);
   cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
   cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
 
@@ -105,8 +101,7 @@ TEST_F(CommandHolderImplTest, Hold_ReleaseAnotherId_ExpectNoReleased) {
 }
 
 TEST_F(CommandHolderImplTest, Hold_DropAnotherId_ExpectReleased) {
-  am::CommandHolderImpl cmd_holder;
-  cmd_holder.SetCommandsProcessor(&mock_app_manager_);
+  am::CommandHolderImpl cmd_holder(mock_app_manager_);
 
   int32_t iterations = 0;
   do {

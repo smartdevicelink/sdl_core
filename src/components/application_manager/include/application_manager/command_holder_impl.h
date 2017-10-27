@@ -49,19 +49,13 @@ class ApplicationManager;
  * process and sends for processing after switching is completed successfully
  * or drop otherwise
  */
-class CommandHolderImpl : public CommandsHolder {
+class CommandHolderImpl : public CommandHolder {
  public:
   /**
    * @brief CommandHolderImpl constructor
    */
-  CommandHolderImpl();
 
-  /**
-   * @brief SetCommandsProcessor sets internal member to be able to
-   * process collected commands
-   * @param app_manager Applicaton manager
-   */
-  void SetCommandsProcessor(ApplicationManager* app_manager);
+  explicit CommandHolderImpl(ApplicationManager& app_manager);
 
   /**
    * @brief Hold collects command for specific application id internally
@@ -69,7 +63,7 @@ class CommandHolderImpl : public CommandsHolder {
    * @param command Command
    */
   void Hold(const std::string& policy_app_id,
-            utils::SharedPtr<smart_objects::SmartObject> command) FINAL;
+            smart_objects::SmartObjectSPtr command) FINAL;
 
   /**
    * @brief Release sends all collected HMI commands to ApplicationManager
@@ -89,7 +83,7 @@ class CommandHolderImpl : public CommandsHolder {
       std::map<std::string,
                std::vector<utils::SharedPtr<smart_objects::SmartObject> > >;
 
-  ApplicationManager* app_manager_;
+  ApplicationManager& app_manager_;
   sync_primitives::Lock commands_lock_;
   AppCommands app_commands_;
 };

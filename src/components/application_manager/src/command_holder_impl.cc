@@ -34,13 +34,8 @@
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
-CommandHolderImpl::CommandHolderImpl()
-    : app_manager_(nullptr), commands_lock_() {}
-
-void CommandHolderImpl::SetCommandsProcessor(ApplicationManager* app_manager) {
-  DCHECK_OR_RETURN_VOID(app_manager);
-  app_manager_ = app_manager;
-}
+CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
+    : app_manager_(app_manager) {}
 
 void CommandHolderImpl::Hold(
     const std::string& policy_app_id,
@@ -56,8 +51,7 @@ void CommandHolderImpl::Release(const std::string& policy_app_id) {
     return;
   }
   for (auto cmd : app_commands->second) {
-    DCHECK_OR_RETURN_VOID(app_manager_);
-    app_manager_->ManageHMICommand(cmd);
+    app_manager_.ManageHMICommand(cmd);
   }
 
   app_commands_.erase(app_commands);

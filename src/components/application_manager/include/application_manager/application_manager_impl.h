@@ -1720,7 +1720,7 @@ class ApplicationManagerImpl
 
   volatile bool is_stopping_;
 
-  CommandHolderImpl commands_holder_;
+  std::unique_ptr<CommandHolder> commands_holder_;
 
 #ifdef BUILD_TESTS
  public:
