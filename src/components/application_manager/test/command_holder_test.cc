@@ -58,11 +58,11 @@ class CommandHolderImplTest : public testing::Test {
 
 TEST_F(CommandHolderImplTest, HoldOne_ExpectReleaseOne) {
   am::CommandHolderImpl cmd_holder(mock_app_manager_);
-  cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
+  cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
 
   // Act
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_));
-  cmd_holder.Release(kPolicyAppId_);
+  cmd_holder.Resume(kPolicyAppId_);
 }
 
 TEST_F(CommandHolderImplTest, HoldMany_ExpectReleaseSame) {
@@ -70,34 +70,34 @@ TEST_F(CommandHolderImplTest, HoldMany_ExpectReleaseSame) {
 
   int32_t iterations = 0;
   do {
-    cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
+    cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
     ++iterations;
   } while (iterations < 5);
 
   // Act
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(iterations);
-  cmd_holder.Release(kPolicyAppId_);
+  cmd_holder.Resume(kPolicyAppId_);
 }
 
 TEST_F(CommandHolderImplTest, Hold_Drop_ExpectNoReleased) {
   am::CommandHolderImpl cmd_holder(mock_app_manager_);
-  cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
-  cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
+  cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
+  cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
 
   // Act
-  cmd_holder.Drop(kPolicyAppId_);
+  cmd_holder.Clear(kPolicyAppId_);
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(0);
-  cmd_holder.Release(kPolicyAppId_);
+  cmd_holder.Resume(kPolicyAppId_);
 }
 
 TEST_F(CommandHolderImplTest, Hold_ReleaseAnotherId_ExpectNoReleased) {
   am::CommandHolderImpl cmd_holder(mock_app_manager_);
-  cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
-  cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
+  cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
+  cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
 
   // Act
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(0);
-  cmd_holder.Release("anotherId");
+  cmd_holder.Resume("anotherId");
 }
 
 TEST_F(CommandHolderImplTest, Hold_DropAnotherId_ExpectReleased) {
@@ -105,15 +105,15 @@ TEST_F(CommandHolderImplTest, Hold_DropAnotherId_ExpectReleased) {
 
   int32_t iterations = 0;
   do {
-    cmd_holder.Hold(kPolicyAppId_, cmd_ptr_);
+    cmd_holder.Suspend(kPolicyAppId_, cmd_ptr_);
     ++iterations;
   } while (iterations < 3);
 
   // Act
-  cmd_holder.Drop("anotherId");
+  cmd_holder.Clear("anotherId");
 
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(iterations);
-  cmd_holder.Release(kPolicyAppId_);
+  cmd_holder.Resume(kPolicyAppId_);
 }
 
 }  // application_manager_test

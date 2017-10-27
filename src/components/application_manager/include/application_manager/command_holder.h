@@ -49,24 +49,25 @@ class CommandHolder {
   virtual ~CommandHolder() {}
 
   /**
-   * @brief Hold collects command for specific application policy id internally
+   * @brief Suspend collects command for specific application policy id
+   * internally
    * @param policy_app_id Application policy id
    * @param command Command
    */
-  virtual void Hold(const std::string& policy_app_id,
-                    smart_objects::SmartObjectSPtr command) = 0;
+  virtual void Suspend(const std::string& policy_app_id,
+                       smart_objects::SmartObjectSPtr command) = 0;
 
   /**
-   * @brief Release send all collected commands for further processing and
+   * @brief Resume send all collected commands for further processing and
    * removes them afterward
    * @param policy_app_id Application policy id
    */
-  virtual void Release(const std::string& policy_app_id) = 0;
+  virtual void Resume(const std::string& policy_app_id) = 0;
 
   /**
-   * @brief Drop removes all collected commands w/o processing
+   * @brief Clear removes all collected commands w/o processing
    * @param policy_app_id Application policy id
    */
-  virtual void Drop(const std::string& policy_app_id) = 0;
+  virtual void Clear(const std::string& policy_app_id) = 0;
 };
 }  // application_manager

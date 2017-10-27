@@ -391,7 +391,7 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
-  commands_holder_->Release(app->policy_app_id());
+  commands_holder_->Resume(app->policy_app_id());
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
@@ -1103,7 +1103,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
        app_it != reregister_wait_list_.end();
        ++app_it) {
     auto app = *app_it;
-    commands_holder_->Drop(app->policy_app_id());
+    commands_holder_->Clear(app->policy_app_id());
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
@@ -2054,7 +2054,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
   auto app = application(command->connection_key());
   if (app && IsAppInReconnectMode(app->policy_app_id())) {
-    commands_holder_->Hold(app->policy_app_id(), message);
+    commands_holder_->Suspend(app->policy_app_id(), message);
     return true;
   }
 
