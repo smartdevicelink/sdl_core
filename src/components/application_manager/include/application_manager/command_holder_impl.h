@@ -58,25 +58,25 @@ class CommandHolderImpl : public CommandHolder {
   explicit CommandHolderImpl(ApplicationManager& app_manager);
 
   /**
-   * @brief Hold collects command for specific application id internally
+   * @brief Suspend collects command for specific application id internally
    * @param policy_app_id Policy id of application
    * @param command Command
    */
-  void Hold(const std::string& policy_app_id,
-            smart_objects::SmartObjectSPtr command) FINAL;
+  void Suspend(const std::string& policy_app_id,
+               smart_objects::SmartObjectSPtr command) FINAL;
 
   /**
-   * @brief Release sends all collected HMI commands to ApplicationManager
+   * @brief Resume sends all collected HMI commands to ApplicationManager
    * for further processing
    * @param policy_app_id Policy id of application
    */
-  void Release(const std::string& policy_app_id) FINAL;
+  void Resume(const std::string& policy_app_id) FINAL;
 
   /**
-   * @brief Drop removes all commands collected for specific application id
+   * @brief Clear removes all commands collected for specific application id
    * @param policy_app_id Policy application id
    */
-  void Drop(const std::string& policy_app_id) FINAL;
+  void Clear(const std::string& policy_app_id) FINAL;
 
  private:
   using AppCommands =

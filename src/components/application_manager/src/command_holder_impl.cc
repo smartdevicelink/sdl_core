@@ -37,14 +37,14 @@ namespace application_manager {
 CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
     : app_manager_(app_manager) {}
 
-void CommandHolderImpl::Hold(
+void CommandHolderImpl::Suspend(
     const std::string& policy_app_id,
     utils::SharedPtr<smart_objects::SmartObject> command) {
   sync_primitives::AutoLock lock(commands_lock_);
   app_commands_[policy_app_id].push_back(command);
 }
 
-void CommandHolderImpl::Release(const std::string& policy_app_id) {
+void CommandHolderImpl::Resume(const std::string& policy_app_id) {
   sync_primitives::AutoLock lock(commands_lock_);
   auto app_commands = app_commands_.find(policy_app_id);
   if (app_commands_.end() == app_commands) {
@@ -57,7 +57,7 @@ void CommandHolderImpl::Release(const std::string& policy_app_id) {
   app_commands_.erase(app_commands);
 }
 
-void CommandHolderImpl::Drop(const std::string& policy_app_id) {
+void CommandHolderImpl::Clear(const std::string& policy_app_id) {
   sync_primitives::AutoLock lock(commands_lock_);
   auto app_commands = app_commands_.find(policy_app_id);
   if (app_commands_.end() == app_commands) {
