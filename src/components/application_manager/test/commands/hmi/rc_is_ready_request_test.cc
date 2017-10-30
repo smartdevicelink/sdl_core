@@ -79,6 +79,9 @@ class RCIsReadyRequestTest
     }
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_rc_cooperating(is_rc_cooperating_available));
+    if (!is_rc_cooperating_available) {
+      EXPECT_CALL(mock_hmi_capabilities_, set_rc_supported(false));
+    }
 
     if (is_message_contain_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())

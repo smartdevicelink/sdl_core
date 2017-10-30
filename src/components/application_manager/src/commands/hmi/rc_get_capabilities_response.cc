@@ -45,9 +45,14 @@ void RCGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  bool capability_exists =
+      (*message_)[strings::msg_params].keyExists(strings::rc_capability);
 
-  hmi_capabilities.set_rc_capability(
-      (*message_)[strings::msg_params][strings::rc_capability]);
+  if (capability_exists) {
+    hmi_capabilities.set_rc_capability(
+        (*message_)[strings::msg_params][strings::rc_capability]);
+  }
+  hmi_capabilities.set_rc_supported(capability_exists);
 }
 
 }  // namespace commands

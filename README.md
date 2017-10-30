@@ -1,8 +1,6 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
 
-[![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
-
- [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
+[![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
 
 # SmartDeviceLink (SDL)
 
@@ -120,54 +118,6 @@ There are several RPCs that are "required" to be implemented in order for SDL to
   * OnLanguageChange
   * OnSystemRequest
   * Speak
-
-## App Launching
-
-Below are instructions for testing app launching and query with a full system set up.
-
-### SDL Server
-The app querying specification defines an endpoint within Policies where sdl_core will reach out to receive a list of applications that can be launched. The SDL Server provides the back end functionality for app launching and querying.
-
-You can find the SDL Server on [GitHub](https://github.com/smartdevicelink/sdl_server). The README contains detailed instructions for installing and launching the server. Launch the server on your local machine, and direct your browser to http://localhost:3000.
-
-The [App Launching Server Specification](https://github.com/smartdevicelink/sdl_server/blob/master/docs/application_launching_v1.0.md) defines an endpoint `/applications/available/:moduleId.json` which return a list of applications available for launching to the handset for filtering.
-
-To check if there is a module already available you can go to http://localhost:3000/modules.json. If there is a module available, there will be one or more objects in the response array. Keep this response, you'll need the "_id" field for later.
-
-If there is not a module already available, go to http://localhost:3000/cars and define a new vehicle, then check http://localhost:3000/modules.json.
-
-Next, you'll need to define applications that can be launched. Go to http://localhost:3000/apps and define some applications. Make sure that you define a url scheme under the iOS tab of the application. This is required for an application to be launched from SDL. A URL scheme has the format `someScheme://`. Save the URL Scheme you used for later steps.
-
-You'll also need the local ip address of your machine
-
-At the end of the SDL Server set up you should have
-  1. SDL Server running on your local machine connected to mongo db
-  2. Your machine's local IP Address
-  3. The module id of your vehicle
-  4. The URL Scheme of the app you want to launch
-
-### Mobile
-You need at least one app installed on the test device (presumably an iPhone), which we have built for you, the [V4Tester application](https://app.box.com/s/eeloquc0fhqfmxjjubw7kousf12f3pzg). This application implements SDL 4.0 and will respond to SDL Core's QUERY_APPS system request, as well as filter the response for available applications. If you do not have any other applications on the device, you can only test QUERY_APPS functionality, in which no applications will be sent to sdl core which can be launched.
-
-In order to support the launching of an application, you'll have to create an additional app which responds to the URL Scheme of the application that you set up on the SDL Server. To do so, go to Xcode, select File>New>Project... and under ios/application create a Single View Application. Open the application's Info.plist file (under the Supporting Files section of the project explorer by default). Highlight the Information Property List item and click the plus button to add a new entry to the Property List. From the drop down menu, select URL Types as the key. In the Item 0 dictionary add a "URL Schemes" Array, and make Item 0 in the array the prefix to the URL you previously defined (So if you defined `someScheme://` then Item 0 should be "someScheme"). Make sure the URL identifier matches your application's identifier. When you're finished you should have something that looks like the following. Install this application on your test device. **Note** - this application will only launch during this process, since it is not SDL Connected it will not register with the head unit.
-
-![Plist Example](http://i.imgur.com/AFyJlZQ.png)
-
-At the end of the Mobile device set up you should have
-  1. The V4 Tester Application installed on your device
-  2. An application for launching that matches the application submitted to SDL Server
-  3. Your iPhone should be on the same network as the machine running SDL Server
-
-### SDL Core
-Take the following steps to launch applications from sdl core.
-
-  1. Install the [correct version of SDL Core](https://github.com/smartdevicelink/sdl_core/pull/39)
-  2. Add the queryAppsUrl that you saved during sdl server set up in the src/appMain/preloaded_pt.json under the "endpoints" property in the format `http://[local machine ip]:3000/applications/available[moduleId].json`. For example `http://192.168.0.150:3000/applications/available/789b739c47c7490321058200.json`.
-  3. Run SDL Core
-  4. Launch the V4 Tester application on the iPhone
-  5. Connect the application via wifi by entering the IP address of Core into the V4 tester
-  6. Both applications should show up on the head unit for launching
-  7. Select the other application, and you should see it launched and brought to the foreground on the phone
 
 ## Test Coverage
 ### Used technologies
