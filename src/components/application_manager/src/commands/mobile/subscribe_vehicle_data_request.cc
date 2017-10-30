@@ -264,11 +264,12 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                result_code,
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
-
-  if (is_succeeded) {
-    app->UpdateHash();
-  }
 #endif  // #ifdef HMI_DBUS_API
+}
+
+bool SubscribeVehicleDataRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(

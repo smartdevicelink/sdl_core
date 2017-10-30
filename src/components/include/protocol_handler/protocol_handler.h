@@ -108,6 +108,27 @@ class ProtocolHandler {
   virtual const ProtocolHandlerSettings& get_settings() const = 0;
   virtual SessionObserver& get_session_observer() = 0;
 
+  /**
+   * \brief Called by connection handler to notify the result of
+   * OnSessionStartedCallback().
+   * \param connection_id Identifier of connection within which session exists
+   * \param session_id session ID passed to OnSessionStartedCallback()
+   * \param generated_session_id Generated session ID, will be 0 if session is
+   * not started
+   * \param hash_id Generated Hash ID
+   * \param protection whether the service will be protected
+   * \param rejected_params list of parameters' name that are rejected.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
+   */
+  virtual void NotifySessionStartedResult(
+      int32_t connection_id,
+      uint8_t session_id,
+      uint8_t generated_session_id,
+      uint32_t hash_id,
+      bool protection,
+      std::vector<std::string>& rejected_params) = 0;
+
  protected:
   /**
    * \brief Destructor

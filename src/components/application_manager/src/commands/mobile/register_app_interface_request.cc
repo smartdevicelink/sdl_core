@@ -74,6 +74,12 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::TESTING;
   } else if ("SYSTEM" == str) {
     return mobile_apis::AppHMIType::SYSTEM;
+  } else if ("PROJECTION" == str) {
+    return mobile_apis::AppHMIType::PROJECTION;
+#ifdef SDL_REMOTE_CONTROL
+  } else if ("REMOTE_CONTROL" == str) {
+    return mobile_apis::AppHMIType::REMOTE_CONTROL;
+#endif
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
@@ -82,6 +88,9 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
       {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+#ifdef SDL_REMOTE_CONTROL
+       {mobile_apis::AppHMIType::REMOTE_CONTROL, "REMOTE_CONTROL"},
+#endif  // SDL_REMOTE_CONTROL
        {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
        {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
        {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
@@ -90,7 +99,8 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
        {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
        {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
        {mobile_apis::AppHMIType::TESTING, "TESTING"},
-       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
+       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"},
+       {mobile_apis::AppHMIType::PROJECTION, "PROJECTION"}};
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
@@ -319,6 +329,11 @@ void RegisterAppInterfaceRequest::Run() {
               app_type.getElement(i).asUInt())) {
         application->set_voice_communication_supported(true);
       }
+      if (mobile_apis::AppHMIType::PROJECTION ==
+          static_cast<mobile_apis::AppHMIType::eType>(
+              app_type.getElement(i).asUInt())) {
+        application->set_mobile_projection_enabled(true);
+      }
     }
   }
 
@@ -477,6 +492,10 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::hmi_capabilities][strings::video_streaming] =
+      hmi_capabilities.video_streaming_supported();
+  response_params[strings::hmi_capabilities][strings::remote_control] =
+      hmi_capabilities.rc_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
@@ -663,6 +682,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
+#ifdef SDL_REMOTE_CONTROL
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
+                                          &(msg_params[strings::app_hmi_type]));
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.

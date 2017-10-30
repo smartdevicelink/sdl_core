@@ -83,6 +83,7 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
     EXPECT_CALL(*app, UpdateHash());
   }
 
+  command->Init();
   MessageSharedPtr mobile_result_msg(
       CatchMobileCommandResult(CallRun(*command)));
 
@@ -120,6 +121,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
     EXPECT_CALL(*app, UpdateHash());
   }
 
+  command->Init();
   command->on_event(event);
 
   Mock::VerifyAndClearExpectations(mock_message_helper);

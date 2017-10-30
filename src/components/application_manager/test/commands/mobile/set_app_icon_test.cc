@@ -55,7 +55,6 @@ using am::commands::SetAppIconRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Mock;
@@ -73,6 +72,15 @@ class SetAppIconRequestTest
  public:
   SetAppIconRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+
+  void SetUp() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
   MockMessageHelper& mock_message_helper_;
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -118,12 +126,6 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(*mock_app, set_app_icon_path(_)).WillByDefault(Return(true));
   ON_CALL(*mock_app, app_icon_path()).WillByDefault(ReturnRef(file_path));
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
@@ -158,7 +160,6 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 }  // namespace set_app_icon_request

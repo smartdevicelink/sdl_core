@@ -55,6 +55,9 @@
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
 #include "policy/policy_manager.h"
+#ifdef SDL_REMOTE_CONTROL
+#include "functional_module/plugin_manager.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 
@@ -541,6 +544,12 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
+struct SmartObjectToInt {
+  int operator()(const smart_objects::SmartObject& item) const {
+    return item.asInt();
+  }
+};
+
 StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id,
     const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
@@ -799,17 +808,17 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const uint32_t app_id = value->app_id();
-
   if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(logger_,
-                  "Application " << app_id << " is not marked as registered.");
+                  "Application " << value->app_id()
+                                 << " is not marked as registered.");
     return false;
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Application " << app_id << " marked as registered."
-                                            "Checking its parameters.");
+                "Application " << value->app_id()
+                               << " marked as registered."
+                                  "Checking its parameters.");
 
   DeviceParams device_params = GetDeviceParams(
       value->device(),
@@ -1178,6 +1187,10 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             accessor.GetData().end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
+#ifdef SDL_REMOTE_CONTROL
+        application_manager_.GetPluginManager().OnPolicyEvent(
+            functional_modules::PolicyEvent::kApplicationsDisabled);
+#endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(
             accessor.GetData().begin(),
@@ -1186,7 +1199,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));
       }
-
 #endif  // EXTERNAL_PROPRIETARY_MODE
     }
   }
@@ -1941,4 +1953,141 @@ bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
 
   return ((is_registered && !is_empty_urls) || is_default);
 }
+
+#ifdef SDL_REMOTE_CONTROL
+
+std::vector<std::string> PolicyHandler::GetDevicesIds(
+    const std::string& policy_app_id) {
+  return application_manager_.devices(policy_app_id);
+}
+
+void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
+                                   mobile_apis::HMILevel::eType level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(app);
+  if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
+    // If default is FULL, send request to HMI. Notification to mobile will be
+    // sent on response receiving.
+    if (mobile_apis::HMILevel::HMI_FULL == level) {
+      MessageHelper::SendActivateAppToHMI(app->app_id(), application_manager_);
+    } else {
+      LOG4CXX_INFO(logger_,
+                   "Changing hmi level of application "
+                       << app->app_id() << " to default hmi level " << level);
+      // Set application hmi level
+      application_manager_.ChangeAppsHMILevel(app->app_id(), level);
+      // If hmi Level is full, it will be seted after ActivateApp response
+      MessageHelper::SendHMIStatusNotification(*app, application_manager_);
+    }
+  }
+}
+
+bool PolicyHandler::CheckModule(const PTString& app_id,
+                                const PTString& module) {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->CheckModule(app_id, module);
+}
+
+void PolicyHandler::OnRemoteAppPermissionsChanged(
+    const std::string& device_id, const std::string& application_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
+                                      const std::string& policy_app_id,
+                                      const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app =
+      application_manager_.application(device_id, policy_app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
+    return;
+  }
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_,
+               "Changing hmi level of application "
+                   << app->app_id() << " to default hmi level " << level);
+  // Set application hmi level
+  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
+  MessageHelper::SendHMIStatusNotification(*app, application_manager_);
+}
+
+bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
+                                   std::vector<std::string>* modules) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetModuleTypes(policy_app_id, modules);
+}
+
+void PolicyHandler::SetDefaultHmiTypes(
+    const std::string& application_id,
+    const smart_objects::SmartObject* app_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  std::vector<int> hmi_types;
+  if (app_types && app_types->asArray()) {
+    smart_objects::SmartArray* hmi_list = app_types->asArray();
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(hmi_types),
+                   SmartObjectToInt());
+  }
+  policy_manager_->SetDefaultHmiTypes(application_id, hmi_types);
+}
+
+bool PolicyHandler::CheckHMIType(const std::string& application_id,
+                                 mobile_apis::AppHMIType::eType hmi,
+                                 const smart_objects::SmartObject* app_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(false);
+  std::vector<int> policy_hmi_types;
+  bool ret = policy_manager_->GetHMITypes(application_id, &policy_hmi_types);
+
+  std::vector<int> additional_hmi_types;
+  if (app_types && app_types->asArray()) {
+    smart_objects::SmartArray* hmi_list = app_types->asArray();
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(additional_hmi_types),
+                   SmartObjectToInt());
+  }
+  const std::vector<int>& hmi_types =
+      ret ? policy_hmi_types : additional_hmi_types;
+  return std::find(hmi_types.begin(), hmi_types.end(), hmi) != hmi_types.end();
+}
+
+void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
+                                     const std::string& policy_app_id,
+                                     const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app =
+      application_manager_.application(device_id, policy_app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
+    return;
+  }
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
+    return;
+  }
+  UpdateHMILevel(app, level);
+}
+#endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy

@@ -342,9 +342,15 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
   if (result) {
-    UpdateHash();
+    application_manager_.TerminateRequest(
+        connection_key(), correlation_id(), function_id());
   }
 #endif  // #ifdef HMI_DBUS_API
+}
+
+bool UnsubscribeVehicleDataRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 struct SubscribedToIVIPredicate {
@@ -385,21 +391,6 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     response[*it_another_app][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
   }
-}
-
-void UnsubscribeVehicleDataRequest::UpdateHash() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-  if (application) {
-    application->UpdateHash();
-  } else {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection_key = " << connection_key()
-                                                       << " doesn't exist.");
-  }
-  application_manager_.TerminateRequest(
-      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

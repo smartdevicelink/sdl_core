@@ -63,7 +63,6 @@ namespace am = ::application_manager;
 using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using am::MockHmiInterfaces;
 using am::MockMessageHelper;
 
 typedef SharedPtr<AlertManeuverRequest> CommandPtr;
@@ -93,10 +92,7 @@ class AlertManeuverRequestTest
     EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
         .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillRepeatedly(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
 
     MessageSharedPtr response_to_mobile;
@@ -213,13 +209,10 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
               ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  MockHmiInterfaces hmi_interfaces;
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillRepeatedly(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),

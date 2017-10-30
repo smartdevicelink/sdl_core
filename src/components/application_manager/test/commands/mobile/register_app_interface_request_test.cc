@@ -151,8 +151,6 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
     ON_CALL(
@@ -191,15 +189,11 @@ class RegisterAppInterfaceRequestTest
   typedef IsNiceMock<application_manager_test::MockHMICapabilities,
                      kMocksAreNice>::Result MockHMICapabilities;
 
-  typedef IsNiceMock<am::MockHmiInterfaces, kMocksAreNice>::Result
-      MockHmiInterfaces;
-
   MockPolicyHandlerInterface mock_policy_handler_;
   MockResumeCtrl mock_resume_crt_;
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   MockHMICapabilities mock_hmi_capabilities_;
-  MockHmiInterfaces mock_hmi_interfaces_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {

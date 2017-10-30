@@ -381,6 +381,18 @@ class MessageHelper {
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /*
+   * @brief Sends SetVideoConfig request to HMI to negotiate video parameters
+   *
+   * @param app_id       the application which will start video streaming
+   * @param app_mngr     reference of application manager
+   * @param video_params parameters of video streaming, notified by mobile
+   */
+  static void SendNaviSetVideoConfig(
+      int32_t app_id,
+      ApplicationManager& app_mngr,
+      const smart_objects::SmartObject& video_params);
+
+  /*
    * @brief Sends notification to HMI to start video streaming
    *
    * @param connection_key  Application connection key
@@ -689,6 +701,31 @@ class MessageHelper {
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sends HMI status notification to mobile
+   * @param application_impl application with changed HMI status
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager);
+
+  /**
+   * @brief SendActivateAppToHMI Sends BasicCommunication.ActivateApp request to
+   * HMI
+   * @param app_id Application id
+   * @param application_manager Application manager
+   * @param level Application HMI level
+   * @param send_policy_priority Defines whether to send "priority" field with
+   * request
+   */
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
+#endif  // SDL_REMOTE_CONTROL
 
  private:
   /**

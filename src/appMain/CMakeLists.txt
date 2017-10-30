@@ -44,6 +44,7 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -56,14 +57,16 @@ include_directories(
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/functional_module/include
+  ${POLICY_PATH}/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
-  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/dbus/include
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
   ${OPENSSL_INCLUDE_DIRECTORY}
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
@@ -114,6 +117,12 @@ set(LIBRARIES
   ConfigProfile
   Resumption
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -138,6 +147,9 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
+
+list(APPEND LIBRARIES bson -L${BSON_LIBS_DIRECTORY})
+list(APPEND LIBRARIES emhashmap -L${EMHASHMAP_LIBS_DIRECTORY})
 
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
@@ -205,6 +217,11 @@ install(
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
+)
+
+install(
+    FILES sdl_preloaded_pt.json
+    DESTINATION bin
 )
 
 if (${QT_HMI})

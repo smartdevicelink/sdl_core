@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 
-namespace NsMessageBroker 
+namespace NsMessageBroker
 {
    CMessageBrokerRegistry::CMessageBrokerRegistry()
    {
@@ -43,7 +43,7 @@ namespace NsMessageBroker
          DBG_MSG(("Controller already exists!\n"));
       }
 
-      DBG_MSG(("Count of controllers: %d\n", mControllersList.size()));
+      DBG_MSG(("Count of controllers: %zu\n", mControllersList.size()));
       return result;
    }
 
@@ -64,7 +64,7 @@ namespace NsMessageBroker
             DBG_MSG(("No such controller in the list!\n"));
             return;
          }
-         DBG_MSG(("Count of controllers: %d\n", mControllersList.size()));
+         DBG_MSG(("Count of controllers: %zu\n", mControllersList.size()));
       }
       removeSubscribersByDescriptor(fd);
    }
@@ -124,7 +124,7 @@ namespace NsMessageBroker
          mSubscribersList.insert(std::map <std::string, int>::value_type(name, fd));
       }
 
-      DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+      DBG_MSG(("Count of subscribers: %zu\n", mSubscribersList.size()));
       return result;
    }
 
@@ -146,7 +146,7 @@ namespace NsMessageBroker
            }
        }
 
-       DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+       DBG_MSG(("Count of subscribers: %zu\n", mSubscribersList.size()));
    }
 
    int CMessageBrokerRegistry::getDestinationFd(std::string name)

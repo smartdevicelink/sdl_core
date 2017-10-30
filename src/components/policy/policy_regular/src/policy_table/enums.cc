@@ -324,6 +324,10 @@ bool IsValidEnum(AppHMIType val) {
       return true;
     case AHT_SYSTEM:
       return true;
+    case AHT_PROJECTION:
+      return true;
+    case AHT_REMOTE_CONTROL:
+      return true;
     default:
       return false;
   }
@@ -350,6 +354,10 @@ const char* EnumToJsonString(AppHMIType val) {
       return "TESTING";
     case AHT_SYSTEM:
       return "SYSTEM";
+    case AHT_PROJECTION:
+      return "PROJECTION";
+    case AHT_REMOTE_CONTROL:
+      return "REMOTE_CONTROL";
     default:
       return "";
   }
@@ -384,6 +392,12 @@ bool EnumFromJsonString(const std::string& literal, AppHMIType* result) {
     return true;
   } else if ("SYSTEM" == literal) {
     *result = AHT_SYSTEM;
+    return true;
+  } else if ("PROJECTION" == literal) {
+    *result = AHT_PROJECTION;
+    return true;
+  } else if ("REMOTE_CONTROL" == literal) {
+    *result = AHT_REMOTE_CONTROL;
     return true;
   } else {
     return false;
@@ -568,6 +582,41 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
     return false;
   }
 }
+
+#ifdef SDL_REMOTE_CONTROL
+bool IsValidEnum(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE:
+      return true;
+    case MT_RADIO:
+      return true;
+    default:
+      return false;
+  }
+}
+const char* EnumToJsonString(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE:
+      return "CLIMATE";
+    case MT_RADIO:
+      return "RADIO";
+    default:
+      return "";
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
+  if ("CLIMATE" == literal) {
+    *result = MT_CLIMATE;
+    return true;
+  } else if ("RADIO" == literal) {
+    *result = MT_RADIO;
+    return true;
+  } else {
+    return false;
+  }
+}
+#endif  // SDL_REMOTE_CONTROL
 
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";

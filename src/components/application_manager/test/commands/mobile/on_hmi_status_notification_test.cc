@@ -49,7 +49,7 @@ const uint32_t kConnectionKey = 1u;
 namespace strings = application_manager::strings;
 
 using application_manager::commands::OnHMIStatusNotification;
-using application_manager::ProtocolVersion;
+using protocol_handler::MajorProtocolVersion;
 using application_manager::MockMessageHelper;
 using application_manager::commands::CommandImpl;
 using testing::Mock;

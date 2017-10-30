@@ -127,6 +127,9 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
+  hmi_handler_->set_message_observer(app_manager_);
+  app_manager_->set_hmi_message_handler(hmi_handler_);
+
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   app_manager_->set_connection_handler(connection_handler_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
@@ -157,8 +160,6 @@ bool LifeCycle::StartComponents() {
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
-  hmi_handler_->set_message_observer(app_manager_);
-
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
 
@@ -178,7 +179,6 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-  app_manager_->set_hmi_message_handler(hmi_handler_);
 
   transport_manager_->Init(*last_state_);
   // start transport manager

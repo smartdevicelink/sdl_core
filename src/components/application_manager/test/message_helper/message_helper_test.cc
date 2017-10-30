@@ -96,7 +96,8 @@ TEST(MessageHelperTestCreate,
             obj[strings::params][strings::correlation_id].asUInt());
   EXPECT_EQ(connection_key,
             obj[strings::params][strings::connection_key].asUInt());
-  EXPECT_EQ(kV2, obj[strings::params][strings::protocol_version].asInt());
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            obj[strings::params][strings::protocol_version].asInt());
 }
 
 TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
@@ -448,7 +449,9 @@ class MessageHelperTest : public ::testing::Test {
                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
+                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK", "EN-IN",
+                         "TH-TH", "EN-SA", "HE-IL", "RO-RO", "UK-UA", "ID-ID",
+                         "VI-VN", "MS-MY", "HI-IN"}
       , hmi_result_strings{"SUCCESS",
                            "UNSUPPORTED_REQUEST",
                            "UNSUPPORTED_RESOURCE",
@@ -1025,6 +1028,39 @@ TEST_F(MessageHelperTest,
               std::find(status_array->begin(), status_array->end(), item_2_so));
 }
 #endif
+
+TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  int32_t app_id = 123;
+  smart_objects::SmartObject video_params(smart_objects::SmartType_Map);
+  video_params[strings::protocol] =
+      hmi_apis::Common_VideoStreamingProtocol::RTP;
+  video_params[strings::codec] = hmi_apis::Common_VideoStreamingCodec::H264;
+  video_params[strings::width] = 640;
+  video_params[strings::height] = 480;
+
+  MessageHelper::SendNaviSetVideoConfig(
+      app_id, mock_application_manager, video_params);
+
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_SetVideoConfig,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  EXPECT_TRUE(msg_params.keyExists(strings::config));
+
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::protocol));
+  EXPECT_EQ(1, msg_params[strings::config][strings::protocol].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::codec));
+  EXPECT_EQ(0, msg_params[strings::config][strings::codec].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::width));
+  EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
+  EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
+  EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

@@ -36,6 +36,7 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <sstream>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -127,6 +128,20 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   return result;
 }
 
+const policy_table::AppHMITypes* CacheManager::GetHMITypes(
+    const std::string& app_id) {
+  const policy_table::ApplicationPolicies& apps =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
+  if (i != apps.end()) {
+    const policy_table::AppHMITypes& app_hmi_types = *i->second.AppHMIType;
+    if (app_hmi_types.is_initialized()) {
+      return &app_hmi_types;
+    }
+  }
+  return NULL;
+}
+
 bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
@@ -136,8 +151,8 @@ bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
 bool CacheManager::GetDefaultHMI(const std::string& app_id,
                                  std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
-  bool result = true;
-  return result;
+  default_hmi = "NONE";
+  return true;
 }
 
 bool CacheManager::ResetUserConsent() {
@@ -222,19 +237,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
   for (; iter != iter_end; ++iter) {
     if (iter->second.is_null()) {
+      pt_->policy_table.app_policies_section.apps[iter->first] =
+          policy_table::ApplicationParams();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
     }

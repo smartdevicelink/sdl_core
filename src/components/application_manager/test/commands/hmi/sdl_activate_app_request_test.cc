@@ -209,9 +209,11 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   ON_CALL(*mock_app, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
 
   const std::string url = "url";
   ON_CALL(*mock_app_first, SchemaUrl()).WillByDefault(Return(url));
@@ -291,7 +293,8 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
 
   app_list_.insert(mock_app_first);
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
 
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
@@ -355,7 +358,8 @@ TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(true));
 
@@ -389,7 +393,8 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
@@ -423,7 +428,8 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
 
   app_list_.insert(mock_app_first);
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV4));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));

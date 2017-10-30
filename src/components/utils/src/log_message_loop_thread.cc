@@ -44,12 +44,14 @@ void LogMessageHandler::Handle(const LogMessage message) {
 }
 
 LogMessageLoopThread::LogMessageLoopThread()
-    : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
+    : LogMessageLoopThreadTemplate("Logger",
+                                   handler_ = new LogMessageHandler()) {}
 
 LogMessageLoopThread::~LogMessageLoopThread() {
   // we'll have to drop messages
   // while deleting logger thread
   logger_status = DeletingLoggerThread;
+  delete handler_;
 }
 
 }  // namespace logger

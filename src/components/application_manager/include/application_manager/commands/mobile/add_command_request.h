@@ -60,25 +60,30 @@ class AddCommandRequest : public CommandRequestImpl {
   /**
    * @brief AddCommandRequest class destructor
    **/
-  virtual ~AddCommandRequest();
+  ~AddCommandRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
 
   /**
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*

@@ -33,7 +33,6 @@ void SubscribeWayPointsRequest::Run() {
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
     application_manager_.SubscribeAppForWayPoints(app->app_id());
     SendResponse(true, mobile_apis::Result::SUCCESS);
-    app->UpdateHash();
     return;
   }
 
@@ -62,9 +61,6 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
                    MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
-      if (result) {
-        app->UpdateHash();
-      }
       break;
     }
     default: {
@@ -72,6 +68,11 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
+}
+
+bool SubscribeWayPointsRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 }  // namespace commands

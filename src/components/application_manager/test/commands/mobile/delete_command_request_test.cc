@@ -61,7 +61,6 @@ using am::commands::DeleteCommandRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 
 typedef SharedPtr<DeleteCommandRequest> DeleteCommandPtr;
 
@@ -130,15 +129,12 @@ class DeleteCommandRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
   void TearDown() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
-  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
@@ -158,12 +154,12 @@ TEST_F(DeleteCommandRequestTest,
   (*test_msg)[am::strings::vr_commands] = 0;
   (*test_msg)[am::strings::menu_params] = 0;
 
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   ON_CALL(*mock_app_, FindCommand(kCommandId))
@@ -188,8 +184,6 @@ TEST_F(DeleteCommandRequestTest,
   event_vr.set_smart_object(*event_msg);
 
   EXPECT_CALL(*mock_app_, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*mock_app_, UpdateHash());
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
@@ -218,12 +212,12 @@ TEST_F(DeleteCommandRequestTest,
   (*test_msg)[am::strings::vr_commands] = 0;
   (*test_msg)[am::strings::menu_params] = 0;
 
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(hmi_interfaces_,
+  ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
@@ -247,8 +241,6 @@ TEST_F(DeleteCommandRequestTest,
   event_ui.set_smart_object(*event_msg);
 
   EXPECT_CALL(*app, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*app, UpdateHash());
 
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event_ui)));

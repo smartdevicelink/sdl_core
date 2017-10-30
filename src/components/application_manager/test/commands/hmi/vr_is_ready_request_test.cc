@@ -139,7 +139,6 @@ class VRIsReadyRequestTest
   }
 
   VRIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 

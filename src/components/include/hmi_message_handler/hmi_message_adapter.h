@@ -43,6 +43,12 @@ namespace hmi_message_handler {
  * SDL with HMI has to implement this interface.
  */
 class HMIMessageAdapter : public HMIMessageSender {
+ public:
+  /**
+   * \brief Destructor
+   */
+  virtual ~HMIMessageAdapter() {}
+
  protected:
   /**
    * \brief Interface for subscriptions.

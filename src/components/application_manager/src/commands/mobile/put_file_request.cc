@@ -110,6 +110,17 @@ void PutFileRequest::Run() {
   }
   sync_file_name_ =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
+
+  if (!file_system::IsFileNameValid(sync_file_name_)) {
+    const std::string err_msg = "Sync file name contains forbidden symbols.";
+    LOG4CXX_ERROR(logger_, err_msg);
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 err_msg.c_str(),
+                 &response_params);
+    return;
+  }
+
   file_type_ = static_cast<mobile_apis::FileType::eType>(
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
