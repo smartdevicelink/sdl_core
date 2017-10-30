@@ -36,7 +36,9 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
   3. If there are any dependency issues, install missing dependencies
   4. Run the following commands to compile and install smartdevicelink
 
-
+  
+  
+  enter
 
 ```
 %make
