@@ -55,6 +55,17 @@
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
+namespace {
+struct ConnectionFinder {
+  const uint32_t id_;
+  explicit ConnectionFinder(const uint32_t id) : id_(id) {}
+  bool operator()(const transport_manager::TransportManagerImpl::Connection&
+                      connection) const {
+    return id_ == connection.id;
+  }
+};
+}  // namespace
+
 namespace transport_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
