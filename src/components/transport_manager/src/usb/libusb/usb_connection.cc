@@ -43,7 +43,8 @@
 
 #include "utils/logger.h"
 
-#define	TRANSPORT_USB_BUFFER_MAX_SIZE		(16*1024)
+// Define the buffer size, because the Android accessory protocol packet support packet buffers up to 16Kbytes
+#define TRANSPORT_USB_BUFFER_MAX_SIZE	(16*1024)
 
 namespace transport_manager {
 namespace transport_adapter {
