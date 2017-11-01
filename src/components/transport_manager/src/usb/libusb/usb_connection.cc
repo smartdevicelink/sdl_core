@@ -203,10 +203,10 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
   sync_primitives::AutoLock locker(out_messages_mutex_);
   
-  if(current_out_message_.valid()) {
-    if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
+  if(current_out_message_) {
+    if (LIBUSB_TRANSFER_COMPLETED == transfer->status) {
       bytes_sent_ += transfer->actual_length;
-      if (bytes_sent_ == current_out_message_->data_size()) {
+      if (current_out_message_->data_size() == bytes_sent_) {
         LOG4CXX_DEBUG(
             logger_,
             "USB out transfer, data sent: " << current_out_message_.get());
