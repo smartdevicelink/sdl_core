@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <string>
 #include "utils/macro.h"
+#include "utils/make_shared.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
@@ -228,11 +229,9 @@ void CommandRequestImpl::SendResponse(
     current_state_ = kCompleted;
   }
 
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
+  smart_objects::SmartObjectSPtr result =
+      utils::MakeShared<smart_objects::SmartObject>();
+
   smart_objects::SmartObject& response = *result;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;

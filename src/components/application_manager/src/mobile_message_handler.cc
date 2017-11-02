@@ -198,6 +198,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   if (!payload.data.empty()) {
     BinaryData binary_payload_data(payload.data);
     outgoing_message->set_binary_data(&binary_payload_data);
+    outgoing_message->set_binary_data(&payload.data);
   }
   return outgoing_message.release();
 }
