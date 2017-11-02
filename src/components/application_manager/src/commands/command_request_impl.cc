@@ -223,6 +223,7 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::Result::eType& result_code,
     const char* info,
     const smart_objects::SmartObject* response_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kTimedOut == current_state_) {
