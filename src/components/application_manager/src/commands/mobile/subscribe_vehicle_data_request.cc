@@ -250,6 +250,15 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       result_code = mobile_apis::Result::IGNORED;
       response_info = "Already subscribed on some provided VehicleData.";
     }
+
+    if (!vi_waiting_for_subscribe_.empty()) {
+      LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
+      VehicleInfoSubscriptions::const_iterator key =
+          vi_waiting_for_subscribe_.begin();
+      for (; key != vi_waiting_for_subscribe_.end(); ++key) {
+        app->SubscribeToIVI(*key);
+      }
+    }
   }
 
   UnsubscribeFailedSubscriptions(app, message[strings::msg_params]);
@@ -407,12 +416,13 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
 
         out_request_params[key_name] = is_key_enabled;
 
-        if (app->SubscribeToIVI(static_cast<uint32_t>(key_type))) {
+        if (is_key_enabled) {
+          vi_waiting_for_subscribe_.insert(key_type);
           LOG4CXX_DEBUG(
               logger_,
               "App with connection key "
                   << connection_key()
-                  << " have been subscribed for VehicleDataType: " << key_type);
+                  << " will be subscribed for VehicleDataType: " << key_type);
           ++subscribed_items;
         }
       }
