@@ -53,9 +53,18 @@ void DeleteFileRequest::Run() {
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
+  smart_objects::SmartObject response_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  response_params[strings::space_available] =
+      static_cast<uint32_t>(application->GetAvailableDiskSpace());
+
   if (!application) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false,
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED,
+                 "Application is not registered",
+                 &response_params);
     return;
   }
 
@@ -66,7 +75,10 @@ void DeleteFileRequest::Run() {
     // DeleteFile request is limited by the configuration profile
     LOG4CXX_ERROR(logger_,
                   "Too many requests from the app with HMILevel HMI_NONE ");
-    SendResponse(false, mobile_apis::Result::REJECTED);
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
+                 "Too many requests from the app with HMILevel HMI_NONE",
+                 &response_params);
     return;
   }
 
@@ -76,7 +88,10 @@ void DeleteFileRequest::Run() {
   if (!file_system::IsFileNameValid(sync_file_name)) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
     LOG4CXX_ERROR(logger_, err_msg);
-    SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 err_msg.c_str(),
+                 &response_params);
     return;
   }
 
@@ -95,16 +110,28 @@ void DeleteFileRequest::Run() {
 
       application->DeleteFile(full_file_path);
       application->increment_delete_file_in_none_count();
-      SendResponse(true, mobile_apis::Result::SUCCESS);
+      response_params[strings::space_available] =
+          static_cast<uint32_t>(application->GetAvailableDiskSpace());
+      SendResponse(true,
+                   mobile_apis::Result::SUCCESS,
+                   "File successfully deleted",
+                   &response_params);
     } else {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      SendResponse(false,
+                   mobile_apis::Result::GENERIC_ERROR,
+                   "File not deleted!",
+                   &response_params);
     }
   } else {
-    SendResponse(false, mobile_apis::Result::REJECTED);
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
+                 "File does not exist!",
+                 &response_params);
   }
 }
 
 void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
