@@ -56,11 +56,8 @@ void DeleteFileResponse::Run() {
     return;
   }
 
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<uint32_t>(app->GetAvailableDiskSpace());
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 
 }  // namespace commands
-
 }  // namespace application_manager
