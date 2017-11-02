@@ -216,23 +216,41 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str = NULL;
+  using smart_objects::SmartArray;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    const smart_objects::SmartArray* tc_array =
+    const SmartArray* tts_chunks_arr =
         (*message_)[strings::msg_params][strings::tts_chunks].asArray();
 
-    smart_objects::SmartArray::const_iterator it_tc = tc_array->begin();
-    smart_objects::SmartArray::const_iterator it_tc_end = tc_array->end();
+    SmartArray::const_iterator it_tts_chunk = tts_chunks_arr->begin();
 
-    for (; it_tc != it_tc_end; ++it_tc) {
-      str = (*it_tc)[strings::text].asCharArray();
-      if (strlen(str) && !CheckSyntax(str)) {
+    for (; it_tts_chunk != tts_chunks_arr->end(); ++it_tts_chunk) {
+      const char* tts_chunk_text = (*it_tts_chunk)[strings::text].asCharArray();
+      if (strlen(tts_chunk_text) && !CheckSyntax(tts_chunk_text)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
     }
   }
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    DCHECK_OR_RETURN(
+        (*message_)[strings::msg_params][strings::soft_buttons].getType() ==
+            smart_objects::SmartType_Array,
+        true);
+    const smart_objects::SmartArray* soft_button_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    SmartArray::const_iterator it_soft_button = soft_button_array->begin();
+
+    for (; it_soft_button != soft_button_array->end(); ++it_soft_button) {
+      const char* soft_button_text = (*it_soft_button)[strings::text].asCharArray();
+      if (!CheckSyntax(soft_button_text)) {
+        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
