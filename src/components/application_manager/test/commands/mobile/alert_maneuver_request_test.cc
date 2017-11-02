@@ -59,6 +59,7 @@ namespace alert_maneuver_request {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Mock;
 namespace am = ::application_manager;
 using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
@@ -70,6 +71,9 @@ typedef SharedPtr<AlertManeuverRequest> CommandPtr;
 class AlertManeuverRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  AlertManeuverRequestTest()
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
@@ -87,10 +91,10 @@ class AlertManeuverRequestTest
     MockAppPtr mock_app(CreateMockApp());
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
-        .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != hmi_response) {
+      EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response))
+          .WillOnce(Return(mobile_response));
+    }
 
     EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
@@ -112,7 +116,16 @@ class AlertManeuverRequestTest
         static_cast<int32_t>(mobile_response));
   }
 
+  void SetUp() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
  protected:
+  MockMessageHelper& mock_message_helper_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
 };
 
@@ -237,30 +250,30 @@ TEST_F(AlertManeuverRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
                     .asInt()));
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case1) {
+TEST_F(AlertManeuverRequestTest, OnEvent_SUCCESS) {
   CheckExpectations(hmi_apis::Common_Result::SUCCESS,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    mobile_apis::Result::SUCCESS,
                     am::HmiInterfaces::STATE_AVAILABLE,
                     true);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case2) {
-  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE) {
+  CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                    am::HmiInterfaces::STATE_NOT_AVAILABLE,
-                    true);
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    false);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case3) {
-  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+TEST_F(AlertManeuverRequestTest, OnEvent_WARNINGS) {
+  CheckExpectations(hmi_apis::Common_Result::WARNINGS,
+                    mobile_apis::Result::WARNINGS,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
                     true);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case4) {
+TEST_F(AlertManeuverRequestTest, OnEvent_GENERIC_ERROR) {
   CheckExpectations(hmi_apis::Common_Result::GENERIC_ERROR,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    mobile_apis::Result::GENERIC_ERROR,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
                     false);
 }

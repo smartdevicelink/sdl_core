@@ -105,18 +105,31 @@ const std::string CreateInfoForUnsupportedResult(
 }
 
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
-  if (first.is_ok && second.is_unsupported_resource &&
-      second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
-    return true;
+  if (!first.is_ok && !second.is_ok) {
+    return false;
   }
-  return false;
+
+  if (!first.is_ok && second.is_not_used) {
+    return false;
+  }
+
+  if (!second.is_ok && first.is_not_used) {
+    return false;
+  }
+
+  if (first.is_unsupported_resource && second.is_not_used &&
+      HmiInterfaces::STATE_NOT_AVAILABLE == first.interface_state) {
+    return false;
+  }
+
+  return true;
 }
 
 bool IsResultCodeUnsupported(const ResponseInfo& first,
                              const ResponseInfo& second) {
-  return ((first.is_ok || first.is_invalid_enum) &&
+  return ((first.is_ok || first.is_not_used) &&
           second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
+         ((second.is_ok || second.is_not_used) &&
           first.is_unsupported_resource) ||
          (first.is_unsupported_resource && second.is_unsupported_resource);
 }
@@ -204,6 +217,7 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::Result::eType& result_code,
     const char* info,
     const smart_objects::SmartObject* response_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kTimedOut == current_state_) {
@@ -777,6 +791,7 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
   out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -795,10 +810,10 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
       hmi_apis::Common_Result::RETRY,
       hmi_apis::Common_Result::SAVED);
 
-  out_first.is_invalid_enum =
+  out_first.is_not_used =
       hmi_apis::Common_Result::INVALID_ENUM == out_first.result_code;
 
-  out_second.is_invalid_enum =
+  out_second.is_not_used =
       hmi_apis::Common_Result::INVALID_ENUM == out_second.result_code;
 
   out_first.is_unsupported_resource =
@@ -810,13 +825,15 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
   out_first.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
           out_first.interface);
+
   out_second.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
           out_second.interface);
 
   bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
+                (out_second.is_not_used && out_first.is_ok) ||
+                (out_first.is_not_used && out_second.is_ok);
+
   result = result || CheckResultCode(out_first, out_second);
   result = result || CheckResultCode(out_second, out_first);
   return result;
@@ -835,6 +852,7 @@ void CommandRequestImpl::GetInfo(
 
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
     const ResponseInfo& first, const ResponseInfo& second) {
+  LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   if (IsResultCodeUnsupported(first, second)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;

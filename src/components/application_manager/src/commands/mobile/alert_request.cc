@@ -219,7 +219,7 @@ bool AlertRequest::PrepareResponseParameters(
     result = false;
   }
   result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
+  if ((ui_alert_info.is_ok || ui_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
@@ -230,6 +230,10 @@ bool AlertRequest::PrepareResponseParameters(
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
   info = MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+  // Mobile Alert request is successful when UI_Alert is successful
+  if (is_ui_alert_sent_ && !ui_alert_info.is_ok) {
+    return false;
+  }
   return result;
 }
 
