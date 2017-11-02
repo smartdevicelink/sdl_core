@@ -2249,6 +2249,27 @@ void CacheManager::FillDeviceSpecificData() {
   }
 }
 
+void CacheManager::MakeLowerCaseAppNames(policy_table::Table& pt) const {
+  policy_table::ApplicationPolicies& apps =
+      pt.policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::iterator iter = apps.begin();
+       iter != apps.end();) {
+    std::string key = iter->first;
+    if (key == kDefaultId || key == kPreDataConsentId || key == kDeviceId) {
+      ++iter;
+      continue;
+    }
+
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (key.compare(iter->first) != 0) {
+      std::swap(apps[key], iter->second);
+      iter = apps.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
 bool CacheManager::LoadFromBackup() {
   sync_primitives::AutoLock lock(cache_lock_);
   pt_ = backup_->GenerateSnapshot();
@@ -2290,6 +2311,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
       logger_,
       "Policy table content loaded:" << s_writer.write(table.ToJsonValue()));
 #endif  // ENABLE_LOG
+
+  MakeLowerCaseAppNames(table);
 
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
