@@ -535,19 +535,8 @@ void SystemRequest::Run() {
     if (!file || !file->is_download_complete ||
         !file_system::MoveFile(app_full_file_path, file_dst_path)) {
       LOG4CXX_DEBUG(logger_, "Binary data not found.");
-
-      std::string origin_file_name;
-      if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
-        origin_file_name =
-            (*message_)[strings::msg_params][strings::file_name].asString();
-      }
-      if (!(mobile_apis::RequestType::HTTP == request_type &&
-            0 == origin_file_name.compare(kIVSU))) {
-        LOG4CXX_DEBUG(logger_, "Binary data required. Invalid data");
-        SendResponse(false, mobile_apis::Result::INVALID_DATA);
-        return;
-      }
-      LOG4CXX_DEBUG(logger_, "IVSU does not require binary data. Continue");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
     }
     processing_file_ = file_dst_path;
   }
