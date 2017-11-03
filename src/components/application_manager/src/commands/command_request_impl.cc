@@ -152,31 +152,6 @@ bool IsResultCodeWarning(const ResponseInfo& first,
   return first_is_ok_second_is_warn || both_warnings;
 }
 
-struct DisallowedParamsInserter {
-  DisallowedParamsInserter(smart_objects::SmartObject& response,
-                           mobile_apis::VehicleDataResultCode::eType code)
-      : response_(response), code_(code) {}
-
-  bool operator()(const std::string& param) {
-    const VehicleData& vehicle_data =
-        application_manager::MessageHelper::vehicle_data();
-    VehicleData::const_iterator it = vehicle_data.find(param);
-    if (vehicle_data.end() != it) {
-      smart_objects::SmartObjectSPtr disallowed_param =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
-      (*disallowed_param)[strings::data_type] = (*it).second;
-      (*disallowed_param)[strings::result_code] = code_;
-      response_[strings::msg_params][param.c_str()] = *disallowed_param;
-      return true;
-    }
-    return false;
-  }
-
- private:
-  smart_objects::SmartObject& response_;
-  mobile_apis::VehicleDataResultCode::eType code_;
-};
-
 ResponseInfo::ResponseInfo()
     : result_code(hmi_apis::Common_Result::INVALID_ENUM)
     , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
@@ -300,30 +275,16 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
+
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-  // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
-  }
-
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  AddSpecificInfoToResponse(response);
 
   is_success_result_ = success;
-
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
@@ -642,6 +603,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
           params,
           &parameters_permissions_);
 
+  RemoveDisallowedParameters();
+
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {
     smart_objects::SmartObjectSPtr response =
@@ -655,6 +618,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     if (!info.empty()) {
       (*response)[strings::msg_params][strings::info] = info;
     }
+    AddSpecificInfoToResponse(*response);
+
     application_manager_.SendMessageToMobile(response);
     return false;
   }
@@ -666,8 +631,6 @@ bool CommandRequestImpl::CheckAllowedParameters() {
       parameters_permissions_.undefined_params.empty()) {
     return true;
   }
-
-  RemoveDisallowedParameters();
 
   return true;
 }
@@ -767,67 +730,8 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
   }
 }
 
-void CommandRequestImpl::AddDissalowedParameterToInfoString(
-    std::string& info, const std::string& param) const {
-  // prepare disallowed params enumeration for response info string
-  if (info.empty()) {
-    info = "\'" + param + "\'";
-  } else {
-    info = info + "," + " " + "\'" + param + "\'";
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParametersToInfo(
-    smart_objects::SmartObject& response) const {
-  std::string info;
-
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  if (!info.empty()) {
-    const uint32_t params_count =
-        removed_parameters_permissions_.disallowed_params.size() +
-        removed_parameters_permissions_.undefined_params.size();
-    info += params_count > 1 ? " parameters are " : " parameter is ";
-    info += "disallowed by Policies";
-
-    if (!response[strings::msg_params][strings::info].asString().empty()) {
-      // If we already have info add info about disallowed params to it
-      response[strings::msg_params][strings::info] =
-          response[strings::msg_params][strings::info].asString() + " " + info;
-    } else {
-      response[strings::msg_params][strings::info] = info;
-    }
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParameters(
-    smart_objects::SmartObject& response) {
-  DisallowedParamsInserter disallowed_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
-                removed_parameters_permissions_.disallowed_params.end(),
-                disallowed_inserter);
-
-  DisallowedParamsInserter undefined_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
-                removed_parameters_permissions_.undefined_params.end(),
-                undefined_inserter);
-}
-
-bool CommandRequestImpl::HasDisallowedParams() const {
-  return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
-          (!removed_parameters_permissions_.undefined_params.empty()));
-}
+void CommandRequestImpl::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {}
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,

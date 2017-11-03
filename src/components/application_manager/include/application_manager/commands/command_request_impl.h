@@ -228,6 +228,19 @@ class CommandRequestImpl : public CommandImpl,
   void AddDisallowedParameters(smart_objects::SmartObject& response);
 
   /**
+   * @brief Adds disallowed parameters to response info
+   * @param response Response message, which info should be extended
+   */
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
+
+  /**
+   * @brief Adds specific message to response info for current RPC
+   * @param response Response message, which info should be updated
+   */
+  virtual void AddSpecificInfoToResponse(smart_objects::SmartObject& response);
+
+  /**
    * @brief Checks if any request param was marked as disallowed by policy
    * @return true if any param was marked as disallowed
    */
@@ -351,13 +364,6 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddDissalowedParameterToInfoString(std::string& info,
                                           const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
 
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,

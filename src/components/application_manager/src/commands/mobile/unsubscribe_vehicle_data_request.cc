@@ -403,5 +403,19 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
   }
 }
 
+void UnsubscribeVehicleDataRequest::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AddDisallowedParameters(response);
+  if (helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          static_cast<mobile_apis::Result::eType>(
+              response[strings::msg_params][strings::result_code].asInt()),
+          mobile_apis::Result::DISALLOWED,
+          mobile_apis::Result::USER_DISALLOWED)) {
+    response[strings::msg_params][strings::info] = std::string();
+    AddDisallowedParametersToInfo(response);
+  }
+}
+
 }  // namespace commands
 }  // namespace application_manager
