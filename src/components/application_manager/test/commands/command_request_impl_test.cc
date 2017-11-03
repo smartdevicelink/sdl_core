@@ -39,6 +39,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/command_helper.h"
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
@@ -59,6 +60,7 @@ namespace command_request_impl {
 namespace am = application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
+namespace command_helper = am::commands::CommandHelper;
 
 using ::testing::_;
 using ::testing::Return;
@@ -86,6 +88,10 @@ const hmi_apis::FunctionID::eType kInvalidFunctionId =
 const std::string kPolicyAppId = "Test";
 const mobile_apis::Result::eType kMobResultSuccess =
     mobile_apis::Result::SUCCESS;
+const mobile_apis::Result::eType kMobResultDisallowed =
+    mobile_apis::Result::DISALLOWED;
+const am::PermitResult kDisallowedPermitResult =
+    am::PermitResult::kRpcAllParamsDisallowed;
 const std::string kDisallowedParam1 = "disallowed_param1";
 const std::string kDisallowedParam2 = "disallowed_param2";
 const std::string kAllowedParam = "allowed_param";
@@ -99,9 +105,6 @@ class CommandRequestImplTest
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
     using CommandRequestImpl::CheckAllowedParameters;
-    using CommandRequestImpl::RemoveDisallowedParameters;
-    using CommandRequestImpl::AddDisallowedParameters;
-    using CommandRequestImpl::HasDisallowedParams;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
                                 ApplicationManager& am)
@@ -319,14 +322,18 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   permission.allowed_params.insert(kAllowedParam);
   permission.undefined_params.insert(kUndefinedParam);
 
-  command->RemoveDisallowedParameters();
+  command_helper::RemoveDisallowedParameters(
+      command->parameters_permissions(),
+      command->removed_parameters_permissions(),
+      (*msg)[strings::msg_params]);
 
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisallowedParam1));
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisallowedParam2));
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kUndefinedParam));
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kMissedParam));
   EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kAllowedParam));
-  EXPECT_TRUE(command->HasDisallowedParams());
+  EXPECT_TRUE(command_helper::HasDisallowedParams(
+      command->removed_parameters_permissions()));
 }
 
 TEST_F(CommandRequestImplTest,
@@ -362,6 +369,10 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
+  am::VehicleData vehicle_data;
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
   EXPECT_TRUE(command->CheckPermissions());
 }
 
@@ -383,6 +394,10 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
+  am::VehicleData vehicle_data;
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
   smart_objects::SmartObjectSPtr response =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -400,6 +415,43 @@ ACTION_P(GetArg3, output) {
   *output = arg2;
 }
 
+TEST_F(CommandRequestImplTest,
+       CheckAllowedParameters_AddDisallowedParamInfo_UNSUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg)[strings::msg_params][kPolicyAppId] = true;
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  command->parameters_permissions().permit_result = kDisallowedPermitResult;
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
+
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(kMobResultDisallowed));
+
+  am::VehicleData vehicle_data;
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*response)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
+      .WillOnce(Return(response));
+
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(response, _));
+
+  EXPECT_FALSE(command->CheckPermissions());
+
+  EXPECT_TRUE((*response)[strings::msg_params].keyExists(strings::info));
+  EXPECT_FALSE(
+      (*response)[strings::msg_params][strings::info].asString().empty());
+}
+
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
@@ -413,6 +465,10 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   RPCParams params;
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
+
+  am::VehicleData vehicle_data;
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
 
   EXPECT_TRUE(command->CheckPermissions());
   EXPECT_TRUE(params.end() !=
@@ -434,7 +490,8 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
 
-  command->AddDisallowedParameters(*msg);
+  command_helper::AddDisallowedParameters(
+      command->removed_parameters_permissions(), *msg);
 
   EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kDisallowedParam1));
 }
@@ -468,37 +525,6 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
   EXPECT_EQ(RequestState::kCompleted, command->current_state());
 
   EXPECT_TRUE(smart_objects::SmartType_Map == (*msg).getType());
-}
-
-TEST_F(CommandRequestImplTest,
-       SendResponse_AddDisallowedParametersToInfo_SUCCESS) {
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(
-      kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
-  MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SubscribeVehicleDataID;
-
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
-  command->removed_parameters_permissions().disallowed_params.insert(
-      kDisallowedParam1);
-
-  MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
-
-  command->SendResponse(true, kMobResultSuccess, NULL, NULL);
-
-  EXPECT_EQ(RequestState::kCompleted, command->current_state());
-
-  EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::info));
-  EXPECT_FALSE(
-      (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
 TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
