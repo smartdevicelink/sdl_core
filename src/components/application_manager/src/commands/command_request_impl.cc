@@ -266,30 +266,16 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
+
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-  // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
-  }
-
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  AddSpecificInfoToResponse(response);
 
   is_success_result_ = success;
-
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
@@ -608,6 +594,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
           params,
           &parameters_permissions_);
 
+  RemoveDisallowedParameters();
+
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {
     smart_objects::SmartObjectSPtr response =
@@ -621,6 +609,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     if (!info.empty()) {
       (*response)[strings::msg_params][strings::info] = info;
     }
+    AddSpecificInfoToResponse(*response);
+
     application_manager_.SendMessageToMobile(response);
     return false;
   }
@@ -632,8 +622,6 @@ bool CommandRequestImpl::CheckAllowedParameters() {
       parameters_permissions_.undefined_params.empty()) {
     return true;
   }
-
-  RemoveDisallowedParameters();
 
   return true;
 }
@@ -732,6 +720,9 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
     }
   }
 }
+
+void CommandRequestImpl::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {}
 
 void CommandRequestImpl::AddDissalowedParameterToInfoString(
     std::string& info, const std::string& param) const {

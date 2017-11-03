@@ -77,6 +77,12 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Adds specific message to response info for current RPC
+   * @param response Response message, which info should be updated
+   */
+  void AddSpecificInfoToResponse(smart_objects::SmartObject& response) FINAL;
+
 #ifdef HMI_DBUS_API
  private:
   struct HmiRequest {
