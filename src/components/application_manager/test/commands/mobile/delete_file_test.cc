@@ -228,10 +228,6 @@ TEST_F(DeleteFileResponseTest, Run_ValidApp_SUCCESS) {
   DeleteFileResponsePtr command = CreateCommand<DeleteFileResponse>(message);
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-  const uint32_t kAvailableDiskSpace = 10u;
-  EXPECT_CALL(*app, GetAvailableDiskSpace())
-      .WillOnce(Return(kAvailableDiskSpace));
-
   EXPECT_CALL(app_mngr_,
               SendMessageToMobile(
                   CheckMessageResultCode(mobile_apis::Result::SUCCESS), _));
