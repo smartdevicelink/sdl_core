@@ -217,6 +217,11 @@ GetVehicleDataRequest::GetVehicleDataRequest(
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
+void GetVehicleDataRequest::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {
+  AddDisallowedParametersToInfo(response);
+}
+
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
