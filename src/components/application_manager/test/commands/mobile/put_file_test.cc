@@ -234,7 +234,7 @@ TEST_F(PutFileRequestTest, Run_BinaryDataGreaterThanAvaliableSpace_UNSUCCESS) {
 
   const uint32_t avaliable_space = 0u;
   EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
-      .WillOnce(Return(avaliable_space));
+      .WillRepeatedly(Return(avaliable_space));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::OUT_OF_MEMORY);
 
   PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
@@ -267,8 +267,7 @@ TEST_F(PutFileRequestTest, Run_IvalidUpdateFile_UNSUCCESS) {
 
   const uint32_t avaliable_space = 2u;
   EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
-      .WillOnce(Return(avaliable_space))
-      .WillOnce(Return(avaliable_space));
+      .WillRepeatedly(Return(avaliable_space));
 
   const std::string file_path = kStorageFolder + "/" + kAppFolder;
   EXPECT_CALL(app_mngr_,
@@ -294,8 +293,7 @@ TEST_F(PutFileRequestTest, Run_AddFile_SUCCESS) {
 
   const uint32_t avaliable_space = 2u;
   EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
-      .WillOnce(Return(avaliable_space))
-      .WillOnce(Return(avaliable_space));
+      .WillRepeatedly(Return(avaliable_space));
 
   const std::string file_path = kStorageFolder + "/" + kAppFolder;
   EXPECT_CALL(app_mngr_,

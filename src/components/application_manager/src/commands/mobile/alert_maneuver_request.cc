@@ -243,7 +243,8 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     SmartArray::const_iterator it_soft_button = soft_button_array->begin();
 
     for (; it_soft_button != soft_button_array->end(); ++it_soft_button) {
-      const char* soft_button_text = (*it_soft_button)[strings::text].asCharArray();
+      const char* soft_button_text =
+          (*it_soft_button)[strings::text].asCharArray();
       if (!CheckSyntax(soft_button_text)) {
         LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
         return true;
