@@ -230,6 +230,7 @@ void TcpClientListener::Loop() {
             inet_ntoa(client_address.sin_addr),
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
+    LOG4CXX_INFO(logger_, "Port is: " << port_);
 
     if (enable_keepalive_) {
       SetKeepaliveOptions(connection_fd);
