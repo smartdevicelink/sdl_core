@@ -413,7 +413,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * Stop() interface of that device
    * @param device_id unique device identifier that has to be stopped.
    */
-  void StopDevice(const DeviceUID& device_id) const FINAL;
+  void StopDevice(const DeviceUID& device_id) const OVERRIDE;
 
   /**
    * @brief DeviceSwitched is triggered for adapter to proceed with possible
@@ -422,7 +422,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * This is default implemenation does nothing. Must be overloaded if needed.
    * @param device_handle Device id to notify on event
    */
-  void DeviceSwitched(const DeviceUID& device_handle) FINAL;
+  void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Allows to obtain connection type used by device.
