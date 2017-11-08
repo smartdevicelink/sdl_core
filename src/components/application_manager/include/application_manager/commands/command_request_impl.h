@@ -224,36 +224,10 @@ class CommandRequestImpl : public CommandImpl,
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
 
   /**
-   * @brief Remove from current message parameters disallowed by policy table
-   */
-  void RemoveDisallowedParameters();
-
-  /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
-   */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
-
-  /**
    * @brief Adds specific message to response info for current RPC
    * @param response Response message, which info should be updated
    */
   virtual void AddSpecificInfoToResponse(smart_objects::SmartObject& response);
-
-  /**
-   * @brief Checks if any request param was marked as disallowed by policy
-   * @return true if any param was marked as disallowed
-   */
-  bool HasDisallowedParams() const;
 
   /**
    * @brief Checks result code from HMI for single RPC
@@ -323,14 +297,6 @@ class CommandRequestImpl : public CommandImpl,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
-  /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
 
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,

@@ -35,6 +35,7 @@
 #include "application_manager/commands/command_impl.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/commands/command_helper.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -183,7 +184,7 @@ void UnsubscribeVehicleDataRequest::Run() {
           vi_already_unsubscribed_by_this_app_.size();
 
   if (0 == items_to_unsubscribe) {
-    if (HasDisallowedParams()) {
+    if (command_helper::HasDisallowedParams(removed_parameters_permissions_)) {
       SendResponse(false, mobile_apis::Result::DISALLOWED);
     } else {
       SendResponse(
@@ -396,14 +397,17 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
 void UnsubscribeVehicleDataRequest::AddSpecificInfoToResponse(
     smart_objects::SmartObject& response) {
   LOG4CXX_AUTO_TRACE(logger_);
-  AddDisallowedParameters(response);
   if (helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
           static_cast<mobile_apis::Result::eType>(
               response[strings::msg_params][strings::result_code].asInt()),
+          mobile_apis::Result::SUCCESS,
           mobile_apis::Result::DISALLOWED,
           mobile_apis::Result::USER_DISALLOWED)) {
     response[strings::msg_params][strings::info] = std::string();
-    AddDisallowedParametersToInfo(response);
+    command_helper::AddDisallowedParameters(removed_parameters_permissions_,
+                                            response);
+    command_helper::AddDisallowedParametersToInfo(
+        removed_parameters_permissions_, response);
   }
 }
 
