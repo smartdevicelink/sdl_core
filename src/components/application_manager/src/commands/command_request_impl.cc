@@ -36,6 +36,7 @@
 #include "utils/macro.h"
 #include "utils/make_shared.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_helper.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
@@ -603,7 +604,9 @@ bool CommandRequestImpl::CheckAllowedParameters() {
           params,
           &parameters_permissions_);
 
-  RemoveDisallowedParameters();
+  command_helper::RemoveDisallowedParameters(parameters_permissions_,
+                                             removed_parameters_permissions_,
+                                             (*message_)[strings::msg_params]);
 
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {
@@ -671,63 +674,6 @@ bool CommandRequestImpl::CheckHMICapabilities(
   LOG4CXX_DEBUG(logger_,
                 "Button capabilities for " << button << " was not found");
   return false;
-}
-
-void CommandRequestImpl::RemoveDisallowedParameters() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObject& params = (*message_)[strings::msg_params];
-
-  // Remove from request all disallowed parameters
-  RPCParams::const_iterator it_disallowed =
-      parameters_permissions_.disallowed_params.begin();
-  RPCParams::const_iterator it_disallowed_end =
-      parameters_permissions_.disallowed_params.end();
-  for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
-    if (params.keyExists(*it_disallowed)) {
-      const std::string key = *it_disallowed;
-      params.erase(key);
-      removed_parameters_permissions_.disallowed_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by user: " << key);
-    }
-  }
-
-  // Remove from request all undefined yet parameters
-  RPCParams::const_iterator it_undefined =
-      parameters_permissions_.undefined_params.begin();
-  RPCParams::const_iterator it_undefined_end =
-      parameters_permissions_.undefined_params.end();
-  for (; it_undefined != it_undefined_end; ++it_undefined) {
-    if (params.keyExists(*it_undefined)) {
-      const std::string key = *it_undefined;
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by policy: " << key);
-    }
-  }
-
-  // Remove from request all parameters missed in allowed
-  const VehicleData& vehicle_data =
-      application_manager::MessageHelper::vehicle_data();
-
-  VehicleData::const_iterator it_vehicle_data = vehicle_data.begin();
-  VehicleData::const_iterator it_vehicle_data_end = vehicle_data.end();
-  for (; it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
-    const std::string key = it_vehicle_data->first;
-    if (params.keyExists(key) &&
-        parameters_permissions_.allowed_params.end() ==
-            std::find(parameters_permissions_.allowed_params.begin(),
-                      parameters_permissions_.allowed_params.end(),
-                      key)) {
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is not found among allowed parameters '"
-                       << key << "' and will be treated as disallowed.");
-    }
-  }
 }
 
 void CommandRequestImpl::AddSpecificInfoToResponse(
