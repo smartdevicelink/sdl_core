@@ -3279,6 +3279,22 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
     return;
   }
 
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message->json_message(), value);
+  if (value.isMember(("result"))) {
+    if (!value["result"].isObject()) {
+      LOG4CXX_ERROR(logger_, "Invalid type of 'result' field.");
+      return;
+    }
+  }
+  if (value.isMember(("error"))) {
+    if (!value["error"].isObject()) {
+      LOG4CXX_ERROR(logger_, "Invalid type of 'error' field.");
+      return;
+    }
+  }
+
 #ifdef SDL_REMOTE_CONTROL
   if (plugin_manager_.IsHMIMessageForPlugin(message)) {
     functional_modules::ProcessResult result =
