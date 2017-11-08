@@ -60,7 +60,7 @@ namespace command_request_impl {
 namespace am = application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-namespace command_helper = am::commands::CommandHelper;
+namespace command_helper = am::commands::command_helper;
 
 using ::testing::_;
 using ::testing::Return;
