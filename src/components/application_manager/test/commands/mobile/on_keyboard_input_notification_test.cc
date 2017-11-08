@@ -61,7 +61,7 @@ using testing::_;
 class OnKeyBoardInputNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  void SetSendNotificationExpectations(MessageSharedPtr msg) {
+  void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
         .WillOnce(Return(false));
     EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
