@@ -1768,7 +1768,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
-  HandlersCollection::const_iterator it = listeners_.begin();
+//  HandlersCollection::const_iterator it = listeners_.begin();
   std::for_each(
       listeners_.begin(),
       listeners_.end(),
