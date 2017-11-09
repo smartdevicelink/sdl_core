@@ -255,6 +255,8 @@ class MockMessageHelper {
 
   MOCK_METHOD1(PrintSmartObject,
                bool(const smart_objects::SmartObject& object));
+  MOCK_METHOD1(SmartObjectToString,
+               std::string(const smart_objects::SmartObject& object));
   MOCK_METHOD3(SendTTSGlobalProperties,
                void(ApplicationSharedPtr app,
                     const bool default_help_prompt,
