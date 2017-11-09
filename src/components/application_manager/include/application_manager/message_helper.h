@@ -620,6 +620,9 @@ class MessageHelper {
 
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
+  static std::string SmartObjectToString(
+      const smart_objects::SmartObject& object);
+
   template <typename From, typename To>
   static To ConvertEnumAPINoCheck(const From& input) {
     return static_cast<To>(input);
