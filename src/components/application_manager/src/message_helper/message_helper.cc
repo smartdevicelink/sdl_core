@@ -61,6 +61,9 @@
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 
+#include "json/json.h"
+#include "formatters/CFormatterJsonBase.h"
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
@@ -2650,6 +2653,14 @@ void MessageHelper::SubscribeApplicationToSoftButton(
     softbuttons_id.insert(soft_buttons[i][strings::soft_button_id].asUInt());
   }
   app->SubscribeToSoftButtons(function_id, softbuttons_id);
+}
+
+std::string MessageHelper::SmartObjectToString(
+    const smart_objects::SmartObject& object) {
+  Json::Value tmp;
+  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
+  return tmp.toStyledString();
 }
 
 // TODO(AK): change printf to logger
