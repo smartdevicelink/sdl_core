@@ -621,6 +621,11 @@ class MessageHelper {
 
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
+  /**
+   * @brief Converts common SmartObject to its string representation
+   * @param object SmartObject to convert
+   * @return string representation of given SmartObject
+   */
   static std::string SmartObjectToString(
       const smart_objects::SmartObject& object);
 
