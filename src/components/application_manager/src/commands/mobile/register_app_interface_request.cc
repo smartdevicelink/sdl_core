@@ -674,7 +674,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     LOG4CXX_DEBUG(logger_,
                   "Application has been switched from another transport.");
 
-    if (!resumption || mobile_apis::Result::RESUME_FAILED == result_code) {
+    if (hash_id.empty() && resumer.CheckApplicationHash(application, hash_id)) {
+      LOG4CXX_INFO(logger_,
+                   "Application does not have hashID saved and neither "
+                   "provided it with RAI. Nothing to resume.");
+      result_code = mobile_apis::Result::SUCCESS;
+    } else if (!resumption ||
+               mobile_apis::Result::RESUME_FAILED == result_code) {
       application_manager::RecallApplicationData(application,
                                                  application_manager_);
       resumer.RemoveApplicationFromSaved(application);
