@@ -119,8 +119,10 @@ void DeleteCommandRequest::Run() {
 bool DeleteCommandRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   using namespace helpers;
-  ResponseInfo ui_delete_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
-  ResponseInfo vr_delete_info(vr_result_, HmiInterfaces::HMI_INTERFACE_VR);
+  ResponseInfo ui_delete_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo vr_delete_info(
+      vr_result_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_delete_info, vr_delete_info);
 

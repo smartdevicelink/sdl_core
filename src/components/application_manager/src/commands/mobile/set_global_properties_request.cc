@@ -279,10 +279,11 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
   if (result &&

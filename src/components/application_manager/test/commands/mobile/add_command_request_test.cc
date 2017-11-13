@@ -209,7 +209,8 @@ class AddCommandRequestTest
     EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
     EXPECT_CALL(app_mngr_, ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
         .WillOnce(Return(true));
-    SmartObjectSPtr response;
+    SmartObjectSPtr response = utils::MakeShared<SmartObject>(SmartType_Map);
+    (*response)[strings::msg_params][strings::info] = "info";
     EXPECT_CALL(
         mock_message_helper_,
         CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
@@ -1042,7 +1043,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
-  SmartObjectSPtr response;
+  SmartObjectSPtr response = utils::MakeShared<SmartObject>(SmartType_Map);
+  (*response)[strings::msg_params][strings::info] = "info";
   EXPECT_CALL(
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
@@ -1091,7 +1093,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  SmartObjectSPtr response;
+  SmartObjectSPtr response = utils::MakeShared<SmartObject>(SmartType_Map);
+  (*response)[strings::msg_params][strings::info] = "info";
   EXPECT_CALL(
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))

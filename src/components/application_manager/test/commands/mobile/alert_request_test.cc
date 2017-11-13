@@ -128,12 +128,12 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
 
     ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
   }
 
   void Expectations() {

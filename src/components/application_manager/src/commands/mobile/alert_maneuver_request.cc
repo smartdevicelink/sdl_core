@@ -195,10 +195,13 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 
   application_manager::commands::ResponseInfo navigation_alert_info(
       navi_alert_maneuver_result_code_,
-      HmiInterfaces::HMI_INTERFACE_Navigation);
+      HmiInterfaces::HMI_INTERFACE_Navigation,
+      application_manager_);
 
   application_manager::commands::ResponseInfo tts_alert_info(
-      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
+      tts_speak_result_code_,
+      HmiInterfaces::HMI_INTERFACE_TTS,
+      application_manager_);
   const bool result =
       PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
 

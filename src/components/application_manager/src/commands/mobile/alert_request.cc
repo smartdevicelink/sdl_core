@@ -116,18 +116,6 @@ void AlertRequest::Run() {
   }
 }
 
-void AlertRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (false ==
-      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    CommandRequestImpl::onTimeOut();
-    return;
-  }
-  LOG4CXX_INFO(logger_,
-               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
-}
-
 void AlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
@@ -208,9 +196,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  ResponseInfo ui_alert_info(alert_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_alert_info(
+      alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   ResponseInfo tts_alert_info(tts_speak_result_,
-                              HmiInterfaces::HMI_INTERFACE_TTS);
+                              HmiInterfaces::HMI_INTERFACE_TTS,
+                              application_manager_);
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 

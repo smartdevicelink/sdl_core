@@ -156,12 +156,12 @@ TEST_F(DeleteCommandRequestTest,
 
   ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(mock_hmi_interfaces_,
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(mock_hmi_interfaces_,
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(*mock_app_, FindCommand(kCommandId))
       .WillByDefault(Return(test_msg.get()));
   ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
@@ -214,12 +214,12 @@ TEST_F(DeleteCommandRequestTest,
 
   ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(mock_hmi_interfaces_,
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(mock_hmi_interfaces_,
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
   ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
 

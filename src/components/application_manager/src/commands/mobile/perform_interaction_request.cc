@@ -393,14 +393,14 @@ void PerformInteractionRequest::ProcessUIResponse(
   if (result) {
     if (is_pi_warning) {
       ui_result_code_ = hmi_apis::Common_Result::WARNINGS;
-      ui_info_ = "Unsupported phoneme type was sent in an item";
+      ui_info_ = message[strings::msg_params][strings::info].asString();
       if (message.keyExists(strings::params) &&
           message[strings::params].keyExists(strings::data)) {
         msg_params = message[strings::params][strings::data];
       }
     } else if (is_pi_unsupported) {
       ui_result_code_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-      ui_info_ = "Unsupported phoneme type was sent in an item";
+      ui_info_ = message[strings::msg_params][strings::info].asString();
     } else if (message.keyExists(strings::msg_params)) {
       msg_params = message[strings::msg_params];
     }
@@ -929,10 +929,10 @@ void PerformInteractionRequest::SendBothModeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType perform_interaction_result_code =
       mobile_apis::Result::INVALID_ENUM;
-  ResponseInfo ui_perform_info(ui_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_UI);
-  ResponseInfo vr_perform_info(vr_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_VR);
+  ResponseInfo ui_perform_info(
+      ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo vr_perform_info(
+      vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
   perform_interaction_result_code =

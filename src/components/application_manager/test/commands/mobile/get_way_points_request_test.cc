@@ -246,15 +246,15 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_WrongEventId_UNSUCCESS) {
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case1) {
-  CheckOnEventResponse("0", SUCCESS, true);
+  CheckOnEventResponse("0", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case2) {
-  CheckOnEventResponse("", SUCCESS, true);
+  CheckOnEventResponse("", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case3) {
-  CheckOnEventResponse("test", SUCCESS, true);
+  CheckOnEventResponse("test", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
@@ -265,7 +265,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("    ", GENERIC_ERROR, false);
+  CheckOnEventResponse("    ", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
@@ -276,7 +276,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\t", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\t", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
@@ -287,7 +287,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\n", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\n", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
@@ -298,7 +298,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\t\n", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\t\n", HmiResult::GENERIC_ERROR, false);
 }
 
 }  // namespace get_way_points_request
