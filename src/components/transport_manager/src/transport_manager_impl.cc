@@ -735,18 +735,20 @@ bool TransportManagerImpl::TryDeviceSwitch(
     DeviceToAdapterMap::iterator value) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto device_uid = value->first;
-  const auto adapter = value->second;
+  const auto old_adapter = value->second;
 
-  if (transport_adapter::DeviceType::IOS_BT != adapter->GetDeviceType()) {
+  if (transport_adapter::DeviceType::IOS_BT != old_adapter->GetDeviceType()) {
     LOG4CXX_DEBUG(logger_, "Adapter type is not IOS_BT.");
     return false;
   }
-  adapter->StopDevice(device_uid);
-  adapter->DeviceSwitched(device_uid);
+  
+  const auto new_adapter = ta;
+  old_adapter->StopDevice(device_uid);
+  new_adapter->DeviceSwitched(device_uid);
 
   DeactivateDeviceConnections(device_uid);
 
-  value->second = ta;
+  value->second = new_adapter;
   device_to_reconnect_ = device_uid;
 
   const uint32_t timeout = get_settings().app_transport_change_timer() +

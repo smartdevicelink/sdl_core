@@ -1159,7 +1159,7 @@ TEST_F(TransportManagerImplTest,
                            transport_adapter::DeviceType::IOS_USB);
 
   EXPECT_CALL(*mock_adapter_, StopDevice(mac_address_));
-  EXPECT_CALL(*mock_adapter_, DeviceSwitched(mac_address_));
+  EXPECT_CALL(*second_mock_adapter, DeviceSwitched(mac_address_));
 
   EXPECT_CALL(mock_transport_manager_settings_, app_transport_change_timer())
       .WillOnce(Return(timeout));
