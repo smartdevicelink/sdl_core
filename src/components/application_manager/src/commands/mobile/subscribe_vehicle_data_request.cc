@@ -149,6 +149,7 @@ void SubscribeVehicleDataRequest::Run() {
        ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
                  &msg_params,
                  true);
@@ -165,7 +166,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_ERROR(logger_, "Received unknown event.");
     return;
   }
-
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
 

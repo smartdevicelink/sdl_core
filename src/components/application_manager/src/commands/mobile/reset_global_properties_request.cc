@@ -46,10 +46,6 @@ namespace commands {
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , is_ui_send_(false)
-    , is_tts_send_(false)
-    , is_ui_received_(false)
-    , is_tts_received_(false)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
@@ -111,11 +107,11 @@ void ResetGlobalPropertiesRequest::Run() {
 
   if (vr_help_title_items || menu_name || menu_icon ||
       is_key_board_properties) {
-    is_ui_send_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   if (timeout_prompt || helpt_promt) {
-    is_tts_send_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   }
 
   app->set_reset_global_properties_active(true);
@@ -245,7 +241,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
-      is_ui_received_ = true;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
@@ -253,7 +249,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
-      is_tts_received_ = true;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
@@ -321,7 +317,8 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
 }
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
+  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
+         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 }  // namespace commands

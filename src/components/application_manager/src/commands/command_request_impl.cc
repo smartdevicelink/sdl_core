@@ -879,6 +879,67 @@ const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
   return parameters_permissions_;
 }
 
+void CommandRequestImpl::StartAwaitForInterface(
+    const HmiInterfaces::InterfaceID interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  awaiting_response_interfaces_.insert(interface_id);
+}
+
+bool CommandRequestImpl::IsInterfaceAwaited(
+    const HmiInterfaces::InterfaceID& interface_id) const {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  return (it != awaiting_response_interfaces_.end());
+}
+
+void CommandRequestImpl::EndAwaitForInterface(
+    const HmiInterfaces::InterfaceID& interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  if (it != awaiting_response_interfaces_.end()) {
+    awaiting_response_interfaces_.erase(it);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "EndAwaitForInterface called on interface \
+                    which was not put into await state: "
+                     << interface_id);
+  }
+}
+
+bool CommandRequestImpl::IsResultCodeUnsupported(
+    const ResponseInfo& first, const ResponseInfo& second) const {
+  const bool first_ok_second_unsupported =
+      (first.is_ok || first.is_not_used) && second.is_unsupported_resource;
+  const bool both_unsupported =
+      first.is_unsupported_resource && second.is_unsupported_resource;
+  return first_ok_second_unsupported || both_unsupported;
+}
+
+std::string GetComponentNameFromInterface(
+    const HmiInterfaces::InterfaceID& interface) {
+  switch (interface) {
+    case HmiInterfaces::HMI_INTERFACE_Buttons:
+      return "Buttons";
+    case HmiInterfaces::HMI_INTERFACE_BasicCommunication:
+      return "BasicCommunication";
+    case HmiInterfaces::HMI_INTERFACE_VR:
+      return "VR";
+    case HmiInterfaces::HMI_INTERFACE_TTS:
+      return "TTS";
+    case HmiInterfaces::HMI_INTERFACE_UI:
+      return "UI";
+    case HmiInterfaces::HMI_INTERFACE_Navigation:
+      return "Navigation";
+    case HmiInterfaces::HMI_INTERFACE_VehicleInfo:
+      return "VehicleInfo";
+    case HmiInterfaces::HMI_INTERFACE_SDL:
+      return "SDL";
+    default:
+      return "Unknown type";
+  }
+}
 }  // namespace commands
 
 }  // namespace application_manager

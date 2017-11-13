@@ -250,6 +250,7 @@ void GetVehicleDataRequest::Run() {
     }
   }
   if (msg_params.length() > min_length_msg_params) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
     SendHMIRequest(
         hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &msg_params, true);
     return;
@@ -266,6 +267,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
