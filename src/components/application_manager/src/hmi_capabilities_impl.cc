@@ -202,15 +202,11 @@ void InitCapabilities() {
   text_fields_enum_name.insert(
       std::make_pair(std::string("locationDescription"),
                      hmi_apis::Common_TextFieldName::locationDescription));
-  text_fields_enum_name.insert(std::make_pair(
-      std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
   text_fields_enum_name.insert(
       std::make_pair(std::string("addressLines"),
                      hmi_apis::Common_TextFieldName::addressLines));
   text_fields_enum_name.insert(std::make_pair(
       std::string("phoneNumber"), hmi_apis::Common_TextFieldName::phoneNumber));
-  text_fields_enum_name.insert(std::make_pair(
-      std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
   text_fields_enum_name.insert(std::make_pair(
       std::string("menuTitle"), hmi_apis::Common_TextFieldName::menuTitle));
 
