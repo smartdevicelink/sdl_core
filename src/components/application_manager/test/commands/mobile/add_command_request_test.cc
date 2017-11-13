@@ -517,9 +517,6 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   request_ptr->on_event(event);
 }
 
@@ -531,9 +528,6 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*msg);
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_)[msg_params]));
 
   am::CommandsMap commands_map;
@@ -620,9 +614,6 @@ TEST_F(AddCommandRequestTest,
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::REJECTED))
-      .WillOnce(Return(mobile_apis::Result::REJECTED));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
@@ -696,9 +687,6 @@ TEST_F(
         .WillOnce(Return(true));
   }
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
-      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -743,9 +731,6 @@ TEST_F(
         .WillOnce(Return(true));
   }
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
-      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -974,9 +959,6 @@ TEST_F(AddCommandRequestTest,
   event_ui.set_smart_object(*msg_ui);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg_);
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::ABORTED))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand)))
@@ -1016,9 +998,6 @@ TEST_F(AddCommandRequestTest,
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::ABORTED))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
 
   Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
   event_ui.set_smart_object(*msg_);

@@ -159,10 +159,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -274,8 +270,6 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_ReceivedUIScrollableMessage_SUCCESS) {
   (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
@@ -288,9 +282,6 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_UnsupportedRCAndUICoop_SUCCESS) {
   (*msg_)[params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
   EXPECT_CALL(
       app_mngr_,

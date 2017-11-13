@@ -250,9 +250,6 @@ TEST_F(DeleteCommandRequestTest,
   EXPECT_CALL(*app, RemoveCommand(kCommandId));
 
   EXPECT_CALL(*app, UpdateHash());
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
-      .WillRepeatedly(Return(am::mobile_api::Result::SUCCESS));
 
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event_ui)));

@@ -248,9 +248,6 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::msg_params][am::strings::info] =
       "UI is not supported by system";
 
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
   MessageSharedPtr msg_tts = CreateMessage();
   (*msg_tts)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -263,9 +260,6 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(mock_message_helper_,
-          HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillByDefault(Return(am::mobile_api::Result::UNSUPPORTED_RESOURCE));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
@@ -442,8 +436,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -504,8 +496,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -574,16 +564,12 @@ TEST_F(AlertRequestTest,
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
   tts_stop_event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(tts_stop_event);
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::WARNINGS);
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -711,8 +697,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
   tts_stop_event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(tts_stop_event);
 
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -722,8 +706,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -750,8 +732,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
   ui_event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(ui_event);
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
@@ -762,8 +742,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 

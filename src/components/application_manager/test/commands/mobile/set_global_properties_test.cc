@@ -355,9 +355,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
   utils::SharedPtr<SetGlobalPropertiesRequest> command =
       CreateCommand<SetGlobalPropertiesRequest>(response);
 
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
@@ -1039,8 +1036,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
-
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
 
@@ -1068,8 +1063,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -1151,7 +1144,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_InvalidEventID_Canceled) {
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).Times(0);
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
 
@@ -1185,8 +1177,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(response_code))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 

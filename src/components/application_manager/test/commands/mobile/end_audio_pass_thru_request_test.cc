@@ -89,10 +89,6 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
 
   MessageSharedPtr ui_command_result;

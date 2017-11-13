@@ -92,8 +92,6 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 
   am::MockMessageHelper& mock_message_helper(
       *am::MockMessageHelper::message_helper_mock());
-  EXPECT_CALL(mock_message_helper, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));

@@ -44,7 +44,7 @@
 #include "test/application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_application.h"
-
+#include "application_manager/mock_message_helper.h"
 namespace test {
 namespace components {
 namespace commands_test {
@@ -63,6 +63,7 @@ using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
 using am::ApplicationSharedPtr;
+using am::MockMessageHelper;
 using ::test::components::application_manager_test::MockApplication;
 
 // Depending on the value type will be selected
@@ -152,6 +153,57 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_SDL));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+    InitHMIToMobileResultConverter();
+  }
+
+  void InitHMIToMobileResultConverter() {
+    namespace MobileResult = mobile_apis::Result;
+    namespace HMIResult = hmi_apis::Common_Result;
+    MockMessageHelper& mock_message_helper =
+        *MockMessageHelper::message_helper_mock();
+    auto link_hmi_to_mob_result = [&mock_message_helper](
+        HMIResult::eType hmi_result, MobileResult::eType mobile_result) {
+      ON_CALL(mock_message_helper, HMIToMobileResult(hmi_result))
+          .WillByDefault(Return(mobile_result));
+    };
+    link_hmi_to_mob_result(HMIResult::INVALID_ENUM, MobileResult::INVALID_ENUM);
+    link_hmi_to_mob_result(HMIResult::SUCCESS, MobileResult::SUCCESS);
+    link_hmi_to_mob_result(HMIResult::UNSUPPORTED_REQUEST,
+                           MobileResult::UNSUPPORTED_REQUEST);
+    link_hmi_to_mob_result(HMIResult::UNSUPPORTED_RESOURCE,
+                           MobileResult::UNSUPPORTED_RESOURCE);
+    link_hmi_to_mob_result(HMIResult::DISALLOWED, MobileResult::DISALLOWED);
+    link_hmi_to_mob_result(HMIResult::REJECTED, MobileResult::REJECTED);
+    link_hmi_to_mob_result(HMIResult::ABORTED, MobileResult::ABORTED);
+    link_hmi_to_mob_result(HMIResult::IGNORED, MobileResult::IGNORED);
+    link_hmi_to_mob_result(HMIResult::RETRY, MobileResult::RETRY);
+    link_hmi_to_mob_result(HMIResult::IN_USE, MobileResult::IN_USE);
+    link_hmi_to_mob_result(HMIResult::TIMED_OUT, MobileResult::TIMED_OUT);
+    link_hmi_to_mob_result(HMIResult::INVALID_DATA, MobileResult::INVALID_DATA);
+    link_hmi_to_mob_result(HMIResult::CHAR_LIMIT_EXCEEDED,
+                           MobileResult::CHAR_LIMIT_EXCEEDED);
+    link_hmi_to_mob_result(HMIResult::INVALID_ID, MobileResult::INVALID_ID);
+    link_hmi_to_mob_result(HMIResult::DUPLICATE_NAME,
+                           MobileResult::DUPLICATE_NAME);
+    link_hmi_to_mob_result(HMIResult::APPLICATION_NOT_REGISTERED,
+                           MobileResult::APPLICATION_NOT_REGISTERED);
+    link_hmi_to_mob_result(HMIResult::WRONG_LANGUAGE,
+                           MobileResult::WRONG_LANGUAGE);
+    link_hmi_to_mob_result(HMIResult::OUT_OF_MEMORY,
+                           MobileResult::OUT_OF_MEMORY);
+    link_hmi_to_mob_result(HMIResult::TOO_MANY_PENDING_REQUESTS,
+                           MobileResult::TOO_MANY_PENDING_REQUESTS);
+    link_hmi_to_mob_result(HMIResult::WARNINGS, MobileResult::WARNINGS);
+    link_hmi_to_mob_result(HMIResult::GENERIC_ERROR,
+                           MobileResult::GENERIC_ERROR);
+    link_hmi_to_mob_result(HMIResult::USER_DISALLOWED,
+                           MobileResult::USER_DISALLOWED);
+    link_hmi_to_mob_result(HMIResult::TRUNCATED_DATA,
+                           MobileResult::TRUNCATED_DATA);
+    link_hmi_to_mob_result(HMIResult::SAVED, MobileResult::SAVED);
+    link_hmi_to_mob_result(HMIResult::DATA_NOT_AVAILABLE,
+                           MobileResult::DATA_NOT_AVAILABLE);
+    link_hmi_to_mob_result(HMIResult::READ_ONLY, MobileResult::READ_ONLY);
   }
 };
 

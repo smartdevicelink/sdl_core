@@ -129,8 +129,6 @@ class GetWayPointsRequestOnEventTest
     event.set_smart_object(*event_msg);
 
     const MobileResult mobile_result = static_cast<MobileResult>(ResultCode);
-    ON_CALL(message_helper_mock_, HMIToMobileResult(ResultCode))
-        .WillByDefault(Return(mobile_result));
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
@@ -207,8 +205,6 @@ TEST_F(GetWayPointsRequestTest,
       hmi_apis::Common_Result::SUCCESS;
 
   event.set_smart_object(*message_);
-  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillOnce(Return(MobileResult::SUCCESS));
 
   CallOnEvent caller(*command_sptr_, event);
 

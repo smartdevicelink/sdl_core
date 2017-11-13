@@ -272,8 +272,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   const hmi_apis::Common_Result::eType result_code =
       hmi_apis::Common_Result::SUCCESS;
   (*msg_)[am::strings::params][am::hmi_response::code] = result_code;
-  ON_CALL(*mock_message_helper_, HMIToMobileResult(result_code))
-      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
 
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
@@ -346,16 +344,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   command_->on_event(event);
 }
 
-TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  event.set_smart_object(*msg_);
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
-
-  command_->on_event(event);
-}
-
 TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
   MessageSharedPtr message(CreateMessage());
   ResetGlobalPropertiesResponsePtr command(
@@ -388,9 +376,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   ResetGlobalPropertiesRequestPtr command =
       CreateCommand<ResetGlobalPropertiesRequest>(msg_);
   command->Run();
-
-  EXPECT_CALL(*mock_message_helper_, HMIToMobileResult(_))
-      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(

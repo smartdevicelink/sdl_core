@@ -140,10 +140,6 @@ TEST_F(SetMediaClockRequestTest,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -330,10 +326,6 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
 

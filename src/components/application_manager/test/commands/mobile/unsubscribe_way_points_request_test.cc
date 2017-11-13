@@ -165,10 +165,6 @@ TEST_F(UnSubscribeWayPointsRequestTest,
 
   EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId));
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

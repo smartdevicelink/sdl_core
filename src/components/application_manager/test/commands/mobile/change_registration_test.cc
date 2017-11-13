@@ -152,9 +152,6 @@ class ChangeRegistrationRequestTest
                              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
     MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-    ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-        .WillByDefault(Return(mobile_response));
-
     utils::SharedPtr<ChangeRegistrationRequest> command =
         CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
     MockAppPtr mock_app = CreateMockApp();

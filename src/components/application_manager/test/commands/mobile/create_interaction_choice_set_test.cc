@@ -230,9 +230,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
   EXPECT_EQ(NULL, ptr);
 
-  ON_CALL(message_helper_mock_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
   am::CommandsMap commands_map;
   ON_CALL(*mock_app_, commands_map())
       .WillByDefault(
