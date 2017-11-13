@@ -164,12 +164,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "turnText",
-                    "characterSet": "TYPE2SET",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "menuTitle",
                     "characterSet": "TYPE2SET",
                     "width": 500,
