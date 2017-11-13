@@ -61,6 +61,7 @@ using application_manager::MockHmiInterfaces;
 
 typedef SharedPtr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
+typedef hmi_apis::Common_Result::eType HmiResult;
 
 namespace {
 const uint32_t kCorrelationId = 2u;
@@ -73,10 +74,10 @@ class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   GetWayPointsRequestTest()
-      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
+      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {
     Mock::VerifyAndClearExpectations(&message_helper_mock_);
   }
-
   ~GetWayPointsRequestTest() {
     Mock::VerifyAndClearExpectations(&message_helper_mock_);
   }
@@ -89,11 +90,7 @@ class GetWayPointsRequestTest
     command_sptr_ =
         CreateCommand<application_manager::commands::GetWayPointsRequest>(
             message_);
-    mock_app_ = CreateMockApp();
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
-
-    ON_CALL(message_helper_mock_, HMIToMobileResult(_))
-        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   }
 
   MockMessageHelper& message_helper_mock_;
@@ -116,7 +113,7 @@ class GetWayPointsRequestOnEventTest
   }
 
   void CheckOnEventResponse(const std::string& wayPointsParam,
-                            const MobileResult ResultCode,
+                            const HmiResult ResultCode,
                             const bool success) {
     Event event(Event::EventID::Navigation_GetWayPoints);
     CommandPtr command(CreateCommand<GetWayPointsRequest>());
@@ -131,17 +128,15 @@ class GetWayPointsRequestOnEventTest
 
     event.set_smart_object(*event_msg);
 
-    EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-        .WillOnce(Return(ResultCode));
-
-    MockAppPtr app(CreateMockApp());
-    EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+    const MobileResult mobile_result = static_cast<MobileResult>(ResultCode);
+    ON_CALL(message_helper_mock_, HMIToMobileResult(ResultCode))
+        .WillByDefault(Return(mobile_result));
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
     EXPECT_EQ(
-        ResultCode,
-        static_cast<mobile_apis::Result::eType>(
+        mobile_result,
+        static_cast<MobileResult>(
             (*result_msg)[am::strings::msg_params][am::strings::result_code]
                 .asInt()));
     EXPECT_EQ(
@@ -212,6 +207,8 @@ TEST_F(GetWayPointsRequestTest,
       hmi_apis::Common_Result::SUCCESS;
 
   event.set_smart_object(*message_);
+  EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
+      .WillOnce(Return(MobileResult::SUCCESS));
 
   CallOnEvent caller(*command_sptr_, event);
 

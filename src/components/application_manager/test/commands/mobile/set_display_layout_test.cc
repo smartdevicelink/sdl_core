@@ -245,17 +245,15 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
   (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities));
 
   EXPECT_CALL(hmi_capabilities, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));
   ON_CALL(mock_message_helper_,
-          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
-      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
+          HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),

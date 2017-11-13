@@ -172,6 +172,8 @@ class ChangeRegistrationRequestTest
     EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
     EXPECT_CALL(*app, name()).WillOnce(ReturnRef(name));
     PrepareExpectationBeforeRun();
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillRepeatedly(Return(state));
     command->Run();
 
     MessageSharedPtr ui_response = CreateMessage(smart_objects::SmartType_Map);
@@ -182,9 +184,6 @@ class ChangeRegistrationRequestTest
 
     (*tts_response)[strings::params][hmi_response::code] = hmi_response;
     (*tts_response)[strings::msg_params] = 0;
-
-    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
-        .WillRepeatedly(Return(state));
 
     am::event_engine::Event event_ui(
         hmi_apis::FunctionID::UI_ChangeRegistration);
