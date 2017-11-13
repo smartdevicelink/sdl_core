@@ -296,14 +296,6 @@ TEST_F(AlertRequestTest, Init_DurationNotExists_SUCCESS) {
   EXPECT_TRUE(command->Init());
 }
 
-TEST_F(AlertRequestTest, OnTimeOut_UNSUCCESS) {
-  Expectations();
-  (*msg_)[am::strings::msg_params][am::strings::soft_buttons] = 0;
-  CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  command->onTimeOut();
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-}
-
 TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {
   Expectations();
   MessageSharedPtr result_msg(CreateMessage(smart_objects::SmartType_Null));
