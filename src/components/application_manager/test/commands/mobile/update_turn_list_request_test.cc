@@ -240,7 +240,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
                            [am::hmi_request::navi_text].keyExists(
                                am::hmi_request::field_name));
   EXPECT_EQ(
-      hmi_apis::Common_TextFieldName::turnText,
+      hmi_apis::Common_TextFieldName::navigationText,
       (*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
                    [am::hmi_request::navi_text][am::hmi_request::field_name]
                        .asInt());
