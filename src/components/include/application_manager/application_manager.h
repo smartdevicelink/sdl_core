@@ -254,6 +254,7 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
+   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
@@ -262,16 +263,38 @@ class ApplicationManager {
   virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
 
   /**
+   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
   virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
 
   /**
+   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
   virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application pointer
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application pointer
+   */
+  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application pointer
+   */
+  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) = 0;
 
   /**
    * @brief Is Any Application is subscribed for way points

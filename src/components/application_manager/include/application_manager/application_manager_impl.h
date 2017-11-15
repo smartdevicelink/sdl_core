@@ -311,6 +311,7 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
+   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
@@ -319,16 +320,38 @@ class ApplicationManagerImpl
   bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
   void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
   void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application pointer
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application pointer
+   */
+  void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application pointer
+   */
+  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) OVERRIDE;
 
   /**
    * @brief Is Any Application is subscribed for way points

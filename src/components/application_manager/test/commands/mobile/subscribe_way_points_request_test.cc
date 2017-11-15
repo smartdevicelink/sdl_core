@@ -51,6 +51,7 @@ namespace mobile_commands_test {
 namespace subscribe_way_points_request {
 
 using ::testing::_;
+using ::testing::A;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
@@ -70,14 +71,15 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(_))
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(true));
 
   {
     InSequence dummy;
-    EXPECT_CALL(app_mngr_, SubscribeAppForWayPoints(_));
+    EXPECT_CALL(app_mngr_,
+                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
     EXPECT_CALL(*app, UpdateHash());
   }
 
@@ -108,7 +110,10 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(app_mngr_, SubscribeAppForWayPoints(_));
+    EXPECT_CALL(app_mngr_,
+                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
+    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(result_code))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
     EXPECT_CALL(*app, UpdateHash());
   }

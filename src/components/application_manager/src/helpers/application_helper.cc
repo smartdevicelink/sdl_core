@@ -9,7 +9,7 @@ namespace {
 using namespace application_manager;
 void RecallWayPoints(ApplicationSharedPtr app,
                      ApplicationManager& app_manager) {
-  app_manager.UnsubscribeAppFromWayPoints(app->app_id());
+  app_manager.UnsubscribeAppFromWayPoints(app);
   if (!app_manager.IsAnyAppSubscribedForWayPoints()) {
     MessageHelper::SendUnsubscribedWayPoints(app_manager);
   }

@@ -4146,9 +4146,46 @@ void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
   subscribed_way_points_apps_list_.erase(app_id);
 }
 
+bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
+    ApplicationSharedPtr app) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  LOG4CXX_DEBUG(logger_,
+                "There are applications subscribed: "
+                    << subscribed_way_points_apps_list_.size());
+  if (subscribed_way_points_apps_list_.find(app) ==
+      subscribed_way_points_apps_list_.end()) {
+    return false;
+  }
+  return true;
+}
+
+void ApplicationManagerImpl::SubscribeAppForWayPoints(
+    ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  subscribed_way_points_apps_list_.insert(app);
+  LOG4CXX_DEBUG(logger_,
+                "There are applications subscribed: "
+                    << subscribed_way_points_apps_list_.size());
+}
+
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
+    ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  subscribed_way_points_apps_list_.erase(app);
+  LOG4CXX_DEBUG(logger_,
+                "There are applications subscribed: "
+                    << subscribed_way_points_apps_list_.size());
+}
+
 bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  LOG4CXX_DEBUG(logger_,
+                "There are applications subscribed: "
+                    << subscribed_way_points_apps_list_.size());
   return !subscribed_way_points_apps_list_.empty();
 }
 

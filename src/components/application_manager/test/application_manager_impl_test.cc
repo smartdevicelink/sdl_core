@@ -66,6 +66,7 @@ namespace policy_test = test::components::policy_handler_test;
 namespace con_test = connection_handler_test;
 
 using testing::_;
+using ::testing::Matcher;
 using ::testing::ByRef;
 using ::testing::DoAll;
 using ::testing::Mock;
@@ -209,16 +210,20 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
-  app_manager_impl_->UnsubscribeAppFromWayPoints(app_id_);
-  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
+  app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
+  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   const std::set<int32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
@@ -235,10 +240,12 @@ TEST_F(
 TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
-  EXPECT_TRUE(result.find(app_id_) != result.end());
+  EXPECT_TRUE(result.find(app_ptr) != result.end());
 }
 
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {

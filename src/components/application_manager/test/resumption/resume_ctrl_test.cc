@@ -54,6 +54,7 @@ namespace components {
 namespace resumption_test {
 
 using ::testing::_;
+using ::testing::A;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
@@ -505,7 +506,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   EXPECT_CALL(*app_mock_, set_grammar_id(kTestGrammarId_));
-  EXPECT_CALL(app_mngr_, SubscribeAppForWayPoints(_));
+  EXPECT_CALL(
+      app_mngr_,
+      SubscribeAppForWayPoints(A<application_manager::ApplicationSharedPtr>()));
   const mobile_apis::HMILevel::eType hmi_test_level =
       mobile_apis::HMILevel::HMI_FULL;
   ON_CALL(app_mngr_, GetDefaultHmiLevel(const_app_))
