@@ -408,7 +408,7 @@ void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
   using namespace smart_objects;
   SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[strings::cmd_id] = (*cmd)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::cmd_id] = (*cmd)[strings::cmd_id];
   msg_params[strings::app_id] = application->app_id();
 
   if ((*cmd).keyExists(strings::menu_params)) {
@@ -452,7 +452,7 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
 
   SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[strings::menu_id] = (*cmd)[strings::msg_params][strings::menu_id];
+  msg_params[strings::menu_id] = (*cmd)[strings::menu_id];
   msg_params[strings::app_id] = application->app_id();
 
   SmartObjectSPtr message = CreateMessageForHMI(
@@ -476,7 +476,7 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
       continue;
     }
 
-    if ((*cmd)[strings::msg_params][strings::menu_id].asInt() ==
+    if ((*cmd)[strings::menu_id].asInt() ==
         (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
       SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
