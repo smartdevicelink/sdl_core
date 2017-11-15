@@ -109,6 +109,12 @@ bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
   }
+  if (first.is_ok && second.is_not_used) {
+    return true;
+  }
+  if (first.is_ok && second.is_ok) {
+    return true;
+  }
   return false;
 }
 
@@ -818,11 +824,8 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_first.is_ok && out_second.is_not_used) ||
-                (out_second.is_ok && out_first.is_not_used);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
+  bool result = CheckResultCode(out_first, out_second) ||
+                CheckResultCode(out_second, out_first);
   return result;
 }
 
