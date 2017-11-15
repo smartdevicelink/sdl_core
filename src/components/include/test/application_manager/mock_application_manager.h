@@ -270,9 +270,18 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(event_dispatcher,
                application_manager::event_engine::EventDispatcher&());
 
+  // DEPRECATED
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(const uint32_t));
+  // DEPRECATED
   MOCK_METHOD1(SubscribeAppForWayPoints, void(const uint32_t));
+  // DEPRECATED
   MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(const uint32_t));
+  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
+                     bool(application_manager::ApplicationSharedPtr));
+  MOCK_METHOD1(SubscribeAppForWayPoints,
+               void(application_manager::ApplicationSharedPtr));
+  MOCK_METHOD1(UnsubscribeAppFromWayPoints,
+               void(application_manager::ApplicationSharedPtr));
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
   MOCK_CONST_METHOD0(GetAppsSubscribedForWayPoints, const std::set<int32_t>());
   MOCK_CONST_METHOD1(

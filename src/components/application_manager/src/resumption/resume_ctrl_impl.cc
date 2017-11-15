@@ -580,7 +580,7 @@ void ResumeCtrlImpl::AddWayPointsSubscription(
     const smart_objects::SmartObject& subscribed_for_way_points_so =
         saved_app[strings::subscribed_for_way_points];
     if (true == subscribed_for_way_points_so.asBool()) {
-      application_manager_.SubscribeAppForWayPoints(application->app_id());
+      application_manager_.SubscribeAppForWayPoints(application);
     }
   }
 }

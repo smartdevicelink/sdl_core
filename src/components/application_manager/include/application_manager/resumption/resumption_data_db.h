@@ -55,6 +55,7 @@ struct ApplicationParams {
   mobile_apis::HMILevel::eType m_hmi_level;
   bool m_is_media_application;
   bool m_is_valid;
+  app_mngr::ApplicationSharedPtr app_ptr;
 };
 
 /**
