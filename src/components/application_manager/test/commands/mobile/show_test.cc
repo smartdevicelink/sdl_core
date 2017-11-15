@@ -238,10 +238,6 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -745,10 +741,6 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*ev_msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -943,9 +935,6 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  ON_CALL(mock_message_helper_,
-          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
-      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
@@ -967,9 +956,6 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
-      .WillOnce(Return(mobile_apis::Result::WARNINGS));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::UI_Show);

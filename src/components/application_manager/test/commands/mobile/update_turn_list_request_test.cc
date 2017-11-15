@@ -275,9 +275,6 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
@@ -296,9 +293,6 @@ TEST_F(UpdateTurnListRequestTest,
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));

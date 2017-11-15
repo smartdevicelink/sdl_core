@@ -72,6 +72,7 @@ void SpeakRequest::Run() {
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
   (*message_)[strings::msg_params][hmi_request::speak_type] =
       hmi_apis::Common_MethodName::SPEAK;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(hmi_apis::FunctionID::TTS_Speak,
                  &message_->getElement(strings::msg_params),
                  true);
@@ -82,7 +83,7 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       ProcessTTSSpeakResponse(event.smart_object());
       break;
     }

@@ -125,11 +125,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetDTCs);
   event.set_smart_object(*event_msg);
-  MockMessageHelper& mock_message_helper =
-      *MockMessageHelper::message_helper_mock();
 
-  ON_CALL(mock_message_helper, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));

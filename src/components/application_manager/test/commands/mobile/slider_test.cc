@@ -167,10 +167,6 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -325,9 +321,6 @@ TEST_F(SliderRequestTest, OnEvent_UISliderPositionExists_SUCCESS) {
   (*msg_)[am::strings::params][am::strings::data]
          [am::strings::slider_position] = "position";
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::TIMED_OUT))
-      .WillOnce(Return(mobile_apis::Result::TIMED_OUT));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::TIMED_OUT);
 
   Event event(hmi_apis::FunctionID::UI_Slider);
@@ -343,9 +336,6 @@ TEST_F(SliderRequestTest, OnEvent_UISliderAborted_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::ABORTED;
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::ABORTED))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::ABORTED);
 
   Event event(hmi_apis::FunctionID::UI_Slider);

@@ -356,10 +356,6 @@ TEST_F(SendLocationRequestTest, OnEvent_Success) {
   Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app));

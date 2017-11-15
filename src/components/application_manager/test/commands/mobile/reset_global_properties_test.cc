@@ -272,8 +272,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   const hmi_apis::Common_Result::eType result_code =
       hmi_apis::Common_Result::SUCCESS;
   (*msg_)[am::strings::params][am::hmi_response::code] = result_code;
-  ON_CALL(*mock_message_helper_, HMIToMobileResult(result_code))
-      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
 
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
@@ -346,16 +344,6 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   command_->on_event(event);
 }
 
-TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  event.set_smart_object(*msg_);
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
-
-  command_->on_event(event);
-}
-
 TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
   MessageSharedPtr message(CreateMessage());
   ResetGlobalPropertiesResponsePtr command(
@@ -389,9 +377,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
       CreateCommand<ResetGlobalPropertiesRequest>(msg_);
   command->Run();
 
-  EXPECT_CALL(*mock_message_helper_, HMIToMobileResult(_))
-      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
@@ -400,6 +385,186 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg_);
   command->on_event(event);
+}
+
+TEST_F(ResetGlobalPropertiesRequestTest,
+       Run_WaitTTS_Timeout_GENERIC_ERROR_TTSNotRespond) {
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::UNSUPPORTED_RESOURCE;
+
+  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
+      mobile_apis::GlobalProperty::TIMEOUTPROMPT;
+  (*msg_)[am::strings::msg_params][am::strings::properties][1] =
+      mobile_apis::GlobalProperty::MENUICON;
+
+  std::vector<std::string> time_out_prompt;
+  time_out_prompt.push_back("time_out");
+  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+      .WillOnce(ReturnRef(time_out_prompt));
+
+  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
+
+  smart_objects::SmartObjectSPtr prompt =
+      utils::MakeShared<smart_objects::SmartObject>();
+  *prompt = "prompt";
+
+  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+
+  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+      .WillOnce(Return(true));
+
+  ResetGlobalPropertiesRequestPtr command =
+      CreateCommand<ResetGlobalPropertiesRequest>(msg_);
+  command->Run();
+
+  // Received response only from UI
+  MessageSharedPtr ui_msg = CreateMessage();
+  (*ui_msg)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
+  (*ui_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+  (*ui_msg)[am::strings::msg_params] =
+      SmartObject(smart_objects::SmartType_Map);
+  Event ui_event(hmi_apis::FunctionID::UI_SetGlobalProperties);
+  ui_event.set_smart_object(*ui_msg);
+  command->on_event(ui_event);
+
+  // TTS doesn't respond, so timeout should send generic error
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>();
+  (*response)[am::strings::msg_params][am::strings::result_code] =
+      mobile_apis::Result::GENERIC_ERROR;
+  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(response));
+  const std::string info = "TTS component does not respond";
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
+          am::commands::Command::ORIGIN_SDL));
+  command->onTimeOut();
+}
+
+TEST_F(ResetGlobalPropertiesRequestTest,
+       Run_WaitUI_Timeout_GENERIC_ERROR_UINotRespond) {
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::UNSUPPORTED_RESOURCE;
+
+  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
+      mobile_apis::GlobalProperty::TIMEOUTPROMPT;
+  (*msg_)[am::strings::msg_params][am::strings::properties][1] =
+      mobile_apis::GlobalProperty::MENUICON;
+
+  std::vector<std::string> time_out_prompt;
+  time_out_prompt.push_back("time_out");
+  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+      .WillOnce(ReturnRef(time_out_prompt));
+
+  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
+
+  smart_objects::SmartObjectSPtr prompt =
+      utils::MakeShared<smart_objects::SmartObject>();
+  *prompt = "prompt";
+
+  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+
+  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+      .WillOnce(Return(true));
+
+  command_->Run();
+
+  // Received response only from TTS
+  MessageSharedPtr tts_msg = CreateMessage();
+  (*tts_msg)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
+  (*tts_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+
+  Event tts_event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+  tts_event.set_smart_object(*tts_msg);
+  command_->on_event(tts_event);
+
+  // UI doesn't respond, so timeout should send generic error
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>();
+  (*response)[am::strings::msg_params][am::strings::result_code] =
+      mobile_apis::Result::GENERIC_ERROR;
+  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(response));
+
+  const std::string info = "UI component does not respond";
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
+          am::commands::Command::ORIGIN_SDL));
+  command_->onTimeOut();
+}
+
+TEST_F(ResetGlobalPropertiesRequestTest,
+       Run_WaitUIAndTTS_Timeout_GENERIC_ERROR_TTSAndUINotRespond) {
+  Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::UNSUPPORTED_RESOURCE;
+
+  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
+      mobile_apis::GlobalProperty::TIMEOUTPROMPT;
+  (*msg_)[am::strings::msg_params][am::strings::properties][1] =
+      mobile_apis::GlobalProperty::MENUICON;
+
+  std::vector<std::string> time_out_prompt;
+  time_out_prompt.push_back("time_out");
+  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+      .WillOnce(ReturnRef(time_out_prompt));
+
+  EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
+
+  smart_objects::SmartObjectSPtr prompt =
+      utils::MakeShared<smart_objects::SmartObject>();
+  *prompt = "prompt";
+
+  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
+
+  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+      .WillOnce(Return(true));
+
+  command_->Run();
+  // TTS and UI don't respond, so timeout should send generic error
+  std::string info = "TTS, UI component does not respond";
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>();
+  (*response)[am::strings::msg_params][am::strings::result_code] =
+      mobile_apis::Result::GENERIC_ERROR;
+  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(response));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
+          am::commands::Command::ORIGIN_SDL));
+  command_->onTimeOut();
 }
 
 }  // namespace reset_global_properties

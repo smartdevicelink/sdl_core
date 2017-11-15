@@ -243,12 +243,9 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   SmartObject message(smart_objects::SmartType_Map);
   const hmi_apis::Common_Result::eType hmi_result =
       hmi_apis::Common_Result::SUCCESS;
-  const mobile_apis::Result::eType mob_result = mobile_apis::Result::SUCCESS;
   message[am::strings::params][am::hmi_response::code] = hmi_result;
   message[am::strings::msg_params][kMsgParamKey] = true;
   test_event.set_smart_object(message);
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              HMIToMobileResult(hmi_result)).WillOnce(Return(mob_result));
 
   EXPECT_CALL(
       app_mngr_,
@@ -272,13 +269,9 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
   SmartObject message(smart_objects::SmartType_Map);
   const hmi_apis::Common_Result::eType hmi_result =
       hmi_apis::Common_Result::SUCCESS;
-  const mobile_apis::Result::eType mob_result = mobile_apis::Result::SUCCESS;
   message[am::strings::params][am::hmi_response::code] = hmi_result;
   message[am::strings::msg_params][kMsgParamKey] = true;
   test_event.set_smart_object(message);
-
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              HMIToMobileResult(hmi_result)).WillOnce(Return(mob_result));
 
   EXPECT_CALL(
       app_mngr_,
