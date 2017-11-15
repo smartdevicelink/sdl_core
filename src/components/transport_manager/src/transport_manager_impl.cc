@@ -741,7 +741,7 @@ bool TransportManagerImpl::TryDeviceSwitch(
     LOG4CXX_DEBUG(logger_, "Adapter type is not IOS_BT.");
     return false;
   }
-  
+
   const auto new_adapter = ta;
   old_adapter->StopDevice(device_uid);
   new_adapter->DeviceSwitched(device_uid);
