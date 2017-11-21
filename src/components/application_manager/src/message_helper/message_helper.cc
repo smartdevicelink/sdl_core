@@ -1510,6 +1510,14 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
         (*i->second)[strings::menu_name];
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
+    if (((*i->second).keyExists(strings::menu_icon)) &&
+      (0 < (*i->second)[strings::menu_icon][strings::value].length())) {
+      msg_params[strings::menu_icon] =
+        (*i->second)[strings::menu_icon];
+        msg_params[strings::menu_icon][strings::value] =
+        (*i->second)[strings::menu_icon][strings::value]
+        .asString();
+    }
     requsets.push_back(ui_sub_menu);
   }
   return requsets;
