@@ -391,7 +391,9 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
-  commands_holder_->Resume(app->policy_app_id());
+  LOG4CXX_AUTO_TRACE(logger_);
+  commands_holder_->Resume(app, CommandHolder::CommandType::kMobileCommand);
+  commands_holder_->Resume(app, CommandHolder::CommandType::kHmiCommand);
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
@@ -1102,8 +1104,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
   for (auto app_it = reregister_wait_list_.begin();
        app_it != reregister_wait_list_.end();
        ++app_it) {
-    auto app = *app_it;
-    commands_holder_->Clear(app->policy_app_id());
+    auto app = *app_it;    
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
@@ -1821,6 +1822,17 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     return false;
   }
 
+  const uint32_t connection_key = static_cast<uint32_t>(
+      (*message)[strings::params][strings::connection_key].asUInt());
+
+  auto app_ptr = application(connection_key);
+  if (app_ptr && IsAppInReconnectMode(app_ptr->policy_app_id())) {
+    commands_holder_->Suspend(app_ptr,
+                              CommandHolder::CommandType::kMobileCommand,
+                              message);
+    return true;
+  }
+
   mobile_apis::FunctionID::eType function_id =
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
@@ -1830,9 +1842,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       (*message)[strings::params].keyExists(strings::correlation_id)
           ? (*message)[strings::params][strings::correlation_id].asUInt()
           : 0;
-
-  uint32_t connection_key =
-      (*message)[strings::params][strings::connection_key].asUInt();
 
   int32_t protocol_type =
       (*message)[strings::params][strings::protocol_type].asUInt();
@@ -2050,10 +2059,18 @@ bool ApplicationManagerImpl::ManageHMICommand(
     return false;
   }
 
-  auto app = application(command->connection_key());
-  if (app && IsAppInReconnectMode(app->policy_app_id())) {
-    commands_holder_->Suspend(app->policy_app_id(), message);
-    return true;
+  if ((*message).keyExists(strings::msg_params) &&
+      (*message)[strings::msg_params].keyExists(strings::app_id)) {
+    const auto connection_key =
+        (*message)[strings::msg_params][strings::app_id].asUInt();
+
+    auto app = application(static_cast<uint32_t>(connection_key));
+    if (app && IsAppInReconnectMode(app->policy_app_id())) {
+      commands_holder_->Suspend(app,
+                                CommandHolder::CommandType::kHmiCommand,
+                                message);
+      return true;
+    }
   }
 
   int32_t message_type =
@@ -3121,6 +3138,9 @@ void ApplicationManagerImpl::UnregisterApplication(
       SendUpdateAppList();
     }
   }
+
+  commands_holder_->Clear(app_to_remove);
+
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     EndAudioPassThrough();
