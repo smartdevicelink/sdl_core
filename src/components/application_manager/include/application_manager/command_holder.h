@@ -33,16 +33,22 @@
 #pragma once
 
 #include <string>
+#include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
 #include "utils/shared_ptr.h"
 
 namespace application_manager {
 /**
  * @brief The CommandHolder class should hold commands for particular
- * application specified by its id
+ * application until certain event happens
  */
 class CommandHolder {
  public:
+  /**
+   * @brief The CommandType enum defines type of command to suspend or resume
+   */
+  enum class CommandType { kHmiCommand, kMobileCommand };
+
   /**
    * @brief ~CommandsHolder destructor
    */
@@ -51,23 +57,26 @@ class CommandHolder {
   /**
    * @brief Suspend collects command for specific application policy id
    * internally
-   * @param policy_app_id Application policy id
+   * @param application Application pointer
+   * @param type Command type
    * @param command Command
    */
-  virtual void Suspend(const std::string& policy_app_id,
+  virtual void Suspend(ApplicationSharedPtr application,
+                       CommandType type,
                        smart_objects::SmartObjectSPtr command) = 0;
 
   /**
    * @brief Resume send all collected commands for further processing and
    * removes them afterward
-   * @param policy_app_id Application policy id
+   * @param application Application pointer
+   * @param type Command type
    */
-  virtual void Resume(const std::string& policy_app_id) = 0;
+  virtual void Resume(ApplicationSharedPtr application, CommandType type) = 0;
 
   /**
    * @brief Clear removes all collected commands w/o processing
-   * @param policy_app_id Application policy id
+   * @param application Application pointer
    */
-  virtual void Clear(const std::string& policy_app_id) = 0;
+  virtual void Clear(ApplicationSharedPtr application) = 0;
 };
 }  // application_manager

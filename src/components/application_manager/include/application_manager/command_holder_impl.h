@@ -36,6 +36,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
@@ -44,10 +46,9 @@
 namespace application_manager {
 class ApplicationManager;
 /**
- * @brief The CommandHolderImpl class should hold HMI commands for particular
- * application specified by its policy id during application transport switching
- * process and sends for processing after switching is completed successfully
- * or drop otherwise
+ * @brief The CommandHolderImpl class should hold commands for particular
+ * application during application transport switching process and sends for
+ * processing after switching is completed successfully or drops otherwise
  */
 class CommandHolderImpl : public CommandHolder {
  public:
@@ -59,32 +60,48 @@ class CommandHolderImpl : public CommandHolder {
 
   /**
    * @brief Suspend collects command for specific application id internally
-   * @param policy_app_id Policy id of application
+   * @param application Application pointer
+   * @param type Command type
    * @param command Command
    */
-  void Suspend(const std::string& policy_app_id,
+  void Suspend(ApplicationSharedPtr application,
+               CommandType type,
                smart_objects::SmartObjectSPtr command) FINAL;
 
   /**
    * @brief Resume sends all collected HMI commands to ApplicationManager
    * for further processing
-   * @param policy_app_id Policy id of application
+   * @param application Application pointer
+   * @param type Command type
    */
-  void Resume(const std::string& policy_app_id) FINAL;
+  void Resume(ApplicationSharedPtr application, CommandType type) FINAL;
 
   /**
    * @brief Clear removes all commands collected for specific application id
-   * @param policy_app_id Policy application id
+   * @param application Application pointer
    */
-  void Clear(const std::string& policy_app_id) FINAL;
+  void Clear(ApplicationSharedPtr application) FINAL;
 
  private:
+  /**
+   * @brief ResumeHmiCommand sends suspended HMI commands for processing
+   * @param application Application which commands to process
+   */
+  void ResumeHmiCommand(ApplicationSharedPtr app);
+
+  /**
+   * @brief ResumeMobileCommand sends suspended mobile commands for processing
+   * @param application Application which commands to process
+   */
+  void ResumeMobileCommand(ApplicationSharedPtr application);
+
   using AppCommands =
-      std::map<std::string,
+      std::map<ApplicationSharedPtr,
                std::vector<utils::SharedPtr<smart_objects::SmartObject> > >;
 
   ApplicationManager& app_manager_;
   sync_primitives::Lock commands_lock_;
-  AppCommands app_commands_;
+  AppCommands app_mobile_commands_;
+  AppCommands app_hmi_commands_;
 };
 }  // application_manager

@@ -202,6 +202,10 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   commands::MessageSharedPtr hmi_msg_3 =
       utils::MakeShared<smart_objects::SmartObject>();
 
+  (*hmi_msg_1)[strings::msg_params][strings::app_id] =
+  (*hmi_msg_2)[strings::msg_params][strings::app_id] =
+  (*hmi_msg_3)[strings::msg_params][strings::app_id] = application_id;
+
   EXPECT_CALL(*cmd_1, Init()).Times(0);
   EXPECT_CALL(*cmd_2, Init()).Times(0);
   EXPECT_CALL(*cmd_3, Init()).Times(0);
