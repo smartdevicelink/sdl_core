@@ -795,17 +795,23 @@ bool TransportManagerImpl::UpdateDeviceMapping(
   for (DeviceList::const_iterator it = device_list.begin();
        it != device_list.end();
        ++it) {
-    auto result = device_to_adapter_map_.insert(std::make_pair(*it, ta));
+    const auto device_uid = *it;
+    auto result = device_to_adapter_map_.insert(std::make_pair(device_uid, ta));
     if (result.second || TryDeviceSwitch(ta, result.first)) {
       DeviceHandle device_handle =
-          converter_.UidToHandle(*it, ta->GetConnectionType());
+          converter_.UidToHandle(device_uid, ta->GetConnectionType());
       DeviceInfo info(
-          device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
+          device_handle, device_uid, ta->DeviceName(device_uid),
+            ta->GetConnectionType());
       RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
+    } else if(device_to_adapter_map_[device_uid]->GetDeviceType() ==
+              ta->GetDeviceType()) {
+      LOG4CXX_DEBUG(logger_, "Device with UID: " << device_uid
+                    << " is found for the same adapter type. Skipping.");
     } else {
       LOG4CXX_ERROR(
           logger_,
-          "Same UUID " + *it + "detected, but transport switching failed.");
+          "Same UID " + device_uid + " detected, but transport switching failed.");
       return false;
     }
   }

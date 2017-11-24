@@ -1082,7 +1082,8 @@ TEST_F(
   EXPECT_CALL(*second_mock_adapter, IsInitialised()).WillOnce(Return(true));
   EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(second_mock_adapter));
 
-  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, GetDeviceType())
+      .WillRepeatedly(Return(transport_adapter::DeviceType::TCP));
   EXPECT_CALL(*mock_adapter_, GetDeviceList())
       .WillRepeatedly(Return(device_list_));
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
@@ -1092,6 +1093,8 @@ TEST_F(
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
   EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+
+  // Act
   tm_.OnDeviceListUpdated(mock_adapter_);
 
   EXPECT_CALL(*second_mock_adapter, GetDeviceList())
@@ -1100,13 +1103,13 @@ TEST_F(
       .WillRepeatedly(Return(dev_info_.name()));
   EXPECT_CALL(*second_mock_adapter, GetConnectionType())
       .WillRepeatedly(Return(dev_info_.connection_type()));
-
-  EXPECT_CALL(*mock_adapter_, GetDeviceType())
-      .WillOnce(Return(transport_adapter::DeviceType::TCP));
-
+  EXPECT_CALL(*second_mock_adapter, GetDeviceType())
+      .WillRepeatedly(Return(transport_adapter::DeviceType::IOS_USB));
   EXPECT_CALL(*second_mock_adapter, StopDevice(_)).Times(0);
   EXPECT_CALL(*second_mock_adapter, DeviceSwitched(_)).Times(0);
   EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_)).Times(0);
+
+  // Act
   tm_.OnDeviceListUpdated(second_mock_adapter);
 
   device_list_.pop_back();
