@@ -42,7 +42,6 @@
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 #include "application_manager/application.h"
-#include "application_manager/vehicle_info_data.h"
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -61,7 +60,7 @@ namespace mobile_api = mobile_apis;
  * @param const char* Name of the parameter in mobile request
  * @param VehicleDataType Enum for vehicle data
  */
-typedef std::map<std::string, VehicleDataType> VehicleData;
+typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
 
 /**
  * @brief MessageHelper class

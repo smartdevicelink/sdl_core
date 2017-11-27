@@ -308,8 +308,8 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
 
 TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   am::VehicleData vehicle_data;
-  vehicle_data.insert(
-      am::VehicleData::value_type(kMissedParam, am::VehicleDataType::MYKEY));
+  vehicle_data.insert(am::VehicleData::value_type(
+      kMissedParam, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
@@ -425,8 +425,8 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
 
 TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(kDisallowedParam1,
-                                                  am::VehicleDataType::MYKEY));
+  vehicle_data.insert(am::VehicleData::value_type(
+      kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
@@ -477,8 +477,8 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
 TEST_F(CommandRequestImplTest,
        SendResponse_AddDisallowedParametersToInfo_SUCCESS) {
   am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(kDisallowedParam1,
-                                                  am::VehicleDataType::MYKEY));
+  vehicle_data.insert(am::VehicleData::value_type(
+      kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));

@@ -134,7 +134,7 @@ void UnsubscribeVehicleDataRequest::Run() {
       if (is_key_enabled) {
         ++items_to_unsubscribe;
 
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (!app->IsSubscribedToIVI(key_type)) {
           ++unsubscribed_items;
           vi_already_unsubscribed_by_this_app_.insert(key_type);

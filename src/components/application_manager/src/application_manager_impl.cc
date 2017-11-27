@@ -354,11 +354,11 @@ struct IsApplication {
 };
 
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
-    VehicleDataType vehicle_info, int value) {
+    mobile_apis::VehicleDataType::eType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc
   switch (vehicle_info) {
-    case ODOMETER:
+    case mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER:
       GetPolicyHandler().KmsChanged(value);
       break;
     default:

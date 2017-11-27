@@ -313,7 +313,8 @@ class MockApplication : public ::application_manager::Application {
                bool(application_manager::AppExtensionPtr extention));
   MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
   MOCK_METHOD0(RemoveExtensions, void());
-  MOCK_CONST_METHOD0(SubscribesIVI, const std::set<uint32_t>&());
+  MOCK_CONST_METHOD0(SubscribesIVI,
+                     const application_manager::VehicleInfoSubscriptions&());
 
 #endif  // SDL_REMOTE_CONTROL
 };

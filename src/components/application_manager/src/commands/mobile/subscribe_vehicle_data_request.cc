@@ -376,7 +376,7 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
         ++items_to_subscribe;
       }
       if (!is_interface_not_available && is_key_enabled) {
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (app->IsSubscribedToIVI(key_type)) {
           LOG4CXX_DEBUG(logger_,
                         "App with connection key "
