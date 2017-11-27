@@ -286,20 +286,33 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
     smart_objects::SmartObject& msg_params) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
+  auto vi_to_string =
+      [](const mobile_apis::VehicleDataType::eType vehicle_data) {
+        for (auto& vi_str_to_int_pair : MessageHelper::vehicle_data()) {
+          if (vehicle_data == vi_str_to_int_pair.second) {
+            return vi_str_to_int_pair.first;
+          }
+        }
+        return std::string();
+      };
+
   VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_subscribed_by_this_app_.begin();
   for (; vi_already_subscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
-    msg_params[*it_same_app][strings::result_code] =
+    msg_params[vi_to_string(*it_same_app)][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
+    msg_params[vi_to_string(*it_same_app)][strings::data_type] = *it_same_app;
   }
 
   VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_already_subscribed_by_another_apps_.begin();
   for (; vi_already_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {
-    msg_params[*it_another_app][strings::result_code] =
+    msg_params[vi_to_string(*it_another_app)][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
+    msg_params[vi_to_string(*it_another_app)][strings::data_type] =
+        *it_another_app;
   }
 }
 
