@@ -124,7 +124,7 @@ void SendLocationRequest::Run() {
       msg_params[strings::address].empty()) {
     msg_params.erase(strings::address);
   }
-  
+
   if (!CheckFieldsCompatibility()) {
     LOG4CXX_ERROR(logger_, "CheckFieldsCompatibility failed");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -276,9 +276,6 @@ bool SendLocationRequest::CheckHMICapabilities(
     std::vector<hmi_apis::Common_TextFieldName::eType>& fields_names) {
   using namespace smart_objects;
   using namespace hmi_apis;
-  if (fields_names.empty()) {
-    return true;
-  }
 
   const HMICapabilities& hmi_capabilities =
       application_manager_.hmi_capabilities();
@@ -295,22 +292,24 @@ bool SendLocationRequest::CheckHMICapabilities(
                   "SendLocation request is disallowed by hmi capabilities");
     return false;
   }
-  if (!fields_names.empty()) {
-    if (hmi_capabilities.display_capabilities()) {
-      const SmartObject& disp_cap = (*hmi_capabilities.display_capabilities());
-      const SmartObject& text_fields =
-          disp_cap.getElement(hmi_response::text_fields);
-      const size_t len = text_fields.length();
-      for (size_t i = 0; i < len; ++i) {
-        const SmartObject& text_field = text_fields[i];
-        const Common_TextFieldName::eType field_name =
-            static_cast<Common_TextFieldName::eType>(
-                text_field.getElement(strings::name).asInt());
-        const std::vector<Common_TextFieldName::eType>::iterator it =
-            std::find(fields_names.begin(), fields_names.end(), field_name);
-        if (it != fields_names.end()) {
-          fields_names.erase(it);
-        }
+  if (fields_names.empty()) {
+    return true;
+  }
+
+  if (hmi_capabilities.display_capabilities()) {
+    const SmartObject& disp_cap = (*hmi_capabilities.display_capabilities());
+    const SmartObject& text_fields =
+        disp_cap.getElement(hmi_response::text_fields);
+    const size_t len = text_fields.length();
+    for (size_t i = 0; i < len; ++i) {
+      const SmartObject& text_field = text_fields[i];
+      const Common_TextFieldName::eType field_name =
+          static_cast<Common_TextFieldName::eType>(
+              text_field.getElement(strings::name).asInt());
+      const std::vector<Common_TextFieldName::eType>::iterator it =
+          std::find(fields_names.begin(), fields_names.end(), field_name);
+      if (it != fields_names.end()) {
+        fields_names.erase(it);
       }
     }
 
@@ -319,6 +318,7 @@ bool SendLocationRequest::CheckHMICapabilities(
       return false;
     }
   }
+
   return true;
 }
 
