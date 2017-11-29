@@ -1073,24 +1073,53 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingStart(
-    const std::string& device_uid) {
+    const connection_handler::Device& device_from,
+    const connection_handler::Device& device_to) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(reregister_wait_list_lock_);
   {
     auto apps_data_accessor = applications();
 
-    std::copy_if(apps_data_accessor.GetData().begin(),
+    std::copy_if(
+        apps_data_accessor.GetData().begin(),
                  apps_data_accessor.GetData().end(),
                  std::back_inserter(reregister_wait_list_),
-                 std::bind1st(std::ptr_fun(&device_id_comparator), device_uid));
+        std::bind1st(std::ptr_fun(&device_id_comparator), 
+                     device_from.mac_address()));
   }
 
+  {
+    // During sending of UpdateDeviceList this lock is acquired also so making
+    // it scoped
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_);
   for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
        ++i) {
     auto app = *i;
     request_ctrl_.terminateAppRequests(app->app_id());
     resume_ctrl_->SaveApplication(app);
   }
+}
+
+  policy_handler_->OnDeviceSwitching(device_from.mac_address(),
+                                     device_to.mac_address());
+  
+  connection_handler::DeviceMap device_list;
+  device_list.insert(std::make_pair(device_to.device_handle(), device_to));
+  
+  smart_objects::SmartObjectSPtr msg_params =
+      MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
+
+  auto update_list = utils::MakeShared<smart_objects::SmartObject>();
+  smart_objects::SmartObject& so_to_send = *update_list;
+  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
+      hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
+  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
+      hmi_apis::messageType::request;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 3;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
+  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
+  so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
+  ManageHMICommand(update_list);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingFinish(
@@ -1115,8 +1144,9 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
 
 void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                                const uint32_t connection_key,
-                                               const uint32_t device_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+                                               const size_t device_id, 
+                                               const std::string& mac_address) {
+   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(applications_list_lock_);
   DCHECK_OR_RETURN_VOID(1 == applications_.erase(app));
 
@@ -1125,7 +1155,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
-  SwitchApplicationParameters(app, connection_key, device_id);
+  SwitchApplicationParameters(app, connection_key, device_id, mac_address);
 
   // Normally this is done during registration, however since switched apps are
   // not being registered again need to set protocol version on session.
@@ -4054,11 +4084,9 @@ void ApplicationManagerImpl::ProcessReconnection(
   connection_handler().get_session_observer().GetDataOnDeviceID(
       new_device_id, NULL, NULL, &device_mac, &connection_type);
 
-  DCHECK_OR_RETURN_VOID(application->mac_address() == device_mac);
-
   EraseAppFromReconnectionList(application);
 
-  SwitchApplication(application, connection_key, new_device_id);
+  SwitchApplication(application, connection_key, new_device_id, device_mac);
 
   // Update connection type for existed device.
   GetPolicyHandler().AddDevice(device_mac, connection_type);

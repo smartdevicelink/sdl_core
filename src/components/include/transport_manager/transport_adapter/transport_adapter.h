@@ -287,6 +287,12 @@ class TransportAdapter {
   virtual void StopDevice(const DeviceUID& device_id) const = 0;
 
   /**
+   * @brief DoTransportSwitch notifies listeners of transport adapter events
+   * that transport switching is requested by system
+   */
+  virtual void DoTransportSwitch() const = 0;
+
+  /**
    * @brief DeviceSwitched is triggered for adapter to proceed with possible
    * further switching steps required on device side. E.g. to notify device
    * on end of switching so it can disconnect transport being switched from.
@@ -294,6 +300,7 @@ class TransportAdapter {
    */
   virtual void DeviceSwitched(const DeviceUID& device_handle) = 0;
 
+  virtual SwitchableDevices GetSwitchableDevices() const = 0;
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer

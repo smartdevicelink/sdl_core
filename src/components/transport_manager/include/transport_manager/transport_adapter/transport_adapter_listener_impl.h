@@ -263,7 +263,14 @@ class TransportAdapterListenerImpl
    */
   virtual void OnCommunicationError(const TransportAdapter* adapter,
                                     const DeviceUID& device,
-                                    const ApplicationHandle& app_id);
+                            const ApplicationHandle& app_id) OVERRIDE;
+
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  void OnTransportSwitchRequested(const TransportAdapter* adapter) OVERRIDE;
 
  private:
   TransportManager* transport_manager_;

@@ -58,6 +58,22 @@ class Device {
       : name_(name)
       , unique_device_id_(unique_device_id)
       , keep_on_disconnect_(false) {}
+
+  /**
+   * Constructor for creating device supporting transport switch
+   * @brief Device constructor
+   * @param name Device name
+   * @param unique_device_id Unique device id
+   * @param transport_switch_id Id used for transport switching flow
+   */
+  Device(const std::string& name,
+         const DeviceUID& unique_device_id,
+         std::string transport_switch_id)
+      : name_(name)
+      , unique_device_id_(unique_device_id)
+      , transport_switch_id_(transport_switch_id)
+      , keep_on_disconnect_(false) {}
+
   /**
    * @brief Destructor.
    **/
@@ -114,6 +130,13 @@ class Device {
     keep_on_disconnect_ = keep_on_disconnect;
   }
 
+  /**
+   * @brief transport_switch_id Returns id used for transport switching
+   * flow of device. Filled if applicable, otherwise - empty.
+   */
+  inline std::string transport_switch_id() const {
+    return transport_switch_id_;
+  }
  private:
   /**
    * @brief Device user-friendly name.
@@ -124,6 +147,11 @@ class Device {
    * @brief Unique device identifier across all devices.
    **/
   DeviceUID unique_device_id_;
+  /**
+   * @brief transport_switch_id_ ID used to switch device from one to another
+   * transport. Filled if applicable, otherwise - empty
+   */
+  std::string transport_switch_id_;
 
   /**
    * @brief If true, device will remain in list even if all its connections

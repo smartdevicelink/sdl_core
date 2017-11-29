@@ -462,14 +462,10 @@ class TransportManagerImpl
    * initiates switching sequence for upper layers. Also starts timer to wait
    * for sequence to complete.
    * @param ta Transport adapter having device to try switching sequence
-   * @param value Value from device-to-adapter container having all the data
-   * required
    * At the moment implementation implies only IAP2-Bluetooth to IAP2-USB
    * switching
-   * @return True if sequence has been successfully initiated, otherwise - false
    */
-  bool TryDeviceSwitch(TransportAdapter* ta,
-                       DeviceToAdapterMap::iterator value);
+  void TryDeviceSwitch(TransportAdapter* ta);
 
   void AddDataToContainer(
       ConnectionUID id,

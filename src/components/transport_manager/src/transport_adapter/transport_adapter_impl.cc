@@ -693,6 +693,16 @@ void TransportAdapterImpl::DataSendFailed(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
+void TransportAdapterImpl::DoTransportSwitch() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::for_each(
+      listeners_.begin(),
+      listeners_.end(),
+      std::bind2nd(
+          std::mem_fun(&TransportAdapterListener::OnTransportSwitchRequested),
+          this));
+}
+
 void TransportAdapterImpl::DeviceSwitched(const DeviceUID& device_handle) {
   LOG4CXX_DEBUG(logger_,
                 "Switching is not implemented for that adapter type "
@@ -880,6 +890,29 @@ void TransportAdapterImpl::StopDevice(const DeviceUID& device_id) const {
 
 std::string TransportAdapterImpl::GetConnectionType() const {
   return devicesType[GetDeviceType()];
+}
+
+SwitchableDevices TransportAdapterImpl::GetSwitchableDevices() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SwitchableDevices devices;
+  sync_primitives::AutoLock locker(devices_mutex_);
+  for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
+       ++it) {
+    const auto device_uid = it->first;
+    const auto device = it->second;
+    const auto transport_switch_id = device->transport_switch_id();
+    if (transport_switch_id.empty()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Device is not suitable for switching: " << device_uid);
+      continue;
+    }
+    LOG4CXX_DEBUG(logger_,
+                  "Device is suitable for switching: " << device_uid);
+    devices.insert(std::make_pair(device_uid, transport_switch_id));
+  }
+  LOG4CXX_INFO(logger_,
+                "Found number of switchable devices: " << devices.size());
+  return devices;
 }
 
 #ifdef TELEMETRY_MONITOR

@@ -140,9 +140,12 @@ class ConnectionHandlerImpl
   /**
    * @brief OnDeviceSwitchingStart notifies listeners on device transport
    * switching start
-   * @param device_uid the id of the device which has to be switched.
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
    */
-  void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
+  void OnDeviceSwitchingStart(const std::string& device_uid_from,
+                              const std::string& device_uid_to) FINAL;
 
   /**
    * @brief OnDeviceSwitchingFinish notifies listeners on device transport

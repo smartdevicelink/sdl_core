@@ -370,7 +370,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
-  SendRegisterAppInterfaceResponseToMobile(AppicationType::kNewApplication);
+  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   application_manager_.ManageMobileCommand(so, commands::Command::ORIGIN_SDL);
@@ -510,7 +510,7 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    AppicationType app_type) {
+    ApplicationType app_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
 
@@ -640,6 +640,28 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     response_params[strings::system_software_version] = ccpu_version;
   }
 
+  if (ApplicationType::kSwitchedApplicationWrongHashId == app_type) {
+     LOG4CXX_DEBUG(logger_,
+           "Application has been switched from another transport, "
+           "but doesn't have correct hashID.");
+
+     application_manager::RecallApplicationData(application,
+                                                application_manager_);
+
+     SendResponse(true, mobile_apis::Result::RESUME_FAILED, NULL,
+                  &response_params);
+     return;
+   }
+
+   if (ApplicationType::kSwitchedApplicationHashOk == app_type) {
+     LOG4CXX_DEBUG(logger_,
+           "Application has been switched from another transport "
+           "and has correct hashID.");
+     SendResponse(true, mobile_apis::Result::SUCCESS, NULL,
+                  &response_params);
+     return;
+   }
+
   bool resumption =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
 
@@ -668,27 +690,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
     add_info += response_info_;
     result_code = result_checking_app_hmi_type_;
-  }
-
-  if (AppicationType::kSwitchedApplication == app_type) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application has been switched from another transport.");
-
-    if (hash_id.empty() && resumer.CheckApplicationHash(application, hash_id)) {
-      LOG4CXX_INFO(logger_,
-                   "Application does not have hashID saved and neither "
-                   "provided it with RAI. Nothing to resume.");
-      result_code = mobile_apis::Result::SUCCESS;
-    } else if (!resumption ||
-               mobile_apis::Result::RESUME_FAILED == result_code) {
-      application_manager::RecallApplicationData(application,
-                                                 application_manager_);
-      resumer.RemoveApplicationFromSaved(application);
-      result_code = mobile_apis::Result::RESUME_FAILED;
-    }
-
-    SendResponse(true, result_code, add_info.c_str(), &response_params);
-    return;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
@@ -1465,9 +1466,20 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
   }
 
   LOG4CXX_DEBUG(logger_, "Application is found in reconnection list.");
+
+  auto app_type = ApplicationType::kSwitchedApplicationWrongHashId;
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+    const auto hash_id = 
+        (*message_)[strings::msg_params][strings::hash_id].asString();
+    
+    auto& resume_ctrl = application_manager_.resume_controller();  
+    if (resume_ctrl.CheckApplicationHash(app, hash_id)) {
+      app_type = ApplicationType::kSwitchedApplicationHashOk;
+    }
+  }
+
   application_manager_.ProcessReconnection(app, connection_key());
-  SendRegisterAppInterfaceResponseToMobile(
-      AppicationType::kSwitchedApplication);
+  SendRegisterAppInterfaceResponseToMobile(app_type);
 
   application_manager_.SendHMIStatusNotification(app);
 

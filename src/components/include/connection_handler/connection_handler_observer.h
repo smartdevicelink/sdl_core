@@ -127,9 +127,11 @@ class ConnectionHandlerObserver {
   /**
    * @brief OnDeviceSwitchingStart is invoked on device transport switching
    * start (e.g. from Bluetooth to USB)
-   * @param device_uid UID of device being switched
+   * @param device_from device params being switched to new transport
+   * @param device_to device params on the new transport
    */
-  virtual void OnDeviceSwitchingStart(const std::string& device_uid) = 0;
+  virtual void OnDeviceSwitchingStart(const Device& device_from,
+                                      const Device& device_to) = 0;
 
   /**
    * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end

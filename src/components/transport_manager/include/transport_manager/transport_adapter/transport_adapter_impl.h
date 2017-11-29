@@ -400,6 +400,26 @@ class TransportAdapterImpl : public TransportAdapter,
                       const DataSendError& error) OVERRIDE;
 
   /**
+   * @brief DoTransportSwitch notifies listeners of transport adapter events
+   * that transport switching is requested by system
+   */
+  void DoTransportSwitch() const OVERRIDE;
+
+  /**
+   * @brief DeviceSwitched Notifies system on successful transport switch for
+   * particular device
+   * @param device_handle Device handle of switched device
+   */
+  void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief GetSwitchableDevices Provides list of devices able to switch their
+   * transport (e.g. iAP2 Bluetooth to iAP2 USB).
+   * @return
+   */
+  SwitchableDevices GetSwitchableDevices() const OVERRIDE;
+
+  /**
    * @brief Return name of device.
    *
    * @param device_id Device unique identifier.
@@ -414,15 +434,6 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_id unique device identifier that has to be stopped.
    */
   void StopDevice(const DeviceUID& device_id) const OVERRIDE;
-
-  /**
-   * @brief DeviceSwitched is triggered for adapter to proceed with possible
-   * further switching steps required on device side. E.g. to notify device
-   * on end of switching so it can disconnect transport being switched from.
-   * This is default implemenation does nothing. Must be overloaded if needed.
-   * @param device_handle Device id to notify on event
-   */
-  void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Allows to obtain connection type used by device.

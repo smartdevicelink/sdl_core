@@ -852,6 +852,13 @@ uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
   return 0;
 }
 
+void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from, 
+                                      const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();

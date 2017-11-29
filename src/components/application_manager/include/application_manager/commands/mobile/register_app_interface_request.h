@@ -88,14 +88,15 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @brief The AppicationType enum defines whether application is newly
    * registered or existing and being switched over another transport
    */
-  enum class AppicationType { kNewApplication, kSwitchedApplication };
+  enum class ApplicationType { 
+    kNewApplication, kSwitchedApplicationHashOk, kSwitchedApplicationWrongHashId };
 
   /**
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    * @param app_type Type of application
    **/
-  void SendRegisterAppInterfaceResponseToMobile(AppicationType app_type);
+  void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type);
 
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
       const uint32_t connection_key, ApplicationSharedPtr app);
