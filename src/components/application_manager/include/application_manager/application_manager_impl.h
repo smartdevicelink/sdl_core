@@ -893,9 +893,11 @@ class ApplicationManagerImpl
    * @brief OnDeviceSwitchingStart is invoked on device transport switching
    * start (e.g. from Bluetooth to USB) and creates waiting list of applications
    * expected to be re-registered after switching is complete
-   * @param device_uid UID of device being switched
+   * @param device_from device params being switched to the new transport
+   * @param device_to device params on the new transport
    */
-  void OnDeviceSwitchingStart(const std::string& device_uid) FINAL;
+  void OnDeviceSwitchingStart(const connection_handler::Device& device_from,
+                              const connection_handler::Device& device_to) FINAL;
 
   /**
    * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end
@@ -1582,10 +1584,12 @@ class ApplicationManagerImpl
    * @param connection_key Connection key of switched application from its
    * registration request
    * @param device_id Device id of switched application
+   * @param mac_address New device mac address
    */
   void SwitchApplication(ApplicationSharedPtr app,
                          const uint32_t connection_key,
-                         const uint32_t device_id);
+                         const size_t device_id,
+                         const std::string& mac_address);
 
   /**
    * @brief Converts BSON object containing video parameters to

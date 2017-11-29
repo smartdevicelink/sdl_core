@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 /**
  * @brief - transport_manager namespace
@@ -90,5 +91,12 @@ typedef int ApplicationHandle;
  * @brief Type definition for vector that contain ApplicationHandle variables.
  */
 typedef std::vector<ApplicationHandle> ApplicationList;
+
+/**
+ * @brief SwitchableDevices defines list of devices having transport switch id
+ * i.e. able to switch their transport. Maps unique device id (MAC, serial etc.)
+ * to transport switch id (e.g. connection UUID for iAP2 transport)
+ */
+typedef std::map<DeviceUID, std::string> SwitchableDevices;
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_

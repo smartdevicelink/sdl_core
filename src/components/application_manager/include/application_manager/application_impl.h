@@ -71,10 +71,12 @@ namespace custom_str = custom_string;
  * @param app Pointer to switched application
  * @param app_id New application id (connection key)
  * @param device_id New device id
+ * @param mac_address New device MAC address
  */
 void SwitchApplicationParameters(ApplicationSharedPtr app,
                                  const uint32_t app_id,
-                                 const uint32_t device_id);
+                                 const size_t device_id,
+                                 const std::string& mac_address);
 
 class ApplicationImpl : public virtual Application,
                         public virtual InitialApplicationDataImpl,
@@ -460,7 +462,7 @@ class ApplicationImpl : public virtual Application,
   uint32_t delete_file_in_none_count_;
   uint32_t list_files_in_none_count_;
   std::string app_icon_path_;
-  const std::string mac_address_;
+  std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
@@ -509,7 +511,8 @@ class ApplicationImpl : public virtual Application,
 
   friend void SwitchApplicationParameters(ApplicationSharedPtr app,
                                           const uint32_t app_id,
-                                          const uint32_t device_id);
+                                          const size_t device_id,
+                                          const std::string& mac_address);
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };

@@ -270,6 +270,13 @@ class TransportAdapterListener {
   virtual void OnCommunicationError(const TransportAdapter* transport_adapter,
                                     const DeviceUID& device_handle,
                                     const ApplicationHandle& app_handle) = 0;
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  virtual void OnTransportSwitchRequested(
+      const TransportAdapter* transport_adapter) = 0;
 };
 
 }  // transport_adapter namespace

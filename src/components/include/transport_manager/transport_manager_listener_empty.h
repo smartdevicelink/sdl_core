@@ -71,9 +71,12 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief OnDeviceSwitchingStart allows to notify listener that device is
    * going to switch its connection. This default implementation does nothing.
-   * @param device_uid the id of the device which has to be switched.
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
    */
-  void OnDeviceSwitchingStart(const DeviceUID& device_uid) OVERRIDE {}
+  void OnDeviceSwitchingStart(const DeviceUID& device_uid_from,
+                              const DeviceUID& device_uid_to) OVERRIDE {}
 
   /**
    * @brief OnDeviceSwitchingFinish notifies listener that device reconnection
