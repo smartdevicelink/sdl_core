@@ -1076,29 +1076,28 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     const connection_handler::Device& device_from,
     const connection_handler::Device& device_to) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
   {
     auto apps_data_accessor = applications();
 
     std::copy_if(
-        apps_data_accessor.GetData().begin(),
-                 apps_data_accessor.GetData().end(),
-                 std::back_inserter(reregister_wait_list_),
-        std::bind1st(std::ptr_fun(&device_id_comparator), 
-                     device_from.mac_address()));
+          apps_data_accessor.GetData().begin(),
+          apps_data_accessor.GetData().end(),
+          std::back_inserter(reregister_wait_list_),
+          std::bind1st(std::ptr_fun(&device_id_comparator),
+                       device_from.mac_address()));
   }
 
   {
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
     sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-  for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
-       ++i) {
-    auto app = *i;
-    request_ctrl_.terminateAppRequests(app->app_id());
-    resume_ctrl_->SaveApplication(app);
+    for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
+         ++i) {
+      auto app = *i;
+      request_ctrl_.terminateAppRequests(app->app_id());
+      resume_ctrl_->SaveApplication(app);
+    }
   }
-}
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
                                      device_to.mac_address());
@@ -1108,6 +1107,10 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
   
   smart_objects::SmartObjectSPtr msg_params =
       MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
+  if (!msg_params) {
+    LOG4CXX_ERROR(logger_, "Can't create UpdateDeviceList notification");
+    return;
+  }
 
   auto update_list = utils::MakeShared<smart_objects::SmartObject>();
   smart_objects::SmartObject& so_to_send = *update_list;

@@ -81,7 +81,8 @@ class MockTransportManagerListener : public TransportManagerListener {
   MOCK_METHOD2(OnTMMessageSendFailed,
                void(const DataSendError& error,
                     const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(OnDeviceSwitchingStart, void(const DeviceUID& device_uid));
+  MOCK_METHOD2(OnDeviceSwitchingStart, void(const DeviceUID& device_uid_from,
+                                            const DeviceUID& device_uid_to));
   MOCK_METHOD1(OnDeviceSwitchingFinish, void(const DeviceUID& device_uid));
 };
 

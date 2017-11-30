@@ -247,6 +247,8 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                GroupsByExternalConsentStatus(const ExternalConsentStatus&));
   MOCK_METHOD0(GetKnownLinksFromPT, std::map<std::string, std::string>());
   MOCK_METHOD1(SetExternalConsentForApp, void(const PermissionConsent&));
+  MOCK_METHOD2(OnDeviceSwitching, void(const std::string& device_id_from,
+                                       const std::string& device_id_to));
 };
 
 }  // namespace policy_test

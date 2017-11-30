@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "utils/custom_string.h"
 #include "utils/make_shared.h"
+#include "encryption/hashing.h"
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
@@ -162,7 +163,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
       application_id,
       policy_app_id,
-      mac_address,
+      encryption::MakeHash(mac_address),
       device_id,
       app_name,
       utils::SharedPtr<usage_statistics::StatisticsManager>(
@@ -171,10 +172,24 @@ TEST_F(ApplicationManagerImplMockHmiTest,
 
   app_manager_impl_->AddMockApplication(app_impl);
 
-  app_manager_impl_->OnDeviceSwitchingStart(mac_address);
+  const connection_handler::Device bt(device_id,
+                                      "BT_device",
+                                      mac_address,
+                                      "BLUETOOTH");
+
+  const connection_handler::Device usb(device_id + 1,
+                                      "USB_device",
+                                      "USB_serial",
+                                      "USB_IOS");
 
   MockHMICommandFactory* mock_hmi_factory =
       MockHMICommandFactory::mock_hmi_command_factory();
+
+  // Skip sending notification on device switching as it is not the goal here
+  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+      .WillOnce(Return(utils::SharedPtr<commands::Command>()));
+
+  app_manager_impl_->OnDeviceSwitchingStart(bt, usb);
 
   const uint32_t connection_key = 1u;
   const uint32_t correlation_id_1 = 1u;

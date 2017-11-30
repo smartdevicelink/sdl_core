@@ -432,13 +432,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               mock_app),
           request_hash_id)).WillOnce(Return(true));
 
-  EXPECT_CALL(
-      mock_resume_crt_,
-      CheckPersistenceFilesForResumption(
-          MockAppPtr::static_pointer_cast<application_manager::Application>(
-              mock_app))).WillOnce(Return(true));
-
-  EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
+   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
 
   EXPECT_CALL(mock_application_helper_, RecallApplicationData(_, _)).Times(0);
 
@@ -473,11 +467,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               mock_app),
           request_hash_id)).WillOnce(Return(false));
 
-  EXPECT_CALL(mock_resume_crt_,
-              RemoveApplicationFromSaved(MockAppPtr::static_pointer_cast<
-                  const application_manager::Application>(mock_app)));
-
-  EXPECT_CALL(
+   EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
           MockAppPtr::static_pointer_cast<application_manager::Application>(
@@ -506,10 +496,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
-
-  EXPECT_CALL(mock_resume_crt_,
-              RemoveApplicationFromSaved(MockAppPtr::static_pointer_cast<
-                  const application_manager::Application>(mock_app)));
 
   EXPECT_CALL(
       mock_application_helper_,

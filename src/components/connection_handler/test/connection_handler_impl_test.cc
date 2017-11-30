@@ -471,6 +471,14 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
       connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
 
+MATCHER_P(SameDevice, device, "") {
+  return
+  arg.device_handle() == device.device_handle() &&
+  arg.user_friendly_name() == device.user_friendly_name() &&
+  arg.mac_address() == device.mac_address() &&
+  arg.connection_type() == device.connection_type();
+}
+
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -1900,23 +1908,35 @@ TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
-  const std::string fake_device_id = "fake_device_id";
+  const transport_manager::DeviceInfo device_info_1(device_handle_,
+                                                    mac_address_,
+                                                    device_name_,
+                                                    connection_type_);
+
+  connection_handler_->OnDeviceAdded(device_info_1);
+
+  const auto second_mac_address = "second_mac_address";
+  const transport_manager::DeviceInfo device_info_2(device_handle_ + 1,
+                                                    second_mac_address,
+                                                    "second_device_name",
+                                                    "second_connection_type");
+
+  connection_handler_->OnDeviceAdded(device_info_2);
+
+  connection_handler::Device d1(device_info_1.device_handle(),
+                                device_info_1.name(),
+                                device_info_1.mac_address(),
+                                device_info_1.connection_type());
+
+  connection_handler::Device d2(device_info_2.device_handle(),
+                                device_info_2.name(),
+                                device_info_2.mac_address(),
+                                device_info_2.connection_type());
+
   EXPECT_CALL(mock_connection_handler_observer,
-              OnDeviceSwitchingStart(encryption::MakeHash(fake_device_id)));
-  connection_handler_->OnDeviceSwitchingStart(fake_device_id);
-}
+              OnDeviceSwitchingStart(SameDevice(d1), SameDevice(d2)));
 
-TEST_F(ConnectionHandlerTest, OnDeviceSwitchingFinish) {
-  connection_handler_test::MockConnectionHandlerObserver
-      mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(
-      &mock_connection_handler_observer);
-
-  const std::string fake_device_id = "fake_device_id";
-  EXPECT_CALL(mock_connection_handler_observer,
-              OnDeviceSwitchingFinish(encryption::MakeHash(fake_device_id)));
-
-  connection_handler_->OnDeviceSwitchingFinish(fake_device_id);
+  connection_handler_->OnDeviceSwitchingStart(mac_address_, second_mac_address);
 }
 
 }  // namespace connection_handler_test
