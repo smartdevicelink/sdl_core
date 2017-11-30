@@ -60,12 +60,11 @@ class CDefaultSchemaItem : public ISchemaItem {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param errorMessage string reference to be filled with an appropriate error
-   *message if an error occurs
+   * @param report__ object for reporting errors during validation
    * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object,
-                         std::string& errorMessage) OVERRIDE;
+                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -110,20 +109,19 @@ CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
 
 template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
-  std::string errorMessage;
-  return validate(Object, errorMessage);
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
 }
 
 template <typename Type>
-Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object,
-                                                 std::string& errorMessage) {
+Errors::eType CDefaultSchemaItem<Type>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__) {
   if (getSmartType() != Object.getType()) {
-    if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
-    }
-    errorMessage += "Incorrect type, expected: " +
-                    SmartObject::typeToString(getSmartType()) + ", got: " +
-                    SmartObject::typeToString(Object.getType());
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(getSmartType()) +
+                                  ", got: " +
+                                  SmartObject::typeToString(Object.getType());
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   } else {
     return Errors::OK;

@@ -52,39 +52,39 @@ TEST(test_AlwaysFalseSchemaItemTest, simple_test) {
   ISchemaItemPtr item = CAlwaysFalseSchemaItem::create();
 
   obj = 5;
-  std::string errorMessage;
-  int resultType = item->validate(obj, errorMessage);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::ERROR, resultType);
   EXPECT_EQ(5, obj.asInt());
 
   obj = true;
-  resultType = item->validate(obj, errorMessage);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::ERROR, resultType);
   EXPECT_TRUE(obj.asBool());
 
   obj = "Test";
-  resultType = item->validate(obj, errorMessage);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::ERROR, resultType);
   EXPECT_EQ(std::string("Test"), obj.asString());
 
   obj["First"] = "Some string";
   obj["Second"] = 555;
-  resultType = item->validate(obj["First"], errorMessage);
+  resultType = item->validate(obj["First"], &report);
   EXPECT_EQ(Errors::ERROR, resultType);
-  resultType = item->validate(obj["Second"], errorMessage);
+  resultType = item->validate(obj["Second"], &report);
   EXPECT_EQ(Errors::ERROR, resultType);
-  resultType = item->validate(obj, errorMessage);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::ERROR, resultType);
   EXPECT_EQ(std::string("Some string"), obj["First"].asString());
   EXPECT_EQ(555, obj["Second"].asInt());
 
   obj[0] = true;
   obj[1] = false;
-  resultType = item->validate(obj[0], errorMessage);
+  resultType = item->validate(obj[0], &report);
   EXPECT_EQ(Errors::ERROR, resultType);
-  resultType = item->validate(obj[1], errorMessage);
+  resultType = item->validate(obj[1], &report);
   EXPECT_EQ(Errors::ERROR, resultType);
-  resultType = item->validate(obj, errorMessage);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::ERROR, resultType);
   EXPECT_TRUE(obj[0].asBool());
   EXPECT_FALSE(obj[1].asBool());

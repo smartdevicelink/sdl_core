@@ -155,7 +155,7 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
       out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
       out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
 
-      jsonValueToObj(root, out[strings::S_MSG_PARAMS], "parameters");
+      jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
     }
   } catch (...) {
     result = false;

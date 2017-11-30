@@ -149,9 +149,9 @@ TEST(FormatterJsonRPCTest, UpperBoundValuesInSystemRequest_ToString_Success) {
 
   hmi_apis::HMI_API factory;
   EXPECT_TRUE(factory.attachSchema(obj, false));
-  std::string errorMessage;
-  EXPECT_EQ(Errors::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));

@@ -40,7 +40,7 @@ Errors::eType ISchemaItem::validate(const SmartObject& Object) {
 }
 
 Errors::eType ISchemaItem::validate(const SmartObject& object,
-                                    std::string& errorMessage) {
+                                    rpc::ValidationReport* report__) {
   return Errors::ERROR;
 }
 

@@ -41,13 +41,13 @@ CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
     : mSchemaItem(SchemaItem) {}
 
 Errors::eType CSmartSchema::validate(const SmartObject& Object) const {
-  std::string errorMessage;
-  return validate(Object, errorMessage);
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
 }
 
 Errors::eType CSmartSchema::validate(const SmartObject& object,
-                                     std::string& errorMessage) const {
-  return mSchemaItem->validate(object, errorMessage);
+                                     rpc::ValidationReport* report__) const {
+  return mSchemaItem->validate(object, report__);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {

@@ -866,8 +866,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         smart_objects::SmartObject display_capabilities_so;
         Json::Value display_capabilities = ui.get("displayCapabilities", "");
         Formatters::CFormatterJsonBase::jsonValueToObj(display_capabilities,
-                                                       display_capabilities_so,
-                                                       "displayCapabilities");
+                                                       display_capabilities_so);
 
         if (display_capabilities_so.keyExists(hmi_response::display_type)) {
           std::map<std::string,
@@ -1064,9 +1063,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             ui.get("softButtonCapabilities", "");
         smart_objects::SmartObject soft_button_capabilities_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(
-            soft_button_capabilities,
-            soft_button_capabilities_so,
-            "softButtonCapabilities");
+            soft_button_capabilities, soft_button_capabilities_so);
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
       if (check_existing_json_member(ui, "systemCapabilities")) {
@@ -1077,9 +1074,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
               system_capabilities.get("navigationCapability", "");
           smart_objects::SmartObject navigation_capability_so;
           Formatters::CFormatterJsonBase::jsonValueToObj(
-              navigation_capability,
-              navigation_capability_so,
-              "navigationCapability");
+              navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
           if (!navigation_capability_so.empty()) {
             set_navigation_supported(true);
@@ -1090,8 +1085,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value phone_capability =
               system_capabilities.get("phoneCapability", "");
           smart_objects::SmartObject phone_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(
-              phone_capability, phone_capability_so, "phoneCapability");
+          Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
+                                                         phone_capability_so);
           set_phone_capability(phone_capability_so);
           if (!phone_capability_so.empty()) {
             set_phone_call_supported(true);
@@ -1102,8 +1097,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value vs_capability =
               system_capabilities.get("videoStreamingCapability", "");
           smart_objects::SmartObject vs_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(
-              vs_capability, vs_capability_so, "videoStreamingCapability");
+          Formatters::CFormatterJsonBase::jsonValueToObj(vs_capability,
+                                                         vs_capability_so);
 
           if (vs_capability_so.keyExists("supportedFormats")) {
             smart_objects::SmartObject& supported_format_array =
@@ -1152,8 +1147,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Json::Value rc_capability =
               system_capabilities.get("remoteControlCapability", "");
           smart_objects::SmartObject rc_capability_so;
-          Formatters::CFormatterJsonBase::jsonValueToObj(
-              rc_capability, rc_capability_so, "remoteControlCapability");
+          Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
+                                                         rc_capability_so);
           set_rc_capability(rc_capability_so);
         }
       }
@@ -1228,8 +1223,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       if (check_existing_json_member(buttons, "capabilities")) {
         Json::Value bt_capabilities = buttons.get("capabilities", "");
         smart_objects::SmartObject buttons_capabilities_so;
-        Formatters::CFormatterJsonBase::jsonValueToObj(
-            bt_capabilities, buttons_capabilities_so, "Buttons.capabilities");
+        Formatters::CFormatterJsonBase::jsonValueToObj(bt_capabilities,
+                                                       buttons_capabilities_so);
 
         for (uint32_t i = 0; i < buttons_capabilities_so.length(); ++i) {
           if ((buttons_capabilities_so[i]).keyExists(strings::name)) {
@@ -1248,8 +1243,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       if (check_existing_json_member(buttons, "presetBankCapabilities")) {
         Json::Value presetBank = buttons.get("presetBankCapabilities", "");
         smart_objects::SmartObject preset_bank_so;
-        Formatters::CFormatterJsonBase::jsonValueToObj(
-            presetBank, preset_bank_so, "presetBankCapabilities");
+        Formatters::CFormatterJsonBase::jsonValueToObj(presetBank,
+                                                       preset_bank_so);
         set_preset_bank_capabilities(preset_bank_so);
       }
     }  // Buttons end
@@ -1258,8 +1253,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
     if (check_existing_json_member(root_json, "VehicleInfo")) {
       Json::Value vehicle_info = root_json.get("VehicleInfo", "");
       smart_objects::SmartObject vehicle_type_so;
-      Formatters::CFormatterJsonBase::jsonValueToObj(
-          vehicle_info, vehicle_type_so, "VehicleInfo");
+      Formatters::CFormatterJsonBase::jsonValueToObj(vehicle_info,
+                                                     vehicle_type_so);
       set_vehicle_type(vehicle_type_so);
     }  // VehicleType end
   } catch (...) {

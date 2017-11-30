@@ -42,13 +42,13 @@ utils::SharedPtr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
 }
 
 Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object) {
-  std::string errorMessage;
-  return validate(object, errorMessage);
+  rpc::ValidationReport report("RPC");
+  return validate(object, &report);
 }
 
-Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object,
-                                               std::string& errorMessage) {
-  errorMessage.assign("Generic error");
+Errors::eType CAlwaysFalseSchemaItem::validate(
+    const SmartObject& object, rpc::ValidationReport* report__) {
+  report__->set_validation_info("Generic error");
   return Errors::ERROR;
 }
 }  // namespace NsSmartObjects

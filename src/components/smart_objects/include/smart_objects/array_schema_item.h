@@ -78,13 +78,13 @@ class CArraySchemaItem : public ISchemaItem {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param errorMessage string reference to be filled with an appropriate error
+   * @param report__ object for reporting errors during validation
    * message if an error occurs
    *
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         std::string& errorMessage) OVERRIDE;
+                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Apply schema.

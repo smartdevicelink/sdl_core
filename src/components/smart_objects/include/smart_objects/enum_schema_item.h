@@ -68,19 +68,18 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return Errors::ERROR
+   * @return NsSmartObjects::Errors::eType
    **/
   // DEPRECATED
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param errorMessage string reference to be filled with an appropriate error
-   *message if an error occurs
-   * @return Errors::ERROR
+   * @param report__ object for reporting errors during validation
+   * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object,
-                         std::string& errorMessage) OVERRIDE;
+                         rpc::ValidationReport* report__) OVERRIDE;
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -218,36 +217,32 @@ utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 
 template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
-  std::string errorMessage;
-  return validate(Object, errorMessage);
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
 }
 
 template <typename EnumType>
-Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object,
-                                                  std::string& errorMessage) {
+Errors::eType TEnumSchemaItem<EnumType>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__) {
   if (SmartType_Integer != Object.getType()) {
-    if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
-    }
-
+    std::string validation_info;
     if (SmartType_String == Object.getType()) {
-      errorMessage += "Invalid enum value: " + Object.asString();
+      validation_info = "Invalid enum value: " + Object.asString();
     } else {
-      errorMessage += "Incorrect type, expected: " +
-                      SmartObject::typeToString(SmartType_Integer) +
-                      " (enum), got: " +
-                      SmartObject::typeToString(Object.getType());
+      validation_info = "Incorrect type, expected: " +
+                        SmartObject::typeToString(SmartType_Integer) +
+                        " (enum), got: " +
+                        SmartObject::typeToString(Object.getType());
     }
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
   if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
       mAllowedElements.end()) {
-    if (!Object.getKey().empty()) {
-      errorMessage.assign("Validation failed for " + Object.getKey() + ". ");
-    }
     std::stringstream stream;
     stream << "Invalid enum value: " << Object.asInt();
-    errorMessage += stream.str();
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;

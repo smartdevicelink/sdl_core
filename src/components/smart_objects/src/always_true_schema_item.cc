@@ -44,7 +44,7 @@ Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
 }
 
 Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object,
-                                              std::string& errorMessage) {
+                                              rpc::ValidationReport* report__) {
   return Errors::OK;
 }
 

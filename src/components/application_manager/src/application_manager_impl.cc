@@ -2069,11 +2069,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
               message.type(),
               message.correlation_id());
 
-      std::string errorMessage = "";
+      rpc::ValidationReport report("RPC");
 
       if (!conversion_result ||
           !mobile_so_factory().attachSchema(output, true) ||
-          ((output.validate(errorMessage) != smart_objects::Errors::OK))) {
+          ((output.validate(&report) != smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object :"
                          << message.json_message());
@@ -2084,7 +2084,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                 message.correlation_id(),
                 mobile_apis::Result::INVALID_DATA));
 
-        (*response)[strings::msg_params][strings::info] = errorMessage;
+        (*response)[strings::msg_params][strings::info] =
+            rpc::PrettyFormat(report);
         ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
         return false;
       }
@@ -2133,15 +2134,17 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         return false;
       }
 
-      std::string errorMessage = "";
+      rpc::ValidationReport report("RPC");
 
-      if (output.validate(errorMessage) != smart_objects::Errors::OK) {
-        LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
+      if (output.validate(&report) != smart_objects::Errors::OK) {
+        LOG4CXX_ERROR(logger_,
+                      "Incorrect parameter from HMI"
+                          << rpc::PrettyFormat(report));
 
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
             hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] = errorMessage;
+        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
         return false;
       }
       break;
@@ -2317,10 +2320,11 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
       if (!mobile_so_factory().attachSchema(so, true)) {
         return INVALID_METADATA;
       }
-      std::string errorMessage("");
-      if (so.validate(errorMessage) != smart_objects::Errors::OK) {
+      rpc::ValidationReport report("RPC");
+      if (so.validate(&report) != smart_objects::Errors::OK) {
         LOG4CXX_WARN(logger_,
-                     "validate() failed for Mobile message - " << errorMessage);
+                     "validate() failed for Mobile message - "
+                         << rpc::PrettyFormat(report));
         return SCHEMA_MISMATCH;
       }
       break;
@@ -2339,10 +2343,11 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
         return INVALID_METADATA;
       }
 
-      std::string errorMessage("");
-      if (so.validate(errorMessage) != smart_objects::Errors::OK) {
+      rpc::ValidationReport report("RPC");
+      if (so.validate(&report) != smart_objects::Errors::OK) {
         LOG4CXX_WARN(logger_,
-                     "validate() failed for HMI message - " << errorMessage);
+                     "validate() failed for HMI message - "
+                         << rpc::PrettyFormat(report));
         return SCHEMA_MISMATCH;
       }
       break;

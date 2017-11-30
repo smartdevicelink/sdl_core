@@ -68,14 +68,17 @@ inline void PrettyFormat(const ValidationReport& report,
   if (!object_path.empty() && report.object_name()[0] != '[') {
     object_path.append(".");
   }
+  const ValidationReports& subreports = report.subobject_reports();
   object_path.append(report.object_name());
   if (!report.validation_info().empty()) {
+    // Insert newline between entries
+    if (!result->empty()) {
+      result->append("\n");
+    }
     result->append(object_path);
     result->append(": ");
     result->append(report.validation_info());
-    result->append("\n");
   }
-  const ValidationReports& subreports = report.subobject_reports();
   for (ValidationReports::const_iterator i = subreports.begin(),
                                          end = subreports.end();
        i != end;

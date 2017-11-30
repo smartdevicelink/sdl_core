@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include "utils/shared_ptr.h"
+#include "rpc_base/validation_report.h"
 
 #include "smart_objects/errors.h"
 
@@ -62,13 +63,13 @@ class ISchemaItem {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param errorMessage string reference to be filled with an appropriate error
+   * @param report__ object for reporting errors during validation
    * message if an error occurs
    *
    * @return NsSmartObjects::Errors::eType
    **/
   virtual Errors::eType validate(const SmartObject& Object,
-                                 std::string& errorMessage);
+                                 rpc::ValidationReport* report__);
 
   /**
    * @brief Set default value to an object.

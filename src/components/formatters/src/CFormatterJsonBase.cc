@@ -37,8 +37,7 @@
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
     jsonValueToObj(const Json::Value& value,
-                   NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-                   const std::string& key) {
+                   NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
   try {
     if (value.type() == Json::objectValue) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
@@ -47,17 +46,14 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
       Json::Value::Members members = value.getMemberNames();
 
       for (uint32_t i = 0; i < members.size(); i++) {
-        std::string newKey(key + "." + members[i]);
-        jsonValueToObj(value[members[i]], obj[members[i]], newKey);
+        jsonValueToObj(value[members[i]], obj[members[i]]);
       }
     } else if (value.type() == Json::arrayValue) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
           NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 
       for (uint32_t i = 0; i < value.size(); i++) {
-        std::stringstream newKey;
-        newKey << key << "." << i;
-        jsonValueToObj(value[i], obj[i], newKey.str());
+        jsonValueToObj(value[i], obj[i]);
       }
     } else if (value.type() == Json::intValue) {
       obj = utils::ConvertLongLongIntToInt64(value.asInt64());
@@ -70,7 +66,6 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
     } else if (value.type() == Json::stringValue) {
       obj = value.asString();
     }
-    obj.setKey(key);
   } catch (...) {
   }
 }

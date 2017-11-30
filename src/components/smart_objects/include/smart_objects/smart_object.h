@@ -40,6 +40,7 @@
 
 #include "smart_objects/smart_schema.h"
 #include "utils/custom_string.h"
+#include "rpc_base/validation_report.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -681,11 +682,10 @@ class SmartObject FINAL {
   /**
    * @brief Validates object according to attached schema.
    *
-   * @param errorMessage string reference to be filled with an appropriate error
-   *message if an error occurs
+   * @param report__ object for reporting errors during validation
    * @return Result of validation.
    */
-  Errors::eType validate(std::string& errorMessage);
+  Errors::eType validate(rpc::ValidationReport* report__);
 
   /**
    * @brief Sets new schema
@@ -708,21 +708,6 @@ class SmartObject FINAL {
    * @return NsSmartObjects::SmartType
    **/
   SmartType getType() const;
-
-  /**
-   * @brief Sets new key for this object
-   *
-   * @param std::string New key sequesnce
-   * @return void
-   **/
-  void setKey(const std::string& NewKey);
-
-  /**
-   * @brief Returns current object type
-   *
-   * @return std::string
-   **/
-  std::string getKey() const;
 
   /**
    * @brief Returns length of object
@@ -1031,12 +1016,6 @@ class SmartObject FINAL {
    * @brief Validation schema, attached to the object
    **/
   CSmartSchema m_schema;
-
-  /**
-   * @brief Key sequence that describes where the current object is within an
-   *object structure, for debugging purposes
-   **/
-  std::string* m_key;
 };
 
 /**

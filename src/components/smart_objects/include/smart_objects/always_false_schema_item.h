@@ -59,12 +59,11 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param errorMessage string reference to be filled with an appropriate error
-   *message if an error occurs
+   * @param report__ object for reporting errors during validation
    * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object,
-                         std::string& errorMessage) OVERRIDE;
+                         rpc::ValidationReport* report__) OVERRIDE;
 
  private:
   CAlwaysFalseSchemaItem();

@@ -67,9 +67,9 @@ TEST(CSmartFactoryTest,
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -81,9 +81,9 @@ TEST(CSmartFactoryTest,
       FunctionIdTest::Function1, MessageTypeTest::INVALID_ENUM);
   EXPECT_FALSE(SmartType::SmartType_Map == obj.getType());
   EXPECT_TRUE(SmartType::SmartType_Null == obj.getType());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -103,10 +103,9 @@ TEST(
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
-            obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -127,9 +126,9 @@ TEST(
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OUT_OF_RANGE, obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OUT_OF_RANGE, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -150,9 +149,9 @@ TEST(
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -174,9 +173,9 @@ TEST(CSmartFactoryTest,
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -198,10 +197,9 @@ TEST(
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
-            obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -237,9 +235,9 @@ TEST(
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -254,9 +252,9 @@ TEST(CSmartFactoryTest,
   obj["position"] = 200;
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -271,10 +269,9 @@ TEST(
   obj["text"] = "test";
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(1u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
-            obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -289,9 +286,9 @@ TEST(CSmartFactoryTest,
   obj["position"] = 200;
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -306,14 +303,14 @@ TEST(CSmartFactoryTest,
   obj["position"] = 200;
   obj["image"]["text"] = "test2";
   obj["image"]["position"] = 100;
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(3u, keys.size());
-  errorMessage = "";
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -330,15 +327,15 @@ TEST(
   obj["image"]["text"] = "test2";
   obj["image"]["position"] = 100;
   // Check object "image"
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(3u, keys.size());
   // Check global object
-  errorMessage = "";
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -354,16 +351,15 @@ TEST(
   obj["image"]["text"] = "test2";
   obj["image"]["position"] = 100;
   // Check object "image"
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
   // Check global object
-  errorMessage = "";
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
-            obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -380,15 +376,15 @@ TEST(
   obj["image"]["text"] = "test2";
   obj["image"]["position"] = 100;
   // Check object "image"
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj["image"].validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(3u, keys.size());
   // Check global object
-  errorMessage = "";
-  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
-  EXPECT_EQ(std::string(""), errorMessage);
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(Errors::eType::OK, obj.validate(&report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
   EXPECT_TRUE(obj.isValid());
 }
 
@@ -405,10 +401,9 @@ TEST(
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(2u, keys.size());
   // Check global object
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
-            obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
@@ -426,9 +421,9 @@ TEST(
   std::set<std::string> keys = obj.enumerate();
   EXPECT_EQ(3u, keys.size());
   // Check global object
-  std::string errorMessage;
-  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(errorMessage));
-  EXPECT_NE(std::string(""), errorMessage);
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(Errors::eType::INVALID_VALUE, obj.validate(&report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
   EXPECT_FALSE(obj.isValid());
 }
 
