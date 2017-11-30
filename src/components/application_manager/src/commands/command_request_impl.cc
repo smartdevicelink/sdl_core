@@ -526,7 +526,7 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       break;
     }
     case hmi_apis::Common_Result::DATA_NOT_AVAILABLE: {
-      mobile_result = mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE;
+      mobile_result = mobile_apis::Result::DATA_NOT_AVAILABLE;
       break;
     }
     case hmi_apis::Common_Result::TIMED_OUT: {
@@ -587,6 +587,14 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
     }
     case hmi_apis::Common_Result::SAVED: {
       mobile_result = mobile_apis::Result::SAVED;
+      break;
+    }
+    case hmi_apis::Common_Result::TRUNCATED_DATA: {
+      mobile_result = mobile_apis::Result::TRUNCATED_DATA;
+      break;
+    }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      mobile_result = mobile_apis::Result::READ_ONLY;
       break;
     }
     default: {
