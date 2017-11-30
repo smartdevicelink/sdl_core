@@ -609,9 +609,10 @@ void ResumeCtrlImpl::AddSubscriptions(
     if (subscribtions.keyExists(strings::application_vehicle_info)) {
       const smart_objects::SmartObject& subscribtions_ivi =
           subscribtions[strings::application_vehicle_info];
-      VehicleDataType ivi;
+      mobile_apis::VehicleDataType::eType ivi;
       for (size_t i = 0; i < subscribtions_ivi.length(); ++i) {
-        ivi = static_cast<VehicleDataType>((subscribtions_ivi[i]).asInt());
+        ivi = static_cast<mobile_apis::VehicleDataType::eType>(
+            (subscribtions_ivi[i]).asInt());
         application->SubscribeToIVI(ivi);
       }
       ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(

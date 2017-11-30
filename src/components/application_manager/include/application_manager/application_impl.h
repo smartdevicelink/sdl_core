@@ -331,7 +331,7 @@ class ApplicationImpl : public virtual Application,
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
-  const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
 
   /**
    * @brief Return pointer to extension by uid

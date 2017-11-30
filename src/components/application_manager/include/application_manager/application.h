@@ -161,7 +161,7 @@ typedef std::set<uint32_t> SoftButtonID;
 /**
  * @brief Defines set of vehicle info types
  */
-typedef std::set<uint32_t> VehicleInfoSubscriptions;
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
 /**
  * @brief Defines set of buttons subscription
@@ -837,7 +837,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
-  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  protected:

@@ -113,7 +113,8 @@ TEST_F(OnVehicleDataNotificationTest,
        Run_NotEmptyListOfAppsSubscribedForEvent_SUCCESS) {
   am::VehicleData test_vehicle_data;
   test_vehicle_data.insert(am::VehicleData::value_type(
-      am::strings::fuel_level, am::VehicleDataType::FUELLEVEL));
+      am::strings::fuel_level,
+      mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL));
 
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(test_vehicle_data));
@@ -126,9 +127,10 @@ TEST_F(OnVehicleDataNotificationTest,
   std::vector<ApplicationSharedPtr> applications;
   applications.push_back(mock_app);
 
-  EXPECT_CALL(app_mngr_,
-              IviInfoUpdated(am::VehicleDataType::FUELLEVEL, kFuelLevel))
-      .WillOnce(Return(applications));
+  EXPECT_CALL(
+      app_mngr_,
+      IviInfoUpdated(mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL,
+                     kFuelLevel)).WillOnce(Return(applications));
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
   ::utils::custom_string::CustomString dummy_name("test_app");

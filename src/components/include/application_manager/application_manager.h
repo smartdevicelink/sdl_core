@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
@@ -374,8 +373,8 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual AppSharedPtrs IviInfoUpdated(VehicleDataType vehicle_info,
-                                       int value) = 0;
+  virtual AppSharedPtrs IviInfoUpdated(
+      mobile_apis::VehicleDataType::eType vehicle_info, int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
       smart_objects::SmartObject>& request_for_registration) = 0;

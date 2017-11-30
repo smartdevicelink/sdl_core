@@ -452,9 +452,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   smart_objects::SmartObject test_subscriptions;
   smart_objects::SmartObject app_vi;
 
-  int vtype = application_manager::VehicleDataType::GPS;
+  int vtype = mobile_apis::VehicleDataType::VEHICLEDATA_GPS;
   uint i = 0;
-  for (; vtype < application_manager::VehicleDataType::STEERINGWHEEL;
+  for (; vtype < mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL;
        ++i, ++vtype) {
     app_vi[i] = vtype;
   }
@@ -481,7 +481,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   for (size_t i = 0; i < app_vi.length(); ++i) {
     EXPECT_CALL(
         *app_mock_,
-        SubscribeToIVI(static_cast<application_manager::VehicleDataType>(i)));
+        SubscribeToIVI(static_cast<mobile_apis::VehicleDataType::eType>(i)));
   }
 
   smart_objects::SmartObjectList requests;

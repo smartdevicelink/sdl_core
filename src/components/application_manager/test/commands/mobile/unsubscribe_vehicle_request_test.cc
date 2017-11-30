@@ -59,7 +59,8 @@ typedef ::utils::SharedPtr<UnsubscribeVehicleDataRequest> CommandPtr;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const std::string kMsgParamKey = "test_key";
-const am::VehicleDataType kVehicleType = am::VehicleDataType::SPEED;
+const mobile_apis::VehicleDataType::eType kVehicleType =
+    mobile_apis::VehicleDataType::VEHICLEDATA_SPEED;
 }  // namespace
 
 class UnsubscribeVehicleRequestTest

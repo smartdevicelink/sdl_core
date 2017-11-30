@@ -201,8 +201,8 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
       CreateCommand<GetVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
-  vehicle_data.insert(
-      am::VehicleData::value_type(kMsgParamKey, am::VehicleDataType::SPEED));
+  vehicle_data.insert(am::VehicleData::value_type(
+      kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
 
