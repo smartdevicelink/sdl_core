@@ -56,6 +56,7 @@
 #include "utils/lock.h"
 #include "utils/make_shared.h"
 #include "utils/push_log.h"
+#include "encryption/hashing.h"
 
 namespace test {
 namespace components {
@@ -131,7 +132,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
     ON_CALL(mock_application_manager_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kDirectoryName));
     ON_CALL(mock_application_manager_settings_, launch_hmi())
-        .WillByDefault(Return(true));
+        .WillByDefault(Return(false));
     ON_CALL(mock_application_manager_settings_, stop_streaming_timeout())
         .WillByDefault(Return(stop_streaming_timeout));
     ON_CALL(mock_application_manager_settings_, default_timeout())
@@ -679,29 +680,56 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string switching_mac_address = "switching";
+  const std::string switching_device_id = "switching";
+  const std::string switching_device_id_hash =
+      encryption::MakeHash(switching_device_id);
   app_manager_impl_->AddMockApplication(switching_app_ptr);
   EXPECT_CALL(*switching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(switching_mac_address));
+      .WillRepeatedly(ReturnRef(switching_device_id_hash));
 
   const std::string policy_app_id_switch = "abc";
   EXPECT_CALL(*switching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_switch));
 
+  const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
+  EXPECT_CALL(*switching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_switching_app));
+
   utils::SharedPtr<MockApplication> nonswitching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const std::string nonswitching_mac_address = "nonswitching";
+  const std::string nonswitching_device_id = "nonswitching";
+  const std::string nonswitching_device_id_hash =
+      encryption::MakeHash(nonswitching_device_id);
   app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
   EXPECT_CALL(*nonswitching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(nonswitching_mac_address));
+      .WillRepeatedly(ReturnRef(nonswitching_device_id_hash));
 
   const std::string policy_app_id_nonswitch = "efg";
   EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
+  const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_nonswitching_app));
+
   // Act
-  app_manager_impl_->OnDeviceSwitchingStart(switching_mac_address);
+  const connection_handler::DeviceHandle switching_handle = 1;
+  const connection_handler::Device switching_device(switching_handle,
+                                                    "switching_device",
+                                                    switching_device_id,
+                                                    "BLUETOOTH");
+
+  const connection_handler::DeviceHandle non_switching_handle = 2;
+  const connection_handler::Device non_switching_device(non_switching_handle,
+                                                        "non_switching_device",
+                                                        nonswitching_device_id,
+                                                        "USB");
+
+  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
+      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device,
+                                            non_switching_device);
   EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
   EXPECT_FALSE(
       app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
@@ -712,62 +740,63 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const uint32_t switching_app_id = 1u;
-  EXPECT_CALL(*switching_app_ptr, app_id())
-      .WillRepeatedly(Return(switching_app_id));
-
-  const uint32_t switching_device_id = 1u;
-  EXPECT_CALL(*switching_app_ptr, device())
-      .WillRepeatedly(Return(switching_device_id));
-
-  const std::string switching_mac_address = "switching";
+  const std::string switching_device_id = "switching";
+  const std::string switching_device_id_hash =
+      encryption::MakeHash(switching_device_id);
   app_manager_impl_->AddMockApplication(switching_app_ptr);
   EXPECT_CALL(*switching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(switching_mac_address));
+      .WillRepeatedly(ReturnRef(switching_device_id_hash));
 
   const std::string policy_app_id_switch = "abc";
   EXPECT_CALL(*switching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_switch));
 
+  const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
+  EXPECT_CALL(*switching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_switching_app));
+
   utils::SharedPtr<MockApplication> nonswitching_app_ptr =
       utils::MakeShared<MockApplication>();
 
-  const uint32_t nonswitching_app_id = 2u;
-  EXPECT_CALL(*nonswitching_app_ptr, app_id())
-      .WillRepeatedly(Return(nonswitching_app_id));
-
-  const uint32_t nonswitching_device_id = 2u;
-  EXPECT_CALL(*nonswitching_app_ptr, device())
-      .WillRepeatedly(Return(nonswitching_device_id));
-
-  const std::string nonswitching_mac_address = "nonswitching";
+  const std::string nonswitching_device_id = "nonswitching";
+  const std::string nonswitching_device_id_hash =
+      encryption::MakeHash(nonswitching_device_id);
   app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
   EXPECT_CALL(*nonswitching_app_ptr, mac_address())
-      .WillRepeatedly(ReturnRef(nonswitching_mac_address));
+      .WillRepeatedly(ReturnRef(nonswitching_device_id_hash));
 
   const std::string policy_app_id_nonswitch = "efg";
   EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
       .WillRepeatedly(Return(policy_app_id_nonswitch));
 
+  const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_nonswitching_app));
+
   // Act
-  app_manager_impl_->OnDeviceSwitchingStart(switching_mac_address);
+  const connection_handler::DeviceHandle switching_handle = 1;
+  const connection_handler::Device switching_device(switching_handle,
+                                                    "switching_device",
+                                                    switching_device_id,
+                                                    "BLUETOOTH");
+
+  const connection_handler::DeviceHandle non_switching_handle = 2;
+  const connection_handler::Device non_switching_device(non_switching_handle,
+                                                        "non_switching_device",
+                                                        nonswitching_device_id,
+                                                        "USB");
+
+  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
+      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device,
+                                            non_switching_device);
+
   EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
-  EXPECT_FALSE(
-      app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
 
-  smart_objects::SmartObjectSPtr sptr =
-      MakeShared<smart_objects::SmartObject>();
-
-  ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
-      .WillByDefault(Return(sptr));
-  ON_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
-      .WillByDefault(Return(sptr));
-
-  app_manager_impl_->OnDeviceSwitchingFinish(switching_mac_address);
+  app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
   EXPECT_FALSE(
       app_manager_impl_->application_by_policy_id(policy_app_id_switch));
-  EXPECT_TRUE(
-      app_manager_impl_->application_by_policy_id(policy_app_id_nonswitch));
 }
 
 TEST_F(ApplicationManagerImplTest,
