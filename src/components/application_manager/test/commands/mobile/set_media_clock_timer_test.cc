@@ -55,7 +55,6 @@ using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -75,18 +74,12 @@ const uint32_t kSeconds = 1u;
 class SetMediaClockRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetMediaClockRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  SetMediaClockRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -114,7 +107,6 @@ class SetMediaClockRequestTest
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
   }
 
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 

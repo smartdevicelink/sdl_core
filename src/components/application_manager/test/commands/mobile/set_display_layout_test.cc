@@ -59,7 +59,6 @@ using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -80,18 +79,10 @@ MATCHER_P(CheckMshCorrId, corr_id, "") {
 class SetDisplayLayoutRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetDisplayLayoutRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
+  SetDisplayLayoutRequestTest() : mock_app_(CreateMockApp()) {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-  }
-
-  ~SetDisplayLayoutRequestTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -130,7 +121,6 @@ class SetDisplayLayoutRequestTest
   }
 
   sync_primitives::Lock lock_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 

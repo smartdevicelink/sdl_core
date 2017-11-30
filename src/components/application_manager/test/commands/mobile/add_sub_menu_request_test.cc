@@ -54,9 +54,7 @@ namespace am = ::application_manager;
 using am::commands::AddSubMenuRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using am::MockMessageHelper;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 
 typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
@@ -66,12 +64,7 @@ const uint32_t kConnectionKey = 2u;
 }  // namespace
 
 class AddSubMenuRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  AddSubMenuRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   const uint32_t menu_id = 10u;
@@ -119,7 +112,6 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 }  // namespace add_sub_menu_request

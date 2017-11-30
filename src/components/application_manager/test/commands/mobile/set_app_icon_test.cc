@@ -57,7 +57,6 @@ using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -70,19 +69,6 @@ const uint32_t kConnectionKey = 2u;
 class SetAppIconRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetAppIconRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  MockMessageHelper& mock_message_helper_;
-
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;

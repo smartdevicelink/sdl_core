@@ -70,19 +70,7 @@ const uint32_t kConnectionKey = 2u;
 }  // namespace
 
 class GetVehicleDataRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  GetVehicleDataRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~GetVehicleDataRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  am::MockMessageHelper& mock_message_helper_;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
  public:

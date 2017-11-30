@@ -64,7 +64,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
-using ::testing::Mock;
 
 using ::utils::SharedPtr;
 using am::commands::MessageSharedPtr;
@@ -128,14 +127,6 @@ class CommandRequestImplTest
     }
   };
 
-  CommandRequestImplTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-  ~CommandRequestImplTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {
     app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
@@ -147,7 +138,6 @@ class CommandRequestImplTest
   }
 
   sync_primitives::Lock app_set_lock_;
-  am::MockMessageHelper& mock_message_helper_;
 };
 
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;

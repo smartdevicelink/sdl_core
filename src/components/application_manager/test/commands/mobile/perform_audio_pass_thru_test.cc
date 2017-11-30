@@ -57,7 +57,6 @@ using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::InSequence;
@@ -80,8 +79,7 @@ class PerformAudioPassThruRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   PerformAudioPassThruRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp())
+      : mock_app_(CreateMockApp())
       , message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
       , msg_params_((*message_)[am::strings::msg_params]) {}
 
@@ -137,10 +135,6 @@ class PerformAudioPassThruRequestTest
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(application_sptr_));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   void ResultCommandExpectations(MessageSharedPtr msg,
                                  const std::string& info) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
@@ -153,7 +147,6 @@ class PerformAudioPassThruRequestTest
   }
 
   sync_primitives::Lock lock_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   ::smart_objects::SmartObject& msg_params_;
@@ -192,7 +185,6 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
       (*vr_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(PerformAudioPassThruRequestTest,

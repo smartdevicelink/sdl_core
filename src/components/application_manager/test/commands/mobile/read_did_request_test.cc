@@ -90,9 +90,6 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 
   event.set_smart_object(*event_msg);
 
-  am::MockMessageHelper& mock_message_helper(
-      *am::MockMessageHelper::message_helper_mock());
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
@@ -100,8 +97,6 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
   command->on_event(event);
-
-  testing::Mock::VerifyAndClearExpectations(&mock_message_helper);
 }
 
 TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {

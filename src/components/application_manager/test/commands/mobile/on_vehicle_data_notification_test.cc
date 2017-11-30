@@ -71,11 +71,9 @@ class OnVehicleDataNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnVehicleDataNotificationTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , command_msg_(CreateMessage(smart_objects::SmartType_Map))
+      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
       , command_(CreateCommand<OnVehicleDataNotification>(command_msg_)) {}
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr command_msg_;
   NotificationPtr command_;
 };

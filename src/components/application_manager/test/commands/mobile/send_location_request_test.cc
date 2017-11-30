@@ -54,7 +54,6 @@ using utils::SharedPtr;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
-using ::testing::Mock;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
@@ -92,16 +91,11 @@ class SendLocationRequestTest
 
   typedef SharedPtr<UnwrappedSendLocationRequest> CommandSPrt;
 
-  SendLocationRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
+  SendLocationRequestTest() {
     mock_app_ = CreateMockApp();
     disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void InitialSetup(MessageSharedPtr message_) {
@@ -158,7 +152,6 @@ class SendLocationRequestTest
 
   MockAppPtr mock_app_;
   MockHMICapabilities mock_hmi_capabilities_;
-  MockMessageHelper& mock_message_helper_;
   SharedPtr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;

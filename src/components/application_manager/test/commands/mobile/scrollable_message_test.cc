@@ -65,7 +65,6 @@ using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -84,9 +83,6 @@ const uint32_t kFunctionID = 3u;
 class ScrollableMessageRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  ScrollableMessageRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
@@ -118,11 +114,6 @@ class ScrollableMessageRequestTest
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     command_ = CreateCommand<ScrollableMessageRequest>(msg_);
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MockPolicyHandlerInterface mock_policy_handler_;
@@ -181,7 +172,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {

@@ -59,7 +59,6 @@ using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 

@@ -72,20 +72,13 @@ class UnSubscribeWayPointsRequestTest
  public:
   UnSubscribeWayPointsRequestTest()
       : command_msg_(CreateMessage(smart_objects::SmartType_Map))
-      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_))
-      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_)) {
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~UnSubscribeWayPointsRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
-  am::MockMessageHelper& mock_message_helper_;
 };
 
 TEST_F(UnSubscribeWayPointsRequestTest,
