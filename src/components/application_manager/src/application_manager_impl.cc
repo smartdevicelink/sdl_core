@@ -1909,19 +1909,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   }
 
   if (message_type == mobile_apis::messageType::response) {
-    if (!message->isValid()) {
-      LOG4CXX_ERROR(logger_, "Mobile message response is invalid");
-      smart_objects::SmartObjectSPtr response =
-          MessageHelper::CreateNegativeResponse(
-              connection_key,
-              static_cast<int32_t>(function_id),
-              correlation_id,
-              static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
-
-      SendMessageToMobile(response);
-      return false;
-    }
-
     if (command->Init()) {
       command->Run();
       command->CleanUp();
