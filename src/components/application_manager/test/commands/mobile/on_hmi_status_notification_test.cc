@@ -70,7 +70,6 @@ class OnHMIStatusNotificationTest
   void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
         .WillOnce(Return(false));
-    EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
     EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
