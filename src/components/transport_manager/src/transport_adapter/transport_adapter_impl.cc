@@ -155,12 +155,6 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
 
   initialised_ = (error == OK);
 
-  if (get_settings().use_last_state()) {
-    if (!Restore()) {
-      LOG4CXX_WARN(logger_, "could not restore transport adapter state");
-      error = FAIL;
-    }
-  }
   LOG4CXX_TRACE(logger_, "exit with error: " << error);
   return error;
 }
@@ -778,6 +772,11 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
 void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
   LOG4CXX_TRACE(logger_, "enter");
   listeners_.push_back(listener);
+  if (get_settings().use_last_state()) {
+    if (!Restore()) {
+      LOG4CXX_WARN(logger_, "could not restore transport adapter state");
+    }
+  }
   LOG4CXX_TRACE(logger_, "exit");
 }
 
