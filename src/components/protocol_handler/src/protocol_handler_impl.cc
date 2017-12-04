@@ -1173,12 +1173,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const uint8_t current_session_id = packet.session_id();
-  const uint32_t hash_id = get_hash_id(packet);
+  uint32_t hash_id = get_hash_id(packet);
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const ConnectionID connection_id = packet.connection_id();
 
   const uint32_t session_key = session_observer_.OnSessionEndedCallback(
-      connection_id, current_session_id, hash_id, service_type);
+      connection_id, current_session_id, &hash_id, service_type);
 
   if (0 == session_key) {
     LOG4CXX_WARN(logger_, "Refused to end service");
@@ -1307,8 +1307,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 }  // namespace
 #endif  // ENABLE_SECURITY
 
-// DEPRECATED
-RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+DEPRECATED RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(
@@ -1461,6 +1462,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   }
   return RESULT_OK;
 }
+#pragma GCC diagnostic pop
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolFramePtr packet) {
@@ -1895,11 +1897,11 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
         connection_key,
         security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED,
         error_text);
+
+    uint32_t hash_id = packet->message_id();
     // Close session to prevent usage unprotected service/session
-    session_observer_.OnSessionEndedCallback(packet->connection_id(),
-                                             packet->session_id(),
-                                             packet->message_id(),
-                                             kRpc);
+    session_observer_.OnSessionEndedCallback(
+        packet->connection_id(), packet->session_id(), &hash_id, kRpc);
     return RESULT_OK;
   }
   LOG4CXX_DEBUG(logger_,
@@ -1948,11 +1950,11 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
         connection_key,
         security_manager::SecurityManager::ERROR_DECRYPTION_FAILED,
         error_text);
+
+    uint32_t hash_id = packet->message_id();
     // Close session to prevent usage unprotected service/session
-    session_observer_.OnSessionEndedCallback(packet->connection_id(),
-                                             packet->session_id(),
-                                             packet->message_id(),
-                                             kRpc);
+    session_observer_.OnSessionEndedCallback(
+        packet->connection_id(), packet->session_id(), &hash_id, kRpc);
     return RESULT_ENCRYPTION_FAILED;
   }
   LOG4CXX_DEBUG(logger_,

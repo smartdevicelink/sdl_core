@@ -64,8 +64,7 @@ void TelemetryMonitor::Start() {
   thread_ = threads::CreateThread("TelemetryMonitor", streamer_.get());
 }
 
-// DEPRECATED
-void TelemetryMonitor::set_streamer(Streamer* streamer) {}
+DEPRECATED void TelemetryMonitor::set_streamer(Streamer* streamer) {}
 
 void TelemetryMonitor::set_streamer(utils::SharedPtr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);

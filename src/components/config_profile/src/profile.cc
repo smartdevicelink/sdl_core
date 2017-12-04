@@ -451,7 +451,7 @@ const std::string& Profile::app_resource_folder() const {
   return app_resource_folder_;
 }
 
-bool Profile::enable_protocol_4() const {
+DEPRECATED bool Profile::enable_protocol_4() const {
   return max_supported_protocol_version_ >= 4;
 }
 
