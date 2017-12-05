@@ -42,9 +42,9 @@
 #include "utils/file_system.h"
 
 namespace  {
-mode_t mode = 0666;
-const auto in_signals_channel = "iap_signals_in";
-const auto out_signals_channel = "iap_signals_out";
+static const mode_t mode = 0666;
+static const auto in_signals_channel = "iap_signals_in";
+static const auto out_signals_channel = "iap_signals_out";
 } // namespace
 
 namespace transport_manager {
@@ -74,12 +74,12 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     resumption::LastState& last_state,
     const TransportManagerSettings& settings)
     : TcpTransportAdapter(port, last_state, settings), out_(0) {
-  auto delegate = new IAPSignalHandlerDelegate(this);
+  auto delegate = new IAPSignalHandlerDelegate(*this);
   signal_handler_ =
       threads::CreateThread("iAP signal handler", delegate);
   signal_handler_->start();
-  LOG4CXX_DEBUG(logger_, "Out signals channel creation result: "
-                << mkfifo(out_signals_channel, mode));
+  const auto result = mkfifo(out_signals_channel, mode);
+  LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
 }
 
 IAP2USBEmulationTransportAdapter::~IAP2USBEmulationTransportAdapter() {
@@ -112,12 +112,12 @@ DeviceType IAP2USBEmulationTransportAdapter::GetDeviceType() const {
 
 IAP2USBEmulationTransportAdapter::
 IAPSignalHandlerDelegate::IAPSignalHandlerDelegate(
-    IAP2USBEmulationTransportAdapter* adapter)
+    IAP2USBEmulationTransportAdapter& adapter)
   : adapter_(adapter),
     run_flag_(true),
     in_(0) {
-  LOG4CXX_DEBUG(logger_, "In signals channel creation result: "
-                << mkfifo(in_signals_channel, mode));
+  const auto result = mkfifo(in_signals_channel, mode);
+  LOG4CXX_DEBUG(logger_, "In signals channel creation result: " << result);
 }
 
 void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
@@ -140,7 +140,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
     std::string str(buffer);
     if (std::string::npos != str.find(switch_signal)) {
       LOG4CXX_DEBUG(logger_, "Switch signal received.");
-      adapter_->DoTransportSwitch();
+      adapter_.DoTransportSwitch();
     }
   }
 }

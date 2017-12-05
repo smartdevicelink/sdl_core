@@ -127,7 +127,7 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
      * @brief IAPSignalHandlerDelegate Constructor
      * @param adapter Pointer to iAP2 USB adapter
      */
-    IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter* adapter);
+    IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter& adapter);
 
     /**
      * @brief threadMain Main loop to track incoming signals
@@ -140,8 +140,19 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
     void exitThreadMain() OVERRIDE;
 
     private:
-    IAP2USBEmulationTransportAdapter* adapter_;
+    /**
+     * @brief adapter_ Reference to owning adapter
+     */
+    IAP2USBEmulationTransportAdapter& adapter_;
+
+    /**
+     * @brief run_flag_ Flag defines whether main loop is active
+     */
     bool run_flag_;
+
+    /**
+     * @brief in_ Input signals channel descriptor
+     */
     int in_;
   };
 
