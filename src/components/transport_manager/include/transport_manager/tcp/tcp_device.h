@@ -66,6 +66,18 @@ class TcpDevice : public Device {
    **/
   TcpDevice(const in_addr_t& in_addr, const std::string& name);
 
+ #if defined (BUILD_TESTS)
+  /**
+   * @brief TcpDevice
+   * @param in_addr IP address of device
+   * @param device_uid Unique device id
+   * @param transport_switch_id Id used for transport switching
+   */
+  TcpDevice(const in_addr_t& in_addr,
+            const std::string& device_uid,
+            const std::string& transport_switch_id);
+#endif
+
   virtual ~TcpDevice();
 
   /**
