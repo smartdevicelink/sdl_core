@@ -66,7 +66,6 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::testing::Mock;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -89,8 +88,7 @@ class ChangeRegistrationRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   ChangeRegistrationRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp())
+      : mock_app_(CreateMockApp())
       , supported_languages_(CreateMessage(smart_objects::SmartType_Array)) {}
 
   MessageSharedPtr CreateMsgFromMobile() {
@@ -246,10 +244,6 @@ class ChangeRegistrationRequestTest
         .WillByDefault(ReturnRef(hmi_capabilities_));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   void ExpectationsHmiCapabilities(
       smart_objects::SmartObjectSPtr supported_languages) {
     EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
@@ -277,7 +271,6 @@ class ChangeRegistrationRequestTest
       MockHMICapabilities;
   sync_primitives::Lock app_set_lock_;
   MockHMICapabilities hmi_capabilities_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr supported_languages_;
   MockPolicyHandlerInterface mock_policy_handler_;

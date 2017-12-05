@@ -59,21 +59,16 @@ namespace alert_maneuver_request {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::Mock;
 namespace am = ::application_manager;
 using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using am::MockMessageHelper;
 
 typedef SharedPtr<AlertManeuverRequest> CommandPtr;
 
 class AlertManeuverRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  AlertManeuverRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
@@ -111,16 +106,7 @@ class AlertManeuverRequestTest
         static_cast<int32_t>(mobile_response));
   }
 
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
  protected:
-  MockMessageHelper& mock_message_helper_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
 };
 
@@ -167,8 +153,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   const mobile_apis::Result::eType kProcessingResult =
       mobile_apis::Result::ABORTED;
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              ProcessSoftButtons(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(kProcessingResult));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -215,8 +200,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(ReturnRef(policy_interface_));
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              ProcessSoftButtons(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -225,8 +209,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              SubscribeApplicationToSoftButton(_, _, _));
+  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
   EXPECT_EQ(hmi_apis::FunctionID::Navigation_AlertManeuver,

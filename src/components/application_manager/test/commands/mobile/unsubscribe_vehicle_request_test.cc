@@ -92,8 +92,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
       kVehicleType;
 
   am::VehicleData data;
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
-      .WillOnce(ReturnRef(data));
+  EXPECT_CALL(mock_message_helper_, vehicle_data()).WillOnce(ReturnRef(data));
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
@@ -116,7 +115,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
@@ -140,7 +139,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
@@ -162,7 +161,7 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
@@ -186,7 +185,7 @@ void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
 
   am::ApplicationSet application_set_;
@@ -229,7 +228,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
   EXPECT_CALL(*mock_app, IsSubscribedToIVI(kVehicleType))
       .WillRepeatedly(Return(false));

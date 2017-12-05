@@ -59,7 +59,6 @@ using am::CommandsMap;
 using utils::custom_string::CustomString;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -75,9 +74,7 @@ const uint32_t kPosition = 1u;
 class SetGlobalPropertiesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetGlobalPropertiesRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  SetGlobalPropertiesRequestTest() : mock_app_(CreateMockApp()) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -220,10 +217,6 @@ class SetGlobalPropertiesRequestTest
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   void ResultCommandExpectations(MessageSharedPtr msg,
                                  const std::string& info) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
@@ -252,7 +245,6 @@ class SetGlobalPropertiesRequestTest
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
   sync_primitives::Lock lock_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 

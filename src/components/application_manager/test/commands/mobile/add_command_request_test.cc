@@ -61,11 +61,9 @@ using am::commands::CommandImpl;
 using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
-using am::MockMessageHelper;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
-using ::testing::Mock;
 using ::testing::InSequence;
 using am::commands::AddCommandRequest;
 using NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr;
@@ -105,17 +103,11 @@ class AddCommandRequestTest
   AddCommandRequestTest()
       : msg_(CreateMessage())
       , default_app_name_("test_default_app_name_")
-      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , mock_app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillRepeatedly(Return(mock_app_));
     InitGetters();
     InitBasicMessage();
-  }
-
-  ~AddCommandRequestTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
  protected:
@@ -227,7 +219,6 @@ class AddCommandRequestTest
   MessageSharedPtr msg_;
   SmartObjectSPtr so_ptr_;
   const utils::custom_string::CustomString default_app_name_;
-  am::MockMessageHelper& mock_message_helper_;
   sync_primitives::Lock lock_;
   MockAppPtr mock_app_;
 };

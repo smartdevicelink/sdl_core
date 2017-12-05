@@ -59,7 +59,6 @@ using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -82,8 +81,7 @@ class SliderRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SliderRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp())
+      : mock_app_(CreateMockApp())
       , msg_(CreateMessage(smart_objects::SmartType_Map)) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -123,10 +121,6 @@ class SliderRequestTest
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
   }
 
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
     EXPECT_CALL(
@@ -135,12 +129,8 @@ class SliderRequestTest
                             am::commands::Command::CommandOrigin::ORIGIN_SDL));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
   sync_primitives::Lock lock_;
 
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
   MockPolicyHandlerInterface mock_policy_handler_;
@@ -189,7 +179,6 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 class CallOnTimeOut {

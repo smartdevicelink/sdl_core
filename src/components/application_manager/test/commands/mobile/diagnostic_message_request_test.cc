@@ -71,17 +71,7 @@ const uint32_t kDiagnosticMode = 5u;
 }  // namespace
 
 class DiagnosticMessageRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  DiagnosticMessageRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-  ~DiagnosticMessageRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-  am::MockMessageHelper& mock_message_helper_;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));

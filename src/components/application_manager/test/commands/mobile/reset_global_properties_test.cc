@@ -58,7 +58,6 @@ namespace mobile_commands_test {
 namespace reset_global_properties {
 
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -83,11 +82,7 @@ class ResetGlobalPropertiesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  protected:
   ResetGlobalPropertiesRequestTest()
-      : mock_message_helper_(am::MockMessageHelper::message_helper_mock())
-      , msg_(CreateMessage())
-      , mock_app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(mock_message_helper_);
-  }
+      : msg_(CreateMessage()), mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -102,10 +97,6 @@ class ResetGlobalPropertiesRequestTest
         .WillByDefault(Return(kCorrelationId));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(mock_message_helper_);
-  }
-  am::MockMessageHelper* mock_message_helper_;
   MessageSharedPtr msg_;
   MockAppPtr mock_app_;
   ResetGlobalPropertiesRequestPtr command_;
@@ -177,7 +168,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   smart_objects::SmartObjectSPtr vr_help;  // = NULL;
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
+  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
@@ -230,7 +221,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   smart_objects::SmartObjectSPtr vr_help =
       ::utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
+  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
   smart_objects::SmartObject msg_params =
@@ -283,7 +274,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   smart_objects::SmartObjectSPtr vr_help =
       ::utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
+  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
   command_->Run();
@@ -368,7 +359,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   smart_objects::SmartObjectSPtr vr_help =
       ::utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
+  EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
@@ -441,7 +432,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       utils::MakeShared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
-  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillOnce(Return(response));
   const std::string info = "TTS component does not respond";
   EXPECT_CALL(
@@ -503,7 +494,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       utils::MakeShared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
-  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillOnce(Return(response));
 
   const std::string info = "UI component does not respond";
@@ -557,7 +548,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       utils::MakeShared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
-  EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillOnce(Return(response));
   EXPECT_CALL(
       app_mngr_,

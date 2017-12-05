@@ -51,7 +51,6 @@ namespace mobile_commands_test {
 namespace delete_sub_menu_request {
 
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::InSequence;
@@ -97,22 +96,14 @@ class DeleteSubMenuRequestTest
  public:
   DeleteSubMenuRequestTest()
       : accessor_(commands_map_, commands_lock_)
-      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , message_(CreateMessage())
       , command_(CreateCommand<DeleteSubMenuRequest>(message_))
-      , app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~DeleteSubMenuRequestTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
+      , app_(CreateMockApp()) {}
 
   am::CommandsMap commands_map_;
   mutable sync_primitives::Lock commands_lock_;
   DataAccessor<am::CommandsMap> accessor_;
 
-  MockMessageHelper& mock_message_helper_;
   MessageSharedPtr message_;
   DeleteSubMenuRequestPtr command_;
   MockAppPtr app_;

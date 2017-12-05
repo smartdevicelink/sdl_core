@@ -60,7 +60,6 @@ using ::utils::SharedPtr;
 using am::event_engine::Event;
 using policy_test::MockPolicyHandlerInterface;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -79,10 +78,7 @@ const mobile_apis::FunctionID::eType kFunctionId =
 
 class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  AlertRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp())
-      , msg_(CreateMessage()) {}
+  AlertRequestTest() : mock_app_(CreateMockApp()), msg_(CreateMessage()) {}
 
  protected:
   MessageSharedPtr CreateFullParamsUISO() {
@@ -114,10 +110,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
-  }
-
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void PreConditions() {
@@ -155,9 +147,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
   void AddAlertTextsToMsg() {
     (*msg_)[am::strings::msg_params][am::strings::alert_text1] = "alert_text1";
     (*msg_)[am::strings::msg_params][am::strings::alert_text2] = "alert_text2";
@@ -192,7 +181,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   }
   sync_primitives::Lock lock_;
 
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
   MockPolicyHandlerInterface mock_policy_handler_;

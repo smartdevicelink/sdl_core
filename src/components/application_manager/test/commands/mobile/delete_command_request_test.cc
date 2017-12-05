@@ -53,7 +53,6 @@ namespace mobile_commands_test {
 namespace delete_command_request {
 
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
@@ -75,9 +74,7 @@ const uint32_t kConnectionKey = 2u;
 class DeleteCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  DeleteCommandRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  DeleteCommandRequestTest() : mock_app_(CreateMockApp()) {}
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -134,12 +131,7 @@ class DeleteCommandRequestTest
         .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 

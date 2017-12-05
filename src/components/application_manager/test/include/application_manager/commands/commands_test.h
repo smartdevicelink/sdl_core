@@ -54,6 +54,7 @@ namespace am = ::application_manager;
 using ::testing::ReturnRef;
 using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Mock;
 using ::testing::_;
 
 using ::utils::SharedPtr;
@@ -101,7 +102,9 @@ class CommandsTest : public ::testing::Test {
                           MockApplication>::Result MockApp;
   typedef SharedPtr<MockApp> MockAppPtr;
 
-  virtual ~CommandsTest() {}
+  virtual ~CommandsTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   static MessageSharedPtr CreateMessage(
       const smart_objects::SmartType type = smart_objects::SmartType_Null) {
@@ -137,6 +140,7 @@ class CommandsTest : public ::testing::Test {
   MockAppManager app_mngr_;
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
+  am::MockMessageHelper& mock_message_helper_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
@@ -146,26 +150,26 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(ReturnRef(timeout));
   }
 
-  CommandsTest() {
+  CommandsTest()
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_SDL));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
     InitHMIToMobileResultConverter();
   }
 
   void InitHMIToMobileResultConverter() {
     namespace MobileResult = mobile_apis::Result;
     namespace HMIResult = hmi_apis::Common_Result;
-    MockMessageHelper& mock_message_helper =
-        *MockMessageHelper::message_helper_mock();
-    auto link_hmi_to_mob_result = [&mock_message_helper](
-        HMIResult::eType hmi_result, MobileResult::eType mobile_result) {
-      ON_CALL(mock_message_helper, HMIToMobileResult(hmi_result))
-          .WillByDefault(Return(mobile_result));
-    };
+    auto link_hmi_to_mob_result =
+        [this](HMIResult::eType hmi_result, MobileResult::eType mobile_result) {
+          ON_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
+              .WillByDefault(Return(mobile_result));
+        };
     link_hmi_to_mob_result(HMIResult::INVALID_ENUM, MobileResult::INVALID_ENUM);
     link_hmi_to_mob_result(HMIResult::SUCCESS, MobileResult::SUCCESS);
     link_hmi_to_mob_result(HMIResult::UNSUPPORTED_REQUEST,

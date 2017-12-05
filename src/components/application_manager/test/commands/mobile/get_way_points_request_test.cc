@@ -53,7 +53,6 @@ namespace get_way_points_request {
 
 using namespace mobile_apis::Result;
 using ::testing::Return;
-using ::testing::Mock;
 using ::testing::_;
 using application_manager::commands::GetWayPointsRequest;
 using application_manager::MockMessageHelper;
@@ -73,14 +72,7 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetWayPointsRequestTest()
-      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
-  ~GetWayPointsRequestTest() {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
+  GetWayPointsRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
@@ -93,7 +85,6 @@ class GetWayPointsRequestTest
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
   }
 
-  MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
@@ -103,14 +94,7 @@ class GetWayPointsRequestTest
 class GetWayPointsRequestOnEventTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetWayPointsRequestOnEventTest()
-      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock())
-      , app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
-  ~GetWayPointsRequestOnEventTest() {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
+  GetWayPointsRequestOnEventTest() : app_(CreateMockApp()) {}
 
   void CheckOnEventResponse(const std::string& wayPointsParam,
                             const HmiResult ResultCode,
@@ -143,7 +127,6 @@ class GetWayPointsRequestOnEventTest
   }
 
  protected:
-  MockMessageHelper& message_helper_mock_;
   MockAppPtr app_;
   MockHmiInterfaces hmi_interfaces_;
 };

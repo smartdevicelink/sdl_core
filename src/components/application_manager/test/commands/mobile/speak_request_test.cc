@@ -84,16 +84,9 @@ const uint32_t kConnectionKey = 5u;
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SpeakRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , request_(CreateMessage(smart_objects::SmartType_Map))
+      : request_(CreateMessage(smart_objects::SmartType_Map))
       , response_(CreateMessage(smart_objects::SmartType_Map))
-      , app_(CreateMockApp()) {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~SpeakRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
+      , app_(CreateMockApp()) {}
 
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
@@ -130,7 +123,6 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
               static_cast<int32_t>(mobile_response));
   }
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr request_;
   MessageSharedPtr response_;
   MockAppPtr app_;
