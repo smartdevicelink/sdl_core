@@ -36,6 +36,11 @@
 #include "transport_manager/transport_manager_settings.h"
 #include "resumption/last_state.h"
 #include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -93,8 +98,13 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
                                    const TransportManagerSettings& settings);
 
   /**
+    * Destructor
+    */
+  ~IAP2USBEmulationTransportAdapter();
+
+  /**
    * @brief DeviceSwitched is called during switching from iAP2 Bluetooth to
-   * iAP2 USB transport
+   * iAP2 USB transport. Sends ACK signal for switching request.
    * @param device_handle Device handle of switched device
    */
   void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
@@ -105,6 +115,38 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    * @return Device type
    */
   DeviceType GetDeviceType() const OVERRIDE;
+
+  private:
+  /**
+   * @brief The IAPSignalHandlerDelegate class handles signals from the system
+   * to start transport switching flow
+   */
+  class IAPSignalHandlerDelegate : public threads::ThreadDelegate {
+    public:
+    /**
+     * @brief IAPSignalHandlerDelegate Constructor
+     * @param adapter Pointer to iAP2 USB adapter
+     */
+    IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter* adapter);
+
+    /**
+     * @brief threadMain Main loop to track incoming signals
+     */
+    void threadMain() OVERRIDE;
+
+    /**
+     * @brief exitThreadMain Stops main loop
+     */
+    void exitThreadMain() OVERRIDE;
+
+    private:
+    IAP2USBEmulationTransportAdapter* adapter_;
+    bool run_flag_;
+    int in_;
+  };
+
+  threads::Thread* signal_handler_;
+  int out_;
 };
 }
 }  // namespace transport_manager::transport_adapter
