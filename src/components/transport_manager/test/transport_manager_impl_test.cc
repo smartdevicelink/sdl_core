@@ -1085,8 +1085,10 @@ TEST_F(
     TransportManagerImplTest,
     UpdateDeviceList_AddSameUUIDNonSwitchableDevices_TwoTransportAdapters_ExpectNoSwitch) {
   device_list_.push_back(dev_info_.mac_address());
-  SetAddDeviceExpectations(
-      mock_adapter_, transport_adapter::DeviceType::TCP, device_list_, dev_info_);
+  SetAddDeviceExpectations(mock_adapter_,
+                           transport_adapter::DeviceType::TCP,
+                           device_list_,
+                           dev_info_);
 
   tm_.OnDeviceListUpdated(mock_adapter_);
 
@@ -1156,8 +1158,10 @@ TEST_F(TransportManagerImplTest,
   device_list_.push_back(dev_info_.mac_address());
   const uint32_t timeout = 0;
 
-  SetAddDeviceExpectations(
-      mock_adapter_, transport_adapter::DeviceType::IOS_BT, device_list_, dev_info_);
+  SetAddDeviceExpectations(mock_adapter_,
+                           transport_adapter::DeviceType::IOS_BT,
+                           device_list_,
+                           dev_info_);
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
 
@@ -1230,8 +1234,10 @@ TEST_F(TransportManagerImplTest,
        TwoTransportAdapterAddSameDeviceSecondSkipped) {
   device_list_.push_back(dev_info_.mac_address());
 
-  SetAddDeviceExpectations(
-      mock_adapter_, transport_adapter::DeviceType::IOS_BT, device_list_, dev_info_);
+  SetAddDeviceExpectations(mock_adapter_,
+                           transport_adapter::DeviceType::IOS_BT,
+                           device_list_,
+                           dev_info_);
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(_));
 
@@ -1266,8 +1272,10 @@ TEST_F(TransportManagerImplTest,
 
 TEST_F(TransportManagerImplTest, NoDeviceTransportSwitchRequest_Fail) {
   device_list_.push_back(dev_info_.mac_address());
-  SetAddDeviceExpectations(
-      mock_adapter_, transport_adapter::DeviceType::IOS_USB,  device_list_, dev_info_);
+  SetAddDeviceExpectations(mock_adapter_,
+                           transport_adapter::DeviceType::IOS_USB,
+                           device_list_,
+                           dev_info_);
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(_));
 
@@ -1280,15 +1288,16 @@ TEST_F(TransportManagerImplTest, NoDeviceTransportSwitchRequest_Fail) {
 
   EXPECT_CALL(*mock_adapter_, StopDevice(mac_address_)).Times(0);
 
-  EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_, mac_address_)).Times(0);
+  EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_, mac_address_))
+      .Times(0);
 
   tm_.TestHandle(
       TransportAdapterEvent(EventTypeEnum::ON_TRANSPORT_SWITCH_REQUESTED,
                             mock_adapter_,
-                                       mac_address_,
-                                       application_id_,
-                                       test_message_,
-                                       error_));
+                            mac_address_,
+                            application_id_,
+                            test_message_,
+                            error_));
 
   device_list_.pop_back();
 }

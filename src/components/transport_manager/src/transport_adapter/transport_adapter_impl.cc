@@ -906,12 +906,11 @@ SwitchableDevices TransportAdapterImpl::GetSwitchableDevices() const {
                     "Device is not suitable for switching: " << device_uid);
       continue;
     }
-    LOG4CXX_DEBUG(logger_,
-                  "Device is suitable for switching: " << device_uid);
+    LOG4CXX_DEBUG(logger_, "Device is suitable for switching: " << device_uid);
     devices.insert(std::make_pair(device_uid, transport_switch_id));
   }
   LOG4CXX_INFO(logger_,
-                "Found number of switchable devices: " << devices.size());
+               "Found number of switchable devices: " << devices.size());
   return devices;
 }
 

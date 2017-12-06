@@ -198,28 +198,31 @@ void ConnectionHandlerImpl::OnDeviceSwitchingFinish(
   }
 }
 
-namespace  {
+namespace {
 struct DeviceFinder {
-  explicit DeviceFinder(const std::string& device_uid) 
-    : device_uid_(device_uid) {}
+  explicit DeviceFinder(const std::string& device_uid)
+      : device_uid_(device_uid) {}
   bool operator()(const DeviceMap::value_type& device) {
-     return device_uid_ == device.second.mac_address();
-   }
-private:
+    return device_uid_ == device.second.mac_address();
+  }
+
+ private:
   const std::string& device_uid_;
 };
-} // namespace 
+}  // namespace
 
 void ConnectionHandlerImpl::OnDeviceSwitchingStart(
     const std::string& device_uid_from, const std::string& device_uid_to) {
-  auto device_from = std::find_if(
-        device_list_.begin(), device_list_.end(), 
-                  DeviceFinder(encryption::MakeHash(device_uid_from)));
-  
-  auto device_to = std::find_if(
-        device_list_.begin(), device_list_.end(), 
-                  DeviceFinder(encryption::MakeHash(device_uid_to)));
-  
+  auto device_from =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_from)));
+
+  auto device_to =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_to)));
+
   DCHECK_OR_RETURN_VOID(device_list_.end() != device_from);
   DCHECK_OR_RETURN_VOID(device_list_.end() != device_to);
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);

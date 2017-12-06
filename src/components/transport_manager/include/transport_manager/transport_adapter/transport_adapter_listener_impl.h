@@ -263,7 +263,7 @@ class TransportAdapterListenerImpl
    */
   virtual void OnCommunicationError(const TransportAdapter* adapter,
                                     const DeviceUID& device,
-                            const ApplicationHandle& app_id) OVERRIDE;
+                                    const ApplicationHandle& app_id) OVERRIDE;
 
   /**
    * @brief OnTransportSwitchRequested notifies on received signal to start

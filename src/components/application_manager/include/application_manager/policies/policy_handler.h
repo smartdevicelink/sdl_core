@@ -536,7 +536,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so
    * policy permissions should be processed accordingly
-   * @param device_id_from Id of device being switched 
+   * @param device_id_from Id of device being switched
    * @param device_id_to Id of device on the new transport
    */
   void OnDeviceSwitching(const std::string& device_id_from,

@@ -1079,19 +1079,19 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
   {
     auto apps_data_accessor = applications();
 
-    std::copy_if(
-          apps_data_accessor.GetData().begin(),
-          apps_data_accessor.GetData().end(),
-          std::back_inserter(reregister_wait_list_),
-          std::bind1st(std::ptr_fun(&device_id_comparator),
-                       device_from.mac_address()));
+    std::copy_if(apps_data_accessor.GetData().begin(),
+                 apps_data_accessor.GetData().end(),
+                 std::back_inserter(reregister_wait_list_),
+                 std::bind1st(std::ptr_fun(&device_id_comparator),
+                              device_from.mac_address()));
   }
 
   {
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
     sync_primitives::AutoLock lock(reregister_wait_list_lock_);
-    for (auto i = reregister_wait_list_.begin(); reregister_wait_list_.end() != i;
+    for (auto i = reregister_wait_list_.begin();
+         reregister_wait_list_.end() != i;
          ++i) {
       auto app = *i;
       request_ctrl_.terminateAppRequests(app->app_id());
@@ -1101,10 +1101,10 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
                                      device_to.mac_address());
-  
+
   connection_handler::DeviceMap device_list;
   device_list.insert(std::make_pair(device_to.device_handle(), device_to));
-  
+
   smart_objects::SmartObjectSPtr msg_params =
       MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
   if (!msg_params) {
@@ -1136,7 +1136,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
   for (auto app_it = reregister_wait_list_.begin();
        app_it != reregister_wait_list_.end();
        ++app_it) {
-    auto app = *app_it;    
+    auto app = *app_it;
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
@@ -1147,9 +1147,9 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
 
 void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                                const uint32_t connection_key,
-                                               const size_t device_id, 
+                                               const size_t device_id,
                                                const std::string& mac_address) {
-   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(applications_list_lock_);
   DCHECK_OR_RETURN_VOID(1 == applications_.erase(app));
 
@@ -1862,9 +1862,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
   auto app_ptr = application(connection_key);
   if (app_ptr && IsAppInReconnectMode(app_ptr->policy_app_id())) {
-    commands_holder_->Suspend(app_ptr,
-                              CommandHolder::CommandType::kMobileCommand,
-                              message);
+    commands_holder_->Suspend(
+        app_ptr, CommandHolder::CommandType::kMobileCommand, message);
     return true;
   }
 
@@ -2101,9 +2100,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
     auto app = application(static_cast<uint32_t>(connection_key));
     if (app && IsAppInReconnectMode(app->policy_app_id())) {
-      commands_holder_->Suspend(app,
-                                CommandHolder::CommandType::kHmiCommand,
-                                message);
+      commands_holder_->Suspend(
+          app, CommandHolder::CommandType::kHmiCommand, message);
       return true;
     }
   }

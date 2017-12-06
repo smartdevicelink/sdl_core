@@ -715,10 +715,8 @@ TEST_F(ApplicationManagerImplTest,
 
   // Act
   const connection_handler::DeviceHandle switching_handle = 1;
-  const connection_handler::Device switching_device(switching_handle,
-                                                    "switching_device",
-                                                    switching_device_id,
-                                                    "BLUETOOTH");
+  const connection_handler::Device switching_device(
+      switching_handle, "switching_device", switching_device_id, "BLUETOOTH");
 
   const connection_handler::DeviceHandle non_switching_handle = 2;
   const connection_handler::Device non_switching_device(non_switching_handle,
@@ -775,10 +773,8 @@ TEST_F(ApplicationManagerImplTest,
 
   // Act
   const connection_handler::DeviceHandle switching_handle = 1;
-  const connection_handler::Device switching_device(switching_handle,
-                                                    "switching_device",
-                                                    switching_device_id,
-                                                    "BLUETOOTH");
+  const connection_handler::Device switching_device(
+      switching_handle, "switching_device", switching_device_id, "BLUETOOTH");
 
   const connection_handler::DeviceHandle non_switching_handle = 2;
   const connection_handler::Device non_switching_device(non_switching_handle,

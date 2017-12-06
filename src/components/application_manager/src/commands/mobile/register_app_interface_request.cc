@@ -641,26 +641,25 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   if (ApplicationType::kSwitchedApplicationWrongHashId == app_type) {
-     LOG4CXX_DEBUG(logger_,
-           "Application has been switched from another transport, "
-           "but doesn't have correct hashID.");
+    LOG4CXX_DEBUG(logger_,
+                  "Application has been switched from another transport, "
+                  "but doesn't have correct hashID.");
 
-     application_manager::RecallApplicationData(application,
-                                                application_manager_);
+    application_manager::RecallApplicationData(application,
+                                               application_manager_);
 
-     SendResponse(true, mobile_apis::Result::RESUME_FAILED, NULL,
-                  &response_params);
-     return;
-   }
+    SendResponse(
+        true, mobile_apis::Result::RESUME_FAILED, NULL, &response_params);
+    return;
+  }
 
-   if (ApplicationType::kSwitchedApplicationHashOk == app_type) {
-     LOG4CXX_DEBUG(logger_,
-           "Application has been switched from another transport "
-           "and has correct hashID.");
-     SendResponse(true, mobile_apis::Result::SUCCESS, NULL,
-                  &response_params);
-     return;
-   }
+  if (ApplicationType::kSwitchedApplicationHashOk == app_type) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application has been switched from another transport "
+                  "and has correct hashID.");
+    SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+    return;
+  }
 
   bool resumption =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
@@ -1469,10 +1468,10 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   auto app_type = ApplicationType::kSwitchedApplicationWrongHashId;
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
-    const auto hash_id = 
+    const auto hash_id =
         (*message_)[strings::msg_params][strings::hash_id].asString();
-    
-    auto& resume_ctrl = application_manager_.resume_controller();  
+
+    auto& resume_ctrl = application_manager_.resume_controller();
     if (resume_ctrl.CheckApplicationHash(app, hash_id)) {
       app_type = ApplicationType::kSwitchedApplicationHashOk;
     }

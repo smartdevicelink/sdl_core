@@ -2645,8 +2645,8 @@ void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
   auto& consents_to = *(to->second.user_consent_records);
 
   LOG4CXX_DEBUG(logger_,
-                "Merging user consents from device: " << device_id_from <<
-                " to device: " << device_id_to);
+                "Merging user consents from device: "
+                    << device_id_from << " to device: " << device_id_to);
   for (auto f = consents_from.begin(); f != consents_from.end(); ++f) {
     const auto app_id = f->first;
     LOG4CXX_DEBUG(logger_, "Updating permissions for key: " << app_id);
