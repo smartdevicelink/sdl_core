@@ -41,11 +41,11 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 
-namespace  {
+namespace {
 static const mode_t mode = 0666;
 static const auto in_signals_channel = "iap_signals_in";
 static const auto out_signals_channel = "iap_signals_out";
-} // namespace
+}  // namespace
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -75,8 +75,7 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     const TransportManagerSettings& settings)
     : TcpTransportAdapter(port, last_state, settings), out_(0) {
   auto delegate = new IAPSignalHandlerDelegate(*this);
-  signal_handler_ =
-      threads::CreateThread("iAP signal handler", delegate);
+  signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
   signal_handler_->start();
   const auto result = mkfifo(out_signals_channel, mode);
   LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
@@ -84,7 +83,7 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
 
 IAP2USBEmulationTransportAdapter::~IAP2USBEmulationTransportAdapter() {
   signal_handler_->join();
-  threads::DeleteThread(signal_handler_);  
+  threads::DeleteThread(signal_handler_);
   LOG4CXX_DEBUG(logger_, "Out close result: " << close(out_));
   LOG4CXX_DEBUG(logger_, "Out unlink result: " << unlink(out_signals_channel));
 }
@@ -110,12 +109,9 @@ DeviceType IAP2USBEmulationTransportAdapter::GetDeviceType() const {
   return IOS_USB;
 }
 
-IAP2USBEmulationTransportAdapter::
-IAPSignalHandlerDelegate::IAPSignalHandlerDelegate(
-    IAP2USBEmulationTransportAdapter& adapter)
-  : adapter_(adapter),
-    run_flag_(true),
-    in_(0) {
+IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
+    IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter& adapter)
+    : adapter_(adapter), run_flag_(true), in_(0) {
   const auto result = mkfifo(in_signals_channel, mode);
   LOG4CXX_DEBUG(logger_, "In signals channel creation result: " << result);
 }
@@ -145,14 +141,13 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
   }
 }
 
-void IAP2USBEmulationTransportAdapter::
-IAPSignalHandlerDelegate::exitThreadMain() {
+void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
+    exitThreadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Stopping signal handling.");
   run_flag_ = false;
   LOG4CXX_DEBUG(logger_, "In close result: " << close(in_));
   LOG4CXX_DEBUG(logger_, "In unlink result: " << unlink(in_signals_channel));
 }
-
 }
 }  // namespace transport_manager::transport_adapter

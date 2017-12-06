@@ -116,13 +116,13 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    */
   DeviceType GetDeviceType() const OVERRIDE;
 
-  private:
+ private:
   /**
    * @brief The IAPSignalHandlerDelegate class handles signals from the system
    * to start transport switching flow
    */
   class IAPSignalHandlerDelegate : public threads::ThreadDelegate {
-    public:
+   public:
     /**
      * @brief IAPSignalHandlerDelegate Constructor
      * @param adapter Pointer to iAP2 USB adapter
@@ -139,7 +139,7 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
      */
     void exitThreadMain() OVERRIDE;
 
-    private:
+   private:
     /**
      * @brief adapter_ Reference to owning adapter
      */

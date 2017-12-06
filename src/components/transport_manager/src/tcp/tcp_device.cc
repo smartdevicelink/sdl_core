@@ -46,22 +46,22 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-#if defined (BUILD_TESTS)
+#if defined(BUILD_TESTS)
 TcpDevice::TcpDevice(const in_addr_t& in_addr,
                      const std::string& device_uid,
                      const std::string& transport_switch_id)
-  : Device(device_uid, device_uid, transport_switch_id),
-    applications_mutex_(),
-    in_addr_(in_addr),
-    last_handle_(0) {
+    : Device(device_uid, device_uid, transport_switch_id)
+    , applications_mutex_()
+    , in_addr_(in_addr)
+    , last_handle_(0) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "Device created with transport switch emulation support.");
   LOG4CXX_DEBUG(logger_,
-                "Device parameters: " << device_uid
-                << " / " << transport_switch_id);
+                "Device parameters: " << device_uid << " / "
+                                      << transport_switch_id);
 }
-#endif // BUILD_TESTS
+#endif  // BUILD_TESTS
 
 bool TcpDevice::IsSameAs(const Device* other) const {
   LOG4CXX_AUTO_TRACE(logger_);
