@@ -137,6 +137,7 @@ class Device {
   inline std::string transport_switch_id() const {
     return transport_switch_id_;
   }
+
  private:
   /**
    * @brief Device user-friendly name.

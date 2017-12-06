@@ -897,8 +897,9 @@ class ApplicationManagerImpl
    * @param device_from device params being switched to the new transport
    * @param device_to device params on the new transport
    */
-  void OnDeviceSwitchingStart(const connection_handler::Device& device_from,
-                              const connection_handler::Device& device_to) FINAL;
+  void OnDeviceSwitchingStart(
+      const connection_handler::Device& device_from,
+      const connection_handler::Device& device_to) FINAL;
 
   /**
    * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end

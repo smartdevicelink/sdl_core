@@ -172,15 +172,11 @@ TEST_F(ApplicationManagerImplMockHmiTest,
 
   app_manager_impl_->AddMockApplication(app_impl);
 
-  const connection_handler::Device bt(device_id,
-                                      "BT_device",
-                                      mac_address,
-                                      "BLUETOOTH");
+  const connection_handler::Device bt(
+      device_id, "BT_device", mac_address, "BLUETOOTH");
 
-  const connection_handler::Device usb(device_id + 1,
-                                      "USB_device",
-                                      "USB_serial",
-                                      "USB_IOS");
+  const connection_handler::Device usb(
+      device_id + 1, "USB_device", "USB_serial", "USB_IOS");
 
   MockHMICommandFactory* mock_hmi_factory =
       MockHMICommandFactory::mock_hmi_command_factory();
@@ -218,8 +214,8 @@ TEST_F(ApplicationManagerImplMockHmiTest,
       utils::MakeShared<smart_objects::SmartObject>();
 
   (*hmi_msg_1)[strings::msg_params][strings::app_id] =
-  (*hmi_msg_2)[strings::msg_params][strings::app_id] =
-  (*hmi_msg_3)[strings::msg_params][strings::app_id] = application_id;
+      (*hmi_msg_2)[strings::msg_params][strings::app_id] =
+          (*hmi_msg_3)[strings::msg_params][strings::app_id] = application_id;
 
   EXPECT_CALL(*cmd_1, Init()).Times(0);
   EXPECT_CALL(*cmd_2, Init()).Times(0);

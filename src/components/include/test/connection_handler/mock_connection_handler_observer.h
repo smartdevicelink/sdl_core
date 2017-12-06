@@ -67,9 +67,9 @@ class MockConnectionHandlerObserver
       GetHandshakeContext,
       security_manager::SSLContext::HandshakeContext(uint32_t key));
 
-  MOCK_METHOD2(OnDeviceSwitchingStart, void(
-                 const connection_handler::Device& device_from,
-                 const connection_handler::Device& device_to));
+  MOCK_METHOD2(OnDeviceSwitchingStart,
+               void(const connection_handler::Device& device_from,
+                    const connection_handler::Device& device_to));
   MOCK_METHOD1(OnDeviceSwitchingFinish, void(const std::string& device_uid));
 };
 

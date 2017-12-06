@@ -763,7 +763,8 @@ void TransportManagerImpl::TryDeviceSwitch(
       transport_adapters_.begin(), transport_adapters_.end(), TAFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
-    LOG4CXX_WARN(logger_,
+    LOG4CXX_WARN(
+        logger_,
         "There is no iAP2 Bluetooth adapter found. Switching is not possible.");
     return;
   }
@@ -791,18 +792,18 @@ void TransportManagerImpl::TryDeviceSwitch(
 
   LOG4CXX_DEBUG(logger_,
                 "Found UUID suitable for transport switching: " << bt->second);
-  LOG4CXX_DEBUG(logger_,
-                "Device to switch from: " << bt->first
-                                          << " to: " << usb->first);
+  LOG4CXX_DEBUG(
+      logger_, "Device to switch from: " << bt->first << " to: " << usb->first);
 
   sync_primitives::AutoWriteLock lock(device_to_adapter_map_lock_);
 
   const auto bt_device_uid = bt->first;
   const auto device_to_switch = device_to_adapter_map_.find(bt_device_uid);
   if (device_to_adapter_map_.end() == device_to_switch) {
-    LOG4CXX_ERROR(logger_, "There is no known device found with UID "
-                  << bt_device_uid
-                  << " . Transport switching is not possible.");
+    LOG4CXX_ERROR(logger_,
+                  "There is no known device found with UID "
+                      << bt_device_uid
+                      << " . Transport switching is not possible.");
     DCHECK_OR_RETURN_VOID(false);
     return;
   }
@@ -811,8 +812,9 @@ void TransportManagerImpl::TryDeviceSwitch(
   const auto bt_uid = device_to_switch->first;
   const auto bt_adapter = device_to_switch->second;
 
-  LOG4CXX_DEBUG(logger_, "Known device with UID "
-                << bt_uid << " is appropriate for transport switching.");
+  LOG4CXX_DEBUG(logger_,
+                "Known device with UID "
+                    << bt_uid << " is appropriate for transport switching.");
 
   RaiseEvent(
       &TransportManagerListener::OnDeviceSwitchingStart, bt_uid, usb_uid);
@@ -878,18 +880,20 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     const auto result =
         device_to_adapter_map_.insert(std::make_pair(device_uid, ta));
     if (!result.second) {
-      LOG4CXX_WARN(logger_, "Device UID "
-                   << device_uid
-                   << " is known already. Processing skipped."
-                      "Connection type is: " << ta->GetConnectionType());
+      LOG4CXX_WARN(logger_,
+                   "Device UID "
+                       << device_uid
+                       << " is known already. Processing skipped."
+                          "Connection type is: " << ta->GetConnectionType());
       continue;
     }
-      DeviceHandle device_handle =
-          converter_.UidToHandle(device_uid, ta->GetConnectionType());
-      DeviceInfo info(
-          device_handle, device_uid, ta->DeviceName(device_uid),
-            ta->GetConnectionType());
-      RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
+    DeviceHandle device_handle =
+        converter_.UidToHandle(device_uid, ta->GetConnectionType());
+    DeviceInfo info(device_handle,
+                    device_uid,
+                    ta->DeviceName(device_uid),
+                    ta->GetConnectionType());
+    RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
 
   LOG4CXX_DEBUG(logger_,

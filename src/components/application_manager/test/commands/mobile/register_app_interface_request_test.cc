@@ -432,7 +432,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               mock_app),
           request_hash_id)).WillOnce(Return(true));
 
-   EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
+  EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
 
   EXPECT_CALL(mock_application_helper_, RecallApplicationData(_, _)).Times(0);
 
@@ -467,7 +467,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               mock_app),
           request_hash_id)).WillOnce(Return(false));
 
-   EXPECT_CALL(
+  EXPECT_CALL(
       mock_application_helper_,
       RecallApplicationData(
           MockAppPtr::static_pointer_cast<application_manager::Application>(

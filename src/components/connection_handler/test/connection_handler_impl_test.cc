@@ -472,11 +472,10 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
 }
 
 MATCHER_P(SameDevice, device, "") {
-  return
-  arg.device_handle() == device.device_handle() &&
-  arg.user_friendly_name() == device.user_friendly_name() &&
-  arg.mac_address() == device.mac_address() &&
-  arg.connection_type() == device.connection_type();
+  return arg.device_handle() == device.device_handle() &&
+         arg.user_friendly_name() == device.user_friendly_name() &&
+         arg.mac_address() == device.mac_address() &&
+         arg.connection_type() == device.connection_type();
 }
 
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
@@ -1908,10 +1907,8 @@ TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
-  const transport_manager::DeviceInfo device_info_1(device_handle_,
-                                                    mac_address_,
-                                                    device_name_,
-                                                    connection_type_);
+  const transport_manager::DeviceInfo device_info_1(
+      device_handle_, mac_address_, device_name_, connection_type_);
 
   connection_handler_->OnDeviceAdded(device_info_1);
 

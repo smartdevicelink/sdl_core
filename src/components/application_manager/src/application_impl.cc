@@ -78,7 +78,7 @@ namespace application_manager {
 
 void SwitchApplicationParameters(ApplicationSharedPtr app,
                                  const uint32_t app_id,
-                                 const size_t device_id, 
+                                 const size_t device_id,
                                  const std::string& mac_address) {
   utils::SharedPtr<ApplicationImpl> application =
       ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);

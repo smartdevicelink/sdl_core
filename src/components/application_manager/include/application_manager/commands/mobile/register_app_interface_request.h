@@ -88,8 +88,11 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @brief The AppicationType enum defines whether application is newly
    * registered or existing and being switched over another transport
    */
-  enum class ApplicationType { 
-    kNewApplication, kSwitchedApplicationHashOk, kSwitchedApplicationWrongHashId };
+  enum class ApplicationType {
+    kNewApplication,
+    kSwitchedApplicationHashOk,
+    kSwitchedApplicationWrongHashId
+  };
 
   /**
    * @brief Prepares and sends RegisterAppInterface response to mobile
