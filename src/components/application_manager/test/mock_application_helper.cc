@@ -47,7 +47,7 @@ MockApplicationHelper& MockApplicationHelper::application_helper_mock() {
 
 namespace application_manager {
 
-void RecallApplicationData(ApplicationSharedPtr app,
+void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   test::components::application_manager_test::MockApplicationHelper::
       application_helper_mock().RecallApplicationData(app, app_manager);

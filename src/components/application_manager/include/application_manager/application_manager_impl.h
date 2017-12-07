@@ -1297,7 +1297,7 @@ class ApplicationManagerImpl
      * @param application Pointer to switched application, must be validated
      * before passing
      * @param connection_key Connection key from registration request of
-   * switched
+     * switched
      * application
      */
   void ProcessReconnection(ApplicationSharedPtr application,

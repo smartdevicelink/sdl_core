@@ -114,7 +114,9 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
         smart_objects::SmartArray* message_array = message.asArray();
         smart_objects::SmartArray::iterator it = message_array->begin();
         for (; it != message_array->end(); ++it) {
-          ReplaceMobileWithHMIAppId(*it);
+          if (!ReplaceMobileWithHMIAppId(*it)) {
+            break;
+          }
         }
         break;
       }
@@ -123,7 +125,9 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
         std::set<std::string>::const_iterator key = keys.begin();
         for (; key != keys.end(); ++key) {
           std::string k = *key;
-          ReplaceMobileWithHMIAppId(message[*key]);
+          if (!ReplaceMobileWithHMIAppId(message[*key])) {
+            break;
+          }
         }
         break;
       }
@@ -193,7 +197,9 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
         smart_objects::SmartArray* message_array = message.asArray();
         smart_objects::SmartArray::iterator it = message_array->begin();
         for (; it != message_array->end(); ++it) {
-          ReplaceHMIWithMobileAppId(*it);
+          if (!ReplaceHMIWithMobileAppId(*it)) {
+            break;
+          }
         }
         break;
       }
@@ -201,7 +207,9 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
         std::set<std::string> keys = message.enumerate();
         std::set<std::string>::const_iterator key = keys.begin();
         for (; key != keys.end(); ++key) {
-          ReplaceHMIWithMobileAppId(message[*key]);
+          if (!ReplaceHMIWithMobileAppId(message[*key])) {
+            break;
+          }
         }
         break;
       }

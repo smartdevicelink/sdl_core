@@ -7,7 +7,7 @@
 
 namespace {
 using namespace application_manager;
-void RecallWayPoints(ApplicationSharedPtr app,
+void DeleteWayPoints(ApplicationSharedPtr app,
                      ApplicationManager& app_manager) {
   app_manager.UnsubscribeAppFromWayPoints(app);
   if (!app_manager.IsAnyAppSubscribedForWayPoints()) {
@@ -15,7 +15,7 @@ void RecallWayPoints(ApplicationSharedPtr app,
   }
 }
 
-void RecallCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
+void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   CommandsMap cmap = app->commands_map().GetData();
 
   for (auto cmd : cmap) {
@@ -24,7 +24,7 @@ void RecallCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   }
 }
 
-void RecallSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
+void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   SubMenuMap smap = app->sub_menu_map().GetData();
 
   for (auto smenu : smap) {
@@ -33,7 +33,7 @@ void RecallSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   }
 }
 
-void RecallChoiceSets(ApplicationSharedPtr app,
+void DeleteChoiceSets(ApplicationSharedPtr app,
                       ApplicationManager& app_manager) {
   ChoiceSetMap csmap = app->choice_set_map().GetData();
 
@@ -43,7 +43,7 @@ void RecallChoiceSets(ApplicationSharedPtr app,
   }
 }
 
-void RecallGlobalProperties(ApplicationSharedPtr app,
+void DeleteGlobalProperties(ApplicationSharedPtr app,
                             ApplicationManager& app_manager) {
   using namespace smart_objects;
 
@@ -74,7 +74,7 @@ void RecallGlobalProperties(ApplicationSharedPtr app,
   MessageHelper::SendResetPropertiesRequest(app, app_manager);
 }
 
-void RecallButtonSubscriptions(ApplicationSharedPtr app,
+void DeleteButtonSubscriptions(ApplicationSharedPtr app,
                                ApplicationManager& app_manager) {
   ButtonSubscriptions buttons = app->SubscribedButtons().GetData();
 
@@ -87,7 +87,7 @@ void RecallButtonSubscriptions(ApplicationSharedPtr app,
   }
 }
 
-void RecallVISubscriptions(ApplicationSharedPtr app,
+void DeleteVISubscriptions(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   VehicleInfoSubscriptions ivi = app->SubscribedIVI().GetData();
 
@@ -128,18 +128,18 @@ bool SubscribedToIVIPredicate::operator()(
   return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
 }
 
-void RecallApplicationData(ApplicationSharedPtr app,
+void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   LOG4CXX_AUTO_TRACE(logger);
   DCHECK_OR_RETURN_VOID(app);
 
-  RecallWayPoints(app, app_manager);
-  RecallCommands(app, app_manager);
-  RecallSubmenus(app, app_manager);
-  RecallChoiceSets(app, app_manager);
-  RecallGlobalProperties(app, app_manager);
-  RecallButtonSubscriptions(app, app_manager);
-  RecallVISubscriptions(app, app_manager);
+  DeleteWayPoints(app, app_manager);
+  DeleteCommands(app, app_manager);
+  DeleteSubmenus(app, app_manager);
+  DeleteChoiceSets(app, app_manager);
+  DeleteGlobalProperties(app, app_manager);
+  DeleteButtonSubscriptions(app, app_manager);
+  DeleteVISubscriptions(app, app_manager);
   CleanupAppFiles(app);
 }
 
