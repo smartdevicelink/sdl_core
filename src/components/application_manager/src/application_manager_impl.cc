@@ -108,6 +108,7 @@ DeviceTypes devicesType = {
  */
 bool device_id_comparator(const std::string& device_id,
                           ApplicationSharedPtr app) {
+  DCHECK_OR_RETURN(app, false);
   LOG4CXX_DEBUG(logger_,
                 "Data to compare: device_id : " << device_id << " app mac: "
                                                 << app->mac_address());
@@ -1118,7 +1119,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
       hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
   so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
       hmi_apis::messageType::request;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 3;
+  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
   so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
   so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
   so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
@@ -1150,6 +1151,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                                const size_t device_id,
                                                const std::string& mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(app);
   sync_primitives::AutoLock lock(applications_list_lock_);
   DCHECK_OR_RETURN_VOID(1 == applications_.erase(app));
 

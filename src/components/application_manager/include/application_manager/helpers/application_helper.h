@@ -88,6 +88,6 @@ struct SubscribedToIVIPredicate {
  * @param app Application to clean its data
  * @param app_manager Application manager
  */
-void RecallApplicationData(ApplicationSharedPtr app,
+void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager);
 }  // namespace application_manager

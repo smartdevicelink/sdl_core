@@ -193,7 +193,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(file_ptr->file_name == filename);
 
   // Act
-  application_manager::RecallApplicationData(app_impl_, app_manager_impl_);
+  application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
   EXPECT_FALSE(NULL != app_impl_->FindCommand(cmd_id));
   EXPECT_FALSE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_FALSE(NULL != app_impl_->FindChoiceSet(choice_set_id));
@@ -249,7 +249,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribeIVIRequest(_, _, _));
 
   // Act
-  application_manager::RecallApplicationData(app_impl_, app_manager_impl_);
+  application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
 }
 
 }  // application_manager_test

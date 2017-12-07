@@ -501,15 +501,13 @@ void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
 }
 
 bool TransportAdapterImpl::IsSearchDevicesSupported() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   return device_scanner_ != 0;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   return server_connection_factory_ != 0;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {

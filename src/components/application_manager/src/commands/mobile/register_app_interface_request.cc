@@ -645,7 +645,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                   "Application has been switched from another transport, "
                   "but doesn't have correct hashID.");
 
-    application_manager::RecallApplicationData(application,
+    application_manager::DeleteApplicationData(application,
                                                application_manager_);
 
     SendResponse(
