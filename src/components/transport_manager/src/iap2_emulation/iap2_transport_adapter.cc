@@ -102,6 +102,7 @@ void IAP2USBEmulationTransportAdapter::DeviceSwitched(
 
   const auto bytes =
       write(out_, switch_signal_ack.c_str(), switch_signal_ack.size());
+  UNUSED(bytes);
   LOG4CXX_DEBUG(logger_, "Written bytes to out: " << bytes);
 
   LOG4CXX_DEBUG(logger_, "Switching signal ACK is sent");
@@ -131,6 +132,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
   const auto size = 32;
   while (run_flag_) {
     char buffer[size];
+    // TODO: maybe need to check errno
     auto bytes = read(in_, &buffer, size);
     if (!bytes) {
       continue;
