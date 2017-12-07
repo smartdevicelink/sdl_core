@@ -131,11 +131,14 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
 
   const auto size = 32;
   while (run_flag_) {
-    char buffer[size];
-    // TODO: maybe need to check errno
+    char buffer[size];    
     auto bytes = read(in_, &buffer, size);
-    if (!bytes) {
+    if (0 == bytes) {
       continue;
+    }
+    if (-1 == bytes) {
+      LOG4CXX_DEBUG(logger_, "Error during input pipe read");
+      break;
     }
     LOG4CXX_DEBUG(logger_, "Read in bytes: " << bytes);
     std::string str(buffer);
