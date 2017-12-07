@@ -83,6 +83,9 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
 
 IAP2USBEmulationTransportAdapter::~IAP2USBEmulationTransportAdapter() {
   signal_handler_->join();
+  auto delegate = signal_handler_->delegate();
+  signal_handler_->set_delegate(NULL);
+  delete delegate;
   threads::DeleteThread(signal_handler_);
   LOG4CXX_DEBUG(logger_, "Out close result: " << close(out_));
   LOG4CXX_DEBUG(logger_, "Out unlink result: " << unlink(out_signals_channel));
@@ -139,6 +142,9 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
       adapter_.DoTransportSwitch();
     }
   }
+
+  LOG4CXX_DEBUG(logger_, "In close result: " << close(in_));
+  LOG4CXX_DEBUG(logger_, "In unlink result: " << unlink(in_signals_channel));
 }
 
 void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
@@ -146,8 +152,11 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Stopping signal handling.");
   run_flag_ = false;
-  LOG4CXX_DEBUG(logger_, "In close result: " << close(in_));
-  LOG4CXX_DEBUG(logger_, "In unlink result: " << unlink(in_signals_channel));
+  if (!in_) {
+    // To stop thread gracefully in case of no one has connected to pipe before
+    auto in = open(in_signals_channel, O_WRONLY);
+    UNUSED(in);
+  }
 }
 }
 }  // namespace transport_manager::transport_adapter
