@@ -63,31 +63,27 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message,
 AlertRequest::~AlertRequest() {}
 
 bool AlertRequest::Init() {
-  /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::duration].asUInt();
-  } else {
-    const int32_t def_value = 5000;
-    default_timeout_ = def_value;
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  // If soft buttons are present, SDL will not use initiate timeout tracking for
-  // response.
+  // Duration in milliseconds.
+  // Standard value of 10000ms(from .ini file) + default RPC duration(5000ms)
+  // is used.
+  default_timeout_ +=
+      (*message_)[strings::msg_params][strings::duration].asUInt();
+
+  // If soft buttons are present, SDL must resend duration to HMI anyway .
+  // But HMI will ignore duration param in this case
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     LOG4CXX_INFO(logger_,
                  "Request contains soft buttons - request timeout "
                  "will be set to 0.");
     default_timeout_ = 0;
   }
-
   return true;
 }
 
 void AlertRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asInt();
 
@@ -129,8 +125,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
                        << awaiting_tts_speak_response_ << " "
                        << awaiting_tts_stop_speaking_response_ << " "
                        << awaiting_ui_alert_response_);
+      const uint32_t new_timeout =
+          application_manager_.get_settings().default_timeout();
       application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
+          connection_key(), correlation_id(), new_timeout);
       break;
     }
     case hmi_apis::FunctionID::UI_Alert: {
@@ -284,7 +282,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
   return true;
 }
 
-void AlertRequest::SendAlertRequest(int32_t app_id) {
+void AlertRequest::SendAlertRequest(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(app_id);
 

@@ -89,7 +89,6 @@ class AlertRequest : public CommandRequestImpl {
    */
   void on_event(const event_engine::Event& event);
 
- protected:
  private:
   /*
    * @brief Checks if request parameters are valid
@@ -102,7 +101,7 @@ class AlertRequest : public CommandRequestImpl {
    *
    * @param app_id Id of application requested this RPC
    */
-  void SendAlertRequest(int32_t app_id);
+  void SendAlertRequest(const int32_t app_id);
 
   /*
    * @brief Sends TTS Speak request

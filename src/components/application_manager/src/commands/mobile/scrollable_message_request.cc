@@ -54,15 +54,11 @@ ScrollableMessageRequest::ScrollableMessageRequest(
 ScrollableMessageRequest::~ScrollableMessageRequest() {}
 
 bool ScrollableMessageRequest::Init() {
-  /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  } else {
-    const int32_t def_value = 30000;
-    default_timeout_ = def_value;
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
+  // Timeout in milliseconds.
+  // Standard value of 10000 ms(from .ini file) + RPC own default value is used.
+  default_timeout_ +=
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
 
   return true;
 }
@@ -120,8 +116,10 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      const uint32_t new_timeout =
+          application_manager_.get_settings().default_timeout();
       application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
+          connection_key(), correlation_id(), new_timeout);
       break;
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {

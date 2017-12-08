@@ -51,13 +51,11 @@ SliderRequest::SliderRequest(const MessageSharedPtr& message,
 SliderRequest::~SliderRequest() {}
 
 bool SliderRequest::Init() {
-  /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        application_manager_.get_settings().default_timeout() +
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
+  // Timeout in milliseconds.
+  // Standard value of 10000 ms(from .ini file) + RPC own default value is used.
+  default_timeout_ +=
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
 
   return true;
 }
@@ -122,8 +120,10 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const event_engine::Event::EventID event_id = event.id();
   if (event_id == FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+    const uint32_t new_timeout =
+        application_manager_.get_settings().default_timeout();
     application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
+        connection_key(), correlation_id(), new_timeout);
     return;
   }
 

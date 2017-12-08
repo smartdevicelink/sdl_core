@@ -155,10 +155,10 @@ RequestController::TResult RequestController::addMobileRequest(
     cond_var_.NotifyOne();
     return INVALID_DATA;
   }
-  LOG4CXX_DEBUG(
-      logger_,
-      "correlation_id : " << request->correlation_id()
-                          << "connection_key : " << request->connection_key());
+  LOG4CXX_DEBUG(logger_,
+                "correlation_id : " << request->correlation_id()
+                                    << " , connection_key : "
+                                    << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request, hmi_level);
   if (SUCCESS == result) {
     AutoLock auto_lock_list(mobile_request_list_lock_);
@@ -325,14 +325,12 @@ void RequestController::updateRequestTimeout(const uint32_t& app_id,
 
   LOG4CXX_DEBUG(logger_,
                 "app_id : " << app_id
-                            << " mobile_correlation_id : " << correlation_id
-                            << " new_timeout : " << new_timeout);
-  LOG4CXX_DEBUG(logger_,
-                "New_timeout is NULL. RequestCtrl will "
-                "not manage this request any more");
+                            << " , mobile_correlation_id : " << correlation_id
+                            << " , new_timeout : " << new_timeout);
 
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
+
   if (request_info) {
     waiting_for_response_.RemoveRequest(request_info);
     request_info->updateTimeOut(new_timeout);
