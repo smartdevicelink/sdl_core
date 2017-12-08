@@ -157,11 +157,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Stopping signal handling.");
   run_flag_ = false;
-  if (!in_) {
-    // To stop thread gracefully in case of no one has connected to pipe before
-    auto in = open(in_signals_channel, O_WRONLY);
-    UNUSED(in);
-  }
+  ThreadDelegate::exitThreadMain();
 }
 }
 }  // namespace transport_manager::transport_adapter
