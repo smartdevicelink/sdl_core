@@ -70,6 +70,7 @@ const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
 const uint32_t kDefaultTimeout = 1000u;
+const uint32_t kCustomTimeout = 5000u;
 const uint32_t kCorrelationId = 2u;
 const uint32_t kFunctionId = 3u;
 const uint32_t kNumTicks = 2u;
@@ -276,15 +277,23 @@ TEST_F(SliderRequestTest, Run_SUCCESS) {
 
 TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
   PreConditions();
-  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
+  (*msg_)[am::strings::msg_params][am::strings::timeout] = kCustomTimeout;
   (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
 
   CommandPtr command(CreateCommand<SliderRequest>(msg_));
   EXPECT_TRUE(command->Init());
 
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
+  // 100 is default timeout value from CommandTest
+  const uint32_t default_cmd_timeout = 100u;
+  const uint32_t updated_rpc_timeout = kCustomTimeout + default_cmd_timeout;
+  EXPECT_EQ(updated_rpc_timeout, command->default_timeout());
+
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(
+                  kConnectionKey, kCorrelationId, default_cmd_timeout));
+
+  EXPECT_CALL(app_mngr_settings_, default_timeout())
+      .WillOnce(ReturnRef(default_cmd_timeout));
 
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);

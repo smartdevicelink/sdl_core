@@ -180,15 +180,8 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
       mobile_apis::InteractionMode::MANUAL_ONLY;
   EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
-}
-
-TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
-  (*msg_)[msg_params][interaction_mode] =
-      mobile_apis::InteractionMode::MANUAL_ONLY;
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
-  command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
+  const uint32_t result_timeout = kTimeOut + kDefaultTimeout_;
+  EXPECT_EQ(result_timeout, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
@@ -248,9 +241,13 @@ TEST_F(ScrollableMessageRequestTest,
        OnEvent_ReceivedUIOnResetTimeoutEvent_SUCCESS) {
   (*msg_)[params][connection_key] = kConnectionKey;
   (*msg_)[params][correlation_id] = kCorrelationId;
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout_));
+  // 100 is default timeout value from CommandTest
+  const uint32_t default_cmd_timeout = 100u;
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(
+                  kConnectionKey, kCorrelationId, default_cmd_timeout));
+  EXPECT_CALL(app_mngr_settings_, default_timeout())
+      .WillOnce(ReturnRef(default_cmd_timeout));
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);
   command_->on_event(event);
