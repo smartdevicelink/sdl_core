@@ -1033,8 +1033,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   resumprion_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
-      .Times(2)
-      .WillRepeatedly(ReturnRef(mock_resume_ctrl));
+      .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, OnSuspend());
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
