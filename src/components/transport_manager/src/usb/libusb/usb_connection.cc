@@ -43,6 +43,9 @@
 
 #include "utils/logger.h"
 
+// Define the buffer size, because the Android accessory protocol packet support packet buffers up to 16Kbytes
+#define TRANSPORT_USB_BUFFER_MAX_SIZE	(16*1024)
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -64,6 +67,7 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
     , out_endpoint_(0)
     , out_endpoint_max_packet_size_(0)
     , in_buffer_(NULL)
+    , in_buffer_size_(0)
     , in_transfer_(NULL)
     , out_transfer_(0)
     , out_messages_()
@@ -96,7 +100,7 @@ bool UsbConnection::PostInTransfer() {
                             device_handle_,
                             in_endpoint_,
                             in_buffer_,
-                            in_endpoint_max_packet_size_,
+                            in_buffer_size_,
                             InTransferCallback,
                             this,
                             0);
@@ -307,7 +311,15 @@ bool UsbConnection::Init() {
     LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: !FindEndpoints()");
     return false;
   }
-  in_buffer_ = new unsigned char[in_endpoint_max_packet_size_];
+
+  if(in_endpoint_max_packet_size_ < TRANSPORT_USB_BUFFER_MAX_SIZE){
+  	in_buffer_size_ = TRANSPORT_USB_BUFFER_MAX_SIZE;
+  }
+  else {
+  	in_buffer_size_ = in_endpoint_max_packet_size_;
+  }
+
+  in_buffer_ = new unsigned char[in_buffer_size_];
   in_transfer_ = libusb_alloc_transfer(0);
   if (NULL == in_transfer_) {
     LOG4CXX_ERROR(logger_, "libusb_alloc_transfer failed");
