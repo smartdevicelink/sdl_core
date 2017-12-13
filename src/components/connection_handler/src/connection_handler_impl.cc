@@ -65,6 +65,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     transport_manager::TransportManager& tm)
     : settings_(settings)
     , connection_handler_observer_(NULL)
+    , connection_handler_observer_valid_(false)
     , transport_manager_(tm)
     , protocol_handler_(NULL)
     , connection_list_lock_()
@@ -89,6 +90,10 @@ void ConnectionHandlerImpl::Stop() {
   start_service_context_map_.clear();
 }
 
+void ConnectionHandlerImpl::invalidate_connection_handler_observer() {
+  connection_handler_observer_valid_ = false;
+}
+
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
   LOG4CXX_DEBUG(logger_,
@@ -97,6 +102,10 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
   sync_primitives::AutoWriteLock write_lock(connection_handler_observer_lock_);
   if (!observer) {
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
+    connection_handler_observer_valid_ = false;
+  }
+  else {
+    connection_handler_observer_valid_ = true;
   }
   connection_handler_observer_ = observer;
 }
@@ -116,14 +125,14 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>&) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
 void ConnectionHandlerImpl::OnFindNewApplicationsRequest() {
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnFindNewApplicationsRequest();
   }
 }
@@ -143,7 +152,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
                                    device_info.mac_address(),
                                    device_info.connection_type())));
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
@@ -175,7 +184,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   }
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -337,7 +346,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     }
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
@@ -607,7 +616,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   }
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnServiceEndedCallback(
         session_key, service_type, CloseSessionReason::kCommon);
   }
@@ -854,7 +863,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
 
   transport_manager_.SearchDevices();
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
@@ -988,7 +997,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   }
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (!connection_handler_observer_) {
+  if (!connection_handler_observer_valid_ || !connection_handler_observer_) {
     LOG4CXX_ERROR(logger_, "Connection handler observer not found");
     return;
   }
@@ -1131,7 +1140,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_lock_.Release();
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_ && connection.get() != NULL) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_ && connection.get() != NULL) {
     const SessionMap session_map = connection->session_map();
 
     for (SessionMap::const_iterator session_it = session_map.begin();

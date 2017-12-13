@@ -55,11 +55,18 @@ void UpdateDeviceListRequest::Run() {
   // exclude
   // hit code to RTC
   if (true == application_manager_.get_settings().launch_hmi()) {
-    if (!application_manager_.IsHMICooperating()) {
+    while (!application_manager_.IsStopping() &&
+           !application_manager_.IsHMICooperating()) {
       LOG4CXX_INFO(logger_, "Wait for HMI Cooperation");
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
-      termination_condition_.Wait(auto_lock);
-      LOG4CXX_DEBUG(logger_, "HMI Cooperation OK");
+      const sync_primitives::ConditionalVariable::WaitStatus wait_status =
+        termination_condition_.WaitFor(auto_lock, 1000);
+      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
+        LOG4CXX_DEBUG(logger_, "HMI Cooperation Wait timed out");
+        unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+      } else {
+        LOG4CXX_DEBUG(logger_, "HMI Cooperation OK");
+      }
     }
   }
 

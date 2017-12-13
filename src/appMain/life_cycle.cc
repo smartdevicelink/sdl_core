@@ -330,13 +330,15 @@ void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);
 
   DCHECK_OR_RETURN_VOID(connection_handler_);
-  connection_handler_->set_connection_handler_observer(NULL);
+  connection_handler_->invalidate_connection_handler_observer();
 
   DCHECK_OR_RETURN_VOID(protocol_handler_);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
+
+  connection_handler_->set_connection_handler_observer(NULL);
 
   LOG4CXX_INFO(logger_, "Stopping Protocol Handler");
   DCHECK_OR_RETURN_VOID(protocol_handler_);

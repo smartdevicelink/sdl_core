@@ -91,6 +91,11 @@ class ConnectionHandlerImpl
       ConnectionHandlerObserver* observer) OVERRIDE;
 
   /**
+   * \brief Invalidates any connection_handler_observer previously set
+   */
+  void invalidate_connection_handler_observer();
+
+  /**
    * \brief Sets pointer to ProtocolHandler.
    * \param protocol_handler Pointer to ProtocolHandler object.
    **/
@@ -555,6 +560,11 @@ class ConnectionHandlerImpl
    * \brief Pointer to observer
    */
   ConnectionHandlerObserver* connection_handler_observer_;
+
+  /**
+   * \brief Used to invalidate an observer without NULL'ing it out
+   */
+  bool connection_handler_observer_valid_;
 
   /**
    * \brief Pointer to TransportManager
