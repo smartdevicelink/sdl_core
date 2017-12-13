@@ -52,8 +52,7 @@ void VRGetSupportedLanguagesResponse::Run() {
           (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
-    HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-    hmi_capabilities.set_vr_supported_languages(
+    application_manager_.hmi_capabilities().GetData().set_vr_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);
   }
 }

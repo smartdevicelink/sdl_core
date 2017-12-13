@@ -50,14 +50,17 @@ OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {}
 void OnVRLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
+    NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.hmi_capabilities();
+    HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
-  hmi_capabilities.set_active_vr_language(
-      static_cast<hmi_apis::Common_Language::eType>(
-          (*message_)[strings::msg_params][strings::language].asInt()));
+    hmi_capabilities.set_active_vr_language(
+        static_cast<hmi_apis::Common_Language::eType>(
+            (*message_)[strings::msg_params][strings::language].asInt()));
 
-  (*message_)[strings::msg_params][strings::hmi_display_language] =
-      hmi_capabilities.active_ui_language();
+    (*message_)[strings::msg_params][strings::hmi_display_language] =
+        hmi_capabilities.active_ui_language();
+  }
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);

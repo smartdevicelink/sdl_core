@@ -111,8 +111,9 @@ TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
+  ::sync_primitives::Lock hmi_lock;
+  ON_CALL(app_mngr_, const_hmi_capabilities())
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -135,8 +136,9 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
+  ::sync_primitives::Lock hmi_lock;
+  ON_CALL(app_mngr_, const_hmi_capabilities())
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
@@ -167,8 +169,9 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
+  ::sync_primitives::Lock hmi_lock;
+  ON_CALL(app_mngr_, const_hmi_capabilities())
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));

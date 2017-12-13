@@ -76,6 +76,7 @@ class TTSGetSupportedLanguageResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   MockHMICapabilities mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   SmartObject capabilities_;
 };
 
@@ -96,7 +97,7 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_SUCCESS) {
       CreateCommand<TTSGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_tts_supported_languages((

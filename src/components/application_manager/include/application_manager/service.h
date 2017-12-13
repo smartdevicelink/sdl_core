@@ -40,6 +40,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_interfaces.h"
+#include "application_manager/hmi_capabilities.h"
 
 namespace application_manager {
 
@@ -136,7 +137,7 @@ class Service {
   virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
                                       mobile_apis::HMILevel::eType level) = 0;
 
-  virtual const smart_objects::SmartObject* GetRCCapabilities() const = 0;
+  virtual const DataAccessor<HMICapabilities> GetHMICapabilities() const = 0;
   /**
    * Checks if application has remote control functions
    * @param app application

@@ -69,7 +69,7 @@ class UIIsReadyRequestTest
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
+        .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   }
   void SetUpExpectations(bool is_ui_cooperating_available,
                          bool is_send_message_to_hmi,
@@ -147,6 +147,7 @@ class UIIsReadyRequestTest
 
   UIIsReadyRequestPtr command_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 

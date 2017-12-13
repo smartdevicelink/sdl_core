@@ -680,7 +680,7 @@ void PolicyHandler::OnGetUserFriendlyMessage(
 #ifdef EXTERNAL_PROPRIETARY_MODE
   const std::string active_hmi_language =
       application_manager::MessageHelper::CommonLanguageToString(
-          application_manager_.hmi_capabilities().active_ui_language());
+          application_manager_.hmi_capabilities().GetData().active_ui_language());
   const std::vector<UserFriendlyMessage> result =
       policy_manager_->GetUserFriendlyMessages(
           message_codes, language, active_hmi_language);

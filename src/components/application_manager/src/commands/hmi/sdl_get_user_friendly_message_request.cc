@@ -71,7 +71,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
             static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
-        application_manager_.hmi_capabilities().active_ui_language();
+        application_manager_.hmi_capabilities().GetData().active_ui_language();
 
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(ui_language);

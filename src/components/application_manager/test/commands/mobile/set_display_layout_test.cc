@@ -228,12 +228,13 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*msg);
 
   MockHMICapabilities hmi_capabilities;
+  ::sync_primitives::Lock hmi_lock;
   MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
   (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities));
+      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
 
   EXPECT_CALL(hmi_capabilities, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));

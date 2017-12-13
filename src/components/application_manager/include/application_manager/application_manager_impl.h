@@ -353,8 +353,8 @@ class ApplicationManagerImpl
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
-  HMICapabilities& hmi_capabilities() OVERRIDE;
-  const HMICapabilities& hmi_capabilities() const OVERRIDE;
+  NonConstDataAccessor<HMICapabilities> hmi_capabilities() OVERRIDE;
+  const DataAccessor<HMICapabilities> const_hmi_capabilities() const OVERRIDE;
 
   /**
    * @brief ProcessQueryApp executes logic related to QUERY_APP system request.
@@ -1517,6 +1517,7 @@ class ApplicationManagerImpl
   mutable sync_primitives::Lock applications_list_lock_;
   mutable sync_primitives::Lock apps_to_register_list_lock_;
   mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
+  mutable sync_primitives::Lock hmi_capabilities_lock_;
 
   /**
    * @brief Map of correlation id  and associated application id.

@@ -44,9 +44,7 @@ VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 void VRGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-
-  hmi_capabilities.set_vr_capabilities(
+  application_manager_.hmi_capabilities().GetData().set_vr_capabilities(
       (*message_)[strings::msg_params][strings::vr_capabilities]);
 }
 

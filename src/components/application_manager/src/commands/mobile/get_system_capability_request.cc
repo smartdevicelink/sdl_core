@@ -34,14 +34,14 @@ void GetSystemCapabilityRequest::Run() {
   response_params[strings::system_capability][strings::system_capability_type] =
       response_type;
 
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
   switch (response_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {
       if (hmi_capabilities.navigation_capability()) {
         response_params[strings::system_capability]
-                       [strings::navigation_capability] =
+                       [strings::navigation_capability] = 
                            *hmi_capabilities.navigation_capability();
       } else {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);

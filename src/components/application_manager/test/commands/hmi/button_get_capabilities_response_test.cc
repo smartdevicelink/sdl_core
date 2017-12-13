@@ -73,6 +73,7 @@ class ButtonGetCapabilitiesResponseTest
   }
 
   MockHMICapabilities mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   SmartObject capabilities_;
   SmartObject preset_bank_capabilities_;
 };
@@ -85,7 +86,7 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeSuccess_SUCCESS) {
   ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_preset_bank_capabilities(preset_bank_capabilities_));

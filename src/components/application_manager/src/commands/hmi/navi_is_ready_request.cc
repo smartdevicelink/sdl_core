@@ -62,9 +62,7 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
                                message,
                                HmiInterfaces::HMI_INTERFACE_Navigation);
 
-      HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
-      hmi_capabilities.set_is_navi_cooperating(is_available);
+      application_manager_.hmi_capabilities().GetData().set_is_navi_cooperating(is_available);
       break;
     }
     default: {

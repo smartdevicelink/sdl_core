@@ -2466,12 +2466,12 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
   return *mobile_so_factory_;
 }
 
-HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
-  return *hmi_capabilities_;
+NonConstDataAccessor<HMICapabilities> ApplicationManagerImpl::hmi_capabilities() {
+  return NonConstDataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
 }
 
-const HMICapabilities& ApplicationManagerImpl::hmi_capabilities() const {
-  return *hmi_capabilities_;
+const DataAccessor<HMICapabilities> ApplicationManagerImpl::const_hmi_capabilities() const {
+  return DataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
 }
 
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
@@ -2483,9 +2483,8 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
     return;
   }
 
-  const HMICapabilities& hmi_cap = hmi_capabilities();
   std::string cur_vr_lang(
-      MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
+      MessageHelper::CommonLanguageToString(const_hmi_capabilities().GetData().active_vr_language()));
   const SmartObject& languages = app_data[json::languages];
 
   std::transform(
@@ -2662,7 +2661,7 @@ void ApplicationManagerImpl::ProcessQueryApp(
 }
 
 bool ApplicationManagerImpl::is_attenuated_supported() const {
-  return hmi_capabilities().attenuated_supported() &&
+  return const_hmi_capabilities().GetData().attenuated_supported() &&
          get_settings().is_mixing_audio_supported();
 }
 

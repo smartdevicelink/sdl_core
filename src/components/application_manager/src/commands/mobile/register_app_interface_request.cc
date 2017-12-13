@@ -507,9 +507,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
 
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
 
@@ -522,6 +519,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     resumer.OnAppRegistrationEnd();
     return;
   }
+
+  const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
   response_params[strings::sync_msg_version][strings::major_version] =
       major_version;  // From generated file interfaces/generated_msg_version.h
@@ -626,7 +626,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
   const std::string ccpu_version =
-      application_manager_.hmi_capabilities().ccpu_version();
+      hmi_capabilities.ccpu_version();
   if (!ccpu_version.empty()) {
     response_params[strings::system_software_version] = ccpu_version;
   }

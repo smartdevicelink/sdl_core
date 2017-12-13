@@ -77,16 +77,18 @@ void GetInteriorVehicleDataRequest::Execute() {
   Json::Value request_params =
       MessageHelper::StringToValue(message_->json_message());
 
-  const smart_objects::SmartObject* capabilities =
-      service()->GetRCCapabilities();
-  if (capabilities &&
-      !CheckIfModuleTypeExistInCapabilities(*capabilities,
-                                            ModuleType(request_params))) {
-    LOG4CXX_WARN(logger_, "Accessing not supported module data");
-    SendResponse(false,
-                 result_codes::kUnsupportedResource,
-                 "Accessing not supported module data");
-    return;
+  {  // A local scope to limit accessor's lifetime and release app list lock.
+    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
+    const smart_objects::SmartObject* capabilities = hmi_capabilities_accessor.GetData().rc_capability();
+    if (capabilities &&
+        !CheckIfModuleTypeExistInCapabilities(*capabilities,
+                                              ModuleType(request_params))) {
+      LOG4CXX_WARN(logger_, "Accessing not supported module data");
+      SendResponse(false,
+                   result_codes::kUnsupportedResource,
+                   "Accessing not supported module data");
+      return;
+    }
   }
   if (HasRequestExcessiveSubscription(request_params)) {
     RemoveExcessiveSubscription(request_params);

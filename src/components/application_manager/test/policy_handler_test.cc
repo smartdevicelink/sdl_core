@@ -1104,8 +1104,9 @@ TEST_F(PolicyHandlerTest, OnGetUserFriendlyMessage) {
       hmi_apis::Common_Language::EN_US;
   const std::string default_language_string = "EN_US";
   application_manager_test::MockHMICapabilities mock_hmi_capabilities;
+  ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_manager_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
+      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities, hmi_lock)));
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(default_language))
       .WillOnce(Return(default_language_string));
   EXPECT_CALL(mock_hmi_capabilities, active_ui_language())

@@ -91,6 +91,7 @@ class GetSystemInfoResponseTest
   }
 
   MockHMICapabilities mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   SmartObject capabilities_;
 };
 
@@ -105,7 +106,7 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
   policy_test::MockPolicyHandlerInterface policy_handler;
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
 
   std::string language;
   EXPECT_CALL(mock_message_helper_,

@@ -81,9 +81,6 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       GetInfo(message, info);
       smart_objects::SmartObject msg_params = message[strings::msg_params];
       if (response_success) {
-        HMICapabilities& hmi_capabilities =
-            application_manager_.hmi_capabilities();
-
         // in case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {
           if (0 ==
@@ -91,7 +88,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
                         [hmi_response::templates_available].length()) {
             msg_params[hmi_response::display_capabilities]
                       [hmi_response::templates_available] =
-                          hmi_capabilities.display_capabilities()->getElement(
+                          application_manager_.hmi_capabilities().GetData().display_capabilities()->getElement(
                               hmi_response::templates_available);
           }
         }

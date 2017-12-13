@@ -182,15 +182,18 @@ void SetInteriorVehicleDataRequest::Execute() {
   }
 
   if (module_type_and_data_match) {
-    const smart_objects::SmartObject* capabilities =
-        service()->GetRCCapabilities();
-    if (capabilities &&
-        !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {
-      LOG4CXX_WARN(logger_, "Accessing not supported module data");
-      SendResponse(false,
-                   result_codes::kUnsupportedResource,
-                   "Accessing not supported module data");
-      return;
+    {  // A local scope to limit accessor's lifetime and release app list lock.
+      const DataAccessor<HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
+      const smart_objects::SmartObject* capabilities = hmi_capabilities_accessor.GetData().rc_capability();
+
+      if (capabilities &&
+          !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {
+        LOG4CXX_WARN(logger_, "Accessing not supported module data");
+        SendResponse(false,
+                     result_codes::kUnsupportedResource,
+                     "Accessing not supported module data");
+        return;
+      }
     }
     if (AreAllParamsReadOnly(request_params)) {
       LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");

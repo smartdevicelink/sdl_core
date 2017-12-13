@@ -44,9 +44,7 @@ VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
 void VIGetVehicleTypeResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-
-  hmi_capabilities.set_vehicle_type(
+  application_manager_.hmi_capabilities().GetData().set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
 }
 

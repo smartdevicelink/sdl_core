@@ -231,11 +231,15 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
       static_cast<int32_t>(kNotification);
   message[strings::params][strings::connection_key] = connection_key;
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-  message[strings::msg_params][strings::hmi_display_language] =
-      hmi_capabilities.active_ui_language();
-  message[strings::msg_params][strings::language] =
-      hmi_capabilities.active_vr_language();
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
+    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+    const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
+    message[strings::msg_params][strings::hmi_display_language] =
+        hmi_capabilities.active_ui_language();
+    message[strings::msg_params][strings::language] =
+        hmi_capabilities.active_vr_language();
+  }
+
   if (application_manager_.ManageMobileCommand(notification,
                                                commands::Command::ORIGIN_SDL)) {
     LOG4CXX_INFO(logger_, "Mobile command sent");
@@ -247,16 +251,19 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
 void HMILanguageHandler::VerifyWithPersistedLanguages() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
 
-  // Updated values compared with persisted
-  if (hmi_capabilities.active_ui_language() == persisted_ui_language_ &&
-      hmi_capabilities.active_vr_language() == persisted_vr_language_ &&
-      hmi_capabilities.active_tts_language() == persisted_tts_language_) {
-    LOG4CXX_INFO(logger_,
-                 "All languages gotten from HMI match to persisted values.");
-    return;
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
+    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+    const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
+
+    // Updated values compared with persisted
+    if (hmi_capabilities.active_ui_language() == persisted_ui_language_ &&
+        hmi_capabilities.active_vr_language() == persisted_vr_language_ &&
+        hmi_capabilities.active_tts_language() == persisted_tts_language_) {
+      LOG4CXX_INFO(logger_,
+                   "All languages gotten from HMI match to persisted values.");
+      return;
+    }
   }
 
   LOG4CXX_INFO(logger_,

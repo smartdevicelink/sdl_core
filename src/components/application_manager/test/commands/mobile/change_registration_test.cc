@@ -88,7 +88,8 @@ class ChangeRegistrationRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   ChangeRegistrationRequestTest()
-      : mock_app_(CreateMockApp())
+      : hmi_lock_(true)
+      , mock_app_(CreateMockApp())
       , supported_languages_(CreateMessage(smart_objects::SmartType_Array)) {}
 
   MessageSharedPtr CreateMsgFromMobile() {
@@ -103,7 +104,7 @@ class ChangeRegistrationRequestTest
   }
   void PrepareExpectationBeforeRun() {
     ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(hmi_capabilities_));
+        .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
     (*supported_languages_)[0] =
         static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
@@ -240,8 +241,8 @@ class ChangeRegistrationRequestTest
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(hmi_capabilities_));
+    ON_CALL(app_mngr_, const_hmi_capabilities())
+        .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
   }
 
   void ExpectationsHmiCapabilities(
@@ -271,6 +272,7 @@ class ChangeRegistrationRequestTest
       MockHMICapabilities;
   sync_primitives::Lock app_set_lock_;
   MockHMICapabilities hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   MockAppPtr mock_app_;
   MessageSharedPtr supported_languages_;
   MockPolicyHandlerInterface mock_policy_handler_;

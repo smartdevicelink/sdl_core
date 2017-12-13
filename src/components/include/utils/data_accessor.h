@@ -32,41 +32,29 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
+#include <memory>
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
 
 // This class is for thread-safe access to data
+// It creates a reference-counted shared pointer to an AutoLock object
+// When the refcount reaches 0, the AutoLock is deleted, and unlocks the lock
 template <class T>
-class DataAccessor {
- public:
-  DataAccessor(const T& data, const sync_primitives::Lock& lock)
-      : data_(data)
-      , lock_(const_cast<sync_primitives::Lock&>(lock))
-      , counter_(new uint32_t(0)) {
-    lock_.Acquire();
+struct DataAccessorImpl {
+  DataAccessorImpl(T& data, sync_primitives::Lock& lock)
+    : lockptr_(std::make_shared<sync_primitives::AutoLock>(lock))
+    , data_(data) {
   }
-
-  DataAccessor(const DataAccessor<T>& other)
-      : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
-    ++(*counter_);
-  }
-
-  ~DataAccessor() {
-    if (0 == *counter_) {
-      lock_.Release();
-    } else {
-      --(*counter_);
-    }
-  }
-  const T& GetData() const {
+  T& GetData() const {
     return data_;
   }
-
+ DataAccessorImpl(const DataAccessorImpl&) = default;
+ DataAccessorImpl(DataAccessorImpl&&) = default;
  private:
-  void* operator new(size_t size);
-  const T& data_;
-  sync_primitives::Lock& lock_;
-  utils::SharedPtr<uint32_t> counter_;
+  std::shared_ptr<sync_primitives::AutoLock> lockptr_;
+  T& data_;
 };
+
+template<class T> using DataAccessor = DataAccessorImpl<const T>;
+template<class T> using NonConstDataAccessor = DataAccessorImpl<T>;
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
