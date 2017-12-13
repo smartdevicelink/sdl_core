@@ -731,6 +731,13 @@ class CacheManager : public CacheManagerInterface {
    */
   void ResetCalculatedPermissionsForDevice(const std::string& device_id);
 
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
+
   void AddCalculatedPermissions(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const policy::Permissions& permissions);

@@ -229,6 +229,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -237,6 +238,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -277,10 +279,11 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
   if (result &&
@@ -397,6 +400,7 @@ void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
   is_tts_send_ = true;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
 }
@@ -405,6 +409,7 @@ void SetGlobalPropertiesRequest::SendUIRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
   is_ui_send_ = true;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(
       hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
 }

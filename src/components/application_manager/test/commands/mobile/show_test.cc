@@ -59,7 +59,6 @@ using am::MockMessageHelper;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -73,8 +72,7 @@ const uint32_t kFunctionID = 3u;
 
 class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  ShowRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
+  ShowRequestTest() {
     mock_app_ = CreateMockApp();
   }
   sync_primitives::Lock lock_;
@@ -203,16 +201,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(*mock_app_, set_show_command(msg_params));
   }
 
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   MockAppPtr mock_app_;
-  MockMessageHelper& mock_message_helper_;
   std::string text_field_;
 };
 
@@ -238,10 +227,6 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -264,12 +249,9 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -298,13 +280,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -328,13 +306,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -361,13 +335,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -392,13 +362,9 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -420,13 +386,9 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -447,13 +409,9 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -478,13 +436,9 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -506,13 +460,9 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -533,8 +483,6 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_MainField1_SUCCESS) {
@@ -936,9 +884,6 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  ON_CALL(mock_message_helper_,
-          HMIToMobileResult(hmi_apis::Common_Result::eType::SUCCESS))
-      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
@@ -960,9 +905,6 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
-      .WillOnce(Return(mobile_apis::Result::WARNINGS));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::UI_Show);

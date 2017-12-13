@@ -53,6 +53,8 @@ class PipeStreamerAdapter : public StreamerAdapter {
                  const std::string& app_storage_folder);
     virtual ~PipeStreamer();
 
+    virtual void Close() {}
+
    protected:
     virtual bool Connect();
     virtual void Disconnect();

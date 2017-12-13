@@ -720,19 +720,23 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.insert(vehicle_info_type).second;
+  return subscribed_vehicle_info_
+      .insert(
+           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+      .second;
 }
 
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it =
-      subscribed_vehicle_info_.find(vehicle_info_type);
+  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
   return (subscribed_vehicle_info_.end() != it);
 }
 
 bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(vehicle_info_type);
+  return subscribed_vehicle_info_.erase(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
@@ -1045,7 +1049,7 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
 

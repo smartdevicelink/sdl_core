@@ -116,18 +116,6 @@ void AlertRequest::Run() {
   }
 }
 
-void AlertRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (false ==
-      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    CommandRequestImpl::onTimeOut();
-    return;
-  }
-  LOG4CXX_INFO(logger_,
-               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
-}
-
 void AlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
@@ -148,6 +136,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
       // Unsubscribe from event to avoid unwanted messages
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
       HmiInterfaces::InterfaceState ui_interface_state =
@@ -157,6 +146,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       if (awaiting_tts_speak_response_ &&
           HmiInterfaces::STATE_NOT_AVAILABLE != ui_interface_state) {
         awaiting_tts_stop_speaking_response_ = true;
+        StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
       }
       alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -170,6 +160,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       // Unsubscribe from event to avoid unwanted messages
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
       tts_speak_result_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -179,6 +170,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
       LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;
@@ -204,9 +196,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  ResponseInfo ui_alert_info(alert_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_alert_info(
+      alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   ResponseInfo tts_alert_info(tts_speak_result_,
-                              HmiInterfaces::HMI_INTERFACE_TTS);
+                              HmiInterfaces::HMI_INTERFACE_TTS,
+                              application_manager_);
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 
@@ -219,7 +213,7 @@ bool AlertRequest::PrepareResponseParameters(
     result = false;
   }
   result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
+  if ((ui_alert_info.is_ok || ui_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
@@ -230,6 +224,10 @@ bool AlertRequest::PrepareResponseParameters(
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
   info = MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+  // Mobile Alert request is successful when UI_Alert is successful
+  if (is_ui_alert_sent_ && !ui_alert_info.is_ok) {
+    return false;
+  }
   return result;
 }
 
@@ -346,6 +344,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
       msg_params.keyExists(hmi_request::soft_buttons)) {
     awaiting_ui_alert_response_ = true;
     is_ui_alert_sent_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
 }
@@ -370,6 +369,7 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
   }
   msg_params[strings::app_id] = app_id;
   msg_params[hmi_request::speak_type] = Common_MethodName::ALERT;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
 }
 

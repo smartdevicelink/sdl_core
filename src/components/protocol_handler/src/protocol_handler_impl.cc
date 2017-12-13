@@ -294,7 +294,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
               ? &defaultProtocolVersion
               : ProtocolPacket::ProtocolVersion::min(full_version,
                                                      defaultProtocolVersion);
-      char protocolVersionString[255];
+      char protocolVersionString[256];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
@@ -1214,7 +1214,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       , hash_id_(hash_id)
       , service_type_(service_type)
       , force_protected_service_(force_protected_service)
-      , full_version_() {}
+      , full_version_()
+      , payload_(NULL) {}
   StartSessionHandler(uint32_t connection_key,
                       ProtocolHandlerImpl* protocol_handler,
                       SessionObserver& session_observer,
@@ -1537,12 +1538,37 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
   }
 
   BsonObject start_session_ack_params;
+  bson_object_initialize_default(&start_session_ack_params);
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
   if (packet->service_type() == kMobileNav && packet->data() != NULL) {
-    start_session_ack_params = bson_object_from_bytes(packet->data());
-  } else {
-    bson_object_initialize_default(&start_session_ack_params);
+    BsonObject req_param = bson_object_from_bytes(packet->data());
+    BsonElement* element = NULL;
+
+    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::height,
+                            bson_object_get_int32(&req_param, strings::height));
+    }
+    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(&start_session_ack_params,
+                            strings::width,
+                            bson_object_get_int32(&req_param, strings::width));
+    }
+    char* protocol =
+        bson_object_get_string(&req_param, strings::video_protocol);
+    if (protocol != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_protocol, protocol);
+    }
+    char* codec = bson_object_get_string(&req_param, strings::video_codec);
+    if (codec != NULL) {
+      bson_object_put_string(
+          &start_session_ack_params, strings::video_codec, codec);
+    }
+    bson_object_deinitialize(&req_param);
   }
 
   ProtocolPacket::ProtocolVersion* fullVersion;
@@ -1944,33 +1970,34 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   LOG4CXX_DEBUG(
       logger_, "SendFramesNumber MobileNaviAck for session " << connection_key);
 
-  // TODO(EZamakhov): add protocol version check - to avoid send for
-  // PROTOCOL_VERSION_1
   transport_manager::ConnectionUID connection_id = 0;
   uint8_t session_id = 0;
   session_observer_.PairFromKey(connection_key, &connection_id, &session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, session_id, protocol_version)) {
-    ProtocolFramePtr ptr(
-        new protocol_handler::ProtocolPacket(connection_id,
-                                             protocol_version,
-                                             PROTECTION_OFF,
-                                             FRAME_TYPE_CONTROL,
-                                             SERVICE_TYPE_NAVI,
-                                             FRAME_DATA_SERVICE_DATA_ACK,
-                                             session_id,
-                                             0,
-                                             message_counters_[session_id]++));
+    if (protocol_version > PROTOCOL_VERSION_1 &&
+        protocol_version < PROTOCOL_VERSION_5) {
+      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+          connection_id,
+          protocol_version,
+          PROTECTION_OFF,
+          FRAME_TYPE_CONTROL,
+          SERVICE_TYPE_NAVI,
+          FRAME_DATA_SERVICE_DATA_ACK,
+          session_id,
+          0,
+          message_counters_[session_id]++));
 
-    // Flow control data shall be 4 bytes according Ford Protocol
-    DCHECK(sizeof(number_of_frames) == 4);
-    number_of_frames = LE_TO_BE32(number_of_frames);
-    ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
-                  sizeof(number_of_frames));
-    raw_ford_messages_to_mobile_.PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+      // Flow control data shall be 4 bytes according Ford Protocol
+      DCHECK(sizeof(number_of_frames) == 4);
+      number_of_frames = LE_TO_BE32(number_of_frames);
+      ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
+                    sizeof(number_of_frames));
+      raw_ford_messages_to_mobile_.PostMessage(
+          impl::RawFordMessageToMobile(ptr, false));
+      LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+    }
   } else {
     LOG4CXX_WARN(
         logger_,

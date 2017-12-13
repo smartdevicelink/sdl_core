@@ -808,17 +808,17 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const uint32_t app_id = value->app_id();
-
   if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(logger_,
-                  "Application " << app_id << " is not marked as registered.");
+                  "Application " << value->app_id()
+                                 << " is not marked as registered.");
     return false;
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Application " << app_id << " marked as registered."
-                                            "Checking its parameters.");
+                "Application " << value->app_id()
+                               << " marked as registered."
+                                  "Checking its parameters.");
 
   DeviceParams device_params = GetDeviceParams(
       value->device(),

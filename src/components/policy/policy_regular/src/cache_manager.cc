@@ -36,6 +36,7 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <sstream>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -133,7 +134,10 @@ const policy_table::AppHMITypes* CacheManager::GetHMITypes(
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
   if (i != apps.end()) {
-    return &(*i->second.AppHMIType);
+    const policy_table::AppHMITypes& app_hmi_types = *i->second.AppHMIType;
+    if (app_hmi_types.is_initialized()) {
+      return &app_hmi_types;
+    }
   }
   return NULL;
 }
@@ -238,16 +242,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
     }
@@ -1404,6 +1398,27 @@ bool CacheManager::LoadFromBackup() {
   return true;
 }
 
+void CacheManager::MakeLowerCaseAppNames(policy_table::Table& pt) const {
+  policy_table::ApplicationPolicies& apps =
+      pt.policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::iterator iter = apps.begin();
+       iter != apps.end();) {
+    std::string key = iter->first;
+    if (key == kDefaultId || key == kPreDataConsentId || key == kDeviceId) {
+      ++iter;
+      continue;
+    }
+
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (key.compare(iter->first) != 0) {
+      std::swap(apps[key], iter->second);
+      iter = apps.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
 bool CacheManager::LoadFromFile(const std::string& file_name,
                                 policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1432,6 +1447,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   LOG4CXX_DEBUG(logger_, "PT out:");
   LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
 
+  MakeLowerCaseAppNames(table);
+
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
     table.ReportErrors(&report);
@@ -1439,6 +1456,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
                   "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
+
   return true;
 }
 

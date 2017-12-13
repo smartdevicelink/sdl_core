@@ -722,6 +722,13 @@ class CacheManager : public CacheManagerInterface {
 
   void PersistData();
 
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
+
   void ResetCalculatedPermissions();
 
   void AddCalculatedPermissions(const std::string& device_id,

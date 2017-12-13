@@ -84,7 +84,7 @@ ProtocolPacket::ProtocolVersion::ProtocolVersion(std::string versionString)
 }
 
 std::string ProtocolPacket::ProtocolVersion::to_string() {
-  char versionString[255];
+  char versionString[256];
   snprintf(versionString,
            255,
            "%u.%u.%u",

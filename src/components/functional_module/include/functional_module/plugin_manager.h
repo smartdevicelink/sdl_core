@@ -130,10 +130,11 @@ class PluginManager : public ModuleObserver {
   /**
    * @brief OnApplicationEvent Notifies modules on certain application events
    * @param event Event
-   * @param application_id Application id of particular application
+   * @param application Pointer to application struct
    */
-  void OnApplicationEvent(functional_modules::ApplicationEvent event,
-                          const uint32_t application_id);
+  void OnApplicationEvent(
+      functional_modules::ApplicationEvent event,
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief OnPolicyEvent Notifies modules on certain events from policy

@@ -655,7 +655,11 @@ class Parser(object):
                     raise ParseError("Unexpected attributes for element '" +
                                      element_name + "' of parameter '" +
                                      params["name"])
-                if len(subelement.getchildren()) != 0:
+                children = subelement.getchildren()
+                for child in children:
+                    if child.tag == "description":
+                        children.remove(child)
+                if len(children) != 0:
                     raise ParseError("Unexpected subelements for element '" +
                                      element_name + "' of parameter '" +
                                      params["name"])

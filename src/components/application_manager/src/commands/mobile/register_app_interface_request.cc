@@ -217,9 +217,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  const std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
@@ -231,7 +228,13 @@ void RegisterAppInterfaceRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string policy_app_id = msg_params[strings::app_id].asString();
+  std::string new_policy_app_id = policy_app_id;
+  std::transform(policy_app_id.begin(),
+                 policy_app_id.end(),
+                 new_policy_app_id.begin(),
+                 ::tolower);
+  (*message_)[strings::msg_params][strings::app_id] = new_policy_app_id;
 
   if (application_manager_.IsApplicationForbidden(connection_key(),
                                                   policy_app_id)) {
@@ -494,6 +497,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.phone_call_supported();
   response_params[strings::hmi_capabilities][strings::video_streaming] =
       hmi_capabilities.video_streaming_supported();
+  response_params[strings::hmi_capabilities][strings::remote_control] =
+      hmi_capabilities.rc_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {

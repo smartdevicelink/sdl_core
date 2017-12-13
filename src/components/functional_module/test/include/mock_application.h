@@ -132,7 +132,8 @@ class MockApplication : public Application {
   MOCK_CONST_METHOD0(tbt_show_command, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(SubscribedButtons,
                      const std::set<mobile_apis::ButtonName::eType>&());
-  MOCK_CONST_METHOD0(SubscribesIVI, const std::set<uint32_t>&());
+  MOCK_CONST_METHOD0(SubscribesIVI,
+                     const application_manager::VehicleInfoSubscriptions&());
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());

@@ -160,6 +160,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(video_streaming_supported, bool());
   MOCK_METHOD1(set_video_streaming_supported, void(const bool supported));
 
+  MOCK_CONST_METHOD0(rc_supported, bool());
+  MOCK_METHOD1(set_rc_supported, void(const bool supported));
+
   MOCK_CONST_METHOD0(navigation_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_navigation_capability,

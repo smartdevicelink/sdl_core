@@ -72,6 +72,8 @@ class StreamerAdapter : public MediaAdapterImpl {
     virtual void threadMain();
     virtual void exitThreadMain();
 
+    virtual void Close() = 0;
+
    protected:
     virtual bool Connect() = 0;
     virtual void Disconnect() = 0;

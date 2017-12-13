@@ -77,7 +77,10 @@ class AlertRequest : public CommandRequestImpl {
    * If Alert request has soft buttons, timeout response should not be sent to
    * mobile
    */
-  virtual void onTimeOut();
+  // DEPRECATED
+  virtual void onTimeOut() {
+    CommandRequestImpl::onTimeOut();
+  }
 
   /**
    * @brief Interface method that is called whenever new event received

@@ -136,8 +136,6 @@
 
 namespace am = application_manager;
 
-static am::MockMessageHelper* message_helper_mock_;
-
 namespace test {
 namespace components {
 namespace commands_test {
@@ -150,7 +148,6 @@ using ::testing::Types;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
-using ::testing::Mock;
 using ::testing::InSequence;
 using ::utils::SharedPtr;
 using ::smart_objects::SmartObject;
@@ -223,16 +220,11 @@ class HMICommandsNotificationsTest
           CommandsTestMocks::kIsNice> {
  public:
   HMICommandsNotificationsTest()
-      : applications_(application_set_, applications_lock_), app_ptr_(NULL) {
-    message_helper_mock_ =
-        application_manager::MockMessageHelper::message_helper_mock();
-    Mock::VerifyAndClearExpectations(message_helper_mock_);
-  }
+      : applications_(application_set_, applications_lock_), app_ptr_(NULL) {}
 
   ~HMICommandsNotificationsTest() {
     // Fix DataAccessor release and WinQt crash
     Mock::VerifyAndClearExpectations(&app_mngr_);
-    Mock::VerifyAndClearExpectations(message_helper_mock_);
   }
   typedef Command CommandType;
 
@@ -842,7 +834,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnSystemInfoChangedNotification>(message);
 
-  EXPECT_CALL(*message_helper_mock_, CommonLanguageToString(_));
+  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_));
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
   EXPECT_CALL(policy_interface_, OnSystemInfoChanged(_));
   command->Run();
@@ -1116,7 +1108,7 @@ TEST_F(HMICommandsNotificationsTest,
 #endif  // SDL_REMOTE_CONTROL
 
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
-    EXPECT_CALL(*message_helper_mock_,
+    EXPECT_CALL(mock_message_helper_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
                     kAppId_, *it_mobile_reason)).WillOnce(Return(notification));
     EXPECT_CALL(app_mngr_,
@@ -1441,7 +1433,7 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(app_, mobile_apis::HMILevel::HMI_NONE, false));
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))
@@ -1764,7 +1756,7 @@ TEST_F(HMICommandsNotificationsTest,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))
@@ -1872,7 +1864,7 @@ TEST_F(HMICommandsNotificationsTest,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, ui_language()).WillRepeatedly(ReturnRef(kLang));
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))

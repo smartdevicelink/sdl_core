@@ -385,53 +385,45 @@ CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
 void PolicyManagerImpl::ProcessAppPolicyCheckResults(
     const CheckAppPolicyResults& results,
     const policy_table::ApplicationPolicies& app_policies) {
-  CheckAppPolicyResults::const_iterator it_results = results.begin();
+  ApplicationsPoliciesActions actions_for_apps_policies;
+  FillActionsForAppPolicies filler(actions_for_apps_policies, app_policies);
 
-  for (; results.end() != it_results; ++it_results) {
-    const policy_table::ApplicationPolicies::const_iterator app_policy =
-        app_policies.find(it_results->first);
+  std::for_each(results.begin(), results.end(), filler);
 
+  ProcessActionsForAppPolicies(actions_for_apps_policies, app_policies);
+}
+
+void PolicyManagerImpl::ProcessActionsForAppPolicies(
+    const ApplicationsPoliciesActions& actions,
+    const policy_table::ApplicationPolicies& app_policies) {
+  ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
+  for (; it_actions != actions.end(); ++it_actions) {
+    policy_table::ApplicationPolicies::const_iterator app_policy =
+        app_policies.find(it_actions->first);
     if (app_policies.end() == app_policy) {
       continue;
     }
 
-    if (IsPredefinedApp(*app_policy)) {
-      continue;
-    }
+    if (it_actions->second.is_consent_needed) {
+      // Post-check after ExternalConsent consent changes
+      const std::string& policy_app_id = app_policy->first;
+      if (!IsConsentNeeded(policy_app_id)) {
+        sync_primitives::AutoLock lock(app_permissions_diff_lock_);
 
-    switch (it_results->second) {
-      case RESULT_NO_CHANGES:
-        continue;
-      case RESULT_APP_REVOKED:
-        NotifySystem(*app_policy);
-        continue;
-      case RESULT_NICKNAME_MISMATCH:
-        NotifySystem(*app_policy);
-        continue;
-      case RESULT_CONSENT_NEEDED:
-      case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED: {
-        // Post-check after ExternalConsent consent changes
-        const std::string policy_app_id = app_policy->first;
-        if (!IsConsentNeeded(policy_app_id)) {
-          sync_primitives::AutoLock lock(app_permissions_diff_lock_);
+        PendingPermissions::iterator app_id_diff =
+            app_permissions_diff_.find(policy_app_id);
 
-          PendingPermissions::iterator app_id_diff =
-              app_permissions_diff_.find(policy_app_id);
-
-          if (app_permissions_diff_.end() != app_id_diff) {
-            app_id_diff->second.appPermissionsConsentNeeded = false;
-          }
+        if (app_permissions_diff_.end() != app_id_diff) {
+          app_id_diff->second.appPermissionsConsentNeeded = false;
         }
-      } break;
-      case RESULT_CONSENT_NOT_REQIURED:
-      case RESULT_PERMISSIONS_REVOKED:
-      case RESULT_REQUEST_TYPE_CHANGED:
-        break;
-      default:
-        continue;
+      }
     }
-    NotifySystem(*app_policy);
-    SendPermissionsToApp(*app_policy);
+    if (it_actions->second.is_notify_system) {
+      NotifySystem(*app_policy);
+    }
+    if (it_actions->second.is_send_permissions_to_app) {
+      SendPermissionsToApp(*app_policy);
+    }
   }
 }
 

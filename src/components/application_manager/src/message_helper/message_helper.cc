@@ -158,37 +158,60 @@ struct ExternalConsentStatusAppender
 
 }  // namespace
 
-std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, GPS),
-    std::make_pair(strings::speed, SPEED),
-    std::make_pair(strings::rpm, RPM),
-    std::make_pair(strings::fuel_level, FUELLEVEL),
-    std::make_pair(strings::fuel_level_state, FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption, FUELCONSUMPTION),
-    std::make_pair(strings::external_temp, EXTERNTEMP),
-    std::make_pair(strings::vin, VIN),
-    std::make_pair(strings::prndl, PRNDL),
-    std::make_pair(strings::tire_pressure, TIREPRESSURE),
-    std::make_pair(strings::odometer, ODOMETER),
-    std::make_pair(strings::belt_status, BELTSTATUS),
-    std::make_pair(strings::body_information, BODYINFO),
-    std::make_pair(strings::device_status, DEVICESTATUS),
-    std::make_pair(strings::driver_braking, BRAKING),
-    std::make_pair(strings::wiper_status, WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status, HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info, ECALLINFO),
-    std::make_pair(strings::airbag_status, AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event, EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status, CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key, MYKEY),
+std::pair<std::string,
+          mobile_apis::VehicleDataType::eType> kVehicleDataInitializer[] = {
+    std::make_pair(strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
+    std::make_pair(strings::speed,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
+    std::make_pair(strings::rpm, mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
+    std::make_pair(strings::fuel_level,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
+    std::make_pair(strings::fuel_level_state,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
+    std::make_pair(strings::instant_fuel_consumption,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+    std::make_pair(strings::external_temp,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
+    std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+    std::make_pair(strings::prndl,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
+    std::make_pair(strings::tire_pressure,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
+    std::make_pair(strings::odometer,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
+    std::make_pair(strings::belt_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
+    std::make_pair(strings::body_information,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
+    std::make_pair(strings::device_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
+    std::make_pair(strings::driver_braking,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
+    std::make_pair(strings::wiper_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
+    std::make_pair(strings::head_lamp_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+    std::make_pair(strings::e_call_info,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
+    std::make_pair(strings::airbag_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
+    std::make_pair(strings::emergency_event,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
+    std::make_pair(strings::cluster_mode_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
+    std::make_pair(strings::my_key,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
     /*
      NOT DEFINED in mobile API
      std::make_pair(strings::gps,
      BATTVOLTAGE),
      */
-    std::make_pair(strings::engine_torque, ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle, STEERINGWHEEL),
+    std::make_pair(strings::engine_torque,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
+    std::make_pair(strings::acc_pedal_pos,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
+    std::make_pair(strings::steering_wheel_angle,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
 };
 
 const VehicleData MessageHelper::vehicle_data_(
@@ -829,7 +852,7 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
   const VehicleInfoSubscriptions& subscriptions = vi_accessor.GetData();
 
   for (; vehicle_data.end() != ivi_it; ++ivi_it) {
-    uint32_t type_id = static_cast<int>(ivi_it->second);
+    mobile_apis::VehicleDataType::eType type_id = ivi_it->second;
     if (subscriptions.end() != subscriptions.find(type_id)) {
       std::string key_name = ivi_it->first;
       msg_params[key_name] = true;
