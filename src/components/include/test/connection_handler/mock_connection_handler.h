@@ -75,6 +75,8 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                     uint8_t session_id,
                     CloseSessionReason close_reason));
   MOCK_METHOD2(SendEndService, void(uint32_t key, uint8_t service_type));
+  MOCK_CONST_METHOD1(IsSessionHeartbeatTracked,
+                     bool(const uint32_t connection_key));
   MOCK_METHOD1(StartSessionHeartBeat, void(uint32_t connection_key));
   MOCK_METHOD2(SendHeartBeat,
                void(ConnectionHandle connection_handle, uint8_t session_id));

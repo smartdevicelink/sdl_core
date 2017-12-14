@@ -400,6 +400,14 @@ class ConnectionHandlerImpl
   void SendEndService(uint32_t key, uint8_t service_type) OVERRIDE;
 
   /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  bool IsSessionHeartbeatTracked(const uint32_t connection_key) const OVERRIDE;
+
+  /**
    * \brief Start heartbeat for specified session
    *
    * \param connection_key pair of connection and session id

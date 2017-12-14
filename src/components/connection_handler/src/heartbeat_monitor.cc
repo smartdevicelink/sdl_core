@@ -142,6 +142,14 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
   }
 }
 
+bool HeartBeatMonitor::IsSessionHeartbeatTracked(
+    const uint8_t session_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AutoLock auto_lock(sessions_list_lock_);
+
+  return sessions_.end() != sessions_.find(session_id);
+}
+
 void HeartBeatMonitor::exitThreadMain() {
   // FIXME (dchmerev@luxoft.com): thread requested to stop should stop as soon
   // as possible,

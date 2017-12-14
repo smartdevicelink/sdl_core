@@ -69,6 +69,14 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   void KeepAlive(uint8_t session_id);
 
   /**
+   * @brief Check is heartbeat monitoring started for specified session
+   * @param  session_id session id
+   * @return returns true if heartbeat monitoring started for specified session
+   * otherwise returns false
+   */
+  bool IsSessionHeartbeatTracked(const uint8_t session_id) const;
+
+  /**
    * \brief Thread exit procedure.
    */
   virtual void exitThreadMain();
@@ -111,7 +119,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;  // recurcive
+  mutable sync_primitives::Lock sessions_list_lock_;  // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;

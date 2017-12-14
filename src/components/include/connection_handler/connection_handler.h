@@ -130,6 +130,15 @@ class ConnectionHandler {
   virtual void SendEndService(uint32_t key, uint8_t service_type) = 0;
 
   /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  virtual bool IsSessionHeartbeatTracked(
+      const uint32_t connection_key) const = 0;
+
+  /**
    * \brief Start heartbeat for specified session
    *
    * \param connection_key pair of connection and session id

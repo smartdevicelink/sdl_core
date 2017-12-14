@@ -229,6 +229,14 @@ class Connection {
   void KeepAlive(uint8_t session_id);
 
   /**
+   * @brief Check is heartbeat monitoring started for specified session
+   * @param  session_id session id
+   * @return returns true if heartbeat monitoring started for specified session
+   * otherwise returns false
+   */
+  bool IsSessionHeartbeatTracked(const uint8_t session_id) const;
+
+  /**
    * @brief Start heartbeat for specified session
    * @param  session_id session id
    */

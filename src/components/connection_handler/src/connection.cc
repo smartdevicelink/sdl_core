@@ -369,6 +369,10 @@ bool Connection::ProtocolVersion(uint8_t session_id,
   return true;
 }
 
+bool Connection::IsSessionHeartbeatTracked(const uint8_t session_id) const {
+  return heartbeat_monitor_->IsSessionHeartbeatTracked(session_id);
+}
+
 void Connection::StartHeartBeat(uint8_t session_id) {
   heartbeat_monitor_->AddSession(session_id);
 }

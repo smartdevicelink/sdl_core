@@ -573,12 +573,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
           message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
 
-  if (protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN !=
-      protocol_version) {
-    connection_handler().BindProtocolVersionWithSession(
-        connection_key, static_cast<uint8_t>(protocol_version));
-  }
-
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_.Acquire();
   AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);

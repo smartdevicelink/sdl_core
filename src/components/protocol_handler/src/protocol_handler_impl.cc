@@ -309,6 +309,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
+  connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                     ack_protocol_version);
+
   LOG4CXX_DEBUG(logger_,
                 "SendStartSessionAck() for connection "
                     << connection_id << " for service_type "
@@ -1701,7 +1706,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
         protocol_version <= PROTOCOL_VERSION_5) {
       const uint32_t connection_key =
           session_observer_.KeyFromPair(connection_id, session_id);
-      connection_handler_.StartSessionHeartBeat(connection_key);
+      if (!connection_handler_.IsSessionHeartbeatTracked(connection_key)) {
+        LOG4CXX_DEBUG(logger_,
+                      "Session heartbeat tracking is not started. "
+                          << "Starting it for session " << session_id);
+        connection_handler_.StartSessionHeartBeat(connection_key);
+      }
       return SendHeartBeatAck(connection_id, session_id, packet.message_id());
     } else {
       LOG4CXX_WARN(logger_, "HeartBeat is not supported");
