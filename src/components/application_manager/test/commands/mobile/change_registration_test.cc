@@ -386,7 +386,7 @@ TEST_F(ChangeRegistrationRequestTest,
   EXPECT_CALL(*app, name()).WillOnce(ReturnRef(name));
 
   ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities_));
+      .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
   (*supported_languages_)[0] =
       static_cast<int32_t>(mobile_apis::Language::EN_US);
   EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
