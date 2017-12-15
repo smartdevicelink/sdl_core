@@ -137,7 +137,7 @@ class Service {
   virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
                                       mobile_apis::HMILevel::eType level) = 0;
 
-  virtual const DataAccessor<HMICapabilities> GetHMICapabilities() const = 0;
+  virtual const DataAccessor<application_manager::HMICapabilities> GetHMICapabilities() const = 0;
   /**
    * Checks if application has remote control functions
    * @param app application

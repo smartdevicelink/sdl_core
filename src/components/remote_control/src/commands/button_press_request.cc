@@ -186,15 +186,13 @@ void ButtonPressRequest::Execute() {
     button_id = btn_map[button_name];
   }
 
-  {  // A local scope to limit accessor's lifetime and release app list lock.
-    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
-    const smart_objects::SmartObject* rc_capabilities = hmi_capabilities_accessor.GetData().rc_capability();
-    const bool button_name_matches_module_type =
-        CheckButtonName(module_type, button_name, rc_capabilities);
-    const bool button_id_exist_in_caps =
-        rc_capabilities &&
-        CheckIfButtonExistInRCCaps(*rc_capabilities, button_id);
-  }
+  const DataAccessor<application_manager::HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
+  const smart_objects::SmartObject* rc_capabilities = hmi_capabilities_accessor.GetData().rc_capability();
+  const bool button_name_matches_module_type =
+      CheckButtonName(module_type, button_name, rc_capabilities);
+  const bool button_id_exist_in_caps =
+      rc_capabilities &&
+      CheckIfButtonExistInRCCaps(*rc_capabilities, button_id);
 
   if (button_name_matches_module_type && button_id_exist_in_caps) {
     SendRequest(functional_modules::hmi_api::button_press, request_params);

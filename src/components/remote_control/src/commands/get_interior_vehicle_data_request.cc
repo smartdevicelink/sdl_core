@@ -78,7 +78,7 @@ void GetInteriorVehicleDataRequest::Execute() {
       MessageHelper::StringToValue(message_->json_message());
 
   {  // A local scope to limit accessor's lifetime and release app list lock.
-    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
+    const DataAccessor<application_manager::HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
     const smart_objects::SmartObject* capabilities = hmi_capabilities_accessor.GetData().rc_capability();
     if (capabilities &&
         !CheckIfModuleTypeExistInCapabilities(*capabilities,

@@ -159,7 +159,7 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
 }
 
-const DataAccessor<HMICapabilities> CoreService::GetHMICapabilities() const {
+const DataAccessor<application_manager::HMICapabilities> CoreService::GetHMICapabilities() const {
   return application_manager_.const_hmi_capabilities();
 }
 

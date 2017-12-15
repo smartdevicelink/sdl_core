@@ -141,7 +141,7 @@ class CoreService : public Service {
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
                             mobile_apis::HMILevel::eType level) FINAL;
 
-  const DataAccessor<HMICapabilities> GetHMICapabilities() const FINAL;
+  const DataAccessor<application_manager::HMICapabilities> GetHMICapabilities() const FINAL;
   /**
    * @brief Notify HMI about app changing HMI Level
    * only NONE, BACKGROUND and LIMITED levels are sent
