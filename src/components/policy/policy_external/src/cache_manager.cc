@@ -249,8 +249,8 @@ policy_table::MessageString FindLanguage(
 }
 
 CacheManager::CacheManager()
-    : CacheManagerInterface()
-    , cache_lock_(true)
+    : cache_lock_(true)
+    , CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation())
     , update_required(false) {
@@ -258,8 +258,8 @@ CacheManager::CacheManager()
 }
 
 CacheManager::CacheManager(bool in_memory)
-    : CacheManagerInterface()
-    , cache_lock_(true)
+    : cache_lock_(true)
+    , CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation(in_memory))
     , update_required(false) {
