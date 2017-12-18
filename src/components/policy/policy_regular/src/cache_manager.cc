@@ -84,11 +84,11 @@ struct LanguageFinder {
 };
 
 CacheManager::CacheManager()
-    : cache_lock_(true)
-    , CacheManagerInterface()
+    : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
-    , update_required(false) {
+    , update_required(false)
+    , cache_lock_(true) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);

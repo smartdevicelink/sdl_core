@@ -249,20 +249,20 @@ policy_table::MessageString FindLanguage(
 }
 
 CacheManager::CacheManager()
-    : cache_lock_(true)
-    , CacheManagerInterface()
+    : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation())
-    , update_required(false) {
+    , update_required(false)
+    , cache_lock_(true) {
   InitBackupThread();
 }
 
 CacheManager::CacheManager(bool in_memory)
-    : cache_lock_(true)
-    , CacheManagerInterface()
+    : CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTExtRepresentation(in_memory))
-    , update_required(false) {
+    , update_required(false)
+    , cache_lock_(true) {
   InitBackupThread();
 }
 
