@@ -747,7 +747,7 @@ class CacheManager : public CacheManagerInterface {
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
 
-  sync_primitives::Lock cache_lock_;
+  mutable sync_primitives::Lock cache_lock_;
   sync_primitives::Lock unpaired_lock_;
 
   typedef std::map<std::string, Permissions> AppCalculatedPermissions;
