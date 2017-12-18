@@ -84,8 +84,8 @@ struct LanguageFinder {
 };
 
 CacheManager::CacheManager()
-    : CacheManagerInterface()
-    , cache_lock_(true)
+    : cache_lock_(true)
+    , CacheManagerInterface()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
     , update_required(false) {
