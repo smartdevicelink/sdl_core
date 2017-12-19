@@ -881,11 +881,11 @@ void ApplicationImpl::UpdateHash() {
   }
 }
 
-bool ApplicationImpl::IsHashChangedAfterAwake() const {
+bool ApplicationImpl::IsHashChangedDuringSuspend() const {
   return is_hash_changed_during_suspend_;
 }
 
-void ApplicationImpl::SetHashChangedAfterAwake(const bool state) {
+void ApplicationImpl::SetHashChangedDuringSuspend(const bool state) {
   is_hash_changed_during_suspend_ = state;
 }
 

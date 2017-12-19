@@ -199,20 +199,12 @@ class ApplicationImpl : public virtual Application,
 
   virtual const std::string& curHash() const;
 
-  /**
-   * @brief checks is hashID was changed during suspended state
-   * @return Returns TRUE if hashID was changed during suspended state
-   * otherwise returns FALSE.
-   */
-  bool IsHashChangedAfterAwake() const OVERRIDE;
-
-  /**
-   * @brief notifies is hashID was changed during suspended state
-   * Method is used when core receives OnAwakeSDL notification
-   * in order to change value of flag_sending_hash_change_after_awake_
-   * @param state new state value
-   */
-  void SetHashChangedAfterAwake(const bool state) OVERRIDE;
+#ifdef CUSTOMER_PASA
+  // DEPRECATED
+  virtual bool flag_sending_hash_change_after_awake() const;
+  // DEPRECATED
+  virtual void set_flag_sending_hash_change_after_awake(bool flag);
+#endif  // CUSTOMER_PASA
 
   /**
    * @brief Change Hash for current application
@@ -220,6 +212,20 @@ class ApplicationImpl : public virtual Application,
    * @return updated_hash
    */
   virtual void UpdateHash();
+
+  /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  bool IsHashChangedDuringSuspend() const OVERRIDE;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
 

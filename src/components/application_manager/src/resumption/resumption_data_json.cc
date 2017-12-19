@@ -143,6 +143,9 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
   return hmi_app_id;
 }
 
+// DEPRECATED
+void ResumptionDataJson::OnSuspend() {}
+
 void ResumptionDataJson::IncrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -166,6 +169,9 @@ void ResumptionDataJson::IncrementIgnOffCount() {
   SetLastIgnOffTime(time(NULL));
   LOG4CXX_DEBUG(logger_, GetResumptionData().toStyledString());
 }
+
+// DEPRECATED
+void ResumptionDataJson::OnAwake() {}
 
 void ResumptionDataJson::DecrementIgnOffCount() {
   using namespace app_mngr;

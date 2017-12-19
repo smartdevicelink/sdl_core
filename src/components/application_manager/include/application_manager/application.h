@@ -413,15 +413,14 @@ class Application : public virtual InitialApplicationData,
    * @return Returns TRUE if hashID was changed during suspended state
    * otherwise returns FALSE.
    */
-  virtual bool IsHashChangedAfterAwake() const = 0;
+  virtual bool IsHashChangedDuringSuspend() const = 0;
 
   /**
-   * @brief notifies is hashID was changed during suspended state
-   * Method is used when core receives OnAwakeSDL notification
-   * in order to change value of flag_sending_hash_change_after_awake_
-   * @param state new state value
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
    */
-  virtual void SetHashChangedAfterAwake(const bool state) = 0;
+  virtual void SetHashChangedDuringSuspend(const bool state) = 0;
 
   /**
    * @brief method is called when SDL is saving application data for resumption

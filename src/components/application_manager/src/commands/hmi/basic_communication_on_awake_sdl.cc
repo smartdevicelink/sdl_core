@@ -57,10 +57,10 @@ void OnAwakeSDLNotification::Run() {
     ApplicationSetIt itEnd = accessor.GetData().end();
     for (; itBegin != itEnd; ++itBegin) {
       const ApplicationSharedPtr app = *itBegin;
-      if (app && app->IsHashChangedAfterAwake()) {
+      if (app && app->IsHashChangedDuringSuspend()) {
         MessageHelper::SendHashUpdateNotification(app->app_id(),
                                                   application_manager_);
-        app->SetHashChangedAfterAwake(false);
+        app->SetHashChangedDuringSuspend(false);
       }
     }
   }

@@ -113,11 +113,23 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
+  // DEPRECATED
+  void OnSuspend() FINAL;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  // DEPRECATED
+  void OnAwake() FINAL;
+
+  /**
+   * @brief Increments ignition counter for all registered applications
+   * and remember ign_off time stamp
+   */
   void IncrementIgnOffCount() FINAL;
 
   /**
    * @brief Decrements ignition counter for all registered applications
-   * and remember ign_off time stamp
    */
   void DecrementIgnOffCount() FINAL;
 
