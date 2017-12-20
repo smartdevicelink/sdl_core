@@ -186,8 +186,9 @@ void ButtonPressRequest::Execute() {
     button_id = btn_map[button_name];
   }
 
-  const DataAccessor<application_manager::HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
-  const smart_objects::SmartObject* rc_capabilities = hmi_capabilities_accessor.GetData().rc_capability();
+  const DataAccessor<const smart_objects::SmartObject *> rc_capabilities_accessor = service()->GetRCCapabilities();
+  const smart_objects::SmartObject* rc_capabilities = rc_capabilities_accessor.GetData();
+
   const bool button_name_matches_module_type =
       CheckButtonName(module_type, button_name, rc_capabilities);
   const bool button_id_exist_in_caps =

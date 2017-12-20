@@ -2474,6 +2474,10 @@ const DataAccessor<HMICapabilities> ApplicationManagerImpl::const_hmi_capabiliti
   return DataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
 }
 
+const DataAccessor<const smart_objects::SmartObject *> ApplicationManagerImpl::rc_capability_accessor() const {
+  return DataAccessor<const smart_objects::SmartObject *>(hmi_capabilities_->rc_capability(), hmi_capabilities_lock_);
+}
+
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
                                                SmartObject& ttsName,
                                                SmartObject& vrSynonym) {
