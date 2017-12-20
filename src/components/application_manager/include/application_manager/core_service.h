@@ -141,7 +141,15 @@ class CoreService : public Service {
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
                             mobile_apis::HMILevel::eType level) FINAL;
 
-  const DataAccessor<const smart_objects::SmartObject *> GetRCCapabilities() const FINAL;
+  /**
+   * @brief Returns a pointer to the protected rc_capabilities object.
+   * NOTE that the data here is an "unsigned long" rather than a
+   * "const smart_objects::SmartObject*", because in the case where
+   * there are no rc_capabilities, the DataAccessor has trouble with
+   * a NULL pointer
+   */
+  const DataAccessor<unsigned long> GetRCCapabilities() const FINAL;
+
 
   /**
    * @brief Notify HMI about app changing HMI Level

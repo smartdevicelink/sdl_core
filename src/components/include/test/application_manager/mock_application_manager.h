@@ -144,7 +144,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(const_hmi_capabilities,
                      const DataAccessor<application_manager::HMICapabilities>());
   MOCK_CONST_METHOD0(rc_capability_accessor,
-                     const DataAccessor<const smart_objects::SmartObject *>());
+                     const DataAccessor<unsigned long>());
   MOCK_METHOD2(ProcessQueryApp,
                void(const smart_objects::SmartObject& sm_object,
                     const uint32_t connection_key));

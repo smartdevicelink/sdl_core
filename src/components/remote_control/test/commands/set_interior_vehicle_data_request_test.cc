@@ -155,6 +155,7 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>
       mock_allocation_manager_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
+  ::sync_primitives::Lock rc_lock_;
 };
 
 TEST_F(SetInteriorVehicleDataRequestTest,
@@ -179,6 +180,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
+  EXPECT_CALL(*mock_service_, GetRCCapabilities())
+      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
 
   const std::string resource = "CLIMATE";
 
@@ -246,6 +249,8 @@ TEST_F(
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
+  EXPECT_CALL(*mock_service_, GetRCCapabilities())
+      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
 
   const std::string resource = "CLIMATE";
 
@@ -314,7 +319,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_)).Times(0);
-
+  EXPECT_CALL(*mock_service_, GetRCCapabilities())
+      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(mock_module_, SendResponseToMobile(_))
       .WillOnce(SaveArg<0>(&result_msg));

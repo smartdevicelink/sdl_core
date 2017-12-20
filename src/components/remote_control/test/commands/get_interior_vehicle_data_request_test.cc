@@ -168,6 +168,9 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID()).WillOnce(Return(1));
+  ::sync_primitives::Lock rc_lock;
+  EXPECT_CALL(*mock_service_, GetRCCapabilities())
+      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock)));
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_))
       .WillOnce(SaveArg<0>(&result_msg));

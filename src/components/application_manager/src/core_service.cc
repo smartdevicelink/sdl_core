@@ -159,7 +159,7 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
 }
 
-const DataAccessor<const smart_objects::SmartObject *> CoreService::GetRCCapabilities() const {
+const DataAccessor<unsigned long> CoreService::GetRCCapabilities() const {
   return application_manager_.rc_capability_accessor();
 }
 

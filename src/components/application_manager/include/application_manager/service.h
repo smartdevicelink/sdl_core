@@ -137,7 +137,14 @@ class Service {
   virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
                                       mobile_apis::HMILevel::eType level) = 0;
 
-  virtual const DataAccessor<const smart_objects::SmartObject *> GetRCCapabilities() const = 0;
+  /**
+   * @brief Returns a pointer to the protected rc_capabilities object.
+   * NOTE that the data here is an "unsigned long" rather than a
+   * "const smart_objects::SmartObject*", because in the case where
+   * there are no rc_capabilities, the DataAccessor has trouble with
+   * a NULL pointer
+   */
+  virtual const DataAccessor<unsigned long> GetRCCapabilities() const = 0;
 
   /**
    * Checks if application has remote control functions

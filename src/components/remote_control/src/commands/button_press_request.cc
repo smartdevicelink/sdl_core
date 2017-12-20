@@ -186,8 +186,8 @@ void ButtonPressRequest::Execute() {
     button_id = btn_map[button_name];
   }
 
-  const DataAccessor<const smart_objects::SmartObject *> rc_capabilities_accessor = service()->GetRCCapabilities();
-  const smart_objects::SmartObject* rc_capabilities = rc_capabilities_accessor.GetData();
+  const DataAccessor<unsigned long> rc_capabilities_accessor = service()->GetRCCapabilities();
+  const smart_objects::SmartObject* rc_capabilities = (const smart_objects::SmartObject *)rc_capabilities_accessor.GetData();
 
   const bool button_name_matches_module_type =
       CheckButtonName(module_type, button_name, rc_capabilities);
