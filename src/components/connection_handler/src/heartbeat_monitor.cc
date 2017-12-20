@@ -90,18 +90,20 @@ void HeartBeatMonitor::threadMain() {
 }
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
-  LOG4CXX_DEBUG(logger_,
-                "Add session with id " << static_cast<int32_t>(session_id));
+  const uint32_t converted_session_id = static_cast<int32_t>(session_id);
+  UNUSED(converted_session_id);
+  LOG4CXX_DEBUG(logger_, "Add session with id " << converted_session_id);
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
     LOG4CXX_WARN(logger_,
-                 "Session with id " << static_cast<int32_t>(session_id)
-                                    << " already exists");
+                 "Session with id: " << converted_session_id
+                                     << " already exists");
     return;
   }
   sessions_.insert(
       std::make_pair(session_id, SessionState(default_heartbeat_timeout_)));
-  LOG4CXX_INFO(logger_, "Start heartbeat for session " << session_id);
+  LOG4CXX_INFO(logger_,
+               "Start heartbeat for session: " << converted_session_id);
 }
 
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {

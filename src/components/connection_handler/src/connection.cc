@@ -346,7 +346,6 @@ const SessionMap Connection::session_map() const {
 }
 
 void Connection::CloseSession(uint8_t session_id) {
-  size_t size;
   {
     sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -354,16 +353,10 @@ void Connection::CloseSession(uint8_t session_id) {
     if (session_it == session_map_.end()) {
       return;
     }
-    size = session_map_.size();
   }
 
   connection_handler_->CloseSession(
       connection_handle_, session_id, connection_handler::kCommon);
-
-  // Close connection if it is last session
-  if (1 == size) {
-    connection_handler_->CloseConnection(connection_handle_);
-  }
 }
 
 void Connection::UpdateProtocolVersionSession(uint8_t session_id,
