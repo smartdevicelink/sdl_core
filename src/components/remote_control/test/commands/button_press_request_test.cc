@@ -94,7 +94,6 @@ class ButtonPressRequestTest : public ::testing::Test {
  public:
   ButtonPressRequestTest()
       : rc_capabilities_(smart_objects::SmartType_Map)
-      , rc_capabilities_ptr_(nullptr)
       , mock_service_(utils::MakeShared<NiceMock<MockService> >())
       , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
       , rc_app_extention_(
@@ -108,10 +107,6 @@ class ButtonPressRequestTest : public ::testing::Test {
         .WillRepeatedly(ReturnRef(event_dispatcher_));
     ServicePtr exp_service(mock_service_);
     mock_module_.set_service(exp_service);
-  }
-
-  ~ButtonPressRequestTest() {
-    delete rc_capabilities_ptr_;
   }
 
   smart_objects::SmartObject ButtonCapability(
@@ -151,14 +146,10 @@ class ButtonPressRequestTest : public ::testing::Test {
     }
     rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
 
-    // For some reason, we can't simply return the address of rc_capabilities_ in the mock service GetRCCapabilities
-    // call. We need to create a copy of rc_capabilities_ on the heap and return a pointer to that.
-    if (rc_capabilities_ptr_) {
-      delete rc_capabilities_ptr_;
-    }
-    rc_capabilities_ptr_ = new smart_objects::SmartObject(rc_capabilities_);
-    ON_CALL(*mock_service_, GetRCCapabilities())
-        .WillByDefault(Return(DataAccessor<unsigned long>((unsigned long)rc_capabilities_ptr_, rc_lock_)));
+    ON_CALL(*mock_service_, GetHMICapabilities())
+        .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+    ON_CALL(mock_hmi_capabilities_, rc_capability())
+        .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(*mock_service_, IsInterfaceAvailable(_))
         .WillByDefault(Return(true));
     ON_CALL(*mock_service_, IsRemoteControlApplication(_))
@@ -182,8 +173,8 @@ class ButtonPressRequestTest : public ::testing::Test {
 
  protected:
   smart_objects::SmartObject rc_capabilities_;
-  smart_objects::SmartObject *rc_capabilities_ptr_;
-  ::sync_primitives::Lock rc_lock_;
+  NiceMock<application_manager_test::MockHMICapabilities> mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
   utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
   utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;

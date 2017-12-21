@@ -310,8 +310,6 @@ class ApplicationManager {
 
   virtual const DataAccessor<HMICapabilities> const_hmi_capabilities() const = 0;
 
-  virtual const DataAccessor<unsigned long> rc_capability_accessor() const = 0;
-
   virtual void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
                                const uint32_t connection_key) = 0;
 

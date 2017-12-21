@@ -2474,15 +2474,6 @@ const DataAccessor<HMICapabilities> ApplicationManagerImpl::const_hmi_capabiliti
   return DataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
 }
 
-const DataAccessor<unsigned long> ApplicationManagerImpl::rc_capability_accessor() const {
-  const smart_objects::SmartObject *rc_capability = hmi_capabilities_->rc_capability();
-
-  // Instead of returning a "const smart_objects::SmartObject*" object, we have to cast
-  // whatever is in "rc_capability" to "unsigned long". This is because the DataAccessor
-  // has real trouble when the templatized data type is a pointer, but its value is NULL.
-  return DataAccessor<unsigned long>((unsigned long)rc_capability, hmi_capabilities_lock_);
-}
-
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
                                                SmartObject& ttsName,
                                                SmartObject& vrSynonym) {

@@ -44,6 +44,7 @@
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "application_manager/mock_hmi_capabilities.h"
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;
@@ -143,6 +144,8 @@ class GetInteriorVehicleDataRequestTest : public ::testing::Test {
   utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
   remote_control_test::MockRemotePluginInterface mock_module_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
+  NiceMock<application_manager_test::MockHMICapabilities> mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
   const uint32_t app_id_ = 11u;
 };
 
@@ -152,6 +155,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::MessagePtr mobile_message = CreateBasicMessage();
   mobile_message->set_json_message(kValidMobileRequest);
   // Expectations
+  EXPECT_CALL(*mock_service_, GetHMICapabilities())
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(mock_module_, service()).Times(2).WillOnce(Return(mock_service_));
   EXPECT_CALL(*mock_service_, GetApplication(mobile_message->connection_key()))
       .WillOnce(Return(mock_app_));
@@ -168,9 +173,6 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID()).WillOnce(Return(1));
-  ::sync_primitives::Lock rc_lock;
-  EXPECT_CALL(*mock_service_, GetRCCapabilities())
-      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock)));
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_))
       .WillOnce(SaveArg<0>(&result_msg));

@@ -45,6 +45,7 @@
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "application_manager/mock_hmi_capabilities.h"
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;
@@ -155,7 +156,8 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>
       mock_allocation_manager_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
-  ::sync_primitives::Lock rc_lock_;
+  NiceMock<application_manager_test::MockHMICapabilities> mock_hmi_capabilities_;
+  ::sync_primitives::Lock hmi_lock_;
 };
 
 TEST_F(SetInteriorVehicleDataRequestTest,
@@ -165,6 +167,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   mobile_message->set_json_message(kValidMobileRequestWithOnlySettableParams);
 
   // Expectations
+  EXPECT_CALL(*mock_service_, GetHMICapabilities())
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
@@ -180,8 +184,6 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
-  EXPECT_CALL(*mock_service_, GetRCCapabilities())
-      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
 
   const std::string resource = "CLIMATE";
 
@@ -233,6 +235,8 @@ TEST_F(
       kValidMobileRequestWithSettableAndReadOnlyParams);
 
   // Expectations
+  EXPECT_CALL(*mock_service_, GetHMICapabilities())
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
@@ -249,8 +253,6 @@ TEST_F(
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, GetNextCorrelationID())
       .WillOnce(Return(kCorrelationId));
-  EXPECT_CALL(*mock_service_, GetRCCapabilities())
-      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
 
   const std::string resource = "CLIMATE";
 
@@ -301,6 +303,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
       kValidMobileRequestWithoutSettableAndWithReadOnlyParams);
 
   // Expectations
+  EXPECT_CALL(*mock_service_, GetHMICapabilities())
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
@@ -319,8 +323,6 @@ TEST_F(SetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&app_extension), Return(true)));
   EXPECT_CALL(*mock_service_, CheckModule(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*mock_service_, SendMessageToHMI(_)).Times(0);
-  EXPECT_CALL(*mock_service_, GetRCCapabilities())
-      .WillOnce(Return(DataAccessor<unsigned long>((unsigned long)nullptr, rc_lock_)));
   application_manager::MessagePtr result_msg;
   EXPECT_CALL(mock_module_, SendResponseToMobile(_))
       .WillOnce(SaveArg<0>(&result_msg));

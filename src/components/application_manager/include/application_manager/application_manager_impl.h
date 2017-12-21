@@ -355,7 +355,6 @@ class ApplicationManagerImpl
 
   NonConstDataAccessor<HMICapabilities> hmi_capabilities() OVERRIDE;
   const DataAccessor<HMICapabilities> const_hmi_capabilities() const OVERRIDE;
-  const DataAccessor<unsigned long> rc_capability_accessor() const OVERRIDE;
 
   /**
    * @brief ProcessQueryApp executes logic related to QUERY_APP system request.

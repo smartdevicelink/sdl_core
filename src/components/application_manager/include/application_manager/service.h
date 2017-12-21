@@ -138,13 +138,9 @@ class Service {
                                       mobile_apis::HMILevel::eType level) = 0;
 
   /**
-   * @brief Returns a pointer to the protected rc_capabilities object.
-   * NOTE that the data here is an "unsigned long" rather than a
-   * "const smart_objects::SmartObject*", because in the case where
-   * there are no rc_capabilities, the DataAccessor has trouble with
-   * a NULL pointer
+   * @brief Returns a pointer to the application manager's HMI capabilities
    */
-  virtual const DataAccessor<unsigned long> GetRCCapabilities() const = 0;
+  virtual const DataAccessor<HMICapabilities> GetHMICapabilities() const = 0;
 
   /**
    * Checks if application has remote control functions
