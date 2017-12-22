@@ -875,6 +875,24 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   connection.SetProtectionFlag(session_id, service_type);
 }
 
+bool ConnectionHandlerImpl::IsSessionServiceExists(
+    const uint32_t connection_key,
+    const protocol_handler::ServiceType& service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    return false;
+  }
+  Connection& connection = *it->second;
+  return connection.IsSessionServiceExists(session_id, service_type);
+}
+
 security_manager::SSLContext::HandshakeContext
 ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
   return connection_handler_observer_->GetHandshakeContext(key);
