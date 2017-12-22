@@ -56,6 +56,60 @@ namespace protocol_handler {
 enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
 
 /**
+ * @brief Struct with data containing attributes of starting session
+ **/
+struct StartingSessionContext {
+  transport_manager::ConnectionUID connection_id_;
+  uint8_t initial_session_id_;
+  uint8_t new_session_id_;
+  protocol_handler::ServiceType service_type_;
+  uint32_t hash_id_;
+  bool is_protected_;
+  bool is_new_service_;
+  bool is_ptu_required_;
+
+  /**
+   * @brief Constructor
+   */
+  StartingSessionContext()
+      : connection_id_(0)
+      , initial_session_id_(0)
+      , new_session_id_(0)
+      , service_type_(protocol_handler::kInvalidServiceType)
+      , hash_id_(0)
+      , is_protected_(false)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+
+  /**
+   * @brief Constructor
+   * @param connection_id_ Connection identifier within which session is
+   * started.
+   * @param session_id Session ID specified to OnSessionStartedCallback()
+   * @param new_session_id Session ID generated
+   * @param service_type Type of service
+   * @param hash_id Hash ID generated from connection_handle and
+   * new_session_id
+   * @param is_protected Whether service will be protected
+   * @param is_new_service Whether service was already established
+   **/
+  StartingSessionContext(transport_manager::ConnectionUID connection_id,
+                         uint8_t session_id,
+                         uint8_t new_session_id,
+                         protocol_handler::ServiceType service_type,
+                         uint32_t hash_id,
+                         const bool is_protected)
+      : connection_id_(connection_id)
+      , initial_session_id_(session_id)
+      , new_session_id_(new_session_id)
+      , service_type_(service_type)
+      , hash_id_(hash_id)
+      , is_protected_(is_protected)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+};
+
+/**
  * \class SessionObserver
  * \brief Interface for making a bridge between ProtocolHandler and
  * ConnectionHandler components.

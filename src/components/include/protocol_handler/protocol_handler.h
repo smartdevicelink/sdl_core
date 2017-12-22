@@ -43,6 +43,8 @@ namespace protocol_handler {
 
 class ProtocolObserver;
 class SessionObserver;
+struct StartingSessionContext;
+
 /**
  * \class ProtocolHandler
  * \brief Interface for component parsing protocol header
