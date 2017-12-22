@@ -77,8 +77,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     security_manager_(NULL)
     ,
 #endif  // ENABLE_SECURITY
-    raw_ford_messages_from_mobile_(
-        "PH FromMobile", this, threads::ThreadOptions(kStackSize))
+    is_ptu_triggered_(false)
+    , raw_ford_messages_from_mobile_(
+          "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
     , start_session_frame_map_lock_()
@@ -1188,128 +1189,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
   return RESULT_OK;
 }
 
-#ifdef ENABLE_SECURITY
-namespace {
-/**
- * \brief SecurityManagerListener for send Ack/NAck on success or fail
- * SSL handshake
- */
-class StartSessionHandler : public security_manager::SecurityManagerListener {
- public:
-  StartSessionHandler(uint32_t connection_key,
-                      ProtocolHandlerImpl* protocol_handler,
-                      SessionObserver& session_observer,
-                      ConnectionID connection_id,
-                      int32_t session_id,
-                      uint8_t protocol_version,
-                      uint32_t hash_id,
-                      ServiceType service_type,
-                      const std::vector<int>& force_protected_service)
-      : connection_key_(connection_key)
-      , protocol_handler_(protocol_handler)
-      , session_observer_(session_observer)
-      , connection_id_(connection_id)
-      , session_id_(session_id)
-      , protocol_version_(protocol_version)
-      , hash_id_(hash_id)
-      , service_type_(service_type)
-      , force_protected_service_(force_protected_service)
-      , full_version_()
-      , payload_(NULL) {}
-  StartSessionHandler(uint32_t connection_key,
-                      ProtocolHandlerImpl* protocol_handler,
-                      SessionObserver& session_observer,
-                      ConnectionID connection_id,
-                      int32_t session_id,
-                      uint8_t protocol_version,
-                      uint32_t hash_id,
-                      ServiceType service_type,
-                      const std::vector<int>& force_protected_service,
-                      ProtocolPacket::ProtocolVersion& full_version,
-                      uint8_t* payload)
-      : connection_key_(connection_key)
-      , protocol_handler_(protocol_handler)
-      , session_observer_(session_observer)
-      , connection_id_(connection_id)
-      , session_id_(session_id)
-      , protocol_version_(protocol_version)
-      , hash_id_(hash_id)
-      , service_type_(service_type)
-      , force_protected_service_(force_protected_service)
-      , full_version_(full_version)
-      , payload_(payload) {}
-
-  bool OnHandshakeDone(
-      const uint32_t connection_key,
-      security_manager::SSLContext::HandshakeResult result) OVERRIDE {
-    if (connection_key != connection_key_) {
-      delete[] payload_;
-      return false;
-    }
-    const bool success =
-        result == security_manager::SSLContext::Handshake_Result_Success;
-    // check current service protection
-    const bool was_service_protection_enabled =
-        session_observer_.GetSSLContext(connection_key_, service_type_) != NULL;
-    if (was_service_protection_enabled) {
-      if (!success) {
-        protocol_handler_->SendStartSessionNAck(
-            connection_id_, session_id_, protocol_version_, service_type_);
-      } else {
-        // Could not be success handshake and not already protected service
-        NOTREACHED();
-      }
-    } else {
-      if (success) {
-        session_observer_.SetProtectionFlag(connection_key_, service_type_);
-      }
-      BsonObject params;
-      if (payload_ != NULL) {
-        params = bson_object_from_bytes(payload_);
-      } else {
-        bson_object_initialize_default(&params);
-      }
-      protocol_handler_->SendStartSessionAck(connection_id_,
-                                             session_id_,
-                                             protocol_version_,
-                                             hash_id_,
-                                             service_type_,
-                                             success,
-                                             full_version_,
-                                             params);
-      bson_object_deinitialize(&params);
-    }
-    delete[] payload_;
-    delete this;
-    return true;
-  }
-
-  void OnCertificateUpdateRequired() OVERRIDE {}
-
-  virtual const std::vector<int>& force_protected_service() const {
-    return force_protected_service_;
-  }
-
- private:
-  const uint32_t connection_key_;
-  ProtocolHandlerImpl* protocol_handler_;
-  SessionObserver& session_observer_;
-
-  const ConnectionID connection_id_;
-  const int32_t session_id_;
-  const uint8_t protocol_version_;
-  const uint32_t hash_id_;
-  const ServiceType service_type_;
-  const std::vector<int> force_protected_service_;
-  ProtocolPacket::ProtocolVersion full_version_;
-  uint8_t* payload_;
-};
-}  // namespace
-#endif  // ENABLE_SECURITY
-
-// Suppress warning for deprecated method used within another deprecated method
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1404,17 +1283,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           *fullVersion);
     } else {
       security_manager_->AddListener(
-          new StartSessionHandler(connection_key,
-                                  this,
-                                  session_observer_,
-                                  connection_id,
-                                  session_id,
-                                  packet.protocol_version(),
-                                  hash_id,
-                                  service_type,
-                                  get_settings().force_protected_service(),
-                                  *fullVersion,
-                                  NULL));
+          new HandshakeHandler(*this,
+                               session_observer_,
+                               connection_id,
+                               session_id,
+                               packet.protocol_version(),
+                               hash_id,
+                               service_type,
+                               get_settings().force_protected_service(),
+                               *fullVersion,
+                               NULL));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);

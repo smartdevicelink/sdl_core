@@ -64,6 +64,7 @@
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
+#include "protocol_handler/handshake_handler.h"
 #endif  // ENABLE_SECURITY
 
 namespace connection_handler {
@@ -77,6 +78,7 @@ class ConnectionHandlerImpl;
 namespace protocol_handler {
 class ProtocolObserver;
 class SessionObserver;
+class HandshakeHandler;
 
 class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
@@ -660,6 +662,10 @@ class ProtocolHandlerImpl
 
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager* security_manager_;
+
+  bool is_ptu_triggered_;
+  std::list<std::shared_ptr<HandshakeHandler> > ptu_pending_handlers_;
+  sync_primitives::Lock ptu_handlers_lock_;
 #endif  // ENABLE_SECURITY
 
   // Thread that pumps non-parsed messages coming from mobile side.
