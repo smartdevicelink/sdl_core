@@ -921,15 +921,43 @@ class ApplicationManagerImpl
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
 
 #ifdef ENABLE_SECURITY
-  // Overriden SecurityManagerListener method
+  /**
+   * @brief Notification about protection result
+   * @param connection_key Unique key of session which triggrs handshake
+   * @param result result of connection protection
+   * @return true on success notification handling or false otherwise
+   */
   bool OnHandshakeDone(
       uint32_t connection_key,
       security_manager::SSLContext::HandshakeResult result) OVERRIDE;
 
+  /**
+   * @brief Notification that certificate update is required.
+   */
   void OnCertificateUpdateRequired() OVERRIDE;
 
+  /**
+   * @brief Get certificate data from policy
+   * @param reference to string where to save certificate data
+   * @return true if listener saved some data to string otherwise false
+   */
+  bool GetPolicyCertificateData(std::string& data) OVERRIDE;
+
+  /**
+   * @brief Get unique handshake context by application id
+   * @param key id of application
+   * @return generated handshake context or empty context if application with
+   * provided id does not exist
+   */
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
+
+  /**
+   * @brief Check if application with specified app_id has NAVIGATION HMI type
+   * @param app_id id of application to check
+   * @return true if application is navi otherwise returns false
+   */
+  bool CheckAppIsNavi(const uint32_t app_id) OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
