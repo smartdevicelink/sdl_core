@@ -539,19 +539,6 @@ class ConnectionHandlerImpl
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
-  /**
-   * \brief Convenient method to call NotifySessionStartedResult() with
-   * negative result.
-   * \param connection_handle Identifier of connection within which session
-   * exists
-   * \param session_id session ID passed to OnSessionStartedCallback()
-   * \param is_protected whether the service would be protected
-   **/
-  void NotifySessionStartedFailure(
-      const transport_manager::ConnectionUID connection_handle,
-      const uint8_t session_id,
-      bool is_protected);
-
   const ConnectionHandlerSettings& settings_;
   /**
    * \brief Pointer to observer
@@ -587,7 +574,7 @@ class ConnectionHandlerImpl
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
   sync_primitives::Lock start_service_context_map_lock_;
-  std::map<uint32_t, protocol_handler::StartingSessionContext>
+  std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
 
 #ifdef BUILD_TESTS

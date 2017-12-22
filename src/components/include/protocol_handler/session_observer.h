@@ -58,7 +58,7 @@ enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
 /**
  * @brief Struct with data containing attributes of starting session
  **/
-struct StartingSessionContext {
+struct SessionContext {
   transport_manager::ConnectionUID connection_id_;
   uint8_t initial_session_id_;
   uint8_t new_session_id_;
@@ -71,7 +71,7 @@ struct StartingSessionContext {
   /**
    * @brief Constructor
    */
-  StartingSessionContext()
+  SessionContext()
       : connection_id_(0)
       , initial_session_id_(0)
       , new_session_id_(0)
@@ -93,12 +93,12 @@ struct StartingSessionContext {
    * @param is_protected Whether service will be protected
    * @param is_new_service Whether service was already established
    **/
-  StartingSessionContext(transport_manager::ConnectionUID connection_id,
-                         uint8_t session_id,
-                         uint8_t new_session_id,
-                         protocol_handler::ServiceType service_type,
-                         uint32_t hash_id,
-                         const bool is_protected)
+  SessionContext(transport_manager::ConnectionUID connection_id,
+                 uint8_t session_id,
+                 uint8_t new_session_id,
+                 protocol_handler::ServiceType service_type,
+                 uint32_t hash_id,
+                 const bool is_protected)
       : connection_id_(connection_id)
       , initial_session_id_(session_id)
       , new_session_id_(new_session_id)

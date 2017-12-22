@@ -391,13 +391,24 @@ class ProtocolHandlerImpl
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
-  void NotifySessionStartedResult(
+  DEPRECATED void NotifySessionStartedResult(
       int32_t connection_id,
       uint8_t session_id,
       uint8_t generated_session_id,
       uint32_t hash_id,
       bool protection,
       std::vector<std::string>& rejected_params) OVERRIDE;
+
+  /**
+   * @brief Called by connection handler to notify the result of
+   * OnSessionStartedCallback().
+   * @param context reference to structure with started session data
+   * @param rejected_params list of parameters name that are rejected.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
+   */
+  void NotifySessionStarted(const SessionContext& context,
+                            std::vector<std::string>& rejected_params) OVERRIDE;
 
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {

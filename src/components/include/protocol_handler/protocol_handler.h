@@ -43,7 +43,7 @@ namespace protocol_handler {
 
 class ProtocolObserver;
 class SessionObserver;
-struct StartingSessionContext;
+struct SessionContext;
 
 /**
  * \class ProtocolHandler
@@ -123,12 +123,24 @@ class ProtocolHandler {
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
-  virtual void NotifySessionStartedResult(
+  DEPRECATED virtual void NotifySessionStartedResult(
       int32_t connection_id,
       uint8_t session_id,
       uint8_t generated_session_id,
       uint32_t hash_id,
       bool protection,
+      std::vector<std::string>& rejected_params) = 0;
+
+  /**
+   * @brief Called by connection handler to notify the result of
+   * OnSessionStartedCallback().
+   * @param context reference to structure with started session data
+   * @param rejected_params list of parameters name that are rejected.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
+   */
+  virtual void NotifySessionStarted(
+      const SessionContext& context,
       std::vector<std::string>& rejected_params) = 0;
 
  protected:
