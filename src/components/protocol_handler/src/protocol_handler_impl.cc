@@ -839,6 +839,59 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   multiframe_builder_.RemoveConnection(connection_id);
 }
 
+void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_handlers_lock_);
+
+  if (!is_ptu_triggered_) {
+    LOG4CXX_ERROR(logger_,
+                  "PTU was not triggered by service starting. Ignored");
+    return;
+  }
+
+  const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired();
+  for (auto handler : ptu_pending_handlers_) {
+    security_manager::SSLContext* ssl_context =
+        is_cert_expired
+            ? NULL
+            : security_manager_->CreateSSLContext(handler->connection_key());
+
+    if (!ssl_context) {
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          handler->connection_key(),
+          security_manager::SecurityManager::ERROR_INTERNAL,
+          error);
+
+      handler->OnHandshakeDone(
+          handler->connection_key(),
+          security_manager::SSLContext::Handshake_Result_Fail);
+
+      continue;
+    }
+
+    if (ssl_context->IsInitCompleted()) {
+      handler->OnHandshakeDone(
+          handler->connection_key(),
+          security_manager::SSLContext::Handshake_Result_Success);
+    } else {
+      security_manager_->AddListener(new HandshakeHandler(*handler));
+      if (!ssl_context->IsHandshakePending()) {
+        // Start handshake process
+        security_manager_->StartHandshake(handler->connection_key());
+      }
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "Handshake handlers were notified");
+  ptu_pending_handlers_.clear();
+  is_ptu_triggered_ = false;
+#endif  // ENABLE_SECURITY
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1479,24 +1532,68 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     char* version_param =
         bson_object_get_string(&request_params, strings::protocol_version);
     std::string version_string(version_param == NULL ? "" : version_param);
-    fullVersion = new ProtocolPacket::ProtocolVersion(version_string);
+    fullVersion =
+        std::make_shared<ProtocolPacket::ProtocolVersion>(version_string);
     // Constructed payloads added in Protocol v5
     if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
       rejected_params.push_back(std::string(strings::protocol_version));
     }
     bson_object_deinitialize(&request_params);
   } else {
-    fullVersion = new ProtocolPacket::ProtocolVersion();
+    fullVersion = std::make_shared<ProtocolPacket::ProtocolVersion>();
   }
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
-  if (protection && security_manager_) {
-    const uint32_t connection_key =
-        session_observer_.KeyFromPair(connection_id, generated_session_id);
+  if (context.is_protected_ && security_manager_) {
+    const uint32_t connection_key = session_observer_.KeyFromPair(
+        context.connection_id_, context.new_session_id_);
+
+    std::shared_ptr<uint8_t> bson_object_bytes(
+        bson_object_to_bytes(start_session_ack_params.get()),
+        [](uint8_t* p) { delete[] p; });
+
+    std::shared_ptr<HandshakeHandler> handler =
+        std::make_shared<HandshakeHandler>(*this,
+                                           session_observer_,
+                                           *fullVersion,
+                                           context,
+                                           packet->protocol_version(),
+                                           bson_object_bytes);
+
+    const bool is_certificate_empty =
+        security_manager_->IsPolicyCertificateDataEmpty();
+
+    const bool is_certificate_expired =
+        is_certificate_empty ||
+        security_manager_->IsCertificateUpdateRequired();
+
+    if (context.is_ptu_required_ && is_certificate_empty) {
+      LOG4CXX_DEBUG(logger_,
+                    "PTU for StartSessionHandler "
+                        << handler.get()
+                        << " is required and certificate data is empty");
+
+      sync_primitives::AutoLock lock(ptu_handlers_lock_);
+      if (!is_ptu_triggered_) {
+        LOG4CXX_DEBUG(logger_,
+                      "PTU is not triggered yet. "
+                          << "Starting PTU and postponing SSL handshake");
+
+        ptu_pending_handlers_.push_back(handler);
+        is_ptu_triggered_ = true;
+        security_manager_->NotifyOnCertififcateUpdateRequired();
+      } else {
+        LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
+        ptu_pending_handlers_.push_back(handler);
+      }
+      return;
+    }
 
     security_manager::SSLContext* ssl_context =
-        security_manager_->CreateSSLContext(connection_key);
+        is_certificate_expired
+            ? NULL
+            : security_manager_->CreateSSLContext(connection_key);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);

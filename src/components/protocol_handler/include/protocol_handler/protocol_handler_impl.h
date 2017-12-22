@@ -56,6 +56,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler.h"
+#include "application_manager/policies/policy_handler_observer.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -143,6 +144,7 @@ typedef threads::MessageLoopThread<
 class ProtocolHandlerImpl
     : public ProtocolHandler,
       public TransportManagerListenerEmpty,
+      public policy::PolicyHandlerObserver,
       public impl::FromMobileQueue::Handler,
       public impl::ToMobileQueue::Handler
 #ifdef TELEMETRY_MONITOR
@@ -469,6 +471,14 @@ class ProtocolHandlerImpl
 
   void OnConnectionClosed(
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
+
+  /**
+   * @brief OnPTUFinished the callback which signals PTU has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message

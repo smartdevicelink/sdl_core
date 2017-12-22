@@ -151,6 +151,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->AddListener(app_manager_);
 
   app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
