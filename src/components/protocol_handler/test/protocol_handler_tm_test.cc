@@ -105,6 +105,7 @@ using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::ByRef;
 using ::testing::DoAll;
+using ::testing::SaveArg;
 using ::testing::Eq;
 using ::testing::_;
 using ::testing::Invoke;
@@ -114,12 +115,14 @@ using ::testing::SetArgPointee;
 typedef std::vector<uint8_t> UCharDataVector;
 
 // custom action to call a member function with 6 arguments
-ACTION_P8(InvokeMemberFuncWithArg6, ptr, memberFunc, a, b, c, d, e, f) {
-  (ptr->*memberFunc)(a, b, c, d, e, f);
+ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
+  (ptr->*memberFunc)(a, b);
 }
 
 namespace {
 const uint32_t kAsyncExpectationsTimeout = 10000u;
+const uint32_t kMicrosecondsInMillisecond = 1000u;
+const uint32_t kAddSessionWaitTimeMs = 100u;
 }
 
 class ProtocolHandlerImplTest : public ::testing::Test {
@@ -145,6 +148,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .WillByDefault(Return(malformd_max_messages));
     ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
         .WillByDefault(Return(multiframe_waiting_timeout));
+#ifdef ENABLE_SECURITY
+    ON_CALL(protocol_handler_settings_mock, force_protected_service())
+        .WillByDefault(ReturnRefOfCopy(force_protected_services));
+    ON_CALL(protocol_handler_settings_mock, force_unprotected_service())
+        .WillByDefault(ReturnRefOfCopy(force_unprotected_services));
+#endif
+
     protocol_handler_impl.reset(
         new ProtocolHandlerImpl(protocol_handler_settings_mock,
                                 session_observer_mock,
@@ -189,6 +199,21 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                          connection_id);
   }
 
+  protocol_handler::SessionContext GetSessionContext(
+      const transport_manager::ConnectionUID connection_id,
+      const uint8_t initial_session_id,
+      const uint8_t new_session_id,
+      const protocol_handler::ServiceType service_type,
+      const uint32_t hash_id,
+      const bool protection_flag) {
+    return protocol_handler::SessionContext(connection_id,
+                                            initial_session_id,
+                                            new_session_id,
+                                            service_type,
+                                            hash_id,
+                                            protection_flag);
+  }
+
   void AddSession(const ::utils::SharedPtr<TestAsyncWaiter>& waiter,
                   uint32_t& times) {
     using namespace protocol_handler;
@@ -206,6 +231,14 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
 
+    const protocol_handler::SessionContext context =
+        GetSessionContext(connection_id,
+                          NEW_SESSION_ID,
+                          session_id,
+                          start_service,
+                          HASH_ID_WRONG,
+                          callback_protection_flag);
+
     // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
                 OnSessionStartedCallback(connection_id,
@@ -215,16 +248,12 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                          An<const BsonObject*>()))
         .
         // Return sessions start success
-        WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                       InvokeMemberFuncWithArg6(
-                           protocol_handler_impl.get(),
-                           &ProtocolHandler::NotifySessionStartedResult,
-                           connection_id,
-                           NEW_SESSION_ID,
-                           session_id,
-                           HASH_ID_WRONG,
-                           callback_protection_flag,
-                           ByRef(empty_rejected_param_))));
+        WillOnce(DoAll(
+            NotifyTestAsyncWaiter(waiter),
+            InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                     &ProtocolHandler::NotifySessionStarted,
+                                     context,
+                                     ByRef(empty_rejected_param_))));
     times++;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -236,6 +265,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
     SendControlMessage(
         PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+    usleep(kAddSessionWaitTimeMs * kMicrosecondsInMillisecond);
   }
 
 #ifdef ENABLE_SECURITY
@@ -316,6 +347,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   testing::NiceMock<security_manager_test::MockSecurityManager>
       security_manager_mock;
   testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
+  std::vector<int> force_protected_services;
+  std::vector<int> force_unprotected_services;
 #endif  // ENABLE_SECURITY
   std::vector<std::string> empty_rejected_param_;
 };
@@ -371,6 +404,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  ServiceType service_type;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -382,16 +416,18 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   SESSION_START_REJECT,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
-                                   ByRef(empty_rejected_param_))));
+      WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                SaveArg<2>(&service_type),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           SESSION_START_REJECT,
+                                                           service_type,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_OFF),
+                                         ByRef(empty_rejected_param_))));
   times += call_times;
 
   // Expect send NAck
@@ -436,6 +472,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  ServiceType service_type;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -449,13 +486,15 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       // Return sessions start rejection
       WillRepeatedly(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   SESSION_START_REJECT,
-                                   HASH_ID_WRONG,
-                                   callback_protection_flag,
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStarted,
+                                   GetSessionContext(connection_id,
+                                                     NEW_SESSION_ID,
+                                                     SESSION_START_REJECT,
+                                                     service_type,
+                                                     HASH_ID_WRONG,
+                                                     callback_protection_flag),
                                    ByRef(empty_rejected_param_))));
   times += call_times;
 
@@ -501,16 +540,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_OFF),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -614,7 +654,7 @@ TEST_F(ProtocolHandlerImplTest,
                                        start_service,
                                        PROTECTION_OFF,
                                        An<const BsonObject*>()))
-      // don't call NotifySessionStartedResult() immediately, instead call it
+      // don't call NotifySessionStartedContext() immediately, instead call it
       // after second OnSessionStartedCallback()
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
@@ -640,21 +680,23 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .WillOnce(DoAll(
           NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id2,
-                                   session_id2,
-                                   SESSION_START_REJECT,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
+          InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStarted,
+                                   GetSessionContext(connection_id2,
+                                                     session_id2,
+                                                     SESSION_START_REJECT,
+                                                     start_service,
+                                                     HASH_ID_WRONG,
+                                                     PROTECTION_OFF),
                                    ByRef(rejected_param_list)),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id1,
-                                   session_id1,
-                                   generated_session_id1,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
+          InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                   &ProtocolHandler::NotifySessionStarted,
+                                   GetSessionContext(connection_id1,
+                                                     session_id1,
+                                                     generated_session_id1,
+                                                     start_service,
+                                                     HASH_ID_WRONG,
+                                                     PROTECTION_OFF),
                                    ByRef(empty_rejected_param_))));
   times++;
 
@@ -802,10 +844,6 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 }
 
 #ifdef ENABLE_SECURITY
-/*
- * ProtocolHandler shall not call Security logics with Protocol version 1
- * Check session_observer with PROTECTION_OFF and Ack with PROTECTION_OFF
- */
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   using namespace protocol_handler;
   ::utils::SharedPtr<TestAsyncWaiter> waiter =
@@ -826,16 +864,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_OFF),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -881,16 +920,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_OFF,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_OFF),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -917,6 +957,15 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+  context.is_new_service_ = true;
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -926,16 +975,12 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         context,
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -980,16 +1025,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_ON),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   SetProtocolVersion2();
@@ -1038,6 +1084,14 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+  context.is_new_service_ = true;
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1047,24 +1101,20 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         context,
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   std::vector<int> services;
   // TODO(AKutsan) : APPLINK-21398 use named constants instead of magic numbers
   services.push_back(0x0A);
   services.push_back(0x0B);
-  ON_CALL(protocol_handler_settings_mock, force_protected_service())
-      .WillByDefault(ReturnRefOfCopy(services));
+  EXPECT_CALL(protocol_handler_settings_mock, force_protected_service())
+      .WillOnce(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
@@ -1092,13 +1142,6 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(Invoke(OnHandshakeDoneFunctor(
           connection_key,
           security_manager::SSLContext::Handshake_Result_Fail)));
-
-  // Listener check SSLContext
-  EXPECT_CALL(session_observer_mock,
-              GetSSLContext(connection_key, start_service))
-      .
-      // Emulate protection for service is not enabled
-      WillOnce(ReturnNull());
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
@@ -1139,16 +1182,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_ON),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation
@@ -1236,16 +1280,17 @@ TEST_F(
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_ON),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation
@@ -1331,16 +1376,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
-          InvokeMemberFuncWithArg6(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStartedResult,
-                                   connection_id,
-                                   NEW_SESSION_ID,
-                                   session_id,
-                                   HASH_ID_WRONG,
-                                   PROTECTION_ON,
-                                   ByRef(empty_rejected_param_))));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
+                                         &ProtocolHandler::NotifySessionStarted,
+                                         GetSessionContext(connection_id,
+                                                           NEW_SESSION_ID,
+                                                           session_id,
+                                                           start_service,
+                                                           HASH_ID_WRONG,
+                                                           PROTECTION_ON),
+                                         ByRef(empty_rejected_param_))));
   times++;
 
   // call new SSLContext creation

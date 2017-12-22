@@ -142,7 +142,7 @@ class SessionObserver {
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * Result must be notified through NotifySessionStartedResult().
+   * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
    * \param sessionId Identifier of the session to be start

@@ -132,7 +132,7 @@ class ProtocolHandler {
       std::vector<std::string>& rejected_params) = 0;
 
   /**
-   * @brief Called by connection handler to notify the result of
+   * @brief Called by connection handler to notify the context of
    * OnSessionStartedCallback().
    * @param context reference to structure with started session data
    * @param rejected_params list of parameters name that are rejected.

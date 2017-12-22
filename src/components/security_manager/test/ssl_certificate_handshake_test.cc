@@ -372,11 +372,8 @@ TEST_F(SSLHandshakeTest, CAVerification_ServerSide) {
 }
 
 TEST_F(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
-  ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
-                                 server_certificate,
-                                 "ALL",
-                                 verify_peer,
-                                 "unex"))
+  ASSERT_TRUE(InitServerManagers(
+      security_manager::TLSv1_2, "", "ALL", verify_peer, "unex"))
       << server_manager->LastError();
   ASSERT_TRUE(InitClientManagers(security_manager::TLSv1_2,
                                  client_certificate,
@@ -423,7 +420,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ClientSide_NoCACertificate) {
                                  ""))
       << server_manager->LastError();
   ASSERT_TRUE(InitClientManagers(security_manager::TLSv1_2,
-                                 client_certificate,
+                                 "",
                                  "ALL",
                                  verify_peer,
                                  "client_ca_cert_filename"))
