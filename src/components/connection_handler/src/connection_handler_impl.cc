@@ -436,7 +436,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 
   Connection* connection = it->second;
   context.is_new_service_ =
-      !connection->IsSessionServiceExists(session_id, service_type);
+      !connection->SessionServiceExists(session_id, service_type);
 
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     context.new_session_id_ = connection->AddNewSession();
@@ -875,22 +875,22 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   connection.SetProtectionFlag(session_id, service_type);
 }
 
-bool ConnectionHandlerImpl::IsSessionServiceExists(
+bool ConnectionHandlerImpl::SessionServiceExists(
     const uint32_t connection_key,
-    const protocol_handler::ServiceType& service_type) {
+    const protocol_handler::ServiceType& service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  ConnectionList::const_iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return false;
   }
-  Connection& connection = *it->second;
-  return connection.IsSessionServiceExists(session_id, service_type);
+  const Connection& connection = *it->second;
+  return connection.SessionServiceExists(session_id, service_type);
 }
 
 security_manager::SSLContext::HandshakeContext

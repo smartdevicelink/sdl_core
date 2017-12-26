@@ -1655,7 +1655,7 @@ void ApplicationManagerImpl::OnCertificateUpdateRequired() {
   GetPolicyHandler().OnPTExchangeNeeded();
 }
 
-bool ApplicationManagerImpl::GetPolicyCertificateData(std::string& data) {
+bool ApplicationManagerImpl::GetPolicyCertificateData(std::string& data) const {
   LOG4CXX_AUTO_TRACE(logger_);
   data = GetPolicyHandler().RetrieveCertificate();
   return true;
@@ -1673,7 +1673,7 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   return SSLContext::HandshakeContext();
 }
 
-bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) {
+bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application(app_id);
   if (app) {

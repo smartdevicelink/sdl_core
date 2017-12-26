@@ -1582,7 +1582,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 
         ptu_pending_handlers_.push_back(handler);
         is_ptu_triggered_ = true;
-        security_manager_->NotifyOnCertififcateUpdateRequired();
+        security_manager_->NotifyOnCertificateUpdateRequired();
       } else {
         LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
         ptu_pending_handlers_.push_back(handler);

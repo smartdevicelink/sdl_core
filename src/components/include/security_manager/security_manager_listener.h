@@ -57,7 +57,7 @@ class SecurityManagerListener {
    * @param reference to string where to save certificate data
    * @return true if listener saved some data to string otherwise false
    */
-  virtual bool GetPolicyCertificateData(std::string& data) = 0;
+  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
 
   virtual ~SecurityManagerListener() {}
 };

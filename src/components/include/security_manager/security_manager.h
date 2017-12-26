@@ -137,7 +137,7 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    * @brief Notify all listeners that certificate update required
    * Allows to notify that certificate should be updated
    */
-  virtual void NotifyOnCertififcateUpdateRequired() = 0;
+  virtual void NotifyOnCertificateUpdateRequired() = 0;
 
   /**
    * @brief Check if policy certificate data is empty

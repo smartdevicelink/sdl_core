@@ -155,7 +155,7 @@ class ConnectionHandlerObserver {
    * @param app_id id of application to check
    * @return true if application is navi otherwise returns false
    */
-  virtual bool CheckAppIsNavi(const uint32_t app_id) = 0;
+  virtual bool CheckAppIsNavi(const uint32_t app_id) const = 0;
 #endif  // ENABLE_SECURITY
  protected:
   /**

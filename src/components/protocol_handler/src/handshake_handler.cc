@@ -78,7 +78,7 @@ HandshakeHandler::HandshakeHandler(
     , payload_(payload) {}
 
 HandshakeHandler::~HandshakeHandler() {
-  LOG4CXX_DEBUG(logger_, "Destroying StartSessionHandler: " << this);
+  LOG4CXX_DEBUG(logger_, "Destroying of HandshakeHandler: " << this);
 }
 
 uint32_t HandshakeHandler::connection_key() const {
@@ -86,7 +86,7 @@ uint32_t HandshakeHandler::connection_key() const {
                                        context_.new_session_id_);
 }
 
-bool HandshakeHandler::GetPolicyCertificateData(std::string& data) {
+bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
   return false;
 }
 
@@ -98,7 +98,12 @@ bool HandshakeHandler::OnHandshakeDone(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (connection_key != this->connection_key()) {
-    LOG4CXX_DEBUG(logger_, "Notification not for handler " << this);
+    LOG4CXX_DEBUG(logger_,
+                  "Listener " << this
+                              << " expects notification for connection id: "
+                              << this->connection_key()
+                              << ". Received notification for connection id "
+                              << connection_key << " will be ignored");
     return false;
   }
 

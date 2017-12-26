@@ -218,9 +218,9 @@ class Connection {
    * @param service_type type of service to check
    * @return true if session contains service with specified service type
    */
-  bool IsSessionServiceExists(
+  bool SessionServiceExists(
       const uint8_t session_id,
-      const protocol_handler::ServiceType& service_type);
+      const protocol_handler::ServiceType& service_type) const;
 
 #endif  // ENABLE_SECURITY
         /**

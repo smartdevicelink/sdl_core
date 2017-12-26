@@ -45,7 +45,7 @@ namespace protocol_handler {
 class ProtocolHandlerImpl;
 
 /**
- * \brief HandshakeHandler class for handling SSL handshake and sending
+ * @brief HandshakeHandler class for handling SSL handshake and sending
  * Ack/Nack on its success or fail
  */
 class HandshakeHandler : public security_manager::SecurityManagerListener {
@@ -77,13 +77,13 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @param reference to string where to save certificate data
    * @return true if listener saved some data to string otherwise false
    */
-  bool GetPolicyCertificateData(std::string& data) OVERRIDE;
+  bool GetPolicyCertificateData(std::string& data) const OVERRIDE;
 
   /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key of session which triggrs handshake
-   * \param result result of connection protection
-   * \return true on success notification handling or false otherwise
+   * @brief Notification about protection result
+   * @param connection_key Unique key of session which triggrs handshake
+   * @param result result of connection protection
+   * @return true on success notification handling or false otherwise
    */
   bool OnHandshakeDone(
       uint32_t connection_key,

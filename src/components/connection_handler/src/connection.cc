@@ -314,19 +314,19 @@ void Connection::SetProtectionFlag(
   }
 }
 
-bool Connection::IsSessionServiceExists(
+bool Connection::SessionServiceExists(
     const uint8_t session_id,
-    const protocol_handler::ServiceType& service_type) {
+    const protocol_handler::ServiceType& service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  SessionMap::iterator session_it = session_map_.find(session_id);
+  SessionMap::const_iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
-  Session& session = session_it->second;
+  const Session& session = session_it->second;
   return session.FindService(service_type);
 }
 

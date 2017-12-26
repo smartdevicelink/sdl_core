@@ -71,6 +71,7 @@ class MockConnectionHandlerObserver
                void(const connection_handler::Device& device_from,
                     const connection_handler::Device& device_to));
   MOCK_METHOD1(OnDeviceSwitchingFinish, void(const std::string& device_uid));
+  MOCK_CONST_METHOD1(CheckAppIsNavi, bool(const uint32_t app_id));
 };
 
 }  // namespace connection_handler_test

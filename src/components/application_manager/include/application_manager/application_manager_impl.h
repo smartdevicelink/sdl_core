@@ -923,7 +923,7 @@ class ApplicationManagerImpl
 #ifdef ENABLE_SECURITY
   /**
    * @brief Notification about protection result
-   * @param connection_key Unique key of session which triggrs handshake
+   * @param connection_key Unique key of session which triggers handshake
    * @param result result of connection protection
    * @return true on success notification handling or false otherwise
    */
@@ -941,7 +941,7 @@ class ApplicationManagerImpl
    * @param reference to string where to save certificate data
    * @return true if listener saved some data to string otherwise false
    */
-  bool GetPolicyCertificateData(std::string& data) OVERRIDE;
+  bool GetPolicyCertificateData(std::string& data) const OVERRIDE;
 
   /**
    * @brief Get unique handshake context by application id
@@ -957,7 +957,7 @@ class ApplicationManagerImpl
    * @param app_id id of application to check
    * @return true if application is navi otherwise returns false
    */
-  bool CheckAppIsNavi(const uint32_t app_id) OVERRIDE;
+  bool CheckAppIsNavi(const uint32_t app_id) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**

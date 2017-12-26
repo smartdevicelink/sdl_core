@@ -250,14 +250,14 @@ TEST_F(SecurityManagerTest, Listeners_Notifying) {
   security_manager_->AddListener(&mock_listener2);
   // 1st call
   security_manager_->NotifyListenersOnHandshakeDone(key, first_call_value);
-  security_manager_->NotifyOnCertififcateUpdateRequired();
+  security_manager_->NotifyOnCertificateUpdateRequired();
   // 2nd call
   security_manager_->NotifyListenersOnHandshakeDone(key, second_call_value);
-  security_manager_->NotifyOnCertififcateUpdateRequired();
+  security_manager_->NotifyOnCertificateUpdateRequired();
   // 3nd call
   security_manager_->NotifyListenersOnHandshakeDone(
       key, SSLContext::Handshake_Result_Fail);
-  security_manager_->NotifyOnCertififcateUpdateRequired();
+  security_manager_->NotifyOnCertificateUpdateRequired();
 }
 
 /*
