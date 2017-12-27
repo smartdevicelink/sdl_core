@@ -397,6 +397,97 @@ void Array<T, minsize, maxsize>::SetPolicyTableType(
   }
 }
 
+///////// Array to be instantiated with Enum<T>
+
+template <typename E, size_t minsize, size_t maxsize>
+Array<Enum<E>, minsize, maxsize>::Array()
+    : CompositeType(kUninitialized) {}
+
+template <typename E, size_t minsize, size_t maxsize>
+template <typename U>
+Array<Enum<E>, minsize, maxsize>::Array(const U& value)
+    : ArrayType(value.begin(), value.end()), CompositeType(kUninitialized) {}
+
+template <typename E, size_t minsize, size_t maxsize>
+template <typename U>
+Array<Enum<E>, minsize, maxsize>& Array<Enum<E>, minsize, maxsize>::operator=(
+    const U& that) {
+  this->assign(that.begin(), that.end());
+  return *this;
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+template <typename U>
+void Array<Enum<E>, minsize, maxsize>::push_back(const U& value) {
+  ArrayType::push_back(Enum<E>(value));
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+bool Array<Enum<E>, minsize, maxsize>::is_valid() const {
+  // Empty array might be valid only if marked initialized
+  if (this->empty() && (initialization_state__ != kInitialized)) {
+    return false;
+  }
+  // Array size must be within allowed range
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+    return false;
+  }
+  // All array elements must be valid
+  for (typename ArrayType::const_iterator i = this->begin(); i != this->end();
+       ++i) {
+    if (!i->is_valid()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+bool Array<Enum<E>, minsize, maxsize>::is_initialized() const {
+  // Array that is not empty is initialized for sure
+  if (!this->empty()) {
+    return true;
+  }
+  // Empty array is initialized if not marked as unitialized
+  if (initialization_state__ != kUninitialized) {
+    return true;
+  }
+  return false;
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+void Array<Enum<E>, minsize, maxsize>::ReportErrors(
+    ValidationReport* report) const {
+  if (this->empty()) {
+    CompositeType::ReportErrors(report);
+  } else {
+    if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+      report->set_validation_info("array has invalid size");
+    } else {
+      // No error
+    }
+  }
+  for (size_t i = 0; i != this->size(); ++i) {
+    const Enum<E>& elem = this->operator[](i);
+    if (!elem.is_valid()) {
+      const size_t buff_size = 32;
+      char elem_idx[buff_size] = {};
+      snprintf(elem_idx, buff_size, "[%zu]", i);
+      ValidationReport& elem_report = report->ReportSubobject(elem_idx);
+      elem.ReportErrors(&elem_report);
+    }
+  }
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+void Array<Enum<E>, minsize, maxsize>::SetPolicyTableType(
+    rpc::policy_table_interface_base::PolicyTableType pt_type) {
+  for (typename ArrayType::iterator it = this->begin(); it != this->end();
+       ++it) {
+    it->SetPolicyTableType(pt_type);
+  }
+}
+
 /*
  * Map class
  */

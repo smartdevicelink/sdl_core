@@ -287,6 +287,61 @@ Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
   return array;
 }
 
+////////// Array to be instantiated with Enum<T>
+
+// Non-const version
+template <typename E, size_t minsize, size_t maxsize>
+Array<Enum<E>, minsize, maxsize>::Array(Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isArray)) {
+  if (value) {
+    if (value->isArray()) {
+      this->reserve(value->size());
+      for (Json::Value::iterator i = value->begin(); i != value->end(); ++i) {
+        Enum<E> item(&*i);
+        if (!item.is_valid()) {
+          continue;
+        }
+        push_back(item);
+      }
+    } else {
+      // Array is empty, empty initialized or uninitialized
+      // depending on InitHelper result
+    }
+  }
+}
+
+// Const version, must be identical to the non-const version
+template <typename E, size_t minsize, size_t maxsize>
+Array<Enum<E>, minsize, maxsize>::Array(const Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isArray)) {
+  if (value) {
+    if (value->isArray()) {
+      this->reserve(value->size());
+      for (Json::Value::const_iterator i = value->begin(); i != value->end();
+           ++i) {
+        Enum<E> item(&*i);
+        if (!item.is_valid()) {
+          continue;
+        }
+        push_back(item);
+      }
+    } else {
+      // Array is empty, empty initialized or uninitialized
+      // depending on InitHelper result
+    }
+  }
+}
+
+template <typename E, size_t minsize, size_t maxsize>
+Json::Value Array<Enum<E>, minsize, maxsize>::ToJsonValue() const {
+  Json::Value array(Json::arrayValue);
+  array.resize(this->size());
+  for (size_t i = 0; i != this->size(); ++i) {
+    array[Json::ArrayIndex(i)] = (this->operator[](i)).ToJsonValue();
+  }
+  return array;
+}
+
 // Non-const version
 template <typename T, size_t minsize, size_t maxsize>
 Map<T, minsize, maxsize>::Map(Json::Value* value)
