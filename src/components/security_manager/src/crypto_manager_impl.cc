@@ -343,6 +343,18 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     return false;
   }
 
+  X509_STORE* store = SSL_CTX_get_cert_store(context_);
+  if (store) {
+    X509* extra_cert = NULL;
+    while ((extra_cert = PEM_read_bio_X509(bio_cert, NULL, 0, 0))) {
+      if (extra_cert != cert) {
+        LOG4CXX_DEBUG(logger_,
+                      "Added new certificate to store: " << extra_cert);
+        X509_STORE_add_cert(store, extra_cert);
+      }
+    }
+  }
+
   LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
   return true;
 }
