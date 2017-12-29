@@ -1309,13 +1309,12 @@ TEST_F(PolicyHandlerTest, AddApplication) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(
-      *mock_policy_manager_,
-      AddApplication(kPolicyAppId_, HmiTypes(policy_table::AHT_DEFAULT)))
+  EXPECT_CALL(*mock_policy_manager_,
+              AddApplication(kPolicyAppId_, HmiTypes(policy_table::DEFAULT)))
       .WillOnce(Return(utils::MakeShared<utils::CallNothing>()));
   // Act
   policy_handler_.AddApplication(kPolicyAppId_,
-                                 HmiTypes(policy_table::AHT_DEFAULT));
+                                 HmiTypes(policy_table::DEFAULT));
 }
 
 TEST_F(PolicyHandlerTest, HeartBeatTimeout) {

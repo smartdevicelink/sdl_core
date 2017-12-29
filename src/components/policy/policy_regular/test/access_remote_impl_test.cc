@@ -72,20 +72,20 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   EXPECT_NE(access_remote.hmi_types_.end(), access_remote.hmi_types_.find(who));
   policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_[who];
   EXPECT_EQ(2u, hmi_output.size());
-  EXPECT_EQ(policy_table::AHT_MEDIA, hmi_output[0]);
-  EXPECT_EQ(policy_table::AHT_SOCIAL, hmi_output[1]);
+  EXPECT_EQ(policy_table::MEDIA, hmi_output[0]);
+  EXPECT_EQ(policy_table::SOCIAL, hmi_output[1]);
 }
 
 TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
   ApplicationOnDevice who = {"dev1", "1234"};
-  access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
+  access_remote.hmi_types_[who].push_back(policy_table::REMOTE_CONTROL);
 
   access_remote.cache_->pt_ = new policy_table::Table();
   policy_table::ApplicationPolicies& apps =
       access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"].groups.push_back("group_default");
-  apps["1234"].AppHMIType->push_back(policy_table::AHT_MEDIA);
+  apps["1234"].AppHMIType->push_back(policy_table::MEDIA);
 
   // Default groups
   const policy_table::Strings& groups1 = access_remote.GetGroups(who);

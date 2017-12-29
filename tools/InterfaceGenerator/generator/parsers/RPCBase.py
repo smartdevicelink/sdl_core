@@ -762,6 +762,4 @@ class Parser(object):
         """
         if name in attrib:
             del attrib[name]
-            print ("Ignoring attribute '" +
-                   name + "'")
         return True

@@ -2853,14 +2853,21 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
   bool is_ignition_off = false;
-  using namespace mobile_api::AppInterfaceUnregisteredReason;
+
   using namespace helpers;
 
   is_ignition_off =
-      Compare<eType, EQ, ONE>(unregister_reason_, IGNITION_OFF, INVALID_ENUM);
+      Compare<mobile_api::AppInterfaceUnregisteredReason::eType, EQ, ONE>(
+          unregister_reason_,
+          mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF,
+          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM);
 
-  bool is_unexpected_disconnect = Compare<eType, NEQ, ALL>(
-      unregister_reason_, IGNITION_OFF, MASTER_RESET, FACTORY_DEFAULTS);
+  bool is_unexpected_disconnect =
+      Compare<mobile_api::AppInterfaceUnregisteredReason::eType, NEQ, ALL>(
+          unregister_reason_,
+          mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF,
+          mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET,
+          mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS);
 
   ClearTTSGlobalPropertiesList();
 

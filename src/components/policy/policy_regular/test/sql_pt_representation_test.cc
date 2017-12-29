@@ -1438,7 +1438,7 @@ TEST_F(SQLPTRepresentationTest,
   policy_table::AppHMITypes hmi_types;
   GatherAppType(kAppId, &hmi_types);
   ASSERT_TRUE(1 == hmi_types.size());
-  EXPECT_EQ(policy_table::AHT_MEDIA, *hmi_types.begin());
+  EXPECT_EQ(policy_table::MEDIA, *hmi_types.begin());
 }
 
 TEST_F(SQLPTRepresentationTest,
