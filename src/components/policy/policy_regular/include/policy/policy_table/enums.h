@@ -94,24 +94,6 @@ bool IsValidEnum(Parameter val);
 const char* EnumToJsonString(Parameter val);
 bool EnumFromJsonString(const std::string& literal, Parameter* result);
 
-// enum AppHMIType {
-//  AHT_DEFAULT,
-//  AHT_COMMUNICATION,
-//  AHT_MEDIA,
-//  AHT_MESSAGING,
-//  AHT_NAVIGATION,
-//  AHT_INFORMATION,
-//  AHT_SOCIAL,
-//  AHT_BACKGROUND_PROCESS,
-//  AHT_TESTING,
-//  AHT_SYSTEM,
-//  AHT_PROJECTION,
-//  AHT_REMOTE_CONTROL
-//};
-// bool IsValidEnum(AppHMIType val);
-// const char* EnumToJsonString(AppHMIType val);
-// bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
-
 enum RequestType {
   RT_HTTP,
   RT_FILE_RESUME,

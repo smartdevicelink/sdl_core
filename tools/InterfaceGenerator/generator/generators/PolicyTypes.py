@@ -68,18 +68,18 @@ class CodeGenerator(object):
             # "ModuleType",
             # "Common_AppPriority"
         ]
-        
+
         get_first_enum_value_name = lambda enum : enum.elements.values()[0].name
         enum_required_for_policy = lambda enum : enum.name in required_enums_for_policy and "." not in get_first_enum_value_name(enum)
-        
+
         # In case if "." is in FunctionID name this is HMI_API function ID and should not be included in Policy  enums
-        
+
         required_enum_values = [val for val in interface.enums.values()
                                if enum_required_for_policy(val)]
-        
+
         self._write_header_with_enums(filename, namespace, destination_dir, required_enum_values)
         self._write_cc_with_enums(filename, namespace, destination_dir, required_enum_values)
-        
+
 
 
     def _write_header_with_enums(self,filename, namespace, destination_dir, required_enum_values):
@@ -92,7 +92,7 @@ class CodeGenerator(object):
                          mode="w") as f_h:
             guard = u"_{0}_{1}_H__".format( class_name.upper(),
                     unicode(uuid.uuid1().hex.capitalize()))
-            namespace_open, namespace_close = self._namespaces_strings(namespace)            
+            namespace_open, namespace_close = self._namespaces_strings(namespace)
             f_h.write(self._h_file_tempalte.substitute(
                 class_name=class_name,
                 guard=guard,
@@ -100,7 +100,7 @@ class CodeGenerator(object):
                 enums_content=self._gen_enums(required_enum_values
                     ),
                 namespace_close=namespace_close))
-    
+
     def _write_cc_with_enums(self,filename, namespace, destination_dir, required_enum_values):
         class_name = u"generated_{0}_policy_types".format(filename)
         header_file_name = u"".join("{0}.h".format(class_name))
@@ -112,7 +112,7 @@ class CodeGenerator(object):
                          mode="w") as f_cc:
             guard = u"_{0}_{1}_CC__".format( class_name.upper(),
                     unicode(uuid.uuid1().hex.capitalize()))
-            namespace_open, namespace_close = self._namespaces_strings(namespace)            
+            namespace_open, namespace_close = self._namespaces_strings(namespace)
             f_cc.write(self._cc_file_tempalte.substitute(
                 class_name=class_name,
                 header_file=header_file_name,
@@ -129,7 +129,7 @@ class CodeGenerator(object):
 
         Keyword arguments:
         namespace -- name of destination namespace.
-        
+
         Returns:
         Tuple with namespace open string and namespace close string
         """
@@ -235,13 +235,13 @@ class CodeGenerator(object):
             return self._enum_element_with_no_value_template.substitute(
                 comment=self._gen_comment(enum_element),
                 name=enum_element.primary_name)
-    
+
     def gen_enums_processing(self, enums):
         validation = "\n".join([self._gen_enum_validation(enum) for enum in enums])
         to_json = "\n".join([self._gen_enum_to_json(enum) for enum in enums])
         from_json = "\n".join([self._gen_enum_from_json(enum) for enum in enums])
         return "\n".join([validation, to_json, from_json])
-        
+
     def _gen_enum_validation(self, enum):
         return self._valiation_enum_template.substitute(
             name = enum.name,
@@ -251,7 +251,7 @@ class CodeGenerator(object):
     def _gen_enum_item_validation(self, item):
         return self._valiation_enum_item_template.substitute(
             name = item.name)
-    
+
     def _gen_enum_to_json(self, enum):
         return self._enum_to_json_template.substitute(
             name = enum.name,
@@ -424,7 +424,7 @@ class CodeGenerator(object):
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
         u''' *\n'''
-        u'''* Copyright (c) 2017, Ford Motor Company\n'''
+        u'''* Copyright (c) 2018, Ford Motor Company\n'''
         u'''* All rights reserved.\n'''
         u'''*\n'''
         u'''* Redistribution and use in source and binary forms, with or without\n'''
@@ -493,7 +493,7 @@ class CodeGenerator(object):
         u'''    default: return false;\n'''
         u'''  }\n'''
         u'''};\n''')
-        
+
     _valiation_enum_item_template = string.Template(
         u'''    case $name: return true;''')
 

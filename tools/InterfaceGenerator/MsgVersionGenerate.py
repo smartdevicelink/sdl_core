@@ -5,7 +5,7 @@ import xml.etree.ElementTree
 from string import Template
 import re
 from generator.parsers import RPCBase
- 
+
 def generate_msg_version(file_name, path_to_storage):
     """Parses MOBILE_API.xml in order to
     receive major_version, minor_version, and patch_version
@@ -20,7 +20,7 @@ def generate_msg_version(file_name, path_to_storage):
         patch_version = array[2]
         if (major_version.isdigit() and minor_version.isdigit() and patch_version.isdigit):
             data_for_storage = prepare_data_for_storage(major_version, minor_version, patch_version)
-            store_data_to_file(path_to_storage, data_for_storage)  
+            store_data_to_file(path_to_storage, data_for_storage)
         else:
             raise RPCBase.ParseError("Attribute version has incorect value in MOBILE_API.xml")
     else:
@@ -49,7 +49,7 @@ def prepare_data_for_storage(major_version, minor_version, patch_version):
     """Prepares data to store to file.
     """
     temp = Template(
-    u'''/*Copyright (c) 2016, Ford Motor Company\n'''
+    u'''/*Copyright (c) 2018, Ford Motor Company\n'''
     u'''All rights reserved.\n'''
     u'''Redistribution and use in source and binary forms, with or without\n'''
     u'''modification, are permitted provided that the following conditions are met:\n'''
@@ -81,7 +81,7 @@ def prepare_data_for_storage(major_version, minor_version, patch_version):
     u'''const uint16_t minor_version = $min_version;\n'''
     u'''const uint16_t patch_version = $p_version;\n'''
     u'''}  // namespace application_manager\n'''
-    u'''#endif  // GENERATED_MSG_VERSION_H''')
+    u'''#endif  // GENERATED_MSG_VERSION_H\n''')
     data_to_file = temp.substitute(m_version = major_version, min_version = minor_version, p_version = patch_version)
     return data_to_file
-    
+

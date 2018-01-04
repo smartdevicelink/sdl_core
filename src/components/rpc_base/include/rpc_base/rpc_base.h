@@ -260,7 +260,6 @@ class Enum : public PrimitiveType {
   // Types
   typedef T EnumType;
 
- public:
   // Methods
   Enum();
   explicit Enum(EnumType value);
@@ -283,7 +282,6 @@ class Array : public std::vector<T>, public CompositeType {
   // Types
   typedef std::vector<T> ArrayType;
 
- public:
   // Methods
   Array();
   // Need const and non-const versions to beat all-type accepting constructor
@@ -317,7 +315,6 @@ class Array<Enum<E>, minsize, maxsize> : public std::vector<Enum<E> >,
   // Types
   typedef std::vector<Enum<E> > ArrayType;
 
- public:
   // Methods
   Array();
   // Need const and non-const versions to beat all-type accepting constructor
@@ -348,7 +345,6 @@ class Map : public std::map<std::string, T>, public CompositeType {
   typedef Map<T, minsize, maxsize> Frankenbase;
   typedef std::map<std::string, T> MapType;
 
- public:
   // Methods
   Map();
   // Need const and non-const versions to beat all-type accepting constructor
