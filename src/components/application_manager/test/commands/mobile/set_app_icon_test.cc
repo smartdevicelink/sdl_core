@@ -88,6 +88,13 @@ class SetAppIconRequestTest
 
     return msg;
   }
+
+ private:
+  void SetUp() OVERRIDE {
+    const std::string dir_path = "./";
+    ON_CALL(app_mngr_settings_, app_icons_folder())
+        .WillByDefault(ReturnRef(dir_path));
+  }
 };
 
 TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
@@ -96,10 +103,6 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg_vr)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_vr)[am::strings::msg_params][am::strings::sync_file_name]
            [am::strings::value] = file_path;
-
-  const std::string dir_path = "./";
-  ON_CALL(app_mngr_settings_, app_icons_folder())
-      .WillByDefault(ReturnRef(dir_path));
 
   utils::SharedPtr<SetAppIconRequest> req_vr =
       CreateCommand<SetAppIconRequest>(msg_vr);
