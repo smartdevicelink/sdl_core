@@ -45,7 +45,6 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/vehicle_info_data.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "smart_objects/smart_object.h"
@@ -135,7 +134,8 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;
   const uint32_t choice_set_id = 3;
-  const VehicleDataType vi = VehicleDataType::ACCPEDAL;
+  const mobile_apis::VehicleDataType::eType vi =
+      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL;
   const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
 
   smart_objects::SmartObject cmd;
@@ -230,7 +230,8 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  app_impl_->SubscribeToIVI(static_cast<uint32_t>(VehicleDataType::ACCPEDAL));
+  app_impl_->SubscribeToIVI(static_cast<uint32_t>(
+      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL));
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));

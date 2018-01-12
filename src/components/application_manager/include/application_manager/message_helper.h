@@ -762,7 +762,7 @@ class MessageHelper {
    * @param application Application to unsubscribe
    * @param app_mngr Application manager
    */
-  static void SendUnsubscribeIVIRequest(uint32_t ivi_id,
+  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
                                         ApplicationSharedPtr application,
                                         ApplicationManager& app_mngr);
 

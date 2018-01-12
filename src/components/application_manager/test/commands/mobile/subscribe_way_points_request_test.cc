@@ -112,7 +112,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
     InSequence dummy;
     EXPECT_CALL(app_mngr_,
                 SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(result_code))
+    EXPECT_CALL(mock_message_helper_, HMIToMobileResult(result_code))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
     EXPECT_CALL(*app, UpdateHash());

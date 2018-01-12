@@ -613,7 +613,7 @@ void MessageHelper::SendUnsubscribeButtonNotification(
   app_mngr.ManageHMICommand(message);
 }
 
-void MessageHelper::SendUnsubscribeIVIRequest(uint32_t ivi_id,
+void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
                                               ApplicationSharedPtr application,
                                               ApplicationManager& app_mngr) {
   using namespace smart_objects;

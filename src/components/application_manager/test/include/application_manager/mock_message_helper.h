@@ -288,7 +288,7 @@ class MockMessageHelper {
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
   MOCK_METHOD3(SendUnsubscribeIVIRequest,
-               void(uint32_t ivi_id,
+               void(int32_t ivi_id,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
 
