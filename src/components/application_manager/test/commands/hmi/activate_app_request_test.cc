@@ -36,6 +36,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "commands/commands_test.h"
+#include "application_manager/mock_application.h"
 
 namespace test {
 namespace components {
@@ -44,12 +45,16 @@ namespace hmi_commands_test {
 namespace activate_app_request {
 
 using ::testing::_;
+using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::MessageSharedPtr;
 using am::commands::ActivateAppRequest;
 using am::commands::CommandImpl;
 
+using ::test::components::application_manager_test::MockApplication;
+
+typedef SharedPtr<MockApplication> MockAppPtr;
 typedef ::utils::SharedPtr<ActivateAppRequest> ActivateAppRequestPtr;
 
 MATCHER_P(CheckMessage, level, "") {
@@ -82,8 +87,13 @@ class ActivateAppRequestTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 
 TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
+  MockAppPtr app = CreateMockApp();
 
-// TODO(OKozlov) Invastigate and fix issue with using log
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+
+  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId));
+
+// TODO(OKozlov) Investigate and fix issue with using log
 #ifdef ENABLE_LOG
   (*msg)[strings::msg_params][strings::activate_app_hmi_level] =
       mobile_apis::HMILevel::HMI_FULL;
