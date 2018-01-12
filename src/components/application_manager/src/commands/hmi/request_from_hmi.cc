@@ -43,7 +43,7 @@ RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
     : CommandImpl(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {
   // Replace HMI app id with Mobile connection id
-  ReplaceHMIWithMobileAppId(*(message.get()));
+  ReplaceHMIByMobileAppId(*message);
 }
 
 RequestFromHMI::~RequestFromHMI() {}

@@ -95,7 +95,7 @@ DeviceTypes devicesType = {
                    hmi_apis::Common_TransportType::USB_IOS),
     std::make_pair(std::string("BLUETOOTH"),
                    hmi_apis::Common_TransportType::BLUETOOTH),
-    std::make_pair(std::string("IOS_BLUETOOTH"),
+    std::make_pair(std::string("BLUETOOTH_IOS"),
                    hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 }
@@ -2109,7 +2109,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
   }
 
   int32_t message_type =
-      (*(message.get()))[strings::params][strings::message_type].asInt();
+      (*message)[strings::params][strings::message_type].asInt();
 
   if (kRequest == message_type) {
     LOG4CXX_DEBUG(logger_, "ManageHMICommand");
@@ -2120,9 +2120,9 @@ bool ApplicationManagerImpl::ManageHMICommand(
     command->Run();
     if (kResponse == message_type) {
       const uint32_t correlation_id =
-          (*(message.get()))[strings::params][strings::correlation_id].asUInt();
+          (*message)[strings::params][strings::correlation_id].asUInt();
       const int32_t function_id =
-          (*(message.get()))[strings::params][strings::function_id].asInt();
+          (*message)[strings::params][strings::function_id].asInt();
       request_ctrl_.OnHMIResponse(correlation_id, function_id);
     }
     return true;

@@ -96,6 +96,7 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
 
 bool CommandImpl::ReplaceMobileWithHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
         application_manager_.application(message[strings::app_id].asUInt());
@@ -141,37 +142,8 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
 // DEPRECATED
 void CommandImpl::ReplaceMobileByHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application =
-        application_manager_.application(message[strings::app_id].asUInt());
-    if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceMobileWithHMIAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->hmi_app_id());
-      message[strings::app_id] = application->hmi_app_id();
-    }
-  } else {
-    switch (message.getType()) {
-      case smart_objects::SmartType::SmartType_Array: {
-        smart_objects::SmartArray* message_array = message.asArray();
-        smart_objects::SmartArray::iterator it = message_array->begin();
-        for (; it != message_array->end(); ++it) {
-          ReplaceMobileWithHMIAppId(*it);
-        }
-        break;
-      }
-      case smart_objects::SmartType::SmartType_Map: {
-        std::set<std::string> keys = message.enumerate();
-        std::set<std::string>::const_iterator key = keys.begin();
-        for (; key != keys.end(); ++key) {
-          std::string k = *key;
-          ReplaceMobileWithHMIAppId(message[*key]);
-        }
-        break;
-      }
-      default: { break; }
-    }
+  if (!ReplaceMobileWithHMIAppId(message)) {
+    LOG4CXX_ERROR(logger_, "Substitution mobile --> HMI id is failed.");
   }
 }
 
@@ -223,38 +195,8 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
 // DEPRECATED
 void CommandImpl::ReplaceHMIByMobileAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application =
-        application_manager_.application_by_hmi_app(
-            message[strings::app_id].asUInt());
-
-    if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
-                    "ReplaceHMIByMobileAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->app_id());
-      message[strings::app_id] = application->app_id();
-    }
-  } else {
-    switch (message.getType()) {
-      case smart_objects::SmartType::SmartType_Array: {
-        smart_objects::SmartArray* message_array = message.asArray();
-        smart_objects::SmartArray::iterator it = message_array->begin();
-        for (; it != message_array->end(); ++it) {
-          ReplaceHMIByMobileAppId(*it);
-        }
-        break;
-      }
-      case smart_objects::SmartType::SmartType_Map: {
-        std::set<std::string> keys = message.enumerate();
-        std::set<std::string>::const_iterator key = keys.begin();
-        for (; key != keys.end(); ++key) {
-          ReplaceHMIByMobileAppId(message[*key]);
-        }
-        break;
-      }
-      default: { break; }
-    }
+  if (!ReplaceHMIWithMobileAppId(message)) {
+    LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");
   }
 }
 

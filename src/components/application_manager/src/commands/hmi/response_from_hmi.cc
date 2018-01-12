@@ -48,7 +48,7 @@ ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
   }
 
   // Replace HMI app id with Mobile connection id
-  ReplaceHMIWithMobileAppId(*(message.get()));
+  ReplaceHMIByMobileAppId(*message);
 }
 
 ResponseFromHMI::~ResponseFromHMI() {}

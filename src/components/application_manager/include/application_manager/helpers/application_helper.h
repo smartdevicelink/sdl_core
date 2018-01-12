@@ -30,7 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELPERS_APPLICATION_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELPERS_APPLICATION_HELPER_H_
+
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 
@@ -91,3 +93,5 @@ struct SubscribedToIVIPredicate {
 void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager);
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELPERS_APPLICATION_HELPER_H_

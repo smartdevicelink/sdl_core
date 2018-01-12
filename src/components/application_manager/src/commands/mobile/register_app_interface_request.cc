@@ -581,18 +581,27 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     FillUIRelatedFields(response_params, hmi_capabilities);
   }
 
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
+    FillVIRelatedFields(response_params, hmi_capabilities);
+  }
+
   if (hmi_capabilities.button_capabilities()) {
     response_params[hmi_response::button_capabilities] =
         *hmi_capabilities.button_capabilities();
   }
+
   if (hmi_capabilities.soft_button_capabilities()) {
     response_params[hmi_response::soft_button_capabilities] =
         *hmi_capabilities.soft_button_capabilities();
   }
+
   if (hmi_capabilities.preset_bank_capabilities()) {
     response_params[hmi_response::preset_bank_capabilities] =
         *hmi_capabilities.preset_bank_capabilities();
   }
+
   if (hmi_capabilities.hmi_zone_capabilities()) {
     if (smart_objects::SmartType_Array ==
         hmi_capabilities.hmi_zone_capabilities()->getType()) {
@@ -605,21 +614,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
-  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_TTS)) {
-    FillTTSRelatedFields(response_params, hmi_capabilities);
-  }
-
   if (hmi_capabilities.pcm_stream_capabilities()) {
     response_params[strings::pcm_stream_capabilities] =
         *hmi_capabilities.pcm_stream_capabilities();
-  }
-
-  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
-    FillVIRelatedFields(response_params, hmi_capabilities);
   }
 
   const std::vector<uint32_t>& diag_modes =
@@ -632,6 +629,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       ++index;
     }
   }
+
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
   const std::string ccpu_version =

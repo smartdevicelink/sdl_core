@@ -39,12 +39,15 @@ namespace commands {
 
 NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message,
                                      ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {}
+    : CommandImpl(message, application_manager) {
+  // Replace Mobile connection id with HMI app id
+  ReplaceMobileByHMIAppId(*message_);
+}
 
 NotificationToHMI::~NotificationToHMI() {}
 
 bool NotificationToHMI::Init() {
-  return ReplaceMobileWithHMIAppId(*message_);
+  return true;
 }
 
 bool NotificationToHMI::CleanUp() {
