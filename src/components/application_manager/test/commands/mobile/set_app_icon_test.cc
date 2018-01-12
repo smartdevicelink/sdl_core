@@ -534,16 +534,136 @@ TEST_F(SetAppIconRequestTest,
   EXPECT_CALL(mock_app_mngr_settings, app_icons_folder_max_size())
       .WillRepeatedly(ReturnRef(storage_max_size));
 
-  const std::string app_policy_id = "test_icon";
-  EXPECT_CALL((*mock_app), policy_app_id())
-      .WillRepeatedly(Return(app_policy_id));
-
   EXPECT_CALL((*mock_app), policy_app_id()).Times(0);
 
   std::string directory = app_storeage_folder + "/" + app_folder;
   std::string full_file_path = directory + "/" + sync_file_name;
   file_system::CreateDirectoryRecursively(directory);
   file_system::CreateFile(full_file_path);
+  req->Run();
+  file_system::RemoveDirectory(app_storeage_folder);
+}
+
+TEST_F(SetAppIconRequestTest,
+       CopyToIconStorage_PolicyAppIdEqualFolderName_CantCreateIcon) {
+  MessageSharedPtr msg = CreateFullParamsUISO();
+  const std::string sync_file_name = "sync_file";
+  (*msg)[am::strings::msg_params][am::strings::sync_file_name] = sync_file_name;
+
+  utils::SharedPtr<SetAppIconRequest> req =
+      CreateCommand<SetAppIconRequest>(msg);
+
+  MockAppPtr mock_app = CreateMockApp();
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  MockApplicationManagerSettings mock_app_mngr_settings;
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_settings));
+
+  const std::string app_storeage_folder = "./storage";
+  EXPECT_CALL(mock_app_mngr_settings, app_storage_folder())
+      .WillRepeatedly(ReturnRef(app_storeage_folder));
+
+  const std::string app_folder = "Test_app";
+  EXPECT_CALL((*mock_app), folder_name()).WillRepeatedly(Return(app_folder));
+
+  MockProtocolHandler mock_app_mngr_protocol_hendler;
+  EXPECT_CALL(app_mngr_, protocol_handler())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_protocol_hendler));
+
+  MockProtocolHandlerSettings mock_app_mngr_protocol_hendler_settings;
+  EXPECT_CALL(mock_app_mngr_protocol_hendler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_protocol_hendler_settings));
+
+  const protocol_handler::MajorProtocolVersion mock_app_mngr_protocol_version =
+      protocol_handler::PROTOCOL_VERSION_4;
+  EXPECT_CALL(mock_app_mngr_protocol_hendler_settings,
+              max_supported_protocol_version())
+      .WillRepeatedly(Return(mock_app_mngr_protocol_version));
+
+  const std::string icon_folder = app_storeage_folder + "/" + app_folder;
+  EXPECT_CALL(mock_app_mngr_settings, app_icons_folder())
+      .WillRepeatedly(ReturnRef(icon_folder));
+
+  const uint32_t storage_max_size = 10;
+  EXPECT_CALL(mock_app_mngr_settings, app_icons_folder_max_size())
+      .WillRepeatedly(ReturnRef(storage_max_size));
+
+  const std::string app_policy_id = "test_icon";
+  EXPECT_CALL((*mock_app), policy_app_id())
+      .WillRepeatedly(Return(app_policy_id));
+
+  std::string directory = app_storeage_folder + "/" + app_folder;
+  std::string full_file_path = directory + "/" + sync_file_name;
+  file_system::CreateDirectoryRecursively(directory);
+  file_system::CreateDirectoryRecursively(directory + "/" + app_policy_id);
+  file_system::CreateFile(full_file_path);
+  req->Run();
+  file_system::RemoveDirectory(app_storeage_folder);
+}
+
+TEST_F(SetAppIconRequestTest, CopyToIconStorage__) {
+  MessageSharedPtr msg = CreateFullParamsUISO();
+  const std::string sync_file_name = "sync_file";
+  (*msg)[am::strings::msg_params][am::strings::sync_file_name] = sync_file_name;
+
+  utils::SharedPtr<SetAppIconRequest> req =
+      CreateCommand<SetAppIconRequest>(msg);
+
+  MockAppPtr mock_app = CreateMockApp();
+  MockAppPtr mock_app_nonexistent;
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app))
+      .WillOnce(Return(mock_app_nonexistent));
+
+  MockApplicationManagerSettings mock_app_mngr_settings;
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_settings));
+
+  const std::string app_storeage_folder = "./storage";
+  EXPECT_CALL(mock_app_mngr_settings, app_storage_folder())
+      .WillRepeatedly(ReturnRef(app_storeage_folder));
+
+  const std::string app_folder = "Test_app";
+  EXPECT_CALL((*mock_app), folder_name()).WillRepeatedly(Return(app_folder));
+
+  MockProtocolHandler mock_app_mngr_protocol_hendler;
+  EXPECT_CALL(app_mngr_, protocol_handler())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_protocol_hendler));
+
+  MockProtocolHandlerSettings mock_app_mngr_protocol_hendler_settings;
+  EXPECT_CALL(mock_app_mngr_protocol_hendler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_app_mngr_protocol_hendler_settings));
+
+  const protocol_handler::MajorProtocolVersion mock_app_mngr_protocol_version =
+      protocol_handler::PROTOCOL_VERSION_4;
+  EXPECT_CALL(mock_app_mngr_protocol_hendler_settings,
+              max_supported_protocol_version())
+      .WillRepeatedly(Return(mock_app_mngr_protocol_version));
+
+  const std::string icon_folder = app_storeage_folder + "/" + app_folder;
+  EXPECT_CALL(mock_app_mngr_settings, app_icons_folder())
+      .WillRepeatedly(ReturnRef(icon_folder));
+
+  const uint32_t storage_max_size = 11;
+  const uint32_t storage_max_size_max = 120;
+  EXPECT_CALL(mock_app_mngr_settings, app_icons_folder_max_size())
+      .WillOnce(ReturnRef(storage_max_size))
+      .WillOnce(ReturnRef(storage_max_size))
+      .WillOnce(ReturnRef(storage_max_size_max));
+
+  const uint32_t icons_amount = 1;
+  EXPECT_CALL(mock_app_mngr_settings, app_icons_amount_to_remove())
+      .WillRepeatedly(ReturnRef(icons_amount));
+
+  std::string directory = app_storeage_folder + "/" + app_folder;
+  std::string full_file_path = directory + "/" + sync_file_name;
+  file_system::CreateDirectoryRecursively(directory);
+  file_system::CreateFile(full_file_path);
+  const std::vector<uint8_t> data(10, 10);
+  file_system::Write(full_file_path, data);
   req->Run();
   file_system::RemoveDirectory(app_storeage_folder);
 }
