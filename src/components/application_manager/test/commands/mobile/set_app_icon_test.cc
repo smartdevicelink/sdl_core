@@ -154,6 +154,40 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   }
 }
 
+TEST_F(SetAppIconRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
+  MessageSharedPtr msg_vr = CreateFullParamsUISO();
+
+  utils::SharedPtr<SetAppIconRequest> req_vr =
+      CreateCommand<SetAppIconRequest>(msg_vr);
+
+  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  event.set_smart_object(*msg);
+
+  req_vr->on_event(event);
+}
+
+TEST_F(SetAppIconRequestTest, OnEvent_NonExistentApp_NullPointer) {
+  MessageSharedPtr msg_vr = CreateFullParamsUISO();
+  utils::SharedPtr<SetAppIconRequest> req_vr =
+      CreateCommand<SetAppIconRequest>(msg_vr);
+
+  MockAppPtr mock_app;
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
+
+  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*msg)[am::strings::msg_params][am::strings::info] = "info1";
+
+  Event event(hmi_apis::FunctionID::UI_SetAppIcon);
+  event.set_smart_object(*msg);
+
+  req_vr->on_event(event);
+}
+
 TEST_F(SetAppIconRequestTest, Run_AllCorrectData_SendHMIRequest) {
   MessageSharedPtr msg = CreateFullParamsUISO();
   const std::string sync_file_name = "sync_file";
@@ -604,7 +638,8 @@ TEST_F(SetAppIconRequestTest,
   file_system::RemoveDirectory(app_storeage_folder);
 }
 
-TEST_F(SetAppIconRequestTest, CopyToIconStorage__) {
+TEST_F(SetAppIconRequestTest,
+       RemoveOldestIcons_AllCorrectData_OldIconDeletedSuccessfully) {
   MessageSharedPtr msg = CreateFullParamsUISO();
   const std::string sync_file_name = "sync_file";
   (*msg)[am::strings::msg_params][am::strings::sync_file_name] = sync_file_name;
