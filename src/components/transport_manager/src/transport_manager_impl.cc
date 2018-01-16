@@ -732,7 +732,7 @@ TransportManagerImpl::GetActiveConnection(
 
 namespace {
 
-struct TAFinder {
+struct IOSBTAdapterFinder {
   bool operator()(const std::vector<TransportAdapter*>::value_type& i) const {
     return i->GetDeviceType() == transport_adapter::DeviceType::IOS_BT;
   }
@@ -759,8 +759,9 @@ void TransportManagerImpl::TryDeviceSwitch(
     return;
   }
 
-  const auto ios_bt_adapter = std::find_if(
-      transport_adapters_.begin(), transport_adapters_.end(), TAFinder());
+  const auto ios_bt_adapter = std::find_if(transport_adapters_.begin(),
+                                           transport_adapters_.end(),
+                                           IOSBTAdapterFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
     LOG4CXX_WARN(

@@ -61,15 +61,13 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
                            ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {
-  // Replace Mobile connection id with HMI app id
-  ReplaceMobileByHMIAppId(*message);
-}
+    : CommandImpl(message, application_manager) {}
 
 RequestToHMI::~RequestToHMI() {}
 
 bool RequestToHMI::Init() {
-  return true;
+  // Replace Mobile connection id with HMI app id
+  return ReplaceMobileWithHMIAppId(*message_);
 }
 
 bool RequestToHMI::CleanUp() {

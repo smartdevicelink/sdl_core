@@ -91,6 +91,11 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
                              uint32_t* device_id));
+  MOCK_CONST_METHOD4(GetDataOnSessionKey,
+                     int32_t(uint32_t key,
+                             uint32_t* app_id,
+                             std::list<int32_t>* sessions_list,
+                             connection_handler::DeviceHandle* device_id));
   MOCK_CONST_METHOD0(get_settings,
                      const connection_handler::ConnectionHandlerSettings&());
   MOCK_METHOD0(get_session_observer,

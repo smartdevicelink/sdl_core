@@ -30,7 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
 
 #include <gmock/gmock.h>
 #include "application_manager/application_manager.h"
@@ -52,6 +53,8 @@ class MockHMICommandFactory {
   static MockHMICommandFactory* mock_hmi_command_factory();
 };
 
-}  // application_manager_test
-}  // components
-}  // test
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_

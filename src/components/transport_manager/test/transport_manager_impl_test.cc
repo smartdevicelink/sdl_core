@@ -115,6 +115,11 @@ class TransportManagerImplTest : public ::testing::Test {
     return DeviceInfo(device_handle, mac_address, device_name, connection_type);
   }
 
+  void SetOnDeviceExpectations(const DeviceInfo& device_info) {
+    EXPECT_CALL(*tm_listener_, OnDeviceAdded(device_info));
+    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  }
+
   void SetAddDeviceExpectations(MockTransportAdapter* mock_adapter,
                                 transport_adapter::DeviceType type,
                                 const DeviceList& device_list,
@@ -130,8 +135,7 @@ class TransportManagerImplTest : public ::testing::Test {
 
     EXPECT_CALL(*mock_adapter, GetDeviceType()).WillRepeatedly(Return(type));
 
-    EXPECT_CALL(*tm_listener_, OnDeviceAdded(device_info));
-    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+    SetOnDeviceExpectations(device_info);
   }
 
   void HandleDeviceListUpdated() {
@@ -655,8 +659,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_AddNewDevice) {
       .WillRepeatedly(Return(dev_info_.name()));
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(dev_info_);
   tm_.OnDeviceListUpdated(mock_adapter_);
   device_list_.pop_back();
 }
@@ -673,8 +676,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
 
     ::testing::InSequence s;
     EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
-    EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+    SetOnDeviceExpectations(dev_info_);
     tm_.OnDeviceListUpdated(mock_adapter_);
   }
   device_list_.pop_back();
@@ -1051,8 +1053,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
       .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(dev_info_);
   tm_.OnDeviceListUpdated(mock_adapter_);
 
   const std::string mac_address("NE:WA:DR:ES:SS");
@@ -1073,9 +1074,8 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*second_mock_adapter, GetConnectionType())
       .WillRepeatedly(Return(second_device.connection_type()));
 
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(second_device));
   EXPECT_CALL(*tm_listener_, OnDeviceFound(second_device));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(second_device);
   tm_.OnDeviceListUpdated(second_mock_adapter);
 
   device_list_.pop_back();
@@ -1136,8 +1136,7 @@ TEST_F(TransportManagerImplTest, OnlyOneDeviceShouldNotTriggerSwitch) {
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
       .WillRepeatedly(Return(dev_info_.connection_type()));
 
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(dev_info_);
 
   EXPECT_CALL(*mock_adapter_, StopDevice(_)).Times(0);
   EXPECT_CALL(*mock_adapter_, DeviceSwitched(_)).Times(0);
@@ -1320,8 +1319,7 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
       .WillRepeatedly(Return(dev_info_.connection_type()));
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(dev_info_);
   tm_.OnDeviceListUpdated(mock_adapter_);
 
   const std::string mac_address("NE:WA:DR:ES:SS");
@@ -1342,9 +1340,8 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*second_mock_adapter, GetConnectionType())
       .WillRepeatedly(Return(second_device.connection_type()));
 
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(second_device));
   EXPECT_CALL(*tm_listener_, OnDeviceFound(second_device));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
+  SetOnDeviceExpectations(second_device);
   tm_.OnDeviceListUpdated(second_mock_adapter);
 
   device_list_.pop_back();

@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_IMPL_H_
 
 #include "application_manager/command_holder.h"
 
@@ -104,4 +105,6 @@ class CommandHolderImpl : public CommandHolder {
   AppCommands app_mobile_commands_;
   AppCommands app_hmi_commands_;
 };
-}  // application_manager
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_IMPL_H_

@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_HELPER_H_
 
 #include <gmock/gmock.h>
 #include "application_manager/application.h"
@@ -48,6 +49,9 @@ class MockApplicationHelper {
 
   static MockApplicationHelper& application_helper_mock();
 };
-}  // application_manager_test
-}  // components
-}  // test
+
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_HELPER_H_

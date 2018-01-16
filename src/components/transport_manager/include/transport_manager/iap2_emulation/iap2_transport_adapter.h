@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_manager_settings.h"
@@ -159,5 +160,6 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
   threads::Thread* signal_handler_;
   int out_;
 };
-}
-}  // namespace transport_manager::transport_adapter
+}  // namespace transport_adapter
+}  // namespace transport_manager
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_

@@ -87,8 +87,7 @@ ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
 namespace {
 const std::string kDirectoryName = "./test_storage";
 const uint32_t kTimeout = 10000u;
-sync_primitives::Lock state_lock_;
-sync_primitives::ConditionalVariable state_condition_;
+connection_handler::DeviceHandle kDeviceId = 12345u;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -110,8 +109,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
-
-    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, _))
+    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));

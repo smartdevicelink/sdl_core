@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_H_
 
 #include <string>
 #include "application_manager/application.h"
@@ -79,4 +80,6 @@ class CommandHolder {
    */
   virtual void Clear(ApplicationSharedPtr application) = 0;
 };
-}  // application_manager
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_HOLDER_H_
