@@ -83,6 +83,21 @@ struct LanguageFinder {
   const std::string& language_;
 };
 
+struct PolicyTableUpdater {
+  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+      : default_params_(default_params) {}
+
+  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+    if (policy::kDefaultId == pt_value.second.get_string()) {
+      pt_value.second = default_params_;
+      pt_value.second.set_to_string(policy::kDefaultId);
+    }
+  }
+
+ private:
+  const policy_table::ApplicationParams& default_params_;
+};
+
 CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
@@ -244,6 +259,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
           "");
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
+      if (kDefaultId == iter->first) {
+        std::for_each(pt_->policy_table.app_policies_section.apps.begin(),
+                      pt_->policy_table.app_policies_section.apps.end(),
+                      PolicyTableUpdater(iter->second));
+      }
     }
   }
 
