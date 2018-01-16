@@ -269,6 +269,7 @@
 #include "application_manager/commands/hmi/on_system_error_notification.h"
 #include "application_manager/commands/hmi/basic_communication_system_request.h"
 #include "application_manager/commands/hmi/basic_communication_system_response.h"
+#include "application_manager/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "application_manager/commands/hmi/sdl_policy_update.h"
 #include "application_manager/commands/hmi/sdl_policy_update_response.h"
 #include "application_manager/commands/hmi/on_received_policy_update.h"
@@ -779,6 +780,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
       command.reset(new commands::OnAppActivatedNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL: {
+      command.reset(
+          new commands::OnAwakeSDLNotification(message, application_manager));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {

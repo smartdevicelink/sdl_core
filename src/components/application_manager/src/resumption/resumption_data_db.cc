@@ -212,7 +212,10 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataDB::OnSuspend() {
+// DEPRECATED
+void ResumptionDataDB::OnSuspend() {}
+
+void ResumptionDataDB::IncrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query_update_suspend_data(db());
@@ -291,7 +294,10 @@ bool ResumptionDataDB::GetHashId(const std::string& policy_app_id,
   return SelectHashId(policy_app_id, device_id, hash_id);
 }
 
-void ResumptionDataDB::OnAwake() {
+// DEPRECATED
+void ResumptionDataDB::OnAwake() {}
+
+void ResumptionDataDB::DecrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   UpdateDataOnAwake();

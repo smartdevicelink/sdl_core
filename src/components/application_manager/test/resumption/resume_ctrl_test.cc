@@ -880,7 +880,7 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithChoiceSet) {
 
 // TODO (VVeremjova) APPLINK-16718
 TEST_F(ResumeCtrlTest, DISABLED_OnSuspend) {
-  EXPECT_CALL(*mock_storage_, OnSuspend());
+  EXPECT_CALL(*mock_storage_, IncrementIgnOffCount());
   res_ctrl_->OnSuspend();
 }
 
@@ -896,7 +896,7 @@ TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
   EXPECT_CALL(*mock_storage_, SaveApplication(mock_app)).Times(0);
 
-  EXPECT_CALL(*mock_storage_, OnSuspend());
+  EXPECT_CALL(*mock_storage_, IncrementIgnOffCount()).Times(0);
   EXPECT_CALL(*mock_storage_, Persist());
   res_ctrl_->OnSuspend();
 }
@@ -906,7 +906,7 @@ TEST_F(ResumeCtrlTest, OnAwake) {
   EXPECT_CALL(mock_application_manager_settings_,
               app_resumption_save_persistent_data_timeout())
       .WillOnce(ReturnRef(timeout));
-  EXPECT_CALL(*mock_storage_, OnAwake());
+  EXPECT_CALL(*mock_storage_, DecrementIgnOffCount()).Times(0);
   res_ctrl_->OnAwake();
 }
 

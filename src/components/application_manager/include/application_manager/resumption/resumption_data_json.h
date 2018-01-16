@@ -85,13 +85,25 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  // DEPRECATED
+  void OnSuspend() FINAL;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  // DEPRECATED
+  void OnAwake() FINAL;
 
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnAwake();
+  void IncrementIgnOffCount() FINAL;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  void DecrementIgnOffCount() FINAL;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID

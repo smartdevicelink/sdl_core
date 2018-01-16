@@ -409,6 +409,20 @@ class Application : public virtual InitialApplicationData,
   virtual void UpdateHash() = 0;
 
   /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  virtual bool IsHashChangedDuringSuspend() const = 0;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  virtual void SetHashChangedDuringSuspend(const bool state) = 0;
+
+  /**
    * @brief method is called when SDL is saving application data for resumption
    * @return TRUE if data of application need to save for resumption, otherwise
    * return FALSE
