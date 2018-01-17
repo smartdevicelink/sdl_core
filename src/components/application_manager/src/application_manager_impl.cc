@@ -1166,7 +1166,6 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
-// DEPRECATED
 bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
@@ -1338,7 +1337,9 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
-// DEPRECATED
+// Suppress warning for deprecated method used within another deprecated method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 bool ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
@@ -1374,6 +1375,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
   return false;
 }
+#pragma GCC diagnostic pop
 
 void ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
@@ -2283,7 +2285,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   }
 
   if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
-    application_manager::BinaryData binaryData(
+    const application_manager::BinaryData binaryData(
         message.getElement(jhs::S_PARAMS)
             .getElement(strings::binary_data)
             .asBinary());

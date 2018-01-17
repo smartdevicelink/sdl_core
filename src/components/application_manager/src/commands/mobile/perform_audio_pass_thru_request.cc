@@ -224,7 +224,6 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
   return response_params_;
 }
 
-// DEPRECATED
 bool PerformAudioPassThruRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);

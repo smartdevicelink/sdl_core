@@ -89,7 +89,7 @@ Message& Message::operator=(const Message& message) {
   set_data_size(message.data_size_);
   set_payload_size(message.payload_size_);
   if (message.binary_data_) {
-    set_binary_data(message.binary_data_);
+    set_binary_data(static_cast<const BinaryData*>(message.binary_data_));
   }
   set_json_message(message.json_message_);
   set_protocol_version(message.protocol_version());
@@ -194,7 +194,6 @@ void Message::set_message_type(MessageType type) {
   type_ = type;
 }
 
-// DEPRECATED
 void Message::set_binary_data(BinaryData* data) {
   if (NULL == data) {
     NOTREACHED();

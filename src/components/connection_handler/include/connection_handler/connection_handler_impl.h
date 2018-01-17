@@ -182,9 +182,9 @@ class ConnectionHandlerImpl
    * \param is_protected would be service protected
    * \param hash_id pointer for session hash identifier
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \deprecated
    */
-  // DEPRECATED
-  virtual uint32_t OnSessionStartedCallback(
+  DEPRECATED virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
@@ -209,9 +209,18 @@ class ConnectionHandlerImpl
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
       const BsonObject* params);
-
-  // DEPRECATED
-  uint32_t OnSessionEndedCallback(
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connection_handle Connection identifier within which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink
+   * protocol.
+   * If not equal to hash assigned to session on start then operation fails.
+   * \return uint32_t 0 if operation fails, session key otherwise
+   * \deprecated
+   */
+  DEPRECATED uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const uint32_t& hashCode,
