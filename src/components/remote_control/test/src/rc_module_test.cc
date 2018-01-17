@@ -169,7 +169,8 @@ TEST_F(RCModuleTest, ProcessMessagePass) {
   application_manager::BinaryData* data = &buf;
   data->push_back(1);
 
-  message_->set_binary_data((const application_manager::BinaryData*)data);
+  message_->set_binary_data(
+      static_cast<const application_manager::BinaryData*>(data));
 
   Json::Value json_value = MessageHelper::StringToValue(json);
   Json::Value module_type =

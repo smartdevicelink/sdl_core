@@ -1307,9 +1307,10 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 }  // namespace
 #endif  // ENABLE_SECURITY
 
+// Suppress warning for deprecated method used within another deprecated method
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-DEPRECATED RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(

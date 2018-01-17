@@ -1166,7 +1166,7 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
-DEPRECATED bool ApplicationManagerImpl::StartNaviService(
+bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1337,9 +1337,10 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
+// Suppress warning for deprecated method used within another deprecated method
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-DEPRECATED bool ApplicationManagerImpl::OnServiceStartedCallback(
+bool ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
     const protocol_handler::ServiceType& type) {
