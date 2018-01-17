@@ -1829,7 +1829,7 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
 
   for (; it != hmi_states.end(); ++it) {
     am::HmiStatePtr hmi_state = it->first;
-    am::HmiStatePtr initial_hmi_state = it->first;
+    am::HmiStatePtr initial_hmi_state = it2->first;
     Common_HMILevel::eType hmi_level = it->second;
 
     SetBCActivateAppRequestToHMI(hmi_level, corr_id);
