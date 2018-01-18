@@ -741,8 +741,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   SendChangeRegistrationOnHMI(application);
 }
 
-// DEPRECATED
-void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
+DEPRECATED void
+RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
 }
 

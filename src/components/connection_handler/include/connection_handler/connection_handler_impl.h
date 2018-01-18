@@ -502,10 +502,10 @@ class ConnectionHandlerImpl
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  int32_t GetDataOnSessionKey(uint32_t key,
-                              uint32_t* app_id,
-                              std::list<int32_t>* sessions_list,
-                              uint32_t* device_id) const OVERRIDE;
+  DEPRECATED int32_t GetDataOnSessionKey(uint32_t key,
+                                         uint32_t* app_id,
+                                         std::list<int32_t>* sessions_list,
+                                         uint32_t* device_id) const OVERRIDE;
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 

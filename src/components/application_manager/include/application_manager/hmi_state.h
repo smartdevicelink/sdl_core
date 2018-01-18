@@ -36,6 +36,7 @@
 #include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -247,8 +248,7 @@ class VRHmiState : public HmiState {
   VRHmiState(utils::SharedPtr<Application> app,
              const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
 /**
@@ -259,8 +259,7 @@ class TTSHmiState : public HmiState {
   TTSHmiState(utils::SharedPtr<Application> app,
               const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
@@ -275,8 +274,8 @@ class NaviStreamingHmiState : public HmiState {
   NaviStreamingHmiState(utils::SharedPtr<Application> app,
                         const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED NaviStreamingHmiState(uint32_t app_id,
+                                   const ApplicationManager& app_mngr);
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
@@ -291,8 +290,8 @@ class PhoneCallHmiState : public HmiState {
   PhoneCallHmiState(utils::SharedPtr<Application> app,
                     const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  PhoneCallHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED PhoneCallHmiState(uint32_t app_id,
+                               const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -310,8 +309,8 @@ class SafetyModeHmiState : public HmiState {
   SafetyModeHmiState(utils::SharedPtr<Application> app,
                      const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  SafetyModeHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED SafetyModeHmiState(uint32_t app_id,
+                                const ApplicationManager& app_mngr);
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -328,8 +327,7 @@ class DeactivateHMI : public HmiState {
   DeactivateHMI(utils::SharedPtr<Application> app,
                 const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -347,8 +345,7 @@ class AudioSource : public HmiState {
   AudioSource(utils::SharedPtr<Application> app,
               const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -367,8 +364,7 @@ class EmbeddedNavi : public HmiState {
   EmbeddedNavi(utils::SharedPtr<Application> app,
                const ApplicationManager& app_mngr);
 
-  // DEPRECATED
-  EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()

@@ -139,8 +139,7 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
   return true;
 }
 
-// DEPRECATED
-void CommandImpl::ReplaceMobileByHMIAppId(
+DEPRECATED void CommandImpl::ReplaceMobileByHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (!ReplaceMobileWithHMIAppId(message)) {
     LOG4CXX_ERROR(logger_, "Substitution mobile --> HMI id is failed.");
@@ -192,8 +191,7 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
   return true;
 }
 
-// DEPRECATED
-void CommandImpl::ReplaceHMIByMobileAppId(
+DEPRECATED void CommandImpl::ReplaceHMIByMobileAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (!ReplaceHMIWithMobileAppId(message)) {
     LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");

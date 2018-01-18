@@ -250,13 +250,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          mobile_apis::HMILevel::eType hmi_level,
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::SystemContext::eType system_context));
-  // DEPRECATED
-  MOCK_CONST_METHOD4(CreateRegularState,
-                     application_manager::HmiStatePtr(
-                         uint32_t app_id,
-                         mobile_apis::HMILevel::eType hmi_level,
-                         mobile_apis::AudioStreamingState::eType audio_state,
-                         mobile_apis::SystemContext::eType system_context));
+  DEPRECATED MOCK_CONST_METHOD4(
+      CreateRegularState,
+      application_manager::HmiStatePtr(
+          uint32_t app_id,
+          mobile_apis::HMILevel::eType hmi_level,
+          mobile_apis::AudioStreamingState::eType audio_state,
+          mobile_apis::SystemContext::eType system_context));
 
   MOCK_METHOD2(SendAudioPassThroughNotification,
                void(uint32_t session_key, std::vector<uint8_t>& binary_data));
@@ -269,12 +269,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(event_dispatcher,
                application_manager::event_engine::EventDispatcher&());
 
-  // DEPRECATED
-  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(const uint32_t));
-  // DEPRECATED
-  MOCK_METHOD1(SubscribeAppForWayPoints, void(const uint32_t));
-  // DEPRECATED
-  MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(const uint32_t));
+  DEPRECATED MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
+                                bool(const uint32_t));
+  DEPRECATED MOCK_METHOD1(SubscribeAppForWayPoints, void(const uint32_t));
+  DEPRECATED MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(const uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));
   MOCK_METHOD1(SubscribeAppForWayPoints,

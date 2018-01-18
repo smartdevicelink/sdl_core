@@ -48,6 +48,7 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -561,8 +562,8 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
-  // DEPRECATED
-  virtual void set_device(connection_handler::DeviceHandle device) = 0;
+  DEPRECATED virtual void set_device(
+      connection_handler::DeviceHandle device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
 

@@ -740,12 +740,11 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   return 0;
 }
 
-// DEPRECATED
-int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
-    uint32_t key,
-    uint32_t* app_id,
-    std::list<int32_t>* sessions_list,
-    uint32_t* device_id) const {
+DEPRECATED int32_t
+ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
+                                           uint32_t* app_id,
+                                           std::list<int32_t>* sessions_list,
+                                           uint32_t* device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   return GetDataOnSessionKey(key, app_id, sessions_list, device_id);
 }

@@ -52,6 +52,7 @@
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
 #include "utils/timer.h"
+#include "utils/macro.h"
 
 namespace usage_statistics {
 
@@ -91,8 +92,7 @@ class ApplicationImpl : public virtual Application,
       utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
-  // DEPRECATED
-  ApplicationImpl(
+  DEPRECATED ApplicationImpl(
       uint32_t application_id,
       const std::string& policy_app_id,
       const std::string& mac_address,
@@ -184,8 +184,7 @@ class ApplicationImpl : public virtual Application,
   void increment_list_files_in_none_count();
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
-  // DEPRECATED
-  void set_device(connection_handler::DeviceHandle device);
+  DEPRECATED void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -222,13 +221,6 @@ class ApplicationImpl : public virtual Application,
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
-
-#ifdef CUSTOMER_PASA
-  // DEPRECATED
-  virtual bool flag_sending_hash_change_after_awake() const;
-  // DEPRECATED
-  virtual void set_flag_sending_hash_change_after_awake(bool flag);
-#endif  // CUSTOMER_PASA
 
   /**
    * @brief Change Hash for current application

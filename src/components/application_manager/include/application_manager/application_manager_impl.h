@@ -453,11 +453,9 @@ class ApplicationManagerImpl
    */
   void UnregisterAllApplications();
 
-  // DEPRECATED
-  bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+  DEPRECATED bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
 
-  // DEPRECATED
-  bool LoadAppDataToHMI(ApplicationSharedPtr app);
+  DEPRECATED bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -1485,9 +1483,8 @@ class ApplicationManagerImpl
    * @param service_type Type of service to start
    * @return True on success, false on fail
    */
-  // DEPRECATED
-  bool StartNaviService(uint32_t app_id,
-                        protocol_handler::ServiceType service_type);
+  DEPRECATED bool StartNaviService(uint32_t app_id,
+                                   protocol_handler::ServiceType service_type);
 
   /**
    * @brief Starts specified navi service for application
@@ -1765,8 +1762,7 @@ class ApplicationManagerImpl
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 
-// DEPRECATED
-bool ApplicationManagerImpl::vr_session_started() const {
+DEPRECATED bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;
 }
 

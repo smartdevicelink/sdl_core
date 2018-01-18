@@ -36,6 +36,7 @@
 #include <list>
 #include <string>
 #include "transport_manager/transport_manager.h"
+#include "utils/macro.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
