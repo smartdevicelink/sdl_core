@@ -69,8 +69,7 @@ class CSmartSchema FINAL {
    *
    * @return NsSmartObjects::Errors::eType
    **/
-  // DEPRECATED
-  Errors::eType validate(const SmartObject& Object) const;
+  DEPRECATED Errors::eType validate(const SmartObject& Object) const;
 
   /**
    * @brief Validate smart object.

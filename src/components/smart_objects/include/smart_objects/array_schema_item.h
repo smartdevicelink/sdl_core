@@ -71,7 +71,6 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return NsSmartObjects::Errors::eType
    **/
-  // DEPRECATED
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
 
   /**

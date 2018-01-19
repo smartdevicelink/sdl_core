@@ -67,7 +67,6 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
-  // DEPRECATED
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
   /**
    * @brief Validate smart object.

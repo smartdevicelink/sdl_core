@@ -56,8 +56,7 @@ class ISchemaItem {
    *
    * @return NsSmartObjects::Errors::eType
    **/
-  // DEPRECATED
-  virtual Errors::eType validate(const SmartObject& Object);
+  DEPRECATED virtual Errors::eType validate(const SmartObject& Object);
 
   /**
    * @brief Validate smart object.

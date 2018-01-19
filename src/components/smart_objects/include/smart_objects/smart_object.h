@@ -676,8 +676,7 @@ class SmartObject FINAL {
    *
    * @return Result of validation.
    */
-  // DEPRECATED
-  Errors::eType validate();
+  DEPRECATED Errors::eType validate();
 
   /**
    * @brief Validates object according to attached schema.

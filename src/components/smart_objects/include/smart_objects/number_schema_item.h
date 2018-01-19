@@ -70,7 +70,6 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param Object Object to validate.
    * @return Errors::ERROR
    **/
-  // DEPRECATED
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
   /**
    * @brief Validate smart object.

@@ -54,7 +54,6 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @return Errors::ERROR
    **/
-  // DEPRECATED
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
   /**
    * @brief Validate smart object.
