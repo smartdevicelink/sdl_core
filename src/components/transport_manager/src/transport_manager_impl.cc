@@ -823,10 +823,10 @@ void TransportManagerImpl::TryDeviceSwitch(
   bt_adapter->StopDevice(bt_uid);
   adapter->DeviceSwitched(usb_uid);
 
-  // Maybe not needed anymore
+  // TODO(AOleynik): Check if next line functionality is still needed
   DeactivateDeviceConnections(bt_uid);
 
-  // Maybe not needed anymore
+  // TODO(AOleynik): Check if next line functionality is still needed
   device_to_switch->second = adapter;
   device_to_reconnect_ = bt_uid;
 
