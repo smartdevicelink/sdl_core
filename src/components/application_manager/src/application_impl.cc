@@ -44,6 +44,7 @@
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace {
 
@@ -111,6 +112,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
     , video_stream_suspend_timer_(
@@ -720,19 +722,23 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.insert(vehicle_info_type).second;
+  return subscribed_vehicle_info_
+      .insert(
+           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+      .second;
 }
 
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it =
-      subscribed_vehicle_info_.find(vehicle_info_type);
+  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
   return (subscribed_vehicle_info_.end() != it);
 }
 
 bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(vehicle_info_type);
+  return subscribed_vehicle_info_.erase(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
@@ -868,7 +874,19 @@ void ApplicationImpl::UpdateHash() {
       utils::gen_hash(application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
 
-  MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  if (!application_manager_.resume_controller().is_suspended()) {
+    MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  } else {
+    is_hash_changed_during_suspend_ = true;
+  }
+}
+
+bool ApplicationImpl::IsHashChangedDuringSuspend() const {
+  return is_hash_changed_during_suspend_;
+}
+
+void ApplicationImpl::SetHashChangedDuringSuspend(const bool state) {
+  is_hash_changed_during_suspend_ = state;
 }
 
 void ApplicationImpl::CleanupFiles() {
@@ -1045,7 +1063,7 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
 

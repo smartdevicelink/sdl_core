@@ -198,16 +198,34 @@ class ApplicationImpl : public virtual Application,
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
+
 #ifdef CUSTOMER_PASA
+  // DEPRECATED
   virtual bool flag_sending_hash_change_after_awake() const;
+  // DEPRECATED
   virtual void set_flag_sending_hash_change_after_awake(bool flag);
 #endif  // CUSTOMER_PASA
-        /**
-         * @brief Change Hash for current application
-         * and send notification to mobile
-         * @return updated_hash
-         */
+
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
   virtual void UpdateHash();
+
+  /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  bool IsHashChangedDuringSuspend() const OVERRIDE;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
 
@@ -331,7 +349,7 @@ class ApplicationImpl : public virtual Application,
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
-  const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
 
   /**
    * @brief Return pointer to extension by uid
@@ -432,6 +450,7 @@ class ApplicationImpl : public virtual Application,
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
+  bool is_hash_changed_during_suspend_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;

@@ -43,7 +43,6 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/hmi_capabilities.h"
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message.h"
 #include "resumption/last_state.h"
@@ -167,7 +166,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
                std::vector<application_manager::ApplicationSharedPtr>(
-                   application_manager::VehicleDataType vehicle_info,
+                   mobile_apis::VehicleDataType::eType vehicle_info,
                    int value));
   MOCK_METHOD1(RegisterApplication,
                application_manager::ApplicationSharedPtr(const utils::SharedPtr<

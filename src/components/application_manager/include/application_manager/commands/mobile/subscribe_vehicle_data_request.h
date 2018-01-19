@@ -148,6 +148,11 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    */
   VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
 
+  /**
+   * @brief VI parameters which wait for subscribe after HMI respond
+   */
+  VehicleInfoSubscriptions vi_waiting_for_subscribe_;
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };
 

@@ -354,11 +354,11 @@ struct IsApplication {
 };
 
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
-    VehicleDataType vehicle_info, int value) {
+    mobile_apis::VehicleDataType::eType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc
   switch (vehicle_info) {
-    case ODOMETER:
+    case mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER:
       GetPolicyHandler().KmsChanged(value);
       break;
     default:
@@ -1166,7 +1166,6 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
-// DEPRECATED
 bool ApplicationManagerImpl::StartNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
@@ -1227,8 +1226,22 @@ bool ApplicationManagerImpl::StartNaviService(
     if (service_type == ServiceType::kMobileNav) {
       smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
       ConvertVideoParamsToSO(converted_params, params);
+      std::vector<std::string> rejected_params;
+      if (converted_params.keyExists(strings::codec) &&
+          converted_params[strings::codec] ==
+              hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM) {
+        rejected_params.push_back(strings::codec);
+      }
+      if (converted_params.keyExists(strings::protocol) &&
+          converted_params[strings::protocol] ==
+              hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM) {
+        rejected_params.push_back(strings::protocol);
+      }
 
-      if (!converted_params.empty()) {
+      if (!rejected_params.empty()) {
+        OnStreamingConfigured(app_id, service_type, false, rejected_params);
+        return false;
+      } else if (!converted_params.empty()) {
         LOG4CXX_INFO(logger_, "Sending video configuration params");
 #ifdef DEBUG
         MessageHelper::PrintSmartObject(converted_params);
@@ -1248,6 +1261,8 @@ bool ApplicationManagerImpl::StartNaviService(
   } else {
     LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
   }
+  std::vector<std::string> empty;
+  OnStreamingConfigured(app_id, service_type, false, empty);
   return false;
 }
 
@@ -1322,7 +1337,9 @@ void ApplicationManagerImpl::StopNaviService(
   app->StopStreaming(service_type);
 }
 
-// DEPRECATED
+// Suppress warning for deprecated method used within another deprecated method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 bool ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
     const int32_t& session_key,
@@ -1358,6 +1375,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
   return false;
 }
+#pragma GCC diagnostic pop
 
 void ApplicationManagerImpl::OnServiceStartedCallback(
     const connection_handler::DeviceHandle& device_handle,
@@ -1390,8 +1408,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     if (app->is_navi() || app->mobile_projection_enabled()) {
       if (!StartNaviService(session_key, type, params)) {
-        connection_handler().NotifyServiceStartedResult(
-            session_key, false, empty);
+        LOG4CXX_WARN(logger_, "Starting Navigation service failed");
       }
       return;
     } else {
@@ -1611,11 +1628,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
             (*message)[strings::params][strings::function_id].asUInt());
     if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
         (*message)[strings::msg_params][strings::success].asBool()) {
-      const bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
       LOG4CXX_INFO(logger_,
-                   "Registered app " << app->app_id() << " is "
-                                     << (is_for_plugin ? "" : "not ")
-                                     << "for plugins.");
+                   "Registered app "
+                       << app->app_id() << " is "
+                       << (plugin_manager_.IsAppForPlugins(app) ? "" : "not ")
+                       << "for plugins.");
     }
 #endif  // SDL_REMOTE_CONTROL
   } else if (app) {
@@ -2284,7 +2301,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   }
 
   if (message.getElement(jhs::S_PARAMS).keyExists(strings::binary_data)) {
-    application_manager::BinaryData binaryData(
+    const application_manager::BinaryData binaryData(
         message.getElement(jhs::S_PARAMS)
             .getElement(strings::binary_data)
             .asBinary());
@@ -2891,7 +2908,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     }
   }
   if (is_ignition_off) {
-    resume_controller().OnSuspend();
+    resume_controller().OnIgnitionOff();
   }
   request_ctrl_.terminateAllHMIRequests();
 }
@@ -4043,21 +4060,12 @@ void ApplicationManagerImpl::ConvertVideoParamsToSO(
   const char* protocol =
       bson_object_get_string(obj, protocol_handler::strings::video_protocol);
   if (protocol != NULL) {
-    hmi_apis::Common_VideoStreamingProtocol::eType protocol_enum =
-        ConvertVideoProtocol(protocol);
-    if (protocol_enum !=
-        hmi_apis::Common_VideoStreamingProtocol::INVALID_ENUM) {
-      output[strings::protocol] = protocol_enum;
-    }
+    output[strings::protocol] = ConvertVideoProtocol(protocol);
   }
   const char* codec =
       bson_object_get_string(obj, protocol_handler::strings::video_codec);
   if (codec != NULL) {
-    hmi_apis::Common_VideoStreamingCodec::eType codec_enum =
-        ConvertVideoCodec(codec);
-    if (codec_enum != hmi_apis::Common_VideoStreamingCodec::INVALID_ENUM) {
-      output[strings::codec] = codec_enum;
-    }
+    output[strings::codec] = ConvertVideoCodec(codec);
   }
   BsonElement* element =
       bson_object_get(obj, protocol_handler::strings::height);

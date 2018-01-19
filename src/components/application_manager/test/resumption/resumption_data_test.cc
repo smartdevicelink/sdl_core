@@ -539,8 +539,8 @@ void ResumptionDataTest::SetKeyboardProperties() {
 void ResumptionDataTest::SetSubscriptions() {
   btn_subscr.insert(ButtonName::eType::CUSTOM_BUTTON);
   btn_subscr.insert(ButtonName::eType::OK);
-  ivi.insert(0);
-  ivi.insert(5);
+  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(0));
+  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(5));
 }
 
 }  // namespace resumption_test

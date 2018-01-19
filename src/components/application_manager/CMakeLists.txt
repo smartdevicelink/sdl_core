@@ -324,6 +324,7 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_error_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_on_awake_sdl.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_received_policy_update.cc

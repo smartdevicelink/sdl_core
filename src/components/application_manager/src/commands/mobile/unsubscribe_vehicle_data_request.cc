@@ -134,7 +134,7 @@ void UnsubscribeVehicleDataRequest::Run() {
       if (is_key_enabled) {
         ++items_to_unsubscribe;
 
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (!app->IsSubscribedToIVI(key_type)) {
           ++unsubscribed_items;
           vi_already_unsubscribed_by_this_app_.insert(key_type);
@@ -234,6 +234,7 @@ void UnsubscribeVehicleDataRequest::Run() {
        ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
                  &msg_params,
                  true);
@@ -250,6 +251,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_ERROR(logger_, "Received unknown event.");
     return;
   }
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();

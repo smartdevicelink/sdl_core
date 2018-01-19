@@ -40,6 +40,8 @@
 #include "connection_handler/mock_connection_handler.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
 using testing::Return;
 using testing::_;
@@ -90,7 +92,8 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   EXPECT_CALL(am_observeble, SetTelemetryObserver(_));
   EXPECT_CALL(transport_manager_mock, SetTelemetryObserver(_));
   telemetry_monitor::TelemetryMonitor telemetry_monitor(server_address, port);
-  StreamerMock* streamer_mock = new StreamerMock(&telemetry_monitor);
+  utils::SharedPtr<StreamerMock> streamer_mock =
+      utils::MakeShared<StreamerMock>(&telemetry_monitor);
   // streamer_mock will be freed by telemetry_monitor on destruction
   telemetry_monitor.Start();
   telemetry_monitor.set_streamer(streamer_mock);

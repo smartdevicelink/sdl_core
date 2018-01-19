@@ -48,7 +48,6 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/application_manager_settings.h"
@@ -349,8 +348,8 @@ class ApplicationManagerImpl
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  std::vector<ApplicationSharedPtr> IviInfoUpdated(VehicleDataType vehicle_info,
-                                                   int value) OVERRIDE;
+  std::vector<ApplicationSharedPtr> IviInfoUpdated(
+      mobile_apis::VehicleDataType::eType vehicle_info, int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
@@ -838,8 +837,7 @@ class ApplicationManagerImpl
   void OnFindNewApplicationsRequest() OVERRIDE;
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
-  // DEPRECATED
-  bool OnServiceStartedCallback(
+  DEPRECATED bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) OVERRIDE;
@@ -1402,9 +1400,8 @@ class ApplicationManagerImpl
    * @param service_type Type of service to start
    * @return True on success, false on fail
    */
-  // DEPRECATED
-  bool StartNaviService(uint32_t app_id,
-                        protocol_handler::ServiceType service_type);
+  DEPRECATED bool StartNaviService(uint32_t app_id,
+                                   protocol_handler::ServiceType service_type);
 
   /**
    * @brief Starts specified navi service for application

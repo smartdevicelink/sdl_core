@@ -50,8 +50,12 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
+  // DEPRECATED
   MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
+  // DEPRECATED
   MOCK_METHOD1(set_flag_sending_hash_change_after_awake, void(bool flag));
+  MOCK_CONST_METHOD0(IsHashChangedDuringSuspend, bool());
+  MOCK_METHOD1(SetHashChangedDuringSuspend, void(const bool flag));
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
                void(bool state_application_data));
@@ -313,7 +317,8 @@ class MockApplication : public ::application_manager::Application {
                bool(application_manager::AppExtensionPtr extention));
   MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
   MOCK_METHOD0(RemoveExtensions, void());
-  MOCK_CONST_METHOD0(SubscribesIVI, const std::set<uint32_t>&());
+  MOCK_CONST_METHOD0(SubscribesIVI,
+                     const application_manager::VehicleInfoSubscriptions&());
 
 #endif  // SDL_REMOTE_CONTROL
 };

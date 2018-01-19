@@ -65,7 +65,6 @@ using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -84,9 +83,6 @@ const uint32_t kFunctionID = 3u;
 class ScrollableMessageRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  ScrollableMessageRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
@@ -118,11 +114,6 @@ class ScrollableMessageRequestTest
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     command_ = CreateCommand<ScrollableMessageRequest>(msg_);
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MockPolicyHandlerInterface mock_policy_handler_;
@@ -159,10 +150,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,
@@ -185,7 +172,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
@@ -274,8 +260,6 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_ReceivedUIScrollableMessage_SUCCESS) {
   (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
@@ -288,9 +272,6 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_UnsupportedRCAndUICoop_SUCCESS) {
   (*msg_)[params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
   EXPECT_CALL(
       app_mngr_,

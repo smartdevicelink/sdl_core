@@ -507,6 +507,7 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_FALSE(hmi_capabilities->navigation_supported());
   EXPECT_TRUE(hmi_capabilities->phone_call_supported());
   EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
+  EXPECT_FALSE(hmi_capabilities->rc_supported());
 
   // verify phone capability
   const smart_objects::SmartObject phone_capability_so =
@@ -547,6 +548,7 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_TRUE(hmi_capabilities->navigation_supported());
   EXPECT_FALSE(hmi_capabilities->phone_call_supported());
   EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
+  EXPECT_FALSE(hmi_capabilities->rc_supported());
 
   // verify navigation capabilities
   smart_objects::SmartObject navigation_capability_so =

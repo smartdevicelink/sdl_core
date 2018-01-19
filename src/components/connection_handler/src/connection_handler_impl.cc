@@ -284,7 +284,6 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
 }
 #endif  // ENABLE_SECURITY
 
-// DEPRECATED
 uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
@@ -542,7 +541,6 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   CloseConnection(connection_handle);
 }
 
-// DEPRECATED
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,

@@ -70,19 +70,7 @@ const uint32_t kConnectionKey = 2u;
 }  // namespace
 
 class GetVehicleDataRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  GetVehicleDataRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~GetVehicleDataRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  am::MockMessageHelper& mock_message_helper_;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
  public:
@@ -201,8 +189,8 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
       CreateCommand<GetVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
-  vehicle_data.insert(
-      am::VehicleData::value_type(kMsgParamKey, am::VehicleDataType::SPEED));
+  vehicle_data.insert(am::VehicleData::value_type(
+      kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
 
@@ -235,7 +223,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
   const hmi_apis::Common_Result::eType hmi_response_code =
       hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   const mobile_result::eType mobile_response_code =
-      mobile_result::VEHICLE_DATA_NOT_AVAILABLE;
+      mobile_result::DATA_NOT_AVAILABLE;
 
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -251,10 +239,6 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
   event.set_smart_object(*event_msg);
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 

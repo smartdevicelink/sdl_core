@@ -110,9 +110,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   /**
    * @brief Returns true, if SDL 4.0 is enabled
+   * @deprecated use max_supported_protocol_version instead
    */
-  // DEPRECATED, use max_supported_protocol_version instead
-  bool enable_protocol_4() const OVERRIDE;
+  DEPRECATED bool enable_protocol_4() const OVERRIDE;
 
   /**
    * @brief Returns application icons folder path

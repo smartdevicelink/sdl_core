@@ -161,7 +161,7 @@ typedef std::set<uint32_t> SoftButtonID;
 /**
  * @brief Defines set of vehicle info types
  */
-typedef std::set<uint32_t> VehicleInfoSubscriptions;
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
 /**
  * @brief Defines set of buttons subscription
@@ -407,6 +407,20 @@ class Application : public virtual InitialApplicationData,
    * @return updated_hash
    */
   virtual void UpdateHash() = 0;
+
+  /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  virtual bool IsHashChangedDuringSuspend() const = 0;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  virtual void SetHashChangedDuringSuspend(const bool state) = 0;
 
   /**
    * @brief method is called when SDL is saving application data for resumption
@@ -837,7 +851,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
-  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  protected:

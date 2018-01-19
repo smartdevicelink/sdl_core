@@ -56,11 +56,9 @@ using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SaveArg;
 using ::testing::InSequence;
-using ::testing::Mock;
 namespace am = ::application_manager;
 using am::commands::SubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
 
 typedef SharedPtr<SubscribeWayPointsRequest> CommandPtr;
 
@@ -106,25 +104,17 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
 
   event.set_smart_object(*event_msg);
 
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
-  Mock::VerifyAndClearExpectations(mock_message_helper);
-
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
   {
     InSequence dummy;
     EXPECT_CALL(app_mngr_, SubscribeAppForWayPoints(_));
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(result_code))
-        .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
     EXPECT_CALL(*app, UpdateHash());
   }
 
   command->Init();
   command->on_event(event);
-
-  Mock::VerifyAndClearExpectations(mock_message_helper);
 }
 
 }  // namespace subscribe_way_points_request
