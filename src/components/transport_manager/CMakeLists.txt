@@ -40,7 +40,6 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -73,9 +72,7 @@ if(BUILD_USB_SUPPORT)
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
-    list(APPEND LIBRARIES
-      Libusb-1.0.16
-    )
+
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
     set(EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
