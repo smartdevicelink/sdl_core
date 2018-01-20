@@ -272,7 +272,7 @@ bool LifeCycle::InitMessageSystem() {
 bool LifeCycle::InitMessageSystem() {
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
 
-  hmi_handler_.AddHMIMessageAdapter(dbus_adapter_);
+  hmi_handler_->AddHMIMessageAdapter(dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
@@ -398,7 +398,6 @@ void LifeCycle::StopComponents() {
   if (dbus_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
     hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    dbus_adapter_->exitReceivingThread();
     StopThread(dbus_adapter_thread_);
     delete dbus_adapter_;
     dbus_adapter_ = NULL;

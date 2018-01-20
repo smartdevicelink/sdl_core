@@ -33,9 +33,11 @@
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
 #include <sstream>
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "utils/logger.h"
 #include "smart_objects/smart_object.h"
+#include "dbus/introspection_xml.cc"
+#include "dbus/message_descriptions.cc"
 
 using ford_message_descriptions::ParameterDescription;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
