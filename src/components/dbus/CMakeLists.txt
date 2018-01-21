@@ -40,11 +40,11 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )
-
+message(${CMAKE_CURRENT_SOURCE_DIR})
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/introspection_xml.cc
   ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
 )
 collect_sources(SOURCES "${PATHS}")
@@ -74,7 +74,6 @@ add_custom_command(
 )
 
 add_library("DBus" ${SOURCES})
-add_dependencies("DBus" Utils install-3rd_party_dbus)
 
 target_link_libraries("DBus" "${LIBRARIES}")
 
