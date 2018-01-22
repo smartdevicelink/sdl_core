@@ -45,11 +45,15 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
+// @deprecated DeviceTypes: PASA_AOA, PASA_BLUETOOTH, MME
 DeviceTypes devicesType = {
     std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
-    std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
-    std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
+    std::make_pair(DeviceType::PASA_AOA, std::string("USB_AOA")),
     std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::PASA_BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::MME, std::string("USB_IOS")),
+    std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
+    std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
     std::make_pair(DeviceType::TCP, std::string("WIFI"))};
 }
 

@@ -823,11 +823,8 @@ void TransportManagerImpl::TryDeviceSwitch(
   bt_adapter->StopDevice(bt_uid);
   adapter->DeviceSwitched(usb_uid);
 
-  // TODO(AOleynik): Check if next line functionality is still needed
   DeactivateDeviceConnections(bt_uid);
 
-  // TODO(AOleynik): Check if next line functionality is still needed
-  device_to_switch->second = adapter;
   device_to_reconnect_ = bt_uid;
 
   const uint32_t timeout = get_settings().app_transport_change_timer() +
