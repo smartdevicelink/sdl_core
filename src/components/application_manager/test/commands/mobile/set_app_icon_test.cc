@@ -111,14 +111,14 @@ class SetAppIconRequestTest
     file_system::CreateDirectoryRecursively(directory);
     file_system::CreateFile(full_file_path);
 
-    EXPECT_CALL(app_mngr_settings_, app_icons_folder())
-        .WillRepeatedly(ReturnRef(kIconFolder));
+    ON_CALL(app_mngr_settings_, app_icons_folder())
+        .WillByDefault(ReturnRef(kIconFolder));
 
-    EXPECT_CALL(app_mngr_settings_, app_storage_folder())
-        .WillRepeatedly(ReturnRef(kAppStorageFolder));
+    ON_CALL(app_mngr_settings_, app_storage_folder())
+        .WillByDefault(ReturnRef(kAppStorageFolder));
 
     mock_app_ = CreateMockApp();
-    EXPECT_CALL(*mock_app_, folder_name()).WillRepeatedly(Return(kAppFolder));
+    ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kAppFolder));
 
     message_ = CreateFullParamsUISO();
 
@@ -295,20 +295,20 @@ TEST_F(SetAppIconRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_3;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillRepeatedly(Return(max_supported_protocol_version));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   request_->Run();
 }
@@ -318,24 +318,24 @@ TEST_F(SetAppIconRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app_));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_4;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillRepeatedly(Return(max_supported_protocol_version));
 
   const uint32_t storage_max_size = 5u;
   EXPECT_CALL(app_mngr_settings_, app_icons_folder_max_size())
       .WillRepeatedly(ReturnRef(storage_max_size));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
@@ -347,17 +347,17 @@ TEST_F(SetAppIconRequestTest, CopyToIconStorage_ZeroIcons_IconSavingSkipped) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_4;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillRepeatedly(Return(max_supported_protocol_version));
 
   const uint32_t storage_max_size = 11u;
@@ -368,7 +368,7 @@ TEST_F(SetAppIconRequestTest, CopyToIconStorage_ZeroIcons_IconSavingSkipped) {
   EXPECT_CALL(app_mngr_settings_, app_icons_amount_to_remove())
       .WillRepeatedly(ReturnRef(icons_amount));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
@@ -383,17 +383,17 @@ TEST_F(SetAppIconRequestTest,
       .WillOnce(Return(mock_app_))
       .WillOnce(Return(mock_app_nonexistent));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_4;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillRepeatedly(Return(max_supported_protocol_version));
 
   const uint32_t storage_max_size = 10u;
@@ -401,6 +401,8 @@ TEST_F(SetAppIconRequestTest,
       .WillRepeatedly(ReturnRef(storage_max_size));
 
   EXPECT_CALL(*mock_app_, policy_app_id()).Times(0);
+
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   request_->Run();
 }
@@ -411,17 +413,17 @@ TEST_F(SetAppIconRequestTest,
       .WillOnce(Return(mock_app_))
       .WillOnce(Return(mock_app_));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_4;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillRepeatedly(Return(max_supported_protocol_version));
 
   const uint32_t storage_max_size = 10u;
@@ -432,7 +434,7 @@ TEST_F(SetAppIconRequestTest,
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(app_policy_id));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   file_system::DeleteFile(kIconFolder + "/" + app_policy_id);
   file_system::CreateDirectory(kIconFolder + "/" + app_policy_id);
@@ -447,17 +449,17 @@ TEST_F(SetAppIconRequestTest,
       .WillOnce(Return(mock_app_))
       .WillOnce(Return(mock_app_nonexistent));
 
-  MockProtocolHandler mock_protocol_hendler;
+  MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler));
+      .WillRepeatedly(ReturnRef(mock_protocol_handler));
 
-  MockProtocolHandlerSettings mock_protocol_hendler_settings;
-  EXPECT_CALL(mock_protocol_hendler, get_settings())
-      .WillRepeatedly(ReturnRef(mock_protocol_hendler_settings));
+  MockProtocolHandlerSettings mock_protocol_handler_settings;
+  EXPECT_CALL(mock_protocol_handler, get_settings())
+      .WillRepeatedly(ReturnRef(mock_protocol_handler_settings));
 
   const protocol_handler::MajorProtocolVersion max_supported_protocol_version =
       protocol_handler::PROTOCOL_VERSION_4;
-  EXPECT_CALL(mock_protocol_hendler_settings, max_supported_protocol_version())
+  EXPECT_CALL(mock_protocol_handler_settings, max_supported_protocol_version())
       .WillOnce(Return(max_supported_protocol_version));
 
   const uint32_t max_storage_size_before_removal = 11u;
@@ -471,7 +473,7 @@ TEST_F(SetAppIconRequestTest,
   EXPECT_CALL(app_mngr_settings_, app_icons_amount_to_remove())
       .WillRepeatedly(ReturnRef(icons_amount));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
