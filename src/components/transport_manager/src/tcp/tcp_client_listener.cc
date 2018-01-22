@@ -235,15 +235,18 @@ void TcpClientListener::Loop() {
     if (enable_keepalive_) {
       SetKeepaliveOptions(connection_fd);
     }
-#if defined(BUILD_TESTS)
+
     const auto device_uid =
         device_name + std::string(":") + std::to_string(port_);
+
+#if defined(BUILD_TESTS)
     TcpDevice* tcp_device =
         new TcpDevice(client_address.sin_addr.s_addr, device_uid, device_name);
 #else
     TcpDevice* tcp_device =
-        new TcpDevice(client_address.sin_addr.s_addr, device_name);
+        new TcpDevice(client_address.sin_addr.s_addr, device_uid);
 #endif  // BUILD_TESTS
+
     DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
     const ApplicationHandle app_handle =
