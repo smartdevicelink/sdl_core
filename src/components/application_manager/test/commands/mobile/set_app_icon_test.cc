@@ -181,6 +181,7 @@ TEST_F(SetAppIconRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
   event.set_smart_object(*msg);
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
   request_->on_event(event);
 }
 
@@ -198,6 +199,7 @@ TEST_F(SetAppIconRequestTest, OnEvent_NonExistentApp_NullPointer) {
   event.set_smart_object(*msg);
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
   request_->on_event(event);
 }
 
@@ -233,7 +235,9 @@ TEST_F(SetAppIconRequestTest, Run_AllCorrectData_SendHMIRequest) {
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  request_->Run();
+  if (request_->Init()) {
+    request_->Run();
+  }
 
   const std::string expected_sync_file_name = file_system::ConvertPathForURL(
       kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName);
@@ -259,7 +263,9 @@ TEST_F(SetAppIconRequestTest, Run_NonExistentApp_ApplicationNotRegistered) {
           MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
           _)).WillOnce(Return(true));
 
-  request_->Run();
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -275,7 +281,10 @@ TEST_F(SetAppIconRequestTest,
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _))
       .WillOnce(Return(true));
 
-  request_->Run();
+  request_ = CreateCommand<SetAppIconRequest>(message_);
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest, Run_NonExistentFile_InvalidData) {
@@ -288,7 +297,10 @@ TEST_F(SetAppIconRequestTest, Run_NonExistentFile_InvalidData) {
       .WillOnce(Return(true));
 
   file_system::RemoveDirectory(kAppStorageFolder);
-  request_->Run();
+
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -311,7 +323,9 @@ TEST_F(SetAppIconRequestTest,
 
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
-  request_->Run();
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -341,7 +355,10 @@ TEST_F(SetAppIconRequestTest,
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
                      data);
-  request_->Run();
+
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest, CopyToIconStorage_ZeroIcons_IconSavingSkipped) {
@@ -374,7 +391,10 @@ TEST_F(SetAppIconRequestTest, CopyToIconStorage_ZeroIcons_IconSavingSkipped) {
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
                      data);
-  request_->Run();
+
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -405,7 +425,9 @@ TEST_F(SetAppIconRequestTest,
 
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
-  request_->Run();
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -440,7 +462,10 @@ TEST_F(SetAppIconRequestTest,
   file_system::DeleteFile(kIconFolder + "/" + app_policy_id);
   file_system::CreateDirectory(kIconFolder + "/" + app_policy_id);
   EXPECT_FALSE(file_system::CreateFile(kIconFolder + "/" + app_policy_id));
-  request_->Run();
+
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 TEST_F(SetAppIconRequestTest,
@@ -466,8 +491,8 @@ TEST_F(SetAppIconRequestTest,
   const uint32_t max_storage_size_before_removal = 11u;
   const uint32_t max_storage_size_after_removal = 120u;
   EXPECT_CALL(app_mngr_settings_, app_icons_folder_max_size())
-      .Times(2)
-      .WillRepeatedly(ReturnRef(max_storage_size_before_removal))
+      .WillOnce(ReturnRef(max_storage_size_before_removal))
+      .WillOnce(ReturnRef(max_storage_size_before_removal))
       .WillOnce(ReturnRef(max_storage_size_after_removal));
 
   const uint32_t icons_amount = 1u;
@@ -479,7 +504,10 @@ TEST_F(SetAppIconRequestTest,
   const std::vector<uint8_t> data(10, 10);
   file_system::Write(kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName,
                      data);
-  request_->Run();
+
+  if (request_->Init()) {
+    request_->Run();
+  }
 }
 
 }  // namespace set_app_icon_request
