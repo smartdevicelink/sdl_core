@@ -124,6 +124,7 @@ class SetAppIconRequestTest
 
     request_ = CreateCommand<SetAppIconRequest>(message_);
   }
+
   void TearDown() OVERRIDE {
     file_system::RemoveDirectory(kAppStorageFolder);
   }
@@ -202,8 +203,8 @@ TEST_F(SetAppIconRequestTest, OnEvent_NonExistentApp_NullPointer) {
 
 TEST_F(SetAppIconRequestTest, Run_AllCorrectData_SendHMIRequest) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_))
-      .WillOnce(Return(mock_app_));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app_));
 
   MockProtocolHandler mock_app_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
@@ -410,8 +411,8 @@ TEST_F(SetAppIconRequestTest,
 TEST_F(SetAppIconRequestTest,
        CopyToIconStorage_PolicyAppIdEqualFolderName_CantCreateIcon) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_))
-      .WillOnce(Return(mock_app_));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app_));
 
   MockProtocolHandler mock_protocol_handler;
   EXPECT_CALL(app_mngr_, protocol_handler())
@@ -465,8 +466,8 @@ TEST_F(SetAppIconRequestTest,
   const uint32_t max_storage_size_before_removal = 11u;
   const uint32_t max_storage_size_after_removal = 120u;
   EXPECT_CALL(app_mngr_settings_, app_icons_folder_max_size())
-      .WillOnce(ReturnRef(max_storage_size_before_removal))
-      .WillOnce(ReturnRef(max_storage_size_before_removal))
+      .Times(2)
+      .WillRepeatedly(ReturnRef(max_storage_size_before_removal))
       .WillOnce(ReturnRef(max_storage_size_after_removal));
 
   const uint32_t icons_amount = 1u;
