@@ -84,9 +84,16 @@ class ShowConstantTBTRequestTest
     msg_params[am::strings::total_distance] = kTotalDistance;
     msg_params[am::strings::time_to_destination] = kTimeToDestination;
 
+    smart_objects::SmartObject soft_button =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    soft_button[am::strings::type] = am::mobile_api::SoftButtonType::SBT_TEXT;
+    soft_button[am::strings::text] = "some text";
+    soft_button[am::strings::soft_button_id] = 15u;
+
     smart_objects::SmartObject soft_buttons =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
-    soft_buttons[0] = "sds";
+    soft_buttons[0] = soft_button;
 
     msg_params[am::strings::soft_buttons] = soft_buttons;
     (*msg)[am::strings::msg_params] = msg_params;
