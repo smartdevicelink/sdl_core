@@ -68,7 +68,7 @@ const std::string kNextTutnIconValue = "0x1A40";
 class ShowConstantTBTRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  MessageSharedPtr CreateFullParamsUISO() {
+  MessageSharedPtr CreateMessageWithParams() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
@@ -83,8 +83,12 @@ class ShowConstantTBTRequestTest
     msg_params[am::strings::eta] = kEta;
     msg_params[am::strings::total_distance] = kTotalDistance;
     msg_params[am::strings::time_to_destination] = kTimeToDestination;
-    msg_params[am::strings::soft_buttons] = "sds";
 
+    smart_objects::SmartObject soft_buttons =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    soft_buttons[0] = "sds";
+
+    msg_params[am::strings::soft_buttons] = soft_buttons;
     (*msg)[am::strings::msg_params] = msg_params;
 
     return msg;
@@ -99,8 +103,8 @@ class ShowConstantTBTRequestTest
     int32_t index = 0;
 
     msg_params[am::hmi_request::navi_texts][index]
-              [am::hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::navigationText1);
+              [am::hmi_request::field_name] =
+                  hmi_apis::Common_TextFieldName::navigationText1;
     msg_params[am::hmi_request::navi_texts][index++]
               [am::hmi_request::field_text] = kNavigationText1;
 
@@ -140,14 +144,13 @@ class ShowConstantTBTRequestTest
 
  private:
   void SetUp() OVERRIDE {
-    message_ = CreateFullParamsUISO();
-    request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+    message_ = CreateMessageWithParams();
     expected_message_ = CreateExpectedMessage();
     mock_app_ = CreateMockApp();
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_polici_handler_interface_));
+        .WillByDefault(ReturnRef(mock_policy_handler_interface_));
   }
 
  protected:
@@ -155,20 +158,25 @@ class ShowConstantTBTRequestTest
   SharedPtr<ShowConstantTBTRequest> request_;
   MessageSharedPtr expected_message_;
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_polici_handler_interface_;
+  MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
 TEST_F(ShowConstantTBTRequestTest, Run_AllCorrectData_SendHMIRequest) {
-  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
+  am::ApplicationConstSharedPtr app_const_ptr(mock_app_);
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons(
+                  (*message_)[am::strings::msg_params], app_const_ptr, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, app_const_ptr, _))
       .Times(2)
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
-  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _));
+  am::ApplicationSharedPtr app_ptr(mock_app_);
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(_, app_ptr, _));
 
   smart_objects::SmartObject msg_params;
   EXPECT_CALL(*mock_app_, set_tbt_show_command(_))
@@ -178,9 +186,9 @@ TEST_F(ShowConstantTBTRequestTest, Run_AllCorrectData_SendHMIRequest) {
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  if (request_->Init()) {
-    request_->Run();
-  }
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 
   EXPECT_TRUE((*expected_message_)[am::strings::msg_params]
                                   [am::hmi_request::navi_texts] ==
@@ -189,73 +197,84 @@ TEST_F(ShowConstantTBTRequestTest, Run_AllCorrectData_SendHMIRequest) {
 
 TEST_F(ShowConstantTBTRequestTest,
        Run_NonExistentApp_ApplicationNotRegistered) {
-  MockAppPtr mock_app_nonexistent;
+  MockAppPtr invalid_mock_app;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_nonexistent));
+      .WillOnce(Return(invalid_mock_app));
 
   ExpectedManageMobileCommandResultCode(
       mobile_apis::Result::APPLICATION_NOT_REGISTERED);
 
-  if (request_->Init()) {
-    request_->Run();
-  }
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest, Run_EmptyParams_InvalidData) {
-  if (message_->keyExists(am::strings::msg_params)) {
-    message_->erase(am::strings::msg_params);
-  }
+  message_ = CreateMessage(smart_objects::SmartType_Map);
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest, Run_ProcessSoftButtonsInvalid_InvalidData) {
-  mobile_apis::Result::eType invalid_data = mobile_apis::Result::INVALID_DATA;
-  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
-      .WillOnce(Return(invalid_data));
+  am::ApplicationConstSharedPtr app_const_ptr(mock_app_);
+  mobile_apis::Result::eType expected_result_code =
+      mobile_apis::Result::INVALID_DATA;
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons(
+                  (*message_)[am::strings::msg_params], app_const_ptr, _, _))
+      .WillOnce(Return(expected_result_code));
 
-  ExpectedManageMobileCommandResultCode(invalid_data);
+  ExpectedManageMobileCommandResultCode(expected_result_code);
 
-  if (request_->Init()) {
-    request_->Run();
-  }
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest, Run_TurnIconInvalid_InvalidData) {
-  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
+  am::ApplicationConstSharedPtr app_const_ptr(mock_app_);
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons(
+                  (*message_)[am::strings::msg_params], app_const_ptr, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  mobile_apis::Result::eType invalid_data = mobile_apis::Result::INVALID_DATA;
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
-      .WillOnce(Return(invalid_data));
+  mobile_apis::Result::eType expected_result_code =
+      mobile_apis::Result::INVALID_DATA;
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, app_const_ptr, _))
+      .WillOnce(Return(expected_result_code));
 
-  ExpectedManageMobileCommandResultCode(invalid_data);
+  ExpectedManageMobileCommandResultCode(expected_result_code);
 
-  if (request_->Init()) {
-    request_->Run();
-  }
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIconInvalid_InvalidData) {
+  am::ApplicationConstSharedPtr app_const_ptr(mock_app_);
   mobile_apis::Result::eType success = mobile_apis::Result::SUCCESS;
-  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons(
+                  (*message_)[am::strings::msg_params], app_const_ptr, _, _))
       .WillOnce(Return(success));
 
-  mobile_apis::Result::eType invalid_data = mobile_apis::Result::INVALID_DATA;
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+  mobile_apis::Result::eType expected_result_code =
+      mobile_apis::Result::INVALID_DATA;
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, app_const_ptr, _))
       .WillOnce(Return(success))
-      .WillOnce(Return(invalid_data));
+      .WillOnce(Return(expected_result_code));
 
-  ExpectedManageMobileCommandResultCode(invalid_data);
+  ExpectedManageMobileCommandResultCode(expected_result_code);
 
-  if (request_->Init()) {
-    request_->Run();
-  }
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -266,9 +285,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -279,9 +297,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -292,9 +309,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -305,9 +321,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -317,9 +332,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -330,9 +344,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -343,9 +356,8 @@ TEST_F(ShowConstantTBTRequestTest,
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
-  if (request_->Init()) {
-    request_->Run();
-  }
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -360,6 +372,7 @@ TEST_F(ShowConstantTBTRequestTest,
 
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::SUCCESS);
 
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
   request_->on_event(event);
 }
 
@@ -371,6 +384,7 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
+  request_ = CreateCommand<ShowConstantTBTRequest>(message_);
   request_->on_event(event);
 }
 
