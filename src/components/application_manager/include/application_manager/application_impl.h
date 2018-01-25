@@ -52,6 +52,7 @@
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
 #include "utils/timer.h"
+#include "utils/macro.h"
 
 namespace usage_statistics {
 
@@ -65,11 +66,33 @@ using namespace timer;
 namespace mobile_api = mobile_apis;
 namespace custom_str = custom_string;
 
+/**
+ * @brief SwitchApplicationParameters updates application internal parameters
+ * on transport switch. Must be used only for switching flow.
+ * @param app Pointer to switched application
+ * @param app_id New application id (connection key)
+ * @param device_id New device id
+ * @param mac_address New device MAC address
+ */
+void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                 const uint32_t app_id,
+                                 const size_t device_id,
+                                 const std::string& mac_address);
+
 class ApplicationImpl : public virtual Application,
                         public virtual InitialApplicationDataImpl,
                         public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(
+      uint32_t application_id,
+      const std::string& policy_app_id,
+      const std::string& mac_address,
+      const connection_handler::DeviceHandle device_id,
+      const custom_str::CustomString& app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      ApplicationManager& application_manager);
+
+  DEPRECATED ApplicationImpl(
       uint32_t application_id,
       const std::string& policy_app_id,
       const std::string& mac_address,
@@ -161,7 +184,7 @@ class ApplicationImpl : public virtual Application,
   void increment_list_files_in_none_count();
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
-  void set_device(connection_handler::DeviceHandle device);
+  DEPRECATED void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -198,13 +221,6 @@ class ApplicationImpl : public virtual Application,
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
-
-#ifdef CUSTOMER_PASA
-  // DEPRECATED
-  virtual bool flag_sending_hash_change_after_awake() const;
-  // DEPRECATED
-  virtual void set_flag_sending_hash_change_after_awake(bool flag);
-#endif  // CUSTOMER_PASA
 
   /**
    * @brief Change Hash for current application
@@ -248,6 +264,13 @@ class ApplicationImpl : public virtual Application,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
+
+  /**
+   * @brief SetInitialState sets initial HMI state for application on
+   * registration
+   * @param state Hmi state value
+   */
+  void SetInitialState(HmiStatePtr state) FINAL;
 
   /**
   * @brief SetRegularState set permanent state of application
@@ -440,8 +463,8 @@ class ApplicationImpl : public virtual Application,
   uint32_t delete_file_in_none_count_;
   uint32_t list_files_in_none_count_;
   std::string app_icon_path_;
-  connection_handler::DeviceHandle device_;
-  const std::string mac_address_;
+  std::string mac_address_;
+  connection_handler::DeviceHandle device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
@@ -486,6 +509,12 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
+  friend void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                          const uint32_t app_id,
+                                          const size_t device_id,
+                                          const std::string& mac_address);
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

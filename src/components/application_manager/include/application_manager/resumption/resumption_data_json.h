@@ -85,14 +85,12 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  // DEPRECATED
-  void OnSuspend() FINAL;
+  DEPRECATED void OnSuspend() FINAL;
 
   /**
    * @brief Decrements ignition counter for all registered applications
    */
-  // DEPRECATED
-  void OnAwake() FINAL;
+  DEPRECATED void OnAwake() FINAL;
 
   /**
    * @brief Increments ignition counter for all registered applications

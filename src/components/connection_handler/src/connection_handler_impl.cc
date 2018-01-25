@@ -38,6 +38,7 @@
 
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
+#include "encryption/hashing.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
@@ -136,15 +137,21 @@ void ConnectionHandlerImpl::OnDeviceFound(
 void ConnectionHandlerImpl::OnDeviceAdded(
     const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-  device_list_.insert(
-      DeviceMap::value_type(device_info.device_handle(),
-                            Device(device_info.device_handle(),
-                                   device_info.name(),
-                                   device_info.mac_address(),
-                                   device_info.connection_type())));
-  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
+  auto handle = device_info.device_handle();
+
+  Device device(handle,
+                device_info.name(),
+                device_info.mac_address(),
+                device_info.connection_type());
+
+  auto result = device_list_.insert(std::make_pair(handle, device));
+
+  if (!result.second) {
+    LOG4CXX_ERROR(logger_,
+                  "Device with handle " << handle
+                                        << " is known already. "
+                                           "Information won't be updated.");
+    return;
   }
 }
 
@@ -180,6 +187,49 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
   device_list_.erase(device_info.device_handle());
+}
+
+void ConnectionHandlerImpl::OnDeviceSwitchingFinish(
+    const transport_manager::DeviceUID& device_uid) {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceSwitchingFinish(
+        encryption::MakeHash(device_uid));
+  }
+}
+
+namespace {
+struct DeviceFinder {
+  explicit DeviceFinder(const std::string& device_uid)
+      : device_uid_(device_uid) {}
+  bool operator()(const DeviceMap::value_type& device) {
+    return device_uid_ == device.second.mac_address();
+  }
+
+ private:
+  const std::string& device_uid_;
+};
+}  // namespace
+
+void ConnectionHandlerImpl::OnDeviceSwitchingStart(
+    const std::string& device_uid_from, const std::string& device_uid_to) {
+  auto device_from =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_from)));
+
+  auto device_to =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_to)));
+
+  DCHECK_OR_RETURN_VOID(device_list_.end() != device_from);
+  DCHECK_OR_RETURN_VOID(device_list_.end() != device_to);
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceSwitchingStart(device_from->second,
+                                                         device_to->second);
+  }
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
@@ -646,7 +696,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key,
     uint32_t* app_id,
     std::list<int32_t>* sessions_list,
-    uint32_t* device_id) const {
+    connection_handler::DeviceHandle* device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const int32_t error_result = -1;
@@ -688,6 +738,15 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
                "Connection " << static_cast<int32_t>(conn_handle) << " has "
                              << session_map.size() << " sessions.");
   return 0;
+}
+
+DEPRECATED int32_t
+ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
+                                           uint32_t* app_id,
+                                           std::list<int32_t>* sessions_list,
+                                           uint32_t* device_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return GetDataOnSessionKey(key, app_id, sessions_list, device_id);
 }
 
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {

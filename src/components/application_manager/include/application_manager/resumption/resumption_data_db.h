@@ -55,6 +55,7 @@ struct ApplicationParams {
   mobile_apis::HMILevel::eType m_hmi_level;
   bool m_is_media_application;
   bool m_is_valid;
+  app_mngr::ApplicationSharedPtr app_ptr;
 };
 
 /**
@@ -113,14 +114,12 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  // DEPRECATED
-  void OnSuspend() FINAL;
+  DEPRECATED void OnSuspend() FINAL;
 
   /**
    * @brief Decrements ignition counter for all registered applications
    */
-  // DEPRECATED
-  void OnAwake() FINAL;
+  DEPRECATED void OnAwake() FINAL;
 
   /**
    * @brief Increments ignition counter for all registered applications

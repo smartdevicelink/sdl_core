@@ -1632,6 +1632,12 @@ const PolicySettings& CacheManager::get_settings() const {
   return *settings_;
 }
 
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Implementation does not support user consents.");
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(
     CacheManager* cache_manager)
     : cache_manager_(cache_manager)

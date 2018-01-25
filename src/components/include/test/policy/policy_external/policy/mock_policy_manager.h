@@ -215,6 +215,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
   MOCK_CONST_METHOD1(IsNeedToUpdateExternalConsentStatus,
                      bool(const ExternalConsentStatus&));
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
 };
 }  // namespace policy_manager_test
 }  // namespace components

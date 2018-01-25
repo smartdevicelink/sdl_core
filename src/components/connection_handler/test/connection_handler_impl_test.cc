@@ -342,9 +342,10 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
   uint32_t app_id = 0;
   const uint32_t testid = SessionHash(uid_, start_session_id_);
 
+  connection_handler::DeviceHandle null_handle = 0;
   EXPECT_EQ(0,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, NULL));
+                connection_key_, &app_id, NULL, &null_handle));
   EXPECT_EQ(testid, app_id);
 }
 
@@ -352,9 +353,10 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_SessionNotStarted) {
   AddTestDeviceConnection();
 
   uint32_t app_id = 0;
+  connection_handler::DeviceHandle null_handle = 0;
   EXPECT_EQ(-1,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, NULL));
+                connection_key_, &app_id, NULL, &null_handle));
 }
 
 TEST_F(ConnectionHandlerTest, GetDeviceID) {
@@ -467,6 +469,13 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
   EXPECT_TRUE(
       connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
+}
+
+MATCHER_P(SameDevice, device, "") {
+  return arg.device_handle() == device.device_handle() &&
+         arg.user_friendly_name() == device.user_friendly_name() &&
+         arg.mac_address() == device.mac_address() &&
+         arg.connection_type() == device.connection_type();
 }
 
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
@@ -1890,6 +1899,41 @@ TEST_F(ConnectionHandlerTest, RunAppOnDevice_AppOnDevice_SUCCESS) {
   EXPECT_CALL(mock_transport_manager_,
               RunAppOnDevice(device_handle_, bundle_id));
   connection_handler_->RunAppOnDevice(hash_of_mac_address, bundle_id);
+}
+
+TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  const transport_manager::DeviceInfo device_info_1(
+      device_handle_, mac_address_, device_name_, connection_type_);
+
+  connection_handler_->OnDeviceAdded(device_info_1);
+
+  const auto second_mac_address = "second_mac_address";
+  const transport_manager::DeviceInfo device_info_2(device_handle_ + 1,
+                                                    second_mac_address,
+                                                    "second_device_name",
+                                                    "second_connection_type");
+
+  connection_handler_->OnDeviceAdded(device_info_2);
+
+  connection_handler::Device d1(device_info_1.device_handle(),
+                                device_info_1.name(),
+                                device_info_1.mac_address(),
+                                device_info_1.connection_type());
+
+  connection_handler::Device d2(device_info_2.device_handle(),
+                                device_info_2.name(),
+                                device_info_2.mac_address(),
+                                device_info_2.connection_type());
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnDeviceSwitchingStart(SameDevice(d1), SameDevice(d2)));
+
+  connection_handler_->OnDeviceSwitchingStart(mac_address_, second_mac_address);
 }
 
 }  // namespace connection_handler_test

@@ -50,10 +50,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
-  // DEPRECATED
-  MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
-  // DEPRECATED
-  MOCK_METHOD1(set_flag_sending_hash_change_after_awake, void(bool flag));
+  DEPRECATED MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
+  DEPRECATED MOCK_METHOD1(set_flag_sending_hash_change_after_awake,
+                          void(bool flag));
   MOCK_CONST_METHOD0(IsHashChangedDuringSuspend, bool());
   MOCK_METHOD1(SetHashChangedDuringSuspend, void(const bool flag));
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
@@ -157,6 +156,7 @@ class MockApplication : public ::application_manager::Application {
                bool(mobile_apis::FunctionID::eType cmd_id,
                     ::application_manager::TLimitSource source));
   MOCK_METHOD0(usage_report, ::application_manager::UsageStatistics&());
+  MOCK_METHOD1(SetInitialState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetRegularState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetPostponedState,
                void(::application_manager::HmiStatePtr state));

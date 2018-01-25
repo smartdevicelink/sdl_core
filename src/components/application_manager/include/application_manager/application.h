@@ -48,6 +48,7 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -561,7 +562,8 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
-  virtual void set_device(connection_handler::DeviceHandle device) = 0;
+  DEPRECATED virtual void set_device(
+      connection_handler::DeviceHandle device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
 
@@ -616,6 +618,13 @@ class Application : public virtual InitialApplicationData,
    * @return object for recording statistics
    */
   virtual UsageStatistics& usage_report() = 0;
+
+  /**
+   * @brief SetInitialState sets initial HMI state for application on
+   * registration
+   * @param state Hmi state value
+   */
+  virtual void SetInitialState(HmiStatePtr state) = 0;
 
   /**
    * @brief SetRegularState set permanent state of application
@@ -707,6 +716,16 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsAudioApplication() const = 0;
 
   /**
+   * DEPRECATED
+   * @brief GetDeviceId allows to obtain device id which posseses
+   * by this application.
+   * @return device the device id.
+   */
+  std::string GetDeviceId() const {
+    return device_id_;
+  }
+
+  /**
    * @brief IsRegistered allows to distinguish if this
    * application has been registered.
    *
@@ -761,16 +780,6 @@ class Application : public virtual InitialApplicationData,
    */
   void SetPackageName(const std::string& packageName) {
     package_name_ = packageName;
-  }
-
-  /**
-   * @brief GetDeviceId allows to obtain device id which posseses
-   * by this application.
-   *
-   * @return device the device id.
-   */
-  std::string GetDeviceId() const {
-    return device_id_;
   }
 
   /**
