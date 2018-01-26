@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/get_urls_response.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 namespace commands {
@@ -46,7 +47,7 @@ void GetUrlsResponse::Run() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  application_manager_.SendMessageToHMI(message_);
+  application_manager_.GetRPCService().SendMessageToHMI(message_);
 }
 
 }  // namespace commands

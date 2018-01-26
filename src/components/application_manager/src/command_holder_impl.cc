@@ -113,7 +113,7 @@ void CommandHolderImpl::ResumeHmiCommand(ApplicationSharedPtr application) {
 
   for (auto cmd : app_commands->second) {
     (*cmd)[strings::msg_params][strings::app_id] = application->hmi_app_id();
-    app_manager_.ManageHMICommand(cmd);
+    app_manager_.GetRPCService().ManageHMICommand(cmd);
   }
 
   app_hmi_commands_.erase(app_commands);
@@ -132,7 +132,7 @@ void CommandHolderImpl::ResumeMobileCommand(ApplicationSharedPtr application) {
 
   for (auto cmd : app_commands->second) {
     (*cmd)[strings::params][strings::connection_key] = application->app_id();
-    app_manager_.ManageMobileCommand(
+    app_manager_.GetRPCService().ManageMobileCommand(
         cmd, commands::Command::CommandOrigin::ORIGIN_MOBILE);
   }
 

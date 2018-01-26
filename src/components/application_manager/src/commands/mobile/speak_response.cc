@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/speak_response.h"
-
+#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -49,7 +49,7 @@ SpeakResponse::~SpeakResponse() {}
 void SpeakResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

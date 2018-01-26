@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/set_display_layout_response.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -47,7 +48,7 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {}
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

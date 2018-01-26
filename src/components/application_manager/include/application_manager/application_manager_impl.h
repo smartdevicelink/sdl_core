@@ -54,6 +54,7 @@
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/command_holder.h"
+#include "application_manager/rpc_service.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -137,20 +138,6 @@ struct MessageFromMobile : public utils::SharedPtr<Message> {
     return (*this)->Priority().OrderingValue();
   }
 };
-
-struct MessageToMobile : public utils::SharedPtr<Message> {
-  MessageToMobile() : is_final(false) {}
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
-                           bool final_message)
-      : utils::SharedPtr<Message>(message), is_final(final_message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const {
-    return (*this)->Priority().OrderingValue();
-  }
-  // Signals if connection to mobile must be closed after sending this message
-  bool is_final;
-};
-
 struct MessageFromHmi : public utils::SharedPtr<Message> {
   MessageFromHmi() {}
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
@@ -161,25 +148,11 @@ struct MessageFromHmi : public utils::SharedPtr<Message> {
   }
 };
 
-struct MessageToHmi : public utils::SharedPtr<Message> {
-  MessageToHmi() {}
-  explicit MessageToHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const {
-    return (*this)->Priority().OrderingValue();
-  }
-};
-
 // Short type names for prioritized message queues
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
     FromMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
-    ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
     FromHmiQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
-    ToHmiQueue;
 
 // AudioPassThru
 typedef struct {
@@ -202,9 +175,7 @@ class ApplicationManagerImpl
       public security_manager::SecurityManagerListener,
 #endif  // ENABLE_SECURITY
       public impl::FromMobileQueue::Handler,
-      public impl::ToMobileQueue::Handler,
       public impl::FromHmiQueue::Handler,
-      public impl::ToHmiQueue::Handler,
       public impl::AudioPassThruQueue::Handler
 #ifdef TELEMETRY_MONITOR
       ,
@@ -294,9 +265,6 @@ class ApplicationManagerImpl
   std::vector<std::string> devices(
       const std::string& policy_app_id) const OVERRIDE;
 
-  virtual void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
-
-  virtual void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;
 #endif  // SDL_REMOTE_CONTROL
 
   /**
@@ -844,20 +812,8 @@ class ApplicationManagerImpl
 
   void StartDevicesDiscovery();
 
-  // Put message to the queue to be sent to mobile.
-  // if |final_message| parameter is set connection to mobile will be closed
-  // after processing this message
-  void SendMessageToMobile(const commands::MessageSharedPtr message,
-                           bool final_message = false) OVERRIDE;
-
-  void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
-
   void RemoveHMIFakeParameters(
       application_manager::MessagePtr& message) OVERRIDE;
-
-  bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                           commands::Command::CommandOrigin origin) OVERRIDE;
-  bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
@@ -1179,6 +1135,9 @@ class ApplicationManagerImpl
     return *policy_handler_;
   }
 
+  virtual rpc_service::RPCService& GetRPCService() const OVERRIDE {
+    return *rpc_service_;
+  }
   /*
    * @brief Function Should be called when Low Voltage is occured
    */
@@ -1338,6 +1297,12 @@ class ApplicationManagerImpl
 
   app_launch::AppLaunchCtrl& app_launch_ctrl() OVERRIDE;
 
+  /**
+   * @brief Function returns supported SDL Protocol Version
+   * @return protocol version depends on parameters from smartDeviceLink.ini.
+   */
+  protocol_handler::MajorProtocolVersion SupportedSDLVersion() const OVERRIDE;
+
  private:
   /**
    * @brief PullLanguagesInfo allows to pull information about languages.
@@ -1392,14 +1357,8 @@ class ApplicationManagerImpl
   // CALLED ON messages_from_mobile_ thread!
   void Handle(const impl::MessageFromMobile message) OVERRIDE;
 
-  // CALLED ON messages_to_mobile_ thread!
-  void Handle(const impl::MessageToMobile message) OVERRIDE;
-
   // CALLED ON messages_from_hmi_ thread!
   void Handle(const impl::MessageFromHmi message) OVERRIDE;
-
-  // CALLED ON messages_to_hmi_ thread!
-  void Handle(const impl::MessageToHmi message) OVERRIDE;
 
   // CALLED ON audio_pass_thru_messages_ thread!
   void Handle(const impl::AudioData message) OVERRIDE;
@@ -1547,12 +1506,6 @@ class ApplicationManagerImpl
    * @param app_id Application to proceed
    */
   void DisallowStreaming(uint32_t app_id);
-
-  /**
-   * @brief Function returns supported SDL Protocol Version
-   * @return protocol version depends on parameters from smartDeviceLink.ini.
-   */
-  protocol_handler::MajorProtocolVersion SupportedSDLVersion() const;
 
   /**
    * @brief Types of directories used by Application Manager
@@ -1714,12 +1667,8 @@ class ApplicationManagerImpl
 
   // Thread that pumps messages coming from mobile side.
   impl::FromMobileQueue messages_from_mobile_;
-  // Thread that pumps messages being passed to mobile side.
-  impl::ToMobileQueue messages_to_mobile_;
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
-  // Thread that pumps messages being passed to HMI.
-  impl::ToHmiQueue messages_to_hmi_;
   // Thread that pumps messages audio pass thru to mobile.
   impl::AudioPassThruQueue audio_pass_thru_messages_;
 
@@ -1774,6 +1723,7 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
+  std::unique_ptr<rpc_service::RPCService> rpc_service_;
 
 #ifdef BUILD_TESTS
  public:

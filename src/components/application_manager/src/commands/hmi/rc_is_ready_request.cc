@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/rc_is_ready_request.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -91,7 +92,7 @@ void RCIsReadyRequest::SendMessageToHMI() {
   utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
-  application_manager_.ManageHMICommand(get_capabilities);
+  application_manager_.GetRPCService().ManageHMICommand(get_capabilities);
 }
 
 }  // namespace commands

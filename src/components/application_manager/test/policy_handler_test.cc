@@ -67,6 +67,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_rpc_service.h"
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 

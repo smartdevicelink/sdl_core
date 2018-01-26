@@ -37,6 +37,7 @@
 #include "utils/make_shared.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 namespace application_manager {
@@ -241,7 +242,8 @@ void CommandRequestImpl::onTimeOut() {
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
   AddTimeOutComponentInfoToMessage(*response);
-  application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(response,
+                                                           ORIGIN_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -304,7 +306,7 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
-  application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(result, ORIGIN_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
@@ -432,7 +434,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!application_manager_.ManageHMICommand(result)) {
+    if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -461,7 +463,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!application_manager_.ManageHMICommand(result)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -628,7 +630,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             correlation_id(),
             app->app_id());
 
-    application_manager_.SendMessageToMobile(response);
+    application_manager_.GetRPCService().SendMessageToMobile(response);
     return false;
   }
 
