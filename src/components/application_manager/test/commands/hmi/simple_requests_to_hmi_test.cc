@@ -152,8 +152,8 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
   SharedPtr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
-
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(NotNull()));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(NotNull()));
 
   command->SendRequest();
 }
@@ -254,7 +254,9 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->app_mngr_, GetRPCService())
+      .WillOnce(ReturnRef(this->rpc_service_));
+  EXPECT_CALL(this->rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }
@@ -263,7 +265,9 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->app_mngr_, GetRPCService())
+      .WillOnce(ReturnRef(this->rpc_service_));
+  EXPECT_CALL(this->rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }
@@ -272,8 +276,9 @@ TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->app_mngr_, GetRPCService())
+      .WillOnce(ReturnRef(this->rpc_service_));
+  EXPECT_CALL(this->rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }

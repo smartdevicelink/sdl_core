@@ -82,6 +82,9 @@ namespace application_manager {
 namespace event_engine {
 class EventDispatcher;
 }
+namespace rpc_service {
+class RPCService;
+}
 
 class Application;
 class StateControllerImpl;
@@ -135,6 +138,12 @@ class ApplicationManager {
 
   virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
+
+  /**
+   * @brief set_protocol_handler
+   * @param handler
+   * set protocol handler and initialize rpc_service
+   */
   virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
   virtual void set_connection_handler(
@@ -175,10 +184,6 @@ class ApplicationManager {
 
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
-
-  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
-
-  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
 
   virtual functional_modules::PluginManager& GetPluginManager() = 0;
 #endif  // SDL_REMOTE_CONTROL
@@ -308,17 +313,8 @@ class ApplicationManager {
    */
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
-  virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
-                                   bool final_message = false) = 0;
-
-  virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
-
   virtual void RemoveHMIFakeParameters(
       application_manager::MessagePtr& message) = 0;
-
-  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
-  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                                   commands::Command::CommandOrigin origin) = 0;
 
   virtual MessageValidationResult ValidateMessageBySchema(
       const Message& message) = 0;
@@ -379,6 +375,7 @@ class ApplicationManager {
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
+  virtual rpc_service::RPCService& GetRPCService() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
@@ -462,6 +459,8 @@ class ApplicationManager {
       const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
+
+  virtual bool IsLowVoltage() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
@@ -612,6 +611,9 @@ class ApplicationManager {
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
+
+  virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
+      const = 0;
 
   /*
    * @brief Converts connection string transport type representation
