@@ -36,6 +36,7 @@
 
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 
 #include "utils/file_system.h"
 
@@ -275,7 +276,7 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
-  application_manager_.ManageHMICommand(notification);
+  application_manager_.GetRPCService().ManageHMICommand(notification);
 }
 
 }  // namespace commands

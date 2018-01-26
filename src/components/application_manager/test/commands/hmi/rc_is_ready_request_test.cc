@@ -104,7 +104,8 @@ class RCIsReadyRequestTest
     EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::RC_GetCapabilities, _))
         .WillOnce(Return(capabilities));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_, ManageHMICommand(capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,

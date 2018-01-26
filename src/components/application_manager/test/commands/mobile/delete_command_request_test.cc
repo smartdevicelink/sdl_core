@@ -184,8 +184,9 @@ TEST_F(DeleteCommandRequestTest,
   EXPECT_CALL(*mock_app_, UpdateHash());
 
   MessageSharedPtr vr_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 

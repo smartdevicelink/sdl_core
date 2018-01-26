@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -63,7 +64,7 @@ void CommandNotificationImpl::SendNotification() {
   LOG4CXX_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

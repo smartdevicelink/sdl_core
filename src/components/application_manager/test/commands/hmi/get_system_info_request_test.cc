@@ -77,8 +77,8 @@ TEST_F(GetSystemInfoRequestTest, RUN_SendRequest_SUCCESS) {
   const uint32_t kAppId = command->application_id();
 
   EXPECT_CALL(app_mngr_, set_application_id(kCorrelationId, kAppId));
-
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 

@@ -88,8 +88,8 @@ TEST_F(OnTouchEventNotificationTest, Run_AppIsNotFullscreen_UNSUCCESS) {
   EXPECT_CALL(*mock_app, IsFullscreen()).WillRepeatedly(Return(false));
 
   EXPECT_CALL(*mock_app, app_id()).Times(0);
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command_->Run();
 }
@@ -136,8 +136,9 @@ TEST_F(OnTouchEventNotificationTest, Run_NotEmptyListOfAppsWithNavi_SUCCESS) {
   EXPECT_CALL(*mock_app, IsFullscreen()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _)).Times(2);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(CheckMessageData(), _))
+      .Times(2);
 
   command_->Run();
 }
