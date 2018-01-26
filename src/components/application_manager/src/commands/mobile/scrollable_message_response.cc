@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/scrollable_message_response.h"
-
+#include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -55,7 +55,7 @@ void ScrollableMessageResponse::Run() {
     application->UnsubscribeFromSoftButtons(
         (*message_)[strings::params][strings::function_id].asInt());
   }
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

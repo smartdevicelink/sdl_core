@@ -113,8 +113,10 @@ class PutFileRequestTest
   }
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
+    EXPECT_CALL(app_mngr_, GetRPCService())
+        .WillRepeatedly(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
                             am::commands::Command::CommandOrigin::ORIGIN_SDL));
   }
@@ -146,8 +148,9 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   utils::SharedPtr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       SendMessageToMobile(
           MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
           _));
@@ -166,8 +169,9 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(application_sptr));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Run();
 }
@@ -319,7 +323,9 @@ TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .WillRepeatedly(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnPutFile)))
       .WillOnce(Return(true));

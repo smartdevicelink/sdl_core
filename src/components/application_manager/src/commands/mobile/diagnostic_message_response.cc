@@ -32,6 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/diagnostic_message_response.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -46,7 +47,7 @@ DiagnosticMessageResponse::~DiagnosticMessageResponse() {}
 void DiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

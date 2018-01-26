@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "application_manager/core_service.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "json/json.h"
@@ -126,11 +127,11 @@ ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
 }
 
 void CoreService::SendMessageToHMI(const MessagePtr& message) {
-  application_manager_.SendPostMessageToHMI(message);
+  application_manager_.GetRPCService().SendPostMessageToHMI(message);
 }
 
 void CoreService::SendMessageToMobile(const MessagePtr& message) {
-  application_manager_.SendPostMessageToMobile(message);
+  application_manager_.GetRPCService().SendPostMessageToMobile(message);
 }
 
 uint32_t CoreService::GetNextCorrelationID() {

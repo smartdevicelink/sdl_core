@@ -179,7 +179,8 @@ class SetGlobalPropertiesRequestTest
   }
 
   void ExpectInvalidData() {
-    EXPECT_CALL(app_mngr_,
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
                     am::commands::Command::ORIGIN_SDL));
@@ -297,8 +298,9 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event_vr);
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
@@ -321,9 +323,9 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .Times(0);
   command->on_event(event);
@@ -351,8 +353,9 @@ TEST_F(SetGlobalPropertiesRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
@@ -613,9 +616,9 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
                           am::commands::Command::ORIGIN_SDL));
 
@@ -1060,8 +1063,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
 
@@ -1093,7 +1096,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
 
@@ -1164,8 +1168,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   OnEventTTSSetupHelper(msg, command);
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
 
@@ -1200,8 +1204,9 @@ TEST_F(SetGlobalPropertiesRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 

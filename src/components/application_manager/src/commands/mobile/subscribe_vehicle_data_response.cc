@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
-
+#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -47,7 +47,7 @@ SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}
 
 void SubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands
