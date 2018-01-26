@@ -181,8 +181,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
   ON_CALL(*mock_app, RemoveCommand(_)).WillByDefault(Return());
 
   MessageSharedPtr vr_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
@@ -231,14 +232,15 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(
           Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
 
   req_vr->Run();
 
   MessageSharedPtr vr_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
@@ -605,8 +607,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 TEST_F(CreateInteractionChoiceSetRequestTest,
        OnTimeOut_InvalidErrorFromHMI_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
                   am::commands::Command::ORIGIN_SDL));
@@ -649,7 +651,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   command_->on_event(event);
 
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(kChoiceSetId));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   command_->onTimeOut();
 }
@@ -679,6 +682,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
@@ -750,8 +754,8 @@ TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
       mobile_apis::Result::INVALID_ENUM;
   CreateInteractionChoiceSetResponsePtr command(
       CreateCommand<CreateInteractionChoiceSetResponse>(message));
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(message, false));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(message, false));
   command->Run();
 }
 
@@ -762,8 +766,8 @@ TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessTrue_SUCCESS) {
       mobile_apis::Result::SUCCESS;
   CreateInteractionChoiceSetResponsePtr command(
       CreateCommand<CreateInteractionChoiceSetResponse>(message));
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(message, false));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(message, false));
   command->Run();
 }
 
@@ -796,8 +800,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   command_->Run();
 
   FillMessageFieldsItem2(message_);
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
                   am::commands::Command::ORIGIN_SDL));

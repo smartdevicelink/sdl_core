@@ -83,9 +83,9 @@ TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -111,9 +111,9 @@ TEST_F(DiagnosticMessageRequestTest, Run_NotSupportedDiagnosticMode_UNSUCCESS) {
   const std::vector<uint32_t> empty_supported_diag_modes;
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(empty_supported_diag_modes));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
@@ -140,8 +140,8 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(supported_diag_modes));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage)));
 
@@ -153,8 +153,8 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_UNSUCCESS) {
 
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -170,9 +170,9 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
 
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   command->on_event(event);

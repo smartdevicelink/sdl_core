@@ -83,8 +83,8 @@ TEST_F(OnTBTClientStateNotificationTest, Run_HmiLevelNone_UNSUCCESS) {
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   EXPECT_CALL(*mock_app, app_id()).Times(0);
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command_->Run();
 }
@@ -127,8 +127,8 @@ TEST_F(OnTBTClientStateNotificationTest,
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(CheckMessageData(), _));
 
   command_->Run();
 }

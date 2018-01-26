@@ -147,7 +147,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
       .WillOnce(ReturnRef(mock_policy_handler_interface_));
   EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
       .WillOnce(GetArg3(&result));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   CheckNotificationParams(
                       am::mobile_api::FunctionID::OnDriverDistractionID, state),

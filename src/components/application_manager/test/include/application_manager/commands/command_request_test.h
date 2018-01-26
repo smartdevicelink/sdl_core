@@ -94,7 +94,9 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MessageSharedPtr CatchMobileCommandResult(CallableT delegate,
                                             bool call_return = true) {
     MessageSharedPtr result_msg;
-    EXPECT_CALL(this->app_mngr_, ManageMobileCommand(_, _))
+    EXPECT_CALL(this->app_mngr_, GetRPCService())
+        .WillOnce(ReturnRef(this->rpc_service_));
+    EXPECT_CALL(this->rpc_service_, ManageMobileCommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
     return result_msg;
@@ -104,7 +106,9 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MessageSharedPtr CatchHMICommandResult(CallableT delegate,
                                          bool call_return = true) {
     MessageSharedPtr result_msg;
-    EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+    ON_CALL(this->app_mngr_, GetRPCService())
+        .WillByDefault(ReturnRef(this->rpc_service_));
+    EXPECT_CALL(this->rpc_service_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
     return result_msg;

@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -90,16 +91,16 @@ void TTSIsReadyRequest::SendMessageToHMI() {
                                         application_manager_));
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_handle_response_for(*get_language);
-  application_manager_.ManageHMICommand(get_language);
+  application_manager_.GetRPCService().ManageHMICommand(get_language);
   utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::TTS_GetSupportedLanguages,
           application_manager_));
-  application_manager_.ManageHMICommand(get_all_languages);
+  application_manager_.GetRPCService().ManageHMICommand(get_all_languages);
   utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::TTS_GetCapabilities, application_manager_));
-  application_manager_.ManageHMICommand(get_capabilities);
+  application_manager_.GetRPCService().ManageHMICommand(get_capabilities);
 }
 }  // namespace commands
 

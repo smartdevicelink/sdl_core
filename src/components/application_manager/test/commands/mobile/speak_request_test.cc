@@ -107,8 +107,8 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     MessageSharedPtr response_to_mobile;
     EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
-
-    EXPECT_CALL(app_mngr_,
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
                     _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
         .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
@@ -143,9 +143,9 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
   MessageSharedPtr response_to_mobile;
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
@@ -188,9 +188,9 @@ TEST_F(SpeakRequestTest, Run_ApplicationIsNotRegistered) {
 
   ON_CALL(app_mngr_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -203,9 +203,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithWhiteSpace_InvalidData) {
   CommandPtr command(CreateCommand<SpeakRequest>(request_));
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -217,9 +217,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar1_InvalidData) {
   CommandPtr command(CreateCommand<SpeakRequest>(request_));
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -232,8 +232,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar2_InvalidData) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -246,8 +247,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar3_InvalidData) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -260,8 +262,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar4_InvalidData) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -274,8 +277,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectCharInfirstPlace_InvalidData) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -294,8 +298,9 @@ TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
 
   command->Run();
@@ -314,8 +319,9 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
 
   command->Run();
@@ -324,8 +330,8 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
 TEST_F(SpeakRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   CommandPtr command(CreateCommand<SpeakRequest>());
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 
@@ -343,9 +349,9 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
   CommandPtr command(CreateCommand<SpeakRequest>(request_));
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
   command->on_event(event);
 }
@@ -361,9 +367,9 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
   CommandPtr command(CreateCommand<SpeakRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS), _));
   command->on_event(event);
 }

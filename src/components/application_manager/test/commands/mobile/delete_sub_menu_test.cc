@@ -151,8 +151,9 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
       .WillOnce(Return(accessor));
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
@@ -177,8 +178,9 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
 TEST_F(DeleteSubMenuRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(
                               mobile_apis::Result::APPLICATION_NOT_REGISTERED),
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
@@ -194,8 +196,8 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   smart_objects::SmartObject* invalid_sub_menu = NULL;
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(invalid_sub_menu));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   CheckMessageResultCode(mobile_apis::Result::INVALID_ID),
                   am::commands::Command::CommandOrigin::ORIGIN_SDL));
@@ -282,8 +284,9 @@ TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
       kConnectionKey;
   DeleteSubMenuResponsePtr command(
       CreateCommand<DeleteSubMenuResponse>(message));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       SendMessageToMobile(CheckMessageConnectionKey(kConnectionKey), _));
   command->Run();
 }
@@ -302,7 +305,8 @@ TEST_F(DeleteSubMenuRequestTest,
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).Times(0);
   EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
   EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
 
@@ -325,7 +329,8 @@ TEST_F(DeleteSubMenuRequestTest,
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).Times(0);
   EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
   EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
 

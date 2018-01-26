@@ -183,16 +183,18 @@ class AddCommandRequestTest
         .WillOnce(Return(so_ptr_.get()));
     {
       InSequence dummy;
-      EXPECT_CALL(app_mngr_,
+      ON_CALL(app_mngr_, GetRPCService())
+          .WillByDefault(ReturnRef(rpc_service_));
+      EXPECT_CALL(rpc_service_,
                   ManageHMICommand(
                       HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
           .WillOnce(Return(true));
-      EXPECT_CALL(app_mngr_,
+      EXPECT_CALL(rpc_service_,
                   ManageHMICommand(
                       HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
           .WillOnce(Return(true));
     }
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+    EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
     utils::SharedPtr<AddCommandRequest> request_ptr =
         CreateCommand<AddCommandRequest>(msg_);
     request_ptr->Run();
@@ -200,7 +202,8 @@ class AddCommandRequestTest
     event.set_smart_object(*msg_);
     request_ptr->on_event(event);
     EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_, ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
         .WillOnce(Return(true));
     SmartObjectSPtr response = utils::MakeShared<SmartObject>(SmartType_Map);
     (*response)[strings::msg_params][strings::info] = "info";
@@ -208,8 +211,9 @@ class AddCommandRequestTest
         mock_message_helper_,
         CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
         .WillOnce(Return(response));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandOrigin::ORIGIN_SDL));
     utils::SharedPtr<CommandRequestImpl> base_class_request =
@@ -228,8 +232,9 @@ TEST_F(AddCommandRequestTest, Run_AppNotExisted_EXPECT_AppNotRegistered) {
   CreateBasicParamsUIRequest();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -243,7 +248,8 @@ TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -268,7 +274,8 @@ TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
   SmartObject parent = SmartObject(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId))
       .WillOnce(Return(&parent));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -286,7 +293,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -309,9 +317,10 @@ TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
-          commands_map, lock_ptr_)));
-  EXPECT_CALL(app_mngr_,
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -327,7 +336,8 @@ TEST_F(AddCommandRequestTest, Run_CommandIDAlreadyExists_EXPECT_INVALID_ID) {
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -351,7 +361,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -373,11 +384,12 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
-          commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -406,7 +418,8 @@ TEST_F(AddCommandRequestTest,
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -421,7 +434,8 @@ TEST_F(AddCommandRequestTest, Run_MsgDataEmpty_EXPECT_INVALID_DATA) {
   msg_params[app_id] = kAppId;
   msg_params[cmd_id] = kCmdId;
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -451,16 +465,17 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(so_ptr_.get()));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
@@ -478,8 +493,9 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -502,8 +518,9 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::UI_AddCommand);
   event.set_smart_object(*msg_);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -526,8 +543,9 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_ptr_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));  
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -560,7 +578,7 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
   event_vr.set_smart_object(*event_msg);
 
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(command_msg);
   request_ptr->Run();
@@ -569,7 +587,8 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
 }
 
 TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
@@ -581,7 +600,8 @@ TEST_F(AddCommandRequestTest, OnEvent_AppNotExisted_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
   Event event(hmi_apis::FunctionID::UI_AddCommand);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->on_event(event);
@@ -599,15 +619,18 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .WillRepeatedly(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::REJECTED), _));
   Event event(hmi_apis::FunctionID::UI_AddCommand);
@@ -630,16 +653,17 @@ TEST_F(AddCommandRequestTest,
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::WARNINGS), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -669,12 +693,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
@@ -713,12 +738,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
@@ -757,12 +783,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
@@ -777,8 +804,9 @@ TEST_F(
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
@@ -806,12 +834,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
@@ -826,8 +855,9 @@ TEST_F(
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
@@ -852,8 +882,9 @@ TEST_F(
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -868,8 +899,9 @@ TEST_F(
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   Event event(hmi_apis::FunctionID::UI_AddCommand);
@@ -887,8 +919,9 @@ TEST_F(
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -903,8 +936,9 @@ TEST_F(
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   Event event(hmi_apis::FunctionID::VR_AddCommand);
@@ -927,16 +961,17 @@ TEST_F(AddCommandRequestTest,
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -951,8 +986,9 @@ TEST_F(AddCommandRequestTest,
   event_ui.set_smart_object(*msg_ui);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg_);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand)))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
@@ -975,16 +1011,17 @@ TEST_F(AddCommandRequestTest,
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _));
   utils::SharedPtr<AddCommandRequest> request_ptr =
@@ -994,8 +1031,9 @@ TEST_F(AddCommandRequestTest,
   Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
   event_ui.set_smart_object(*msg_);
   request_ptr->on_event(event_ui);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand)))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
@@ -1020,7 +1058,8 @@ TEST_F(AddCommandRequestTest,
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
       .WillOnce(Return(response));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
   utils::SharedPtr<CommandRequestImpl> base_class_request =
@@ -1050,16 +1089,17 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       .WillOnce(Return(so_ptr_.get()));
   {
     InSequence dummy;
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
         .WillOnce(Return(true));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
         .WillOnce(Return(true));
   }
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
@@ -1070,7 +1110,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
       .WillOnce(Return(response));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
   utils::SharedPtr<CommandRequestImpl> base_class_request =

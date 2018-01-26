@@ -43,6 +43,7 @@
 #include "policy/mock_policy_settings.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -578,6 +579,7 @@ class MessageHelperTest : public ::testing::Test {
 
  protected:
   application_manager_test::MockApplicationManager mock_application_manager;
+  application_manager_test::MockRPCService rpc_service_;
   const StringArray language_strings;
   const StringArray hmi_result_strings;
   const StringArray mobile_result_strings;
@@ -957,7 +959,8 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   permissions.push_back(permission);
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -994,7 +997,8 @@ TEST_F(MessageHelperTest,
       entity_type_2, entity_id_2, entity_status_2));
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1038,7 +1042,9 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   int32_t app_id = 123;
