@@ -340,9 +340,9 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 
   SharedPtr<commands::NotificationFromHMI> command(
       CreateCommand<commands::NotificationFromHMI>());
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
@@ -358,7 +358,8 @@ TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   const uint32_t correlation_id = 1u;
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(correlation_id));
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(CheckMsgType(am::MessageType::kRequest)))
       .WillOnce(Return(false));
 

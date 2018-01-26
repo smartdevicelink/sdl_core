@@ -207,7 +207,8 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
   event.set_smart_object(*message_);
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);
   caller();
@@ -216,8 +217,8 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   CommandPtr command(CreateCommand<GetWayPointsRequest>());
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 

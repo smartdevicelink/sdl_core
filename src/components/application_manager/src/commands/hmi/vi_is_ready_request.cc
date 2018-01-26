@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/vi_is_ready_request.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -95,7 +96,7 @@ void VIIsReadyRequest::SendMessageToHMI() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
           application_manager_));
-  application_manager_.ManageHMICommand(get_type);
+  application_manager_.GetRPCService().ManageHMICommand(get_type);
 }
 
 }  // namespace commands

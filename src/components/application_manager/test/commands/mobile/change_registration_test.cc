@@ -191,8 +191,8 @@ class ChangeRegistrationRequestTest
     event_tts.set_smart_object(*tts_response);
 
     MessageSharedPtr response_to_mobile;
-
-    EXPECT_CALL(app_mngr_,
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
                     _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
         .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
@@ -242,6 +242,7 @@ class ChangeRegistrationRequestTest
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(hmi_capabilities_));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   }
 
   void ExpectationsHmiCapabilities(
@@ -352,9 +353,9 @@ TEST_F(ChangeRegistrationRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
@@ -401,8 +402,9 @@ TEST_F(ChangeRegistrationRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
   command->Run();
@@ -544,9 +546,9 @@ TEST_F(ChangeRegistrationRequestTest,
   event_tts.set_smart_object(*tts_response);
 
   MessageSharedPtr response_to_mobile;
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 

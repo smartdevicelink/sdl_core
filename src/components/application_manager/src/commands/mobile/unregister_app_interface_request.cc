@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
-
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -48,7 +48,7 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  application_manager_.ManageMobileCommand(
+  application_manager_.GetRPCService().ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           connection_key(),
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),

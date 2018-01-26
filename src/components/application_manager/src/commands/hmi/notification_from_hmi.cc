@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -61,7 +62,7 @@ void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-  application_manager_.ManageMobileCommand(message, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(message, ORIGIN_SDL);
 }
 
 void NotificationFromHMI::CreateHMIRequest(
@@ -90,7 +91,7 @@ void NotificationFromHMI::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!application_manager_.ManageHMICommand(result)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }

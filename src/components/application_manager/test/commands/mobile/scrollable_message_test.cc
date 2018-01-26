@@ -151,8 +151,9 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
@@ -194,8 +195,9 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
   command_->Run();
@@ -239,7 +241,8 @@ TEST_F(ScrollableMessageRequestTest, Run_SoftButtonProcessingResult_SUCCESS) {
 }
 
 TEST_F(ScrollableMessageRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   command_->on_event(event);
 }
@@ -259,9 +262,9 @@ TEST_F(ScrollableMessageRequestTest,
 TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_ReceivedUIScrollableMessage_SUCCESS) {
   (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*msg_);
@@ -272,9 +275,9 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_UnsupportedRCAndUICoop_SUCCESS) {
   (*msg_)[params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);

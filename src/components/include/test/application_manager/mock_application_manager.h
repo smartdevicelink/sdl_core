@@ -85,10 +85,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
-  MOCK_METHOD1(SendPostMessageToMobile,
-               void(const application_manager::MessagePtr& message));
-  MOCK_METHOD1(SendPostMessageToHMI,
-               void(const application_manager::MessagePtr& message));
 #endif  // SDL_REMOTE_CONTROL
 
   MOCK_CONST_METHOD1(
@@ -122,20 +118,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const utils::SharedPtr<application_manager::Application> app));
-  MOCK_METHOD2(SendMessageToMobile,
-               void(application_manager::commands::MessageSharedPtr, bool));
-  MOCK_METHOD1(
-      SendMessageToHMI,
-      void(const application_manager::commands::MessageSharedPtr message));
   MOCK_METHOD1(RemoveHMIFakeParameters,
                void(application_manager::MessagePtr& message));
-  MOCK_METHOD1(
-      ManageHMICommand,
-      bool(const application_manager::commands::MessageSharedPtr message));
-  MOCK_METHOD2(
-      ManageMobileCommand,
-      bool(const application_manager::commands::MessageSharedPtr message,
-           application_manager::commands::Command::CommandOrigin origin));
   MOCK_CONST_METHOD1(
       GetDefaultHmiLevel,
       mobile_apis::HMILevel::eType(
@@ -158,6 +142,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
   MOCK_METHOD0(GetPolicyHandler, policy::PolicyHandlerInterface&());
   MOCK_CONST_METHOD0(GetPolicyHandler, const policy::PolicyHandlerInterface&());
+  MOCK_CONST_METHOD0(GetRPCService,
+                     application_manager::rpc_service::RPCService&());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
@@ -180,6 +166,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
   MOCK_CONST_METHOD0(IsStopping, bool());
+  MOCK_METHOD0(IsLowVoltage, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
   MOCK_METHOD4(
@@ -232,6 +219,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(resume_controller, resumption::ResumeCtrl&());
   MOCK_METHOD0(hmi_interfaces, application_manager::HmiInterfaces&());
   MOCK_METHOD0(app_launch_ctrl, app_launch::AppLaunchCtrl&());
+  MOCK_CONST_METHOD0(SupportedSDLVersion,
+                     protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(
       GetDeviceTransportType,
       hmi_apis::Common_TransportType::eType(const std::string& transport_type));

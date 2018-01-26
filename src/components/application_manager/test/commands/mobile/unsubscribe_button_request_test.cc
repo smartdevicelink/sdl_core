@@ -44,9 +44,9 @@ TEST_F(UnsubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -77,8 +77,9 @@ TEST_F(UnsubscribeButtonRequestTest,
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(false));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
 
   command->Run();
@@ -104,8 +105,8 @@ TEST_F(UnsubscribeButtonRequestTest,
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   EXPECT_CALL(hmi_capabilities, button_capabilities())
       .WillOnce(Return(button_caps_ptr.get()));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _));
 
@@ -136,12 +137,13 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(true));
-
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .WillRepeatedly(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   EXPECT_CALL(*mock_app, UpdateHash());

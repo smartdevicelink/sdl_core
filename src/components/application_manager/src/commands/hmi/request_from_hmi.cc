@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "utils/make_shared.h"
 
 namespace application_manager {
@@ -74,7 +75,7 @@ void RequestFromHMI::SendResponse(
   (*message)[strings::msg_params][strings::success] = success;
   (*message)[strings::msg_params][strings::result_code] = result_code;
 
-  application_manager_.ManageHMICommand(message);
+  application_manager_.GetRPCService().ManageHMICommand(message);
 }
 
 void RequestFromHMI::SendErrorResponse(
@@ -91,7 +92,7 @@ void RequestFromHMI::SendErrorResponse(
   (*message)[strings::params][hmi_response::code] = result_code;
   (*message)[strings::params][strings::error_msg] = error_message;
 
-  application_manager_.ManageHMICommand(message);
+  application_manager_.GetRPCService().ManageHMICommand(message);
 }
 
 void RequestFromHMI::FillCommonParametersOfSO(
