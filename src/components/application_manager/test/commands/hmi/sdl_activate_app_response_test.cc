@@ -70,8 +70,8 @@ TEST_F(SDLActivateAppResponseTest, RUN_SendRequest_SUCCESS) {
 
   SDLActivateAppResponsePtr command(
       CreateCommand<SDLActivateAppResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 

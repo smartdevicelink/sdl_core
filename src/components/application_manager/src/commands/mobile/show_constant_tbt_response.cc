@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_response.h"
-
+#include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -49,7 +49,7 @@ ShowConstantTBTResponse::~ShowConstantTBTResponse() {}
 void ShowConstantTBTResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

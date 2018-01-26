@@ -42,6 +42,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "policy/policy_manager_impl.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
@@ -1018,7 +1019,7 @@ void PolicyHandler::OnPendingPermissionChange(
       MessageHelper::SendOnAppPermissionsChangedNotification(
           app->app_id(), permissions, application_manager_);
     }
-    application_manager_.ManageMobileCommand(
+    application_manager_.GetRPCService().ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app->app_id(),
             mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),

@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #ifdef SDL_REMOTE_CONTROL
@@ -82,7 +83,7 @@ void OnExitApplicationNotification::Run() {
       break;
     }
     case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
-      application_manager_.ManageMobileCommand(
+      application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
           commands::Command::ORIGIN_SDL);
@@ -91,7 +92,7 @@ void OnExitApplicationNotification::Run() {
       return;
     }
     case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
-      application_manager_.ManageMobileCommand(
+      application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE),
           commands::Command::ORIGIN_SDL);

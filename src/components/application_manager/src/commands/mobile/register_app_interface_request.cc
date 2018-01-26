@@ -47,6 +47,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/rpc_service.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
@@ -396,7 +397,8 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
-  application_manager_.ManageMobileCommand(so, commands::Command::ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(
+      so, commands::Command::ORIGIN_SDL);
 }
 
 smart_objects::SmartObjectSPtr
@@ -968,7 +970,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::night_color_scheme] = *night_color_scheme;
   }
 
-  DCHECK(application_manager_.ManageHMICommand(notification));
+  DCHECK(application_manager_.GetRPCService().ManageHMICommand(notification));
 }
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
