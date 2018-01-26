@@ -161,7 +161,6 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);

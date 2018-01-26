@@ -64,7 +64,8 @@ class OnKeyBoardInputNotificationTest
   void SetSendNotificationExpectations(MessageSharedPtr msg) {
     EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
         .WillOnce(Return(false));
-    EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, _));
   }
 
   void SetSendNotificationVariables(MessageSharedPtr msg) {
@@ -150,9 +151,9 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_InvalidApp_NoNotification) {
 
   EXPECT_CALL(*mock_app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::eType::HMI_BACKGROUND));
-
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
 }

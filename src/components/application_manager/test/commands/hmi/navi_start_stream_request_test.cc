@@ -81,7 +81,8 @@ class NaviStartStreamRequestTest
 TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(kHmiInterface))
       .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(_)).Times(0);
 
   command_->Run();
 }
@@ -94,7 +95,8 @@ TEST_F(NaviStartStreamRequestTest,
 
   EXPECT_CALL(app_mngr_, application_by_hmi_app(kHmiAppId))
       .WillOnce(Return(ApplicationSharedPtr()));
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(_)).Times(0);
 
   command_->Run();
 }
@@ -108,7 +110,8 @@ TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceAvailable_SentRequest) {
   EXPECT_CALL(app_mngr_, application_by_hmi_app(kHmiAppId))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_video_streaming_allowed(true));
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(msg_));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, SendMessageToHMI(msg_));
 
   command_->Run();
 }

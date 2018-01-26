@@ -180,7 +180,8 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
   MessageSharedPtr hmi_result_msg;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg(

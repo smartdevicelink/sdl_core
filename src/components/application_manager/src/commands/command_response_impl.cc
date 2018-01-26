@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -80,7 +81,8 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  application_manager_.SendMessageToMobile(message_, final_message);
+  application_manager_.GetRPCService().SendMessageToMobile(message_,
+                                                           final_message);
 }
 
 }  // namespace commands
