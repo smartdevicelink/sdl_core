@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -75,7 +76,7 @@ void OnVRLanguageChangeNotification::Run() {
       application_manager_.state_controller().SetRegularState(
           app, mobile_api::HMILevel::HMI_NONE, false);
 
-      application_manager_.ManageMobileCommand(
+      application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
               mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),

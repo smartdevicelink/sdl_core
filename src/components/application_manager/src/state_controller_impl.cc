@@ -32,6 +32,7 @@
 
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/rpc_service.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
 #include "connection_handler/connection_handler.h"
@@ -758,7 +759,7 @@ int64_t StateControllerImpl::SendBCActivateApp(
     LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
     return -1;
   }
-  if (!app_mngr_.ManageHMICommand(bc_activate_app_request)) {
+  if (!app_mngr_.GetRPCService().ManageHMICommand(bc_activate_app_request)) {
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
     return -1;
   }

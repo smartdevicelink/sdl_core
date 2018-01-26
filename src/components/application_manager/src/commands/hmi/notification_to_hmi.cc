@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/notification_to_hmi.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -57,7 +58,7 @@ void NotificationToHMI::Run() {}
 void NotificationToHMI::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-  application_manager_.SendMessageToHMI(message_);
+  application_manager_.GetRPCService().SendMessageToHMI(message_);
 }
 
 }  // namespace commands
