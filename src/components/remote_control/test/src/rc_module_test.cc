@@ -226,7 +226,6 @@ TEST_F(RCModuleTest, IsAppForPluginSuccess) {
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app0_, hmi_level()).WillRepeatedly(Return(hmi));
   ON_CALL(*app0_, device()).WillByDefault(Return(1));
-  EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _));
   EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
       .WillOnce(Return(true));
   ASSERT_TRUE(module_.IsAppForPlugin(app0_));
