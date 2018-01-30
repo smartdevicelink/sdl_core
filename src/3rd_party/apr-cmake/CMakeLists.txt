@@ -55,15 +55,28 @@ if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
     "apr_cv_tcp_nodelay_with_cork=no"
     "ac_cv_sizeof_struct_iovec=8"
   )
+elseif(CROSS_HOST)
+  set(CONFIGURE_FLAGS
+    "--host=${CROSS_HOST}"
+    ${CROSS_APR_VARS}
+  )
 else()
   set(CONFIGURE_FLAGS "")
 endif()
 
-add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
-  COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
-)
+if(CROSS_HOST)
+  add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
+    COMMAND ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
+    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+  )
+else()
+  add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
+    WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+  )
+endif()
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
   DEPENDS ${APR_BUILD_DIRECTORY}/Makefile

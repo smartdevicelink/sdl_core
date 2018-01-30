@@ -5,7 +5,11 @@ include(ExternalProject)
 set(intergen_SOURCES "${CMAKE_CURRENT_LIST_DIR}/intergen")
 set(intergen_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/intergen")
 set(intergen_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/intergen")
-set(intergen_CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_INSTALL_PREFIX=${intergen_INSTALL_DIR})
+if(CROSS_HOST)
+  set(intergen_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${intergen_INSTALL_DIR})
+else()
+  set(intergen_CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_INSTALL_PREFIX=${intergen_INSTALL_DIR})  
+endif()
 
 ExternalProject_Add(intergen
                     SOURCE_DIR ${intergen_SOURCES}
