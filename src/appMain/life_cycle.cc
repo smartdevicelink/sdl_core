@@ -54,10 +54,12 @@ namespace main_namespace {
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
+#ifdef MESSAGEBROKER_HMIADAPTER
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(thread.GetId(), name);
 }
+#endif  // MESSAGEBROKER_HMIADAPTER
 
 void StopThread(System::Thread* thread) {
   if (thread) {

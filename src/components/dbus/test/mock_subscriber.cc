@@ -31,14 +31,14 @@
 */
 
 #include "dbus/dbus.h"
-#include "hmi_message_handler/mock_subscriber.h"
+#include "dbus/mock_subscriber.h"
 
 namespace test {
 namespace components {
-namespace hmi_message_handler_test {
+namespace dbus {
 
-MockSubscriber::MockSubscriber(const std::string& nameService,
-                               const std::string& path)
+MockSubscriber::MockSubscriber(const std::string nameService,
+                               const std::string path)
     : nameService_(nameService), path_(path), conn_(NULL) {}
 
 MockSubscriber::~MockSubscriber() {}
@@ -66,6 +66,6 @@ bool MockSubscriber::Start() {
 
 void MockSubscriber::Send(const std::string& message) {}
 
-}  // namespace hmi_message_handler_test
+}  // namespace dbus
 }  // namespace components
 }  // namespace test

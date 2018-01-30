@@ -52,7 +52,7 @@ collect_sources(SOURCES "${PATHS}")
 set(LIBRARIES
   HMI_API
   Utils
-  dbus-1 -L${DBUS_LIBS_DIRECTORY}
+  dbus-1
 )
 
 add_custom_command(
