@@ -228,7 +228,8 @@ void ApplicationImpl::set_voice_communication_supported(
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
-  return is_media_ || is_voice_communication_application_ || is_navi_;
+  return is_media_ || is_voice_communication_application_ || is_navi_ ||
+         mobile_projection_enabled_;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
