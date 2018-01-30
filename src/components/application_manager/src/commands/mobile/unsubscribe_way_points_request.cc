@@ -33,13 +33,13 @@ void UnSubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (!application_manager_.IsAppSubscribedForWayPoints(app->app_id())) {
+  if (!application_manager_.IsAppSubscribedForWayPoints(app)) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   if (application_manager_.GetAppsSubscribedForWayPoints().size() > 1) {
-    application_manager_.UnsubscribeAppFromWayPoints(app->app_id());
+    application_manager_.UnsubscribeAppFromWayPoints(app);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
@@ -64,7 +64,7 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
-        application_manager_.UnsubscribeAppFromWayPoints(app->app_id());
+        application_manager_.UnsubscribeAppFromWayPoints(app);
         if (application_manager_.GetAppsSubscribedForWayPoints().empty()) {
           application_manager_.SetWaypointsInfo(
               smart_objects::SmartObject(smart_objects::SmartType_Null));

@@ -4181,25 +4181,21 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
     const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  if (subscribed_way_points_apps_list_.find(app_id) ==
-      subscribed_way_points_apps_list_.end()) {
-    return false;
-  }
-  return true;
+  ApplicationSharedPtr app = application(app_id);
+  return IsAppSubscribedForWayPoints(app);
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.insert(app_id);
+  ApplicationSharedPtr app = application(app_id);
+  SubscribeAppForWayPoints(app);
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.erase(app_id);
+  ApplicationSharedPtr app = application(app_id);
+  UnsubscribeAppFromWayPoints(app);
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
@@ -4248,8 +4244,12 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
 const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
+  std::set<int32_t> subscribers_list;
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  return subscribed_way_points_apps_list_;
+  for (ApplicationSharedPtr app : subscribed_way_points_apps_list_) {
+    subscribers_list.insert(app->app_id());
+  }
+  return subscribers_list;
 }
 
 smart_objects::SmartObjectSPtr ApplicationManagerImpl::GetWaypointsInfo()

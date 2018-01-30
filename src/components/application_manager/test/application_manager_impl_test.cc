@@ -86,6 +86,7 @@ ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
 
 namespace {
 const std::string kDirectoryName = "./test_storage";
+const uint32_t kAppId = 123u;
 const uint32_t kTimeout = 10000u;
 connection_handler::DeviceHandle kDeviceId = 12345u;
 }  // namespace
@@ -232,7 +233,9 @@ TEST_F(
     ApplicationManagerImplTest,
     IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
 }
 
@@ -242,9 +245,10 @@ TEST_F(
   auto app_ptr =
       ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillOnce(Return(kAppId));
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
-  EXPECT_TRUE(result.find(app_ptr) != result.end());
+  EXPECT_TRUE(result.find(kAppId) != result.end());
 }
 
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {

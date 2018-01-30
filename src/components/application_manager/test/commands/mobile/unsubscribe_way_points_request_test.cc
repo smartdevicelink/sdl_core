@@ -57,6 +57,7 @@ namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
+using ::testing::A;
 using ::testing::Return;
 
 using am::commands::UnSubscribeWayPointsRequest;
@@ -101,9 +102,8 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId1));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId1))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
@@ -121,10 +121,12 @@ TEST_F(UnSubscribeWayPointsRequestTest,
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId1));
 
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId1))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId1));
+  EXPECT_CALL(app_mngr_,
+              UnsubscribeAppFromWayPoints(A<am::ApplicationSharedPtr>()));
 
   std::set<int32_t> subscribed_apps;
   subscribed_apps.insert(kAppId1);
@@ -145,9 +147,8 @@ TEST_F(UnSubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId1));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId1))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_,
@@ -186,9 +187,8 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId1));
-
-  EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId1));
+  EXPECT_CALL(app_mngr_,
+              UnsubscribeAppFromWayPoints(A<am::ApplicationSharedPtr>()));
 
   std::set<int32_t> subscribed_apps;
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
