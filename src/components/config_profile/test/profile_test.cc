@@ -724,6 +724,193 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
 }
 #endif
 
+TEST_F(ProfileTest, CheckSdlVersion) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Declare empty string
+  std::string sdl_version;
+  // Check initial sdl_version
+  EXPECT_EQ(sdl_version, profile_.sdl_version());
+}
+
+TEST_F(ProfileTest, CheckLinkToWebHmi) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial link_to_web_hmi
+  EXPECT_EQ("HMI/index.html", profile_.link_to_web_hmi());
+}
+
+TEST_F(ProfileTest, CheckAppConfigFolder) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_config_folder
+  EXPECT_EQ(file_system::CurrentWorkingDirectory().c_str(),
+            profile_.app_config_folder());
+}
+
+TEST_F(ProfileTest, CheckAppIconsFolder) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_icons_folder
+  EXPECT_EQ(file_system::CurrentWorkingDirectory().c_str(),
+            profile_.app_icons_folder());
+}
+
+TEST_F(ProfileTest, CheckMaxSuportedProtocolVersion) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial max_supported_protocol_version
+  EXPECT_TRUE(profile_.enable_protocol_4());
+}
+
+TEST_F(ProfileTest, CheckAppIconsFolderMaxSize) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial profile_.app_icons_folder_max_size
+  EXPECT_EQ(104857600u, profile_.app_icons_folder_max_size());
+}
+
+TEST_F(ProfileTest, CheckAppIconsAmountToRemove) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_icons_amount_to_remove
+  EXPECT_EQ(1u, profile_.app_icons_amount_to_remove());
+}
+
+TEST_F(ProfileTest, CheckMaximumControlPayloadSize) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial maximum_control_payload_size
+  EXPECT_EQ(0u, profile_.maximum_control_payload_size());
+}
+
+TEST_F(ProfileTest, CheckMaximumRpcPayloadSize) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial maximum_rpc_payload_size
+  EXPECT_EQ(0u, profile_.maximum_rpc_payload_size());
+}
+
+TEST_F(ProfileTest, CheckMaximumAudioPayloadSize) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial maximum_audio_payload_size
+  EXPECT_EQ(0u, profile_.maximum_audio_payload_size());
+}
+
+TEST_F(ProfileTest, CheckMaximumVideoPayLoadSize) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial maximum_video_payload_size
+  EXPECT_EQ(0u, profile_.maximum_video_payload_size());
+}
+
+TEST_F(ProfileTest, CheckHmiCapabilitiesFileName) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial hmi_capabilities_file_name
+  EXPECT_EQ(profile_.app_config_folder() + "/" + "hmi_capabilities.json",
+            profile_.hmi_capabilities_file_name());
+}
+
+TEST_F(ProfileTest, CheckDefaultTimeout) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial default_timeout
+  EXPECT_EQ(10000u, profile_.default_timeout());
+}
+
+TEST_F(ProfileTest, CheckAppResumingTimeout) {
+  EXPECT_EQ(3000u, profile_.app_resuming_timeout());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_resuming_timeout
+  EXPECT_EQ(3u, profile_.app_resuming_timeout());
+}
+
+TEST_F(ProfileTest, CheckAppResumptionSavePersistentDataTimeout) {
+  EXPECT_EQ(10000u, profile_.app_resumption_save_persistent_data_timeout());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_resumption_save_persistent_data_timeout
+  EXPECT_EQ(10u, profile_.app_resumption_save_persistent_data_timeout());
+}
+
+TEST_F(ProfileTest, CheckVideoStreamingPort) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial video_streaming_port
+  EXPECT_EQ(5050u, profile_.video_streaming_port());
+}
+
+TEST_F(ProfileTest, CheckAudioStreamingPort) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial audio_streaming_port
+  EXPECT_EQ(5080u, profile_.audio_streaming_port());
+}
+
+TEST_F(ProfileTest, CheckStopStreamingTimeout) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial stop_streaming_timeout
+  EXPECT_EQ(1u, profile_.stop_streaming_timeout());
+}
+
+TEST_F(ProfileTest, CheckTimeTestingPort) {
+  EXPECT_EQ(5090u, profile_.time_testing_port());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial time_testing_port
+  EXPECT_EQ(8090u, profile_.time_testing_port());
+}
+
+TEST_F(ProfileTest, CheckAppDirQuota) {
+  EXPECT_EQ(5090u, profile_.time_testing_port());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial app_dir_quota
+  EXPECT_EQ(104857600u, profile_.app_dir_quota());
+}
+
+TEST_F(ProfileTest, CheckVideoServerType) {
+  EXPECT_TRUE(profile_.video_server_type().empty());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial video_server_type
+  EXPECT_EQ("socket", profile_.video_server_type());
+}
+
+TEST_F(ProfileTest, CheckAudioServerType) {
+  EXPECT_TRUE(profile_.video_server_type().empty());
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  // Check initial audio_server_type
+  EXPECT_EQ("socket", profile_.audio_server_type());
+}
+
 }  // namespace profile_test
 }  // namespace components
 }  // namespace test
