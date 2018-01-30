@@ -1197,7 +1197,7 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckHash) {
     CheckSessionExists(uid_, out_context_.new_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(
-        uid_, out_context_.new_session_id_, hash, kRpc);
+        uid_, out_context_.new_session_id_, &hash, kRpc);
     EXPECT_EQ(connection_key_, end_audio);
     CheckSessionExists(uid_, 0);
   }
@@ -1213,13 +1213,13 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
 
     const uint32_t end_audio_wrong_hash =
         connection_handler_->OnSessionEndedCallback(
-            uid_, out_context_.new_session_id_, wrong_hash, kRpc);
+            uid_, out_context_.new_session_id_, &wrong_hash, kRpc);
     EXPECT_EQ(0u, end_audio_wrong_hash);
     EXPECT_EQ(protocol_handler::HASH_ID_WRONG, wrong_hash);
     CheckSessionExists(uid_, out_context_.new_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(
-        uid_, out_context_.new_session_id_, hash, kRpc);
+        uid_, out_context_.new_session_id_, &hash, kRpc);
     EXPECT_EQ(connection_key_, end_audio);
     CheckSessionExists(uid_, 0);
   }

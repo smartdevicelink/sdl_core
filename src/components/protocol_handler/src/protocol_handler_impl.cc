@@ -1242,6 +1242,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
   return RESULT_OK;
 }
 
+// Suppress warning for deprecated method used within another deprecated method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
