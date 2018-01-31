@@ -146,6 +146,8 @@ file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY validJSON.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/commands)
+file(COPY invalidJSON.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/commands)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
