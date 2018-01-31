@@ -123,8 +123,9 @@ class SliderRequestTest
 
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
                             am::commands::Command::CommandOrigin::ORIGIN_SDL));
   }
@@ -158,8 +159,9 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   MessageSharedPtr ui_command_result;
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
@@ -266,8 +268,9 @@ TEST_F(SliderRequestTest, Run_InvalidSliderFooter_UNSUCCESS) {
 
 TEST_F(SliderRequestTest, Run_SUCCESS) {
   PreConditions();
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Slider)));
 
   CommandPtr command(CreateCommand<SliderRequest>(msg_));
@@ -293,7 +296,8 @@ TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
 
 TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {
   PreConditions();
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   event.set_smart_object(*msg_);

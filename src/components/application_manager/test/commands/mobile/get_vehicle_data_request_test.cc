@@ -94,9 +94,9 @@ TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -121,9 +121,9 @@ TEST_F(GetVehicleDataRequestTest, Run_TooHighFrequency_UNSUCCESS) {
       *app,
       AreCommandLimitsExceeded(kFunctionId, am::TLimitSource::CONFIG_FILE))
       .WillOnce(Return(true));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
@@ -143,9 +143,9 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -169,9 +169,9 @@ TEST_F(GetVehicleDataRequestTest,
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::DISALLOWED), _));
 
   command->Run();
@@ -196,8 +196,8 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::VehicleInfo_GetVehicleData)));
 
@@ -213,8 +213,8 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -239,7 +239,8 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
   event.set_smart_object(*event_msg);
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   command->on_event(event);

@@ -89,6 +89,8 @@ using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::Mock;
 
+typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
+
 const std::string kDummyData = "some_data";
 
 class PolicyHandlerTest : public ::testing::Test {
@@ -163,6 +165,7 @@ class PolicyHandlerTest : public ::testing::Test {
   const uint32_t kCallsCount_;
   const uint32_t kTimeout_;
   application_manager::MockMessageHelper& mock_message_helper_;
+  MockRPCService rpc_service_;
 
   virtual void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
@@ -1005,7 +1008,8 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  EXPECT_CALL(app_manager_,
+  ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,
@@ -1057,7 +1061,8 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  EXPECT_CALL(app_manager_,
+  ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,

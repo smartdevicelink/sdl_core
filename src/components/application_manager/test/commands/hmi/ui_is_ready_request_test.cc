@@ -129,9 +129,10 @@ class UIIsReadyRequestTest
         .WillOnce(Return(get_capabilities));
 
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*get_language));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(get_language));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(get_all_language));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(get_capabilities));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    EXPECT_CALL(rpc_service_, ManageHMICommand(get_language));
+    EXPECT_CALL(rpc_service_, ManageHMICommand(get_all_language));
+    EXPECT_CALL(rpc_service_, ManageHMICommand(get_capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,
