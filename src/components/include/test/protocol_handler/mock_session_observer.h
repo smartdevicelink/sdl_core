@@ -126,6 +126,9 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
   MOCK_METHOD2(SetProtectionFlag,
                void(const uint32_t& key,
                     const protocol_handler::ServiceType& service_type));
+  MOCK_CONST_METHOD2(SessionServiceExists,
+                     bool(const uint32_t connection_key,
+                          const protocol_handler::ServiceType& service_type));
   MOCK_CONST_METHOD1(
       GetHandshakeContext,
       security_manager::SSLContext::HandshakeContext(uint32_t key));

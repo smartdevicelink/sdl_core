@@ -56,6 +56,60 @@ namespace protocol_handler {
 enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
 
 /**
+ * @brief Struct with data containing attributes of starting session
+ **/
+struct SessionContext {
+  transport_manager::ConnectionUID connection_id_;
+  uint8_t initial_session_id_;
+  uint8_t new_session_id_;
+  protocol_handler::ServiceType service_type_;
+  uint32_t hash_id_;
+  bool is_protected_;
+  bool is_new_service_;
+  bool is_ptu_required_;
+
+  /**
+   * @brief Constructor
+   */
+  SessionContext()
+      : connection_id_(0)
+      , initial_session_id_(0)
+      , new_session_id_(0)
+      , service_type_(protocol_handler::kInvalidServiceType)
+      , hash_id_(0)
+      , is_protected_(false)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+
+  /**
+   * @brief Constructor
+   * @param connection_id_ Connection identifier within which session is
+   * started.
+   * @param session_id Session ID specified to OnSessionStartedCallback()
+   * @param new_session_id Session ID generated
+   * @param service_type Type of service
+   * @param hash_id Hash ID generated from connection_handle and
+   * new_session_id
+   * @param is_protected Whether service will be protected
+   * @param is_new_service Whether service was already established
+   **/
+  SessionContext(transport_manager::ConnectionUID connection_id,
+                 uint8_t session_id,
+                 uint8_t new_session_id,
+                 protocol_handler::ServiceType service_type,
+                 uint32_t hash_id,
+                 const bool is_protected)
+      : connection_id_(connection_id)
+      , initial_session_id_(session_id)
+      , new_session_id_(new_session_id)
+      , service_type_(service_type)
+      , hash_id_(hash_id)
+      , is_protected_(is_protected)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+};
+
+/**
  * \class SessionObserver
  * \brief Interface for making a bridge between ProtocolHandler and
  * ConnectionHandler components.
@@ -88,7 +142,7 @@ class SessionObserver {
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * Result must be notified through NotifySessionStartedResult().
+   * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
    * \param sessionId Identifier of the session to be start
@@ -272,6 +326,16 @@ class SessionObserver {
   virtual void SetProtectionFlag(
       const uint32_t& key,
       const protocol_handler::ServiceType& service_type) = 0;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  virtual bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const = 0;
 
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;

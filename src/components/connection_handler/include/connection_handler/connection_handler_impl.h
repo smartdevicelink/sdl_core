@@ -212,7 +212,7 @@ class ConnectionHandlerImpl
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * Result must be notified through NotifySessionStartedResult().
+   * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
    * \param sessionId Identifier of the session to be start
@@ -349,6 +349,16 @@ class ConnectionHandlerImpl
   void SetProtectionFlag(
       const uint32_t& key,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const OVERRIDE;
 
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
@@ -530,54 +540,6 @@ class ConnectionHandlerImpl
 
  private:
   /**
-   * \brief Struct to keep variables between OnSessionStartedCallback() and
-   * NotifyServiceStartedResult()
-   **/
-  struct ServiceStartedContext {
-    transport_manager::ConnectionUID connection_handle_;
-    uint8_t session_id_;
-    uint32_t new_session_id_;
-    protocol_handler::ServiceType service_type_;
-    uint32_t hash_id_;
-    bool is_protected_;
-
-    /**
-     * \brief Constructor
-     */
-    ServiceStartedContext()
-        : connection_handle_(0)
-        , session_id_(0)
-        , new_session_id_(0)
-        , service_type_(protocol_handler::kInvalidServiceType)
-        , hash_id_(0)
-        , is_protected_(0) {}
-
-    /**
-     * \brief Constructor
-     * \param connection_handle Connection identifier within which session is
-     * started.
-     * \param session_id Session ID specified to OnSessionStartedCallback()
-     * \param new_session_id Session ID generated
-     * \param service_type Type of service
-     * \param hash_id Hash ID generated from connection_handle and
-     * new_session_id
-     * \param is_protected Whether service will be protected
-     **/
-    ServiceStartedContext(transport_manager::ConnectionUID connection_handle,
-                          uint8_t session_id,
-                          uint32_t new_session_id,
-                          protocol_handler::ServiceType service_type,
-                          uint32_t hash_id,
-                          bool is_protected)
-        : connection_handle_(connection_handle)
-        , session_id_(session_id)
-        , new_session_id_(new_session_id)
-        , service_type_(service_type)
-        , hash_id_(hash_id)
-        , is_protected_(is_protected) {}
-  };
-
-  /**
    * \brief Disconnect application.
    *
    * \param device_handle DeviceHandle of disconnected device.
@@ -586,19 +548,6 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
-
-  /**
-   * \brief Convenient method to call NotifySessionStartedResult() with
-   * negative result.
-   * \param connection_handle Identifier of connection within which session
-   * exists
-   * \param session_id session ID passed to OnSessionStartedCallback()
-   * \param is_protected whether the service would be protected
-   **/
-  void NotifySessionStartedFailure(
-      const transport_manager::ConnectionUID connection_handle,
-      const uint8_t session_id,
-      bool is_protected);
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -635,7 +584,8 @@ class ConnectionHandlerImpl
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
   sync_primitives::Lock start_service_context_map_lock_;
-  std::map<uint32_t, ServiceStartedContext> start_service_context_map_;
+  std::map<uint32_t, protocol_handler::SessionContext>
+      start_service_context_map_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage
