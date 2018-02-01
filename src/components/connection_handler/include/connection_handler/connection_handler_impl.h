@@ -202,7 +202,7 @@ class ConnectionHandlerImpl
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    * \deprecated
    */
-  DEPRECATED virtual uint32_t OnSessionStartedCallback(
+  virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
@@ -238,7 +238,7 @@ class ConnectionHandlerImpl
    * \return uint32_t 0 if operation fails, session key otherwise
    * \deprecated
    */
-  DEPRECATED uint32_t OnSessionEndedCallback(
+  uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const uint32_t& hashCode,
@@ -512,10 +512,10 @@ class ConnectionHandlerImpl
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  DEPRECATED int32_t GetDataOnSessionKey(uint32_t key,
-                                         uint32_t* app_id,
-                                         std::list<int32_t>* sessions_list,
-                                         uint32_t* device_id) const OVERRIDE;
+  int32_t GetDataOnSessionKey(uint32_t key,
+                              uint32_t* app_id,
+                              std::list<int32_t>* sessions_list,
+                              uint32_t* device_id) const OVERRIDE;
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 

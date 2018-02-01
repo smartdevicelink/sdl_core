@@ -184,7 +184,7 @@ class ApplicationImpl : public virtual Application,
   void increment_list_files_in_none_count();
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
-  DEPRECATED void set_device(connection_handler::DeviceHandle device);
+  void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
