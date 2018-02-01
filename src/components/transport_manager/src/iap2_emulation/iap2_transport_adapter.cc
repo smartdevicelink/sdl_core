@@ -131,7 +131,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
 
   const auto size = 32;
   while (run_flag_) {
-    char buffer[size];    
+    char buffer[size];
     auto bytes = read(in_, &buffer, size);
     if (0 == bytes) {
       continue;
