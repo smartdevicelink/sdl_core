@@ -46,59 +46,6 @@ SubscribeVehicleDataRequest::SubscribeVehicleDataRequest(
 
 SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {}
 
-#ifdef HMI_DBUS_API
-namespace {
-struct Subrequest {
-  hmi_apis::FunctionID::eType func_id;
-  const char* str;
-};
-Subrequest subrequests[] = {
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeGps, strings::gps},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed, strings::speed},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeRpm, strings::rpm},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel, strings::fuel_level},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State,
-     strings::fuel_level_state},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption,
-     strings::instant_fuel_consumption},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature,
-     strings::external_temp},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeVin, strings::vin},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribePrndl, strings::prndl},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure,
-     strings::tire_pressure},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer, strings::odometer},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus,
-     strings::belt_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation,
-     strings::body_information},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeDeviceStatus,
-     strings::device_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeDriverBraking,
-     strings::driver_braking},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeWiperStatus,
-     strings::wiper_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeHeadLampStatus,
-     strings::head_lamp_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeEngineTorque,
-     strings::engine_torque},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeAccPedalPosition,
-     strings::acc_pedal_pos},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeSteeringWheelAngle,
-     strings::steering_wheel_angle},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeECallInfo,
-     strings::e_call_info},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeAirbagStatus,
-     strings::airbag_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeEmergencyEvent,
-     strings::emergency_event},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus,
-     strings::cluster_mode_status},
-    {hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
-};
-}
-#endif  // #ifdef HMI_DBUS_API
-
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -127,33 +74,10 @@ void SubscribeVehicleDataRequest::Run() {
     return;
   }
 
-#ifdef HMI_DBUS_API
-  // Generate list of subrequests
-  for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
-    const Subrequest& sr = subrequests[i];
-    if (true == (*message_)[strings::msg_params].keyExists(sr.str) &&
-        true == (*message_)[strings::msg_params][sr.str].asBool()) {
-      HmiRequest hmi_request;
-      hmi_request.str = sr.str;
-      hmi_request.func_id = sr.func_id;
-      hmi_request.complete = false;
-      hmi_requests_.push_back(hmi_request);
-    }
-  }
-  LOG4CXX_DEBUG(
-      logger_, hmi_requests_.size() << " requests are going to be sent to HMI");
-
-  // Send subrequests
-  for (HmiRequests::const_iterator it = hmi_requests_.begin();
-       it != hmi_requests_.end();
-       ++it)
-    SendHMIRequest(it->func_id, &msg_params, true);
-#else
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
                  &msg_params,
                  true);
-#endif  // #ifdef HMI_DBUS_API
 }
 
 void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
@@ -174,64 +98,6 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     return;
   }
-
-#ifdef HMI_DBUS_API
-  for (HmiRequests::iterator it = hmi_requests_.begin();
-       it != hmi_requests_.end();
-       ++it) {
-    HmiRequest& hmi_request = *it;
-    if (hmi_request.func_id == event.id()) {
-      hmi_request.status = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
-        hmi_request.value = message[strings::msg_params][hmi_request.str];
-      hmi_request.complete = true;
-      break;
-    }
-  }
-  bool all_complete = true;
-  bool any_arg_success = false;
-  mobile_api::Result::eType status = mobile_api::Result::eType::SUCCESS;
-  for (HmiRequests::const_iterator it = hmi_requests_.begin();
-       it != hmi_requests_.end();
-       ++it) {
-    if (!it->complete) {
-      all_complete = false;
-      break;
-    }
-    if (hmi_apis::Common_Result::SUCCESS != it->status) {
-      if (mobile_api::Result::SUCCESS == status) {
-        status = static_cast<mobile_apis::Result::eType>(it->status);
-      } else if (status !=
-                 static_cast<mobile_apis::Result::eType>(it->status)) {
-        status = mobile_api::Result::eType::GENERIC_ERROR;
-      }
-      LOG4CXX_TRACE(logger_,
-                    "Status from HMI: " << it->status
-                                        << ", so response status become "
-                                        << status);
-    } else {
-      any_arg_success = true;
-    }
-  }
-
-  if (all_complete) {
-    smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
-    if (any_arg_success) {
-      for (HmiRequests::const_iterator it = hmi_requests_.begin();
-           it != hmi_requests_.end();
-           ++it) {
-        response_params[it->str] = it->value;
-      }
-    }
-    LOG4CXX_DEBUG(logger_, "All HMI requests are complete");
-    const bool result = any_arg_success;
-    SendResponse(any_arg_success, status, NULL, &response_params);
-    if (result) {
-      app->UpdateHash();
-    }
-  }
-#else
 
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -274,7 +140,6 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                result_code,
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
-#endif  // #ifdef HMI_DBUS_API
 }
 
 bool SubscribeVehicleDataRequest::Init() {

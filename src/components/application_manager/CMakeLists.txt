@@ -345,9 +345,6 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/rc_get_capabilities_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_response.cc
-)
-
-set (HMI_COMMANDS_SOURCES_JSON
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_subscribe_vehicle_data_request.cc
@@ -356,36 +353,6 @@ set (HMI_COMMANDS_SOURCES_JSON
   ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vehicle_data_notification.cc
 )
-
-set (HMI_COMMANDS_SOURCES_DBUS
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_gps_data_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_speed_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_rpm_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_fuel_level_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_fuel_level_state_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_instant_fuel_consumption_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_external_temperature_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vin_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_prndl_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_tire_pressure_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_odometer_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_belt_status_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_body_information_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_device_status_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_driver_braking_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_wiper_status_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_head_lamp_status_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_engine_torque_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_acc_pedal_position_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_steering_wheel_angle_notification.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_my_key_notification.cc
-)
-
-if (${HMI_JSON_API})
-  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
-endif (${HMI_JSON_API})
-
-set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 
 set(EXCLUDE_PATHS
   ${COMMANDS_SOURCE_DIR}

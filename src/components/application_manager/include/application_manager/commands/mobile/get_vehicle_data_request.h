@@ -69,22 +69,6 @@ class GetVehicleDataRequest : public CommandRequestImpl {
  protected:
   virtual void on_event(const event_engine::Event& event);
 
-#ifdef HMI_DBUS_API
- private:
-  void SendRequestsToHmi(const int32_t app_id);
-
-  struct HmiRequest {
-    hmi_apis::Common_Result::eType status;
-    bool complete;
-    smart_objects::SmartObject value;
-    const char* str;
-    hmi_apis::FunctionID::eType func_id;
-  };
-
-  typedef std::vector<HmiRequest> HmiRequests;
-  HmiRequests hmi_requests_;
-#endif  // #ifdef HMI_DBUS_API
-
   DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
 };
 

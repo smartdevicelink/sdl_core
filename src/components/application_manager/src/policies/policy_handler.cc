@@ -1080,12 +1080,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     SetDaysAfterEpoch();
 
     event_observer_->subscribe_on_event(
-#ifdef HMI_DBUS_API
-        hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id
-#else
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id
-#endif
-        );
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(strings::odometer);
     MessageHelper::CreateGetVehicleDataRequest(
