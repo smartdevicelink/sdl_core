@@ -90,23 +90,6 @@ bool InitHmi(std::string hmi_link) {
       .Execute();
 }
 #endif  // WEB_HMI
-
-#ifdef QT_HMI
-/**
- * Initialize HTML based HMI.
- * @return true if success otherwise false.
- */
-bool InitHmi() {
-  std::string kStartHmi = "./start_hmi.sh";
-  struct stat sb;
-  if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
-    return false;
-  }
-
-  return utils::System(kStartHmi).Execute();
-}
-#endif  // QT_HMI
 }
 
 /**
@@ -178,13 +161,13 @@ int32_t main(int32_t argc, char** argv) {
     if (profile_instance.server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
-#ifndef NO_HMI
+#ifdef WEB_HMI
       if (!InitHmi(profile_instance.link_to_web_hmi())) {
         LOG4CXX_INFO(logger_, "InitHmi successful");
       } else {
         LOG4CXX_WARN(logger_, "Failed to init HMI");
       }
-#endif  // #ifndef NO_HMI
+#endif
     }
   }
   // --------------------------------------------------------------------------
