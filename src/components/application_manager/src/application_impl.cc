@@ -614,7 +614,7 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
-DEPRECATED void ApplicationImpl::set_device(
+void ApplicationImpl::set_device(
     connection_handler::DeviceHandle device) {
   device_id_ = device;
 }
