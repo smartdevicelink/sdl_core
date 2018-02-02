@@ -32,10 +32,6 @@
 add_subdirectory(./jsoncpp)
 set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-# --- Message Broker
-add_subdirectory(./message_broker)
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
 # --- encryption
 add_subdirectory(./encryption)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)

@@ -319,10 +319,36 @@ else()
   set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
 endif()
 
+if (HMIADAPTER STREQUAL "messagebroker")
+  find_package(Boost 1.66.0 COMPONENTS system) 
+  message(STATUS ${Boost_FOUND})
+  if (NOT ${Boost_FOUND})
+    set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
+    set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+    set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
+    include(ExternalProject)
+    ExternalProject_Add(
+      Boost
+      URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+      DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_COMMAND sudo ./b2 install --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}    
+      INSTALL_COMMAND ""
+      INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_IN_SOURCE true
+    )
+
+    set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
+    set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
+  endif()
+endif()
+
 add_custom_target(install-3rd_party
   DEPENDS ${install-3rd_party_logger_var}
   DEPENDS ${install-3rd_party_dbus_var}
   DEPENDS libbson
+  DEPENDS Boost
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
 

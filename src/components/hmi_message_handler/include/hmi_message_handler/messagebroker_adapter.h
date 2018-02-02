@@ -35,7 +35,7 @@
 
 #include <string>
 
-#include "mb_controller.hpp"
+#include "hmi_message_handler/mb_controller.h"
 #include "hmi_message_handler/hmi_message_adapter_impl.h"
 #include "utils/threads/thread_validator.h"
 
@@ -47,7 +47,8 @@ class MessageBrokerAdapter : public HMIMessageAdapterImpl,
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param,
                        const std::string& server_address,
-                       uint16_t port);
+                       uint16_t port,
+                       boost::asio::io_context& ioc);
   ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 

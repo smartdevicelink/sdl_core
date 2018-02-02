@@ -38,10 +38,7 @@ include_directories (
 )
 
 if (HMIADAPTER STREQUAL "messagebroker")
-  set (BROKER_LIBRARIES
-    message_broker_client
-    message_broker_server
-  )
+  add_dependencies("hmi_message_handler_test" Boost)
 endif()
 
 set(EXCLUDE_PATHS)

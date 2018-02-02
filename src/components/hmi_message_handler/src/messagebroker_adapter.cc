@@ -43,9 +43,9 @@ typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
-                                           uint16_t port)
+                                           uint16_t port, boost::asio::io_context& ioc)
     : HMIMessageAdapterImpl(handler_param)
-    , MessageBrokerController(server_address, port, "SDL") {
+    , MessageBrokerController(server_address, port, "SDL", 8, ioc) {
   LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 
@@ -153,6 +153,7 @@ void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
 
 void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MB_Adapter: " << root);
   if (root.isNull()) {
     // LOG
     return;

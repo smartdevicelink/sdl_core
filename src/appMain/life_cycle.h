@@ -38,10 +38,12 @@
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER
+#include "system.h"
 #include "hmi_message_handler/dbus_message_adapter.h"
 #endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
+//#include "hmi_message_handler/mb_controller.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #include "application_manager/application_manager_impl.h"
 #ifdef SDL_REMOTE_CONTROL
@@ -59,11 +61,8 @@
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #ifdef MESSAGEBROKER_HMIADAPTER
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
-#include "networking.h"  // cpplint: Include the directory when naming .h files
+
 #endif                   // MESSAGEBROKER_HMIADAPTER
-#include "system.h"      // cpplint: Include the directory when naming .h files
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -82,7 +81,11 @@ class LifeCycle {
   * Initialize MessageBroker component
   * @return true if success otherwise false.
   */
+  #ifdef MESSAGEBROKER_HMIADAPTER
+  bool InitMessageSystem(boost::asio::io_context& ioc);
+  #else
   bool InitMessageSystem();
+  #endif
   /**
    * \brief Main loop
    */
@@ -112,11 +115,11 @@ class LifeCycle {
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-  NsMessageBroker::CMessageBroker* message_broker_;
-  NsMessageBroker::TcpServer* message_broker_server_;
-  System::Thread* mb_thread_;
-  System::Thread* mb_server_thread_;
-  System::Thread* mb_adapter_thread_;
+  void* message_broker_;
+  void* message_broker_server_;
+  void* mb_thread_;
+  void* mb_server_thread_;
+  std::thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   const profile::Profile& profile_;
