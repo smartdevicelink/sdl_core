@@ -37,7 +37,6 @@ set (install-3rd_party_logger_var "")
 
 if(NO_REBUILD_3RD_PARTY)
   set(NO_REBUILD_3RD_PARTY_LOGGER ON)
-
 endif()
 
 if(FORCE_3RD_PARTY)

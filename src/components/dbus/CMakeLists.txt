@@ -40,7 +40,7 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )
-message(${CMAKE_CURRENT_SOURCE_DIR})
+
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
