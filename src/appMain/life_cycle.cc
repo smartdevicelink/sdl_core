@@ -109,7 +109,7 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
-  hmi_handler_->set_message_observer(app_manager_);
+  hmi_handler_->set_message_observer(&(app_manager_->GetRPCHandler()));
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
@@ -148,7 +148,7 @@ bool LifeCycle::StartComponents() {
   transport_manager_->AddEventListener(connection_handler_);
 
   protocol_handler_->AddProtocolObserver(media_manager_);
-  protocol_handler_->AddProtocolObserver(app_manager_);
+  protocol_handler_->AddProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   media_manager_->SetProtocolHandler(protocol_handler_);
 
@@ -254,7 +254,7 @@ void LifeCycle::StopComponents() {
   connection_handler_->set_connection_handler_observer(NULL);
 
   DCHECK_OR_RETURN_VOID(protocol_handler_);
-  protocol_handler_->RemoveProtocolObserver(app_manager_);
+  protocol_handler_->RemoveProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
