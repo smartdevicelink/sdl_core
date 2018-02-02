@@ -154,8 +154,6 @@ endif()
 
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
-
-
 add_dependencies(${PROJECT} Policy)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

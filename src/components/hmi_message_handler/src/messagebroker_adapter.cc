@@ -39,13 +39,13 @@ namespace hmi_message_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+typedef hmi_message_handler::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
-                                           uint16_t port, boost::asio::io_context& ioc)
+                                           uint16_t port)
     : HMIMessageAdapterImpl(handler_param)
-    , MessageBrokerController(server_address, port, "SDL", 8, ioc) {
+    , MessageBrokerController(server_address, port, "SDL", 8) {
   LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 

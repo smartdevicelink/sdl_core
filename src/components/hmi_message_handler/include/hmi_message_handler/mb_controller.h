@@ -1,5 +1,5 @@
-#ifndef MB_CONTROLLER_H 
-#define MB_CONTROLLER_H 
+#ifndef MB_CONTROLLER_H
+#define MB_CONTROLLER_H
 
 #include <iostream>
 #include <boost/beast/core.hpp>
@@ -20,146 +20,137 @@
 #include <vector>
 #include <map>
 #include "json/json.h"
-
+#include "utils/macro.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
+#include "websocket_session.h"
 
 using namespace boost::beast::websocket;
 
-#ifdef DEBUG_ON 
-/**
-* \def DBG_MSG
-* \brief Debug message output with file name and line number.
-* \param x formatted debug message.
-* \return printf construction.
-*/
-#define DBG_MSG(x) printf("%s:%d ", __FILE__, __LINE__);\
-                   printf x
-#else
-#define DBG_MSG(x)
-#endif
+namespace hmi_message_handler {
 
-#define DBG_MSG_ERROR(x) printf("ERROR!!! %s:%d ", __FILE__, __LINE__);\
-                         printf x
+CREATE_LOGGERPTR_GLOBAL(mb_logger_, "HMIMessageHandler")
 
+enum ErrorCode {
+  CONTROLLER_EXISTS = -32000,
+  SUBSCRIBTION_EXISTS = -32001,
+  INVALID_REQUEST = -32600
+};
 
-namespace NsMessageBroker {
+class WebsocketSession;
 
-  enum ErrorCode {
-    CONTROLLER_EXISTS   = -32000,
-    SUBSCRIBTION_EXISTS = -32001,
-    INVALID_REQUEST     = -32600
-  };
+class CMessageBrokerController
+    : public std::enable_shared_from_this<CMessageBrokerController> {
+ public:
+  CMessageBrokerController(const std::string& address,
+                           uint16_t port,
+                           std::string name,
+                           int num_ports);
 
-  class WebsocketSession;
+  ~CMessageBrokerController();
 
-  class CMessageBrokerController : public std::enable_shared_from_this<CMessageBrokerController> {
-    public:
-      CMessageBrokerController(const std::string& address, uint16_t port, std::string name, int num_ports, boost::asio::io_context& ioc);
+  bool StartListener();
 
-      ~CMessageBrokerController();
+  bool Run();
 
-      bool StartListener();
+  void WaitForConnection();
 
-      bool Run();
+  void StartSession(boost::system::error_code ec);
 
-      void WaitForConnection();
+  void OnAccept(
+      boost::system::error_code ec,
+      boost::asio::strand<boost::asio::io_context::executor_type>& strand,
+      stream<boost::asio::ip::tcp::socket>& ws);
 
-      void StartSession(boost::system::error_code ec);
+  void OnRead(boost::system::error_code ec, std::size_t bytes_transferred);
 
-      void OnAccept(boost::system::error_code ec, boost::asio::strand<boost::asio::io_context::executor_type>& strand, stream<boost::asio::ip::tcp::socket>& ws);
+  bool isNotification(Json::Value& message);
 
-      void OnRead(boost::system::error_code ec, std::size_t bytes_transferred);
+  void sendNotification(Json::Value& message);
 
-      bool isNotification(Json::Value& message);
+  bool isResponse(Json::Value& message);
 
-      void sendNotification(Json::Value& message);
+  void sendResponse(Json::Value& message);
 
-      bool isResponse(Json::Value& message);
+  void sendJsonMessage(Json::Value& message);
 
-      void sendResponse(Json::Value& message);
+  void subscribeTo(std::string property);
 
-      void sendJsonMessage(Json::Value& message);
+  void registerController(int id = 0);
 
-      void subscribeTo(std::string property);
+  void unregisterController();
 
-      void registerController(int id = 0);
+  void* MethodForReceiverThread(void* arg);
 
-      void unregisterController();
+  bool Connect();
 
-      void* MethodForReceiverThread(void * arg);
+  void exitReceivingThread();
 
-      bool Connect();
+  virtual void processResponse(std::string method, Json::Value& root) = 0;
 
-      void exitReceivingThread();
+  virtual void processRequest(Json::Value& root) = 0;
 
-      virtual void processResponse(std::string method, Json::Value& root) = 0;
+  virtual void processNotification(Json::Value& root) = 0;
 
-      virtual void processRequest(Json::Value& root) = 0;
+  std::string getMethodName(std::string& method);
 
-      virtual void processNotification(Json::Value& root) = 0;
+  std::string GetComponentName(std::string& method);
 
-      std::string getMethodName(std::string& method);
+  void processInternalRequest(Json::Value& message,
+                              WebsocketSession* ws_session);
 
-      std::string GetComponentName(std::string& method);
+  void pushRequest(Json::Value& message, WebsocketSession* ws_session);
 
-      void processInternalRequest(Json::Value& message, WebsocketSession* ws_session );
+  // Registry
+  bool addController(WebsocketSession* ws_session, std::string name);
 
-      void pushRequest(Json::Value& message, WebsocketSession* ws_session);
+  void deleteController(WebsocketSession* ws_session);
 
-      //Registry
-      bool addController(WebsocketSession* ws_session, std::string name);
+  void deleteController(std::string name);
 
-      void deleteController(WebsocketSession* ws_session);
+  void removeSubscribersBySession(const WebsocketSession* ws);
 
-      void deleteController(std::string name);
+  bool addSubscriber(WebsocketSession* ws_session, std::string name);
 
-      void removeSubscribersBySession(const WebsocketSession* ws);
+  void deleteSubscriber(WebsocketSession* ws, std::string name);
 
-      bool addSubscriber(WebsocketSession* ws_session, std::string name);
+  int getSubscribersFd(std::string name,
+                       std::vector<WebsocketSession*>& result);
 
-      void deleteSubscriber(WebsocketSession* ws, std::string name);
+  int getNextControllerId();
 
-      int getSubscribersFd(std::string name, std::vector<WebsocketSession*>& result);
+ private:
+  boost::asio::io_context ioc_;
+  const std::string& address_;
+  uint16_t port_;
+  std::string name_;
+  int num_threads_;
+  std::vector<std::thread> thread_vector_;
 
-      int getNextControllerIdDiapason();
+  boost::asio::ip::tcp::acceptor acceptor_;
+  boost::asio::ip::tcp::socket socket_;
+  boost::beast::multi_buffer buffer_;
+  boost::asio::ip::tcp::endpoint endpoint_;
 
-    private:
-      boost::asio::io_context ioc_;
-      const std::string& address_;
-      uint16_t port_;
-      std::string name_;
-      int num_threads_;
-      std::vector<std::thread> thread_vector_;
-      
-      boost::asio::ip::tcp::acceptor acceptor_;
-      boost::asio::ip::tcp::socket socket_;
-      boost::beast::multi_buffer buffer_;
-      boost::asio::ip::tcp::endpoint endpoint_;
+  int mControllersIdCounter;
 
-      int mControllersIdCounter;
+  // Registry
+  std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >
+      mConnectionList;
+  sync_primitives::Lock mConnectionListLock;
 
-      //Registry
-      std::vector <std::shared_ptr<NsMessageBroker::WebsocketSession>> mConnectionList;
-      sync_primitives::Lock mConnectionListLock;
+  std::map<std::string, WebsocketSession*> mControllersList;
+  sync_primitives::Lock mControllersListLock;
 
-      std::map <std::string, WebsocketSession*> mControllersList;
-      sync_primitives::Lock mControllersListLock;
+  std::multimap<std::string, WebsocketSession*> mSubscribersList;
+  sync_primitives::Lock mSubscribersListLock;
 
-      std::multimap <std::string, WebsocketSession*> mSubscribersList;
-      sync_primitives::Lock mSubscribersListLock;
+  std::map<std::string, WebsocketSession*> mRequestList;
+  sync_primitives::Lock mRequestListLock;
 
-      std::map <std::string, WebsocketSession*> mRequestList;
-      sync_primitives::Lock mRequestListLock;
+  std::atomic_bool shutdown_;
+};
 
-      std::atomic_bool shutdown_;
-
-
-  };
-
-} //NsMessageBroker
-
-
-
+}  // hmi_message_handler
 
 #endif /* MB_CONTROLLER_H */

@@ -75,10 +75,6 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
     , mb_adapter_(NULL)
-    , message_broker_(NULL)
-    , message_broker_server_(NULL)
-    , mb_thread_(NULL)
-    , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
     , profile_(profile) {
@@ -174,17 +170,17 @@ bool LifeCycle::StartComponents() {
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-bool LifeCycle::InitMessageSystem(boost::asio::io_context& ioc) {
-  DCHECK(!message_broker_)  
+bool LifeCycle::InitMessageSystem() {
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-      hmi_handler_, profile_.server_address(), profile_.server_port(), ioc);
+      hmi_handler_, profile_.server_address(), profile_.server_port());
 
-  if(!mb_adapter_->StartListener()) {
+  if (!mb_adapter_->StartListener()) {
     return false;
   }
 
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
-  mb_adapter_thread_ = new std::thread(&hmi_message_handler::MessageBrokerAdapter::Run, mb_adapter_);
+  mb_adapter_thread_ = new std::thread(
+      &hmi_message_handler::MessageBrokerAdapter::Run, mb_adapter_);
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER

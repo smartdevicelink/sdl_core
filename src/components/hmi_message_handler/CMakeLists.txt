@@ -54,10 +54,7 @@ include_directories (
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
-  
 )
-
-message(${PATHS})
 
 if (HMIADAPTER STREQUAL "dbus")
   set(EXCLUDE_PATHS)
@@ -78,7 +75,6 @@ set(LIBRARIES
   ${DBUS_ADAPTER}
   ${RTLIB}
 )
-
 
 add_library("HMIMessageHandler" ${SOURCES})
 

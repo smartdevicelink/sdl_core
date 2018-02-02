@@ -68,8 +68,6 @@ const std::string kBrowserName = "chromium-browser";
 const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
 const std::string kLocalHostAddress = "127.0.0.1";
 
-boost::asio::io_context ioc;
-
 #ifdef WEB_HMI
 /**
  * Initialize HTML based HMI.
@@ -146,17 +144,14 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
-  
 
-  if (!life_cycle.InitMessageSystem(ioc)) {
+  if (!life_cycle.InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
     life_cycle.StopComponents();
     DEINIT_LOGGER();
     _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-  //ioc.run();
-  LOG4CXX_INFO(logger_, "IOC RUN");
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
@@ -174,9 +169,8 @@ int32_t main(int32_t argc, char** argv) {
 
   life_cycle.Run();
   LOG4CXX_INFO(logger_, "Stop SDL due to caught signal");
-  
+
   life_cycle.StopComponents();
-  ioc.stop();
   LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
 
   DEINIT_LOGGER();

@@ -43,7 +43,6 @@
 #endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
-//#include "hmi_message_handler/mb_controller.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #include "application_manager/application_manager_impl.h"
 #ifdef SDL_REMOTE_CONTROL
@@ -58,11 +57,6 @@
 #ifdef TELEMETRY_MONITOR
 #include "telemetry_monitor/telemetry_monitor.h"
 #endif
-
-//#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#ifdef MESSAGEBROKER_HMIADAPTER
-
-#endif                   // MESSAGEBROKER_HMIADAPTER
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -81,14 +75,10 @@ class LifeCycle {
   * Initialize MessageBroker component
   * @return true if success otherwise false.
   */
-  #ifdef MESSAGEBROKER_HMIADAPTER
-  bool InitMessageSystem(boost::asio::io_context& ioc);
-  #else
   bool InitMessageSystem();
-  #endif
   /**
-   * \brief Main loop
-   */
+ * \brief Main loop
+ */
   void Run();
   void StopComponents();
 
@@ -115,10 +105,6 @@ class LifeCycle {
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-  void* message_broker_;
-  void* message_broker_server_;
-  void* mb_thread_;
-  void* mb_server_thread_;
   std::thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 

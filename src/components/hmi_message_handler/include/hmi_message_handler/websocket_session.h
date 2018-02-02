@@ -1,5 +1,5 @@
-#ifndef WEBSOCKET_SESSION_H 
-#define WEBSOCKET_SESSION_H 
+#ifndef WEBSOCKET_SESSION_H
+#define WEBSOCKET_SESSION_H
 
 #include <iostream>
 #include <boost/beast/core.hpp>
@@ -21,162 +21,158 @@
 #include <mutex>
 #include <queue>
 #include "json/json.h"
-
+#include "utils/macro.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/message_queue.h"
 
-//#include "hmi_message_handler/mb_controller.h"
-
 using namespace boost::beast::websocket;
 using ::utils::MessageQueue;
 
-#ifdef DEBUG_ON 
+#ifdef DEBUG_ON
 /**
 * \def DBG_MSG
 * \brief Debug message output with file name and line number.
 * \param x formatted debug message.
 * \return printf construction.
 */
-#define DBG_MSG(x) printf("%s:%d ", __FILE__, __LINE__);\
-                   printf x
+#define DBG_MSG(x)                      \
+  printf("%s:%d ", __FILE__, __LINE__); \
+  printf x
 #else
 #define DBG_MSG(x)
 #endif
 
-#define DBG_MSG_ERROR(x) printf("ERROR!!! %s:%d ", __FILE__, __LINE__);\
-                         printf x
+#define DBG_MSG_ERROR(x)                         \
+  printf("ERROR!!! %s:%d ", __FILE__, __LINE__); \
+  printf x
 
-typedef std::queue<std::shared_ptr<std::string>> AsyncQueue;                    
+typedef std::queue<std::shared_ptr<std::string> > AsyncQueue;
 typedef std::shared_ptr<std::string> Message;
 
+namespace hmi_message_handler {
 
-namespace NsMessageBroker {
+CREATE_LOGGERPTR_GLOBAL(ws_logger_, "HMIMessageHandler")
 
-  class CMessageBrokerController;
+class CMessageBrokerController;
 
-  class WebsocketSession : 
-  public std::enable_shared_from_this<WebsocketSession> {
-
+class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
   boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws_;
   boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::multi_buffer buffer_;
   boost::beast::multi_buffer send_buffer_;
-  CMessageBrokerController* controller_;  
+  CMessageBrokerController* controller_;
 
-  public:
-    WebsocketSession(boost::asio::ip::tcp::socket socket, CMessageBrokerController* controller);
+ public:
+  WebsocketSession(boost::asio::ip::tcp::socket socket,
+                   CMessageBrokerController* controller);
 
-    ~WebsocketSession();
+  ~WebsocketSession();
 
-    void Accept();
+  void Accept();
 
-    void Shutdown();
+  void Shutdown();
 
-    bool IsShuttingDown();
+  bool IsShuttingDown();
 
-    void Recv(boost::system::error_code ec);
+  void Recv(boost::system::error_code ec);
 
-    void Send(std::string& message, Json::Value& json_message);
+  void Send(std::string& message, Json::Value& json_message);
 
-    void SendFromQueue();
+  void SendFromQueue();
 
-    void sendJsonMessage(Json::Value& message);
+  void sendJsonMessage(Json::Value& message);
 
-    void OnWrite(boost::system::error_code ec, std::size_t bytes_transferred, std::shared_ptr<std::string> message);
+  void OnWrite(boost::system::error_code ec,
+               std::size_t bytes_transferred,
+               std::shared_ptr<std::string> message);
 
-    void Read(boost::system::error_code ec, std::size_t bytes_transferred);
+  void Read(boost::system::error_code ec, std::size_t bytes_transferred);
 
-    int getNextMessageId();
+  int getNextMessageId();
 
-    void prepareMessage(Json::Value& root);
+  void prepareMessage(Json::Value& root);
 
-    void prepareErrorMessage(int errCode, std::string errMessage, Json::Value& error);
+  void prepareErrorMessage(int errCode,
+                           std::string errMessage,
+                           Json::Value& error);
 
-    std::string getDestinationComponentName(Json::Value& root);
+  std::string getDestinationComponentName(Json::Value& root);
 
-    bool isNotification(Json::Value& root);
+  bool isNotification(Json::Value& root);
 
-    bool isResponse(Json::Value& root);
+  bool isResponse(Json::Value& root);
 
-    std::string findMethodById(std::string id);
+  std::string findMethodById(std::string id);
 
-    void registerController(int id = 0);
+  void registerController(int id = 0);
 
-    void unregisterController();
+  void unregisterController();
 
-    void subscribeTo(std::string property);
+  void subscribeTo(std::string property);
 
-    void unsubscribeFrom(std::string property);
+  void unsubscribeFrom(std::string property);
 
-    bool checkMessage(Json::Value& root, Json::Value& error);
+  bool checkMessage(Json::Value& root, Json::Value& error);
 
-    std::string getControllersName();
+  std::string getControllersName();
 
-    std::string GetComponentName(std::string& method);
+  std::string GetComponentName(std::string& method);
 
-  protected:
+ protected:
+  sync_primitives::atomic_bool stop;
 
-    sync_primitives::atomic_bool stop;
+ private:
+  void onMessageReceived(Json::Value message);
 
-  private:
-    void onMessageReceived(Json::Value message);
+  std::map<std::string, std::string> mWaitResponseQueue;
 
-    std::map<std::string, std::string> mWaitResponseQueue;
+  std::string m_receivingBuffer;
 
-    std::string m_receivingBuffer;
+  int mControllersIdStart;
 
-    int mControllersIdStart;
+  int mControllersIdCurrent;
 
-    int mControllersIdCurrent;
+  Json::Reader m_reader;
+  Json::FastWriter m_writer;
+  Json::FastWriter m_receiverWriter;
 
-    Json::Reader m_reader;
-    Json::FastWriter m_writer;
-    Json::FastWriter m_receiverWriter;
-    
+  sync_primitives::Lock queue_lock_;
+  sync_primitives::Lock message_queue_lock_;
+  std::atomic_bool shutdown_;
 
-    sync_primitives::Lock       queue_lock_;   
-    sync_primitives::Lock       message_queue_lock_;    
-    std::atomic_bool            shutdown_;
+  MessageQueue<Message, AsyncQueue> message_queue_;
 
+  class LoopThreadDelegate : public threads::ThreadDelegate {
+   public:
+    LoopThreadDelegate(MessageQueue<Message, AsyncQueue>* message_queue,
+                       WebsocketSession* handler);
 
-    MessageQueue<Message, AsyncQueue> message_queue_;
+    virtual void threadMain() OVERRIDE;
+    virtual void exitThreadMain() OVERRIDE;
 
-    class LoopThreadDelegate : public threads::ThreadDelegate {
-     public:
-      LoopThreadDelegate(MessageQueue<Message, AsyncQueue>* message_queue, 
-        WebsocketSession* handler);
+    void OnWrite();
 
-      virtual void threadMain() OVERRIDE;
-      virtual void exitThreadMain() OVERRIDE;
+    void SetShutdown();
 
-      void OnWrite();
+   private:
+    void DrainQueue();
+    MessageQueue<Message, AsyncQueue>& message_queue_;
+    WebsocketSession& handler_;
+    sync_primitives::Lock queue_lock_;
+    sync_primitives::ConditionalVariable queue_new_items_;
+    std::atomic_bool write_pending_;
+    std::atomic_bool shutdown_;
 
-      void SetShutdown();
-
-     private:
-      void DrainQueue();  
-      MessageQueue<Message, AsyncQueue>& message_queue_;
-      WebsocketSession& handler_;
-      sync_primitives::Lock queue_lock_;
-      sync_primitives::ConditionalVariable queue_new_items_;
-      std::atomic_bool write_pending_;
-      std::atomic_bool shutdown_;
-
-      sync_primitives::Lock write_lock_;
-
-    };
-
-    LoopThreadDelegate* thread_delegate_;
-    threads::Thread* thread_;
-
+    sync_primitives::Lock write_lock_;
   };
 
-} //NsMessageBroker
+  LoopThreadDelegate* thread_delegate_;
+  threads::Thread* thread_;
+};
 
-
-
+}  // hmi_message_handler
 
 #endif /* WEBSOCKET_SESSION_H */

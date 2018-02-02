@@ -41,14 +41,14 @@
 
 namespace hmi_message_handler {
 
-class MessageBrokerAdapter : public HMIMessageAdapterImpl,
-                             public NsMessageBroker::CMessageBrokerController,
-                             public threads::SingleThreadValidator {
+class MessageBrokerAdapter
+    : public HMIMessageAdapterImpl,
+      public hmi_message_handler::CMessageBrokerController,
+      public threads::SingleThreadValidator {
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param,
                        const std::string& server_address,
-                       uint16_t port,
-                       boost::asio::io_context& ioc);
+                       uint16_t port);
   ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 

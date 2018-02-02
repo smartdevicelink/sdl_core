@@ -52,12 +52,12 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
       : mb_adapter_(NULL)
       , hmi_handler_(NULL)
       , mock_hmi_message_observer_(NULL) {}
-  boost::asio::io_context ioc_;
+
  protected:
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   MockHMIMessageObserver* mock_hmi_message_observer_;
-  
+
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -69,7 +69,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         mock_hmi_message_handler_settings);
     ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-        hmi_handler_, "127.0.0.1", 8087, ioc_);
+        hmi_handler_, "127.0.0.1", 8087);
     ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ = new MockHMIMessageObserver();
     ASSERT_TRUE(NULL != mock_hmi_message_observer_);
@@ -125,7 +125,7 @@ TEST_F(HMIMessageHandlerImplTest,
        AddHMIMessageAdapter_AddExistedAdapter_ExpectAdded) {
   // Check before action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
-  // Act    
+  // Act
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Check after action
   EXPECT_EQ(1u, hmi_handler_->message_adapters().size());

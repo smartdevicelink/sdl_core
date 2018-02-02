@@ -321,11 +321,12 @@ endif()
 
 if (HMIADAPTER STREQUAL "messagebroker")
   find_package(Boost 1.66.0 COMPONENTS system) 
-  message(STATUS ${Boost_FOUND})
+  set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
+  set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+  set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
   if (NOT ${Boost_FOUND})
-    set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
-    set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
-    set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
+    message(STATUS "Did not find boost. Downloading and installing boost 1.66")
     include(ExternalProject)
     ExternalProject_Add(
       Boost
