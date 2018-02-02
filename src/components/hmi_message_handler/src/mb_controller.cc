@@ -94,7 +94,13 @@ namespace NsMessageBroker
       if(shutdown_) {
          return;
       }
-      std::make_shared<WebsocketSession>(std::move(socket_), this)->Accept();
+      std::shared_ptr<WebsocketSession> ws_ptr = std::make_shared<WebsocketSession>(std::move(socket_), this);
+      ws_ptr->Accept();      
+      
+      mConnectionListLock.Acquire();
+      mConnectionList.push_back(ws_ptr);
+      mConnectionListLock.Release();
+
       WaitForConnection();
 
    }
@@ -190,14 +196,15 @@ namespace NsMessageBroker
 	}
 
 	void CMessageBrokerController::exitReceivingThread(){
-      sync_primitives::AutoLock lock(mControllersListLock);
       shutdown_ = true;
-      std::map <std::string, WebsocketSession*>::iterator it;
-      for(it = mControllersList.begin(); it != mControllersList.end(); it++) {
-         if(!it->second->IsShuttingDown()) {
-            it->second->Shutdown();
-         }         
+      mConnectionListLock.Acquire();      
+      std::vector<std::shared_ptr<NsMessageBroker::WebsocketSession>>::iterator it;
+      for(it = mConnectionList.begin(); it != mConnectionList.end(); it++) {
+         (*it)->Shutdown();
+         mConnectionList.erase(it);       
       }
+      mConnectionListLock.Release();
+
       boost::system::error_code ec;
       socket_.close();
       acceptor_.cancel(ec);

@@ -30,18 +30,12 @@ namespace NsMessageBroker
                  shared_from_this(), std::placeholders::_1)));
    }
 
-   void WebsocketSession::Close() {
-      ws_.async_close({}, [](boost::system::error_code){});   
-   }
-
    void WebsocketSession::Shutdown() {
       shutdown_ = true;
       thread_delegate_->SetShutdown();
       thread_->join();
       delete thread_delegate_;
       threads::DeleteThread(thread_);
-      Close();
-
    }
 
    bool WebsocketSession::IsShuttingDown() {
@@ -314,7 +308,9 @@ namespace NsMessageBroker
 
    void WebsocketSession::LoopThreadDelegate::exitThreadMain() {
       shutdown_= true;
-      message_queue_.Shutdown();
+      if(!message_queue_.IsShuttingDown()) {
+         message_queue_.Shutdown();         
+      }
    }
 
    void WebsocketSession::LoopThreadDelegate::DrainQueue() {
@@ -329,6 +325,8 @@ namespace NsMessageBroker
 
    void WebsocketSession::LoopThreadDelegate::SetShutdown(){
       shutdown_ = true;
-      message_queue_.Shutdown();
+      if(!message_queue_.IsShuttingDown()) {
+         message_queue_.Shutdown();         
+      }
    }
 }

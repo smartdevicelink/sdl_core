@@ -73,8 +73,6 @@ namespace NsMessageBroker {
 
     void Accept();
 
-    void Close();
-
     void Shutdown();
 
     bool IsShuttingDown();

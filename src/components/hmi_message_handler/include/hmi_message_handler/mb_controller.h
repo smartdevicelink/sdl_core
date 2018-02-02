@@ -140,6 +140,9 @@ namespace NsMessageBroker {
       int mControllersIdCounter;
 
       //Registry
+      std::vector <std::shared_ptr<NsMessageBroker::WebsocketSession>> mConnectionList;
+      sync_primitives::Lock mConnectionListLock;
+
       std::map <std::string, WebsocketSession*> mControllersList;
       sync_primitives::Lock mControllersListLock;
 
