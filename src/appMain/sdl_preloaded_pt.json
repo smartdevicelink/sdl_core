@@ -16,7 +16,7 @@
                     "default": ["https://policies.smartdevicelink.com/api/1/policies/proprietary"]
                 },
                 "0x04": {
-                    "default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
+                    "default": ["http://ivsu.smartdevicelink.com/api/getsoftwareupdates"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]
