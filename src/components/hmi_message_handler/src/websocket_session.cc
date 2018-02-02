@@ -205,61 +205,54 @@ std::string WebsocketSession::findMethodById(std::string id) {
 
 bool WebsocketSession::checkMessage(Json::Value& root, Json::Value& error) {
   Json::Value err;
-  try {
-    /* check the JSON-RPC version => 2.0 */
-    if (!root.isObject() || !root.isMember("jsonrpc") ||
-        root["jsonrpc"] != "2.0") {
-      error["id"] = Json::Value::null;
-      error["jsonrpc"] = "2.0";
-      err["code"] = hmi_message_handler::INVALID_REQUEST;
-      err["message"] = "Invalid MessageBroker request.";
-      error["error"] = err;
-      return false;
-    }
-
-    if (root.isMember("id") &&
-        (root["id"].isArray() || root["id"].isObject())) {
-      error["id"] = Json::Value::null;
-      error["jsonrpc"] = "2.0";
-      err["code"] = hmi_message_handler::INVALID_REQUEST;
-      err["message"] = "Invalid MessageBroker request.";
-      error["error"] = err;
-      return false;
-    }
-
-    if (root.isMember("result") && root.isMember("error")) {
-      /* message can't contain simultaneously result and error*/
-      return false;
-    }
-
-    if (root.isMember("method")) {
-      if (!root["method"].isString()) {
-        error["id"] = Json::Value::null;
-        error["jsonrpc"] = "2.0";
-        err["code"] = hmi_message_handler::INVALID_REQUEST;
-        err["message"] = "Invalid MessageBroker request.";
-        error["error"] = err;
-        return false;
-      }
-      /* Check the params is  an object*/
-      if (root.isMember("params") && !root["params"].isObject()) {
-        error["id"] = Json::Value::null;
-        error["jsonrpc"] = "2.0";
-        err["code"] = INVALID_REQUEST;
-        err["message"] = "Invalid JSONRPC params.";
-        error["error"] = err;
-        return false;
-      }
-    } else if (!root.isMember("result") && !root.isMember("error")) {
-      return false;
-    }
-    return true;
-  } catch (...) {
-    LOG4CXX_ERROR(
-        ws_logger_,
-        "CMessageBrokerController::checkMessage() EXCEPTION has been caught!");
+  /* check the JSON-RPC version => 2.0 */
+  if (!root.isObject() || !root.isMember("jsonrpc") ||
+      root["jsonrpc"] != "2.0") {
+    error["id"] = Json::Value::null;
+    error["jsonrpc"] = "2.0";
+    err["code"] = hmi_message_handler::INVALID_REQUEST;
+    err["message"] = "Invalid MessageBroker request.";
+    error["error"] = err;
     return false;
   }
+
+  if (root.isMember("id") &&
+      (root["id"].isArray() || root["id"].isObject())) {
+    error["id"] = Json::Value::null;
+    error["jsonrpc"] = "2.0";
+    err["code"] = hmi_message_handler::INVALID_REQUEST;
+    err["message"] = "Invalid MessageBroker request.";
+    error["error"] = err;
+    return false;
+  }
+
+  if (root.isMember("result") && root.isMember("error")) {
+    /* message can't contain simultaneously result and error*/
+    return false;
+  }
+
+  if (root.isMember("method")) {
+    if (!root["method"].isString()) {
+      error["id"] = Json::Value::null;
+      error["jsonrpc"] = "2.0";
+      err["code"] = hmi_message_handler::INVALID_REQUEST;
+      err["message"] = "Invalid MessageBroker request.";
+      error["error"] = err;
+      return false;
+    }
+    /* Check the params is  an object*/
+    if (root.isMember("params") && !root["params"].isObject()) {
+      error["id"] = Json::Value::null;
+      error["jsonrpc"] = "2.0";
+      err["code"] = INVALID_REQUEST;
+      err["message"] = "Invalid JSONRPC params.";
+      error["error"] = err;
+      return false;
+    }
+  } else if (!root.isMember("result") && !root.isMember("error")) {
+    return false;
+  }
+  return true;
 }
 
 WebsocketSession::LoopThreadDelegate::LoopThreadDelegate(

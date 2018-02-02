@@ -334,8 +334,8 @@ if (HMIADAPTER STREQUAL "messagebroker")
       DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
-      BUILD_COMMAND sudo ./b2 install --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}    
-      INSTALL_COMMAND ""
+      BUILD_COMMAND ./b2
+      INSTALL_COMMAND sudo ./b2 install --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
