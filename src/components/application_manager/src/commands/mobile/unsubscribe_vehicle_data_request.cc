@@ -253,6 +253,14 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
+  ApplicationSharedPtr app =
+      application_manager_.application(CommandRequestImpl::connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    return;
+  }
+
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
        it != hmi_requests_.end();
@@ -308,7 +316,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     SendResponse(any_arg_success, status, NULL, &response_params);
     if (true == any_arg_success) {
-      UpdateHash();
+      app->UpdateHash();
     }
   }
 #else

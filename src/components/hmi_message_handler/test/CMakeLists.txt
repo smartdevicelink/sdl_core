@@ -42,9 +42,10 @@ if (HMIADAPTER STREQUAL "messagebroker")
     message_broker_client
     message_broker_server
   )
+  set(EXCLUDE_PATHS)
+else()
+  set(EXCLUDE_PATHS hmi_message_handler_impl_test.cc)
 endif()
-
-set(EXCLUDE_PATHS)
 
 set(LIBRARIES    
     gmock
@@ -54,13 +55,6 @@ set(LIBRARIES
 	${BROKER_LIBRARIES}
     ConfigProfile
 )
-
-if(NOT HMI_DBUS_API})
-  list (APPEND EXCLUDE_PATHS  
-    mock_subscriber.cc 
-    dbus_message_adapter_test.cc
-  )
-endif()
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
