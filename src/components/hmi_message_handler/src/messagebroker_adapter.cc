@@ -39,13 +39,13 @@ namespace hmi_message_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+typedef hmi_message_handler::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
                                            uint16_t port)
     : HMIMessageAdapterImpl(handler_param)
-    , MessageBrokerController(server_address, port, "SDL") {
+    , MessageBrokerController(server_address, port, "SDL", 8) {
   LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 
@@ -153,6 +153,7 @@ void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
 
 void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MB_Adapter: " << root);
   if (root.isNull()) {
     // LOG
     return;

@@ -38,10 +38,6 @@ include_directories (
 )
 
 if (HMIADAPTER STREQUAL "messagebroker")
-  set (BROKER_LIBRARIES
-    message_broker_client
-    message_broker_server
-  )
   set(EXCLUDE_PATHS)
 else()
   set(EXCLUDE_PATHS hmi_message_handler_impl_test.cc)
@@ -57,5 +53,10 @@ set(LIBRARIES
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+
+if (HMIADAPTER STREQUAL "messagebroker")
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES ${BOOST_LIBS_DIRECTORY}/libboost_system.so)
+endif()
 
 create_test(hmi_message_handler_test "${SOURCES}" "${LIBRARIES}")

@@ -58,11 +58,6 @@
 #endif
 
 #include "media_manager/media_manager_impl.h"
-// ----------------------------------------------------------------------------
-// Third-Party includes
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-
-// ----------------------------------------------------------------------------
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
@@ -145,6 +140,7 @@ int32_t main(int32_t argc, char** argv) {
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
+  LOG4CXX_INFO(logger_, "Components Started");
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
@@ -156,7 +152,6 @@ int32_t main(int32_t argc, char** argv) {
     _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");

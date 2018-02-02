@@ -53,23 +53,6 @@ namespace main_namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
-namespace {
-#ifdef MESSAGEBROKER_HMIADAPTER
-void NameMessageBrokerThread(const System::Thread& thread,
-                             const std::string& name) {
-  Thread::SetNameForId(thread.GetId(), name);
-}
-#endif  // MESSAGEBROKER_HMIADAPTER
-
-void StopThread(System::Thread* thread) {
-  if (thread) {
-    thread->Stop();
-    thread->Join();
-    delete thread;
-  }
-}
-}  // namespace
-
 LifeCycle::LifeCycle(const profile::Profile& profile)
     : transport_manager_(NULL)
     , protocol_handler_(NULL)
@@ -92,10 +75,6 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
     , mb_adapter_(NULL)
-    , message_broker_(NULL)
-    , message_broker_server_(NULL)
-    , mb_thread_(NULL)
-    , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
     , profile_(profile) {
@@ -192,77 +171,16 @@ bool LifeCycle::StartComponents() {
 
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
-  DCHECK(!message_broker_)
-  message_broker_ = NsMessageBroker::CMessageBroker::getInstance();
-  if (!message_broker_) {
-    LOG4CXX_FATAL(logger_, " Wrong pMessageBroker pointer!");
-    return false;
-  }
-
-  message_broker_server_ = new NsMessageBroker::TcpServer(
-      profile_.server_address(), profile_.server_port(), message_broker_);
-  if (!message_broker_server_) {
-    LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
-    return false;
-  }
-  message_broker_->startMessageBroker(message_broker_server_);
-  if (!networking::init()) {
-    LOG4CXX_FATAL(logger_, " Networking initialization failed!");
-    return false;
-  }
-
-  if (!message_broker_server_->Bind()) {
-    LOG4CXX_FATAL(logger_, "Message broker server bind failed!");
-    return false;
-  } else {
-    LOG4CXX_INFO(logger_, "Message broker server bind successful!");
-  }
-
-  if (!message_broker_server_->Listen()) {
-    LOG4CXX_FATAL(logger_, "Message broker server listen failed!");
-    return false;
-  } else {
-    LOG4CXX_INFO(logger_, " Message broker server listen successful!");
-  }
-
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
       hmi_handler_, profile_.server_address(), profile_.server_port());
 
-  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
-  if (!mb_adapter_->Connect()) {
-    LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
+  if (!mb_adapter_->StartListener()) {
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
-  mb_thread_ = new System::Thread(
-      new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
-          *message_broker_,
-          &NsMessageBroker::CMessageBroker::MethodForThread,
-          NULL));
-  mb_thread_->Start(false);
-  // Thread can be named only when started because before that point
-  // thread doesn't have valid Id to associate name with
-  NameMessageBrokerThread(*mb_thread_, "MessageBroker");
-
-  LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
-  mb_server_thread_ =
-      new System::Thread(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
-          *message_broker_server_,
-          &NsMessageBroker::TcpServer::MethodForThread,
-          NULL));
-  mb_server_thread_->Start(false);
-  NameMessageBrokerThread(*mb_server_thread_, "MB TCPServer");
-
-  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-  mb_adapter_thread_ = new System::Thread(
-      new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-          *mb_adapter_,
-          &hmi_message_handler::MessageBrokerAdapter::
-              SubscribeAndBeginReceiverThread,
-          NULL));
-  mb_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_adapter_thread_, "MB Adapter");
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
+  mb_adapter_thread_ = new std::thread(
+      &hmi_message_handler::MessageBrokerAdapter::Run, mb_adapter_);
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
@@ -413,7 +331,7 @@ void LifeCycle::StopComponents() {
     hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
     mb_adapter_->exitReceivingThread();
-    StopThread(mb_adapter_thread_);
+    mb_adapter_thread_->join();
     delete mb_adapter_;
     mb_adapter_ = NULL;
   }
@@ -423,20 +341,6 @@ void LifeCycle::StopComponents() {
   hmi_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
-  StopThread(mb_server_thread_);
-  StopThread(mb_thread_);
-
-  if (message_broker_server_) {
-    message_broker_server_->Close();
-    delete message_broker_server_;
-    message_broker_server_ = NULL;
-  }
-
-  if (message_broker_) {
-    message_broker_->stopMessageBroker();
-  }
-
-  networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef TELEMETRY_MONITOR

@@ -53,6 +53,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/src
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/media_manager/include
@@ -70,16 +71,10 @@ include_directories(
   ${OPENSSL_INCLUDE_DIRECTORY}
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
-
-if (HMIADAPTER STREQUAL "messagebroker")
-  set (BROKER_LIBRARIES
-    message_broker_client
-    message_broker_server
-  )
-endif()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -109,7 +104,6 @@ set(LIBRARIES
   TransportManager
   ${SecurityManagerLibrary}
   HMIMessageHandler
-  message_broker
   ${BROKER_LIBRARIES}
   Utils
   jsoncpp
@@ -151,6 +145,12 @@ list(APPEND LIBRARIES bson -L${BSON_LIBS_DIRECTORY})
 list(APPEND LIBRARIES emhashmap -L${EMHASHMAP_LIBS_DIRECTORY})
 
 add_executable(${PROJECT} ${SOURCES})
+
+if (HMIADAPTER STREQUAL "messagebroker")
+  add_dependencies(${PROJECT} Boost)
+  list(APPEND LIBRARIES libboost_system.so)
+endif()
+
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
