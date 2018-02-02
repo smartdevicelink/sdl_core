@@ -185,7 +185,6 @@ class SetGlobalPropertiesRequestTest
   }
 
   void ExpectInvalidData() {
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
@@ -222,6 +221,7 @@ class SetGlobalPropertiesRequestTest
     ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -294,13 +294,19 @@ TEST_F(SetGlobalPropertiesRequestTest,
 
   ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(
       mock_message_helper_,
       VerifyTtsFiles(
           (*msg_vr)[am::strings::msg_params][am::strings::help_prompt], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
+  EXPECT_CALL(rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetGlobalProperties)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_SetGlobalProperties)))
+      .WillOnce(Return(true));
   (*msg_vr)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   Event event_vr(hmi_apis::FunctionID::TTS_SetGlobalProperties);
@@ -310,7 +316,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event_vr);
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
@@ -335,7 +340,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
@@ -365,7 +369,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
@@ -628,7 +631,6 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
@@ -1083,7 +1085,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
@@ -1116,7 +1117,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
@@ -1188,7 +1188,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
   OnEventTTSSetupHelper(msg, command);
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
@@ -1224,7 +1223,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))

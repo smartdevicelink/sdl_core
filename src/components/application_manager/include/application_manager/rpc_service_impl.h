@@ -42,6 +42,7 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mobile_message_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "application_manager/command_holder_impl.h"
 
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
@@ -96,7 +97,8 @@ class RPCServiceImpl : public RPCService,
   RPCServiceImpl(ApplicationManager& app_manager,
                  request_controller::RequestController& request_ctrl,
                  protocol_handler::ProtocolHandler* protocol_handler,
-                 hmi_message_handler::HMIMessageHandler* hmi_handler);
+                 hmi_message_handler::HMIMessageHandler* hmi_handler,
+                 CommandHolder& commands_holder);
   ~RPCServiceImpl();
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -127,6 +129,7 @@ class RPCServiceImpl : public RPCService,
   request_controller::RequestController& request_ctrl_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
+  CommandHolder& commands_holder_;
   // Thread that pumps messages being passed to mobile side.
   impl::ToMobileQueue messages_to_mobile_;
   // Thread that pumps messages being passed to HMI.

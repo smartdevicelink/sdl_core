@@ -263,6 +263,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 
   command_->Run();
 }
@@ -277,6 +278,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_VerifyImageFail_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::INVALID_DATA));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 
   command_->Run();
 }
@@ -299,6 +301,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(invalid_choice_set_id));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
 }
 
@@ -332,6 +335,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
   command_->Run();
 }
@@ -364,6 +369,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 
   if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
           .keyExists(am::strings::menu_name)) {
@@ -444,6 +450,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .Times(AtLeast(2))
       .WillOnce(Return(kConnectionKey))
       .WillOnce(Return(kConnectionKey));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
 }
 
@@ -478,6 +485,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillOnce(Return(choice_set_id));
 
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
 }
 
@@ -527,6 +535,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_ValidVrNoError_SUCCESS) {
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
@@ -560,6 +569,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   command_->Run();
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(0);
@@ -594,6 +604,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .Times(3)
+      .WillRepeatedly(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
@@ -641,6 +654,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .Times(3)
+      .WillRepeatedly(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
@@ -683,6 +699,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .Times(3)
+      .WillRepeatedly(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
@@ -727,6 +746,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillOnce(Return(choice_set_id));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
 
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .Times(6)
+      .WillRepeatedly(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
@@ -797,6 +819,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _)).Times(2);
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .Times(3)
+      .WillRepeatedly(ReturnRef(rpc_service_));
   command_->Run();
 
   FillMessageFieldsItem2(message_);
