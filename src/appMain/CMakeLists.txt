@@ -80,7 +80,6 @@ cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
 # info: cmake --help-policy CMP0015
 cmake_policy(SET CMP0015 NEW)
-link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
 
 if (TELEMETRY_MONITOR)
@@ -131,7 +130,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    list(APPEND LIBRARIES Libusb-1.0.16)
+    list(APPEND LIBRARIES libusb-1.0.so)
   endif()
 endif()
 

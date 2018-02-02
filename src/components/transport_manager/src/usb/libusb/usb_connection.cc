@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include <libusb/libusb.h>
+#include <libusb-1.0/libusb.h>
 
 #include <sstream>
 

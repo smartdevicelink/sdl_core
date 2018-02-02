@@ -57,7 +57,7 @@ set(PATHS
 )
 
 if (HMIADAPTER STREQUAL "dbus")
-  set(EXCLUDE_PATHS)
+  set(EXCLUDE_PATHS messagebroker_adapter.cc)
   set(DBUS_ADAPTER DBus)
 else()
   set(EXCLUDE_PATHS dbus_message_adapter.cc)

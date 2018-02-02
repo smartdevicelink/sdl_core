@@ -57,7 +57,7 @@ void GetVehicleDataRequest::Run() {
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = appplication_manager.application(app_id);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
