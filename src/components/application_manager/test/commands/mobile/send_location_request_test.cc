@@ -355,7 +355,11 @@ TEST_F(SendLocationRequestTest, OnEvent_Success) {
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app));
-
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(
+      rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      .WillOnce(Return(false));
   command_->on_event(event);
 }
 

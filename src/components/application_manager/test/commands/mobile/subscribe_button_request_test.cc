@@ -184,8 +184,11 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   EXPECT_CALL(rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
-  MessageSharedPtr mobile_result_msg(
-      CatchMobileCommandResult(CallRun(*command)));
+  MessageSharedPtr mobile_result_msg;
+  EXPECT_CALL(this->rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
+  ASSERT_TRUE(command->Init());
+  command->Run();
 
   EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
             static_cast<hmi_apis::FunctionID::eType>(

@@ -85,6 +85,9 @@ class EventDispatcher;
 namespace rpc_service {
 class RPCService;
 }
+namespace rpc_handler {
+class RPCHandler;
+}
 
 class Application;
 class StateControllerImpl;
@@ -97,7 +100,6 @@ struct ApplicationsAppIdSorter {
     return lhs->app_id() < rhs->app_id();
   }
 };
-
 struct ApplicationsPolicyAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) {
@@ -376,6 +378,8 @@ class ApplicationManager {
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
   virtual rpc_service::RPCService& GetRPCService() const = 0;
+  virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual bool is_stopping() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
