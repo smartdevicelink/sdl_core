@@ -43,11 +43,13 @@ RPCServiceImpl::RPCServiceImpl(
     ApplicationManager& app_manager,
     request_controller::RequestController& request_ctrl,
     protocol_handler::ProtocolHandler* protocol_handler,
-    hmi_message_handler::HMIMessageHandler* hmi_handler)
+    hmi_message_handler::HMIMessageHandler* hmi_handler,
+    CommandHolder& commands_holder)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
+    , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
     , hmi_so_factory_(hmi_apis::HMI_API())
@@ -83,6 +85,15 @@ bool RPCServiceImpl::ManageMobileCommand(
     return false;
   }
 
+  const uint32_t connection_key = static_cast<uint32_t>(
+      (*message)[strings::params][strings::connection_key].asUInt());
+
+  auto app_ptr = app_manager_.application(connection_key);
+  if (app_ptr && app_manager_.IsAppInReconnectMode(app_ptr->policy_app_id())) {
+    commands_holder_.Suspend(
+        app_ptr, CommandHolder::CommandType::kMobileCommand, message);
+    return true;
+  }
   mobile_apis::FunctionID::eType function_id =
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
@@ -92,9 +103,6 @@ bool RPCServiceImpl::ManageMobileCommand(
       (*message)[strings::params].keyExists(strings::correlation_id)
           ? (*message)[strings::params][strings::correlation_id].asUInt()
           : 0;
-
-  uint32_t connection_key =
-      (*message)[strings::params][strings::connection_key].asUInt();
 
   int32_t protocol_type =
       (*message)[strings::params][strings::protocol_type].asInt();
@@ -251,6 +259,19 @@ bool RPCServiceImpl::ManageHMICommand(
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");
     return false;
+  }
+
+  if ((*message).keyExists(strings::msg_params) &&
+      (*message)[strings::msg_params].keyExists(strings::app_id)) {
+    const auto connection_key =
+        (*message)[strings::msg_params][strings::app_id].asUInt();
+
+    auto app = app_manager_.application(static_cast<uint32_t>(connection_key));
+    if (app && app_manager_.IsAppInReconnectMode(app->policy_app_id())) {
+      commands_holder_.Suspend(
+          app, CommandHolder::CommandType::kHmiCommand, message);
+      return true;
+    }
   }
 
   int32_t message_type =
