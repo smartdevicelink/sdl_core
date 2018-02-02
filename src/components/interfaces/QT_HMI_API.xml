@@ -2138,6 +2138,20 @@
         <description>Defines the name of app's request that initiates playing a tone</description>
       </param>
     </function>
+    <function name="DialNumber" messagetype="request">
+      <description>Request from SDL to call a specific number.</description>
+      <param name="number" type="String" maxlength="40">
+        <description>Phone number is a string, which can be up to 40 chars.
+        All characters shall be stripped from string except digits 0-9 and * # , ; +
+        </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that concerns this RPC.</description>
+      </param>
+    </function>
+
+    <function name="DialNumber" messagetype="response">
+    </function>
     <!-- Policies -->
     <!-- SyncP RPC-->
     <function name="OnSystemRequest" messagetype="notification" provider="hmi">

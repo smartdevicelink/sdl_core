@@ -27,6 +27,19 @@ addons:
     - binutils
 before_install:
   - sudo apt-get -qq update
+  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev
+  - sudo add-apt-repository ppa:kalakris/cmake -y
+  - sudo apt-get update -q
+  - sudo apt-get install -y cmake
+  - sudo add-apt-repository ppa:beineri/opt-qt521 -y
+  - sudo apt-get update -q
+  - sudo apt-get install -y qt52base qt52declarative qt52graphicaleffects qt52quick1 qt52quickcontrols qt52script
+  - sudo apt-get install mlocate
+  - sudo updatedb
+script:
+  - source /opt/qt52/bin/qt52-env.sh && mkdir build_dbus && cd build_dbus && cmake ../ -DHMI2=ON -DHMI=qt && make && make install
+  - source /opt/qt52/bin/qt52-env.sh && cd .. && mkdir build && cd build && cmake ../ && make && make install
+=======
   - sudo apt-get -q -y install bluez-tools sqlite3 libsqlite3-dev automake1.11
   - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
   - sudo dpkg -i lcov_1.11-3_all.deb
@@ -62,4 +75,3 @@ notifications:
     - AKutsan@luxoft.com
     - NSnitsar@luxoft.com
     - MGhiumiusliu@luxoft.com
-
