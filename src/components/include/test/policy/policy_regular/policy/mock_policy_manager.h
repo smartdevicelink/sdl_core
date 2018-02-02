@@ -222,6 +222,10 @@ class MockPolicyManager : public PolicyManager {
       CheckPendingPermissionsChanges,
       void(const std::string& policy_app_id,
            const std::vector<FunctionalGroupPermission>& current_permissions));
+
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
 };
 
 }  // namespace policy_manager_test

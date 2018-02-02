@@ -75,6 +75,7 @@ void OnExitAllApplicationsNotification::Run() {
       break;
     }
     case hmi_apis::Common_ApplicationsCloseReason::SUSPEND: {
+      application_manager_.resume_controller().OnSuspend();
       SendOnSDLPersistenceComplete();
       return;
     }

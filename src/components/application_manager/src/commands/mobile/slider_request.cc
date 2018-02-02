@@ -107,6 +107,7 @@ void SliderRequest::Run() {
     msg_params[strings::timeout] = default_timeout_;
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Slider, &msg_params, true);
 }
 
@@ -132,7 +133,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   }
 
   LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
-
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   const Common_Result::eType response_code = static_cast<Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 

@@ -1,5 +1,5 @@
 <!--
-* Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,13 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE. --><interfaces name="SmartDeviceLink HMI API">
+ * POSSIBILITY OF SUCH DAMAGE. -->
+
+<!--
+ * DEPRECATED, use HMI_API instead. This API is used with the DBus adapter, 
+ * which will be removed or refactored to use HMI_API in the next major release
+-->
+<interfaces name="SmartDeviceLink HMI API">
   <interface name="Common" version="1.1" date="2013-10-02">
     <enum name="Result">
       <element name="SUCCESS" value="0"/>

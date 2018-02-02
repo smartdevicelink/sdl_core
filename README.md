@@ -65,7 +65,6 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 | Flag | Description | Dependencies |
 |------|-------------|--------------|
 |Web HMI|Use HTML5 HMI|chromium-browser|
-|HMI2|Build with QT HMI|QT5, dbus-*dev|
 |EXTENDED_MEDIA_MODE|Support Video and Audio Streaming|Opengl es2, gstreamer1.0*|
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
 |Testing framework|Needed to support running unit tests|libgtest-dev|

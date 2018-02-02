@@ -267,9 +267,7 @@ void policy::CheckAppPolicy::NotifySystem(
 }
 
 void CheckAppPolicy::SendPermissionsToApp(
-    const AppPoliciesValueType& app_policy) const {
-  const std::string app_id = app_policy.first;
-
+    const std::string& app_id, const policy_table::Strings& groups) const {
   const std::string device_id = pm_->GetCurrentDeviceId(app_id);
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_,
@@ -281,7 +279,7 @@ void CheckAppPolicy::SendPermissionsToApp(
 
   Permissions notification_data;
   pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
-                               app_policy.second.groups,
+                               groups,
                                group_permissons,
                                notification_data);
 
@@ -356,6 +354,20 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
                "Permissions for application:" << app_id
                                               << " have been changed.");
 
+  if (IsPredefinedApp(app_policy)) {
+    for (const policy_table::ApplicationPolicies::value_type& app :
+         snapshot_->policy_table.app_policies_section.apps) {
+      if (app_policy.first == app.second.get_string()) {
+        if (RESULT_CONSENT_NOT_REQIURED != result) {
+          SetPendingPermissions(app, result);
+          NotifySystem(app);
+        }
+        SendPermissionsToApp(app.first, app_policy.second.groups);
+      }
+    }
+    return true;
+  }
+
   if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
     SetPendingPermissions(app_policy, result);
     NotifySystem(app_policy);
@@ -363,7 +375,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   // Don't sent notification for predefined apps (e.g. default, device etc.)
   if (!IsPredefinedApp(app_policy)) {
-    SendPermissionsToApp(app_policy);
+    SendPermissionsToApp(app_policy.first, app_policy.second.groups);
   }
   return true;
 }

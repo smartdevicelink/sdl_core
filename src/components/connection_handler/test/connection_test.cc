@@ -71,6 +71,11 @@ class ConnectionTest : public ::testing::Test {
     delete connection_handler_;
   }
   void StartSession() {
+    StartDefaultSession();
+    connection_->UpdateProtocolVersionSession(
+        session_id, protocol_handler::PROTOCOL_VERSION_3);
+  }
+  void StartDefaultSession() {
     session_id = connection_->AddNewSession();
     EXPECT_NE(session_id, 0u);
     const SessionMap sessionMap = connection_->session_map();
@@ -142,13 +147,13 @@ TEST_F(ConnectionTest, Session_TryGetProtocolVersionWithoutSession) {
 }
 
 TEST_F(ConnectionTest, Session_GetDefaultProtocolVersion) {
-  StartSession();
+  StartDefaultSession();
   uint8_t protocol_version;
   EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
   EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
 }
 TEST_F(ConnectionTest, Session_UpdateProtocolVersion) {
-  StartSession();
+  StartDefaultSession();
   uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
   connection_->UpdateProtocolVersionSession(session_id, protocol_version);
   EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
@@ -157,7 +162,7 @@ TEST_F(ConnectionTest, Session_UpdateProtocolVersion) {
 
 TEST_F(ConnectionTest, HeartBeat_NotSupported) {
   // Arrange
-  StartSession();
+  StartDefaultSession();
   uint8_t protocol_version;
   EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
   EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);

@@ -188,10 +188,6 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
 
-  if (crypto_manager_->IsCertificateUpdateRequired()) {
-    NotifyOnCertififcateUpdateRequired();
-  }
-
   if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
@@ -219,14 +215,22 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     SendHandshakeBinData(connection_key, data, data_size);
   }
 }
+
+bool SecurityManagerImpl::IsCertificateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return crypto_manager_->IsCertificateUpdateRequired();
+}
+
 void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
   if (!listener) {
     LOG4CXX_ERROR(logger_,
                   "Invalid (NULL) pointer to SecurityManagerListener.");
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Adding listener " << listener);
   listeners_.push_back(listener);
 }
+
 void SecurityManagerImpl::RemoveListener(
     SecurityManagerListener* const listener) {
   if (!listener) {
@@ -236,13 +240,15 @@ void SecurityManagerImpl::RemoveListener(
   }
   listeners_.remove(listener);
 }
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     if ((*it)->OnHandshakeDone(connection_key, error)) {
-      // On get notification remove listener
+      LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+      delete (*it);
       it = listeners_.erase(it);
     } else {
       ++it;
@@ -251,12 +257,29 @@ void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
 }
 
 void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
+  NotifyOnCertificateUpdateRequired();
+}
+
+void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     (*it)->OnCertificateUpdateRequired();
     ++it;
   }
+}
+
+bool SecurityManagerImpl::IsPolicyCertificateDataEmpty() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string certificate_data;
+  for (auto it = listeners_.begin(); it != listeners_.end(); ++it) {
+    if ((*it)->GetPolicyCertificateData(certificate_data)) {
+      LOG4CXX_DEBUG(logger_, "Certificate data received from listener");
+      return certificate_data.empty();
+    }
+  }
+  return false;
 }
 
 bool SecurityManagerImpl::ProccessHandshakeData(
