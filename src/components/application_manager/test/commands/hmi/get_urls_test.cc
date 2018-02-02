@@ -107,6 +107,7 @@ class GetUrlsTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 
 TEST_F(GetUrlsTest, RUN_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 
   request_command_->Run();
 }
@@ -328,6 +329,7 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(_))
       .WillOnce(Return(mock_app));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   request_command_->Run();
 
   EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(

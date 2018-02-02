@@ -44,6 +44,7 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/rpc_handler_impl.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/hmi_capabilities_impl.h"
@@ -158,8 +159,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , request_ctrl_(am_settings)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
-    , messages_from_mobile_("AM FromMobile", this)
-    , messages_from_hmi_("AM FromHMI", this)
     , audio_pass_thru_messages_("AudioPassThru", this)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
@@ -198,6 +197,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
+  rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
 }
 
@@ -930,43 +930,6 @@ ApplicationManagerImpl::GetDeviceTransportType(
   }
 
   return result;
-}
-
-void ApplicationManagerImpl::OnMessageReceived(
-    const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-    NOTREACHED();
-    return;
-  }
-
-  utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
-
-  if (outgoing_message) {
-    LOG4CXX_DEBUG(logger_, "Posting new Message");
-    messages_from_mobile_.PostMessage(
-        impl::MessageFromMobile(outgoing_message));
-  }
-}
-
-void ApplicationManagerImpl::OnMobileMessageSent(
-    const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
-
-void ApplicationManagerImpl::OnMessageReceived(
-    hmi_message_handler::MessageSharedPointer message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-    NOTREACHED();
-    return;
-  }
-
-  messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
 ApplicationConstSharedPtr ApplicationManagerImpl::WaitingApplicationByID(
@@ -1737,8 +1700,11 @@ protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler()
 void ApplicationManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
-  rpc_service_.reset(new rpc_service::RPCServiceImpl(
-      *this, request_ctrl_, protocol_handler_, hmi_handler_));
+  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
+                                                     request_ctrl_,
+                                                     protocol_handler_,
+                                                     hmi_handler_,
+                                                     *commands_holder_));
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1861,156 +1827,6 @@ bool ApplicationManagerImpl::Stop() {
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
   GetPolicyHandler().UnloadPolicyLibrary();
 
-  return true;
-}
-
-bool ApplicationManagerImpl::ConvertMessageToSO(
-    const Message& message, smart_objects::SmartObject& output) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "\t\t\tMessage to convert: protocol "
-                    << message.protocol_version() << "; json "
-                    << message.json_message());
-
-  switch (message.protocol_version()) {
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5:
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4:
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3:
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2: {
-      const bool conversion_result =
-          formatters::CFormatterJsonSDLRPCv2::fromString(
-              message.json_message(),
-              output,
-              message.function_id(),
-              message.type(),
-              message.correlation_id());
-
-      rpc::ValidationReport report("RPC");
-
-      if (!conversion_result ||
-          !mobile_so_factory().attachSchema(output, true) ||
-          ((output.validate(&report) != smart_objects::Errors::OK))) {
-        LOG4CXX_WARN(logger_,
-                     "Failed to parse string to smart object :"
-                         << message.json_message());
-        utils::SharedPtr<smart_objects::SmartObject> response(
-            MessageHelper::CreateNegativeResponse(
-                message.connection_key(),
-                message.function_id(),
-                message.correlation_id(),
-                mobile_apis::Result::INVALID_DATA));
-
-        (*response)[strings::msg_params][strings::info] =
-            rpc::PrettyFormat(report);
-        rpc_service_->ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
-        return false;
-      }
-      LOG4CXX_DEBUG(logger_,
-                    "Convertion result for sdl object is true function_id "
-                        << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-
-      output[strings::params][strings::connection_key] =
-          message.connection_key();
-      output[strings::params][strings::protocol_version] =
-          message.protocol_version();
-      if (message.binary_data()) {
-        if (message.payload_size() < message.data_size()) {
-          LOG4CXX_ERROR(logger_,
-                        "Incomplete binary"
-                            << " binary size should be  " << message.data_size()
-                            << " payload data size is "
-                            << message.payload_size());
-          utils::SharedPtr<smart_objects::SmartObject> response(
-              MessageHelper::CreateNegativeResponse(
-                  message.connection_key(),
-                  message.function_id(),
-                  message.correlation_id(),
-                  mobile_apis::Result::INVALID_DATA));
-          rpc_service_->ManageMobileCommand(response,
-                                            commands::Command::ORIGIN_SDL);
-          return false;
-        }
-        output[strings::params][strings::binary_data] =
-            *(message.binary_data());
-      }
-      break;
-    }
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI: {
-#ifdef ENABLE_LOG
-      int32_t result =
-#endif
-          formatters::FormatterJsonRpc::FromString<
-              hmi_apis::FunctionID::eType,
-              hmi_apis::messageType::eType>(message.json_message(), output);
-      LOG4CXX_DEBUG(logger_,
-                    "Convertion result: "
-                        << result << " function id "
-                        << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      if (!hmi_so_factory().attachSchema(output, false)) {
-        LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
-        return false;
-      }
-
-      rpc::ValidationReport report("RPC");
-
-      if (output.validate(&report) != smart_objects::Errors::OK) {
-        LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI"
-                          << rpc::PrettyFormat(report));
-
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
-        return false;
-      }
-      break;
-    }
-    case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
-      static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
-
-      if (message.function_id() == 0 || message.type() == kUnknownType) {
-        LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
-
-        int32_t conversation_result =
-            formatters::CFormatterJsonSDLRPCv1::fromString<
-                NsSmartDeviceLinkRPC::V1::FunctionID::eType,
-                NsSmartDeviceLinkRPC::V1::messageType::eType>(
-                message.json_message(), output);
-
-        if (formatters::CFormatterJsonSDLRPCv1::kSuccess ==
-            conversation_result) {
-          smart_objects::SmartObject params = smart_objects::SmartObject(
-              smart_objects::SmartType::SmartType_Map);
-
-          output[strings::params][strings::message_type] =
-              NsSmartDeviceLinkRPC::V1::messageType::response;
-          output[strings::params][strings::connection_key] =
-              message.connection_key();
-
-          output[strings::msg_params] = smart_objects::SmartObject(
-              smart_objects::SmartType::SmartType_Map);
-          output[strings::msg_params][strings::success] = false;
-          output[strings::msg_params][strings::result_code] =
-              NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
-
-          smart_objects::SmartObjectSPtr msg_to_send =
-              new smart_objects::SmartObject(output);
-          v1_shema.attachSchema(*msg_to_send, false);
-          rpc_service_->SendMessageToMobile(msg_to_send);
-          return false;
-        }
-      }
-      break;
-    }
-    default:
-      LOG4CXX_WARN(logger_,
-                   "Application used unsupported protocol :"
-                       << message.protocol_version() << ".");
-      return false;
-  }
-
-  LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
   return true;
 }
 
@@ -2172,102 +1988,6 @@ MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
     default: { return UNSUPPORTED_PROTOCOL; }
   }
   return SUCCESS;
-}
-
-utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
-    const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(message);
-  utils::SharedPtr<Message> outgoing_message;
-
-  LOG4CXX_DEBUG(logger_, "Service type." << message->service_type());
-  if (message->service_type() != protocol_handler::kRpc &&
-      message->service_type() != protocol_handler::kBulk) {
-    // skip this message, not under handling of ApplicationManager
-    LOG4CXX_TRACE(logger_, "Skipping message; not the under AM handling.");
-    return outgoing_message;
-  }
-
-  Message* convertion_result =
-      MobileMessageHandler::HandleIncomingMessageProtocol(message);
-
-  if (convertion_result) {
-    outgoing_message = convertion_result;
-  } else {
-    LOG4CXX_ERROR(logger_, "Received invalid message");
-  }
-  return outgoing_message;
-}
-
-void ApplicationManagerImpl::ProcessMessageFromMobile(
-    const utils::SharedPtr<Message> message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-#ifdef TELEMETRY_MONITOR
-  AMTelemetryObserver::MessageMetricSharedPtr metric(
-      new AMTelemetryObserver::MessageMetric());
-  metric->begin = date_time::DateTime::getCurrentTime();
-#endif  // TELEMETRY_MONITOR
-  smart_objects::SmartObjectSPtr so_from_mobile =
-      utils::MakeShared<smart_objects::SmartObject>();
-
-  DCHECK_OR_RETURN_VOID(so_from_mobile);
-  if (!so_from_mobile) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
-  if (!ConvertMessageToSO(*message, *so_from_mobile)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
-  }
-#ifdef TELEMETRY_MONITOR
-  metric->message = so_from_mobile;
-#endif  // TELEMETRY_MONITOR
-
-  if (!rpc_service_->ManageMobileCommand(so_from_mobile,
-                                         commands::Command::ORIGIN_MOBILE)) {
-    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
-  }
-#ifdef TELEMETRY_MONITOR
-  metric->end = date_time::DateTime::getCurrentTime();
-  if (metric_observer_) {
-    metric_observer_->OnMessage(metric);
-  }
-#endif  // TELEMETRY_MONITOR
-}
-
-void ApplicationManagerImpl::ProcessMessageFromHMI(
-    const utils::SharedPtr<Message> message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr smart_object(new smart_objects::SmartObject);
-
-  if (!smart_object) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
-    return;
-  }
-
-#ifdef HMI_DBUS_API
-  *smart_object = message->smart_object();
-#else
-  if (!ConvertMessageToSO(*message, *smart_object)) {
-    if (application_manager::MessageType::kResponse ==
-        (*smart_object)[strings::params][strings::message_type].asInt()) {
-      (*smart_object).erase(strings::msg_params);
-      (*smart_object)[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::INVALID_DATA;
-      (*smart_object)[strings::msg_params][strings::info] =
-          std::string("Received invalid data on HMI response");
-    } else {
-      LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-      return;
-    }
-  }
-#endif  // HMI_DBUS_API
-
-  LOG4CXX_DEBUG(logger_, "Converted message, trying to create hmi command");
-  if (!rpc_service_->ManageHMICommand(smart_object)) {
-    LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
-  }
 }
 
 hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
@@ -2495,7 +2215,7 @@ bool ApplicationManagerImpl::is_attenuated_supported() const {
 #ifdef TELEMETRY_MONITOR
 void ApplicationManagerImpl::SetTelemetryObserver(
     AMTelemetryObserver* observer) {
-  metric_observer_ = observer;
+  rpc_handler_->SetTelemetryObserver(observer);
 }
 #endif  // TELEMETRY_MONITOR
 
@@ -2864,54 +2584,6 @@ void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
                                     connection_handler::kUnauthorizedApp);
 }
 
-void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-    return;
-  }
-  sync_primitives::AutoLock lock(stopping_application_mng_lock_);
-  if (is_stopping_) {
-    LOG4CXX_INFO(logger_, "Application manager is stopping");
-    return;
-  }
-#ifdef SDL_REMOTE_CONTROL
-  if (plugin_manager_.IsMessageForPlugin(message)) {
-    if (functional_modules::ProcessResult::PROCESSED ==
-        plugin_manager_.ProcessMessage(message)) {
-      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-      return;
-    }
-  }
-#endif
-  ProcessMessageFromMobile(message);
-}
-
-
-void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-    return;
-  }
-
-#ifdef SDL_REMOTE_CONTROL
-  if (plugin_manager_.IsHMIMessageForPlugin(message)) {
-    functional_modules::ProcessResult result =
-        plugin_manager_.ProcessHMIMessage(message);
-    if (functional_modules::ProcessResult::PROCESSED == result ||
-        functional_modules::ProcessResult::FAILED == result) {
-      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-      return;
-    }
-  }
-#endif
-
-  ProcessMessageFromHMI(message);
-}
-
 void ApplicationManagerImpl::Handle(const impl::AudioData message) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr on_audio_pass =
@@ -3003,6 +2675,11 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   }
   LOG4CXX_DEBUG(logger_, "Request is allowed by policies. " << log_msg);
   return mobile_api::Result::SUCCESS;
+}
+
+bool ApplicationManagerImpl::is_stopping() const {
+  sync_primitives::AutoLock lock(stopping_application_mng_lock_);
+  return is_stopping_;
 }
 
 void ApplicationManagerImpl::OnLowVoltage() {

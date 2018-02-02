@@ -384,7 +384,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
+  ON_CALL(app_mngr_, GetRPCService());
   EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   CallOnEvent on_event_caller(*command_sptr_, event);
