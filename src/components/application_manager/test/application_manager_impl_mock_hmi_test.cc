@@ -222,9 +222,9 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   EXPECT_CALL(*cmd_3, Init()).Times(0);
 
   // Act
-  app_manager_impl_->ManageHMICommand(hmi_msg_1);
-  app_manager_impl_->ManageHMICommand(hmi_msg_2);
-  app_manager_impl_->ManageHMICommand(hmi_msg_3);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_1);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_2);
+  app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_3);
 
   EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))

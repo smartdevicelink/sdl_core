@@ -100,8 +100,6 @@ class RPCHandlerImpl : public RPCHandler,
   RPCHandlerImpl(ApplicationManager& app_manager);
   ~RPCHandlerImpl();
 
-  void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
-  void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
   // CALLED ON messages_from_mobile_ thread!
   void Handle(const impl::MessageFromMobile message) OVERRIDE;
   // CALLED ON messages_from_hmi_ thread!
@@ -150,6 +148,8 @@ class RPCHandlerImpl : public RPCHandler,
 #endif  // TELEMETRY_MONITOR
 
  private:
+  void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
+  void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output);
   utils::SharedPtr<Message> ConvertRawMsgToMessage(
