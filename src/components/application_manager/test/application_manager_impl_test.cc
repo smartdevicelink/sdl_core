@@ -52,6 +52,7 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
@@ -140,7 +141,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -186,10 +187,10 @@ class ApplicationManagerImplTest : public ::testing::Test {
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
   utils::SharedPtr<MockApplication> mock_app_ptr_;
-  MockRPCService rpc_service_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
-TEST_F(ApplicationManagerImplTest, DISABLED_ProcessQueryApp_ExpectSuccess) {
+TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
@@ -206,7 +207,6 @@ TEST_F(ApplicationManagerImplTest, DISABLED_ProcessQueryApp_ExpectSuccess) {
       .WillByDefault(Return(sptr));
   ON_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillByDefault(Return(sptr));
-  ON_CALL(rpc_service_, ManageHMICommand(_));
   app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
 }
 
@@ -785,7 +785,6 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
-
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 

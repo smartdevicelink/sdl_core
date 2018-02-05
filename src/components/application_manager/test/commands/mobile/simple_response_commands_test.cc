@@ -192,6 +192,7 @@ TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
   SharedPtr<am::commands::ScrollableMessageResponse> command(
       CreateCommand<am::commands::ScrollableMessageResponse>(message));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
   command->Run();
 }

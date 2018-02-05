@@ -132,8 +132,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
 
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
-  EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->rpc_service_));
+  EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
