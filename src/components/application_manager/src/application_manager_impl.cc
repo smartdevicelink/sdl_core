@@ -1661,8 +1661,11 @@ protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler()
 void ApplicationManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
-  rpc_service_.reset(new rpc_service::RPCServiceImpl(
-      *this, request_ctrl_, protocol_handler_, hmi_handler_));
+  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
+                                                     request_ctrl_,
+                                                     protocol_handler_,
+                                                     hmi_handler_,
+                                                     *commands_holder_));
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {

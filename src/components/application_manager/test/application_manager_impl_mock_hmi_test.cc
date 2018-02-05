@@ -49,6 +49,7 @@
 #include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 
 namespace test {
 namespace components {
@@ -113,6 +114,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
   }
 
   void SetCommonExpectationOnAppReconnection(
@@ -149,6 +151,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
       mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
 };
 
