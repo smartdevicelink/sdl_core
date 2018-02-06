@@ -132,7 +132,7 @@ TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
 
   (*msg_)[am::strings::msg_params] = 0;
   (*msg_)[am::strings::params][am::hmi_response::code] =
