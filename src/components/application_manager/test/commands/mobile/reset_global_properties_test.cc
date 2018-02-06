@@ -113,7 +113,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
   MessageSharedPtr command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   command_->Run();
