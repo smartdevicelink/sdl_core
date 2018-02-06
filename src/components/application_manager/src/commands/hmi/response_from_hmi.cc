@@ -67,7 +67,7 @@ void ResponseFromHMI::SendResponseToMobile(
     const MessageSharedPtr& message, ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
-  application_manager_.GetRPCService().ManageMobileCommand(message, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);
 }
 
 void ResponseFromHMI::CreateHMIRequest(

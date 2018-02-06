@@ -62,7 +62,7 @@ void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-  application_manager_.GetRPCService().ManageMobileCommand(message, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);
 }
 
 void NotificationFromHMI::CreateHMIRequest(
