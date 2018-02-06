@@ -16,7 +16,7 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
   MOCK_METHOD2(
       ManageMobileCommand,
       bool(const application_manager::commands::MessageSharedPtr message,
-           application_manager::commands::Command::CommandOrigin origin));
+           application_manager::commands::Command::CommandSource origin));
   MOCK_METHOD2(SendMessageToMobile,
                void(application_manager::commands::MessageSharedPtr, bool));
   MOCK_METHOD1(

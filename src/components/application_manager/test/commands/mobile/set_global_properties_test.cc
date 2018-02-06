@@ -307,7 +307,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -331,7 +331,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .Times(0);
   command->on_event(event);
 }
@@ -360,7 +360,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->Run();
@@ -1197,7 +1197,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
