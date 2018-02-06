@@ -244,7 +244,7 @@ void CommandRequestImpl::onTimeOut() {
                                             mobile_api::Result::GENERIC_ERROR);
   AddTimeOutComponentInfoToMessage(*response);
   application_manager_.GetRPCService().ManageMobileCommand(response,
-                                                           ORIGIN_SDL);
+                                                           SOURCE_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -307,7 +307,7 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
-  application_manager_.GetRPCService().ManageMobileCommand(result, ORIGIN_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(result, SOURCE_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
