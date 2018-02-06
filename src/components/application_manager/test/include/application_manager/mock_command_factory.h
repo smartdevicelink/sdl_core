@@ -30,28 +30,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
+
 #include <gmock/gmock.h>
-#include "application_manager/hmi_command_factory.h"
-#include "application_manager/mock_hmi_command_factory.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
+#include "smart_objects/smart_object.h"
+#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
-MockHMICommandFactory* MockHMICommandFactory::mock_hmi_command_factory() {
-  static MockHMICommandFactory mock_hmi_command_factory;
-  return &mock_hmi_command_factory;
-}
+class MockCommandFactory : public application_manager::CommandFactory {
+ public:
+  MOCK_METHOD2(CreateCommand,
+               application_manager::CommandSharedPtr(
+                   const application_manager::commands::MessageSharedPtr&,
+                   application_manager::commands::Command::CommandSource));
 
-}  // application_manager_test
-}  // components
-}  // test
+  //               const commands::MessageSharedPtr& message,
+  //                   application_manager::commands::Command::CommandSource));
+};
 
-namespace application_manager {
-CommandSharedPtr HMICommandFactory::CreateCommand(
-    const commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager) {
-  return test::components::application_manager_test::MockHMICommandFactory::
-      mock_hmi_command_factory()->CreateCommand(message, application_manager);
-}
-}  // application_manager
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
