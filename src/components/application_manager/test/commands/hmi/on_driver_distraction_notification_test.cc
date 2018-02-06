@@ -152,7 +152,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
               ManageMobileCommand(
                   CheckNotificationParams(
                       am::mobile_api::FunctionID::OnDriverDistractionID, state),
-                  Command::CommandOrigin::ORIGIN_SDL));
+                  Command::CommandOrigin::SOURCE_SDL));
 
   command->Run();
 }

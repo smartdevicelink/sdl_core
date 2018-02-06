@@ -215,7 +215,7 @@ class AddCommandRequestTest
     EXPECT_CALL(
         rpc_service_,
         ManageMobileCommand(response,
-                            am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                            am::commands::Command::CommandOrigin::SOURCE_SDL));
     utils::SharedPtr<CommandRequestImpl> base_class_request =
         static_cast<utils::SharedPtr<CommandRequestImpl> >(request_ptr);
     base_class_request->onTimeOut();
@@ -1061,7 +1061,7 @@ TEST_F(AddCommandRequestTest,
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
-                  response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                  response, am::commands::Command::CommandOrigin::SOURCE_SDL));
   utils::SharedPtr<CommandRequestImpl> base_class_request =
       static_cast<utils::SharedPtr<CommandRequestImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
@@ -1113,7 +1113,7 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
-                  response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                  response, am::commands::Command::CommandOrigin::SOURCE_SDL));
   utils::SharedPtr<CommandRequestImpl> base_class_request =
       static_cast<utils::SharedPtr<CommandRequestImpl> >(request_ptr);
   base_class_request->onTimeOut();

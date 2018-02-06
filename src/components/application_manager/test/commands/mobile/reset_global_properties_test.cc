@@ -113,7 +113,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
   MessageSharedPtr command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   command_->Run();
@@ -288,7 +288,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::ORIGIN_SDL));
+                  am::commands::Command::SOURCE_SDL));
 
   command_->on_event(event);
 }
@@ -340,7 +340,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::WARNINGS),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
 
   command_->on_event(event);
 }
@@ -383,7 +383,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::ORIGIN_SDL));
+                  am::commands::Command::SOURCE_SDL));
 
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg_);
@@ -451,7 +451,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::ORIGIN_SDL));
+          am::commands::Command::SOURCE_SDL));
   command->onTimeOut();
 }
 
@@ -514,7 +514,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::ORIGIN_SDL));
+          am::commands::Command::SOURCE_SDL));
   command_->onTimeOut();
 }
 
@@ -567,7 +567,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::ORIGIN_SDL));
+          am::commands::Command::SOURCE_SDL));
   command_->onTimeOut();
 }
 

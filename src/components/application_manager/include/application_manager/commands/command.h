@@ -113,7 +113,7 @@ class Command {
  */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
-  enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
+  enum CommandSource { SOURCE_SDL, SOURCE_MOBILE, SOURCE_HMI };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
