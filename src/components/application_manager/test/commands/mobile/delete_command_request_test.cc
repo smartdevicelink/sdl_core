@@ -186,7 +186,7 @@ TEST_F(DeleteCommandRequestTest,
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   command->on_event(event_vr);

@@ -1023,7 +1023,7 @@ void PolicyHandler::OnPendingPermissionChange(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app->app_id(),
             mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
-        commands::Command::ORIGIN_SDL);
+        commands::Command::SOURCE_SDL);
 
     application_manager_.OnAppUnauthorized(app->app_id());
 

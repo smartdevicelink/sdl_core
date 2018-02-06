@@ -186,7 +186,7 @@ class SetGlobalPropertiesRequestTest
     EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
-                    am::commands::Command::ORIGIN_SDL));
+                    am::commands::Command::SOURCE_SDL));
   }
 
   void ExpectVerifyImageVrHelpSuccess(SmartObject& smart_obj) {
@@ -316,7 +316,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -340,7 +340,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .Times(0);
   command->on_event(event);
 }
@@ -369,7 +369,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->Run();
@@ -632,7 +632,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
 
   command->Run();
 }
@@ -1084,7 +1084,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
 
   command->on_event(event);
@@ -1116,7 +1116,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
 
   command->on_event(event);
@@ -1187,7 +1187,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -1223,7 +1223,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
