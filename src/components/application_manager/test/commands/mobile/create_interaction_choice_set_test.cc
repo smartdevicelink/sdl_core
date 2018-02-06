@@ -183,7 +183,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   req_vr->onTimeOut();
@@ -240,7 +240,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   req_vr->on_event(event);
@@ -623,7 +623,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
-                  am::commands::Command::ORIGIN_SDL));
+                  am::commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   command_->onTimeOut();
@@ -828,7 +828,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
-                  am::commands::Command::ORIGIN_SDL));
+                  am::commands::Command::SOURCE_SDL));
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   event.set_smart_object(*message_);

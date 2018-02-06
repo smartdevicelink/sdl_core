@@ -50,7 +50,7 @@ class RPCService {
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                                   commands::Command::CommandOrigin origin) = 0;
+                                   commands::Command::CommandSource source) = 0;
   /**
    * @brief ManageHMICommand convert message to HMI command and execute it
    * @param message pointer to received message

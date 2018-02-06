@@ -79,7 +79,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #endif  // TELEMETRY_MONITOR
 
   if (!app_manager_.GetRPCService().ManageMobileCommand(
-          so_from_mobile, commands::Command::ORIGIN_MOBILE)) {
+          so_from_mobile, commands::Command::SOURCE_MOBILE)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 #ifdef TELEMETRY_MONITOR
@@ -215,6 +215,7 @@ void RPCHandlerImpl::OnErrorSending(
 void RPCHandlerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
+
 #endif  // TELEMETRY_MONITOR
 
 bool RPCHandlerImpl::ConvertMessageToSO(
@@ -251,7 +252,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                 message.correlation_id(),
                 mobile_apis::Result::INVALID_DATA));
         app_manager_.GetRPCService().ManageMobileCommand(
-            response, commands::Command::ORIGIN_SDL);
+            response, commands::Command::SOURCE_SDL);
         return false;
       }
       LOG4CXX_DEBUG(logger_,
@@ -276,7 +277,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                   message.correlation_id(),
                   mobile_apis::Result::INVALID_DATA));
           app_manager_.GetRPCService().ManageMobileCommand(
-              response, commands::Command::ORIGIN_SDL);
+              response, commands::Command::SOURCE_SDL);
           return false;
         }
         output[strings::params][strings::binary_data] =

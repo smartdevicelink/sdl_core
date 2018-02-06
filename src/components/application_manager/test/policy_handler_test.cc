@@ -1011,7 +1011,7 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(Return(message));
   ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
@@ -1064,7 +1064,7 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(Return(message));
   ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
