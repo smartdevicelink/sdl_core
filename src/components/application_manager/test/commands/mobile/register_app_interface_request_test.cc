@@ -294,7 +294,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   command_->Run();
 }
@@ -406,7 +406,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
 
   command_->Run();

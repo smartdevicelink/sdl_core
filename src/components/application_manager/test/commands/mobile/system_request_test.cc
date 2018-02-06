@@ -112,7 +112,7 @@ class SystemRequestTest
     EXPECT_CALL(
         rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
-                            am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                            am::commands::Command::CommandOrigin::SOURCE_SDL));
   }
 
   MockAppPtr mock_app_;

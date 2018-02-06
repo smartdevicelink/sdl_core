@@ -153,7 +153,7 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -182,7 +182,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_InvalidApp_UNSUCCESS) {
       rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(
                               mobile_apis::Result::APPLICATION_NOT_REGISTERED),
-                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                          am::commands::Command::CommandOrigin::SOURCE_SDL));
   EXPECT_CALL(*app_, FindSubMenu(_)).Times(0);
   command_->Run();
 }
@@ -199,7 +199,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   CheckMessageResultCode(mobile_apis::Result::INVALID_ID),
-                  am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                  am::commands::Command::CommandOrigin::SOURCE_SDL));
   EXPECT_CALL(*app_, app_id()).Times(0);
   command_->Run();
 }
@@ -284,7 +284,7 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
   EXPECT_CALL(*app_, UpdateHash());
   DeleteSubMenuRequestPtr command =
       CreateCommand<DeleteSubMenuRequest>(message_);
@@ -327,7 +327,7 @@ TEST_F(DeleteSubMenuRequestTest,
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
   command_->on_event(event);
 }
 
@@ -354,7 +354,7 @@ TEST_F(DeleteSubMenuRequestTest,
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::ORIGIN_SDL));
+                          am::commands::Command::SOURCE_SDL));
   command_->on_event(event);
 }
 

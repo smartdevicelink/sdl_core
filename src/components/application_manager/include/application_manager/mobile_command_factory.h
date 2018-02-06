@@ -33,32 +33,23 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
 
-#include "application_manager/commands/command.h"
-#include "utils/macro.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
-
-typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
-class ApplicationManager;
-
 /**
- * @brief Factory class for command creation
+ * @brief Factory class for mobile command creation
  **/
-class MobileCommandFactory {
+class MobileCommandFactory : public CommandFactory {
  public:
-  /**
-   * @brief Create command object and return pointer to it
-   *
-   * @param  smartObject SmartObject shared pointer.
-   * @return Pointer to created command object.
-   **/
-  static CommandSharedPtr CreateCommand(
+  MobileCommandFactory(ApplicationManager& application_manager);
+
+  CommandSharedPtr CreateCommand(
       const commands::MessageSharedPtr& message,
-      commands::Command::CommandOrigin origin,
-      ApplicationManager& application_manager);
+      commands::Command::CommandSource source) OVERRIDE;
 
  private:
-  MobileCommandFactory();
+  ApplicationManager& application_manager_;
   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
 

@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2018, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,34 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/unregister_app_interface_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+
+#include <memory>
+#include "application_manager/application_manager.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/hmi_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 #include "application_manager/rpc_service.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
-namespace commands {
+class SDLCommandFactory : public CommandFactory {
+ public:
+  SDLCommandFactory(ApplicationManager& app_manager,
+                    rpc_service::RPCService& rpc_service,
+                    HMICapabilities& hmi_capabilities,
+                    policy::PolicyHandlerInterface& policy_handler);
 
-void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  CommandSharedPtr CreateCommand(
+      const commands::MessageSharedPtr& message,
+      commands::Command::CommandSource source) OVERRIDE;
 
-  if (!application_manager_.application(connection_key())) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
-    return;
-  }
-
-  application_manager_.GetRPCService().ManageMobileCommand(
-      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key(),
-          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      commands::Command::SOURCE_SDL);
-  application_manager_.EndNaviServices(connection_key());
-  application_manager_.UnregisterApplication(connection_key(),
-                                             mobile_apis::Result::SUCCESS);
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+ private:
+  ApplicationManager& app_manager_;
+  rpc_service::RPCService& rpc_service_;
+  HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
+  std::unique_ptr<HMICommandFactory> hmi_command_factory_;
+  std::unique_ptr<MobileCommandFactory> mobile_command_factory_;
+};
 }
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
