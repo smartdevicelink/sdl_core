@@ -43,6 +43,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -51,6 +52,7 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
@@ -139,7 +141,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -185,6 +187,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
   utils::SharedPtr<MockApplication> mock_app_ptr_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
@@ -782,7 +785,6 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
-
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 

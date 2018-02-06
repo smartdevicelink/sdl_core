@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -743,7 +744,7 @@ bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
         (*request)[strings::correlation_id].asInt();
     subscribe_on_event(function_id, hmi_correlation_id);
   }
-  if (!application_manager_.ManageHMICommand(request)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(request)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return false;
   }

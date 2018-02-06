@@ -182,6 +182,7 @@ class RegisterAppInterfaceRequestTest
         mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   }
 
   void SetCommonExpectionsOnSwitchedApplication(
@@ -189,28 +190,28 @@ class RegisterAppInterfaceRequestTest
     EXPECT_CALL(mock_policy_handler_, AddApplication(_, _)).Times(0);
 
     EXPECT_CALL(
-        app_mngr_,
+        rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(response_result_code), _));
 
-    EXPECT_CALL(app_mngr_,
+    EXPECT_CALL(rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
         .Times(0);
 
-    EXPECT_CALL(app_mngr_,
+    EXPECT_CALL(rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
         .Times(0);
 
-    EXPECT_CALL(app_mngr_,
+    EXPECT_CALL(rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::UI_ChangeRegistration))).Times(0);
 
-    EXPECT_CALL(app_mngr_,
+    EXPECT_CALL(rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::TTS_ChangeRegistration))).Times(0);
 
-    EXPECT_CALL(app_mngr_,
+    EXPECT_CALL(rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
                     hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
 
@@ -282,15 +283,17 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(app_mngr_, GetRPCService())
+      .WillRepeatedly(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .Times(2);
   command_->Run();
@@ -381,27 +384,28 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(app_mngr_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::TTS_ChangeRegistration)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(rpc_service_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .Times(2);
 

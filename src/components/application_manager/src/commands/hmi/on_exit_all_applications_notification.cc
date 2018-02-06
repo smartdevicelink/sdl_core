@@ -37,6 +37,7 @@
 #include <signal.h>
 
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "interfaces/HMI_API.h"
 
@@ -107,7 +108,7 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
   (*message)[strings::params][strings::correlation_id] =
       application_manager_.GetNextHMICorrelationID();
 
-  application_manager_.ManageHMICommand(message);
+  application_manager_.GetRPCService().ManageHMICommand(message);
 }
 
 }  // namespace commands

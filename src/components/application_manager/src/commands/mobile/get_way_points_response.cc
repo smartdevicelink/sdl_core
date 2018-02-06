@@ -1,5 +1,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/mobile/get_way_points_response.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
@@ -14,7 +15,7 @@ GetWayPointsResponse::~GetWayPointsResponse() {}
 void GetWayPointsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.SendMessageToMobile(message_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands

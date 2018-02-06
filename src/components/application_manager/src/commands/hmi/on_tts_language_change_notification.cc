@@ -34,6 +34,7 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -77,7 +78,7 @@ void OnTTSLanguageChangeNotification::Run() {
 
     if (static_cast<int>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
-      application_manager_.ManageMobileCommand(
+      application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
               mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),

@@ -83,7 +83,8 @@ TYPED_TEST(NaviStopStreamRequestsTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(TestFixture::mock_hmi_interfaces_,
               GetInterfaceState(kHmiInterface))
       .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(TestFixture::app_mngr_, SendMessageToHMI(_)).Times(0);
+  EXPECT_CALL(TestFixture::app_mngr_, GetRPCService()).Times(0);
+  EXPECT_CALL(TestFixture::rpc_service_, SendMessageToHMI(_)).Times(0);
 
   TestFixture::command_->Run();
 }
@@ -92,7 +93,9 @@ TYPED_TEST(NaviStopStreamRequestsTest, Run_HmiInterfaceAvailable_SentRequest) {
   EXPECT_CALL(TestFixture::mock_hmi_interfaces_,
               GetInterfaceState(kHmiInterface))
       .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  EXPECT_CALL(TestFixture::app_mngr_, SendMessageToHMI(TestFixture::msg_));
+  EXPECT_CALL(TestFixture::app_mngr_, GetRPCService())
+      .WillOnce(ReturnRef(TestFixture::rpc_service_));
+  EXPECT_CALL(TestFixture::rpc_service_, SendMessageToHMI(TestFixture::msg_));
 
   TestFixture::command_->Run();
 }

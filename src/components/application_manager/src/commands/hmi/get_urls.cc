@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/message.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/policies/policy_handler.h"
 #include "utils/helpers.h"
 
@@ -125,7 +126,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::params][hmi_response::code] = result;
-  application_manager_.ManageHMICommand(message_);
+  application_manager_.GetRPCService().ManageHMICommand(message_);
 }
 
 #ifdef PROPRIETARY_MODE

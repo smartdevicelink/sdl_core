@@ -54,6 +54,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 
 namespace am = application_manager;
 using am::HmiState;
@@ -145,6 +146,7 @@ class StateControllerImplTest : public ::testing::Test {
   }
 
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
+  NiceMock<application_manager_test::MockRPCService> rpc_service_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
   NiceMock<connection_handler_test::MockConnectionHandler>
       mock_connection_handler_;
@@ -900,8 +902,9 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(message_helper_mock_,
             GetBCActivateAppRequestToHMI(_, _, _, hmi_lvl, _, _))
         .WillByDefault(Return(bc_activate_app_request));
-
-    ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(rpc_service_));
+    ON_CALL(rpc_service_, ManageHMICommand(bc_activate_app_request))
         .WillByDefault(Return(true));
   }
 
@@ -1833,7 +1836,9 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
     Common_HMILevel::eType hmi_level = it->second;
 
     SetBCActivateAppRequestToHMI(hmi_level, corr_id);
-    ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(rpc_service_));
+    ON_CALL(rpc_service_, ManageHMICommand(bc_activate_app_request))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(app_manager_mock_, application_id(corr_id))

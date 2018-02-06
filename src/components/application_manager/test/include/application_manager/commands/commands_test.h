@@ -45,6 +45,7 @@
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_rpc_service.h"
 namespace test {
 namespace components {
 namespace commands_test {
@@ -94,6 +95,7 @@ class CommandsTest : public ::testing::Test {
   enum { kMocksAreNice = kIsNice };
 
   typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
+  typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplicationManager>,
                           MockApplicationManager>::Result MockAppManager;
@@ -141,6 +143,7 @@ class CommandsTest : public ::testing::Test {
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
+  MockRPCService rpc_service_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {

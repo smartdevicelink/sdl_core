@@ -162,8 +162,9 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DactivateApp_REJECTED) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(true));
 
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      app_mngr_,
+      rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp)))
       .WillOnce(Return(true));
 
@@ -244,6 +245,7 @@ TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(app_mngr_, GetRPCService()).WillOnce(ReturnRef(rpc_service_));
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
@@ -435,7 +437,8 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
   ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
 
   command->onTimeOut();
 }
