@@ -178,7 +178,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(dummy_msg, Command::CommandOrigin::SOURCE_SDL));
+      ManageMobileCommand(dummy_msg, Command::CommandSource::SOURCE_SDL));
 
   command->onTimeOut();
 

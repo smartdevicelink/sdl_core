@@ -129,7 +129,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL));
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, FindChoiceSet(_)).Times(0);
   command_->Run();
 }
@@ -148,7 +148,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL));
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
 
   command_->Run();
 }
@@ -178,7 +178,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_ChoiceSetInUse_SUCCESS) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL));
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
 
   command_->Run();
 }

@@ -154,7 +154,7 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -183,7 +183,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_InvalidApp_UNSUCCESS) {
       rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(
                               mobile_apis::Result::APPLICATION_NOT_REGISTERED),
-                          am::commands::Command::CommandOrigin::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, FindSubMenu(_)).Times(0);
   command_->Run();
 }
@@ -200,7 +200,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   CheckMessageResultCode(mobile_apis::Result::INVALID_ID),
-                  am::commands::Command::CommandOrigin::SOURCE_SDL));
+                  am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, app_id()).Times(0);
   command_->Run();
 }

@@ -167,7 +167,7 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(
         rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
-                            am::commands::Command::CommandOrigin::SOURCE_SDL));
+                            am::commands::Command::CommandSource::SOURCE_SDL));
   }
 
   void ExpectManageHmiCommandTTSAndUI() {
@@ -208,7 +208,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->onTimeOut();
@@ -254,7 +254,7 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
