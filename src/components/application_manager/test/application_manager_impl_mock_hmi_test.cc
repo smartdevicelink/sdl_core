@@ -43,7 +43,7 @@
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
-#include "application_manager/mock_hmi_command_factory.h"
+#include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_request.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "policy/mock_policy_settings.h"
@@ -181,11 +181,10 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const connection_handler::Device usb(
       device_id + 1, "USB_device", "USB_serial", "USB_IOS");
 
-  MockHMICommandFactory* mock_hmi_factory =
-      MockHMICommandFactory::mock_hmi_command_factory();
+  MockCommandFactory mock_command_factory;
 
   // Skip sending notification on device switching as it is not the goal here
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(utils::SharedPtr<commands::Command>()));
 
   app_manager_impl_->OnDeviceSwitchingStart(bt, usb);
@@ -204,7 +203,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
       utils::MakeShared<NiceMock<MockRequest> >(connection_key,
                                                 correlation_id_3);
 
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))
       .WillOnce(Return(cmd_2))
       .WillOnce(Return(cmd_3));
@@ -229,7 +228,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_2);
   app_manager_impl_->GetRPCService().ManageHMICommand(hmi_msg_3);
 
-  EXPECT_CALL(*mock_hmi_factory, CreateCommand(_, _))
+  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(cmd_1))
       .WillOnce(Return(cmd_2))
       .WillOnce(Return(cmd_3));
@@ -249,7 +248,7 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
   app_manager_impl_->OnApplicationSwitched(app_impl);
 
-  Mock::VerifyAndClearExpectations(&mock_hmi_factory);
+  Mock::VerifyAndClearExpectations(&mock_command_factory);
 }
 
 }  // application_manager_test
