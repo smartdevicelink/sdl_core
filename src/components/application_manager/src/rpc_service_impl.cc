@@ -59,7 +59,7 @@ RPCServiceImpl::~RPCServiceImpl() {}
 
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
-    commands::Command::CommandOrigin origin) {
+    commands::Command::CommandSource source) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -77,7 +77,7 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   LOG4CXX_DEBUG(logger_, "Trying to create message in mobile factory.");
   utils::SharedPtr<commands::Command> command(
-      MobileCommandFactory::CreateCommand(message, origin, app_manager_));
+      app_manager_.GetCommandFactory().CreateCommand(message, source));
 
   if (!command) {
     LOG4CXX_WARN(logger_,
@@ -254,8 +254,8 @@ bool RPCServiceImpl::ManageHMICommand(
 
   MessageHelper::PrintSmartObject(*message);
 
-  CommandSharedPtr command =
-      HMICommandFactory::CreateCommand(message, app_manager_);
+  CommandSharedPtr command = app_manager_.GetCommandFactory().CreateCommand(
+      message, commands::Command::SOURCE_HMI);
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");
     return false;

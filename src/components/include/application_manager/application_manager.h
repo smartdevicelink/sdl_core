@@ -39,6 +39,7 @@
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/command_factory.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
@@ -377,6 +378,7 @@ class ApplicationManager {
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
+  virtual CommandFactory& GetCommandFactory() const = 0;
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
   virtual bool is_stopping() const = 0;

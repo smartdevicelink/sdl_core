@@ -45,6 +45,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service_impl.h"
 #include "application_manager/rpc_handler_impl.h"
+#include "application_manager/sdl_command_factory.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/hmi_capabilities_impl.h"
@@ -1666,6 +1667,8 @@ void ApplicationManagerImpl::set_protocol_handler(
                                                      protocol_handler_,
                                                      hmi_handler_,
                                                      *commands_holder_));
+  command_factory_.reset(new SDLCommandFactory(
+      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {

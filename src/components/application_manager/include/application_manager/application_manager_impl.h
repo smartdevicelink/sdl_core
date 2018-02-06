@@ -54,6 +54,7 @@
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/command_holder.h"
+#include "application_manager/command_factory.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/rpc_handler.h"
 
@@ -1656,6 +1657,7 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
+  std::unique_ptr<CommandFactory> command_factory_;
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
 

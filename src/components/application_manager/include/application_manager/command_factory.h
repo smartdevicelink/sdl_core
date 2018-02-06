@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2018, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,29 +30,31 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
 
-#include "application_manager/command_factory.h"
-#include "application_manager/application_manager.h"
+#include "application_manager/commands/command.h"
+#include "utils/macro.h"
 
 namespace application_manager {
+
+typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+
 /**
- * @brief Factory class for mobile command creation
+ * @brief Factory class for command creation
  **/
-class MobileCommandFactory : public CommandFactory {
+class CommandFactory {
  public:
-  MobileCommandFactory(ApplicationManager& application_manager);
-
-  CommandSharedPtr CreateCommand(
+  /**
+   * @brief Create command object and return pointer to it
+   *
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
+  virtual CommandSharedPtr CreateCommand(
       const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
-
- private:
-  ApplicationManager& application_manager_;
-  DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
+      commands::Command::CommandSource source) = 0;
 };
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
