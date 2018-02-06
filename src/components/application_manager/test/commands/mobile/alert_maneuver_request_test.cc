@@ -93,7 +93,7 @@ class AlertManeuverRequestTest
     ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
     EXPECT_CALL(rpc_service_,
                 ManageMobileCommand(
-                    _, am::commands::Command::CommandOrigin::SOURCE_SDL))
+                    _, am::commands::Command::CommandSource::SOURCE_SDL))
         .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
     command->on_event(event);
 
