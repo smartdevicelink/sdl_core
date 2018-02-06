@@ -158,7 +158,7 @@ TEST_F(SetDisplayLayoutRequestTest,
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -178,7 +178,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                  am::commands::Command::CommandOrigin::SOURCE_SDL));
 
   command->Run();
 }
@@ -243,7 +243,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
-                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
+                          am::commands::Command::CommandOrigin::SOURCE_SDL));
 
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
   command->on_event(event);

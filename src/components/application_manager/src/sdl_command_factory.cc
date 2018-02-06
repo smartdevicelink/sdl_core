@@ -1,6 +1,8 @@
 /*
+ Copyright (c) 2018, Ford Motor Company
+ All rights reserved.
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017 Xevo Inc.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -14,7 +16,7 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
+ Neither the name of the copyright holders nor the names of their contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
 
@@ -31,34 +33,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/unregister_app_interface_request.h"
-#include "application_manager/rpc_service.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/sdl_command_factory.h"
+#include "application_manager/hmi_command_factory.h"
+#include "application_manager/mobile_command_factory.h"
 
 namespace application_manager {
 
-namespace commands {
-
-void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!application_manager_.application(connection_key())) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
-    return;
-  }
-
-  application_manager_.GetRPCService().ManageMobileCommand(
-      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key(),
-          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      commands::Command::SOURCE_SDL);
-  application_manager_.EndNaviServices(connection_key());
-  application_manager_.UnregisterApplication(connection_key(),
-                                             mobile_apis::Result::SUCCESS);
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+SDLCommandFactory::SDLCommandFactory(
+    ApplicationManager& app_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : app_manager_(app_manager)
+    , rpc_service_(rpc_service)
+    , hmi_capabilities_(hmi_capabilities)
+    , policy_handler_(policy_handler) {
+  hmi_command_factory_.reset(new HMICommandFactory(app_manager));
+  mobile_command_factory_.reset(new MobileCommandFactory(app_manager));
 }
 
-}  // namespace commands
+CommandSharedPtr SDLCommandFactory::CreateCommand(
+    const commands::MessageSharedPtr& message,
+    commands::Command::CommandSource source) {
+  if (commands::Command::SOURCE_HMI == source) {
+    return hmi_command_factory_->CreateCommand(message, source);
+  } else {
+    return mobile_command_factory_->CreateCommand(message, source);
+  }
+}
 
 }  // namespace application_manager
