@@ -106,10 +106,10 @@ class SetAppIconRequestTest
   }
 
   void SetUp() OVERRIDE {
-    const std::string directory = kAppStorageFolder + "/" + kAppFolder;
+    const std::string directory = kIconFolder;
     const std::string full_file_path = directory + "/" + kSyncFileName;
-    file_system::CreateDirectoryRecursively(directory);
-    file_system::CreateFile(full_file_path);
+    EXPECT_TRUE(file_system::CreateDirectoryRecursively(directory));
+    EXPECT_TRUE(file_system::CreateFile(full_file_path));
 
     ON_CALL(app_mngr_settings_, app_icons_folder())
         .WillByDefault(ReturnRef(kIconFolder));
@@ -238,8 +238,8 @@ TEST_F(SetAppIconRequestTest, Run_AllCorrectData_SendHMIRequest) {
   ASSERT_TRUE(request_->Init());
   request_->Run();
 
-  const std::string expected_sync_file_name = file_system::ConvertPathForURL(
-      kAppStorageFolder + "/" + kAppFolder + "/" + kSyncFileName);
+  const std::string expected_sync_file_name =
+      file_system::ConvertPathForURL(kIconFolder + "/" + kSyncFileName);
   const std::string actual_sync_file_name =
       (*result)[am::strings::msg_params][am::strings::sync_file_name]
                [am::strings::value].asString();
