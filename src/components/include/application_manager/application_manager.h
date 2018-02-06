@@ -382,6 +382,7 @@ class ApplicationManager {
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
   virtual bool is_stopping() const = 0;
+  virtual bool is_audio_pass_thru_active() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
@@ -678,9 +679,6 @@ class ApplicationManager {
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
-
-  virtual void SendAudioPassThroughNotification(
-      uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
 
   /**
    * @brief Checks if application can stream (streaming service is started and

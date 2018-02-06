@@ -158,7 +158,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , request_ctrl_(am_settings)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
-    , audio_pass_thru_messages_("AudioPassThru", this)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -842,23 +841,6 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->StartMicrophoneRecording(
       session_key, get_settings().recording_file_name(), max_duration);
-}
-
-void ApplicationManagerImpl::SendAudioPassThroughNotification(
-    uint32_t session_key, std::vector<uint8_t>& binary_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!audio_pass_thru_active_) {
-    LOG4CXX_ERROR(logger_,
-                  "Trying to send PassThroughNotification"
-                  " when PassThrough is not active");
-    return;
-  }
-
-  impl::AudioData data;
-  data.session_key = session_key;
-  data.binary_data = binary_data;
-  audio_pass_thru_messages_.PostMessage(data);
 }
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
@@ -2542,46 +2524,6 @@ void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
                                     connection_handler::kUnauthorizedApp);
 }
 
-void ApplicationManagerImpl::Handle(const impl::AudioData message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr on_audio_pass =
-      new smart_objects::SmartObject();
-
-  if (!on_audio_pass) {
-    LOG4CXX_ERROR(logger_, "OnAudioPassThru NULL pointer");
-    return;
-  }
-
-  LOG4CXX_DEBUG(logger_, "Fill smart object");
-
-  (*on_audio_pass)[strings::params][strings::message_type] =
-      application_manager::MessageType::kNotification;
-
-  (*on_audio_pass)[strings::params][strings::connection_key] =
-      static_cast<int32_t>(message.session_key);
-  (*on_audio_pass)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnAudioPassThruID;
-
-  LOG4CXX_DEBUG(logger_, "Fill binary data");
-  // binary data
-  (*on_audio_pass)[strings::params][strings::binary_data] =
-      smart_objects::SmartObject(message.binary_data);
-
-  LOG4CXX_DEBUG(logger_, "After fill binary data");
-  LOG4CXX_DEBUG(logger_, "Send data");
-  CommandSharedPtr command(MobileCommandFactory::CreateCommand(
-      on_audio_pass, commands::Command::ORIGIN_SDL, *this));
-  if (!command) {
-    LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
-    return;
-  }
-
-  if (command->Init()) {
-    command->Run();
-    command->CleanUp();
-  }
-}
-
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     const ApplicationSharedPtr app,
     const std::string& function_id,
@@ -2638,6 +2580,10 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 bool ApplicationManagerImpl::is_stopping() const {
   sync_primitives::AutoLock lock(stopping_application_mng_lock_);
   return is_stopping_;
+}
+
+bool ApplicationManagerImpl::is_audio_pass_thru_active() const {
+  return audio_pass_thru_active_;
 }
 
 void ApplicationManagerImpl::OnLowVoltage() {

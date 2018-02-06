@@ -215,6 +215,7 @@ void RPCHandlerImpl::OnErrorSending(
 void RPCHandlerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
+
 #endif  // TELEMETRY_MONITOR
 
 bool RPCHandlerImpl::ConvertMessageToSO(
