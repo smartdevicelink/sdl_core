@@ -344,7 +344,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   EXPECT_CALL(
       rpc_service_,
       ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
-                          am::commands::Command::CommandOrigin::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL));
 
   command->SendNotificationToMobile(command_msg);
 }

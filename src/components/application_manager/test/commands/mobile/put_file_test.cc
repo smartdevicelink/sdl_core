@@ -118,7 +118,7 @@ class PutFileRequestTest
     EXPECT_CALL(
         rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
-                            am::commands::Command::CommandOrigin::SOURCE_SDL));
+                            am::commands::Command::CommandSource::SOURCE_SDL));
   }
 
   MessageSharedPtr msg_;
