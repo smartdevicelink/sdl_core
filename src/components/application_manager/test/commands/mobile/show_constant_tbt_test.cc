@@ -56,13 +56,15 @@ using policy_test::MockPolicyHandlerInterface;
 namespace {
 const uint32_t kAppId = 1u;
 const uint32_t kConnectionKey = 2u;
+const uint32_t kSoftButtonId = 15u;
 const std::string kNavigationText1 = "Some text1";
 const std::string kNavigationText2 = "Some text2";
-const std::string kEta = "Some time";
+const std::string kETA = "Some time";
 const std::string kTotalDistance = "Some distance";
 const std::string kTimeToDestination = "Some time";
-const std::string kTutnIconValue = "0x1A3F";
+const std::string kTurnIconValue = "0x1A3F";
 const std::string kNextTutnIconValue = "0x1A40";
+const std::string kSoftButtonText = "some text";
 }  // namespace
 
 class ShowConstantTBTRequestTest
@@ -75,12 +77,12 @@ class ShowConstantTBTRequestTest
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[am::strings::turn_icon][am::strings::value] = kTutnIconValue;
+    msg_params[am::strings::turn_icon][am::strings::value] = kTurnIconValue;
     msg_params[am::strings::next_turn_icon][am::strings::value] =
         kNextTutnIconValue;
     msg_params[am::strings::navigation_text_1] = kNavigationText1;
     msg_params[am::strings::navigation_text_2] = kNavigationText2;
-    msg_params[am::strings::eta] = kEta;
+    msg_params[am::strings::eta] = kETA;
     msg_params[am::strings::total_distance] = kTotalDistance;
     msg_params[am::strings::time_to_destination] = kTimeToDestination;
 
@@ -88,8 +90,8 @@ class ShowConstantTBTRequestTest
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     soft_button[am::strings::type] = am::mobile_api::SoftButtonType::SBT_TEXT;
-    soft_button[am::strings::text] = "some text";
-    soft_button[am::strings::soft_button_id] = 15u;
+    soft_button[am::strings::text] = kSoftButtonText;
+    soft_button[am::strings::soft_button_id] = kSoftButtonId;
 
     smart_objects::SmartObject soft_buttons =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -109,35 +111,27 @@ class ShowConstantTBTRequestTest
 
     int32_t index = 0;
 
-    msg_params[am::hmi_request::navi_texts][index]
-              [am::hmi_request::field_name] =
-                  hmi_apis::Common_TextFieldName::navigationText1;
-    msg_params[am::hmi_request::navi_texts][index++]
-              [am::hmi_request::field_text] = kNavigationText1;
+    SmartObject& navi_text = msg_params[am::hmi_request::navi_texts];
 
-    msg_params[am::hmi_request::navi_texts][index]
-              [am::hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::navigationText2);
-    msg_params[am::hmi_request::navi_texts][index++]
-              [am::hmi_request::field_text] = kNavigationText2;
+    navi_text[index][am::hmi_request::field_name] =
+        hmi_apis::Common_TextFieldName::navigationText1;
+    navi_text[index++][am::hmi_request::field_text] = kNavigationText1;
 
-    msg_params[am::hmi_request::navi_texts][index]
-              [am::hmi_request::field_name] =
-                  static_cast<int32_t>(hmi_apis::Common_TextFieldName::ETA);
-    msg_params[am::hmi_request::navi_texts][index++]
-              [am::hmi_request::field_text] = kEta;
+    navi_text[index][am::hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::navigationText2);
+    navi_text[index++][am::hmi_request::field_text] = kNavigationText2;
 
-    msg_params
-        [am::hmi_request::navi_texts][index][am::hmi_request::field_name] =
-            static_cast<int32_t>(hmi_apis::Common_TextFieldName::totalDistance);
-    msg_params[am::hmi_request::navi_texts][index++]
-              [am::hmi_request::field_text] = kTotalDistance;
+    navi_text[index][am::hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::ETA);
+    navi_text[index++][am::hmi_request::field_text] = kETA;
 
-    msg_params[am::hmi_request::navi_texts][index]
-              [am::hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::timeToDestination);
-    msg_params[am::hmi_request::navi_texts][index++]
-              [am::hmi_request::field_text] = kTimeToDestination;
+    navi_text[index][am::hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::totalDistance);
+    navi_text[index++][am::hmi_request::field_text] = kTotalDistance;
+
+    navi_text[index][am::hmi_request::field_name] =
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
+    navi_text[index++][am::hmi_request::field_text] = kTimeToDestination;
 
     (*msg)[am::strings::msg_params] = msg_params;
 
@@ -149,7 +143,35 @@ class ShowConstantTBTRequestTest
         .WillOnce(Return(true));
   }
 
- private:
+  void RunWithSuccessScenarioShowConstantTBTRequest() {
+    am::ApplicationConstSharedPtr app_const_ptr_(mock_app_);
+    EXPECT_CALL(
+        mock_message_helper_,
+        ProcessSoftButtons((*message_)[am::strings::msg_params], _, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+    EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+        .Times(2)
+        .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+    am::ApplicationSharedPtr app_ptr(mock_app_);
+    EXPECT_CALL(mock_message_helper_,
+                SubscribeApplicationToSoftButton(_, app_ptr, _));
+
+    EXPECT_CALL(*mock_app_, set_tbt_show_command(_));
+
+    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&result_message_), Return(true)));
+  }
+
+ protected:
+  MessageSharedPtr message_;
+  SharedPtr<ShowConstantTBTRequest> request_;
+  MessageSharedPtr expected_message_;
+  MockAppPtr mock_app_;
+  MessageSharedPtr result_message_;
+  MockPolicyHandlerInterface mock_policy_handler_interface_;
+
   void SetUp() OVERRIDE {
     message_ = CreateMessageWithParams();
     expected_message_ = CreateExpectedMessage();
@@ -158,48 +180,22 @@ class ShowConstantTBTRequestTest
         .WillByDefault(Return(mock_app_));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_interface_));
-  }
 
- protected:
-  MessageSharedPtr message_;
-  SharedPtr<ShowConstantTBTRequest> request_;
-  MessageSharedPtr expected_message_;
-  MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_interface_;
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+  }
 };
 
 TEST_F(ShowConstantTBTRequestTest, Run_AllCorrectData_SendHMIRequest) {
-  am::ApplicationConstSharedPtr app_const_ptr(mock_app_);
-  EXPECT_CALL(mock_message_helper_,
-              ProcessSoftButtons(
-                  (*message_)[am::strings::msg_params], app_const_ptr, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, app_const_ptr, _))
-      .Times(2)
-      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
-
-  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
-
-  am::ApplicationSharedPtr app_ptr(mock_app_);
-  EXPECT_CALL(mock_message_helper_,
-              SubscribeApplicationToSoftButton(_, app_ptr, _));
-
-  smart_objects::SmartObject msg_params;
-  EXPECT_CALL(*mock_app_, set_tbt_show_command(_))
-      .WillOnce(SaveArg<0>(&msg_params));
-
-  MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
-      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  RunWithSuccessScenarioShowConstantTBTRequest();
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
   ASSERT_TRUE(request_->Init());
   request_->Run();
 
-  EXPECT_TRUE((*expected_message_)[am::strings::msg_params]
-                                  [am::hmi_request::navi_texts] ==
-              (*result)[am::strings::msg_params][am::hmi_request::navi_texts]);
+  EXPECT_TRUE(
+      (*expected_message_)[am::strings::msg_params]
+                          [am::hmi_request::navi_texts] ==
+      (*result_message_)[am::strings::msg_params][am::hmi_request::navi_texts]);
 }
 
 TEST_F(ShowConstantTBTRequestTest,
@@ -285,9 +281,9 @@ TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIconInvalid_InvalidData) {
 }
 
 TEST_F(ShowConstantTBTRequestTest,
-       IsWhiteSpaceExist_TurnIconInvalidSyntax_InvalidData) {
+       IsWhiteSpaceExist_TurnIconHasInvalidCharecters_InvalidData) {
   (*message_)[am::strings::msg_params][am::strings::turn_icon]
-             [am::strings::value] = kTutnIconValue + "\n";
+             [am::strings::value] = kTurnIconValue + "\n";
 
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
@@ -309,7 +305,7 @@ TEST_F(ShowConstantTBTRequestTest,
 }
 
 TEST_F(ShowConstantTBTRequestTest,
-       IsWhiteSpaceExist_NavigationText1InvalidSyntax_InvalidData) {
+       IsWhiteSpaceExist_NavigationText1HasInvalidCharecters_InvalidData) {
   (*message_)[am::strings::msg_params][am::strings::navigation_text_1] =
       kNavigationText1 + "\n";
 
@@ -321,7 +317,7 @@ TEST_F(ShowConstantTBTRequestTest,
 }
 
 TEST_F(ShowConstantTBTRequestTest,
-       IsWhiteSpaceExist_NavigationText2InvalidSyntax_InvalidData) {
+       IsWhiteSpaceExist_NavigationText2HasInvalidCharecters_InvalidData) {
   (*message_)[am::strings::msg_params][am::strings::navigation_text_2] =
       kNavigationText2 + "\n";
 
@@ -334,7 +330,7 @@ TEST_F(ShowConstantTBTRequestTest,
 
 TEST_F(ShowConstantTBTRequestTest,
        IsWhiteSpaceExist_EtaInvalidSyntax_InvalidData) {
-  (*message_)[am::strings::msg_params][am::strings::eta] = kEta + "\n";
+  (*message_)[am::strings::msg_params][am::strings::eta] = kETA + "\n";
 
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::INVALID_DATA);
 
@@ -369,6 +365,8 @@ TEST_F(ShowConstantTBTRequestTest,
 
 TEST_F(ShowConstantTBTRequestTest,
        OnEvent_NavigationShowConstantTBT_SendMobileResponse) {
+  RunWithSuccessScenarioShowConstantTBTRequest();
+
   MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
   (*message)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -378,12 +376,16 @@ TEST_F(ShowConstantTBTRequestTest,
   event.set_smart_object(*message);
 
   ExpectedManageMobileCommandResultCode(mobile_apis::Result::SUCCESS);
-
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
   request_->on_event(event);
 }
 
 TEST_F(ShowConstantTBTRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
+  RunWithSuccessScenarioShowConstantTBTRequest();
+
   MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
@@ -392,6 +394,9 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
   request_ = CreateCommand<ShowConstantTBTRequest>(message_);
+
+  ASSERT_TRUE(request_->Init());
+  request_->Run();
   request_->on_event(event);
 }
 
