@@ -196,7 +196,7 @@ bool RPCServiceImpl::ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               connection_key,
               mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS),
-          commands::Command::ORIGIN_SDL);
+          commands::Command::SOURCE_SDL);
 
       app_manager_.UnregisterApplication(
           connection_key,
@@ -218,7 +218,7 @@ bool RPCServiceImpl::ManageMobileCommand(
               connection_key,
               mobile_api::AppInterfaceUnregisteredReason::
                   REQUEST_WHILE_IN_NONE_HMI_LEVEL),
-          commands::Command::ORIGIN_SDL);
+          commands::Command::SOURCE_SDL);
 
       ApplicationSharedPtr app_ptr = app_manager_.application(connection_key);
       if (app_ptr) {

@@ -372,7 +372,7 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
   smart_objects::SmartObjectSPtr so = CreateHashUpdateNotification(app_id);
   PrintSmartObject(*so);
   if (!app_mngr.GetRPCService().ManageMobileCommand(
-          so, commands::Command::ORIGIN_SDL)) {
+          so, commands::Command::SOURCE_SDL)) {
     LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
     return;
   }
@@ -746,7 +746,7 @@ void MessageHelper::SendHMIStatusNotification(
       static_cast<int32_t>(application_impl.system_context());
 
   application_manager.GetRPCService().ManageMobileCommand(
-      notification, commands::Command::ORIGIN_SDL);
+      notification, commands::Command::SOURCE_SDL);
 }
 
 void MessageHelper::SendActivateAppToHMI(
@@ -2348,7 +2348,7 @@ void MessageHelper::SendSystemRequestNotification(
 
   DCHECK(app_mngr.GetRPCService().ManageMobileCommand(
       utils::MakeShared<smart_objects::SmartObject>(content),
-      commands::Command::ORIGIN_SDL));
+      commands::Command::SOURCE_SDL));
 }
 
 void MessageHelper::SendLaunchApp(const uint32_t connection_key,
@@ -2515,7 +2515,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
   app_mngr.GetRPCService().ManageMobileCommand(
       utils::MakeShared<smart_objects::SmartObject>(content),
-      commands::Command::ORIGIN_SDL);
+      commands::Command::SOURCE_SDL);
 }
 
 void MessageHelper::FillAppRevokedPermissions(

@@ -484,7 +484,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
             mobile_apis::FunctionID::RegisterAppInterfaceID,
             message[strings::params][strings::correlation_id].asUInt(),
             mobile_apis::Result::GENERIC_ERROR));
-    rpc_service_->ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
+    rpc_service_->ManageMobileCommand(response, commands::Command::SOURCE_SDL);
     return ApplicationSharedPtr();
   }
 
@@ -516,7 +516,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
             mobile_apis::FunctionID::RegisterAppInterfaceID,
             message[strings::params][strings::correlation_id].asUInt(),
             mobile_apis::Result::DISALLOWED));
-    rpc_service_->ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
+    rpc_service_->ManageMobileCommand(response, commands::Command::SOURCE_SDL);
     return ApplicationSharedPtr();
   }
 
@@ -535,7 +535,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
             mobile_apis::FunctionID::RegisterAppInterfaceID,
             message[strings::params][strings::correlation_id].asUInt(),
             mobile_apis::Result::OUT_OF_MEMORY));
-    rpc_service_->ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
+    rpc_service_->ManageMobileCommand(response, commands::Command::SOURCE_SDL);
     return ApplicationSharedPtr();
   }
 
@@ -1532,7 +1532,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
         rpc_service_->ManageMobileCommand(
             MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
                 session_key, AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS),
-            commands::Command::ORIGIN_SDL);
+            commands::Command::SOURCE_SDL);
         break;
       }
       case CloseSessionReason::kMalformed: {
@@ -2357,7 +2357,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
       rpc_service_->ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_to_remove->app_id(), unregister_reason_),
-          commands::Command::ORIGIN_SDL);
+          commands::Command::SOURCE_SDL);
       UnregisterApplication(app_to_remove->app_id(),
                             mobile_apis::Result::INVALID_ENUM,
                             is_ignition_off,
@@ -2684,7 +2684,7 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
     rpc_service_->ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app_id, PROTOCOL_VIOLATION),
-        commands::Command::ORIGIN_SDL);
+        commands::Command::SOURCE_SDL);
     UnregisterApplication(app_id, ABORTED);
     return;
   }
@@ -2840,7 +2840,7 @@ void ApplicationManagerImpl::SendHMIStatusNotification(
       static_cast<int32_t>(app->system_context());
 
   rpc_service_->ManageMobileCommand(notification,
-                                    commands::Command::ORIGIN_SDL);
+                                    commands::Command::SOURCE_SDL);
 }
 
 void ApplicationManagerImpl::ClearTimerPool() {
@@ -2886,7 +2886,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
     rpc_service_->ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app_id, PROTOCOL_VIOLATION),
-        commands::Command::ORIGIN_SDL);
+        commands::Command::SOURCE_SDL);
     UnregisterApplication(app_id, ABORTED);
   }
 }

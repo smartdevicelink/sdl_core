@@ -86,7 +86,7 @@ void OnExitApplicationNotification::Run() {
       application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
-          commands::Command::ORIGIN_SDL);
+          commands::Command::SOURCE_SDL);
       // HMI rejects registration for navi application
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
@@ -95,7 +95,7 @@ void OnExitApplicationNotification::Run() {
       application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE),
-          commands::Command::ORIGIN_SDL);
+          commands::Command::SOURCE_SDL);
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }

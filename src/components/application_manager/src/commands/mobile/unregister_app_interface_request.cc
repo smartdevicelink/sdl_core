@@ -52,7 +52,7 @@ void UnregisterAppInterfaceRequest::Run() {
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           connection_key(),
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      commands::Command::ORIGIN_SDL);
+      commands::Command::SOURCE_SDL);
   application_manager_.EndNaviServices(connection_key());
   application_manager_.UnregisterApplication(connection_key(),
                                              mobile_apis::Result::SUCCESS);
