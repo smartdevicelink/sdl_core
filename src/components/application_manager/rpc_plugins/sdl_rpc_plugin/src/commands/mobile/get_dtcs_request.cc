@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/get_dtcs_request.h"
+#include "sdl_rpc_plugin/commands/mobile/get_dtcs_request.h"
 
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"

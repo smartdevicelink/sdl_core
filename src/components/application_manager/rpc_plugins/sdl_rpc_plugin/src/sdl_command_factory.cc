@@ -33,9 +33,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/sdl_command_factory.h"
-#include "application_manager/hmi_command_factory.h"
-#include "application_manager/mobile_command_factory.h"
+#include "sdl_rpc_plugin/sdl_command_factory.h"
+#include "sdl_rpc_plugin/hmi_command_factory.h"
+#include "sdl_rpc_plugin/mobile_command_factory.h"
 
 namespace application_manager {
 

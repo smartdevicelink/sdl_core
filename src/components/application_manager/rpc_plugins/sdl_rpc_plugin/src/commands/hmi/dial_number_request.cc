@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/dial_number_request.h"
+#include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 
 namespace application_manager {
 

@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/sdl_get_status_update_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_request.h"
 #include "application_manager/application_manager.h"
 
 namespace application_manager {

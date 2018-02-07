@@ -33,7 +33,7 @@
 
 #include <string.h>
 #include <string>
-#include "application_manager/commands/mobile/perform_interaction_request.h"
+#include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"

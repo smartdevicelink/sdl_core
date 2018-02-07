@@ -31,7 +31,7 @@
  */
 
 #include <algorithm>
-#include "application_manager/commands/hmi/on_device_state_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"

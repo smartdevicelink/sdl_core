@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/on_vehicle_data_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_vehicle_data_notification.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"

@@ -31,7 +31,7 @@ Copyright (c) 2013, Ford Motor Company
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/system_request.h"
+#include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
 #include <vector>
 #include <string>

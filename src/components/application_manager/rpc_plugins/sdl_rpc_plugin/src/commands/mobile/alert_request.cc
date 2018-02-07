@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/alert_request.h"
+#include "sdl_rpc_plugin/commands/mobile/alert_request.h"
 
 #include <string.h>
 

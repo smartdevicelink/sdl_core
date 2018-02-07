@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/basic_communication_system_request.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_system_request.h"
 
 namespace application_manager {
 

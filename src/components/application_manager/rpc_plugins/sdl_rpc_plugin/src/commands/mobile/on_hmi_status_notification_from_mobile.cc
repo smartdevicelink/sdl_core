@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/on_hmi_status_notification_from_mobile.h"
+#include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification_from_mobile.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/message.h"
 

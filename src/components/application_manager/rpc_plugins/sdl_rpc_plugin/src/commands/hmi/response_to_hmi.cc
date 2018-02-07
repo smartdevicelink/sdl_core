@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/response_to_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/response_to_hmi.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 

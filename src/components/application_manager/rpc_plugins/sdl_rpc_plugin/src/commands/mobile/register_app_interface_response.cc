@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/register_app_interface_response.h"
+#include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"

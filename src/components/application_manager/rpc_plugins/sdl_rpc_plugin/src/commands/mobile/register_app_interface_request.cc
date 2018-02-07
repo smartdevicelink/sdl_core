@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/register_app_interface_request.h"
+#include "sdl_rpc_plugin/commands/mobile/register_app_interface_request.h"
 
 #include <unistd.h>
 #include <algorithm>
