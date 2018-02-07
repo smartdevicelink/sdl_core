@@ -210,6 +210,7 @@ class ApplicationManagerImpl
   }
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
+    DCHECK(plugin_manager_);
     return *plugin_manager_;
   }
 
@@ -1074,6 +1075,10 @@ class ApplicationManagerImpl
 
   rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
     return *rpc_handler_;
+  }
+
+  void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
+    rpc_service_ = std::move(rpc_service);
   }
 
   bool is_stopping() const OVERRIDE;
