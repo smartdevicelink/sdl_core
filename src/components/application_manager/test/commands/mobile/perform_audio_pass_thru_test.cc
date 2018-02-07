@@ -175,7 +175,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   command->onTimeOut();
@@ -238,7 +238,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(rpc_service_, ManageHMICommand(_)).WillRepeatedly(Return(true));
   EXPECT_CALL(
       rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->Run();
@@ -783,7 +783,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   // For setting current_state_ -> kCompleted
   ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(rpc_service_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL));
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL));
   command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
   EXPECT_CALL(
       rpc_service_,

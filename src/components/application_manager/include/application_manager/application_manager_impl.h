@@ -54,6 +54,7 @@
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/command_holder.h"
+#include "application_manager/command_factory.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/rpc_handler.h"
 
@@ -117,28 +118,17 @@ struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
 
-namespace impl {
-using namespace threads;
-
-// AudioPassThru
-typedef struct {
-  std::vector<uint8_t> binary_data;
-  int32_t session_key;
-} AudioData;
-typedef std::queue<AudioData> RawAudioDataQueue;
-typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
-}
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
     : public ApplicationManager,
       public connection_handler::ConnectionHandlerObserver,
-      public policy::PolicyHandlerObserver,
+      public policy::PolicyHandlerObserver
 #ifdef ENABLE_SECURITY
-      public security_manager::SecurityManagerListener,
+      ,
+      public security_manager::SecurityManagerListener
 #endif  // ENABLE_SECURITY
-      public impl::AudioPassThruQueue::Handler
 #ifdef TELEMETRY_MONITOR
       ,
       public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
@@ -743,18 +733,6 @@ class ApplicationManagerImpl
    */
   void StopAudioPassThru(int32_t application_key) OVERRIDE;
 
-  /*
-   * @brief Creates AudioPassThru data chunk and inserts it
-   * to audio_pass_thru_messages_
-   *
-   * @param session_key Id of application for which
-   * audio pass thru should be sent
-   *
-   * @param binary_data AudioPassThru data chunk
-   */
-  void SendAudioPassThroughNotification(
-      uint32_t session_key, std::vector<uint8_t>& binary_data) OVERRIDE;
-
   std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
   /*
@@ -1077,24 +1055,29 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
-  virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
+  policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
     return *policy_handler_;
   }
 
-  virtual const policy::PolicyHandlerInterface& GetPolicyHandler()
-      const OVERRIDE {
+  const policy::PolicyHandlerInterface& GetPolicyHandler() const OVERRIDE {
     return *policy_handler_;
   }
 
-  virtual rpc_service::RPCService& GetRPCService() const OVERRIDE {
+  CommandFactory& GetCommandFactory() const OVERRIDE {
+    return *command_factory_;
+  }
+
+  rpc_service::RPCService& GetRPCService() const OVERRIDE {
     return *rpc_service_;
   }
 
-  virtual rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
+  rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
     return *rpc_handler_;
   }
 
   bool is_stopping() const OVERRIDE;
+
+  bool is_audio_pass_thru_active() const OVERRIDE;
   /*
    * @brief Function Should be called when Low Voltage is occured
    */
@@ -1297,9 +1280,6 @@ class ApplicationManagerImpl
 
   MessageValidationResult ValidateMessageBySchema(
       const Message& message) OVERRIDE;
-
-  // CALLED ON audio_pass_thru_messages_ thread!
-  void Handle(const impl::AudioData message) OVERRIDE;
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
@@ -1601,10 +1581,6 @@ class ApplicationManagerImpl
   static uint32_t corelation_id_;
   static const uint32_t max_corelation_id_;
 
-  // Construct message threads when everything is already created
-  // Thread that pumps messages audio pass thru to mobile.
-  impl::AudioPassThruQueue audio_pass_thru_messages_;
-
   std::auto_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
@@ -1656,6 +1632,7 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
+  std::unique_ptr<CommandFactory> command_factory_;
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
 

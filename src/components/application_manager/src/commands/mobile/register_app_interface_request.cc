@@ -375,7 +375,7 @@ void RegisterAppInterfaceRequest::Run() {
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   application_manager_.GetRPCService().ManageMobileCommand(
-      so, commands::Command::ORIGIN_SDL);
+      so, commands::Command::SOURCE_SDL);
 }
 
 smart_objects::SmartObjectSPtr
