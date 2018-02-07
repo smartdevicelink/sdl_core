@@ -215,6 +215,10 @@ if (HMIADAPTER STREQUAL "messagebroker")
   set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
   if (NOT ${Boost_FOUND})
     message(STATUS "Did not find boost. Downloading and installing boost 1.66")
+    set(BOOST_INSTALL_COMMAND ./b2 install)
+    if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+      set(BOOST_INSTALL_COMMAND sudo ./b2 install)
+    endif()
     include(ExternalProject)
     ExternalProject_Add(
       Boost
@@ -223,7 +227,7 @@ if (HMIADAPTER STREQUAL "messagebroker")
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND ./b2
-      INSTALL_COMMAND sudo ./b2 install --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
