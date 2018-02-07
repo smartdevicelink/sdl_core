@@ -41,7 +41,6 @@ set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 include_directories (
   include/
   ${COMPONENTS_DIR}
-  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -116,9 +115,7 @@ set (EVENT_ENGINE_PATHS
 )
 collect_sources(EVENT_ENGINE_SOURCES "${EVENT_ENGINE_PATHS}")
 
-set (COMMANDS_SOURCE_DIR
-  ${AM_SOURCE_DIR}/src/commands
-)
+
 collect_sources(POLICIES_SOURCES "${POLICIES_PATHS}")
 
 if (${HMI_JSON_API})
@@ -128,7 +125,6 @@ endif (${HMI_JSON_API})
 set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 
 set(EXCLUDE_PATHS
-  ${COMMANDS_SOURCE_DIR}
   ${EVENT_ENGINE_SOURCE_DIR}
   ${MESSAGE_HELPER_SOURCE_DIR}
   ${POLICIES_SOURCE_DIR}
@@ -192,8 +188,6 @@ add_library("ApplicationManager" ${SOURCES})
 list(APPEND LIBRARIES
   AMEventEngine
   AMPolicyLibrary
-  AMHMICommandsLibrary
-  AMMobileCommandsLibrary
 )
 
 if(ENABLE_LOG)
