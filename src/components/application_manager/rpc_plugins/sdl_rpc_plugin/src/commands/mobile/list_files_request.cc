@@ -36,7 +36,7 @@
 
 #include "application_manager/application_impl.h"
 
-#include "application_manager/mobile_command_factory.h"
+#include "sdl_rpc_plugin/mobile_command_factory.h"
 #include "utils/file_system.h"
 
 namespace application_manager {

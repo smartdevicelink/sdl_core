@@ -33,7 +33,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/mobile_command_factory.h"
+#include "sdl_rpc_plugin/mobile_command_factory.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_command_request.h"
