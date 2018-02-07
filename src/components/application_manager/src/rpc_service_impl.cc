@@ -269,47 +269,44 @@ bool RPCServiceImpl::ManageHMICommand(
   auto factory = plugin->GetCommandFactory();
   auto command = factory.CreateCommand(message, source);
 
-      message, commands::Command::SOURCE_HMI);
-      if (!command) {
-        LOG4CXX_WARN(logger_, "Failed to create command from smart object");
-        return false;
-      }
+  if (!command) {
+    LOG4CXX_WARN(logger_, "Failed to create command from smart object");
+    return false;
+  }
 
-      if ((*message).keyExists(strings::msg_params) &&
-          (*message)[strings::msg_params].keyExists(strings::app_id)) {
-        const auto connection_key =
-            (*message)[strings::msg_params][strings::app_id].asUInt();
+  if ((*message).keyExists(strings::msg_params) &&
+      (*message)[strings::msg_params].keyExists(strings::app_id)) {
+    const auto connection_key =
+        (*message)[strings::msg_params][strings::app_id].asUInt();
 
-        auto app =
-            app_manager_.application(static_cast<uint32_t>(connection_key));
-        if (app && app_manager_.IsAppInReconnectMode(app->policy_app_id())) {
-          commands_holder_.Suspend(
-              app, CommandHolder::CommandType::kHmiCommand, message);
-          return true;
-        }
-      }
+    auto app = app_manager_.application(static_cast<uint32_t>(connection_key));
+    if (app && app_manager_.IsAppInReconnectMode(app->policy_app_id())) {
+      commands_holder_.Suspend(
+          app, CommandHolder::CommandType::kHmiCommand, message);
+      return true;
+    }
+  }
 
-      int32_t message_type =
-          (*(message.get()))[strings::params][strings::message_type].asInt();
+  int32_t message_type =
+      (*(message.get()))[strings::params][strings::message_type].asInt();
 
-      if (kRequest == message_type) {
-        LOG4CXX_DEBUG(logger_, "ManageHMICommand");
-        request_ctrl_.addHMIRequest(command);
-      }
+  if (kRequest == message_type) {
+    LOG4CXX_DEBUG(logger_, "ManageHMICommand");
+    request_ctrl_.addHMIRequest(command);
+  }
 
-      if (command->Init()) {
-        command->Run();
-        if (kResponse == message_type) {
-          const uint32_t correlation_id =
-              (*(message.get()))[strings::params][strings::correlation_id]
-                  .asUInt();
-          const int32_t function_id =
-              (*(message.get()))[strings::params][strings::function_id].asInt();
-          request_ctrl_.OnHMIResponse(correlation_id, function_id);
-        }
-        return true;
-      }
-      return false;
+  if (command->Init()) {
+    command->Run();
+    if (kResponse == message_type) {
+      const uint32_t correlation_id =
+          (*(message.get()))[strings::params][strings::correlation_id].asUInt();
+      const int32_t function_id =
+          (*(message.get()))[strings::params][strings::function_id].asInt();
+      request_ctrl_.OnHMIResponse(correlation_id, function_id);
+    }
+    return true;
+  }
+  return false;
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToHmi message) {

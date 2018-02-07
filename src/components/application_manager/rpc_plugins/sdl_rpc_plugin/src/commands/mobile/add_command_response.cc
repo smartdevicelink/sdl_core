@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/add_command_response.h"
+#include "sdl_rpc_plugin/commands/mobile/add_command_response.h"
 #include "application_manager/rpc_service.h"
 
 namespace application_manager {

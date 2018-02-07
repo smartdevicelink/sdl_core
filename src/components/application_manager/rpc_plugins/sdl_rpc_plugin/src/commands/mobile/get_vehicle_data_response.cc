@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/get_vehicle_data_response.h"
+#include "sdl_rpc_plugin/commands/mobile/get_vehicle_data_response.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 

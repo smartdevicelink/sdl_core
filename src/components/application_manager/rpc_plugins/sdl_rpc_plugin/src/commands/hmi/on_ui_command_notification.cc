@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_ui_command_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {

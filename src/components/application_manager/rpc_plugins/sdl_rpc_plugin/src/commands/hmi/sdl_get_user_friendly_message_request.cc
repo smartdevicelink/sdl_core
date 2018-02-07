@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {

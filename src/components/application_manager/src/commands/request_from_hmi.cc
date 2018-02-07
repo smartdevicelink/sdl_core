@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 #include "utils/make_shared.h"

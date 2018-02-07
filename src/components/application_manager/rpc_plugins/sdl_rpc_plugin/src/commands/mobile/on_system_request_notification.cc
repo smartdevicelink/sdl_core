@@ -33,7 +33,7 @@
 #include <cstring>
 #include <cstdio>
 #include <string>
-#include "application_manager/commands/mobile/on_system_request_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "application_manager/application_manager.h"

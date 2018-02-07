@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/subscribe_button_response.h"
+#include "sdl_rpc_plugin/commands/mobile/subscribe_button_response.h"
 
 namespace application_manager {
 

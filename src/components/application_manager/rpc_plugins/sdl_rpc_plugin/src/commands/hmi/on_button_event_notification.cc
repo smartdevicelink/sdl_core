@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_button_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"

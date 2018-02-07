@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/generic_response.h"
+#include "sdl_rpc_plugin/commands/mobile/generic_response.h"
 
 #include "application_manager/application_impl.h"
 
