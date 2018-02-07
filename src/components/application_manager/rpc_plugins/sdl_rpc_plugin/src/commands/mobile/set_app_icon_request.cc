@@ -31,9 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/set_app_icon_request.h"
-
 #include <algorithm>
+#include "sdl_rpc_plugin/commands/mobile/set_app_icon_request.h"
 
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"

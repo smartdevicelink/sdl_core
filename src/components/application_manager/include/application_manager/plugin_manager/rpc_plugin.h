@@ -4,10 +4,14 @@
 #include "utils/macro.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/application.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
-namespace plugin_manager {
 class CommandFactory;
+
+namespace plugin_manager {
 
 /**
  * @brief The PolicyEvent enum defines events related to policy
@@ -22,7 +26,10 @@ enum ApplicationEvent { kApplicationExit = 0, kApplicationUnregistered };
 class RPCPlugin {
  public:
   // TODO : pass all required components for plugin
-  virtual bool Init() = 0;
+  virtual bool Init(ApplicationManager& app_manager,
+                    rpc_service::RPCService& rpc_service,
+                    HMICapabilities& hmi_capabilities,
+                    policy::PolicyHandlerInterface& policy_handler) = 0;
   /**
    * @brief IsAbleToProcess check if plugin is able to process function
    * @param function_id RPC identifier

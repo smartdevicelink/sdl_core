@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_vr_command_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"

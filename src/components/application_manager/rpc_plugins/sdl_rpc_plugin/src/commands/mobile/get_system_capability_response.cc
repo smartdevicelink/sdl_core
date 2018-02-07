@@ -1,6 +1,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
-#include "application_manager/commands/mobile/get_system_capability_response.h"
+#include "sdl_rpc_plugin/commands/mobile/get_system_capability_response.h"
 
 namespace application_manager {
 

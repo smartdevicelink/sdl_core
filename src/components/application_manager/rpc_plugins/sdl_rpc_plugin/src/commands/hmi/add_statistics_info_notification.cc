@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/add_statistics_info_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/add_statistics_info_notification.h"
 #include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
 

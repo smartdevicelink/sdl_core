@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_POLICY_UPDATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_POLICY_UPDATE_H_
 
-#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 namespace commands {

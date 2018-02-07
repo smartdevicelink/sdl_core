@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include <algorithm>
-#include "application_manager/commands/mobile/send_location_request.h"
+#include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
 #include "application_manager/message_helper.h"
 #include "utils/custom_string.h"
 

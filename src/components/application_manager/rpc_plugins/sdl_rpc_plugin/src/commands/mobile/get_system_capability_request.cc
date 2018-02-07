@@ -1,4 +1,4 @@
-#include "application_manager/commands/mobile/get_system_capability_request.h"
+#include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 
 namespace application_manager {
 

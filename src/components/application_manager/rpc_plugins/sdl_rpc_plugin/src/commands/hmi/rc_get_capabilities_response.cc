@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/rc_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
 
 namespace application_manager {
 
