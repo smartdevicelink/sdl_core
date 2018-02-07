@@ -82,7 +82,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          const std::string& policy_app_id));
   MOCK_METHOD2(ChangeAppsHMILevel,
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
-  MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
+  MOCK_METHOD0(GetPluginManager, plugin_manager::RPCPluginManager&());
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
 #endif  // SDL_REMOTE_CONTROL
