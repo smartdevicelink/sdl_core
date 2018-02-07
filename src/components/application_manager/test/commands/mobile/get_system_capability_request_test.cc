@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ *
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,17 +30,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#include <vector>
+#include "gtest/gtest.h"
 #include "application_manager/commands/mobile/get_system_capability_request.h"
 #include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/test/include/application_manager/mock_hmi_capabilities.h"
-#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
-namespace get_vehicle_data_tequest {
+namespace get_system_capability_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -67,20 +68,16 @@ class GetSystemCapabilityRequestTest
 
 TEST_F(GetSystemCapabilityRequestTest, Run_NotExistApp_AppNotRegistered) {
   MockAppPtr mock_app;
-
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MessageSharedPtr msg = CreateMessageParams();
-
-  SharedPtr<GetSystemCapabilityRequest> command(
-      CreateCommand<GetSystemCapabilityRequest>(msg));
-
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
           _)).WillOnce(Return(true));
-
+  MessageSharedPtr msg = CreateMessageParams();
+  SharedPtr<GetSystemCapabilityRequest> command(
+      CreateCommand<GetSystemCapabilityRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 }
@@ -89,37 +86,34 @@ TEST_F(GetSystemCapabilityRequestTest, Run_EmptyMessage_ExpectInvalidData) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-
-  MessageSharedPtr msg = CreateMessageParams();
-  SharedPtr<GetSystemCapabilityRequest> command(
-      CreateCommand<GetSystemCapabilityRequest>(msg));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _))
       .WillOnce(Return(true));
-
+  MessageSharedPtr msg = CreateMessageParams();
+  SharedPtr<GetSystemCapabilityRequest> command(
+      CreateCommand<GetSystemCapabilityRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 }
 
 TEST_F(GetSystemCapabilityRequestTest, Run_NAVIGATION_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
-  SmartObject sm(smart_objects::SmartType_Map);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MessageSharedPtr msg = CreateMessageParams();
   amt::MockHMICapabilities mock_hmi_cap;
+  SmartObject smart_object(smart_objects::SmartType_Map);
+  EXPECT_CALL(mock_hmi_cap, navigation_capability())
+      .WillRepeatedly(Return(&smart_object));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
+                                  _)).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
+  MessageSharedPtr msg = CreateMessageParams();
   (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::NAVIGATION;
   SharedPtr<GetSystemCapabilityRequest> command(
       CreateCommand<GetSystemCapabilityRequest>(msg));
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
-  EXPECT_CALL(mock_hmi_cap, navigation_capability())
-      .WillRepeatedly(Return(&sm));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
-                                  _)).WillOnce(Return(true));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -141,7 +135,6 @@ TEST_F(GetSystemCapabilityRequestTest, Run_SystemCapabilityPhoneCall_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
                                   _)).WillOnce(Return(true));
-
   ASSERT_TRUE(command->Init());
   command->Run();
 }
@@ -149,21 +142,21 @@ TEST_F(GetSystemCapabilityRequestTest, Run_SystemCapabilityPhoneCall_SUCCESS) {
 TEST_F(GetSystemCapabilityRequestTest,
        Run_SystemCapabilityRemoteControl_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
-  SmartObject sm(smart_objects::SmartType_Map);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MessageSharedPtr msg = CreateMessageParams();
   amt::MockHMICapabilities mock_hmi_cap;
+  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
+  SmartObject smart_object(smart_objects::SmartType_Map);
+  EXPECT_CALL(mock_hmi_cap, rc_capability())
+      .WillRepeatedly(Return(&smart_object));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
+                                  _)).WillOnce(Return(true));
+  MessageSharedPtr msg = CreateMessageParams();
   (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::REMOTE_CONTROL;
   SharedPtr<GetSystemCapabilityRequest> command(
       CreateCommand<GetSystemCapabilityRequest>(msg));
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
-  EXPECT_CALL(mock_hmi_cap, rc_capability()).WillRepeatedly(Return(&sm));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
-                                  _)).WillOnce(Return(true));
-
   ASSERT_TRUE(command->Init());
   command->Run();
 }
@@ -171,44 +164,40 @@ TEST_F(GetSystemCapabilityRequestTest,
 TEST_F(GetSystemCapabilityRequestTest,
        Run_SystemCapabilityVideoStreaming_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
-  SmartObject sm(smart_objects::SmartType_Map);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MessageSharedPtr msg = CreateMessageParams();
   amt::MockHMICapabilities mock_hmi_cap;
+  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
+  SmartObject smart_object(smart_objects::SmartType_Map);
+  EXPECT_CALL(mock_hmi_cap, video_streaming_capability())
+      .WillRepeatedly(Return(&smart_object));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
+                                  _)).WillOnce(Return(true));
+  MessageSharedPtr msg = CreateMessageParams();
   (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
       mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
   SharedPtr<GetSystemCapabilityRequest> command(
       CreateCommand<GetSystemCapabilityRequest>(msg));
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
-  EXPECT_CALL(mock_hmi_cap, video_streaming_capability())
-      .WillRepeatedly(Return(&sm));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
-                                  _)).WillOnce(Return(true));
-
   ASSERT_TRUE(command->Init());
   command->Run();
 }
 
-TEST_F(GetSystemCapabilityRequestTest, Run_DefaultCase_UnsupportedResource) {
+TEST_F(GetSystemCapabilityRequestTest, Run_InvalidEnum_UnsupportedResource) {
   MockAppPtr mock_app = CreateMockApp();
-  SmartObject sm(smart_objects::SmartType_Map);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MessageSharedPtr msg = CreateMessageParams();
   amt::MockHMICapabilities mock_hmi_cap;
-  (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
-      mobile_apis::SystemCapabilityType::INVALID_ENUM;
-  SharedPtr<GetSystemCapabilityRequest> command(
-      CreateCommand<GetSystemCapabilityRequest>(msg));
   EXPECT_CALL(app_mngr_, hmi_capabilities()).WillOnce(ReturnRef(mock_hmi_cap));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _))
       .WillOnce(Return(true));
-
+  MessageSharedPtr msg = CreateMessageParams();
+  (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::INVALID_ENUM;
+  SharedPtr<GetSystemCapabilityRequest> command(
+      CreateCommand<GetSystemCapabilityRequest>(msg));
   ASSERT_TRUE(command->Init());
   command->Run();
 }
@@ -218,28 +207,33 @@ TEST_F(GetSystemCapabilityRequestTest,
   MockAppPtr mock_app = CreateMockApp();
   MessageSharedPtr msg = CreateMessageParams();
   amt::MockHMICapabilities mock_hmi_cap;
-  uint32_t size = sizeof(mobile_apis::SystemCapabilityType::eType);
-  for (uint32_t type = 0; type < size; type++) {
-    (*msg)[am::strings::msg_params][am::strings::system_capability_type] = type;
-    SharedPtr<GetSystemCapabilityRequest> command(
-        CreateCommand<GetSystemCapabilityRequest>(msg));
+  const std::vector<mobile_apis::SystemCapabilityType::eType>
+      system_capability_type_values = {
+          mobile_apis::SystemCapabilityType::NAVIGATION,
+          mobile_apis::SystemCapabilityType::PHONE_CALL,
+          mobile_apis::SystemCapabilityType::VIDEO_STREAMING,
+          mobile_apis::SystemCapabilityType::REMOTE_CONTROL,
+
+      };
+  for (auto& value : system_capability_type_values) {
+    (*msg)[am::strings::msg_params][am::strings::system_capability_type] =
+        value;
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app));
-
     EXPECT_CALL(app_mngr_, hmi_capabilities())
         .WillOnce(ReturnRef(mock_hmi_cap));
-
     EXPECT_CALL(app_mngr_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_result::DATA_NOT_AVAILABLE), _))
         .WillOnce(Return(true));
-
+    SharedPtr<GetSystemCapabilityRequest> command(
+        CreateCommand<GetSystemCapabilityRequest>(msg));
     ASSERT_TRUE(command->Init());
     command->Run();
   }
 }
 
-}  // namespace get_vehicle_data_tequest
+}  // namespace get_system_capability_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
