@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
 # disclaimer in the documentation and/or other materials provided with the
 # distribution.
 #
-# Neither the name of the copyright holders nor the names of their contributors
+# Neither the name of the Ford Motor Company nor the names of its contributors
 # may be used to endorse or promote products derived from this software
 # without specific prior written permission.
 #
@@ -28,39 +28,5 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
-
-set (COMMANDS_SOURCE_DIR
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/commands
-)
-
-set (MOBILE_COMMANDS_SOURCE_DIR
-  ${COMMANDS_SOURCE_DIR}/mobile
-)
-
-set (HMI_COMMANDS_SOURCE_DIR
-  ${COMMANDS_SOURCE_DIR}/hmi
-)
-
-collect_sources(MOBILE_COMMANDS "${MOBILE_COMMANDS_SOURCE_DIR}")
-collect_sources(HMI_COMMANDS "${HMI_COMMANDS_SOURCE_DIR}")
-collect_sources(RPC_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
-
-set(LIBRARIES
-  HMI_API
-  MOBILE_API
-  v4_protocol_v1_2_no_extra
-  SmartObjects
-  Utils
-)
-
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
-
-add_library("sdl_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES})
-target_link_libraries("sdl_rpc_plugin" ${LIBRARIES})
-
-if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
+# --- Utils
+add_subdirectory(sdl_rpc_plugin)
