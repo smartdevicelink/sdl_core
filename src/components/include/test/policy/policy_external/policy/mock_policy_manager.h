@@ -67,7 +67,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     EndpointUrls& out_end_points));
-  MOCK_METHOD0(RequestPTUpdate, void());
+  MOCK_METHOD0(RequestPTUpdate, bool());
   MOCK_METHOD5(CheckPermissions,
                void(const PTString& app_id,
                     const PTString& hmi_level,
@@ -81,7 +81,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ForcePTExchangeAtUserRequest, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
-  MOCK_METHOD0(NextRetryTimeout, int());
+  MOCK_METHOD0(NextRetryTimeout, uint32_t());
   MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
   MOCK_METHOD0(OnExceededTimeout, void());
@@ -110,9 +110,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetDeviceInfo,
                void(const std::string& device_id,
                     const policy::DeviceInfo& device_info));
-  MOCK_METHOD2(SetUserConsentForApp,
-               void(const policy::PermissionConsent& permissions,
-                    const NotificationMode mode));
+  MOCK_METHOD1(SetUserConsentForApp,
+               void(const policy::PermissionConsent& permissions));
   MOCK_CONST_METHOD2(GetDefaultHmi,
                      bool(const std::string& policy_app_id,
                           std::string* default_hmi));
