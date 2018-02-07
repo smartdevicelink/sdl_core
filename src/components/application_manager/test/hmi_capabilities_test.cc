@@ -102,7 +102,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
-  application_manager_test::MockRPCService rpc_service_;
+  application_manager_test::MockRPCService mock_rpc_service_;
 };
 
 const char* const cstring_values_[] = {
@@ -580,9 +580,8 @@ void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
-  EXPECT_CALL(app_mngr_, GetRPCService())
-      .WillRepeatedly(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillRepeatedly(Return(true));
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {

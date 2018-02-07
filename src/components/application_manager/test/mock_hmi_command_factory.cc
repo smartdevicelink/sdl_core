@@ -31,7 +31,7 @@
  */
 
 #include <gmock/gmock.h>
-#include "application_manager/hmi_command_factory.h"
+#include "application_manager/rpc_plugins/sdl_rpc_plugin/include/sdl_rpc_plugin/hmi_command_factory.h"
 #include "application_manager/mock_hmi_command_factory.h"
 
 namespace test {
@@ -47,10 +47,11 @@ MockHMICommandFactory* MockHMICommandFactory::mock_hmi_command_factory() {
 }  // components
 }  // test
 
-namespace application_manager {
-CommandSharedPtr HMICommandFactory::CreateCommand(
-    const commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager) {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
+app_mngr::CommandSharedPtr HMICommandFactory::CreateCommand(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager) {
   return test::components::application_manager_test::MockHMICommandFactory::
       mock_hmi_command_factory()->CreateCommand(message, application_manager);
 }
