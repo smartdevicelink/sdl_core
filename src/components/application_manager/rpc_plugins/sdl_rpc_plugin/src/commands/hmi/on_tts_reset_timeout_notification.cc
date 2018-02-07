@@ -1,4 +1,4 @@
-#include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 

@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/on_permissions_change_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_permissions_change_notification.h"
 #include "application_manager/message.h"
 #include "interfaces/MOBILE_API.h"
 

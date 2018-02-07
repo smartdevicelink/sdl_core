@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/decrypt_certificate_response.h"
+#include "sdl_rpc_plugin/commands/hmi/decrypt_certificate_response.h"
 
 #include "application_manager/policies/policy_handler.h"
 #ifdef EXTERNAL_PROPRIETARY_MODE
