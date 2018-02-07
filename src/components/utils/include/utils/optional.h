@@ -69,10 +69,15 @@ class Optional {
     return *object_;
   }
 
+  ErrorType error() const {
+    return error_;
+  }
+
  private:
   ObjectType* object_;
   ErrorType error_;
   bool is_initialized_;
 };
+
 }  // utils utils
 #endif  // ERROR_OR_H

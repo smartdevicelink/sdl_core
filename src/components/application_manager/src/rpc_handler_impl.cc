@@ -134,15 +134,7 @@ void RPCHandlerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
-#ifdef SDL_REMOTE_CONTROL
-  if (app_manager_.GetPluginManager().IsMessageForPlugin(message)) {
-    if (functional_modules::ProcessResult::PROCESSED ==
-        app_manager_.GetPluginManager().ProcessMessage(message)) {
-      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-      return;
-    }
-  }
-#endif
+
   ProcessMessageFromMobile(message);
 }
 
