@@ -48,8 +48,7 @@ RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
   return RPCPluginPtr(plugin);
 }
 
-uint32_t RPCPluginManagerImpl::LoadPlugins(
-    const std::string& plugins_path) {
+uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
   LOG4CXX_INFO(logger_, "Loading plugins from " << plugins_path);
   std::vector<std::string> plugin_files = file_system::ListFiles(plugins_path);
   for (auto& plugin_file : plugin_files) {
@@ -79,7 +78,7 @@ std::vector<RPCPluginPtr>& RPCPluginManagerImpl::GetPlugins() {
 
 utils::Optional<RPCPlugin> RPCPluginManagerImpl::FindPluginToProcess(
     const int32_t function_id,
-    const commands::Command::CommandOrigin message_source) {
+    const commands::Command::CommandSource message_source) {
   typedef utils::Optional<RPCPlugin> PluginOptional;
   for (auto& plugin : loaded_plugins_) {
     if (plugin->IsAbleToProcess(function_id, message_source)) {

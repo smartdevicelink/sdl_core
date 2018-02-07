@@ -32,7 +32,7 @@ class RPCPlugin {
    */
   virtual bool IsAbleToProcess(
       const int32_t function_id,
-      const commands::Command::CommandOrigin message_source) = 0;
+      const commands::Command::CommandSource message_source) = 0;
 
   /**
    * @brief PluginName plugin name
