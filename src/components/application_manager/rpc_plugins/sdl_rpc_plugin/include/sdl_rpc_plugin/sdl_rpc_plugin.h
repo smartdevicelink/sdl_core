@@ -3,7 +3,7 @@
 #include "application_manager/plugin_manager/rpc_plugin.h"
 namespace sdl_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
-class SDLRPCPlugin : plugins::RPCPlugin {
+class SDLRPCPlugin : public plugins::RPCPlugin {
   // RPCPlugin interface
  public:
   bool Init() OVERRIDE;
@@ -21,5 +21,7 @@ class SDLRPCPlugin : plugins::RPCPlugin {
       application_manager::ApplicationSharedPtr application) OVERRIDE;
 };
 }
+
+extern "C" application_manager::plugin_manager::RPCPlugin* Create();
 
 #endif  // SDL_RPC_PLUGIN_H
