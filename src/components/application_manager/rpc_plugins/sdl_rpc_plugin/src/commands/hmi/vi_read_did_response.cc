@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vi_read_did_response.h"
+#include "sdl_rpc_plugin/commands/hmi/vi_read_did_response.h"
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {

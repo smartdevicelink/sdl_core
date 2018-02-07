@@ -32,7 +32,7 @@
  */
 
 #include <string>
-#include "application_manager/commands/mobile/add_command_request.h"
+#include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"

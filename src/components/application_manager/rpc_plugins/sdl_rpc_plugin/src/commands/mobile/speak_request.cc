@@ -32,7 +32,7 @@
  */
 
 #include <string.h>
-#include "application_manager/commands/mobile/speak_request.h"
+#include "sdl_rpc_plugin/commands/mobile/speak_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"

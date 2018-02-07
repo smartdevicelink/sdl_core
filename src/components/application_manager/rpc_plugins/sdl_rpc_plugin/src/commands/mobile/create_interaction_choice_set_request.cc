@@ -35,7 +35,7 @@
 #include <cstring>
 #include <algorithm>
 #include <vector>
-#include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
+#include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"

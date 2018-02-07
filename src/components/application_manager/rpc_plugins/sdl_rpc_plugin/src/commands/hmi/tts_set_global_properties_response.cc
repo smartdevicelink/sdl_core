@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_set_global_properties_response.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/event_engine/event.h"
 
 #include "interfaces/HMI_API.h"

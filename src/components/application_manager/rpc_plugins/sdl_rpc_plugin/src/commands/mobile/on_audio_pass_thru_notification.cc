@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/on_audio_pass_thru_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_audio_pass_thru_notification.h"
 
 namespace application_manager {
 namespace commands {

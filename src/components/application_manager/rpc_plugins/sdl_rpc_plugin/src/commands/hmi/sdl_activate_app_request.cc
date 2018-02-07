@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/sdl_activate_app_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 

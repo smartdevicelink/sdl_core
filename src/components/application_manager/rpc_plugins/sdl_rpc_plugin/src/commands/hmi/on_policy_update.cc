@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_policy_update.h"
+#include "sdl_rpc_plugin/commands/hmi/on_policy_update.h"
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
