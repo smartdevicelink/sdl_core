@@ -9,7 +9,7 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
   bool Init() OVERRIDE;
   bool IsAbleToProcess(
       const int32_t function_id,
-      const application_manager::commands::Command::CommandOrigin
+      const application_manager::commands::Command::CommandSource
           message_source) OVERRIDE;
   std::string PluginName() OVERRIDE;
   application_manager::plugin_manager::CommandFactory& GetCommandFactory()
