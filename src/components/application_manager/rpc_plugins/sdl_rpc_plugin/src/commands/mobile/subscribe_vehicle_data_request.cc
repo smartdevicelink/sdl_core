@@ -34,7 +34,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
+#include "sdl_rpc_plugin/commands/mobile/subscribe_vehicle_data_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"

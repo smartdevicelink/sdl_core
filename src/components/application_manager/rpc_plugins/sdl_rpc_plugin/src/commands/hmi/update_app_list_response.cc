@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_app_list_response.h"
+#include "sdl_rpc_plugin/commands/hmi/update_app_list_response.h"
 
 namespace application_manager {
 

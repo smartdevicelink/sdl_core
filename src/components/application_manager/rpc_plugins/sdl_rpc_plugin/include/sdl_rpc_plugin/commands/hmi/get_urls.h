@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_
 
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/request_from_hmi.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 

@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_find_applications.h"
+#include "sdl_rpc_plugin/commands/hmi/on_find_applications.h"
 
 namespace application_manager {
 

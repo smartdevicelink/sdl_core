@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/get_urls.h"
+#include "sdl_rpc_plugin/commands/hmi/get_urls.h"
 #include "application_manager/message.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"

@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_audio_data_streaming_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
 
 namespace application_manager {
 

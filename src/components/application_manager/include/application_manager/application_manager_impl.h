@@ -41,7 +41,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
@@ -211,7 +210,7 @@ class ApplicationManagerImpl
   }
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
-    return plugin_manager_;
+    return *plugin_manager_;
   }
 
   std::vector<std::string> devices(
@@ -1611,7 +1610,7 @@ bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
   request_controller::RequestController request_ctrl_;
 
 #ifdef SDL_REMOTE_CONTROL
-  plugin_manager::RPCPluginManager plugin_manager_;
+  std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call

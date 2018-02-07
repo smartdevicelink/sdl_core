@@ -47,9 +47,6 @@
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 #ifdef TELEMETRY_MONITOR

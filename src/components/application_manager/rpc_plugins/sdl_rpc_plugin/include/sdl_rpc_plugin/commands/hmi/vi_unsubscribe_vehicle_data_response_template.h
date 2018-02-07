@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/response_from_hmi.h"
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
