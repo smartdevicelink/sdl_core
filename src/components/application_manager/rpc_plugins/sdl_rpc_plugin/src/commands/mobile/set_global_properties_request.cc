@@ -32,7 +32,7 @@
 
 #include <string.h>
 #include <algorithm>
-#include "application_manager/commands/mobile/set_global_properties_request.h"
+#include "sdl_rpc_plugin/commands/mobile/set_global_properties_request.h"
 
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"

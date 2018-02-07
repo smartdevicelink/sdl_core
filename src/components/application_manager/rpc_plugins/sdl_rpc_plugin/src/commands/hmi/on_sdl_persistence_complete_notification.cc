@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_sdl_persistence_complete_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_sdl_persistence_complete_notification.h"
 
 namespace application_manager {
 

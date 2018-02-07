@@ -32,7 +32,7 @@
 
 #include "application_manager/application_impl.h"
 
-#include "application_manager/commands/hmi/on_system_request_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"

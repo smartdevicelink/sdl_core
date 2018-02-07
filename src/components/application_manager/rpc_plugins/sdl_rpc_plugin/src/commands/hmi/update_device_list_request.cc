@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_device_list_request.h"
+#include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
 
 #include "interfaces/HMI_API.h"
 

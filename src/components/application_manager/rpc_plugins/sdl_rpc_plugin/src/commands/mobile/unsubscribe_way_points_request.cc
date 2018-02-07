@@ -1,5 +1,5 @@
 #include "application_manager/application_manager.h"
-#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {

@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/request_to_hmi.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"

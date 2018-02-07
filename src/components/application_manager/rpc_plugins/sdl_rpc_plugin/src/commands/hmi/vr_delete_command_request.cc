@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/vr_delete_command_request.h"
+#include "sdl_rpc_plugin/commands/hmi/vr_delete_command_request.h"
 
 namespace application_manager {
 

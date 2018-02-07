@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ALLOW_ALL_APPS_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ALLOW_ALL_APPS_REQUEST_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 

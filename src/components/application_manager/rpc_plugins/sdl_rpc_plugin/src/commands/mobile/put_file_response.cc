@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/put_file_response.h"
+#include "sdl_rpc_plugin/commands/mobile/put_file_response.h"
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 

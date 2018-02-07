@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/basic_communication_on_awake_sdl.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resume_ctrl.h"
 

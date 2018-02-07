@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_audio_start_stream_request.h"
 
 #include "application_manager/message_helper.h"
 #include "protocol_handler/protocol_handler.h"

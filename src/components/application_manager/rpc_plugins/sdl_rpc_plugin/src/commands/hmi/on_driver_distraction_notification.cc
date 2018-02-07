@@ -31,7 +31,7 @@
  */
 
 #include <set>
-#include "application_manager/commands/hmi/on_driver_distraction_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
 
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"

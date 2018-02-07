@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "application_manager/rpc_service.h"
 
 namespace application_manager {

@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/unsubscribe_button_response.h"
+#include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_response.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
