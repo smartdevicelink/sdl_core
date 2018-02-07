@@ -12,7 +12,7 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   std::vector<RPCPluginPtr>& GetPlugins() OVERRIDE;
   utils::Optional<RPCPlugin> FindPluginToProcess(
       const int32_t function_id,
-      const commands::Command::CommandOrigin message_source) OVERRIDE;
+      const commands::Command::CommandSource message_source) OVERRIDE;
 
  private:
   std::vector<RPCPluginPtr> loaded_plugins_;

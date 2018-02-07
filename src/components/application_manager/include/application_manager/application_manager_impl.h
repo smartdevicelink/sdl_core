@@ -210,7 +210,7 @@ class ApplicationManagerImpl
     applications_.erase(app_to_remove);
   }
 
-  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
+  virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
     return plugin_manager_;
   }
 
@@ -1590,7 +1590,7 @@ class ApplicationManagerImpl
   request_controller::RequestController request_ctrl_;
 
 #ifdef SDL_REMOTE_CONTROL
-  functional_modules::PluginManager plugin_manager_;
+  plugin_manager::RPCPluginManager plugin_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call
