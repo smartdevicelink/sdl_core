@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navi_get_way_points_response.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_get_way_points_response.h"
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 

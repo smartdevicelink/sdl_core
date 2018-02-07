@@ -33,7 +33,7 @@
 
 #include <string.h>
 #include <algorithm>
-#include "application_manager/commands/mobile/change_registration_request.h"
+#include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"

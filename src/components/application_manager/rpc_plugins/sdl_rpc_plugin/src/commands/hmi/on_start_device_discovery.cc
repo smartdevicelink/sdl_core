@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_start_device_discovery.h"
+#include "sdl_rpc_plugin/commands/hmi/on_start_device_discovery.h"
 
 namespace application_manager {
 

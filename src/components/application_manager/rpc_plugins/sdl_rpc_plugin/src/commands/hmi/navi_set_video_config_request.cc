@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navi_set_video_config_request.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_set_video_config_request.h"
 #include <string>
 #include <vector>
 

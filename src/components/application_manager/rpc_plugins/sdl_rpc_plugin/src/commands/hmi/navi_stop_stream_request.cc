@@ -1,4 +1,4 @@
-#include "application_manager/commands/hmi/navi_stop_stream_request.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_stop_stream_request.h"
 
 namespace application_manager {
 
