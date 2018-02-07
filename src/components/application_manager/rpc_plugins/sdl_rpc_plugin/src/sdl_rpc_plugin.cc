@@ -8,7 +8,7 @@ bool SDLRPCPlugin::Init() {
 
 bool SDLRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
-    const application_manager::commands::Command::CommandOrigin
+    const application_manager::commands::Command::CommandSource
         message_source) {
   return true;
 }
