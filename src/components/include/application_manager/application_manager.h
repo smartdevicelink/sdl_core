@@ -39,7 +39,7 @@
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
-#include "application_manager/command_factory.h"
+#include "sdl_rpc_plugin/command_factory.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"

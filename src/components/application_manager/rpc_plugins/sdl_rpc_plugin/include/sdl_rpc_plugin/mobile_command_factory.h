@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,38 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
 
-#include <memory>
-#include "application_manager/application_manager.h"
-#include "application_manager/command_factory.h"
-#include "application_manager/hmi_command_factory.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/rpc_service.h"
-#include "application_manager/hmi_capabilities.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/commands/command.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
-class SDLCommandFactory : public CommandFactory {
- public:
-  SDLCommandFactory(ApplicationManager& app_manager,
-                    rpc_service::RPCService& rpc_service,
-                    HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handler);
+typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+class ApplicationManager;
 
-  CommandSharedPtr CreateCommand(
+/**
+ * @brief Factory class for command creation
+ **/
+class MobileCommandFactory {
+ public:
+  /**
+   * @brief Create command object and return pointer to it
+   *
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
+  static CommandSharedPtr CreateCommand(
       const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
+      commands::Command::CommandOrigin origin,
+      ApplicationManager& application_manager);
 
  private:
-  ApplicationManager& app_manager_;
-  rpc_service::RPCService& rpc_service_;
-  HMICapabilities& hmi_capabilities_;
-  policy::PolicyHandlerInterface& policy_handler_;
-  std::unique_ptr<HMICommandFactory> hmi_command_factory_;
-  std::unique_ptr<MobileCommandFactory> mobile_command_factory_;
+  MobileCommandFactory();
+  DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
-}
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_COMMAND_FACTORY_H_
