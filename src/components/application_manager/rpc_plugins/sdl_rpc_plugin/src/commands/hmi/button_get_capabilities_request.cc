@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/button_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
 #include "utils/logger.h"
 
 namespace application_manager {

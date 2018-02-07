@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/activate_app_response.h"
+#include "sdl_rpc_plugin/commands/hmi/activate_app_response.h"
 
 #include "application_manager/message_helper.h"
 

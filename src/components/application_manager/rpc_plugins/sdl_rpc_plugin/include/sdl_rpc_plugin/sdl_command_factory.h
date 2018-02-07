@@ -36,8 +36,8 @@
 #include <memory>
 #include "application_manager/application_manager.h"
 #include "application_manager/command_factory.h"
-#include "application_manager/hmi_command_factory.h"
-#include "application_manager/mobile_command_factory.h"
+#include "sdl_rpc_plugin/hmi_command_factory.h"
+#include "sdl_rpc_plugin/mobile_command_factory.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"

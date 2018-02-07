@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/create_interaction_choice_set_response.h"
+#include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_response.h"
 
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"

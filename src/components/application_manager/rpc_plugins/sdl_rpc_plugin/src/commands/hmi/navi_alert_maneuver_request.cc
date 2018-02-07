@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_request.h"
 
 namespace application_manager {
 

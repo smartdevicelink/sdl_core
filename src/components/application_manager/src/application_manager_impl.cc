@@ -1751,7 +1751,6 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
-
   return true;
 }
 
@@ -2513,7 +2512,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru(*this);
   }
-
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
@@ -3336,8 +3334,7 @@ void ApplicationManagerImpl::ProcessReconnection(
   GetPolicyHandler().AddDevice(device_mac, connection_type);
 }
 
-void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
-}
+void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {}
 
 void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
     ApplicationSharedPtr application) const {

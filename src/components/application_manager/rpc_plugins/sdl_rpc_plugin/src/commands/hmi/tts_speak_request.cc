@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/tts_speak_request.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_speak_request.h"
 
 namespace application_manager {
 

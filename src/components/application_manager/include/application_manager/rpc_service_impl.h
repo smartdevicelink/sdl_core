@@ -35,8 +35,6 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/hmi_command_factory.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/usage_statistics.h"
