@@ -57,9 +57,6 @@
 #include "utils/make_shared.h"
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 
@@ -1196,10 +1193,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             accessor.GetData().end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
-#ifdef SDL_REMOTE_CONTROL
-        application_manager_.GetPluginManager().OnPolicyEvent(
-            functional_modules::PolicyEvent::kApplicationsDisabled);
-#endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(
             accessor.GetData().begin(),

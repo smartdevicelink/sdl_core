@@ -76,12 +76,6 @@
 #include "utils/custom_string.h"
 #include <time.h>
 
-#ifdef SDL_REMOTE_CONTROL
-#include "policy/usage_statistics/counter.h"
-#include "functional_module/plugin_manager.h"
-#include "application_manager/core_service.h"
-#endif  // SDL_REMOTE_CONTROL
-
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
@@ -1787,16 +1781,6 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
-#ifdef SDL_REMOTE_CONTROL
-  if (!hmi_handler_) {
-    LOG4CXX_ERROR(logger_, "HMI message handler was not initialized");
-    return false;
-  }
-  plugin_manager_.SetServiceHandler(utils::MakeShared<CoreService>(*this));
-  plugin_manager_.LoadPlugins(settings_.plugins_folder());
-  plugin_manager_.OnServiceStateChanged(
-      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
-#endif  // SDL_REMOTE_CONTROL
 
   return true;
 }
@@ -2559,11 +2543,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendStopAudioPathThru(*this);
   }
 
-#ifdef SDL_REMOTE_CONTROL
-  plugin_manager_.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationUnregistered,
-      app_to_remove);
-#endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
@@ -3387,13 +3366,6 @@ void ApplicationManagerImpl::ProcessReconnection(
 }
 
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
-#ifdef SDL_REMOTE_CONTROL
-  if (!ptu_result) {
-    return;
-  }
-  plugin_manager_.OnPolicyEvent(
-      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
@@ -3739,7 +3711,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     app->set_hmi_level(level);
     OnHMILevelChanged(app_id, old_level, level);
 
-    plugin_manager_.OnAppHMILevelChanged(app, old_level);
   } else {
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
