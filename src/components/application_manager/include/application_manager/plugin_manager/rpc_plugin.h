@@ -1,5 +1,5 @@
-#ifndef COMMAND_PLUGIN_H
-#define COMMAND_PLUGIN_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
 #include <memory>
 #include "utils/macro.h"
 #include "application_manager/commands/command.h"
@@ -65,4 +65,4 @@ typedef std::unique_ptr<RPCPlugin> RPCPluginPtr;
 }  // namespace plugin_manager
 }  // namespace application_manager
 
-#endif  // COMMAND_PLUGIN_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H

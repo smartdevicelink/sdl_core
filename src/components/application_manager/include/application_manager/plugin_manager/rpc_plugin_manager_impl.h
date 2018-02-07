@@ -1,5 +1,5 @@
-#ifndef PLUGIN_MANAGER_IMPLEMENTATION_H
-#define PLUGIN_MANAGER_IMPLEMENTATION_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_IMPL_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_IMPL_H
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "utils/optional.h"
 namespace application_manager {
@@ -19,4 +19,4 @@ class RPCPluginManagerImpl : public RPCPluginManager {
 };
 }  // namespace plugin_manager
 }  // namespace application_manager
-#endif  // PLUGIN_MANAGER_IMPLEMENTATION_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_MANAGER_IMPL_H
