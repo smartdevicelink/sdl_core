@@ -99,6 +99,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& app_config_folder() const;
 
   /**
+   * @brief Returns sdl message queue name
+   * which is used for handling LOW Voltage functionality
+   */
+  const std::string& sdl_mq_name() const;
+
+  /**
     * @brief Returns application storage path
     */
   const std::string& app_storage_folder() const;
@@ -930,6 +936,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_tranport_change_timer_addition_;
   bool error_occured_;
   std::string error_description_;
+  std::string sdl_mq_name_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

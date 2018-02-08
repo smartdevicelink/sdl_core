@@ -46,6 +46,7 @@
 #ifdef ENABLE_LOG
 #include "utils/log_message_loop_thread.h"
 #endif  // ENABLE_LOG
+#include "mq_signals_handler.h"
 
 using threads::Thread;
 
@@ -58,6 +59,7 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , protocol_handler_(NULL)
     , connection_handler_(NULL)
     , app_manager_(NULL)
+    , mq_signals_handler_(NULL)
 #ifdef ENABLE_SECURITY
     , crypto_manager_(NULL)
     , security_manager_(NULL)
@@ -118,6 +120,13 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
+  mq_signals_handler_ = new MQSignalsHandler(*this, profile_.sdl_mq_name());
+  DCHECK(mq_signals_handler_);
+  if (!mq_signals_handler_->Init()) {
+    LOG4CXX_ERROR(logger_, "MQ Signals handler init failed.");
+    return false;
+  }
+
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
@@ -167,6 +176,22 @@ bool LifeCycle::StartComponents() {
   transport_manager_->Visibility(true);
 
   return true;
+}
+
+void LifeCycle::LowVoltage() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  low_voltage_ = true;
+  transport_manager_->Visibility(false);
+  app_manager_->OnLowVoltage();
+}
+
+void LifeCycle::WakeUp() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(low_voltage_ == true);
+  app_manager_->OnWakeUp();
+  transport_manager_->Reinit();
+  transport_manager_->Visibility(true);
+  low_voltage_ = false;
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -308,6 +333,11 @@ void LifeCycle::StopComponents() {
   DCHECK(app_manager_);
   delete app_manager_;
   app_manager_ = NULL;
+
+  LOG4CXX_INFO(logger_, "Destroying MQ Signals Handler.");
+  DCHECK(mq_signals_handler_);
+  delete mq_signals_handler_;
+  mq_signals_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 

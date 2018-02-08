@@ -214,6 +214,8 @@ const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
 const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
 const char* kAppTransportChangeTimerAdditionKey =
     "AppTransportChangeTimerAddition";
+const char* kSDLMessageQueueNameKey = "SDLMessageQueueName";
+
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -229,6 +231,7 @@ const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
+const char* kDefaultSDLMessageQueueName = "/SDLMQ";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
@@ -414,7 +417,8 @@ Profile::Profile()
     , app_tranport_change_timer_addition_(
           kDefaultAppTransportChangeTimerAddition)
     , error_occured_(false)
-    , error_description_() {
+    , error_description_()
+    , sdl_mq_name_(kDefaultSDLMessageQueueName) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -449,6 +453,10 @@ std::string Profile::link_to_web_hmi() const {
 
 const std::string& Profile::app_config_folder() const {
   return app_config_folder_;
+}
+
+const std::string& Profile::sdl_mq_name() const {
+  return sdl_mq_name_;
 }
 
 const std::string& Profile::app_storage_folder() const {
@@ -1609,6 +1617,13 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_,
                     kTCPAdapterPortKey,
                     kTransportManagerSection);
+
+  // SDL Low Voltage MQ
+  ReadStringValue(&sdl_mq_name_,
+                  kDefaultSDLMessageQueueName,
+                  kMainSection,
+                  kSDLMessageQueueNameKey);
+  LOG_UPDATED_VALUE(sdl_mq_name_, kSDLMessageQueueNameKey, kMainSection);
 
   // Event MQ
   ReadStringValue(

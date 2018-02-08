@@ -66,6 +66,9 @@ class SecurityManagerImpl;
 #endif  // ENABLE_SECURITY
 
 namespace main_namespace {
+
+class MQSignalsHandler;
+
 class LifeCycle {
  public:
   LifeCycle(const profile::Profile& profile);
@@ -81,12 +84,15 @@ class LifeCycle {
  */
   void Run();
   void StopComponents();
+  void LowVoltage();
+  void WakeUp();
 
  private:
   transport_manager::TransportManagerImpl* transport_manager_;
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
+  MQSignalsHandler* mq_signals_handler_;
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;
@@ -109,6 +115,7 @@ class LifeCycle {
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   const profile::Profile& profile_;
+  bool low_voltage_;
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace
