@@ -106,6 +106,25 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
+std::string CreateInfoForPolicyPermitResult(const PermitResult value) {
+  switch (value) {
+    case PermitResult::kRpcDisallowed: {
+      return "RPC is disallowed by Policies";
+    }
+    case PermitResult::kRpcUserDisallowed: {
+      return "RPC is disallowed by the User";
+    }
+    case PermitResult::kRpcAllParamsDisallowed: {
+      return "Requested parameters are disallowed by Policies";
+    }
+    case PermitResult::kRpcAllParamsUserDisallowed: {
+      return "Requested parameters are disallowed by User";
+    }
+    default:
+      return std::string();
+  }
+}
+
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
@@ -291,7 +310,8 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
     if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID) ||
+        (id == mobile_apis::FunctionID::SendLocationID)) {
       AddDisallowedParameters(response);
       AddDisallowedParametersToInfo(response);
     } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
@@ -507,7 +527,7 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       break;
     }
     case hmi_apis::Common_Result::DATA_NOT_AVAILABLE: {
-      mobile_result = mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE;
+      mobile_result = mobile_apis::Result::DATA_NOT_AVAILABLE;
       break;
     }
     case hmi_apis::Common_Result::TIMED_OUT: {
@@ -570,6 +590,14 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       mobile_result = mobile_apis::Result::SAVED;
       break;
     }
+    case hmi_apis::Common_Result::TRUNCATED_DATA: {
+      mobile_result = mobile_apis::Result::TRUNCATED_DATA;
+      break;
+    }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      mobile_result = mobile_apis::Result::READ_ONLY;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
@@ -605,7 +633,10 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
+    if (helpers::Compare<smart_objects::SmartType, helpers::NEQ, helpers::ALL>(
+            iter->second.getType(),
+            smart_objects::SmartType_Null,
+            smart_objects::SmartType_Invalid)) {
       LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
       params.insert(iter->first);
     }
@@ -627,7 +658,11 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             check_result,
             correlation_id(),
             app->app_id());
-
+    std::string info =
+        CreateInfoForPolicyPermitResult(parameters_permissions_.permit_result);
+    if (!info.empty()) {
+      (*response)[strings::msg_params][strings::info] = info;
+    }
     application_manager_.SendMessageToMobile(response);
     return false;
   }
@@ -740,34 +775,69 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
   }
 }
 
-void CommandRequestImpl::AddDissalowedParameterToInfoString(
-    std::string& info, const std::string& param) const {
-  // prepare disallowed params enumeration for response info string
-  if (info.empty()) {
-    info = "\'" + param + "\'";
+void AddDissalowedParameterToInfoString(const std::string& param,
+                                        std::string& info_out) {
+  // Prepare disallowed params enumeration for response info string
+  if (info_out.empty()) {
+    info_out = "\'" + param + "\'";
   } else {
-    info = info + "," + " " + "\'" + param + "\'";
+    info_out = info_out + "," + " " + "\'" + param + "\'";
   }
+}
+
+CustomInfo CommandRequestImpl::CustomInfoMap() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return std::map<std::string, std::string>();
 }
 
 void CommandRequestImpl::AddDisallowedParametersToInfo(
     smart_objects::SmartObject& response) const {
-  std::string info;
+  LOG4CXX_AUTO_TRACE(logger_);
+  const CustomInfo& custom_info_map = CustomInfoMap();
 
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+  CustomInfo::const_iterator custom_param_it = custom_info_map.begin();
+  const RPCParams& disallowed_params =
+      removed_parameters_permissions_.disallowed_params;
+  const RPCParams& undefined_params =
+      removed_parameters_permissions_.undefined_params;
+
+  std::string info;
+  for (; custom_param_it != custom_info_map.end(); ++custom_param_it) {
+    const bool is_in_disallowed =
+        disallowed_params.find(custom_param_it->first) !=
+        disallowed_params.end();
+    const bool is_in_undefined =
+        undefined_params.find(custom_param_it->first) != undefined_params.end();
+    if (is_in_disallowed || is_in_undefined) {
+      info += custom_param_it->second;
+    }
   }
 
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+  uint32_t added_params_counter = 0;
+  RPCParams::const_iterator params_it = disallowed_params.begin();
+  for (; params_it != disallowed_params.end(); ++params_it) {
+    if (custom_info_map.find(*params_it) == custom_info_map.end()) {
+      LOG4CXX_INFO(logger_, "Adding param to info : " << *params_it);
+      AddDissalowedParameterToInfoString((*params_it), info);
+      ++added_params_counter;
+    }
+  }
+
+  params_it = undefined_params.begin();
+  for (; params_it != undefined_params.end(); ++params_it) {
+    if (custom_info_map.find(*params_it) == custom_info_map.end()) {
+      LOG4CXX_INFO(logger_, "Adding param to info : " << *params_it);
+      AddDissalowedParameterToInfoString((*params_it), info);
+      ++added_params_counter;
+    }
+  }
+
+  if (added_params_counter != 0) {
+    info += added_params_counter > 1 ? " parameters are " : " parameter is ";
+    info += "disallowed by Policies";
   }
 
   if (!info.empty()) {
-    info += " disallowed by policies.";
-
     if (!response[strings::msg_params][strings::info].asString().empty()) {
       // If we already have info add info about disallowed params to it
       response[strings::msg_params][strings::info] =

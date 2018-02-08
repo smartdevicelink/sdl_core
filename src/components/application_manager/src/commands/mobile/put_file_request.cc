@@ -63,10 +63,16 @@ void PutFileRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (!application) {
+    response_params[strings::space_available] = 0u;
     LOG4CXX_ERROR(logger_, "Application is not registered");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    SendResponse(false,
+                 mobile_apis::Result::APPLICATION_NOT_REGISTERED,
+                 "Application is not registered",
+                 &response_params);
     return;
   }
+  response_params[strings::space_available] =
+      static_cast<uint32_t>(application->GetAvailableDiskSpace());
 
   if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
       application_manager_.get_settings().put_file_in_none() <=
@@ -163,7 +169,7 @@ void PutFileRequest::Run() {
     file_path = application_manager_.get_settings().app_storage_folder();
     file_path += "/" + application->folder_name();
 
-    uint32_t space_available = application->GetAvailableDiskSpace();
+    const uint32_t space_available = application->GetAvailableDiskSpace();
 
     if (binary_data.size() > space_available) {
       response_params[strings::space_available] =

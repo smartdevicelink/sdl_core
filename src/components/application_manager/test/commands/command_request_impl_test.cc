@@ -206,27 +206,30 @@ TEST_F(CommandRequestImplTest, GetMobileResultCode_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
 
+  const std::map<hmi_apis::Common_Result::eType, mobile_apis::Result::eType>
+      mapping_exceptions = {
+          {hmi_apis::Common_Result::NO_DEVICES_CONNECTED,
+           mobile_apis::Result::APPLICATION_NOT_REGISTERED},
+          {hmi_apis::Common_Result::NO_APPS_REGISTERED,
+           mobile_apis::Result::APPLICATION_NOT_REGISTERED},
+          {hmi_apis::Common_Result::DATA_NOT_AVAILABLE,
+           mobile_apis::Result::DATA_NOT_AVAILABLE},
+          {hmi_apis::Common_Result::SAVED, mobile_apis::Result::SAVED}};
+
   // Run thru all possible accordance
   // of HMI and Mobile result codes.
   ResultU result_it;
   for (result_it.hmi_ = hmi_apis::Common_Result::SUCCESS;
-       result_it.value_ < hmi_apis::Common_Result::TRUNCATED_DATA;
+       result_it.value_ < hmi_apis::Common_Result::READ_ONLY;
        ++result_it.value_) {
-    if (result_it.hmi_ != hmi_apis::Common_Result::NO_DEVICES_CONNECTED &&
-        result_it.hmi_ != hmi_apis::Common_Result::NO_APPS_REGISTERED) {
+    if (mapping_exceptions.find(result_it.hmi_) == mapping_exceptions.end()) {
       EXPECT_EQ(result_it.mobile_,
+                command->GetMobileResultCode(result_it.hmi_));
+    } else {
+      EXPECT_EQ(mapping_exceptions.at(result_it.hmi_),
                 command->GetMobileResultCode(result_it.hmi_));
     }
   }
-  EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
-            command->GetMobileResultCode(
-                hmi_apis::Common_Result::NO_DEVICES_CONNECTED));
-  EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
-            command->GetMobileResultCode(
-                hmi_apis::Common_Result::NO_APPS_REGISTERED));
-  EXPECT_EQ(
-      mobile_apis::Result::GENERIC_ERROR,
-      command->GetMobileResultCode(hmi_apis::Common_Result::TRUNCATED_DATA));
 }
 
 TEST_F(CommandRequestImplTest, BasicMethodsOverloads_SUCCESS) {
@@ -383,8 +386,14 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
+  smart_objects::SmartObjectSPtr response =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*response)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+      .WillOnce(Return(response));
 
   EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _));
   EXPECT_FALSE(command->CheckPermissions());

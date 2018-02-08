@@ -555,8 +555,6 @@
     <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
   <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-    <element name="turnText"/>
 </enum>
 
 <enum name="MetadataType">
@@ -2527,10 +2525,10 @@
   <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
     <description>Name of the country (localized)</description>
   </param>
-  <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+  <param name="countryCode" minlength="0" maxlength="200" type="String" mandatory="false">
     <description>Name of country (ISO 3166-2)</description>
   </param>
-  <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+  <param name="postalCode" minlength="0" maxlength="200" type="String" mandatory="false">
     <description>(PLZ, ZIP, PIN, CAP etc.)</description>
   </param>
   <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
@@ -3879,9 +3877,9 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
-    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
+    <param name="longitudeDegrees" type="Double" minvalue="-180" maxvalue="180" mandatory="true">
     </param>
-    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
+    <param name="latitudeDegrees" type="Double" minvalue="-90" maxvalue="90" mandatory="true">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>     Name / title of intended location   </description>

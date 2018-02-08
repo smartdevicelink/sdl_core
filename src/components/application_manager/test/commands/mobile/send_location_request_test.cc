@@ -96,6 +96,7 @@ class SendLocationRequestTest
     disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
+    navi_caps_so = SmartObject(smart_objects::SmartType_Map);
   }
 
   void InitialSetup(MessageSharedPtr message_) {
@@ -115,6 +116,11 @@ class SendLocationRequestTest
         .WillOnce(ReturnRef(mock_hmi_capabilities_));
     EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
         .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_, is_navi_cooperating())
+        .WillOnce(Return(true));
+    navi_caps_so["sendLocationEnabled"] = true;
+    EXPECT_CALL(mock_hmi_capabilities_, navigation_capability())
+        .WillOnce(Return(&navi_caps_so));
   }
 
   void HMICapabilitiesSetupWithArguments(
@@ -155,6 +161,7 @@ class SendLocationRequestTest
   SharedPtr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;
+  smart_objects::SmartObject navi_caps_so;
 };
 
 TEST_F(SendLocationRequestTest, Run_InvalidApp_Success) {
@@ -171,6 +178,7 @@ TEST_F(SendLocationRequestTest, Run_DeliveryMode_Success) {
   msg_params[strings::delivery_mode] = SmartObject();
   (*message_)[strings::msg_params] = msg_params;
   msg_params.erase(strings::delivery_mode);
+  HMICapabilitiesSetupHelper();
   FinishSetup();
   command_->Run();
 }
@@ -284,6 +292,7 @@ TEST_F(SendLocationRequestTest, Run_PhoneNumberWrongSyntax_Cancelled) {
 
 TEST_F(SendLocationRequestTest, Run_AddressesContainWrongSyntax_Cancelled) {
   InitialSetup(message_);
+  HMICapabilitiesSetupHelper();
   (*message_)[strings::msg_params][strings::address] =
       SmartObject(smart_objects::SmartType_Array);
   (*message_)[strings::msg_params][strings::address]["Address 1"] =
@@ -296,6 +305,7 @@ TEST_F(SendLocationRequestTest, Run_AddressesContainWrongSyntax_Cancelled) {
 
 TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
   InitialSetup(message_);
+  HMICapabilitiesSetupHelper();
   (*message_)[strings::msg_params][strings::location_image] =
       SmartObject(smart_objects::SmartType_Map);
   (*message_)[strings::msg_params][strings::location_image][strings::value] =
@@ -311,6 +321,7 @@ TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
 
 TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
   InitialSetup(message_);
+  HMICapabilitiesSetupHelper();
   (*message_)[strings::msg_params][strings::location_image] =
       SmartObject(smart_objects::SmartType_Map);
   (*message_)[strings::msg_params][strings::location_image][strings::value] =
@@ -353,6 +364,10 @@ TEST_F(SendLocationRequestTest, OnEvent_Success) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app));
 
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+
   command_->on_event(event);
 }
 
@@ -368,24 +383,39 @@ TEST_F(SendLocationRequestTest, OnEvent_Cancelled) {
   command_->on_event(event);
 }
 
-TEST_F(SendLocationRequestTest, Run_MandatoryParamsDisallowed_InvalidData) {
-  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
-  (*message_)[strings::params][strings::function_id] = kFunctionID;
-  (*message_)[strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
-  (*message_)[strings::msg_params][strings::address] = kCorrectAddress;
-  (*message_)[strings::msg_params][strings::longitude_degrees] =
-      kLongitudeDegrees;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
+TEST_F(SendLocationRequestTest,
+       Run_MandatoryParamsDisallowedByUser_UserDisallowed) {
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
   application_manager::CommandParametersPermissions& permissions =
       command_->get_parameters_permissions();
   // 1st one allowed
   permissions.allowed_params.insert(strings::longitude_degrees);
   // 2nd one disallowed
   permissions.disallowed_params.insert(strings::latitude_degrees);
+
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
+                  MobileResultCodeIs(mobile_apis::Result::USER_DISALLOWED), _));
+
+  command_->Run();
+}
+
+TEST_F(SendLocationRequestTest,
+       Run_MandatoryParamsDisallowedByPolicy_Disallowed) {
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
+  application_manager::CommandParametersPermissions& permissions =
+      command_->get_parameters_permissions();
+  // 1st one allowed
+  permissions.allowed_params.insert(strings::longitude_degrees);
+  // 2nd one undefined
+  permissions.undefined_params.insert(strings::latitude_degrees);
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::DISALLOWED), _));
+
   command_->Run();
 }
 

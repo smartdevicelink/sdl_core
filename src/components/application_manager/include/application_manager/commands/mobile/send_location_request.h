@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,13 @@ class SendLocationRequest : public CommandRequestImpl {
 
  private:
   /**
+   * @brief Returns map of parameters and their custom info strings
+   * specified especially for these parameters
+   * @return map of parameters and their info strings
+   */
+  CustomInfo CustomInfoMap() const OVERRIDE;
+
+  /**
  * @brief CheckFieldsCompatibility checks if fields are compatible with each
  * other.
  * @return true if compatible, otherwise return false
@@ -83,6 +90,20 @@ class SendLocationRequest : public CommandRequestImpl {
    * @return true if string contains invalid characters, otherwise returns false
    */
   bool IsWhiteSpaceExist();
+
+  /**
+   * @brief Check policy permissions of mandatory parameters
+   * @return false in case when one of mandatory params disallowed by policy
+   * otherwise return true
+   */
+  bool AreMandatoryParamsAllowedByPolicy() const;
+
+  /**
+   * @brief Check policy permissions of mandatory parameters
+   * @return false in case when one of mandatory params disallowed by user
+   * otherwise return true
+   */
+  bool AreMandatoryParamsAllowedByUser() const;
 
   bool CheckHMICapabilities(
       std::vector<hmi_apis::Common_TextFieldName::eType>& fields_names);
