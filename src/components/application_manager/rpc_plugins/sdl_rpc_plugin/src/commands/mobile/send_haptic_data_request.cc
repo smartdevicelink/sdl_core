@@ -33,14 +33,16 @@
 #include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace custom_str = utils::custom_string;
 
 SendHapticDataRequest::SendHapticDataRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SendHapticDataRequest::~SendHapticDataRequest() {}

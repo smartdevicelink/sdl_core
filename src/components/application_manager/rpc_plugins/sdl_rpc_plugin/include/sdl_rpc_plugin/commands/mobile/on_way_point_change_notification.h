@@ -30,25 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-class OnWayPointChangeNotification : public CommandNotificationImpl {
+class OnWayPointChangeNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnWayPointChangeNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnWayPointChangeNotification(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  OnWayPointChangeNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnWayPointChangeNotification class destructor
@@ -66,4 +69,4 @@ class OnWayPointChangeNotification : public CommandNotificationImpl {
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_H_

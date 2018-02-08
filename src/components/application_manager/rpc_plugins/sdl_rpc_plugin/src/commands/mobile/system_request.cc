@@ -46,7 +46,8 @@ Copyright (c) 2013, Ford Motor Company
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
 namespace {
@@ -430,8 +431,9 @@ uint32_t SystemRequest::index = 0;
 const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
-SystemRequest::SystemRequest(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager)
+SystemRequest::SystemRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SystemRequest::~SystemRequest() {}
@@ -531,7 +533,8 @@ void SystemRequest::Run() {
                       << file_name << " within previously saved app file in "
                       << binary_data_folder);
 
-    const AppFile* file = application->GetFile(app_full_file_path);
+    const application_manager::AppFile* file =
+        application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
         !file_system::MoveFile(app_full_file_path, file_dst_path)) {
       LOG4CXX_DEBUG(logger_, "Binary data not found.");

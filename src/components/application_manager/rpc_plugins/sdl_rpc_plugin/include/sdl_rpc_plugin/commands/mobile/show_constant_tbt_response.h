@@ -31,28 +31,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ShowConstantTBTResponse command class
  **/
-class ShowConstantTBTResponse : public CommandResponseImpl {
+class ShowConstantTBTResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief ShowConstantTBTResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ShowConstantTBTResponse(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  ShowConstantTBTResponse(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTResponse class destructor
@@ -71,4 +72,4 @@ class ShowConstantTBTResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SHOW_CONSTANT_TBT_RESPONSE_H_

@@ -33,12 +33,14 @@
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-VIGetDTCsResponse::VIGetDTCsResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+VIGetDTCsResponse::VIGetDTCsResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 VIGetDTCsResponse::~VIGetDTCsResponse() {}

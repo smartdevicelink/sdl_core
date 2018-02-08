@@ -35,12 +35,14 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-ListFilesResponse::ListFilesResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+ListFilesResponse::ListFilesResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 ListFilesResponse::~ListFilesResponse() {}

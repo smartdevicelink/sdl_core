@@ -40,14 +40,16 @@
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace custom_str = utils::custom_string;
 
-AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+AddCommandRequest::AddCommandRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , send_ui_(false)
     , send_vr_(false)
@@ -575,7 +577,7 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
     return ui_info_;
   }
 
-  return MergeInfos(ui_info_, vr_info_);
+  return app_mngr::commands::MergeInfos(ui_info_, vr_info_);
 }
 
 void AddCommandRequest::RemoveCommand() {

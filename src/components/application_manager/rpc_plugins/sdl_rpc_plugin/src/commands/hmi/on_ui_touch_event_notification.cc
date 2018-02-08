@@ -33,14 +33,16 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace hmi {
 
 OnUITouchEventNotification::OnUITouchEventNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnUITouchEventNotification::~OnUITouchEventNotification() {}
