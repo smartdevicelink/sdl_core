@@ -37,10 +37,11 @@
 #include "application_manager/policies/policy_handler.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message,
+GetUrls::GetUrls(const application_manager::commands::MessageSharedPtr& message,
                  ApplicationManager& application_manager)
     : RequestFromHMI(message, application_manager) {}
 

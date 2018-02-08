@@ -31,23 +31,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RESPONSE_TO_HMI_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RESPONSE_TO_HMI_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RESPONSE_TO_HMI_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RESPONSE_TO_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
-class ResponseToHMI : public CommandImpl {
+class ResponseToHMI : public app_mngr::commands::CommandImpl {
  public:
-  ResponseToHMI(const MessageSharedPtr& message,
-                ApplicationManager& application_manager);
+  ResponseToHMI(const app_mngr::commands::MessageSharedPtr& message,
+                app_mngr::ApplicationManager& application_manager);
   virtual ~ResponseToHMI();
   virtual bool Init();
   virtual bool CleanUp();
@@ -60,4 +61,4 @@ class ResponseToHMI : public CommandImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RESPONSE_TO_HMI_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RESPONSE_TO_HMI_H_

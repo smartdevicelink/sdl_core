@@ -33,12 +33,14 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vi_fuel_level_state_notification.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnVIFuelLevelStateNotification::OnVIFuelLevelStateNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnVIFuelLevelStateNotification::~OnVIFuelLevelStateNotification() {}

@@ -36,11 +36,13 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
 SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}

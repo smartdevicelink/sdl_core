@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
 
 #include <string>
 
@@ -40,22 +40,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief AddCommandRequest command class
  **/
-class AddCommandRequest : public CommandRequestImpl {
+class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief AddCommandRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  AddCommandRequest(const MessageSharedPtr& message,
-                    ApplicationManager& application_manager);
+  AddCommandRequest(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief AddCommandRequest class destructor
@@ -72,7 +73,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Function is called by RequestController when request execution time
@@ -94,7 +95,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandName(ApplicationConstSharedPtr app);
+  bool CheckCommandName(app_mngr::ApplicationConstSharedPtr app);
 
   /*
    * @brief Check if command VR synonyms doesn't exist in application commands
@@ -104,7 +105,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandVRSynonym(ApplicationConstSharedPtr app);
+  bool CheckCommandVRSynonym(app_mngr::ApplicationConstSharedPtr app);
 
   /*
    * @brief Check if command parent ID exists in submenu map
@@ -113,7 +114,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandParentId(ApplicationConstSharedPtr app);
+  bool CheckCommandParentId(app_mngr::ApplicationConstSharedPtr app);
 
   /**
    * @brief Removes command from list when HMI sends negative response or
@@ -162,4 +163,4 @@ class AddCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_

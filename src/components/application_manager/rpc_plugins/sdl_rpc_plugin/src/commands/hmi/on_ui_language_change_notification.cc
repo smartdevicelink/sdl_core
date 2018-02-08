@@ -37,12 +37,14 @@
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
@@ -81,7 +83,7 @@ void OnUILanguageChangeNotification::Run() {
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
               mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
-          commands::Command::SOURCE_SDL);
+          SOURCE_SDL);
       application_manager_.UnregisterApplication(
           app->app_id(), mobile_apis::Result::SUCCESS, false);
     }

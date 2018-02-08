@@ -41,12 +41,14 @@
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+SetAppIconRequest::SetAppIconRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , is_icons_saving_enabled_(false) {
   const std::string path =

@@ -33,12 +33,14 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 SDLGetUserFriendlyMessageResponse::SDLGetUserFriendlyMessageResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseToHMI(message, application_manager) {}
 
 SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {}

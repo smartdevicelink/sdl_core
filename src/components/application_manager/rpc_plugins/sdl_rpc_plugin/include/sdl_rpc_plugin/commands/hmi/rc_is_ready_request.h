@@ -30,29 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_IS_READY_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_IS_READY_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RC_IS_READY_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RC_IS_READY_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief RCIsReadyRequest command class
  **/
-class RCIsReadyRequest : public RequestToHMI,
-                         public event_engine::EventObserver {
+class RCIsReadyRequest : public app_mngr::commands::RequestToHMI,
+                         public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief RCIsReadyRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  RCIsReadyRequest(const MessageSharedPtr& message,
-                   ApplicationManager& application_manager);
+  RCIsReadyRequest(const app_mngr::commands::MessageSharedPtr& message,
+                   app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief RCIsReadyRequest class destructor
@@ -67,7 +68,7 @@ class RCIsReadyRequest : public RequestToHMI,
   /**
    * @brief On event callback
    **/
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief onTimeOut from requrst Controller
@@ -87,4 +88,4 @@ class RCIsReadyRequest : public RequestToHMI,
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_IS_READY_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_RC_IS_READY_REQUEST_H_

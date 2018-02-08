@@ -31,14 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -48,15 +49,16 @@ namespace mobile {
  * @brief OnButtonEventNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnButtonEventNotification : public CommandNotificationImpl {
+class OnButtonEventNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnButtonEventNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnButtonEventNotification(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  OnButtonEventNotification(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnButtonEventNotification class destructor
@@ -74,7 +76,7 @@ class OnButtonEventNotification : public CommandNotificationImpl {
    *
    * @param app Application to receive notification
    */
-  void SendButtonEvent(ApplicationConstSharedPtr app);
+  void SendButtonEvent(app_mngr::ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
@@ -84,4 +86,4 @@ class OnButtonEventNotification : public CommandNotificationImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_

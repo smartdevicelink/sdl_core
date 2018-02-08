@@ -112,6 +112,9 @@ class RPCServiceImpl : public RPCService,
                            bool final_message = false) OVERRIDE;
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
+  void set_protocol_handler(
+      protocol_handler::ProtocolHandler* handler) OVERRIDE;
+
 #ifdef SDL_REMOTE_CONTROL
   void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
   void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;

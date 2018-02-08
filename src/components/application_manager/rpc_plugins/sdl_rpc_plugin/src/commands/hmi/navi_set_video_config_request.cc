@@ -34,12 +34,14 @@
 #include <string>
 #include <vector>
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 NaviSetVideoConfigRequest::NaviSetVideoConfigRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -47,7 +49,7 @@ NaviSetVideoConfigRequest::~NaviSetVideoConfigRequest() {}
 
 void NaviSetVideoConfigRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!CheckAvailabilityHMIInterfaces(
+  if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
           application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
     LOG4CXX_WARN(logger_, "HMI interface Navigation is not supported");
     return;

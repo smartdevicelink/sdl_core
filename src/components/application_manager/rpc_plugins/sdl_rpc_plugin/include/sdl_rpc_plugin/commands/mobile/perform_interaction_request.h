@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
 
 #include <string>
 
@@ -40,7 +40,8 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class Application;
 
@@ -49,15 +50,16 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public CommandRequestImpl {
+class PerformInteractionRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  PerformInteractionRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  PerformInteractionRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief PerformInteractionRequest class destructor
@@ -79,7 +81,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
   /*
    * @brief Function is called by RequestController when request execution time
@@ -113,7 +115,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    *
    */
   void SendUIPerformInteractionRequest(
-      application_manager::ApplicationSharedPtr const app);
+      app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Sends TTS PerformInteraction request to HMI
@@ -122,14 +124,14 @@ class PerformInteractionRequest : public CommandRequestImpl {
    *
    */
   void SendVRPerformInteractionRequest(
-      application_manager::ApplicationSharedPtr const app);
+      app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Sends UI Show VR help request to HMI
    *
    * @param app_id Application ID
    */
-  void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
+  void SendUIShowVRHelpRequest(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
@@ -139,8 +141,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * return Return TRUE if there are no similar menu names in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetMenuNames(
-      application_manager::ApplicationSharedPtr const app);
+  bool CheckChoiceSetMenuNames(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -150,8 +151,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * return Return TRUE if there are no similar VR synonyms in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetVRSynonyms(
-      application_manager::ApplicationSharedPtr const app);
+  bool CheckChoiceSetVRSynonyms(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -162,8 +162,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @return TRUE if vrHelpItems positions are sequential,
    * otherwise FALSE
    */
-  bool CheckVrHelpItemPositions(
-      application_manager::ApplicationSharedPtr const app);
+  bool CheckVrHelpItemPositions(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Disable PerformInteraction state in application and
@@ -191,7 +190,8 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @return if ChoiceID from response is correct method returns TRUE
    * otherwise returns FALSE.
    */
-  bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
+  bool CheckChoiceIDFromResponse(app_mngr::ApplicationSharedPtr app,
+                                 int32_t choice_id);
 
   /**
    * @brief Checks for a match of choice ID, in
@@ -205,7 +205,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * true.
    */
   bool CheckChoiceIDFromRequest(
-      ApplicationSharedPtr app,
+      app_mngr::ApplicationSharedPtr app,
       const size_t choice_set_id_list_length,
       const smart_objects::SmartObject& choice_set_id_list) const;
 
@@ -238,4 +238,4 @@ class PerformInteractionRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_

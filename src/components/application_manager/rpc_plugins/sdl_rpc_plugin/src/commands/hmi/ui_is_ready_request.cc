@@ -34,12 +34,14 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-UIIsReadyRequest::UIIsReadyRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+UIIsReadyRequest::UIIsReadyRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -58,13 +60,13 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_IsReady: {
       LOG4CXX_DEBUG(logger_, "Received UI_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_IsReady);
-      const bool is_available = ChangeInterfaceState(
+      const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_UI);
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_ui_cooperating(is_available);
-      if (!CheckAvailabilityHMIInterfaces(application_manager_,
-                                          HmiInterfaces::HMI_INTERFACE_UI)) {
+      if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
+              application_manager_, HmiInterfaces::HMI_INTERFACE_UI)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_UI isn't available");
         return;

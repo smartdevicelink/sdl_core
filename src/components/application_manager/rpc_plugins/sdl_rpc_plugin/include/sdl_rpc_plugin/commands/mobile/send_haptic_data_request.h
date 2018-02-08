@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_
 
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
@@ -39,14 +39,15 @@
 #include "application_manager/event_engine/event.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SendHapticDataRequest command class
  **/
-class SendHapticDataRequest : public CommandRequestImpl {
+class SendHapticDataRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SendHapticDataRequest class constructor
@@ -54,8 +55,8 @@ class SendHapticDataRequest : public CommandRequestImpl {
    * @param message Incoming SmartObject message
    * @param application_manager Reference of application manager
    **/
-  SendHapticDataRequest(const MessageSharedPtr& message,
-                        ApplicationManager& application_manager);
+  SendHapticDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SendHapticDataRequest class destructor
@@ -72,7 +73,7 @@ class SendHapticDataRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SendHapticDataRequest);
@@ -81,4 +82,4 @@ class SendHapticDataRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SEND_HAPTIC_DATA_REQUEST_H_

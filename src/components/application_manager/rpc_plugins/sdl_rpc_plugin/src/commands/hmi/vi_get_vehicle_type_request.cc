@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 VIGetVehicleTypeRequest::VIGetVehicleTypeRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 VIGetVehicleTypeRequest::~VIGetVehicleTypeRequest() {}

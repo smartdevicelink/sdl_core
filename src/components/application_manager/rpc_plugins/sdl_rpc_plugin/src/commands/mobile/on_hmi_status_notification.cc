@@ -37,11 +37,13 @@
 #include "application_manager/message.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
 OnHMIStatusNotification::OnHMIStatusNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandNotificationImpl(message, application_manager) {}
 
 OnHMIStatusNotification::~OnHMIStatusNotification() {}

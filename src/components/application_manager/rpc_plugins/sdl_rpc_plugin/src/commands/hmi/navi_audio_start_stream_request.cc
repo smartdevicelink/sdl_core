@@ -35,12 +35,14 @@
 #include "application_manager/message_helper.h"
 #include "protocol_handler/protocol_handler.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 AudioStartStreamRequest::AudioStartStreamRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher())
     , retry_number_(0) {
@@ -58,7 +60,7 @@ AudioStartStreamRequest::~AudioStartStreamRequest() {}
 
 void AudioStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!CheckAvailabilityHMIInterfaces(
+  if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
           application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
     LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
     return;
