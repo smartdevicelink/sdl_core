@@ -39,13 +39,11 @@
 #include <bson_object.h>
 
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service_impl.h"
 #include "application_manager/rpc_handler_impl.h"
-#include "application_manager/sdl_command_factory.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/hmi_capabilities_impl.h"
@@ -54,6 +52,7 @@
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
@@ -187,6 +186,11 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
+  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
+                                                     request_ctrl_,
+                                                     protocol_handler_,
+                                                     hmi_handler_,
+                                                     *commands_holder_));
   commands_holder_.reset(new CommandHolderImpl(*this));
 }
 
@@ -1638,13 +1642,7 @@ protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler()
 void ApplicationManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
-  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
-                                                     request_ctrl_,
-                                                     protocol_handler_,
-                                                     hmi_handler_,
-                                                     *commands_holder_));
-  command_factory_.reset(new SDLCommandFactory(
-      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
+  rpc_service_->set_protocol_handler(handler);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1734,7 +1732,9 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
-
+  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
+      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
+  plugin_manager_->LoadPlugins(get_settings().plugins_folder());
   return true;
 }
 

@@ -533,6 +533,11 @@ void RPCServiceImpl::SendPostMessageToHMI(const MessagePtr& message) {
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
 
+void RPCServiceImpl::set_protocol_handler(
+    protocol_handler::ProtocolHandler* handler) {
+  protocol_handler_ = handler;
+}
+
 bool RPCServiceImpl::ConvertSOtoMessage(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
     Message& output) {
