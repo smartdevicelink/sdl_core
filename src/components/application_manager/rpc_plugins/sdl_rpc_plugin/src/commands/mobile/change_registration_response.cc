@@ -34,12 +34,14 @@
 #include "sdl_rpc_plugin/commands/mobile/change_registration_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 ChangeRegistrationResponse::~ChangeRegistrationResponse() {}

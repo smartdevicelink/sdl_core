@@ -33,12 +33,14 @@
 
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-AllowAppResponse::AllowAppResponse(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+AllowAppResponse::AllowAppResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 AllowAppResponse::~AllowAppResponse() {}

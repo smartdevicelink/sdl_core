@@ -31,12 +31,14 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/vr_get_capabilities_response.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}

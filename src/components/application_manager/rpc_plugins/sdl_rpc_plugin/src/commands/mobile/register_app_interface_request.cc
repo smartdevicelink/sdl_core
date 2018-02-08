@@ -172,12 +172,14 @@ struct IsSameNickname {
 };
 }
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , result_checking_app_hmi_type_(mobile_apis::Result::INVALID_ENUM) {}
 
@@ -374,8 +376,7 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
-  application_manager_.GetRPCService().ManageMobileCommand(
-      so, commands::Command::SOURCE_SDL);
+  application_manager_.GetRPCService().ManageMobileCommand(so, SOURCE_SDL);
 }
 
 smart_objects::SmartObjectSPtr
@@ -390,10 +391,8 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
   (*message)[strings::params][strings::connection_key] = connection_key;
   (*message)[strings::params][strings::message_type] =
       mobile_apis::messageType::notification;
-  (*message)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::mobile_protocol_type_;
-  (*message)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
+  (*message)[strings::params][strings::protocol_type] = mobile_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] = protocol_version_;
   (*message)[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
   (*message)[strings::msg_params][strings::url] =
@@ -781,7 +780,7 @@ void RegisterAppInterfaceRequest::SendChangeRegistrationOnHMI(
 }
 
 void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
-    const Application& application_impl,
+    const app_mngr::Application& application_impl,
     bool resumption,
     bool need_restore_vr) {
   using namespace smart_objects;
@@ -796,8 +795,8 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   params[strings::function_id] = static_cast<int32_t>(
       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
   params[strings::message_type] = static_cast<int32_t>(kNotification);
-  params[strings::protocol_version] = commands::CommandImpl::protocol_version_;
-  params[strings::protocol_type] = commands::CommandImpl::hmi_protocol_type_;
+  params[strings::protocol_version] = protocol_version_;
+  params[strings::protocol_type] = hmi_protocol_type_;
 
   (*notification)[strings::msg_params] = SmartObject(SmartType_Map);
   smart_objects::SmartObject& msg_params = (*notification)[strings::msg_params];

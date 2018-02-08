@@ -39,12 +39,14 @@
 #include "sdl_rpc_plugin/mobile_command_factory.h"
 #include "utils/file_system.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-ListFilesRequest::ListFilesRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+ListFilesRequest::ListFilesRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 ListFilesRequest::~ListFilesRequest() {}

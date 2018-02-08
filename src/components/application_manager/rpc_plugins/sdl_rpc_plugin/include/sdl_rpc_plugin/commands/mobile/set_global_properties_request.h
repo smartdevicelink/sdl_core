@@ -30,29 +30,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 #include "application_manager/application.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief Register app interface request  command class
  **/
-class SetGlobalPropertiesRequest : public CommandRequestImpl {
+class SetGlobalPropertiesRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SetGlobalPropertiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SetGlobalPropertiesRequest(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager);
+  SetGlobalPropertiesRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesRequest class destructor
@@ -69,7 +72,7 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -83,15 +86,16 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
 
   // prepare UI sending data (VrHelps, Menus, Keyboard) to SmartObject
   static void PrepareUIRequestVRHelpData(
-      const ApplicationSharedPtr app,
+      const app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params,
       smart_objects::SmartObject& out_params);
 
   static bool PrepareUIRequestDefaultVRHelpData(
-      const ApplicationSharedPtr app, smart_objects::SmartObject& out_params);
+      const app_mngr::ApplicationSharedPtr app,
+      smart_objects::SmartObject& out_params);
 
   static void PrepareUIRequestMenuAndKeyboardData(
-      const ApplicationSharedPtr app,
+      const app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params,
       smart_objects::SmartObject& out_params);
 
@@ -156,4 +160,4 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_

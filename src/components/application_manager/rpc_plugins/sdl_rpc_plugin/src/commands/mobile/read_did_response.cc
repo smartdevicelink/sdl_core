@@ -34,12 +34,14 @@
 #include "sdl_rpc_plugin/commands/mobile/read_did_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message,
-                                 ApplicationManager& application_manager)
+ReadDIDResponse::ReadDIDResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 ReadDIDResponse::~ReadDIDResponse() {}

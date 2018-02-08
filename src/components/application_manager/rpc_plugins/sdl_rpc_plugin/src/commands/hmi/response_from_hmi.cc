@@ -30,16 +30,18 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/response_from_hmi.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
-                                 ApplicationManager& application_manager)
+ResponseFromHMI::ResponseFromHMI(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {
   // If it is error response, shift info
   if ((*message)[strings::params].keyExists(hmi_response::message)) {
@@ -64,7 +66,8 @@ bool ResponseFromHMI::CleanUp() {
 void ResponseFromHMI::Run() {}
 
 void ResponseFromHMI::SendResponseToMobile(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) {
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
   application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);

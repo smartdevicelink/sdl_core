@@ -37,12 +37,14 @@
 
 #include "utils/file_system.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+DeleteFileRequest::DeleteFileRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 DeleteFileRequest::~DeleteFileRequest() {}
@@ -88,7 +90,8 @@ void DeleteFileRequest::Run() {
 
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
-      const AppFile* file = application->GetFile(full_file_path);
+      const application_manager::AppFile* file =
+          application->GetFile(full_file_path);
       if (file) {
         SendFileRemovedNotification(file);
       }
@@ -104,7 +107,8 @@ void DeleteFileRequest::Run() {
   }
 }
 
-void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+void DeleteFileRequest::SendFileRemovedNotification(
+    const application_manager::AppFile* file) const {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 

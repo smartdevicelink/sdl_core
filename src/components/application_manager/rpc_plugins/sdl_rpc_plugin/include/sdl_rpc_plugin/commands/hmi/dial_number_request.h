@@ -30,12 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -43,15 +44,15 @@ namespace hmi {
 /**
  * @brief DialNumberRequest command class
  **/
-class DialNumberRequest : public RequestToHMI {
+class DialNumberRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief DialNumberRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DialNumberRequest(const MessageSharedPtr& message,
-                    ApplicationManager& application_manager);
+  DialNumberRequest(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberRequest class destructor
@@ -73,4 +74,4 @@ class DialNumberRequest : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_DIAL_NUMBER_REQUEST_H_

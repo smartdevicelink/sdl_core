@@ -9,7 +9,7 @@ bool SDLRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
-  command_factory_.reset(new application_manager::SDLCommandFactory(
+  command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
 }

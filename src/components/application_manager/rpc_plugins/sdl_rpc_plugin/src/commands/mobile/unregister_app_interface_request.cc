@@ -35,7 +35,8 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
@@ -52,7 +53,7 @@ void UnregisterAppInterfaceRequest::Run() {
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           connection_key(),
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      commands::Command::SOURCE_SDL);
+      SOURCE_SDL);
   application_manager_.EndNaviServices(connection_key());
   application_manager_.UnregisterApplication(connection_key(),
                                              mobile_apis::Result::SUCCESS);

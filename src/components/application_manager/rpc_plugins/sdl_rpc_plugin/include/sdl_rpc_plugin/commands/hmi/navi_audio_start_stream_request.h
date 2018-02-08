@@ -30,28 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief AudioStartStreamRequest command class
  **/
-class AudioStartStreamRequest : public RequestToHMI,
-                                public event_engine::EventObserver {
+class AudioStartStreamRequest : public app_mngr::commands::RequestToHMI,
+                                public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief AudioStartStreamRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  AudioStartStreamRequest(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  AudioStartStreamRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStartStreamRequest class destructor
@@ -71,7 +72,7 @@ class AudioStartStreamRequest : public RequestToHMI,
   /**
    * @brief On event callback
    **/
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
   /**
  * @brief RetryStartSession resend HMI startSession request if needed.
@@ -88,4 +89,4 @@ class AudioStartStreamRequest : public RequestToHMI,
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_

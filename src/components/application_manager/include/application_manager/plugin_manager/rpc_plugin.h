@@ -25,7 +25,6 @@ enum ApplicationEvent { kApplicationExit = 0, kApplicationUnregistered };
 
 class RPCPlugin {
  public:
-  // TODO : pass all required components for plugin
   virtual bool Init(ApplicationManager& app_manager,
                     rpc_service::RPCService& rpc_service,
                     HMICapabilities& hmi_capabilities,
