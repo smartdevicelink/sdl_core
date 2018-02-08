@@ -126,7 +126,7 @@ bool RPCServiceImpl::ManageMobileCommand(
     LOG4CXX_WARN(logger_, "Filed to find plugin : " << plugin.error());
     return false;
   }
-  auto factory = plugin->GetCommandFactory();
+  application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
   auto command = factory.CreateCommand(message, source);
 
   if (!command) {
@@ -259,15 +259,15 @@ bool RPCServiceImpl::ManageHMICommand(
   MessageHelper::PrintSmartObject(*message);
   const int32_t function_id =
       (*(message.get()))[strings::params][strings::function_id].asInt();
-  auto plugin =
-      app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
+  auto plugin = app_manager_.GetPluginManager().FindPluginToProcess(
+      function_id, commands::Command::SOURCE_HMI);
   if (!plugin) {
     LOG4CXX_WARN(logger_, "Filed to find plugin : " << plugin.error());
     return false;
   }
 
-  auto factory = plugin->GetCommandFactory();
-  auto command = factory.CreateCommand(message, source);
+  application_manager::CommandFactory& factory = (*plugin).GetCommandFactory();
+  auto command = factory.CreateCommand(message, commands::Command::SOURCE_HMI);
 
   if (!command) {
     LOG4CXX_WARN(logger_, "Failed to create command from smart object");
@@ -425,12 +425,13 @@ void RPCServiceImpl::SendMessageToMobile(
             (*message)[strings::params][strings::function_id].asUInt());
     if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
         (*message)[strings::msg_params][strings::success].asBool()) {
-      LOG4CXX_INFO(logger_,
-                   "Registered app "
-                       << app->app_id() << " is "
-                       << (app_manager_.GetPluginManager().IsAppForPlugins(app)
-                               ? ""
-                               : "not ") << "for plugins.");
+      //      LOG4CXX_INFO(logger_,
+      //                   "Registered app "
+      //                       << app->app_id() << " is "
+      //                       <<
+      //                       (app_manager_.GetPluginManager().IsAppForPlugins(app)
+      //                               ? ""
+      //                               : "not ") << "for plugins.");
     }
 #endif  // SDL_REMOTE_CONTROL
   } else if (app) {

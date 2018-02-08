@@ -117,12 +117,6 @@ set(LIBRARIES
   ConfigProfile
   Resumption
 )
-if(REMOTE_CONTROL)
-    SET (LIBRARIES
-      ${LIBRARIES}
-      FunctionalModule
-    )
-endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)

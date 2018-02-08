@@ -1734,7 +1734,10 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
       *app_launch_dto_.get(), *this, settings_));
   plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
       *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
-  plugin_manager_->LoadPlugins(get_settings().plugins_folder());
+  if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
+    LOG4CXX_ERROR(logger_, "Plugins are not loaded");
+    return false;
+  }
   return true;
 }
 
