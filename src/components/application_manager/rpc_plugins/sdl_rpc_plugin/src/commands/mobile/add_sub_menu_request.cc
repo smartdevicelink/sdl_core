@@ -37,12 +37,14 @@
 #include "application_manager/application.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+AddSubMenuRequest::AddSubMenuRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 AddSubMenuRequest::~AddSubMenuRequest() {}

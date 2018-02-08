@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 /**
@@ -45,7 +46,8 @@ namespace commands {
  * Template class for sending 1 unsubscribe thin request
  **/
 template <event_engine::Event::EventID eventID>
-class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
+class VIUnsubscribeVehicleDataRequestTemplate
+    : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VIUnsubscriveVehicleDataRequestTemplate class constructor
@@ -53,7 +55,8 @@ class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
    * @param message Incoming SmartObject message
    **/
   VIUnsubscribeVehicleDataRequestTemplate(
-      const MessageSharedPtr& message, ApplicationManager& application_manager)
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager)
       : RequestToHMI(message, application_manager) {}
 
   /**
@@ -70,4 +73,4 @@ class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_

@@ -39,12 +39,14 @@
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , is_ui_send_(false)
     , is_tts_send_(false)
@@ -279,10 +281,10 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info(
+  app_mngr::commands::ResponseInfo ui_properties_info(
       ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(
+  app_mngr::commands::ResponseInfo tts_properties_info(
       tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
@@ -291,18 +293,18 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
       (tts_properties_info.is_unsupported_resource)) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(tts_properties_info,
-                      tts_response_info_,
-                      ui_properties_info,
-                      ui_response_info_);
+    info = app_mngr::commands::MergeInfos(tts_properties_info,
+                                          tts_response_info_,
+                                          ui_properties_info,
+                                          ui_response_info_);
     return result;
   }
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
-  info = MergeInfos(tts_properties_info,
-                    tts_response_info_,
-                    ui_properties_info,
-                    ui_response_info_);
+  info = app_mngr::commands::MergeInfos(tts_properties_info,
+                                        tts_response_info_,
+                                        ui_properties_info,
+                                        ui_response_info_);
   return result;
 }
 

@@ -47,7 +47,6 @@
 #include "application_manager/application_manager_impl.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "application_manager/core_service.h"
-#include "functional_module/plugin_manager.h"
 #endif  // SDL_REMOTE_CONTROL
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"

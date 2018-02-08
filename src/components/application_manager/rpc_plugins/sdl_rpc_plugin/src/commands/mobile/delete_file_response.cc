@@ -35,12 +35,14 @@
 
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
+DeleteFileResponse::DeleteFileResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 DeleteFileResponse::~DeleteFileResponse() {}

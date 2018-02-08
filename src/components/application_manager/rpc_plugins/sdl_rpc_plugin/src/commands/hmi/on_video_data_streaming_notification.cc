@@ -33,12 +33,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnVideoDataStreamingNotification::OnVideoDataStreamingNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationToHMI(message, application_manager) {}
 
 OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {}

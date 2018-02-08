@@ -32,12 +32,14 @@
 #include "sdl_rpc_plugin/commands/hmi/update_sdl_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-UpdateSDLResponse::UpdateSDLResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+UpdateSDLResponse::UpdateSDLResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 UpdateSDLResponse::~UpdateSDLResponse() {}

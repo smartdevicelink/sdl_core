@@ -34,12 +34,14 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {}

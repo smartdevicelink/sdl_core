@@ -30,25 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SubsribeWayPointsRequest command class
  **/
-class SubscribeWayPointsRequest : public CommandRequestImpl {
+class SubscribeWayPointsRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * \brief SubscribeWayPointsRequest class constructor
    **/
-  SubscribeWayPointsRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  SubscribeWayPointsRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * \brief SubscribeWayPointsRequest class destructor
@@ -64,7 +66,7 @@ class SubscribeWayPointsRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -79,4 +81,4 @@ class SubscribeWayPointsRequest : public CommandRequestImpl {
 
 }  // application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_

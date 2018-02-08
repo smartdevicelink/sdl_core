@@ -37,12 +37,13 @@
 #include "sdl_rpc_plugin/hmi_command_factory.h"
 #include "sdl_rpc_plugin/mobile_command_factory.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 SDLCommandFactory::SDLCommandFactory(
-    ApplicationManager& app_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
+    app_mngr::ApplicationManager& app_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : app_manager_(app_manager)
     , rpc_service_(rpc_service)
@@ -52,10 +53,10 @@ SDLCommandFactory::SDLCommandFactory(
   mobile_command_factory_.reset(new MobileCommandFactory(app_manager));
 }
 
-CommandSharedPtr SDLCommandFactory::CreateCommand(
-    const commands::MessageSharedPtr& message,
-    commands::Command::CommandSource source) {
-  if (commands::Command::SOURCE_HMI == source) {
+app_mngr::CommandSharedPtr SDLCommandFactory::CreateCommand(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::commands::Command::CommandSource source) {
+  if (app_mngr::commands::Command::SOURCE_HMI == source) {
     return hmi_command_factory_->CreateCommand(message, source);
   } else {
     return mobile_command_factory_->CreateCommand(message, source);

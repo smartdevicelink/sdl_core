@@ -38,7 +38,8 @@
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 

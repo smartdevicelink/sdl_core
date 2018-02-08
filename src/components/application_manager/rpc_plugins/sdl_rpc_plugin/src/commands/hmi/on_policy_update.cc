@@ -33,11 +33,13 @@
 #include "sdl_rpc_plugin/commands/hmi/on_policy_update.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-OnPolicyUpdate::OnPolicyUpdate(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager)
+OnPolicyUpdate::OnPolicyUpdate(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnPolicyUpdate::~OnPolicyUpdate() {}

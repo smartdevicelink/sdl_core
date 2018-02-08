@@ -34,12 +34,14 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+VIIsReadyRequest::VIIsReadyRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -59,16 +61,16 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VehicleInfo_IsReady: {
       LOG4CXX_DEBUG(logger_, "VehicleInfo_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-      const bool is_available =
-          ChangeInterfaceState(application_manager_,
-                               message,
-                               HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      const bool is_available = app_mngr::commands::ChangeInterfaceState(
+          application_manager_,
+          message,
+          HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_ivi_cooperating(is_available);
       application_manager_.GetPolicyHandler().OnVIIsReady();
-      if (!CheckAvailabilityHMIInterfaces(
+      if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
         LOG4CXX_INFO(
             logger_,

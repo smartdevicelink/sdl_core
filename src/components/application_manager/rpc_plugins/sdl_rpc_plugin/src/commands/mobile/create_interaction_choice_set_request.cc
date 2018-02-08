@@ -42,12 +42,14 @@
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , choice_set_id_(0)
     , expected_chs_count_(0)

@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/navi_send_location_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 NaviSendLocationRequest::NaviSendLocationRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 NaviSendLocationRequest::~NaviSendLocationRequest() {}

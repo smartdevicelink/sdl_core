@@ -39,12 +39,14 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
@@ -288,9 +290,9 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   using namespace helpers;
 
   bool result = false;
-  ResponseInfo ui_properties_info(
+  app_mngr::commands::ResponseInfo ui_properties_info(
       ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo tts_properties_info(
+  app_mngr::commands::ResponseInfo tts_properties_info(
       tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
 
   HmiInterfaces::InterfaceState tts_interface_state =
@@ -308,10 +310,10 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
         PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
     out_result_code =
         PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
-    out_response_info = MergeInfos(tts_properties_info,
-                                   tts_response_info_,
-                                   ui_properties_info,
-                                   ui_response_info_);
+    out_response_info = app_mngr::commands::MergeInfos(tts_properties_info,
+                                                       tts_response_info_,
+                                                       ui_properties_info,
+                                                       ui_response_info_);
   }
 
   return result;

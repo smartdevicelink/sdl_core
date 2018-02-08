@@ -33,12 +33,14 @@
 
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 ActivateAppResponse::ActivateAppResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 ActivateAppResponse::~ActivateAppResponse() {}

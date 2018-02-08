@@ -42,12 +42,14 @@
 #include "utils/helpers.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-AlertRequest::AlertRequest(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager)
+AlertRequest::AlertRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
@@ -196,11 +198,12 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  ResponseInfo ui_alert_info(
+  app_mngr::commands::ResponseInfo ui_alert_info(
       alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo tts_alert_info(tts_speak_result_,
-                              HmiInterfaces::HMI_INTERFACE_TTS,
-                              application_manager_);
+  app_mngr::commands::ResponseInfo tts_alert_info(
+      tts_speak_result_,
+      HmiInterfaces::HMI_INTERFACE_TTS,
+      application_manager_);
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 
@@ -217,12 +220,12 @@ bool AlertRequest::PrepareResponseParameters(
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(
+    info = app_mngr::commands::MergeInfos(
         ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
     return result;
   }
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
-  info = MergeInfos(
+  info = app_mngr::commands::MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
   // Mobile Alert request is successful when UI_Alert is successful
   if (is_ui_alert_sent_ && !ui_alert_info.is_ok) {
