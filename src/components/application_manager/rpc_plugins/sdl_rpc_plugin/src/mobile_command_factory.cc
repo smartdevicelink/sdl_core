@@ -144,15 +144,16 @@
 #include "utils/make_shared.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 MobileCommandFactory::MobileCommandFactory(
     ApplicationManager& application_manager)
     : application_manager_(application_manager) {}
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
-    const commands::MessageSharedPtr& message,
-    commands::Command::CommandSource source) {
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::commands::Command::CommandSource source) {
   CommandSharedPtr command;
   const int function_id =
       (*message)[strings::params][strings::function_id].asInt();
@@ -696,7 +697,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnHMIStatusID: {
-      if (commands::Command::SOURCE_SDL == source) {
+      if (app_mngr::commands::Command::SOURCE_SDL == source) {
         command.reset(new commands::OnHMIStatusNotification(
             message, application_manager_));
       } else {

@@ -30,31 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public RequestToHMI,
-                                public event_engine::EventObserver {
+class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
+                                public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UpdateDeviceListRequest(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  UpdateDeviceListRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UpdateDeviceListRequest class destructor
@@ -72,7 +73,7 @@ class UpdateDeviceListRequest : public RequestToHMI,
    * when HMI will be ready
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
   /**
    * @brief Need to stop execution StopMethod if HMI did not started
@@ -90,4 +91,4 @@ class UpdateDeviceListRequest : public RequestToHMI,
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_

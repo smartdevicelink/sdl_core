@@ -31,14 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,15 +47,16 @@ namespace commands {
  * @brief OnVehicleDataNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnVehicleDataNotification : public CommandNotificationImpl {
+class OnVehicleDataNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnVehicleDataNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnVehicleDataNotification(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  OnVehicleDataNotification(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnVehicleDataNotification class destructor
@@ -72,7 +74,7 @@ class OnVehicleDataNotification : public CommandNotificationImpl {
    *
    * @param app Application to receive notification
    */
-  void SendVehicleData(ApplicationConstSharedPtr app);
+  void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
 };
@@ -80,4 +82,4 @@ class OnVehicleDataNotification : public CommandNotificationImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_

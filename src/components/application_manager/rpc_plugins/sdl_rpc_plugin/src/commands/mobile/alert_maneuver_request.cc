@@ -32,12 +32,14 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 AlertManeuverRequest::AlertManeuverRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -193,12 +195,12 @@ bool AlertManeuverRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  application_manager::commands::ResponseInfo navigation_alert_info(
+  app_mngr::commands::ResponseInfo navigation_alert_info(
       navi_alert_maneuver_result_code_,
       HmiInterfaces::HMI_INTERFACE_Navigation,
       application_manager_);
 
-  application_manager::commands::ResponseInfo tts_alert_info(
+  app_mngr::commands::ResponseInfo tts_alert_info(
       tts_speak_result_code_,
       HmiInterfaces::HMI_INTERFACE_TTS,
       application_manager_);
@@ -216,8 +218,8 @@ bool AlertManeuverRequest::PrepareResponseParameters(
   }
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
-  return_info =
-      MergeInfos(navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
+  return_info = app_mngr::commands::MergeInfos(
+      navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
   return result;
 }
 

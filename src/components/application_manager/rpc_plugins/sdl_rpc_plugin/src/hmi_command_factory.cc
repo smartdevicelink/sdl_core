@@ -291,14 +291,15 @@
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 HMICommandFactory::HMICommandFactory(ApplicationManager& application_manager)
     : application_manager_(application_manager) {}
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const commands::MessageSharedPtr& message,
-    commands::Command::CommandSource source) {
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::commands::Command::CommandSource source) {
   const int function_id =
       (*message)[strings::params][strings::function_id].asInt();
   LOG4CXX_DEBUG(

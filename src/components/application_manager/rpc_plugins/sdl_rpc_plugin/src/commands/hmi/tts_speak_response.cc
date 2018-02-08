@@ -35,12 +35,14 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+TTSSpeakResponse::TTSSpeakResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 TTSSpeakResponse::~TTSSpeakResponse() {}

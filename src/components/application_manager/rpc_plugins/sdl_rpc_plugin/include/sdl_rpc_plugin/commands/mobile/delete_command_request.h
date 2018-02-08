@@ -31,30 +31,31 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
 
 #include <string>
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief DeleteCommandRequest command class
  **/
-class DeleteCommandRequest : public CommandRequestImpl {
+class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief DeleteCommandRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteCommandRequest(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  DeleteCommandRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandRequest class destructor
@@ -71,7 +72,7 @@ class DeleteCommandRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -112,4 +113,4 @@ class DeleteCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_

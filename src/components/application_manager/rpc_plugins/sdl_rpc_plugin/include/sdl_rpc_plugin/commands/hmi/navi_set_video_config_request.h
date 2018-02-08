@@ -30,20 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief NaviSetVideoConfigRequest command class
  **/
-class NaviSetVideoConfigRequest : public RequestToHMI,
-                                  public event_engine::EventObserver {
+class NaviSetVideoConfigRequest : public app_mngr::commands::RequestToHMI,
+                                  public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief NaviSetVideoConfigRequest class constructor
@@ -51,8 +52,8 @@ class NaviSetVideoConfigRequest : public RequestToHMI,
    * @param message Incoming SmartObject message
    * @param application_manager Reference of application manager
    **/
-  NaviSetVideoConfigRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  NaviSetVideoConfigRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief NaviSetVideoConfigRequest class destructor
@@ -67,7 +68,7 @@ class NaviSetVideoConfigRequest : public RequestToHMI,
   /**
    * @brief On event callback
    **/
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief onTimeOut callback
@@ -82,4 +83,4 @@ class NaviSetVideoConfigRequest : public RequestToHMI,
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_SET_VIDEO_CONFIG_REQUEST_H_

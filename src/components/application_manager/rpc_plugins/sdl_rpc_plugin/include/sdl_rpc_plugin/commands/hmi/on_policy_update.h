@@ -30,12 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_POLICY_UPDATE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_POLICY_UPDATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_POLICY_UPDATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_POLICY_UPDATE_H_
 
-#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/notification_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 class OnPolicyUpdate : public NotificationFromHMI {
@@ -45,8 +46,8 @@ class OnPolicyUpdate : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnPolicyUpdate(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+  OnPolicyUpdate(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnPolicyUpdate class destructor
@@ -64,4 +65,4 @@ class OnPolicyUpdate : public NotificationFromHMI {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_POLICY_UPDATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_POLICY_UPDATE_H_

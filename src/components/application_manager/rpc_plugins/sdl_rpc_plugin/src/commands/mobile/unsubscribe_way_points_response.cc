@@ -2,12 +2,14 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 UnsubscribeWayPointsResponse::UnsubscribeWayPointsResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 UnsubscribeWayPointsResponse::~UnsubscribeWayPointsResponse() {}

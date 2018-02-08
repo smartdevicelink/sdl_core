@@ -33,7 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_response.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 

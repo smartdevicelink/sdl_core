@@ -142,10 +142,11 @@ class ApplicationManager {
   /**
    * @brief set_protocol_handler
    * @param handler
-   * set protocol handler and initialize rpc_service
+   * set protocol handler
    */
   virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
+
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
 

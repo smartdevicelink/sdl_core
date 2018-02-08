@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/ui_add_submenu_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 UIAddSubmenuRequest::UIAddSubmenuRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 UIAddSubmenuRequest::~UIAddSubmenuRequest() {}
