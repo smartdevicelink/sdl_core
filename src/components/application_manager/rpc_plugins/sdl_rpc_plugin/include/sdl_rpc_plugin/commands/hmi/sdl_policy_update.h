@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_POLICY_UPDATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_POLICY_UPDATE_H_
 
-#include "sdl_rpc_plugin/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/request_to_hmi.h"
 
 namespace application_manager {
 
