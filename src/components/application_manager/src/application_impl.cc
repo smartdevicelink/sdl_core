@@ -1135,7 +1135,7 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 }
 
 void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+  //  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
 }
 #endif  // SDL_REMOTE_CONTROL
 

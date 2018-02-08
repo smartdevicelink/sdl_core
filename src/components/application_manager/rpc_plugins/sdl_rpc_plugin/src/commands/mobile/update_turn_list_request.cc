@@ -41,14 +41,16 @@
 #include "interfaces/HMI_API.h"
 #include "utils/custom_string.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace custom_str = utils::custom_string;
 
 UpdateTurnListRequest::UpdateTurnListRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {}

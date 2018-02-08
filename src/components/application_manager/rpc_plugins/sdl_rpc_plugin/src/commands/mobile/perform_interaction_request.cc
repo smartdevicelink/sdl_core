@@ -46,7 +46,8 @@
 #include "utils/custom_string.h"
 #include "utils/gen_hash.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
@@ -55,7 +56,8 @@ namespace custom_str = utils::custom_string;
 uint32_t PerformInteractionRequest::pi_requests_count_ = 0;
 
 PerformInteractionRequest::PerformInteractionRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM)
     , ui_response_received_(false)
@@ -980,9 +982,9 @@ void PerformInteractionRequest::SendBothModeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType perform_interaction_result_code =
       mobile_apis::Result::INVALID_ENUM;
-  ResponseInfo ui_perform_info(
+  app_mngr::commands::ResponseInfo ui_perform_info(
       ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo vr_perform_info(
+  app_mngr::commands::ResponseInfo vr_perform_info(
       vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
@@ -990,8 +992,8 @@ void PerformInteractionRequest::SendBothModeResponse(
       PrepareResultCodeForResponse(ui_perform_info, vr_perform_info);
   const smart_objects::SmartObject* response_params =
       msg_param.empty() ? NULL : &msg_param;
-  std::string info =
-      MergeInfos(ui_perform_info, ui_info_, vr_perform_info, vr_info_);
+  std::string info = app_mngr::commands::MergeInfos(
+      ui_perform_info, ui_info_, vr_perform_info, vr_info_);
   DisablePerformInteraction();
   SendResponse(result,
                perform_interaction_result_code,

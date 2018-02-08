@@ -35,7 +35,8 @@
 
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 

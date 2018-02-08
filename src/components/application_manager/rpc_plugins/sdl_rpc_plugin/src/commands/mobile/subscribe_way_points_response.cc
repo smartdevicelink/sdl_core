@@ -2,12 +2,14 @@
 #include "application_manager/rpc_service.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_response.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 SubscribeWayPointsResponse::SubscribeWayPointsResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {}

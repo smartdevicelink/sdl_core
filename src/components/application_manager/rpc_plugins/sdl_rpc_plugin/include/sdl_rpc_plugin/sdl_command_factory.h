@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H
 
 #include <memory>
 #include "application_manager/application_manager.h"
@@ -42,26 +42,27 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
-class SDLCommandFactory : public CommandFactory {
+class SDLCommandFactory : public app_mngr::CommandFactory {
  public:
-  SDLCommandFactory(ApplicationManager& app_manager,
-                    rpc_service::RPCService& rpc_service,
-                    HMICapabilities& hmi_capabilities,
+  SDLCommandFactory(app_mngr::ApplicationManager& app_manager,
+                    app_mngr::rpc_service::RPCService& rpc_service,
+                    app_mngr::HMICapabilities& hmi_capabilities,
                     policy::PolicyHandlerInterface& policy_handler);
 
-  CommandSharedPtr CreateCommand(
-      const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
+  app_mngr::CommandSharedPtr CreateCommand(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
  private:
-  ApplicationManager& app_manager_;
-  rpc_service::RPCService& rpc_service_;
-  HMICapabilities& hmi_capabilities_;
+  app_mngr::ApplicationManager& app_manager_;
+  app_mngr::rpc_service::RPCService& rpc_service_;
+  app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
   std::unique_ptr<HMICommandFactory> hmi_command_factory_;
   std::unique_ptr<MobileCommandFactory> mobile_command_factory_;
 };
 }
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SDL_COMMAND_FACTORY_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H

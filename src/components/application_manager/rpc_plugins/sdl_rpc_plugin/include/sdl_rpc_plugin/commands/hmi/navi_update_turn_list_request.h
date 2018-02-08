@@ -30,27 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief NaviUpdateTurnListRequest command class
  **/
-class NaviUpdateTurnListRequest : public RequestToHMI {
+class NaviUpdateTurnListRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief NaviUpdateTurnListRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  NaviUpdateTurnListRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  NaviUpdateTurnListRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief NaviUpdateTurnListRequest class destructor
@@ -70,4 +71,4 @@ class NaviUpdateTurnListRequest : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_UPDATE_TURN_LIST_REQUEST_H_

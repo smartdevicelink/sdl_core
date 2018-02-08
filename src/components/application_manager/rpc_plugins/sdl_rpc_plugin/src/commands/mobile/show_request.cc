@@ -39,12 +39,14 @@
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-ShowRequest::ShowRequest(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager)
+ShowRequest::ShowRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , core_result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
@@ -266,7 +268,8 @@ void ShowRequest::Run() {
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);
 
-  MessageSharedPtr persistentData = new smart_objects::SmartObject(msg_params);
+  app_mngr::commands::MessageSharedPtr persistentData =
+      new smart_objects::SmartObject(msg_params);
   app->set_show_command(*persistentData);
 }
 

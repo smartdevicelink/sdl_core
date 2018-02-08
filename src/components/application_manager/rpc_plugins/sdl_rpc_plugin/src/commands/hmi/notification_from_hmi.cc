@@ -30,17 +30,19 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 NotificationFromHMI::NotificationFromHMI(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {
   // Replace HMI app id with Mobile connection id
   ReplaceHMIWithMobileAppId(*message);
@@ -59,7 +61,7 @@ bool NotificationFromHMI::CleanUp() {
 void NotificationFromHMI::Run() {}
 
 void NotificationFromHMI::SendNotificationToMobile(
-    const MessageSharedPtr& message) {
+    const application_manager::commands::MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);

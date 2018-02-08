@@ -32,14 +32,16 @@
 
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace hmi {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+DialNumberRequest::DialNumberRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 DialNumberRequest::~DialNumberRequest() {}

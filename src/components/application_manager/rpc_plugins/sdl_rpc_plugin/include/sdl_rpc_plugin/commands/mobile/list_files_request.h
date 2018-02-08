@@ -31,28 +31,29 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ListFilesRequest command class
  **/
-class ListFilesRequest : public CommandRequestImpl {
+class ListFilesRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ListFilesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ListFilesRequest(const MessageSharedPtr& message,
-                   ApplicationManager& application_manager);
+  ListFilesRequest(const app_mngr::commands::MessageSharedPtr& message,
+                   app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ListFilesRequest class destructor
@@ -71,4 +72,4 @@ class ListFilesRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_LIST_FILES_REQUEST_H_

@@ -1,5 +1,5 @@
-#ifndef SDL_RPC_PLUGIN_H
-#define SDL_RPC_PLUGIN_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
 
@@ -33,4 +33,4 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
 
-#endif  // SDL_RPC_PLUGIN_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H

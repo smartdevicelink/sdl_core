@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/navi_is_ready_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
+NaviIsReadyRequest::NaviIsReadyRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -57,10 +59,10 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::Navigation_IsReady: {
       LOG4CXX_DEBUG(logger_, "Received Navigation_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::Navigation_IsReady);
-      const bool is_available =
-          ChangeInterfaceState(application_manager_,
-                               message,
-                               HmiInterfaces::HMI_INTERFACE_Navigation);
+      const bool is_available = app_mngr::commands::ChangeInterfaceState(
+          application_manager_,
+          message,
+          HmiInterfaces::HMI_INTERFACE_Navigation);
 
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();

@@ -39,7 +39,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
@@ -47,7 +48,8 @@ namespace str = strings;
 
 #ifdef HMI_DBUS_API
 GetVehicleDataRequest::GetVehicleDataRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
@@ -212,7 +214,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 }
 #else
 GetVehicleDataRequest::GetVehicleDataRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}

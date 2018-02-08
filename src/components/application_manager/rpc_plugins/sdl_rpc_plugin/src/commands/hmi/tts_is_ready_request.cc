@@ -34,12 +34,14 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-TTSIsReadyRequest::TTSIsReadyRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+TTSIsReadyRequest::TTSIsReadyRequest(
+    const app_mngr::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -59,13 +61,13 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_IsReady: {
       LOG4CXX_DEBUG(logger_, "Received TTS_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_IsReady);
-      const bool is_available = ChangeInterfaceState(
+      const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_TTS);
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_tts_cooperating(is_available);
-      if (!CheckAvailabilityHMIInterfaces(application_manager_,
-                                          HmiInterfaces::HMI_INTERFACE_TTS)) {
+      if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
+              application_manager_, HmiInterfaces::HMI_INTERFACE_TTS)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_TTS isn't available");
         return;

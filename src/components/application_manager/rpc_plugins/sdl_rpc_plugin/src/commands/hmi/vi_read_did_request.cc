@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/vi_read_did_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-VIReadDIDRequest::VIReadDIDRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+VIReadDIDRequest::VIReadDIDRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 VIReadDIDRequest::~VIReadDIDRequest() {}

@@ -39,7 +39,8 @@
 #include "interfaces/HMI_API.h"
 #include "utils/make_shared.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
@@ -93,7 +94,8 @@ struct OnDriverDistractionProcessor {
 }
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
