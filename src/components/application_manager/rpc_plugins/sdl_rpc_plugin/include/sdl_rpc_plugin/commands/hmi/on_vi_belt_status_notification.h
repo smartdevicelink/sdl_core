@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_
 
-#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,8 +51,9 @@ class OnVIBeltStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIBeltStatusNotification(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager);
+  OnVIBeltStatusNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnVIBeltStatusNotification class destructor
@@ -71,4 +73,4 @@ class OnVIBeltStatusNotification : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_VI_BELT_STATUS_NOTIFICATION_H_

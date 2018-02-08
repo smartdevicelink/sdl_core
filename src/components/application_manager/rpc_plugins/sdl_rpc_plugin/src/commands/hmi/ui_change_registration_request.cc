@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/ui_change_registration_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 UIChangeRegistrationRequest::UIChangeRegistrationRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
 UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {}

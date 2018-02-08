@@ -30,20 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
 
 #include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SDLActivateAppRequest command class
  **/
-class SDLActivateAppRequest : public RequestFromHMI {
+class SDLActivateAppRequest : public app_mngr::commands::RequestFromHMI {
  public:
   /**
    * @brief Applications registered over protocol v4
@@ -55,8 +56,8 @@ class SDLActivateAppRequest : public RequestFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  SDLActivateAppRequest(const MessageSharedPtr& message,
-                        ApplicationManager& application_manager);
+  SDLActivateAppRequest(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SDLActivateAppRequest class destructor
@@ -79,7 +80,7 @@ class SDLActivateAppRequest : public RequestFromHMI {
    *
    * @param event event type that current request subscribed on.
    */
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   uint32_t app_id() const;
@@ -98,7 +99,7 @@ class SDLActivateAppRequest : public RequestFromHMI {
    * @param handle Device
    * @return Pointer to application or empty pointer
    */
-  ApplicationSharedPtr get_foreground_app(
+  app_mngr::ApplicationSharedPtr get_foreground_app(
       const connection_handler::DeviceHandle handle) const;
 
   DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
@@ -107,4 +108,4 @@ class SDLActivateAppRequest : public RequestFromHMI {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_

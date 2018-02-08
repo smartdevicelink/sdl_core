@@ -39,12 +39,14 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnExitApplicationNotification::OnExitApplicationNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnExitApplicationNotification::~OnExitApplicationNotification() {}
@@ -77,7 +79,7 @@ void OnExitApplicationNotification::Run() {
       application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
-          commands::Command::SOURCE_SDL);
+          SOURCE_SDL);
       // HMI rejects registration for navi application
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
@@ -86,7 +88,7 @@ void OnExitApplicationNotification::Run() {
       application_manager_.GetRPCService().ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE),
-          commands::Command::SOURCE_SDL);
+          SOURCE_SDL);
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }

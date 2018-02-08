@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
-    const MessageSharedPtr& message, ApplicationManager& app_man)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& app_man)
     : NotificationFromHMI(message, app_man) {}
 
 OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}

@@ -33,14 +33,16 @@
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace str = strings;
 
 SubscribeButtonRequest::SubscribeButtonRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SubscribeButtonRequest::~SubscribeButtonRequest() {}

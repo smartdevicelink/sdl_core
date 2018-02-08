@@ -38,14 +38,16 @@
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace str = strings;
 
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
     , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -206,11 +208,12 @@ const PerformAudioPassThruRequest::ResponseParams&
 PerformAudioPassThruRequest::PrepareResponseParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ResponseInfo ui_perform_info(
+  app_mngr::commands::ResponseInfo ui_perform_info(
       result_ui_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo tts_perform_info(result_tts_speak_,
-                                HmiInterfaces::HMI_INTERFACE_TTS,
-                                application_manager_);
+  app_mngr::commands::ResponseInfo tts_perform_info(
+      result_tts_speak_,
+      HmiInterfaces::HMI_INTERFACE_TTS,
+      application_manager_);
 
   // Note(dtrunov): According to requirment "WARNINGS, success:true on getting
   // UNSUPPORTED_RESOURCE for "ttsChunks"
@@ -218,8 +221,8 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     response_params_.result_code = mobile_apis::Result::WARNINGS;
     tts_info_ = "Unsupported phoneme type sent in a prompt";
-    response_params_.info =
-        MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+    response_params_.info = app_mngr::commands::MergeInfos(
+        ui_perform_info, ui_info_, tts_perform_info, tts_info_);
     response_params_.success = true;
     return response_params_;
   }
@@ -234,8 +237,8 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
     response_params_.success = results.second;
     response_params_.result_code = results.first;
   }
-  response_params_.info =
-      MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+  response_params_.info = app_mngr::commands::MergeInfos(
+      ui_perform_info, ui_info_, tts_perform_info, tts_info_);
 
   return response_params_;
 }
@@ -401,7 +404,8 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
 
 PerformAudioPassThruRequest::AudioPassThruResults
 PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
-    const ResponseInfo& ui_response, const ResponseInfo& tts_response) {
+    const app_mngr::commands::ResponseInfo& ui_response,
+    const app_mngr::commands::ResponseInfo& tts_response) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
   hmi_apis::Common_Result::eType common_result =

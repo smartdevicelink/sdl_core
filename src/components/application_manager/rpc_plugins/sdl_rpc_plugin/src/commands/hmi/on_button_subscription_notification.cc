@@ -32,14 +32,16 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace hmi {
 
 OnButtonSubscriptionNotification::OnButtonSubscriptionNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationToHMI(message, application_manager) {}
 
 OnButtonSubscriptionNotification::~OnButtonSubscriptionNotification() {}
