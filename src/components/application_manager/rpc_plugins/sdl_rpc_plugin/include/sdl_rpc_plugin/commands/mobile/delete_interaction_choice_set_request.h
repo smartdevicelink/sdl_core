@@ -31,29 +31,32 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief DeleteInteractionChoiceSetRequest command class
  **/
-class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
+class DeleteInteractionChoiceSetRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief DeleteInteractionChoiceSetRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  DeleteInteractionChoiceSetRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
@@ -76,9 +79,9 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param app mobile application
    */
-  bool ChoiceSetInUse(ApplicationConstSharedPtr app);
+  bool ChoiceSetInUse(app_mngr::ApplicationConstSharedPtr app);
 
-  void SendVrDeleteCommand(ApplicationSharedPtr app);
+  void SendVrDeleteCommand(app_mngr::ApplicationSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };
@@ -86,4 +89,4 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_

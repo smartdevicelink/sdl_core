@@ -53,12 +53,14 @@ struct IsSameNickname {
 };
 }
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
@@ -354,13 +356,13 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
       hmi_interfaces.GetInterfaceState(
           HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
 
-  ResponseInfo ui_properties_info(
+  app_mngr::commands::ResponseInfo ui_properties_info(
       ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(
+  app_mngr::commands::ResponseInfo tts_properties_info(
       tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
 
-  ResponseInfo vr_properties_info(
+  app_mngr::commands::ResponseInfo vr_properties_info(
       ui_result_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
 
   bool result = ((!is_tts_ui_vr_unsupported) && is_tts_succeeded_unsupported &&
@@ -425,8 +427,8 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
       CheckInfo(vr_response_info_);
   }
 
-  response_info =
-      MergeInfos(ui_response_info_, vr_response_info_, tts_response_info_);
+  response_info = app_mngr::commands::MergeInfos(
+      ui_response_info_, vr_response_info_, tts_response_info_);
   return result;
 }
 

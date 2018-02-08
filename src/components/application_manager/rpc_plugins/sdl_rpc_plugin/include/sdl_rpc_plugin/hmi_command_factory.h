@@ -30,29 +30,30 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_COMMAND_FACTORY_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_COMMAND_FACTORY_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_HMI_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_HMI_COMMAND_FACTORY_H_
 
 #include "application_manager/command_factory.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 /**
  * @brief Factory class for HMI command creation
  **/
-class HMICommandFactory : public CommandFactory {
+class HMICommandFactory : public app_mngr::CommandFactory {
  public:
-  HMICommandFactory(ApplicationManager& application_manager);
+  HMICommandFactory(app_mngr::ApplicationManager& application_manager);
 
-  CommandSharedPtr CreateCommand(
-      const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
+  app_mngr::CommandSharedPtr CreateCommand(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
  private:
-  ApplicationManager& application_manager_;
+  app_mngr::ApplicationManager& application_manager_;
   DISALLOW_COPY_AND_ASSIGN(HMICommandFactory);
 };
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_COMMAND_FACTORY_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_HMI_COMMAND_FACTORY_H_

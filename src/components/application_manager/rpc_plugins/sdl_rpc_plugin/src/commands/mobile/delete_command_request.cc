@@ -39,12 +39,14 @@
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 DeleteCommandRequest::DeleteCommandRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , is_ui_send_(false)
     , is_vr_send_(false)
@@ -119,9 +121,9 @@ void DeleteCommandRequest::Run() {
 bool DeleteCommandRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   using namespace helpers;
-  ResponseInfo ui_delete_info(
+  app_mngr::commands::ResponseInfo ui_delete_info(
       ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo vr_delete_info(
+  app_mngr::commands::ResponseInfo vr_delete_info(
       vr_result_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_delete_info, vr_delete_info);
@@ -129,7 +131,8 @@ bool DeleteCommandRequest::PrepareResponseParameters(
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
-  info = MergeInfos(ui_delete_info, ui_info_, vr_delete_info, vr_info_);
+  info = app_mngr::commands::MergeInfos(
+      ui_delete_info, ui_info_, vr_delete_info, vr_info_);
   if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
       !vr_delete_info.is_unsupported_resource) {
     LOG4CXX_DEBUG(logger_, "VR or UI result is warning");

@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 
 #include <strings.h>
 
@@ -41,7 +41,8 @@
 #include "utils/macro.h"
 #include "utils/custom_string.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,15 +51,16 @@ namespace custom_str = utils::custom_string;
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest : public CommandRequestImpl {
+class ChangeRegistrationRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ChangeRegistrationRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  ChangeRegistrationRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ChangeRegistrationRequest class destructor
@@ -75,7 +77,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /*
@@ -148,7 +150,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
     */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
-        : newItem_(newItem){};
+        : newItem_(newItem) {}
 
     bool operator()(const smart_objects::SmartObject& obj) const {
       const custom_str::CustomString& vr_synonym = obj.asCustomString();
@@ -158,7 +160,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
     const custom_str::CustomString& newItem_;
   };
 
-  Pending pending_requests_;
+  app_mngr::commands::Pending pending_requests_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
@@ -167,13 +169,13 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
   std::string vr_response_info_;
   std::string tts_response_info_;
 
-  void SendVRRequest(ApplicationSharedPtr app,
+  void SendVRRequest(app_mngr::ApplicationSharedPtr app,
                      smart_objects::SmartObject& msg_params);
 
-  void SendTTSRequest(ApplicationSharedPtr app,
+  void SendTTSRequest(app_mngr::ApplicationSharedPtr app,
                       smart_objects::SmartObject& msg_params);
 
-  void SendUIRequest(ApplicationSharedPtr app,
+  void SendUIRequest(app_mngr::ApplicationSharedPtr app,
                      smart_objects::SmartObject& msg_params,
                      const int32_t hmi_language);
 
@@ -183,4 +185,4 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_

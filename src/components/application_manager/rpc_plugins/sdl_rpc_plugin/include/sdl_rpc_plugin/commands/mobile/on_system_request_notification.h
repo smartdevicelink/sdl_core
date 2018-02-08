@@ -30,13 +30,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include <vector>
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -45,7 +46,8 @@ namespace mobile {
 /**
  * @brief OnSystemRequestNotification class
  **/
-class OnSystemRequestNotification : public CommandNotificationImpl {
+class OnSystemRequestNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   typedef std::vector<uint8_t> BinaryMessage;
   /**
@@ -53,8 +55,9 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemRequestNotification(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  OnSystemRequestNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor
@@ -83,4 +86,4 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_

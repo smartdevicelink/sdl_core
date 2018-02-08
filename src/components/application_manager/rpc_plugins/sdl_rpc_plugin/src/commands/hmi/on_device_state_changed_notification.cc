@@ -74,12 +74,14 @@ std::string convert_to_bt_mac(std::string& deviceInternalId) {
 }
 }
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {}

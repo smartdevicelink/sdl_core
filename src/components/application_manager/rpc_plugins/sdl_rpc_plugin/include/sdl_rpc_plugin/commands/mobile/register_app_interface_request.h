@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -43,7 +43,8 @@ namespace policy {
 struct DeviceInfo;
 }
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class Application;
 
@@ -54,13 +55,15 @@ namespace custom_str = utils::custom_string;
 /**
  * @brief Register app interface request  command class
  **/
-class RegisterAppInterfaceRequest : public CommandRequestImpl {
+class RegisterAppInterfaceRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * \brief RegisterAppInterfaceRequest class constructor
    **/
-  RegisterAppInterfaceRequest(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  RegisterAppInterfaceRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief RegisterAppInterfaceRequest class destructor
@@ -102,7 +105,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type);
 
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
-      const uint32_t connection_key, ApplicationSharedPtr app);
+      const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);
 
   /**
    * @brief SendChangeRegistration send ChangeRegistration on HMI
@@ -119,7 +122,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * HMI
    * @param app application to change registration
    */
-  void SendChangeRegistrationOnHMI(ApplicationConstSharedPtr app);
+  void SendChangeRegistrationOnHMI(app_mngr::ApplicationConstSharedPtr app);
 
   /**
    * @brief Sends OnAppRegistered notification to HMI
@@ -127,9 +130,10 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    *@param application_impl application with changed HMI status
    *
    **/
-  void SendOnAppRegisteredNotificationToHMI(const Application& application_impl,
-                                            bool resumption = false,
-                                            bool need_restore_vr = false);
+  void SendOnAppRegisteredNotificationToHMI(
+      const app_mngr::Application& application_impl,
+      bool resumption = false,
+      bool need_restore_vr = false);
   /*
    * @brief Check new ID along with known mobile application ID
    *
@@ -220,4 +224,4 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
