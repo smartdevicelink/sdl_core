@@ -4,6 +4,11 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    :app_mngr::commands::NotificationFromHMI(message, application_manager) {}
+
 bool RCOnRemoteControlSettingsNotification::Init() {
   return true;
 }
