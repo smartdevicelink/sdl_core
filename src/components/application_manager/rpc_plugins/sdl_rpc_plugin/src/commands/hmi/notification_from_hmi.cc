@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"

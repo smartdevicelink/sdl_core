@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
 
 #include "application_manager/event_engine/event.h"
-#include "sdl_rpc_plugin/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/response_from_hmi.h"
 #include "application_manager/application_manager.h"
 
 namespace sdl_rpc_plugin {

@@ -49,6 +49,7 @@ collect_sources(RPC_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  ApplicationManager
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils

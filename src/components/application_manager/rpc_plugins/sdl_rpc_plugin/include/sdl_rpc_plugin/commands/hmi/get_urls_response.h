@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_URLS_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_URLS_RESPONSE_H_
 
-#include "sdl_rpc_plugin/commands/hmi/response_to_hmi.h"
+#include "application_manager/commands/response_to_hmi.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;

@@ -1677,6 +1677,12 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
                                   media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
+  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
+      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
+  if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
+    LOG4CXX_ERROR(logger_, "Plugins are not loaded");
+    return false;
+  }
   const std::string app_storage_folder = get_settings().app_storage_folder();
   if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
@@ -1732,12 +1738,6 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
-  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
-      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
-  if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
-    LOG4CXX_ERROR(logger_, "Plugins are not loaded");
-    return false;
-  }
   return true;
 }
 

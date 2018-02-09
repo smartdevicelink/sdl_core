@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_VI_PRNDL_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_VI_PRNDL_NOTIFICATION_H_
 
-#include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 
 namespace sdl_rpc_plugin {
