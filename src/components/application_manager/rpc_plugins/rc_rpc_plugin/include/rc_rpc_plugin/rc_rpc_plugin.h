@@ -52,6 +52,9 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
+
+ private:
+  std::unique_ptr<application_manager::CommandFactory> command_factory_;
 };
 }  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
