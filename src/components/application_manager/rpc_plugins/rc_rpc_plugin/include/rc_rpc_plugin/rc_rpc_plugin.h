@@ -53,6 +53,8 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  static const uint32_t kRCPluginID = 153;
+
  private:
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
 };

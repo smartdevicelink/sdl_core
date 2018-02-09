@@ -1,5 +1,6 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -32,6 +33,15 @@ void RCRPCPlugin::OnPolicyEvent(
 
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
-    application_manager::ApplicationSharedPtr application) {}
+    application_manager::ApplicationSharedPtr application) {
+  switch (event) {
+    case plugins::kApplicationRegistered: {
+      application->AddExtension(new RCAppExtension(kRCPluginID));
+      break;
+    }
+    default:
+      break;
+  }
+}
 
 }  // namespace rc_rpc_plugin

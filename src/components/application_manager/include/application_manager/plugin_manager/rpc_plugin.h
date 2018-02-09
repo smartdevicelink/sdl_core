@@ -21,7 +21,11 @@ enum PolicyEvent { kApplicationPolicyUpdated = 0, kApplicationsDisabled };
 /**
  * @brief The ApplicationEvent enum defines events related to single application
  */
-enum ApplicationEvent { kApplicationExit = 0, kApplicationUnregistered };
+enum ApplicationEvent {
+  kApplicationExit = 0,
+  kApplicationRegistered,
+  kApplicationUnregistered
+};
 
 class RPCPlugin {
  public:
@@ -37,7 +41,7 @@ class RPCPlugin {
    * @return true if plugin is able to process this RPC, false if not
    */
   virtual bool IsAbleToProcess(
-      const int32_t function_id,
+      const int32_t function_icomponentsd,
       const commands::Command::CommandSource message_source) = 0;
 
   /**
@@ -45,6 +49,7 @@ class RPCPlugin {
    * @return plugin name
    */
   virtual std::string PluginName() = 0;
+
   /**
    * @brief GetCommandFactory get that is able to generate command
    * from message
