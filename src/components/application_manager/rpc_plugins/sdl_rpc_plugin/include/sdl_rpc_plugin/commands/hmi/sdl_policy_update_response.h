@@ -40,7 +40,7 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
-class SDLPolicyUpdateResponse : public ResponseFromHMI {
+class SDLPolicyUpdateResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief SDLPolicyUpdateResponse class constructor

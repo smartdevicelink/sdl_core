@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VIDiagnosticMessageResponse command class
  **/
-class VIDiagnosticMessageResponse : public ResponseFromHMI {
+class VIDiagnosticMessageResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VIDiagnosticMessageResponse class constructor

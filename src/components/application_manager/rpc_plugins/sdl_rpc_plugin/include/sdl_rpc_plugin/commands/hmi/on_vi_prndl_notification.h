@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIPrndlNotification command class
  **/
-class OnVIPrndlNotification : public NotificationFromHMI {
+class OnVIPrndlNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIPrndlNotification class constructor

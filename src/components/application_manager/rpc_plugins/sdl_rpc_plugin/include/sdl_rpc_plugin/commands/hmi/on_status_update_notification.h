@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnGetStatusUpdateNotification command class
  **/
-class OnStatusUpdateNotification : public NotificationToHMI {
+class OnStatusUpdateNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnGetStatusUpdateNotification class constructor

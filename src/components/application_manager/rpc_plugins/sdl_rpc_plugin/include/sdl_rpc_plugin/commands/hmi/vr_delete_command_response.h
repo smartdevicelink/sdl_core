@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VRDeleteCommandResponse command class
  **/
-class VRDeleteCommandResponse : public ResponseFromHMI {
+class VRDeleteCommandResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VRDeleteCommandResponse class constructor

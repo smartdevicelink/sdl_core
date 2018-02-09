@@ -46,7 +46,7 @@ namespace hmi {
 /**
  * @brief OnUIKeyBoardInputNotification command class
  **/
-class OnUIKeyBoardInputNotification : public NotificationFromHMI {
+class OnUIKeyBoardInputNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnUIKeyBoardInputNotification class constructor
