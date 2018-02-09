@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief SDLGetListOfPermissionsResponse command class
  **/
-class SDLGetListOfPermissionsResponse : public ResponseToHMI {
+class SDLGetListOfPermissionsResponse : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief SDLGetListOfPermissionsResponse class constructor

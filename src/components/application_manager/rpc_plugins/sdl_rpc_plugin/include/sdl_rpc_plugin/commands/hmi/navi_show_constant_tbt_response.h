@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief NaviShowConstantTBTResponse command class
  **/
-class NaviShowConstantTBTResponse : public ResponseFromHMI {
+class NaviShowConstantTBTResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief NaviShowConstantTBTResponse class constructor

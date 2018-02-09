@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VIGetDTCsResponse command class
  **/
-class VIGetDTCsResponse : public ResponseFromHMI {
+class VIGetDTCsResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VIGetDTCsResponse class constructor

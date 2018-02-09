@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnFileRemovedNotification command class
  **/
-class OnFileRemovedNotification : public NotificationToHMI {
+class OnFileRemovedNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnFileRemovedNotification class constructor

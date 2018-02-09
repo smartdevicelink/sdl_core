@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnNaviTBTClientStateNotification command class
  **/
-class OnNaviTBTClientStateNotification : public NotificationFromHMI {
+class OnNaviTBTClientStateNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnNaviTBTClientStateNotification class constructor

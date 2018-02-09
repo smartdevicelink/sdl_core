@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief TTSStopSpeakingResponse command class
  **/
-class TTSStopSpeakingResponse : public ResponseFromHMI {
+class TTSStopSpeakingResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSStopSpeakingResponse class constructor
