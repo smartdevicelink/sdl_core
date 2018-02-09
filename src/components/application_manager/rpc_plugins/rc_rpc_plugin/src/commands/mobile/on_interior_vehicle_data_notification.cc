@@ -4,6 +4,12 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    : app_mngr::commands::CommandNotificationImpl(message,
+                                                  application_manager) {}
+
 bool OnInteriorVehicleDataNotification::Init() {
   return true;
 }

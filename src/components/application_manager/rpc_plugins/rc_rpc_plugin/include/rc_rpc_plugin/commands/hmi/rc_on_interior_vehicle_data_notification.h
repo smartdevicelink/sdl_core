@@ -5,10 +5,15 @@
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
+namespace app_mngr = application_manager;
+
 namespace commands {
 class RCOnInteriorVehicleDataNotification
     : public application_manager::commands::NotificationFromHMI {
  public:
+  RCOnInteriorVehicleDataNotification(
+            const app_mngr::commands::MessageSharedPtr& message,
+            app_mngr::ApplicationManager& application_manager);
   bool Init() OVERRIDE;
   void Run() OVERRIDE;
   void on_event(const application_manager::event_engine::Event& event);
