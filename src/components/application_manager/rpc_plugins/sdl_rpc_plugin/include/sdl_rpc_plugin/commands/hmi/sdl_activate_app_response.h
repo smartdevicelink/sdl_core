@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief SDLActivateAppResponse command class
  **/
-class SDLActivateAppResponse : public ResponseToHMI {
+class SDLActivateAppResponse : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief SDLActivateAppResponse class constructor

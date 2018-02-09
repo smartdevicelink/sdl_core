@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIOdometerNotification command class
  **/
-class OnVIOdometerNotification : public NotificationFromHMI {
+class OnVIOdometerNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIOdometerNotification class constructor

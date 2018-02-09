@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnAppUnregisteredNotification command class
  **/
-class OnAppUnregisteredNotification : public NotificationToHMI {
+class OnAppUnregisteredNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnAppUnregisteredNotification class constructor

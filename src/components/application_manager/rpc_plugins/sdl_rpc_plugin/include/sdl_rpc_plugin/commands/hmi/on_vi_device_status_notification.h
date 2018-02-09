@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIDeviceStatusNotification command class
  **/
-class OnVIDeviceStatusNotification : public NotificationFromHMI {
+class OnVIDeviceStatusNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIDeviceStatusNotification class constructor

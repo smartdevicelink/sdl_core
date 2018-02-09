@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIAddCommandResponse command class
  **/
-class UIAddCommandResponse : public ResponseFromHMI {
+class UIAddCommandResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIAddCommandResponse class constructor

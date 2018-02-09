@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnVideoDataStreamingNotification command class
  **/
-class OnVideoDataStreamingNotification : public NotificationToHMI {
+class OnVideoDataStreamingNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnVideoDataStreamingNotification class constructor

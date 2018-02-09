@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UISliderResponse command class
  **/
-class UISliderResponse : public ResponseFromHMI {
+class UISliderResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UISliderResponse class constructor

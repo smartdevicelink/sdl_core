@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief RCGetCapabilitiesResponse command class
  **/
-class RCGetCapabilitiesResponse : public ResponseFromHMI {
+class RCGetCapabilitiesResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief RCGetCapabilitiesResponse class constructor

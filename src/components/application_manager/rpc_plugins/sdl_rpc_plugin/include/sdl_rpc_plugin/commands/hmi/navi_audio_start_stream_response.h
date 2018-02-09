@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief AudioStartStreamResponse command class
  **/
-class AudioStartStreamResponse : public ResponseFromHMI {
+class AudioStartStreamResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief AudioStartStreamResponse class constructor

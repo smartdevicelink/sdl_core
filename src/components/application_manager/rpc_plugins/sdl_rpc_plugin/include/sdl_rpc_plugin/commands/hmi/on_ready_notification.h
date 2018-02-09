@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnReadyNotification command class
  **/
-class OnReadyNotification : public NotificationFromHMI {
+class OnReadyNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnReadyNotification class constructor
