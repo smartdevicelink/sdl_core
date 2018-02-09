@@ -195,9 +195,17 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager)
+CommandRequestImpl::CommandRequestImpl(
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler)
     , EventObserver(application_manager.event_dispatcher())
     , current_state_(kAwaitingHMIResponse)
     , hash_update_mode_(kSkipHashUpdate)
