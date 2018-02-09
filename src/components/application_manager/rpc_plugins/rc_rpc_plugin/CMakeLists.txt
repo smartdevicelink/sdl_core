@@ -61,6 +61,15 @@ endif()
 add_library("rc_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES})
 target_link_libraries("rc_rpc_plugin" ${LIBRARIES})
 
+set(INSTALL_DESTINATION bin)
+
+install(TARGETS rc_rpc_plugin
+  DESTINATION ${INSTALL_DESTINATION}
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

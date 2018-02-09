@@ -11,7 +11,7 @@ class RCSetInteriorVehicleDataResponse
  public:
   bool Init() OVERRIDE;
   void Run() OVERRIDE;
-  void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
+  void on_event(const application_manager::event_engine::Event& event);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
