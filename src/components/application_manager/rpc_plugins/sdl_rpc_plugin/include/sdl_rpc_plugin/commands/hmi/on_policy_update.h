@@ -39,7 +39,7 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace commands {
 
-class OnPolicyUpdate : public NotificationFromHMI {
+class OnPolicyUpdate : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnPolicyUpdate class constructor

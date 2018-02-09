@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnVRLanguageChangeNotification command class
  **/
-class OnVRLanguageChangeNotification : public NotificationFromHMI {
+class OnVRLanguageChangeNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVRLanguageChangeNotification class constructor

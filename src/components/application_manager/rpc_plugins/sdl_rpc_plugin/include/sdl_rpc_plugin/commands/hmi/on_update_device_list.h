@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnUpdateDeviceList command class
  **/
-class OnUpdateDeviceList : public NotificationFromHMI {
+class OnUpdateDeviceList : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnUpdateDeviceList class constructor

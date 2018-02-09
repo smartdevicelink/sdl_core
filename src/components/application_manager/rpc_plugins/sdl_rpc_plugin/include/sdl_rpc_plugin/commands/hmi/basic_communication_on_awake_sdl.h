@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnAwakeSDLNotification command class
  **/
-class OnAwakeSDLNotification : public NotificationFromHMI {
+class OnAwakeSDLNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnAwakeSDLNotification class constructor

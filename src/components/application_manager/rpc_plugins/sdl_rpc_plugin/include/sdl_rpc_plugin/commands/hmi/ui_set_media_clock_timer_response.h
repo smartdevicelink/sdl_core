@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UISetMediaClockTimerResponse command class
  **/
-class UISetMediaClockTimerResponse : public ResponseFromHMI {
+class UISetMediaClockTimerResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UISetMediaClockTimerResponse class constructor

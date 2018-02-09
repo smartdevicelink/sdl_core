@@ -45,7 +45,7 @@ namespace hmi {
 /**
  * @brief OnTTSResetTimeoutNotification command class
  **/
-class OnTTSResetTimeoutNotification : public NotificationFromHMI {
+class OnTTSResetTimeoutNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnTTSResetTimeoutNotification class constructor

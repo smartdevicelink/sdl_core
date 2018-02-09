@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief NaviIsReadyResponse command class
  **/
-class NaviIsReadyResponse : public ResponseFromHMI {
+class NaviIsReadyResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief NaviIsReadyResponse class constructor

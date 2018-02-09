@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VRChangeRegistrationResponse command class
  **/
-class VRChangeRegistrationResponse : public ResponseFromHMI {
+class VRChangeRegistrationResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VRChangeRegistrationResponse class constructor

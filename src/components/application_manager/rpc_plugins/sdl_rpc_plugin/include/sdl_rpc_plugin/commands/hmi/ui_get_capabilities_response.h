@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIGetCapabilitiesResponse command class
  **/
-class UIGetCapabilitiesResponse : public ResponseFromHMI {
+class UIGetCapabilitiesResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIGetCapabilitiesResponse class constructor

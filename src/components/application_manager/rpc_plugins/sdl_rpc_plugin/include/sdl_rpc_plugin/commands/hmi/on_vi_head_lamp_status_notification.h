@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIHeadLampStatusNotification command class
  **/
-class OnVIHeadLampStatusNotification : public NotificationFromHMI {
+class OnVIHeadLampStatusNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIHeadLampStatusNotification class constructor
