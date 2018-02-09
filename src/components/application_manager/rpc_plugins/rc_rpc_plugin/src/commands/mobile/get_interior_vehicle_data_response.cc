@@ -4,11 +4,17 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    : app_mngr::commands::CommandResponseImpl(message, application_manager) {}
+
 bool GetInteriorVehicleDataResponse::Init() {
-    return true;
+  return true;
 }
 void GetInteriorVehicleDataResponse::Run() {}
-void GetInteriorVehicleDataResponse::on_event(const application_manager::event_engine::Event& event) {}
+void GetInteriorVehicleDataResponse::on_event(
+    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
