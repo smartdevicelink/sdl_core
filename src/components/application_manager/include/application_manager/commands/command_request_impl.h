@@ -110,7 +110,10 @@ class CommandRequestImpl : public CommandImpl,
   enum HashUpdateMode { kSkipHashUpdate, kDoHashUpdate };
 
   CommandRequestImpl(const MessageSharedPtr& message,
-                     ApplicationManager& application_manager);
+                     ApplicationManager& application_manager,
+                     rpc_service::RPCService& rpc_service,
+                     HMICapabilities& hmi_capabilities,
+                     policy::PolicyHandlerInterface& policy_handler);
 
   ~CommandRequestImpl();
 
