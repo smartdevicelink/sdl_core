@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief VRGetLanguageRequest command class
  **/
-class VRGetLanguageRequest : public RequestToHMI {
+class VRGetLanguageRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VRGetLanguageRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VRGetLanguageRequest(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  VRGetLanguageRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief VRGetLanguageRequest class destructor

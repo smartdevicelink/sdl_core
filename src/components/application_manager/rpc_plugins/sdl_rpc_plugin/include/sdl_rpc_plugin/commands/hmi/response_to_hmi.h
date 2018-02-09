@@ -38,16 +38,17 @@
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
-class ResponseToHMI : public CommandImpl {
+class ResponseToHMI : public app_mngr::commands::CommandImpl {
  public:
-  ResponseToHMI(const MessageSharedPtr& message,
-                ApplicationManager& application_manager);
+  ResponseToHMI(const app_mngr::commands::MessageSharedPtr& message,
+                app_mngr::ApplicationManager& application_manager);
   virtual ~ResponseToHMI();
   virtual bool Init();
   virtual bool CleanUp();

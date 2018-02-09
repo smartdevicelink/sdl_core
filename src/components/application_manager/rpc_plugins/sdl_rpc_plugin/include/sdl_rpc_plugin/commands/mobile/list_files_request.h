@@ -37,22 +37,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ListFilesRequest command class
  **/
-class ListFilesRequest : public CommandRequestImpl {
+class ListFilesRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ListFilesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ListFilesRequest(const MessageSharedPtr& message,
-                   ApplicationManager& application_manager);
+  ListFilesRequest(const app_mngr::commands::MessageSharedPtr& message,
+                   app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ListFilesRequest class destructor

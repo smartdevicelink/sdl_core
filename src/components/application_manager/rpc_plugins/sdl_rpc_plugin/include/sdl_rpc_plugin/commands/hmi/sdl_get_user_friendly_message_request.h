@@ -36,22 +36,25 @@
 #include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SDLGetUserFriendlyMessageRequest command class
  **/
-class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
+class SDLGetUserFriendlyMessageRequest
+    : public app_mngr::commands::RequestFromHMI {
  public:
   /**
    * @brief SDLGetUserFriendlyMessageRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager);
+  SDLGetUserFriendlyMessageRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SDLGetUserFriendlyMessageRequest class destructor

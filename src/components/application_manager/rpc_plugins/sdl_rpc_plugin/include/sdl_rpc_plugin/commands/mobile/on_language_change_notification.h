@@ -37,22 +37,25 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief OnLanguageChangeNotification class
  **/
-class OnLanguageChangeNotification : public CommandNotificationImpl {
+class OnLanguageChangeNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnLanguageChangeNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnLanguageChangeNotification(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  OnLanguageChangeNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnLanguageChangeNotification class destructor

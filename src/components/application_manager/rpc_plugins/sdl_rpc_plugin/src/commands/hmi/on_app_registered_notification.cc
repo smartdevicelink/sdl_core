@@ -32,12 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_app_registered_notification.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 OnAppRegisteredNotification::OnAppRegisteredNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationToHMI(message, application_manager) {}
 
 OnAppRegisteredNotification::~OnAppRegisteredNotification() {}

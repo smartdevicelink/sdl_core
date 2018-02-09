@@ -35,23 +35,24 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief NaviIsReadyRequest command class
  **/
-class NaviIsReadyRequest : public RequestToHMI,
-                           public event_engine::EventObserver {
+class NaviIsReadyRequest : public app_mngr::commands::RequestToHMI,
+                           public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief NaviIsReadyRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  NaviIsReadyRequest(const MessageSharedPtr& message,
-                     ApplicationManager& application_manager);
+  NaviIsReadyRequest(const app_mngr::commands::MessageSharedPtr& message,
+                     app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief NaviIsReadyRequest class destructor
@@ -66,7 +67,7 @@ class NaviIsReadyRequest : public RequestToHMI,
   /**
    * @brief On event callback
    **/
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviIsReadyRequest);

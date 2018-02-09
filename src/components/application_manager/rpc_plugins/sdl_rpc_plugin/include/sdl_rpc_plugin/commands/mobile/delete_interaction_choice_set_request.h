@@ -38,22 +38,25 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief DeleteInteractionChoiceSetRequest command class
  **/
-class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
+class DeleteInteractionChoiceSetRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief DeleteInteractionChoiceSetRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  DeleteInteractionChoiceSetRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
@@ -76,9 +79,9 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param app mobile application
    */
-  bool ChoiceSetInUse(ApplicationConstSharedPtr app);
+  bool ChoiceSetInUse(app_mngr::ApplicationConstSharedPtr app);
 
-  void SendVrDeleteCommand(ApplicationSharedPtr app);
+  void SendVrDeleteCommand(app_mngr::ApplicationSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };

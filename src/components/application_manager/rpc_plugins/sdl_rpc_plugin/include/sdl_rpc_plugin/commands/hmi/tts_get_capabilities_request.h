@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief TTSGetCapabilitiesRequest command class
  **/
-class TTSGetCapabilitiesRequest : public RequestToHMI {
+class TTSGetCapabilitiesRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief TTSGetCapabilitiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  TTSGetCapabilitiesRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  TTSGetCapabilitiesRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetCapabilitiesRequest class destructor

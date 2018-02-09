@@ -37,20 +37,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief Unregister app interface request  command class
  **/
-class UnregisterAppInterfaceRequest : public CommandRequestImpl {
+class UnregisterAppInterfaceRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * \brief UnregisterAppInterfaceRequest class constructor
    **/
-  UnregisterAppInterfaceRequest(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager)
+  UnregisterAppInterfaceRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager)
       : CommandRequestImpl(message, application_manager) {}
 
   /**

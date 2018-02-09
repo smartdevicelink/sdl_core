@@ -34,12 +34,14 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_response.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}

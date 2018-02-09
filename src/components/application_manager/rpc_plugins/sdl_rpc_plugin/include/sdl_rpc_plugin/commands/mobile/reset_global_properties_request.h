@@ -38,22 +38,25 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ResetGlobalPropertiesRequest command class
  **/
-class ResetGlobalPropertiesRequest : public CommandRequestImpl {
+class ResetGlobalPropertiesRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ResetGlobalPropertiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ResetGlobalPropertiesRequest(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  ResetGlobalPropertiesRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesRequest class destructor
@@ -70,7 +73,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -88,7 +91,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetHelpPromt(ApplicationSharedPtr app);
+  bool ResetHelpPromt(app_mngr::ApplicationSharedPtr app);
 
   /*
    * @brief  Sets default value of the TIMEOUTPROMT global property

@@ -37,22 +37,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief GetDTCsRequest command class
  **/
-class GetDTCsRequest : public CommandRequestImpl {
+class GetDTCsRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief GetDTCsRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetDTCsRequest(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+  GetDTCsRequest(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief GetDTCsRequest class destructor
@@ -69,7 +70,7 @@ class GetDTCsRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(GetDTCsRequest);

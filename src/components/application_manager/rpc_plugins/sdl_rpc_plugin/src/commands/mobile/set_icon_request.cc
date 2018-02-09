@@ -39,12 +39,14 @@
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-SetIconRequest::SetIconRequest(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager)
+SetIconRequest::SetIconRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SetIconRequest::~SetIconRequest() {}

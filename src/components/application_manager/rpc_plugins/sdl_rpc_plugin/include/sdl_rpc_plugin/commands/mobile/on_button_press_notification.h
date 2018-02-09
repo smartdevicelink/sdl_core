@@ -38,7 +38,8 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -48,15 +49,16 @@ namespace mobile {
  * @brief OnButtonPressNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnButtonPressNotification : public CommandNotificationImpl {
+class OnButtonPressNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnButtonPressNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnButtonPressNotification(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  OnButtonPressNotification(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnButtonEventCommand class destructor
@@ -74,7 +76,7 @@ class OnButtonPressNotification : public CommandNotificationImpl {
    *
    * @param app Application to receive notification
    */
-  void SendButtonPress(ApplicationConstSharedPtr app);
+  void SendButtonPress(app_mngr::ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnButtonPressNotification);
 };

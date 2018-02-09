@@ -35,22 +35,24 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ButtonGetCapabilitiesRequest command class
  **/
-class ButtonGetCapabilitiesRequest : public RequestToHMI {
+class ButtonGetCapabilitiesRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief ButtonGetCapabilitiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ButtonGetCapabilitiesRequest(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  ButtonGetCapabilitiesRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ButtonGetCapabilitiesRequest class destructor

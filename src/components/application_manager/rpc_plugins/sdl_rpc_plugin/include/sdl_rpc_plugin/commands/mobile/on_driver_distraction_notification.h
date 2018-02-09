@@ -37,7 +37,8 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,15 +47,17 @@ namespace mobile {
 /**
  * @brief OnDriverDistractionNotification class
  **/
-class OnDriverDistractionNotification : public CommandNotificationImpl {
+class OnDriverDistractionNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnDriverDistractionNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnDriverDistractionNotification(const MessageSharedPtr& message,
-                                  ApplicationManager& application_manager);
+  OnDriverDistractionNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnDriverDistractionNotification class destructor

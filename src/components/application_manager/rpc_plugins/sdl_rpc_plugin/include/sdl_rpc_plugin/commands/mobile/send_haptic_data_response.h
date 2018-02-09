@@ -35,14 +35,15 @@
 
 #include "application_manager/commands/command_response_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SendHapticDataResponse command class
  **/
-class SendHapticDataResponse : public CommandResponseImpl {
+class SendHapticDataResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief SendHapticDataResponse class constructor
@@ -50,8 +51,8 @@ class SendHapticDataResponse : public CommandResponseImpl {
    * @param message Incoming SmartObject message
    * @param application_manager Reference of application manager
    **/
-  SendHapticDataResponse(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager);
+  SendHapticDataResponse(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SendHapticDataResponse class destructor

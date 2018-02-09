@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief NaviAlertManeuverRequest command class
  **/
-class NaviAlertManeuverRequest : public RequestToHMI {
+class NaviAlertManeuverRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief NaviAlertManeuverRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  NaviAlertManeuverRequest(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  NaviAlertManeuverRequest(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief NaviAlertManeuverRequest class destructor

@@ -37,22 +37,23 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief PutFileResponse command class
  **/
-class PutFileResponse : public CommandResponseImpl {
+class PutFileResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief PutFileResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  PutFileResponse(const MessageSharedPtr& message,
-                  ApplicationManager& application_manager);
+  PutFileResponse(const app_mngr::commands::MessageSharedPtr& message,
+                  app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief PutFileResponse class destructor

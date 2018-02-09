@@ -38,22 +38,25 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SubscribeVehicleDataRequest command class
  **/
-class SubscribeVehicleDataRequest : public CommandRequestImpl {
+class SubscribeVehicleDataRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SubscribeVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SubscribeVehicleDataRequest(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  SubscribeVehicleDataRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonCommandRequest class destructor
@@ -70,7 +73,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -114,7 +117,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * @param msg_params 'message_parameters' response section reference
    */
   void UnsubscribeFailedSubscriptions(
-      ApplicationSharedPtr app,
+      app_mngr::ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params) const;
 
   /**
@@ -130,7 +133,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * HMI
    * @param result contains result that SDL sends to mobile app.
    */
-  void CheckVISubscribtions(ApplicationSharedPtr app,
+  void CheckVISubscribtions(app_mngr::ApplicationSharedPtr app,
                             std::string& out_info,
                             mobile_apis::Result::eType& out_result_code,
                             smart_objects::SmartObject& out_response_params,
@@ -141,17 +144,17 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */
-  VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
+  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
 
   /**
    * @brief VI parameters which had been subscribed already by particular app
    */
-  VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
+  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
 
   /**
    * @brief VI parameters which wait for subscribe after HMI respond
    */
-  VehicleInfoSubscriptions vi_waiting_for_subscribe_;
+  app_mngr::VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

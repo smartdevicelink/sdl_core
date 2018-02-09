@@ -42,7 +42,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class Application;
 
@@ -51,15 +52,17 @@ namespace commands {
 /**
  * @brief CreateInteractionChoiceSetRequest command class
  **/
-class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
+class CreateInteractionChoiceSetRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief CreateInteractionChoiceSetRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  CreateInteractionChoiceSetRequest(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  CreateInteractionChoiceSetRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief CreateInteractionChoiceSetRequest class destructor
@@ -76,7 +79,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Function is called by RequestController when request execution time
@@ -143,7 +146,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @param app_id Application ID
    *
    */
-  void SendVRAddCommandRequests(ApplicationSharedPtr const app);
+  void SendVRAddCommandRequests(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks incoming choiseSet params.
@@ -151,7 +154,8 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @return Mobile result code
    */
-  mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
+  mobile_apis::Result::eType CheckChoiceSet(
+      app_mngr::ApplicationConstSharedPtr app);
 
   /*
   * @brief Predicate for using with CheckChoiceSet method to compare choice ID
@@ -163,7 +167,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
     CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
 
     bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::choice_id].asUInt() == newItem_;
+      return obj[app_mngr::strings::choice_id].asUInt() == newItem_;
     }
 
     const uint32_t newItem_;
@@ -177,10 +181,10 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   */
   struct CoincidencePredicateMenuName {
     CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem){};
+        : newItem_(newItem) {}
 
     bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::menu_name].asString() == newItem_;
+      return obj[app_mngr::strings::menu_name].asString() == newItem_;
     }
 
     const std::string& newItem_;

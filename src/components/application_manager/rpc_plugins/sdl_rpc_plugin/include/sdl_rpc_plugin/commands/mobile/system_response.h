@@ -36,22 +36,23 @@
 
 #include "application_manager/commands/command_response_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SystemResponse command class
  **/
-class SystemResponse : public CommandResponseImpl {
+class SystemResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief SystemResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SystemResponse(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+  SystemResponse(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SystemResponse class destructor

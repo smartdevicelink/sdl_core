@@ -36,7 +36,8 @@
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,8 +51,9 @@ class OnSystemRequestNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemRequestNotification(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  OnSystemRequestNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor

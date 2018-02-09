@@ -37,20 +37,21 @@
 #include <list>
 #include "application_manager/commands/command_request_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief send location request command class
  */
-class SendLocationRequest : public CommandRequestImpl {
+class SendLocationRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SendLocationRquest class constructor
    */
-  SendLocationRequest(const MessageSharedPtr& message,
-                      ApplicationManager& application_manager);
+  SendLocationRequest(const app_mngr::commands::MessageSharedPtr& message,
+                      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationRquest class destructor
@@ -67,7 +68,7 @@ class SendLocationRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /**

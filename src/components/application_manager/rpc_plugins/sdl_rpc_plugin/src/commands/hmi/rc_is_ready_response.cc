@@ -31,12 +31,14 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-RCIsReadyResponse::RCIsReadyResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+RCIsReadyResponse::RCIsReadyResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 RCIsReadyResponse::~RCIsReadyResponse() {}

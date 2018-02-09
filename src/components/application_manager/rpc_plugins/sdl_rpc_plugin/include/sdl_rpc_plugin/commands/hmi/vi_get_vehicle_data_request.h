@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief VIGetVehicleDataRequest command class
  **/
-class VIGetVehicleDataRequest : public RequestToHMI {
+class VIGetVehicleDataRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VIGetVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleDataRequest(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  VIGetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleDataRequest class destructor

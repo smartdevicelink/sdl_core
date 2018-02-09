@@ -36,7 +36,8 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 /**
@@ -45,15 +46,17 @@ namespace commands {
  * Template class for sending 1 subscribe thin request
  **/
 template <event_engine::Event::EventID eventID>
-class VIGetVehicleDataRequestTemplate : public RequestToHMI {
+class VIGetVehicleDataRequestTemplate
+    : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VIGetVehicleDataRequestTemplate class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message,
-                                  ApplicationManager& application_manager)
+  VIGetVehicleDataRequestTemplate(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager)
       : RequestToHMI(message, application_manager) {}
 
   /**

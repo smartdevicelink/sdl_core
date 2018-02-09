@@ -40,22 +40,23 @@
 #include "application_manager/event_engine/event.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SystemRequest command class
  **/
-class SystemRequest : public CommandRequestImpl {
+class SystemRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SystemRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SystemRequest(const MessageSharedPtr& message,
-                ApplicationManager& application_manager);
+  SystemRequest(const app_mngr::commands::MessageSharedPtr& message,
+                app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SystemRequest class destructor
@@ -72,7 +73,7 @@ class SystemRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /**

@@ -37,22 +37,24 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief OnHMIStatusNotification class
  **/
-class OnHMIStatusNotification : public CommandNotificationImpl {
+class OnHMIStatusNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnHMIStatusNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnHMIStatusNotification(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  OnHMIStatusNotification(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotification class destructor

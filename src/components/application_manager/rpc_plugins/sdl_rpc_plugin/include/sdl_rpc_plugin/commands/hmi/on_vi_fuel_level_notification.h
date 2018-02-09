@@ -36,7 +36,8 @@
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,8 +51,8 @@ class OnVIFuelLevelNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIFuelLevelNotification(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  OnVIFuelLevelNotification(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnVIFuelLevelNotification class destructor

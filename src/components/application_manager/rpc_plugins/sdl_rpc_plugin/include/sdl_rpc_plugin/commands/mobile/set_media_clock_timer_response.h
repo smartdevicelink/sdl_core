@@ -37,16 +37,19 @@
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
-class SetMediaClockTimerResponse : public CommandResponseImpl {
+class SetMediaClockTimerResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * \brief SetMediaClockTimerResponse class constructor
    **/
-  SetMediaClockTimerResponse(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager);
+  SetMediaClockTimerResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * \brief SetMediaClockTimerResponse class destructor

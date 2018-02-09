@@ -38,23 +38,24 @@
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public RequestToHMI,
-                                public event_engine::EventObserver {
+class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
+                                public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UpdateDeviceListRequest(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  UpdateDeviceListRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UpdateDeviceListRequest class destructor
@@ -72,7 +73,7 @@ class UpdateDeviceListRequest : public RequestToHMI,
    * when HMI will be ready
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
   /**
    * @brief Need to stop execution StopMethod if HMI did not started

@@ -34,22 +34,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief AudioStopStreamRequest command class
  **/
-class AudioStopStreamRequest : public RequestToHMI {
+class AudioStopStreamRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief AudioStopStreamRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  AudioStopStreamRequest(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager);
+  AudioStopStreamRequest(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief NaviStopStreamRequest class destructor

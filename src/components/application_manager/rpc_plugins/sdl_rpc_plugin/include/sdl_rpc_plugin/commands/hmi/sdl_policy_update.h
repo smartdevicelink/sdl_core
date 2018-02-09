@@ -35,19 +35,20 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-class SDLPolicyUpdate : public RequestToHMI {
+class SDLPolicyUpdate : public app_mngr::commands::RequestToHMI {
  public:
   /**
      * @brief SDLPolicyUpdate class constructor
      *
      * @param message Incoming SmartObject message
      **/
-  SDLPolicyUpdate(const MessageSharedPtr& message,
-                  ApplicationManager& application_manager);
+  SDLPolicyUpdate(const app_mngr::commands::MessageSharedPtr& message,
+                  app_mngr::ApplicationManager& application_manager);
 
   ~SDLPolicyUpdate() OVERRIDE;
 

@@ -36,7 +36,8 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include <vector>
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -45,7 +46,8 @@ namespace mobile {
 /**
  * @brief OnSystemRequestNotification class
  **/
-class OnSystemRequestNotification : public CommandNotificationImpl {
+class OnSystemRequestNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   typedef std::vector<uint8_t> BinaryMessage;
   /**
@@ -53,8 +55,9 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemRequestNotification(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  OnSystemRequestNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor

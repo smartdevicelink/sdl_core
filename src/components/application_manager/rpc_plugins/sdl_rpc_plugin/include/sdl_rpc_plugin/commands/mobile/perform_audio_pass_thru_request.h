@@ -38,22 +38,25 @@
 #include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief PerformAudioPassThruRequest command class
  **/
-class PerformAudioPassThruRequest : public CommandRequestImpl {
+class PerformAudioPassThruRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief PerformAudioPassThruRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  PerformAudioPassThruRequest(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  PerformAudioPassThruRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief PerformAudioPassThruRequest class destructor
@@ -82,7 +85,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /**
@@ -179,7 +182,8 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * result for mobile app
    */
   AudioPassThruResults PrepareAudioPassThruResultCodeForResponse(
-      const ResponseInfo& ui_response, const ResponseInfo& tts_response);
+      const app_mngr::commands::ResponseInfo& ui_response,
+      const app_mngr::commands::ResponseInfo& tts_response);
 
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;

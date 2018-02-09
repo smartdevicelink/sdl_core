@@ -38,20 +38,21 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief scrollable message request command class
  **/
-class ScrollableMessageRequest : public CommandRequestImpl {
+class ScrollableMessageRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ScrollableMessageRequest class constructor
    **/
-  ScrollableMessageRequest(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  ScrollableMessageRequest(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SliderCommand class destructor
@@ -73,7 +74,7 @@ class ScrollableMessageRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ScrollableMessageRequest);

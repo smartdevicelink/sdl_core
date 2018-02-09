@@ -35,22 +35,24 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UIPerformAudioPassThruRequest command class
  **/
-class UIPerformAudioPassThruRequest : public RequestToHMI {
+class UIPerformAudioPassThruRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UIPerformAudioPassThruRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UIPerformAudioPassThruRequest(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  UIPerformAudioPassThruRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformAudioPassThruRequest class destructor

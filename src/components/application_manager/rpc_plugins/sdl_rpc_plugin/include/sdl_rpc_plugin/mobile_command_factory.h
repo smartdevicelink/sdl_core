@@ -36,20 +36,21 @@
 #include "application_manager/command_factory.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 /**
  * @brief Factory class for mobile command creation
  **/
-class MobileCommandFactory : public CommandFactory {
+class MobileCommandFactory : public app_mngr::CommandFactory {
  public:
-  MobileCommandFactory(ApplicationManager& application_manager);
+  MobileCommandFactory(app_mngr::ApplicationManager& application_manager);
 
-  CommandSharedPtr CreateCommand(
-      const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
+  app_mngr::CommandSharedPtr CreateCommand(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
  private:
-  ApplicationManager& application_manager_;
+  app_mngr::ApplicationManager& application_manager_;
   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
 

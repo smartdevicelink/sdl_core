@@ -35,12 +35,14 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-PutFileResponse::PutFileResponse(const MessageSharedPtr& message,
-                                 ApplicationManager& application_manager)
+PutFileResponse::PutFileResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 PutFileResponse::~PutFileResponse() {}

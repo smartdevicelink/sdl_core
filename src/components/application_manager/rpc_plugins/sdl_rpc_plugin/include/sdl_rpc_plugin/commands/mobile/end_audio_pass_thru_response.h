@@ -37,22 +37,24 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief EndAudioPassThruResponse command class
  **/
-class EndAudioPassThruResponse : public CommandResponseImpl {
+class EndAudioPassThruResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief EndAudioPassThruResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  EndAudioPassThruResponse(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  EndAudioPassThruResponse(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief EndAudioPassThruResponse class destructor

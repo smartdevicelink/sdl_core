@@ -38,22 +38,25 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UnsubscribeVehicleDataRequest command class
  **/
-class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
+class UnsubscribeVehicleDataRequest
+    : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief UnsubscribeVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UnsubscribeVehicleDataRequest(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  UnsubscribeVehicleDataRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeVehicleDataRequest class destructor
@@ -70,7 +73,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -111,12 +114,12 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    * @brief VI parameters which still being subscribed by another apps after
    * particular app had been unsubscribed from these parameters
    */
-  VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
+  app_mngr::VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
 
   /**
    * @brief VI parameters which had been unsubscribed already by particular app
    */
-  VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+  app_mngr::VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
 
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };

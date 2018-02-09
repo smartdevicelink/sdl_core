@@ -37,22 +37,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UnsubscribeButtonRequest command class
  **/
-class UnsubscribeButtonRequest : public CommandRequestImpl {
+class UnsubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief UnsubscribeButtonRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UnsubscribeButtonRequest(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  UnsubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeButtonRequest class destructor

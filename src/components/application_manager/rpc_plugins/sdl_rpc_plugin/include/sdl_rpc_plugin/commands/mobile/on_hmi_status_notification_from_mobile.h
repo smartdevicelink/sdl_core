@@ -39,7 +39,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -47,15 +48,16 @@ namespace commands {
  * @brief OnHMIStatusNotificationFromMobile class
  **/
 class OnHMIStatusNotificationFromMobile
-    : public CommandNotificationFromMobileImpl {
+    : public app_mngr::commands::CommandNotificationFromMobileImpl {
  public:
   /**
    * @brief OnHMIStatusNotificationFromMobile class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  OnHMIStatusNotificationFromMobile(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotificationFromMobile class destructor

@@ -37,7 +37,8 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class SmartObject;
 
@@ -46,15 +47,15 @@ namespace commands {
 /**
  * @brief GetVehicleDataRequest command class
  **/
-class GetVehicleDataRequest : public CommandRequestImpl {
+class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief GetVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetVehicleDataRequest(const MessageSharedPtr& message,
-                        ApplicationManager& application_manager);
+  GetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief GetVehicleDataRequest class destructor
@@ -67,7 +68,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
   virtual void Run();
 
  protected:
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
 #ifdef HMI_DBUS_API
  private:

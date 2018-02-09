@@ -38,14 +38,15 @@
 #include "application_manager/application_manager.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SetIconRequest command class
  **/
-class SetIconRequest : public CommandRequestImpl {
+class SetIconRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief Contains information about the type of image
@@ -57,8 +58,8 @@ class SetIconRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  SetIconRequest(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+  SetIconRequest(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor
@@ -70,7 +71,7 @@ class SetIconRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event);
 
   /**
    * @brief Execute command

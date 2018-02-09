@@ -34,12 +34,14 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
+NotificationToHMI::NotificationToHMI(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {}
 
 NotificationToHMI::~NotificationToHMI() {}

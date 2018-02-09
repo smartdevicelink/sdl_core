@@ -37,22 +37,25 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ResetGlobalPropertiesResponse command class
  **/
-class ResetGlobalPropertiesResponse : public CommandResponseImpl {
+class ResetGlobalPropertiesResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief ResetGlobalPropertiesResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ResetGlobalPropertiesResponse(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  ResetGlobalPropertiesResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesResponse class destructor

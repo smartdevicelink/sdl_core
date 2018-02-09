@@ -38,7 +38,8 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,15 +47,16 @@ namespace commands {
  * @brief OnVehicleDataNotification class is used to send notification
  * to mobile device that some button was pressed on HMI.
  **/
-class OnVehicleDataNotification : public CommandNotificationImpl {
+class OnVehicleDataNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnVehicleDataNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnVehicleDataNotification(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  OnVehicleDataNotification(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnVehicleDataNotification class destructor
@@ -72,7 +74,7 @@ class OnVehicleDataNotification : public CommandNotificationImpl {
    *
    * @param app Application to receive notification
    */
-  void SendVehicleData(ApplicationConstSharedPtr app);
+  void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
 };

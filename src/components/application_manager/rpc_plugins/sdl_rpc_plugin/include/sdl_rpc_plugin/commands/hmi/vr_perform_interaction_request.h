@@ -35,22 +35,24 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief VRPerformInteractionRequest command class
  **/
-class VRPerformInteractionRequest : public RequestToHMI {
+class VRPerformInteractionRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VRPerformInteractionRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VRPerformInteractionRequest(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  VRPerformInteractionRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief VRPerformInteractionRequest class destructor

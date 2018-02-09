@@ -37,20 +37,21 @@
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 /**
  * @brief GetUrls command class
  **/
-class GetUrls : public RequestFromHMI {
+class GetUrls : public app_mngr::commands::RequestFromHMI {
  public:
   /**
    * @brief GetUrls class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetUrls(const MessageSharedPtr& message,
-          ApplicationManager& application_manager);
+  GetUrls(const app_mngr::commands::MessageSharedPtr& message,
+          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief GetUrls class destructor

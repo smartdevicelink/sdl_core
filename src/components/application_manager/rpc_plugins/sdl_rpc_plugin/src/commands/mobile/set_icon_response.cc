@@ -35,12 +35,14 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-SetIconResponse::SetIconResponse(const MessageSharedPtr& message,
-                                 ApplicationManager& app_man)
+SetIconResponse::SetIconResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& app_man)
     : CommandResponseImpl(message, app_man) {}
 
 SetIconResponse::~SetIconResponse() {}

@@ -35,7 +35,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,8 +47,8 @@ class OnReceivedPolicyUpdate : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-  OnReceivedPolicyUpdate(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager);
+  OnReceivedPolicyUpdate(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnReceivedPolicyUpdate class destructor

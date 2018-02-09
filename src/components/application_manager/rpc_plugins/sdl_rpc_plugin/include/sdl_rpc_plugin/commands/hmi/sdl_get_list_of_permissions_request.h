@@ -35,22 +35,25 @@
 
 #include "application_manager/commands/request_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SDLGetListOfPermissionsRequest command class
  **/
-class SDLGetListOfPermissionsRequest : public RequestFromHMI {
+class SDLGetListOfPermissionsRequest
+    : public app_mngr::commands::RequestFromHMI {
  public:
   /**
    * @brief SDLGetListOfPermissionsRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SDLGetListOfPermissionsRequest(const MessageSharedPtr& message,
-                                 ApplicationManager& application_manager);
+  SDLGetListOfPermissionsRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SDLGetListOfPermissionsRequest class destructor

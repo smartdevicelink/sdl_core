@@ -35,14 +35,16 @@
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 namespace hmi {
 
 OnButtonEventNotification::OnButtonEventNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : NotificationFromHMI(message, application_manager) {}
 
 void OnButtonEventNotification::Run() {

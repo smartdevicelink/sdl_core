@@ -36,7 +36,8 @@
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -52,8 +53,9 @@ class OnUIKeyBoardInputNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnUIKeyBoardInputNotification(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  OnUIKeyBoardInputNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnUIKeyBoardInputNotification class destructor

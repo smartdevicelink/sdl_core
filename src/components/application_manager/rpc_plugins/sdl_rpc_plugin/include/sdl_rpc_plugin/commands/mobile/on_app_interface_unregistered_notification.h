@@ -37,14 +37,16 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief OnAppInterfaceUnregisteredNotification class
  **/
-class OnAppInterfaceUnregisteredNotification : public CommandNotificationImpl {
+class OnAppInterfaceUnregisteredNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnAppInterfaceUnregisteredNotification class constructor
@@ -52,7 +54,8 @@ class OnAppInterfaceUnregisteredNotification : public CommandNotificationImpl {
    * @param message Incoming SmartObject message
    **/
   OnAppInterfaceUnregisteredNotification(
-      const MessageSharedPtr& message, ApplicationManager& application_manager);
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnAppInterfaceUnregisteredNotification class destructor

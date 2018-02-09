@@ -37,22 +37,25 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief DeleteInteractionChoiceSetResponse command class
  **/
-class DeleteInteractionChoiceSetResponse : public CommandResponseImpl {
+class DeleteInteractionChoiceSetResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief DeleteInteractionChoiceSetResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteInteractionChoiceSetResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager);
+  DeleteInteractionChoiceSetResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetResponse class destructor

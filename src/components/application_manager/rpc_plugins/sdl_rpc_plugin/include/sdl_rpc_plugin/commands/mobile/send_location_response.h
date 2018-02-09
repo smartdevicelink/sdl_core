@@ -36,16 +36,17 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
-class SendLocationResponse : public CommandResponseImpl {
+class SendLocationResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief SendLocationResponse class constructor
    */
-  SendLocationResponse(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  SendLocationResponse(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationResponse class destructor

@@ -36,7 +36,8 @@
 #include "sdl_rpc_plugin/commands/hmi/response_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,8 +51,8 @@ class VIGetVehicleDataResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleDataResponse(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  VIGetVehicleDataResponse(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleDataResponse class destructor

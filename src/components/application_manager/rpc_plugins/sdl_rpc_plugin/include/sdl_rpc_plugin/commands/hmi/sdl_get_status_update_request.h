@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SDLGetStatusUpdateRequest command class
  **/
-class SDLGetStatusUpdateRequest : public RequestFromHMI {
+class SDLGetStatusUpdateRequest : public app_mngr::commands::RequestFromHMI {
  public:
   /**
    * @brief SDLGetStatusUpdateRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SDLGetStatusUpdateRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  SDLGetStatusUpdateRequest(const app_mngr::commands::MessageSharedPtr& message,
+                            app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SDLGetStatusUpdateRequest class destructor

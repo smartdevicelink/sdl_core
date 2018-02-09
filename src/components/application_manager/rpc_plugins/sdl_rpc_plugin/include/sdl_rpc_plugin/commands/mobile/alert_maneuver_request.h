@@ -39,22 +39,23 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief AlertManeuverRequest command class
  **/
-class AlertManeuverRequest : public CommandRequestImpl {
+class AlertManeuverRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief AlertManeuverRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  AlertManeuverRequest(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  AlertManeuverRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief AlertManeuverRequest class destructor
@@ -71,7 +72,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /**
@@ -95,7 +96,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
   hmi_apis::Common_Result::eType navi_alert_maneuver_result_code_;
   std::string info_navi_;
   std::string info_tts_;
-  Pending pending_requests_;
+  app_mngr::commands::Pending pending_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };

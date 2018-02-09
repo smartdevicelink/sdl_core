@@ -39,22 +39,23 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief DeleteCommandRequest command class
  **/
-class DeleteCommandRequest : public CommandRequestImpl {
+class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief DeleteCommandRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteCommandRequest(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  DeleteCommandRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandRequest class destructor
@@ -71,7 +72,7 @@ class DeleteCommandRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event) FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
    * @brief Init sets hash update mode for request

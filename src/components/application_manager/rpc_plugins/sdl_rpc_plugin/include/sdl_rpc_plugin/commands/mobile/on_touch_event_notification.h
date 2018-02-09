@@ -37,7 +37,8 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,15 +47,16 @@ namespace mobile {
 /**
  * @brief OnTouchEventNotification class
  **/
-class OnTouchEventNotification : public CommandNotificationImpl {
+class OnTouchEventNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnTouchEventNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnTouchEventNotification(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  OnTouchEventNotification(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnTouchEventNotification class destructor

@@ -37,22 +37,23 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ListFilesResponse command class
  **/
-class ListFilesResponse : public CommandResponseImpl {
+class ListFilesResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief ListFilesResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ListFilesResponse(const MessageSharedPtr& message,
-                    ApplicationManager& application_manager);
+  ListFilesResponse(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ListFilesResponse class destructor

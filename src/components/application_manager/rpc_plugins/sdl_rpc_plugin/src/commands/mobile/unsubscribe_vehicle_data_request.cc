@@ -41,11 +41,13 @@
 #include "application_manager/smart_object_keys.h"
 #include "utils/helpers.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {}
@@ -378,7 +380,7 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     smart_objects::SmartObject& response) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
-  VehicleInfoSubscriptions::const_iterator it_same_app =
+  app_mngr::VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_unsubscribed_by_this_app_.begin();
   for (; vi_already_unsubscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
@@ -386,7 +388,7 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
         VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
   }
 
-  VehicleInfoSubscriptions::const_iterator it_another_app =
+  app_mngr::VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_still_subscribed_by_another_apps_.begin();
   for (; vi_still_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {

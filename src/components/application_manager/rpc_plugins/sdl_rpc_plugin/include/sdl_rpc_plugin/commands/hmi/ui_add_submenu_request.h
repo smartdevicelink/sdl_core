@@ -35,22 +35,23 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UIAddSubmenuRequest command class
  **/
-class UIAddSubmenuRequest : public RequestToHMI {
+class UIAddSubmenuRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UIAddSubmenuRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UIAddSubmenuRequest(const MessageSharedPtr& message,
-                      ApplicationManager& application_manager);
+  UIAddSubmenuRequest(const app_mngr::commands::MessageSharedPtr& message,
+                      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UIAddSubmenuRequest class destructor

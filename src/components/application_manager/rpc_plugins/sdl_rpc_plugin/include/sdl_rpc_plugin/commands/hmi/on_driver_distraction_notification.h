@@ -35,7 +35,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class Application;
 
@@ -53,8 +54,9 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnDriverDistractionNotification(const MessageSharedPtr& message,
-                                  ApplicationManager& application_manager);
+  OnDriverDistractionNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnDriverDistractionNotification class destructor

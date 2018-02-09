@@ -37,16 +37,17 @@
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
-class SpeakResponse : public CommandResponseImpl {
+class SpeakResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * \brief SpeakResponse class constructor
    **/
-  SpeakResponse(const MessageSharedPtr& message,
-                ApplicationManager& application_manager);
+  SpeakResponse(const app_mngr::commands::MessageSharedPtr& message,
+                app_mngr::ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponse class destructor

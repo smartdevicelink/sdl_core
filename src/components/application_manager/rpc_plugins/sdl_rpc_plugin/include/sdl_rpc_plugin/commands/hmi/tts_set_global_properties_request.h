@@ -35,22 +35,24 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief TTSSetGlobalPropertiesRequest command class
  **/
-class TTSSetGlobalPropertiesRequest : public RequestToHMI {
+class TTSSetGlobalPropertiesRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief TTSSetGlobalPropertiesRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  TTSSetGlobalPropertiesRequest(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  TTSSetGlobalPropertiesRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief TTSSetGlobalPropertiesRequest class destructor

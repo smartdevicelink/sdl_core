@@ -38,22 +38,23 @@
 #include "application_manager/application_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public CommandRequestImpl {
+class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SubscribeButtonRequest(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager);
+  SubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonRequest class destructor
@@ -81,7 +82,7 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise false
    **/
-  bool IsSubscriptionAllowed(ApplicationSharedPtr app,
+  bool IsSubscriptionAllowed(app_mngr::ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
 
   /**

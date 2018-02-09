@@ -37,20 +37,21 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SetMediaClockRequest request command class
  **/
-class SetMediaClockRequest : public CommandRequestImpl {
+class SetMediaClockRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * \brief SetMediaClockRequest class constructor
    **/
-  SetMediaClockRequest(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+  SetMediaClockRequest(const app_mngr::commands::MessageSharedPtr& message,
+                       app_mngr::ApplicationManager& application_manager);
 
   /**
    * \brief ShowCommand class destructor
@@ -67,7 +68,7 @@ class SetMediaClockRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   bool isDataValid();

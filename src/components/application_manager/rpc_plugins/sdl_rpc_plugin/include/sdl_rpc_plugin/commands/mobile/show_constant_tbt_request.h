@@ -38,22 +38,23 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief ShowConstantTBTRequest command class
  **/
-class ShowConstantTBTRequest : public CommandRequestImpl {
+class ShowConstantTBTRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief ShowConstantTBTRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  ShowConstantTBTRequest(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager);
+  ShowConstantTBTRequest(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTRequest class destructor
@@ -70,7 +71,7 @@ class ShowConstantTBTRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
  private:
   /**

@@ -35,14 +35,15 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UISendHapticDataRequest command class
  **/
-class UISendHapticDataRequest : public RequestToHMI {
+class UISendHapticDataRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UISendHapticDataRequest class constructor
@@ -50,8 +51,8 @@ class UISendHapticDataRequest : public RequestToHMI {
    * @param message Incoming SmartObject message
    * @param application_manager Reference of application manager
    **/
-  UISendHapticDataRequest(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+  UISendHapticDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                          app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief UISendHapticDataRequest class destructor

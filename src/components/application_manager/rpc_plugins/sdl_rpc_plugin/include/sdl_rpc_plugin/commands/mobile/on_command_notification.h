@@ -37,7 +37,8 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 class Application;
 
@@ -47,15 +48,16 @@ namespace commands {
  * @brief OnCommandNotification class is used to send notification
  * to mobile device.
  **/
-class OnCommandNotification : public CommandNotificationImpl {
+class OnCommandNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnCommandNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnCommandNotification(const MessageSharedPtr& message,
-                        ApplicationManager& application_manager);
+  OnCommandNotification(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnCommandNotification class destructor

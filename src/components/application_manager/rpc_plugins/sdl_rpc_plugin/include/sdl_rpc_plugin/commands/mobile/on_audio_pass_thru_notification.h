@@ -37,7 +37,8 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -46,15 +47,17 @@ namespace commands {
  *binary data written from
  * microphone to mobile device while PerformAudioPassThru is active.
  **/
-class OnAudioPassThruNotification : public CommandNotificationImpl {
+class OnAudioPassThruNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnAudioPassThruNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnAudioPassThruNotification(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  OnAudioPassThruNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnAudioPassThruNotification class destructor

@@ -37,22 +37,24 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief SetDisplayLayoutResponse command class
  **/
-class SetDisplayLayoutResponse : public CommandResponseImpl {
+class SetDisplayLayoutResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * @brief SetDisplayLayoutResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  SetDisplayLayoutResponse(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+  SetDisplayLayoutResponse(const app_mngr::commands::MessageSharedPtr& message,
+                           app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief SetDisplayLayoutResponse class destructor

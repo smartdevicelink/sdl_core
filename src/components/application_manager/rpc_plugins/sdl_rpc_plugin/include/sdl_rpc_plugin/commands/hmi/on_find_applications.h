@@ -35,7 +35,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -49,8 +50,8 @@ class OnFindApplications : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnFindApplications(const MessageSharedPtr& message,
-                     ApplicationManager& application_manager);
+  OnFindApplications(const app_mngr::commands::MessageSharedPtr& message,
+                     app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnFindApplications class destructor

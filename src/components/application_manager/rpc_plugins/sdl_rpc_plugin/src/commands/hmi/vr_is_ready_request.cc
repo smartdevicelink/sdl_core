@@ -33,12 +33,14 @@
 #include "sdl_rpc_plugin/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/rpc_service.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-VRIsReadyRequest::VRIsReadyRequest(const MessageSharedPtr& message,
-                                   ApplicationManager& application_manager)
+VRIsReadyRequest::VRIsReadyRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {}
 
@@ -57,14 +59,14 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_IsReady: {
       LOG4CXX_DEBUG(logger_, "Received VR_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VR_IsReady);
-      const bool is_available = ChangeInterfaceState(
+      const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_VR);
 
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_vr_cooperating(is_available);
-      if (!CheckAvailabilityHMIInterfaces(application_manager_,
-                                          HmiInterfaces::HMI_INTERFACE_VR)) {
+      if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
+              application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_VR isn't available");
         return;

@@ -36,20 +36,23 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
  * @brief UnsubscribeWayPointsResponse command class
  **/
-class UnsubscribeWayPointsResponse : public CommandResponseImpl {
+class UnsubscribeWayPointsResponse
+    : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
    * \brief UnsubscribeWayPointsResponse class constructor
    **/
-  UnsubscribeWayPointsResponse(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  UnsubscribeWayPointsResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * \brief UnsubscribeWayPointsResponse class destructor

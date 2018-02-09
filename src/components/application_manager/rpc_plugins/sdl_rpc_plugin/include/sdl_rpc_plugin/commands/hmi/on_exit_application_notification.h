@@ -35,7 +35,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -49,8 +50,9 @@ class OnExitApplicationNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnExitApplicationNotification(const MessageSharedPtr& message,
-                                ApplicationManager& application_manager);
+  OnExitApplicationNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnExitApplicationNotification class destructor

@@ -34,11 +34,13 @@
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
 OnWayPointChangeNotification::OnWayPointChangeNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandNotificationImpl(message, application_manager) {}
 
 OnWayPointChangeNotification::~OnWayPointChangeNotification() {}

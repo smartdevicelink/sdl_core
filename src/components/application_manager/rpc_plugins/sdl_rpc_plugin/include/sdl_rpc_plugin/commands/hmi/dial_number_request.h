@@ -35,7 +35,8 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -43,15 +44,15 @@ namespace hmi {
 /**
  * @brief DialNumberRequest command class
  **/
-class DialNumberRequest : public RequestToHMI {
+class DialNumberRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief DialNumberRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  DialNumberRequest(const MessageSharedPtr& message,
-                    ApplicationManager& application_manager);
+  DialNumberRequest(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberRequest class destructor

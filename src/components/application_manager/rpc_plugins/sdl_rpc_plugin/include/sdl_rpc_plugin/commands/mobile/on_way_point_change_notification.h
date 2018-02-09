@@ -36,19 +36,22 @@
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-class OnWayPointChangeNotification : public CommandNotificationImpl {
+class OnWayPointChangeNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnWayPointChangeNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnWayPointChangeNotification(const MessageSharedPtr& message,
-                               ApplicationManager& application_manager);
+  OnWayPointChangeNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager);
 
   /**
    * @brief OnWayPointChangeNotification class destructor

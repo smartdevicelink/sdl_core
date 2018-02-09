@@ -1,11 +1,13 @@
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
 GetSystemCapabilityRequest::GetSystemCapabilityRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 GetSystemCapabilityRequest::~GetSystemCapabilityRequest() {}

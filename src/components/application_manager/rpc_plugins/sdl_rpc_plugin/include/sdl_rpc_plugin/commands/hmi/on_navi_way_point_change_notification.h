@@ -36,7 +36,8 @@
 #include "sdl_rpc_plugin/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -50,8 +51,9 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnNaviWayPointChangeNotification(const MessageSharedPtr& message,
-                                   ApplicationManager& app_man);
+  OnNaviWayPointChangeNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& app_man);
 
   /**
    * @brief OnNaviWayPointChangeNotification class destructor

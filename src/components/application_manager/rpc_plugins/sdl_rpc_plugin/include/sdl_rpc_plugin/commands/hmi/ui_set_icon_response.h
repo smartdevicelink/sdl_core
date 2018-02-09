@@ -35,7 +35,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/response_from_hmi.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
@@ -49,7 +50,7 @@ class UISetIconResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UISetIconResponse(const MessageSharedPtr& message);
+  UISetIconResponse(const app_mngr::commands::MessageSharedPtr& message);
 
   /**
    * @brief UISetIconResponse class destructor
