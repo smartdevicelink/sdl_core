@@ -4,11 +4,17 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+ButtonPressRequest::ButtonPressRequest(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    : app_mngr::commands::CommandRequestImpl(message, application_manager) {}
+
 bool ButtonPressRequest::Init() {
-    return true;
+  return true;
 }
 void ButtonPressRequest::Run() {}
-void ButtonPressRequest::on_event(const application_manager::event_engine::Event& event) {}
+void ButtonPressRequest::on_event(
+    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

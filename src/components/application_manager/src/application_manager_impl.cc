@@ -373,6 +373,12 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
 
+  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
+      [app](plugin_manager::RPCPlugin& plugin) {
+        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
+      };
+  plugin_manager_->ForEachPlugin(on_app_registered);
+
   // TODO(AOleynik): Is neccessary to be able to know that registration process
   // has been completed and default HMI level is set, otherwise policy will
   // block all the requests/notifications to mobile
