@@ -5,10 +5,11 @@ namespace rc_rpc_plugin {
 namespace commands {
 
 bool SetInteriorVehicleDataResponse::Init() {
-    return true;
+  return true;
 }
 void SetInteriorVehicleDataResponse::Run() {}
-void SetInteriorVehicleDataResponse::on_event(const application_manager::event_engine::Event& event) {}
+void SetInteriorVehicleDataResponse::on_event(
+    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
