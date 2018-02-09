@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief TTSChangeRegistratioResponse command class
  **/
-class TTSChangeRegistratioResponse : public ResponseFromHMI {
+class TTSChangeRegistratioResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSChangeRegistratioResponse class constructor

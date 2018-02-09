@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnAudioDataStreamingNotification command class
  **/
-class OnAudioDataStreamingNotification : public NotificationToHMI {
+class OnAudioDataStreamingNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnAudioDataStreamingNotification class constructor

@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief ClosePopupResponse command class
  **/
-class ClosePopupResponse : public ResponseFromHMI {
+class ClosePopupResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief ClosePopupResponse class constructor

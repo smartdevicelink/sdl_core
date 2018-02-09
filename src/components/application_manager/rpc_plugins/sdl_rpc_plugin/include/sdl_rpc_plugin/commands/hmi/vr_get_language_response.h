@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VRGetLanguageResponse command class
  **/
-class VRGetLanguageResponse : public ResponseFromHMI {
+class VRGetLanguageResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VRGetLanguageResponse class constructor
