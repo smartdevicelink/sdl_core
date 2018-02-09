@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief NaviStopStreamResponse command class
  **/
-class AudioStopStreamResponse : public ResponseFromHMI {
+class AudioStopStreamResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief AudioStopStreamResponse class constructor

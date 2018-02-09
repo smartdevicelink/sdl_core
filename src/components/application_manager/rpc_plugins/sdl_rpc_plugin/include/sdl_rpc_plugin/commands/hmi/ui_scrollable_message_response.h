@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIScrollableMessageResponse command class
  **/
-class UIScrollableMessageResponse : public ResponseFromHMI {
+class UIScrollableMessageResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIScrollableMessageResponse class constructor

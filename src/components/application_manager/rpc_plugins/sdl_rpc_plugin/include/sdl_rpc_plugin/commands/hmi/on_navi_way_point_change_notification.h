@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnNaviWayPointChangeNotification command class
  **/
-class OnNaviWayPointChangeNotification : public NotificationFromHMI {
+class OnNaviWayPointChangeNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnNaviWayPointChangeNotification class constructor

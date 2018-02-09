@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief VIIsReadyResponse command class
  **/
-class VIIsReadyResponse : public ResponseFromHMI {
+class VIIsReadyResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VIIsReadyResponse class constructor

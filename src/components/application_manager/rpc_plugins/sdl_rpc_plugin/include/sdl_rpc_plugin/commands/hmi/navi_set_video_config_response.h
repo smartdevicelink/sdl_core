@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief NaviSetVideoConfigResponse command class
  **/
-class NaviSetVideoConfigResponse : public ResponseFromHMI {
+class NaviSetVideoConfigResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief NaviSetVideoConfigResponse class constructor

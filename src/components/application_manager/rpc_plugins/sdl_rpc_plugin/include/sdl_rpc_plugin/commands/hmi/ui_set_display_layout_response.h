@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UiSetDisplayLayoutResponse command class
  **/
-class UiSetDisplayLayoutResponse : public ResponseFromHMI {
+class UiSetDisplayLayoutResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UiSetDisplayLayoutResponse class constructor

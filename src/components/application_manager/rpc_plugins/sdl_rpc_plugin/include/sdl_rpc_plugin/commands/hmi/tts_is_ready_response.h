@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief TTSIsReadyResponse command class
  **/
-class TTSIsReadyResponse : public ResponseFromHMI {
+class TTSIsReadyResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSIsReadyResponse class constructor

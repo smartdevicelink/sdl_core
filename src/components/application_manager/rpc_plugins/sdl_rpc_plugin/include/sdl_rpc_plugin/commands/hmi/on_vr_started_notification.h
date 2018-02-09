@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnVRStartedNotification command class
  **/
-class OnVRStartedNotification : public NotificationFromHMI {
+class OnVRStartedNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVRStartedNotification class constructor
