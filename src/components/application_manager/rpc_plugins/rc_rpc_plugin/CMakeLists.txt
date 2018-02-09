@@ -58,7 +58,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("rc_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES})
+add_library("rc_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
 target_link_libraries("rc_rpc_plugin" ${LIBRARIES})
 
 set(INSTALL_DESTINATION bin)
