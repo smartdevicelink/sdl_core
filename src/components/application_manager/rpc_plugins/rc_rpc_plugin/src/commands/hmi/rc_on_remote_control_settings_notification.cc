@@ -5,10 +5,11 @@ namespace rc_rpc_plugin {
 namespace commands {
 
 bool RCOnRemoteControlSettingsNotification::Init() {
-    return true;
+  return true;
 }
 void RCOnRemoteControlSettingsNotification::Run() {}
-void RCOnRemoteControlSettingsNotification::on_event(const application_manager::event_engine::Event& event) {}
+void RCOnRemoteControlSettingsNotification::on_event(
+    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

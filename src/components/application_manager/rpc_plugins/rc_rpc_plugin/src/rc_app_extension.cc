@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
-#include "application_manager/plugin_manager/rpc_plugin.h"
-#include "application_manager/command_factory.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
 
 namespace rc_rpc_plugin {
-namespace plugins = application_manager::plugin_manager;
-namespace app_mngr = application_manager;
-class RCRPCPlugin : public plugins::RPCPlugin {
- public:
-  bool Init(app_mngr::ApplicationManager& app_manager,
-            app_mngr::rpc_service::RPCService& rpc_service,
-            app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
-  bool IsAbleToProcess(
-      const int32_t function_id,
-      const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
-  std::string PluginName() OVERRIDE;
-  app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
-  void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
-  void OnApplicationEvent(plugins::ApplicationEvent event,
-                          app_mngr::ApplicationSharedPtr application) OVERRIDE;
+RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
+    : AppExtension(uid) {}
 
-  static const uint32_t kRCPluginID = 153;
+void RCAppExtension::SubscribeToInteriorVehicleData(
+    const Json::Value& module_type) {
+  subscribed_interior_vehicle_data_.insert(module_type);
+}
 
- private:
-  std::unique_ptr<application_manager::CommandFactory> command_factory_;
-};
-}  // namespace rc_rpc_plugin
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
+void RCAppExtension::UnsubscribeFromInteriorVehicleData(
+    const Json::Value& module_type) {
+  subscribed_interior_vehicle_data_.erase(module_type);
+}
+
+void RCAppExtension::UnsubscribeFromInteriorVehicleData() {
+  subscribed_interior_vehicle_data_.clear();
+}
+
+bool RCAppExtension::IsSubscibedToInteriorVehicleData(
+    const Json::Value& module_type) {
+  std::set<Json::Value>::iterator it =
+      subscribed_interior_vehicle_data_.find(module_type);
+
+  return (it != subscribed_interior_vehicle_data_.end());
+}
+
+RCAppExtension::~RCAppExtension() {}
+}  //  namespace rc_rpc_plugin

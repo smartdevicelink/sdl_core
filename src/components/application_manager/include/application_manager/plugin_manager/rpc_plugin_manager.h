@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "utils/optional.h"
@@ -37,6 +38,12 @@ class RPCPluginManager {
   virtual utils::Optional<RPCPlugin> FindPluginToProcess(
       const int32_t function_id,
       const commands::Command::CommandSource message_source) = 0;
+
+  /**
+   * @brief OnPolicyEvent Notifies modules on certain events from policy
+   * @param event Policy event
+   */
+  virtual void ForEachPlugin(std::function<void(RPCPlugin&)> functor) = 0;
 };
 }  // namespace plugin_manager
 }  // namespace application_manager

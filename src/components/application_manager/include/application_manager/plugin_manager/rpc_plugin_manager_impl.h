@@ -30,6 +30,10 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+
+  // RPCPluginManager interface
+ public:
+  void ForEachPlugin(std::function<void(RPCPlugin&)> functor) OVERRIDE;
 };
 }  // namespace plugin_manager
 }  // namespace application_manager

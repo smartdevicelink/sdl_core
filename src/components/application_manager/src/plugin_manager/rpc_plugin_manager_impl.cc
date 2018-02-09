@@ -98,5 +98,13 @@ utils::Optional<RPCPlugin> RPCPluginManagerImpl::FindPluginToProcess(
   return PluginOptional(PluginOptional::EMPTY,
                         std::string("Plugin for processing RPC not found"));
 }
+
+void RPCPluginManagerImpl::ForEachPlugin(
+    std::function<void(RPCPlugin&)> functor) {
+  for (auto& plugin : loaded_plugins_) {
+    functor(*plugin);
+  }
+}
+
 }  // namespace plugin_manager
 }  // namespace application_manager
