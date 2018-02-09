@@ -4,6 +4,11 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+RCButtonPressRequest::RCButtonPressRequest(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    :app_mngr::commands::RequestFromHMI(message, application_manager) {}
+
 bool RCButtonPressRequest::Init() {
   return true;
 }
