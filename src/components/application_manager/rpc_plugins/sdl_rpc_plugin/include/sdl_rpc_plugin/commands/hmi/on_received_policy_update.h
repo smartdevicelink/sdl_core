@@ -40,7 +40,7 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
-class OnReceivedPolicyUpdate : public NotificationFromHMI {
+class OnReceivedPolicyUpdate : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
      * @brief OnReceivedPolicyUpdate class constructor

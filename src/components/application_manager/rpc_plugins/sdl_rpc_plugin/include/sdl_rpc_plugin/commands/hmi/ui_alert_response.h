@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIAlertResponse command class
  **/
-class UIAlertResponse : public ResponseFromHMI {
+class UIAlertResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIAlertResponse class constructor

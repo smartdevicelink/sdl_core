@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief ActivateAppResponse command class
  **/
-class ActivateAppResponse : public ResponseFromHMI {
+class ActivateAppResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief ActivateAppResponse class constructor

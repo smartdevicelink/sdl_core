@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief NaviUpdateTurnListResponse command class
  **/
-class NaviUpdateTurnListResponse : public ResponseFromHMI {
+class NaviUpdateTurnListResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief NaviUpdateTurnListResponse class constructor

@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIGpsDataNotification command class
  **/
-class OnVIGpsDataNotification : public NotificationFromHMI {
+class OnVIGpsDataNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIGpsDataNotification class constructor

@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VIReadDIDResponse command class
  **/
-class VIReadDIDResponse : public ResponseFromHMI {
+class VIReadDIDResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VIReadDIDResponse class constructor

@@ -50,7 +50,7 @@ struct SystemInfo {
 /**
  * @brief GetSystemInfoResponse command class
  **/
-class GetSystemInfoResponse : public ResponseFromHMI {
+class GetSystemInfoResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief GetSystemInfoResponse class constructor
