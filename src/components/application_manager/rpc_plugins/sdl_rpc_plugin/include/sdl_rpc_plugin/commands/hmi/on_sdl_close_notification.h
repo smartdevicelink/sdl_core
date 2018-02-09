@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnSDLCloseNotification command class
  **/
-class OnSDLCloseNotification : public NotificationToHMI {
+class OnSDLCloseNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnSDLCloseNotification class constructor

@@ -45,7 +45,7 @@ namespace mobile_api = mobile_apis;
 /**
  * @brief OnSystemContextNotification command class
  **/
-class OnSystemContextNotification : public NotificationFromHMI {
+class OnSystemContextNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnSystemContextNotification class constructor

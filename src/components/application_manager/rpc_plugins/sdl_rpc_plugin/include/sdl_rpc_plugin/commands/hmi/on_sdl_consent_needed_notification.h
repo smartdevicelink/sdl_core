@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnSDLConsentNeededNotification command class
  **/
-class OnSDLConsentNeededNotification : public NotificationToHMI {
+class OnSDLConsentNeededNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnSDLConsentNeededNotification class constructor

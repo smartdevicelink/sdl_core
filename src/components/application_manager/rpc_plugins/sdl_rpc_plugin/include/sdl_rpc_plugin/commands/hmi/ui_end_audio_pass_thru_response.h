@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIEndAudioPassThruResponse command class
  **/
-class UIEndAudioPassThruResponse : public ResponseFromHMI {
+class UIEndAudioPassThruResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIEndAudioPassThruResponse class constructor

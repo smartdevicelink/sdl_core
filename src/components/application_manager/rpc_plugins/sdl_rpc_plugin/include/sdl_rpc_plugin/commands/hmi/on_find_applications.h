@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnFindApplications command class
  **/
-class OnFindApplications : public NotificationFromHMI {
+class OnFindApplications : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnFindApplications class constructor

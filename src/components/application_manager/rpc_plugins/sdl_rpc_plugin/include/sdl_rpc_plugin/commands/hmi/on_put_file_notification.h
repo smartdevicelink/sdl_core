@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnPutFileNotification command class
  **/
-class OnPutFileNotification : public NotificationToHMI {
+class OnPutFileNotification : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnPutFileNotification class constructor

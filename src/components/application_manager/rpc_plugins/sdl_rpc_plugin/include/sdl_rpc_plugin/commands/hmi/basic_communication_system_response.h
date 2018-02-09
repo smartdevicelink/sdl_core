@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief BasicCommunicationSystemResponse command class
  **/
-class BasicCommunicationSystemResponse : public ResponseFromHMI {
+class BasicCommunicationSystemResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief BasicCommunicationSystemResponse class constructor

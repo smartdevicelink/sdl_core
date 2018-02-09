@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UISendHapticDataResponse command class
  **/
-class UISendHapticDataResponse : public ResponseFromHMI {
+class UISendHapticDataResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UISendHapticDataResponse class constructor

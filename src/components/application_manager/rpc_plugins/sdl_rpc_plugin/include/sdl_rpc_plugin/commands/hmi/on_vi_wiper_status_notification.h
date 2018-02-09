@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIWiperStatusNotification command class
  **/
-class OnVIWiperStatusNotification : public NotificationFromHMI {
+class OnVIWiperStatusNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIWiperStatusNotification class constructor
