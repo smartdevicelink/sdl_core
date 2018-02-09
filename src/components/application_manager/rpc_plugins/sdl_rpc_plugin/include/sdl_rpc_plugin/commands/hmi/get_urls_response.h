@@ -39,7 +39,7 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace commands {
 
-class GetUrlsResponse : public ResponseToHMI {
+class GetUrlsResponse : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief GetUrlsResponse class constructor

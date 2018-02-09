@@ -45,7 +45,7 @@ namespace hmi {
 /**
  * @brief DialNumberResponse command class
  **/
-class DialNumberResponse : public ResponseFromHMI {
+class DialNumberResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief DialNumberResponse class constructor

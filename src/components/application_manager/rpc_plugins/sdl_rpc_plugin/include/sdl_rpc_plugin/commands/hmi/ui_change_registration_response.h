@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UIChangeRegistratioResponse command class
  **/
-class UIChangeRegistratioResponse : public ResponseFromHMI {
+class UIChangeRegistratioResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIChangeRegistratioResponse class constructor

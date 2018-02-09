@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VRAddCommandResponse command class
  **/
-class VRAddCommandResponse : public ResponseFromHMI {
+class VRAddCommandResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VRAddCommandResponse class constructor

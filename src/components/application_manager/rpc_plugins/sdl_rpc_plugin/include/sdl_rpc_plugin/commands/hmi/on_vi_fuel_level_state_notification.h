@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief OnVIFuelLevelStateNotification command class
  **/
-class OnVIFuelLevelStateNotification : public NotificationFromHMI {
+class OnVIFuelLevelStateNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIFuelLevelStateNotification class constructor

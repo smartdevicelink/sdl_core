@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VRGetCapabilitiesResponse command class
  **/
-class VRGetCapabilitiesResponse : public ResponseFromHMI {
+class VRGetCapabilitiesResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VRGetCapabilitiesResponse class constructor

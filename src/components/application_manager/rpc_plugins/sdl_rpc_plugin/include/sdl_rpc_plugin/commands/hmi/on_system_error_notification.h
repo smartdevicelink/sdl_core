@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnSystemErrorNotification command class
  **/
-class OnSystemErrorNotification : public NotificationFromHMI {
+class OnSystemErrorNotification : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnSystemErrorNotification class constructor
