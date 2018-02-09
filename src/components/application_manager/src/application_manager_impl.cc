@@ -1675,6 +1675,7 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
 void ApplicationManagerImpl::set_hmi_message_handler(
     hmi_message_handler::HMIMessageHandler* handler) {
   hmi_handler_ = handler;
+  rpc_service_->set_hmi_message_handler(handler);
 }
 
 void ApplicationManagerImpl::set_connection_handler(
