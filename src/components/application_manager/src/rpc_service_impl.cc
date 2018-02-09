@@ -539,6 +539,11 @@ void RPCServiceImpl::set_protocol_handler(
   protocol_handler_ = handler;
 }
 
+void RPCServiceImpl::set_hmi_message_handler(
+    hmi_message_handler::HMIMessageHandler* handler) {
+  hmi_handler_ = handler;
+}
+
 bool RPCServiceImpl::ConvertSOtoMessage(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
     Message& output) {
