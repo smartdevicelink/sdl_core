@@ -4,6 +4,11 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+RCGetInteriorVehicleDataResponse::RCGetInteriorVehicleDataResponse(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    :app_mngr::commands::ResponseToHMI(message, application_manager) {}
+
 bool RCGetInteriorVehicleDataResponse::Init() {
   return true;
 }
