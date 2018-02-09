@@ -4,6 +4,11 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager)
+    : app_mngr::commands::CommandRequestImpl(message, application_manager) {}
+
 bool SetInteriorVehicleDataRequest::Init() {
   return true;
 }
