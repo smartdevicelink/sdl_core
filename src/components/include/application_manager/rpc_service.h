@@ -36,6 +36,7 @@
 #include "application_manager/commands/command.h"
 #include "application_manager/message.h"
 #include "protocol_handler/protocol_handler.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -80,6 +81,8 @@ class RPCService {
    */
   virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
+  virtual void set_hmi_message_handler(
+      hmi_message_handler::HMIMessageHandler* handler) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
   virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
