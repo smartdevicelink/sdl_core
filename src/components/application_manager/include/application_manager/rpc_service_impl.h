@@ -39,7 +39,6 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mobile_message_handler.h"
-#include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
 
 #include "formatters/formatter_json_rpc.h"
@@ -114,6 +113,8 @@ class RPCServiceImpl : public RPCService,
 
   void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) OVERRIDE;
+  void set_hmi_message_handler(
+      hmi_message_handler::HMIMessageHandler* handler) OVERRIDE;
 
 #ifdef SDL_REMOTE_CONTROL
   void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
