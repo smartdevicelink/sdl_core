@@ -53,7 +53,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RCCommandFactory")
+CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 namespace rc_rpc_plugin {
 using namespace application_manager;
@@ -62,11 +62,13 @@ RCCommandFactory::RCCommandFactory(
     app_mngr::ApplicationManager& app_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    policy::PolicyHandlerInterface& policy_handler,
+    ResourceAllocationManager& allocation_manager)
     : app_manager_(app_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
-    , policy_handler_(policy_handler) {}
+    , policy_handler_(policy_handler)
+    , allocation_manager_(allocation_manager) {}
 
 CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -84,14 +86,13 @@ CommandSharedPtr RCCommandFactory::CreateMobileCommand(
   CommandSharedPtr command;
   const int function_id =
       (*message)[strings::params][strings::function_id].asInt();
-  LOG4CXX_DEBUG(
-      logger_,
-      "CreateMobileCommand function_id: " << function_id);
+  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " << function_id);
   switch (function_id) {
     case mobile_apis::FunctionID::ButtonPressID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(new commands::ButtonPressRequest(message, app_manager_));
+        command.reset(new commands::ButtonPressRequest(
+            message, app_manager_, allocation_manager_));
       } else {
         command.reset(new commands::ButtonPressResponse(message, app_manager_));
       }
@@ -132,57 +133,57 @@ CommandSharedPtr RCCommandFactory::CreateMobileCommand(
 CommandSharedPtr RCCommandFactory::CreateHMICommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-    CommandSharedPtr command;
-    const int function_id =
-        (*message)[strings::params][strings::function_id].asInt();
-    LOG4CXX_DEBUG(
-        logger_,
-        "CreateHMICommand function_id: " << function_id);
-    switch (function_id) {
-      case hmi_apis::FunctionID::Buttons_ButtonPress: {
-        if ((*message)[strings::params][strings::message_type] ==
-            static_cast<int>(application_manager::MessageType::kRequest)) {
-          command.reset(new commands::RCButtonPressRequest(message, app_manager_));
-        } else {
-          command.reset(new commands::RCButtonPressResponse(message, app_manager_));
-        }
-        break;
+  CommandSharedPtr command;
+  const int function_id =
+      (*message)[strings::params][strings::function_id].asInt();
+  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << function_id);
+  switch (function_id) {
+    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command.reset(
+            new commands::RCButtonPressRequest(message, app_manager_));
+      } else {
+        command.reset(
+            new commands::RCButtonPressResponse(message, app_manager_));
       }
-      case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
-        if ((*message)[strings::params][strings::message_type] ==
-            static_cast<int>(application_manager::MessageType::kRequest)) {
-          command.reset(
-              new commands::RCGetInteriorVehicleDataRequest(message, app_manager_));
-        } else {
-          command.reset(new commands::RCGetInteriorVehicleDataResponse(
-              message, app_manager_));
-        }
-        break;
-      }
-      case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
-        if ((*message)[strings::params][strings::message_type] ==
-            static_cast<int>(application_manager::MessageType::kRequest)) {
-          command.reset(
-              new commands::RCSetInteriorVehicleDataRequest(message, app_manager_));
-        } else {
-          command.reset(new commands::RCSetInteriorVehicleDataResponse(
-              message, app_manager_));
-        }
-        break;
-      }
-      case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-        command.reset(new commands::RCOnInteriorVehicleDataNotification(
-            message, app_manager_));
-        break;
-      }
-      case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
-        command.reset(new commands::RCOnRemoteControlSettingsNotification(
-            message, app_manager_));
-        break;
-      }
-      default: { break; }
+      break;
     }
-    return command;
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command.reset(new commands::RCGetInteriorVehicleDataRequest(
+            message, app_manager_));
+      } else {
+        command.reset(new commands::RCGetInteriorVehicleDataResponse(
+            message, app_manager_));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command.reset(new commands::RCSetInteriorVehicleDataRequest(
+            message, app_manager_));
+      } else {
+        command.reset(new commands::RCSetInteriorVehicleDataResponse(
+            message, app_manager_));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
+      command.reset(new commands::RCOnInteriorVehicleDataNotification(
+          message, app_manager_));
+      break;
+    }
+    case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
+      command.reset(new commands::RCOnRemoteControlSettingsNotification(
+          message, app_manager_));
+      break;
+    }
+    default: { break; }
   }
+  return command;
+}
 
 }  // namespace application_manager

@@ -13,6 +13,12 @@ bool RCRPCPlugin::Init(
     policy::PolicyHandlerInterface& policy_handler) {
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager));
+  command_factory_.reset(
+      new rc_rpc_plugin::RCCommandFactory(app_manager,
+                                          rpc_service,
+                                          hmi_capabilities,
+                                          policy_handler,
+                                          *resource_allocation_manager_));
   return true;
 }
 
@@ -48,3 +54,7 @@ void RCRPCPlugin::OnApplicationEvent(
 }
 
 }  // namespace rc_rpc_plugin
+
+extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+  return new rc_rpc_plugin::RCRPCPlugin();
+}
