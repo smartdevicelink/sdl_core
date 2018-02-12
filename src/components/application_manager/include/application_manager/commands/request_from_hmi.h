@@ -46,7 +46,10 @@ namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
  public:
   RequestFromHMI(const MessageSharedPtr& message,
-                 ApplicationManager& application_manager);
+                 ApplicationManager& application_manager,
+                 rpc_service::RPCService& rpc_service,
+                 HMICapabilities& hmi_capabilities,
+                 policy::PolicyHandlerInterface& policy_handler);
   virtual ~RequestFromHMI();
   virtual bool Init();
   virtual bool CleanUp();
