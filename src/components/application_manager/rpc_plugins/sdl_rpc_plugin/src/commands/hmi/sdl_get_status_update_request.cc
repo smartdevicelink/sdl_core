@@ -54,7 +54,7 @@ SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.GetPolicyHandler().OnGetStatusUpdate(
+  policy_handler_.OnGetStatusUpdate(
       (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 

@@ -53,7 +53,7 @@ OnPolicyUpdate::~OnPolicyUpdate() {}
 
 void OnPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.GetPolicyHandler().OnPTExchangeNeeded();
+  policy_handler_.OnPTExchangeNeeded();
 }
 
 }  // namespace commands

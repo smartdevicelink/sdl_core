@@ -71,7 +71,7 @@ void NotificationFromHMI::SendNotificationToMobile(
     const application_manager::commands::MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-  application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);
+  rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
 }
 
 void NotificationFromHMI::CreateHMIRequest(
@@ -100,7 +100,7 @@ void NotificationFromHMI::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }

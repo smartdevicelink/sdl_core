@@ -53,7 +53,7 @@ RCGetCapabilitiesResponse::~RCGetCapabilitiesResponse() {}
 void RCGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
   bool capability_exists =
       (*message_)[strings::msg_params].keyExists(strings::rc_capability);
 
