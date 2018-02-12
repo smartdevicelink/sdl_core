@@ -39,8 +39,15 @@ namespace commands {
 
 GetUrlsResponse::GetUrlsResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : ResponseToHMI(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : ResponseToHMI(message,
+                    application_manager,
+                    rpc_service,
+                    hmi_capabilities,
+                    policy_handle) {}
 
 GetUrlsResponse::~GetUrlsResponse() {}
 

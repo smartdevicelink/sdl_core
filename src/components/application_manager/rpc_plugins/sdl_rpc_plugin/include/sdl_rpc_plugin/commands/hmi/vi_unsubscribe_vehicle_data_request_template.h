@@ -56,8 +56,15 @@ class VIUnsubscribeVehicleDataRequestTemplate
    **/
   VIUnsubscribeVehicleDataRequestTemplate(
       const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager)
-      : RequestToHMI(message, application_manager) {}
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle)
+      : RequestToHMI(message,
+                     application_manager,
+                     rpc_service,
+                     hmi_capabilities,
+                     policy_handle) {}
 
   /**
    * @brief Execute command with sending DBus thin request to HMI

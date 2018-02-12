@@ -61,8 +61,15 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
 }
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {}
+                           ApplicationManager& application_manager,
+                           rpc_service::RPCService& rpc_service,
+                           HMICapabilities& hmi_capabilities,
+                           policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler) {}
 
 RequestToHMI::~RequestToHMI() {}
 

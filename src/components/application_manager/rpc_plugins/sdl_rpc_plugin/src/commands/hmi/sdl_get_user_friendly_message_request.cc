@@ -40,8 +40,15 @@ namespace commands {
 
 SDLGetUserFriendlyMessageRequest::SDLGetUserFriendlyMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : RequestFromHMI(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : RequestFromHMI(message,
+                     application_manager,
+                     rpc_service,
+                     hmi_capabilities,
+                     policy_handle) {}
 
 SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {}
 

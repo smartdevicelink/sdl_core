@@ -39,8 +39,12 @@ namespace commands {
 
 OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& app_man)
-    : NotificationFromHMI(message, app_man) {}
+    ApplicationManager& app_man,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationFromHMI(
+          message, app_man, rpc_service, hmi_capabilities, policy_handle) {}
 
 OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
 
