@@ -49,7 +49,10 @@ namespace str = strings;
 #ifdef HMI_DBUS_API
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
     : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
@@ -215,8 +218,15 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 #else
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 

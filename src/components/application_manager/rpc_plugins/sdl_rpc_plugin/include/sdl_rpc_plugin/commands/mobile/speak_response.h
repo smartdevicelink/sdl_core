@@ -47,7 +47,10 @@ class SpeakResponse : public app_mngr::commands::CommandResponseImpl {
    * \brief SpeakResponse class constructor
    **/
   SpeakResponse(const app_mngr::commands::MessageSharedPtr& message,
-                app_mngr::ApplicationManager& application_manager);
+                app_mngr::ApplicationManager& application_manager,
+                app_mngr::rpc_service::RPCService& rpc_service,
+                app_mngr::HMICapabilities& hmi_capabilities,
+                policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * \brief SpeakResponse class destructor
