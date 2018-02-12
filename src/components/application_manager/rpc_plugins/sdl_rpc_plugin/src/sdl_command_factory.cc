@@ -49,8 +49,10 @@ SDLCommandFactory::SDLCommandFactory(
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler) {
-  hmi_command_factory_.reset(new HMICommandFactory(app_manager));
-  mobile_command_factory_.reset(new MobileCommandFactory(app_manager));
+  hmi_command_factory_.reset(new HMICommandFactory(
+      app_manager, rpc_service, hmi_capabilities, policy_handler));
+  mobile_command_factory_.reset(new MobileCommandFactory(
+      app_manager, rpc_service, hmi_capabilities, policy_handler));
 }
 
 app_mngr::CommandSharedPtr SDLCommandFactory::CreateCommand(

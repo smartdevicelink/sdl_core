@@ -50,7 +50,10 @@ class UISetIconResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UISetIconResponse(const app_mngr::commands::MessageSharedPtr& message);
+  UISetIconResponse(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::rpc_service::RPCService& rpc_service,
+                    app_mngr::HMICapabilities& hmi_capabilities,
+                    policy::PolicyHandlerInterface& policy_handle);
 
   /**
    * @brief UISetIconResponse class destructor
