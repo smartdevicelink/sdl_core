@@ -47,8 +47,15 @@ class GenericResponse : public app_mngr::commands::CommandResponseImpl {
    * \brief GenericResponse class constructor
    **/
   GenericResponse(const app_mngr::commands::MessageSharedPtr& message,
-                  app_mngr::ApplicationManager& application_manager)
-      : CommandResponseImpl(message, application_manager) {}
+                  app_mngr::ApplicationManager& application_manage,
+                  app_mngr::rpc_service::RPCService& rpc_service,
+                  app_mngr::HMICapabilities& hmi_capabilities,
+                  policy::PolicyHandlerInterface& policy_handler)
+      : CommandResponseImpl(message,
+                            application_manage,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
   /**
    * \brief GenericResponse class destructor

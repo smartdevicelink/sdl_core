@@ -42,8 +42,12 @@ namespace commands {
 
 SetIconResponse::SetIconResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& app_man)
-    : CommandResponseImpl(message, app_man) {}
+    ApplicationManager& app_man,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(
+          message, app_man, rpc_service, hmi_capabilities, policy_handler) {}
 
 SetIconResponse::~SetIconResponse() {}
 
