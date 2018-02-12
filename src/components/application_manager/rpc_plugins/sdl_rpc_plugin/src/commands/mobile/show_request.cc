@@ -125,7 +125,7 @@ void ShowRequest::Run() {
     processing_result = MessageHelper::ProcessSoftButtons(
         (*message_)[strings::msg_params],
         app,
-        application_manager_.GetPolicyHandler(),
+        policy_handler_,
         application_manager_);
   }
 

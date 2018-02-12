@@ -442,7 +442,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+      hmi_capabilities_;
   const smart_objects::SmartObject* ui_languages =
       hmi_capabilities.ui_supported_languages();
 
@@ -465,7 +465,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+      hmi_capabilities_;
   const smart_objects::SmartObject* vr_languages =
       hmi_capabilities.vr_supported_languages();
 
@@ -488,7 +488,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+      hmi_capabilities_;
   const smart_objects::SmartObject* tts_languages =
       hmi_capabilities.tts_supported_languages();
 
@@ -635,7 +635,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result = application_manager_.GetPolicyHandler().GetInitialAppData(
+  bool init_result = policy_handler_.GetInitialAppData(
       policy_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
@@ -654,7 +654,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
                    "Application name was not found in nicknames list.");
 
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
-          application_manager_.GetPolicyHandler().GetStatisticManager(),
+          policy_handler_.GetStatisticManager(),
           policy_app_id,
           usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
       ++count_of_rejections_nickname_mismatch;

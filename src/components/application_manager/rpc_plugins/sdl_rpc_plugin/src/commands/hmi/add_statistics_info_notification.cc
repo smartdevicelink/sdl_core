@@ -59,7 +59,7 @@ void AddStatisticsInfoNotification::Run() {
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
                  .asInt();
 
-  application_manager_.GetPolicyHandler().AddStatisticsInfo(type);
+  policy_handler_.AddStatisticsInfo(type);
 }
 
 }  // namespace commands

@@ -66,7 +66,7 @@ void ResponseToHMI::Run() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  application_manager_.GetRPCService().SendMessageToHMI(message_);
+  rpc_service_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

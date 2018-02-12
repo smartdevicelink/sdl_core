@@ -462,13 +462,12 @@ void SystemRequest::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
-  const policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
-
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
+
+  const policy::PolicyHandlerInterface& policy_handler = policy_handler_;
 
   if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
                                            request_type)) {
@@ -584,8 +583,7 @@ void SystemRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string& file =
         (*message_)[strings::msg_params][strings::file_name].asString();
-    application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file,
-                                                                  binary_data);
+    policy_handler_.ReceiveMessageFromSDK(file, binary_data);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {

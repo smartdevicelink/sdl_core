@@ -64,7 +64,7 @@ void TTSGetLanguageResponse::Run() {
         (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
-  application_manager_.hmi_capabilities().set_active_tts_language(language);
+  hmi_capabilities_.set_active_tts_language(language);
 
   LOG4CXX_DEBUG(logger_,
                 "Raising event for function_id " << function_id()

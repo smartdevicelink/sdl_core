@@ -53,7 +53,7 @@ UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
