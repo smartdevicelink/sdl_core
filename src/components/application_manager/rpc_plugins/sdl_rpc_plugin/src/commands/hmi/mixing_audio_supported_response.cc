@@ -53,7 +53,7 @@ MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {}
 void MixingAudioSupportedResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
   hmi_capabilities.set_attenuated_supported(
       (*message_)[strings::msg_params][hmi_response::attenuated_supported]
           .asBool());

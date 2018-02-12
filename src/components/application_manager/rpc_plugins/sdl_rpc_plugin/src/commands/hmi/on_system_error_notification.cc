@@ -59,7 +59,7 @@ void OnSystemErrorNotification::Run() {
   const int code =
       (*message_)[strings::msg_params][hmi_notification::error].asInt();
 
-  application_manager_.GetPolicyHandler().OnSystemError(code);
+  policy_handler_.OnSystemError(code);
 }
 
 }  // namespace commands

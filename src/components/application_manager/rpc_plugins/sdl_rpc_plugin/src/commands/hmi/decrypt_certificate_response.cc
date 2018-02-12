@@ -60,7 +60,7 @@ void DecryptCertificateResponse::Run() {
 
   const bool is_succeeded = hmi_apis::Common_Result::SUCCESS == code;
 
-  application_manager_.GetPolicyHandler().OnCertificateDecrypted(is_succeeded);
+  policy_handler_.OnCertificateDecrypted(is_succeeded);
 }
 
 }  // namespace commands

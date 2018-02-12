@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,46 +30,31 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/notification_to_hmi.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_
+
+#include <gmock/gmock.h>
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
+#include "smart_objects/smart_object.h"
+#include "utils/shared_ptr.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace test {
+namespace components {
+namespace application_manager_test {
 
-namespace commands {
+class MockHMICommandFactory {
+ public:
+  MOCK_METHOD2(CreateCommand,
+               utils::SharedPtr<application_manager::commands::Command>(
+                   const utils::SharedPtr<smart_objects::SmartObject>&,
+                   application_manager::ApplicationManager&));
 
-NotificationToHMI::NotificationToHMI(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : CommandImpl(message,
-                  application_manager,
-                  rpc_service,
-                  hmi_capabilities,
-                  policy_handle) {}
+  static MockHMICommandFactory* mock_hmi_command_factory();
+};
 
-NotificationToHMI::~NotificationToHMI() {}
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
 
-bool NotificationToHMI::Init() {
-  // Replace Mobile connection id with HMI app id
-  return ReplaceMobileWithHMIAppId(*message_);
-}
-
-bool NotificationToHMI::CleanUp() {
-  return true;
-}
-
-void NotificationToHMI::Run() {}
-
-void NotificationToHMI::SendNotification() {
-  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-  rpc_service_.SendMessageToHMI(message_);
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_HMI_COMMAND_FACTORY_H_

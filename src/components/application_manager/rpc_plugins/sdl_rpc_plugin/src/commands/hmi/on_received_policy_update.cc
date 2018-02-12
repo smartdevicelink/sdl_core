@@ -64,8 +64,7 @@ void OnReceivedPolicyUpdate::Run() {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file_path,
-                                                                file_content);
+  policy_handler_.ReceiveMessageFromSDK(file_path, file_content);
 #else
   LOG4CXX_WARN(logger_,
                "This RPC is part of extended policy flow."
