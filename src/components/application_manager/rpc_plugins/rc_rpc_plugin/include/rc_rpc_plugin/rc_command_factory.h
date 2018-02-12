@@ -8,6 +8,7 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -17,7 +18,8 @@ class RCCommandFactory : public application_manager::CommandFactory {
   RCCommandFactory(app_mngr::ApplicationManager& app_manager,
                    app_mngr::rpc_service::RPCService& rpc_service,
                    app_mngr::HMICapabilities& hmi_capabilities,
-                   policy::PolicyHandlerInterface& policy_handler);
+                   policy::PolicyHandlerInterface& policy_handler,
+                   ResourceAllocationManager& allocation_manager);
   application_manager::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
@@ -35,6 +37,7 @@ class RCCommandFactory : public application_manager::CommandFactory {
   app_mngr::rpc_service::RPCService& rpc_service_;
   app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+  ResourceAllocationManager& allocation_manager_;
 };
 }  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_COMMAND_FACTORY_H

@@ -7,14 +7,14 @@ namespace commands {
 RCButtonPressRequest::RCButtonPressRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager)
-    :app_mngr::commands::RequestFromHMI(message, application_manager) {}
+    :app_mngr::commands::RequestToHMI(message, application_manager) {}
 
-bool RCButtonPressRequest::Init() {
-  return true;
+RCButtonPressRequest::~RCButtonPressRequest(){}
+
+void RCButtonPressRequest::Run() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    SendRequest();
 }
-void RCButtonPressRequest::Run() {}
-void RCButtonPressRequest::on_event(
-    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
