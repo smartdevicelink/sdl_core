@@ -52,7 +52,10 @@ class ScrollableMessageRequest : public app_mngr::commands::CommandRequestImpl {
    * @brief ScrollableMessageRequest class constructor
    **/
   ScrollableMessageRequest(const app_mngr::commands::MessageSharedPtr& message,
-                           app_mngr::ApplicationManager& application_manager);
+                           app_mngr::ApplicationManager& application_manager,
+                           app_mngr::rpc_service::RPCService& rpc_service,
+                           app_mngr::HMICapabilities& hmi_capabilities,
+                           policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief SliderCommand class destructor
