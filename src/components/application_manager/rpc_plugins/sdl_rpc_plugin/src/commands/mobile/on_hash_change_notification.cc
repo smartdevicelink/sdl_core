@@ -47,8 +47,15 @@ namespace mobile {
 
 OnHashChangeNotification::OnHashChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandNotificationImpl(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandNotificationImpl(message,
+                              application_manager,
+                              rpc_service,
+                              hmi_capabilities,
+                              policy_handler) {}
 
 OnHashChangeNotification::~OnHashChangeNotification() {}
 
