@@ -52,7 +52,10 @@ class BasicCommunicationSystemResponse : public ResponseFromHMI {
    **/
   BasicCommunicationSystemResponse(
       const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager);
+      app_mngr::ApplicationManager& application_manager,
+      application_manager::rpc_service::RPCService& rpc_service,
+      application_manager::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
   /**
    * @brief BasicCommunicationSystemResponse class destructor

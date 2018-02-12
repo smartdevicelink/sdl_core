@@ -44,8 +44,15 @@ namespace hmi {
 
 OnButtonEventNotification::OnButtonEventNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationFromHMI(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handle) {}
 
 void OnButtonEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
