@@ -61,4 +61,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
 };
 }  // namespace rc_rpc_plugin
+
+extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H

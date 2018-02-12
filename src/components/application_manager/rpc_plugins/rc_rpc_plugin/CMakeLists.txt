@@ -45,10 +45,12 @@ set (HMI_COMMANDS_SOURCE_DIR
 collect_sources(MOBILE_COMMANDS "${MOBILE_COMMANDS_SOURCE_DIR}")
 collect_sources(HMI_COMMANDS "${HMI_COMMANDS_SOURCE_DIR}")
 collect_sources(PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+collect_sources(COMMANDS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/commands")
 
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  ApplicationManager
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
@@ -58,13 +60,11 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("rc_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
+add_library("rc_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${COMMANDS_SOURCES})
 target_link_libraries("rc_rpc_plugin" ${LIBRARIES})
 
 add_library("RCRpcPluginStaticLib" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
 target_link_libraries("RCRpcPluginStaticLib" ${LIBRARIES})
-
-
 
 set(INSTALL_DESTINATION bin)
 
