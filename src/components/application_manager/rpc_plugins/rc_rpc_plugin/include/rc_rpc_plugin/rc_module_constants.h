@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_MODULE_CONSTANTS_H_
 #define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_MODULE_CONSTANTS_H_
 
-namespace remote_control {
+namespace rc_rpc_plugin {
 
 namespace strings {
 // RemoteControlCapabilities constants
