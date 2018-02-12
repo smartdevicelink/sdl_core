@@ -63,7 +63,7 @@ void ButtonGetCapabilitiesResponse::Run() {
     return;
   }
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
   hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);

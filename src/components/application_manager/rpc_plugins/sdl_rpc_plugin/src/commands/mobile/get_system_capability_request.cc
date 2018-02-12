@@ -76,7 +76,7 @@ void GetSystemCapabilityRequest::Run() {
       response_type;
 
   const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+      hmi_capabilities_;
 
   switch (response_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {

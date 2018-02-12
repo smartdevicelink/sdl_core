@@ -406,7 +406,7 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
-  application_manager_.GetRPCService().ManageMobileCommand(so, SOURCE_SDL);
+  rpc_service_.ManageMobileCommand(so, SOURCE_SDL);
 }
 
 smart_objects::SmartObjectSPtr
@@ -567,7 +567,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
 
   const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+      hmi_capabilities_;
 
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
@@ -683,7 +683,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
   const std::string ccpu_version =
-      application_manager_.hmi_capabilities().ccpu_version();
+      hmi_capabilities_.ccpu_version();
   if (!ccpu_version.empty()) {
     response_params[strings::system_software_version] = ccpu_version;
   }
@@ -976,7 +976,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::night_color_scheme] = *night_color_scheme;
   }
 
-  DCHECK(application_manager_.GetRPCService().ManageHMICommand(notification));
+  DCHECK(rpc_service_.ManageHMICommand(notification));
 }
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
@@ -1371,7 +1371,7 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
 policy::PolicyHandlerInterface&
 RegisterAppInterfaceRequest::GetPolicyHandler() {
-  return application_manager_.GetPolicyHandler();
+  return policy_handler_;
 }
 
 }  // namespace commands

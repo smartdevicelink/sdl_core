@@ -59,7 +59,7 @@ OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
   hmi_capabilities.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
@@ -86,7 +86,7 @@ void OnUILanguageChangeNotification::Run() {
     if (app->ui_language() !=
         (*message_)[strings::msg_params][strings::hmi_display_language]
             .asInt()) {
-      application_manager_.GetRPCService().ManageMobileCommand(
+      rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
               mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),

@@ -115,7 +115,7 @@ void OnDeviceStateChangedNotification::Run() {
       device_id = encryption::MakeHash(bt_mac);
       LOG4CXX_DEBUG(logger_, "Device_id hashed as BT MAC : " << device_id);
     }
-    application_manager_.GetPolicyHandler().RemoveDevice(device_id);
+    policy_handler_.RemoveDevice(device_id);
   }
 }
 

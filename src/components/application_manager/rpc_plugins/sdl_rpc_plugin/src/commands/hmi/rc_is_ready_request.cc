@@ -70,7 +70,7 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_RC);
 
       HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
+          hmi_capabilities_;
       hmi_capabilities.set_is_rc_cooperating(is_available);
       if (!is_available) {
         hmi_capabilities.set_rc_supported(false);
@@ -101,7 +101,7 @@ void RCIsReadyRequest::SendMessageToHMI() {
   utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
-  application_manager_.GetRPCService().ManageHMICommand(get_capabilities);
+  rpc_service_.ManageHMICommand(get_capabilities);
 }
 
 }  // namespace commands

@@ -58,7 +58,7 @@ void SDLGetListOfPermissionsRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
   }
-  application_manager_.GetPolicyHandler().OnGetListOfPermissions(
+  policy_handler_.OnGetListOfPermissions(
       connection_key,
       (*message_)[strings::params][strings::correlation_id].asUInt());
 }

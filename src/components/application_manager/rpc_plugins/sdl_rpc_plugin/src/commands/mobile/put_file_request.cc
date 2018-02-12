@@ -155,7 +155,7 @@ void PutFileRequest::Run() {
   // Policy table update in json format is currently to be received via PutFile
   // TODO(PV): after latest discussion has to be changed
   if (mobile_apis::FileType::JSON == file_type_) {
-    application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(
+    policy_handler_.ReceiveMessageFromSDK(
         sync_file_name_, binary_data);
   }
 
@@ -319,7 +319,7 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
-  application_manager_.GetRPCService().ManageHMICommand(notification);
+  rpc_service_.ManageHMICommand(notification);
 }
 
 }  // namespace commands
