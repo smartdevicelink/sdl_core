@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -57,6 +58,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 
  private:
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
+  std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
 };
 }  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
