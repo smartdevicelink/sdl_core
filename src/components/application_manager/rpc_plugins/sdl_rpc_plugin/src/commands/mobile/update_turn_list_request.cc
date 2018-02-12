@@ -86,7 +86,7 @@ void UpdateTurnListRequest::Run() {
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
                                         app,
-                                        application_manager_.GetPolicyHandler(),
+                                        policy_handler_,
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {

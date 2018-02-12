@@ -60,7 +60,7 @@ OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {}
 void OnVRLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
   hmi_capabilities.set_active_vr_language(
       static_cast<hmi_apis::Common_Language::eType>(
@@ -85,7 +85,7 @@ void OnVRLanguageChangeNotification::Run() {
       application_manager_.state_controller().SetRegularState(
           app, mobile_api::HMILevel::HMI_NONE, false);
 
-      application_manager_.GetRPCService().ManageMobileCommand(
+      rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
               mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),

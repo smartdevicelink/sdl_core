@@ -70,6 +70,7 @@ set(testSources
 set(testSourcesMockHmi
   ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
   ${AM_TEST_DIR}/application_manager_impl_mock_hmi_test.cc
+  ${AM_TEST_DIR}/mock_hmi_command_factory.cc
 )
 
 if(REMOTE_CONTROL)

@@ -81,8 +81,7 @@ void OnSystemRequestNotification::Run() {
                   "Received OnSystemRequest without appID."
                   " One of registered apps will be used.");
     LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
-    const PolicyHandlerInterface& policy_handler =
-        application_manager_.GetPolicyHandler();
+    const PolicyHandlerInterface& policy_handler = policy_handler_;
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
@@ -104,8 +103,7 @@ void OnSystemRequestNotification::Run() {
       .GetDataOnDeviceID(app->device(), NULL, NULL, &device_mac, NULL);
 
   if (policy::kDeviceAllowed !=
-      application_manager_.GetPolicyHandler().GetUserConsentForDevice(
-          device_mac)) {
+      policy_handler_.GetUserConsentForDevice(device_mac)) {
     LOG4CXX_WARN(logger_,
                  "Application "
                      << app->policy_app_id()

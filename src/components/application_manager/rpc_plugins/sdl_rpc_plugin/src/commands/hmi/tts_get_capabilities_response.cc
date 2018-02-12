@@ -53,7 +53,7 @@ TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {}
 void TTSGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::speech_capabilities)) {
     hmi_capabilities.set_speech_capabilities(

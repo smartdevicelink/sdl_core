@@ -59,7 +59,7 @@ void GetUrls::Run() {
   namespace Common_Result = hmi_apis::Common_Result;
   using policy::EndpointUrls;
 
-  if (!application_manager_.GetPolicyHandler().PolicyEnabled()) {
+  if (!policy_handler_.PolicyEnabled()) {
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
@@ -68,8 +68,7 @@ void GetUrls::Run() {
       (*message_)[strings::msg_params][hmi_request::service].asUInt();
 
   EndpointUrls endpoints;
-  application_manager_.GetPolicyHandler().GetUpdateUrls(service_to_check,
-                                                        endpoints);
+  policy_handler_.GetUpdateUrls(service_to_check, endpoints);
 
   if (endpoints.empty()) {
     LOG4CXX_ERROR(logger_, "No URLs for service " << service_to_check);
@@ -134,7 +133,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::params][hmi_response::code] = result;
-  application_manager_.GetRPCService().ManageHMICommand(message_);
+  rpc_service_.ManageHMICommand(message_);
 }
 
 #ifdef PROPRIETARY_MODE
@@ -171,8 +170,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   using namespace strings;
   using namespace hmi_apis;
 
-  const uint32_t app_id_to_send_to =
-      application_manager_.GetPolicyHandler().GetAppIdForSending();
+  const uint32_t app_id_to_send_to = policy_handler_.GetAppIdForSending();
 
   if (!app_id_to_send_to) {
     LOG4CXX_ERROR(logger_,

@@ -127,8 +127,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(hmi_capabilities, application_manager::HMICapabilities&());
   MOCK_CONST_METHOD0(hmi_capabilities,
                      const application_manager::HMICapabilities&());
-  MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
-  MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD2(ProcessQueryApp,
                void(const smart_objects::SmartObject& sm_object,
                     const uint32_t connection_key));
