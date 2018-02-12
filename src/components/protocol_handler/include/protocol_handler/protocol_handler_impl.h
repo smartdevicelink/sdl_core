@@ -56,6 +56,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler.h"
+#include "application_manager/policies/policy_handler_observer.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -64,6 +65,7 @@
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
+#include "protocol_handler/handshake_handler.h"
 #endif  // ENABLE_SECURITY
 
 namespace connection_handler {
@@ -77,6 +79,7 @@ class ConnectionHandlerImpl;
 namespace protocol_handler {
 class ProtocolObserver;
 class SessionObserver;
+class HandshakeHandler;
 
 class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
@@ -141,6 +144,7 @@ typedef threads::MessageLoopThread<
 class ProtocolHandlerImpl
     : public ProtocolHandler,
       public TransportManagerListenerEmpty,
+      public policy::PolicyHandlerObserver,
       public impl::FromMobileQueue::Handler,
       public impl::ToMobileQueue::Handler
 #ifdef TELEMETRY_MONITOR
@@ -389,13 +393,24 @@ class ProtocolHandlerImpl
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
-  void NotifySessionStartedResult(
+  DEPRECATED void NotifySessionStartedResult(
       int32_t connection_id,
       uint8_t session_id,
       uint8_t generated_session_id,
       uint32_t hash_id,
       bool protection,
       std::vector<std::string>& rejected_params) OVERRIDE;
+
+  /**
+   * @brief Called by connection handler to notify the result of
+   * OnSessionStartedCallback().
+   * @param context reference to structure with started session data
+   * @param rejected_params list of parameters name that are rejected.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
+   */
+  void NotifySessionStarted(const SessionContext& context,
+                            std::vector<std::string>& rejected_params) OVERRIDE;
 
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
@@ -456,6 +471,14 @@ class ProtocolHandlerImpl
 
   void OnConnectionClosed(
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
+
+  /**
+   * @brief OnPTUFinished the callback which signals PTU has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message
@@ -553,8 +576,8 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
-  // DEPRECATED
-  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket& packet);
+  DEPRECATED RESULT_CODE
+  HandleControlMessageStartSession(const ProtocolPacket& packet);
 
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
 
@@ -660,6 +683,10 @@ class ProtocolHandlerImpl
 
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager* security_manager_;
+
+  bool is_ptu_triggered_;
+  std::list<std::shared_ptr<HandshakeHandler> > ptu_pending_handlers_;
+  sync_primitives::Lock ptu_handlers_lock_;
 #endif  // ENABLE_SECURITY
 
   // Thread that pumps non-parsed messages coming from mobile side.

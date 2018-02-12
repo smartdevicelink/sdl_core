@@ -49,8 +49,8 @@ set(LIBRARIES
 
 if(REMOTE_CONTROL)
     SET (LIBRARIES
-      FunctionalModule
-      ${LIBRARIES}
+        FunctionalModule
+        ${LIBRARIES}
     )
 endif(REMOTE_CONTROL)
 

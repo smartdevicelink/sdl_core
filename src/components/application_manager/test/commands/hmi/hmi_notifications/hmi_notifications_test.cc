@@ -130,6 +130,8 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "application_manager/mock_resume_ctrl.h"
+
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
 #endif  // SDL_REMOTE_CONTROL
@@ -1034,10 +1036,16 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, OnSuspend());
+
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId_));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(GetMessage(temp_message));
+
   command->Run();
   EXPECT_EQ(
       static_cast<uint32_t>(
@@ -1592,7 +1600,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
@@ -1642,7 +1653,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))

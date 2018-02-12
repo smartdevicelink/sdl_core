@@ -13,10 +13,10 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://policies.telematics.ford.com/api/policies"]
+                    "default": ["http://localhost:3000/api/1/policies/proprietary"]
                 },
                 "0x04": {
-                    "default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
+                    "default": ["http://localhost:3000/api/1/softwareUpdate"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]

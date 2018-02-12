@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include <libusb/libusb.h>
+#include <libusb-1.0/libusb.h>
 
 #include <sstream>
 
@@ -43,8 +43,9 @@
 
 #include "utils/logger.h"
 
-// Define the buffer size, because the Android accessory protocol packet support packet buffers up to 16Kbytes
-#define TRANSPORT_USB_BUFFER_MAX_SIZE	(16*1024)
+// Define the buffer size, because the Android accessory protocol packet support
+// packet buffers up to 16Kbytes
+#define TRANSPORT_USB_BUFFER_MAX_SIZE (16 * 1024)
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -312,11 +313,10 @@ bool UsbConnection::Init() {
     return false;
   }
 
-  if(in_endpoint_max_packet_size_ < TRANSPORT_USB_BUFFER_MAX_SIZE){
-  	in_buffer_size_ = TRANSPORT_USB_BUFFER_MAX_SIZE;
-  }
-  else {
-  	in_buffer_size_ = in_endpoint_max_packet_size_;
+  if (in_endpoint_max_packet_size_ < TRANSPORT_USB_BUFFER_MAX_SIZE) {
+    in_buffer_size_ = TRANSPORT_USB_BUFFER_MAX_SIZE;
+  } else {
+    in_buffer_size_ = in_endpoint_max_packet_size_;
   }
 
   in_buffer_ = new unsigned char[in_buffer_size_];

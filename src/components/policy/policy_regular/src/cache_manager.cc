@@ -83,6 +83,21 @@ struct LanguageFinder {
   const std::string& language_;
 };
 
+struct PolicyTableUpdater {
+  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+      : default_params_(default_params) {}
+
+  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+    if (policy::kDefaultId == pt_value.second.get_string()) {
+      pt_value.second = default_params_;
+      pt_value.second.set_to_string(policy::kDefaultId);
+    }
+  }
+
+ private:
+  const policy_table::ApplicationParams& default_params_;
+};
+
 CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
@@ -244,6 +259,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
           "");
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
+      if (kDefaultId == iter->first) {
+        std::for_each(pt_->policy_table.app_policies_section.apps.begin(),
+                      pt_->policy_table.app_policies_section.apps.end(),
+                      PolicyTableUpdater(iter->second));
+      }
     }
   }
 
@@ -463,6 +483,13 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
       if (rpcs.rpcs.end() != rpc_iter) {
         policy_table::RpcParameters rpc_param = rpc_iter->second;
 
+        if (rpc_param.parameters.is_initialized() &&
+            rpc_param.parameters->empty()) {
+          // If "parameters" field exist in PT section of incoming RPC but empty
+          // all  params considered as DISALLOWED
+          result.hmi_level_permitted = kRpcDisallowed;
+          return;
+        }
         policy_table::HmiLevel hmi_level_e;
         policy_table::EnumFromJsonString(hmi_level, &hmi_level_e);
 
@@ -1610,6 +1637,12 @@ const PolicySettings& CacheManager::get_settings() const {
   DCHECK(settings_);
 
   return *settings_;
+}
+
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Implementation does not support user consents.");
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(

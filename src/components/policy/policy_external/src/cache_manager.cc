@@ -2629,6 +2629,31 @@ const PolicySettings& CacheManager::get_settings() const {
   return *settings_;
 }
 
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  auto device_data = *(pt_->policy_table.device_data);
+
+  auto from = pt_->policy_table.device_data->find(device_id_from);
+  DCHECK_OR_RETURN_VOID(from != device_data.end());
+
+  auto to = pt_->policy_table.device_data->find(device_id_to);
+  DCHECK_OR_RETURN_VOID(to != device_data.end());
+
+  auto& consents_from = *(from->second.user_consent_records);
+  auto& consents_to = *(to->second.user_consent_records);
+
+  LOG4CXX_DEBUG(logger_,
+                "Merging user consents from device: "
+                    << device_id_from << " to device: " << device_id_to);
+  for (auto f = consents_from.begin(); f != consents_from.end(); ++f) {
+    const auto app_id = f->first;
+    LOG4CXX_DEBUG(logger_, "Updating permissions for key: " << app_id);
+    consents_to[app_id] = f->second;
+  }
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(
     CacheManager* cache_manager)
     : cache_manager_(cache_manager)

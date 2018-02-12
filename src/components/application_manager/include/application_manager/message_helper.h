@@ -701,6 +701,71 @@ class MessageHelper {
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
+  /**
+   * @brief SendDeleteCommandRequest sends requests to HMI to remove UI/VR
+   * command data depending on command parameters
+   * @param cmd Command data
+   * @param application Application owning the command data
+   * @param app_mngr Application manager
+   */
+  static void SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
+                                       ApplicationSharedPtr application,
+                                       ApplicationManager& app_mngr);
+
+  /**
+   * @brief SendDeleteSubmenuRequest sends UI/VR requests to HMI to remove
+   * submenues-related data depending on command parameters
+   * @param cmd Command data
+   * @param application Application owning the commmand data
+   * @param app_mngr Application manager
+   */
+  static void SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
+                                       ApplicationSharedPtr application,
+                                       ApplicationManager& app_mngr);
+
+  /**
+   * @brief SendDeleteChoiceSetRequest sends requests to HMI to remove
+   * choice sets - related data depending on command parameters
+   * @param cmd Command data
+   * @param application Application owning command data
+   * @param app_mngr Application manager
+   */
+  static void SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
+                                         ApplicationSharedPtr application,
+                                         ApplicationManager& app_mngr);
+
+  /**
+   * @brief SendResetPropertiesRequest sends requests to HMI to remove/reset
+   * global properties for application
+   * @param application Application to remove/reset global properties for
+   * @param app_mngr Application manager
+   */
+  static void SendResetPropertiesRequest(ApplicationSharedPtr application,
+                                         ApplicationManager& app_mngr);
+
+  /**
+   * @brief SendUnsubscribeButtonNotification sends notification to HMI to
+   * remove button subscription for application
+   * @param button Button type
+   * @param application Application to unsubscribe
+   * @param app_mngr Application manager
+   */
+  static void SendUnsubscribeButtonNotification(
+      mobile_apis::ButtonName::eType button,
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr);
+
+  /**
+   * @brief SendUnsubscribeIVIRequest sends request to HMI to remove vehicle
+   * data subscription for application
+   * @param ivi_id Vehicle data item id
+   * @param application Application to unsubscribe
+   * @param app_mngr Application manager
+   */
+  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
+                                        ApplicationSharedPtr application,
+                                        ApplicationManager& app_mngr);
+
 #ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sends HMI status notification to mobile
@@ -728,11 +793,14 @@ class MessageHelper {
 
  private:
   /**
-   * @brief Creates new request object and fill its header
-   * @return New request object
+   * @brief CreateMessageForHMI Creates HMI message with prepared header
+   * acccoring to message type
+   * @param message_type Message type
+   * @param correlation_id Correlation id
+   * @return HMI message object with filled header
    */
-  static smart_objects::SmartObjectSPtr CreateRequestObject(
-      const uint32_t correlation_id);
+  static smart_objects::SmartObjectSPtr CreateMessageForHMI(
+      hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
   /**
    * @brief Allows to fill SO according to the  current permissions.

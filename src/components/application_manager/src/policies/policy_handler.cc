@@ -852,6 +852,13 @@ uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
   return 0;
 }
 
+void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
+                                      const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1170,7 +1177,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
         continue;
       }
       policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
-      uint32_t device_handle = 0;
+      connection_handler::DeviceHandle device_handle = 0;
       if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
         LOG4CXX_WARN(logger_,
                      "Device handle with mac " << device_id
@@ -1204,7 +1211,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
   // Case, when specific device was changed
-  uint32_t device_handle = 0u;
+  connection_handler::DeviceHandle device_handle = 0u;
   if (device_specific) {
     policy_manager_->SetUserConsentForDevice(device_mac, is_allowed);
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
@@ -1768,7 +1775,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
-  HandlersCollection::const_iterator it = listeners_.begin();
+
   std::for_each(
       listeners_.begin(),
       listeners_.end(),

@@ -284,7 +284,6 @@ bool RemoteControlPlugin::IsAppForPlugin(
   if (service()->IsRemoteControlApplication(app)) {
     RCAppExtensionPtr rc_app_extension = new RCAppExtension(GetModuleID());
     app->AddExtension(rc_app_extension);
-    service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
     return true;
   }
   return false;
