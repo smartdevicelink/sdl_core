@@ -49,7 +49,7 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  application_manager_.GetRPCService().ManageMobileCommand(
+  rpc_service_.ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           connection_key(),
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),

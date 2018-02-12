@@ -79,7 +79,7 @@ void VIGetVehicleDataResponse::Run() {
     event.set_smart_object(result);
   } else {
     event.set_smart_object(*message_);
-    application_manager_.GetPolicyHandler().OnVehicleDataUpdated(*message_);
+    policy_handler_.OnVehicleDataUpdated(*message_);
   }
 
   event.raise(application_manager_.event_dispatcher());

@@ -54,7 +54,7 @@ OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {}
 
 void OnIgnitionCycleOverNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.GetPolicyHandler().OnIgnitionCycleOver();
+  policy_handler_.OnIgnitionCycleOver();
 }
 
 }  // namespace commands

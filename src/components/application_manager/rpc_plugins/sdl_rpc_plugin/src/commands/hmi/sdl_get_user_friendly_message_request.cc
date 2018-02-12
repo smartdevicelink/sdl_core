@@ -80,13 +80,13 @@ void SDLGetUserFriendlyMessageRequest::Run() {
             static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
-        application_manager_.hmi_capabilities().active_ui_language();
+        hmi_capabilities_.active_ui_language();
 
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(ui_language);
   }
 
-  application_manager_.GetPolicyHandler().OnGetUserFriendlyMessage(
+  policy_handler_.OnGetUserFriendlyMessage(
       msg_codes,
       required_language,
       (*message_)[strings::params][strings::correlation_id].asInt());

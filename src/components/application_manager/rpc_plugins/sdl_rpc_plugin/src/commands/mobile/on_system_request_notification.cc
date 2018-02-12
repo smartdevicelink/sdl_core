@@ -77,7 +77,7 @@ void OnSystemRequestNotification::Run() {
   RequestType::eType request_type = static_cast<RequestType::eType>(
       (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
+      policy_handler_;
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
     LOG4CXX_WARN(logger_,
@@ -121,7 +121,7 @@ void OnSystemRequestNotification::Run() {
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t timeout =
-      application_manager_.GetPolicyHandler().TimeoutExchangeSec();
+      policy_handler_.TimeoutExchangeSec();
 
   size_t content_length;
   char size_str[24];

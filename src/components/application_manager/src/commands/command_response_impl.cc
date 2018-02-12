@@ -89,8 +89,7 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  application_manager_.GetRPCService().SendMessageToMobile(message_,
-                                                           final_message);
+  rpc_service_.SendMessageToMobile(message_, final_message);
 }
 
 }  // namespace commands
