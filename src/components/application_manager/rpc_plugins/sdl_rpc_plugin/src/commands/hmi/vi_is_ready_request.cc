@@ -74,9 +74,9 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
           HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
       HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
+          hmi_capabilities_;
       hmi_capabilities.set_is_ivi_cooperating(is_available);
-      application_manager_.GetPolicyHandler().OnVIIsReady();
+      policy_handler_.OnVIIsReady();
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
         LOG4CXX_INFO(
@@ -105,7 +105,7 @@ void VIIsReadyRequest::SendMessageToHMI() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
           application_manager_));
-  application_manager_.GetRPCService().ManageHMICommand(get_type);
+  rpc_service_.ManageHMICommand(get_type);
 }
 
 }  // namespace commands
