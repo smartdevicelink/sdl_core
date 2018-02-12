@@ -1065,10 +1065,6 @@ class ApplicationManagerImpl
     return *policy_handler_;
   }
 
-  CommandFactory& GetCommandFactory() const OVERRIDE {
-    return *command_factory_;
-  }
-
   rpc_service::RPCService& GetRPCService() const OVERRIDE {
     return *rpc_service_;
   }
@@ -1672,7 +1668,7 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
-  std::unique_ptr<CommandFactory> command_factory_;
+
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
 
