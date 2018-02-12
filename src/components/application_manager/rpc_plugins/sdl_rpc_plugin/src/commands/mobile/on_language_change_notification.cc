@@ -40,8 +40,15 @@ namespace commands {
 
 OnLanguageChangeNotification::OnLanguageChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandNotificationImpl(message, application_manager) {}
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandNotificationImpl(message,
+                              application_manager,
+                              rpc_service,
+                              hmi_capabilities,
+                              policy_handler) {}
 
 OnLanguageChangeNotification::~OnLanguageChangeNotification() {}
 

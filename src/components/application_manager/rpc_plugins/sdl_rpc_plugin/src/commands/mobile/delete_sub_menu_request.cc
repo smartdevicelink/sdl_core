@@ -45,8 +45,15 @@ namespace commands {
 
 DeleteSubMenuRequest::DeleteSubMenuRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {}
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
