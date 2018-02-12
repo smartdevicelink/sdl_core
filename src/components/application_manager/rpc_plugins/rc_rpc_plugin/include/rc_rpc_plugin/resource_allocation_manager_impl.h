@@ -59,6 +59,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
+  Apps GetRCApplications();
+
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
