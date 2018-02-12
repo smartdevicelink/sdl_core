@@ -596,8 +596,8 @@ void SQLPTRepresentation::GatherDeviceData(
 bool SQLPTRepresentation::GatherFunctionalGroupings(
     policy_table::FunctionalGroupings* groups) const {
   LOG4CXX_INFO(logger_, "Gather Functional Groupings info");
-  utils::dbms::SQLQuery func_group(db());
-  if (!func_group.Prepare(sql_pt::kSelectFunctionalGroups)) {
+  utils::dbms::SQLQuery functional_group(db());
+  if (!functional_group.Prepare(sql_pt::kSelectFunctionalGroups)) {
     LOG4CXX_WARN(logger_, "Incorrect select from functional_groupings");
     return false;
   }
@@ -606,32 +606,50 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
     LOG4CXX_WARN(logger_, "Incorrect select all from rpc");
     return false;
   }
-  while (func_group.Next()) {
-    policy_table::Rpcs rpcs_tbl;
-    if (!func_group.IsNull(2)) {
-      *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
+
+  while (functional_group.Next()) {
+    policy_table::Rpcs rpcs_structure;
+
+    if (!functional_group.IsNull(2)) {
+      *rpcs_structure.user_consent_prompt = functional_group.GetString(2);
     }
-    int func_id = func_group.GetInteger(0);
-    rpcs.Bind(0, func_id);
+
+    const int group_id = functional_group.GetInteger(0);
+
+    // Collecting RPCs with their HMI levels and parameters (if any)
+    rpcs.Bind(0, group_id);
     while (rpcs.Next()) {
       if (!rpcs.IsNull(1)) {
         policy_table::HmiLevel level;
         if (policy_table::EnumFromJsonString(rpcs.GetString(1), &level)) {
-          InsertUnique(level, &rpcs_tbl.rpcs[rpcs.GetString(0)].hmi_levels);
+          InsertUnique(level,
+                       &rpcs_structure.rpcs[rpcs.GetString(0)].hmi_levels);
         }
       }
       if (!rpcs.IsNull(2)) {
         policy_table::Parameter param;
-        if (policy_table::EnumFromJsonString(rpcs.GetString(2), &param)) {
-          InsertUnique(param, &(*rpcs_tbl.rpcs[rpcs.GetString(0)].parameters));
+        if (EnumFromJsonString(rpcs.GetString(2), &param)) {
+          // EMPTY is a special mark to specify that 'parameters' section is
+          // present, but has no parameters. It is not valid parameter value.
+          if (policy_table::P_EMPTY == param) {
+            (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
+                .mark_initialized();
+            continue;
+          }
+          InsertUnique(param,
+                       &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
         }
       }
     }
-    if (!rpcs_tbl.rpcs.is_initialized()) {
-      rpcs_tbl.rpcs.set_to_null();
-    }
+
     rpcs.Reset();
-    (*groups)[func_group.GetString(1)] = rpcs_tbl;
+
+    if (!rpcs_structure.rpcs.is_initialized()) {
+      rpcs_structure.rpcs.set_to_null();
+    }
+    policy_table::Rpcs& group_rpcs_structure =
+        (*groups)[functional_group.GetString(1)];
+    group_rpcs_structure = rpcs_structure;
   }
   return true;
 }
@@ -847,6 +865,18 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
             LOG4CXX_WARN(logger_, "Incorrect insert into rpc with parameter");
             return false;
           }
+        }
+      } else if (parameters.is_initialized()) {
+        query_parameter.Bind(0, it->first);
+        query_parameter.Bind(
+            1, std::string(policy_table::EnumToJsonString(*hmi_it)));
+        query_parameter.Bind(
+            2,
+            std::string(policy_table::EnumToJsonString(policy_table::P_EMPTY)));
+        query_parameter.Bind(3, group_id);
+        if (!query_parameter.Exec() || !query_parameter.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into rpc with parameter");
+          return false;
         }
       } else {
         query.Bind(0, it->first);

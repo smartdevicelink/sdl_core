@@ -483,6 +483,13 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
       if (rpcs.rpcs.end() != rpc_iter) {
         policy_table::RpcParameters rpc_param = rpc_iter->second;
 
+        if (rpc_param.parameters.is_initialized() &&
+            rpc_param.parameters->empty()) {
+          // If "parameters" field exist in PT section of incoming RPC but empty
+          // all  params considered as DISALLOWED
+          result.hmi_level_permitted = kRpcDisallowed;
+          return;
+        }
         policy_table::HmiLevel hmi_level_e;
         policy_table::EnumFromJsonString(hmi_level, &hmi_level_e);
 
