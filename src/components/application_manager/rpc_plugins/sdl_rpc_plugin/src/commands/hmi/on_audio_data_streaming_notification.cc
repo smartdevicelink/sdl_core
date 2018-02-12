@@ -39,8 +39,15 @@ namespace commands {
 
 OnAudioDataStreamingNotification::OnAudioDataStreamingNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : NotificationToHMI(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationToHMI(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handle) {}
 
 OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {}
 

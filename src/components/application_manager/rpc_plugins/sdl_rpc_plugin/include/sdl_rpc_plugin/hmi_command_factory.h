@@ -43,7 +43,10 @@ namespace app_mngr = application_manager;
  **/
 class HMICommandFactory : public app_mngr::CommandFactory {
  public:
-  HMICommandFactory(app_mngr::ApplicationManager& application_manager);
+  HMICommandFactory(app_mngr::ApplicationManager& application_manager,
+                    app_mngr::rpc_service::RPCService& rpc_service,
+                    app_mngr::HMICapabilities& hmi_capabilities,
+                    policy::PolicyHandlerInterface& policy_handler);
 
   app_mngr::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,
@@ -51,6 +54,9 @@ class HMICommandFactory : public app_mngr::CommandFactory {
 
  private:
   app_mngr::ApplicationManager& application_manager_;
+  app_mngr::rpc_service::RPCService& rpc_service_;
+  app_mngr::HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
   DISALLOW_COPY_AND_ASSIGN(HMICommandFactory);
 };
 
