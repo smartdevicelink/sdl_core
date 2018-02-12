@@ -53,7 +53,10 @@ class GetDTCsResponse : public app_mngr::commands::CommandResponseImpl {
    * @param message Incoming SmartObject message
    **/
   GetDTCsResponse(const app_mngr::commands::MessageSharedPtr& message,
-                  app_mngr::ApplicationManager& application_manager);
+                  app_mngr::ApplicationManager& application_manager,
+                  app_mngr::rpc_service::RPCService& rpc_service,
+                  app_mngr::HMICapabilities& hmi_capabilities,
+                  policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief GetDTCsResponse class destructor
