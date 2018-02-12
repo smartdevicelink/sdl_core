@@ -169,6 +169,11 @@ typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
 
+/**
+ * @breif Collection for the mobile command smart object.
+ */
+typedef std::vector<smart_objects::SmartObjectSPtr> MobileMessageQueue;
+
 class DynamicApplicationData {
  public:
   virtual ~DynamicApplicationData() {}
@@ -808,6 +813,21 @@ class Application : public virtual InitialApplicationData,
    * @return free app space.
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
+
+  /**
+   * @brief Allows to save mobile's command smart object in order to perform
+   * this command later.
+   * @param mobile_message the message smart_object.
+   */
+  virtual void PushMobileMessage(
+      smart_objects::SmartObjectSPtr mobile_message) = 0;
+
+  /**
+   * @brief Allows to obtain the whole list of pending commands in order to
+   * process them.
+   * @param mobile_message the messages array which is filled by the method.
+   */
+  virtual void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
   /**

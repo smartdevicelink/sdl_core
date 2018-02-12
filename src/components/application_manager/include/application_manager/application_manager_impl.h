@@ -495,14 +495,16 @@ class ApplicationManagerImpl
    *
    * @return Current state of the distraction state
    */
-  inline bool driver_distraction() const;
+  hmi_apis::Common_DriverDistractionState::eType driver_distraction_state()
+      const;
 
   /*
    * @brief Sets state for driver distraction
    *
    * @param state New state to be set
    */
-  void set_driver_distraction(const bool is_distracting) OVERRIDE;
+  void set_driver_distraction_state(
+      const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
 
   /*
    * DEPRECATED
@@ -1463,6 +1465,32 @@ class ApplicationManagerImpl
    */
   bool IsLowVoltage();
 
+  /**
+   * @brief Allows to process postponed commands for application
+   * when its HMI level has been changed.
+   * @param app_id the application id for processing.
+   * @param from the old HMILevel.
+   * @param to the new HMILevel for the certain app.
+   */
+  void ProcessPostponedMessages(const uint32_t app_id);
+
+  /**
+   * @brief Allows to process applications after HMILevel has been changed.
+   * @param app_id the application id for processing.
+   * @param from the old HMILevel.
+   * @param to the new HMILevel for the certain app.
+   */
+  void ProcessApp(const uint32_t app_id,
+                  const mobile_apis::HMILevel::eType from,
+                  const mobile_apis::HMILevel::eType to);
+
+  /**
+   * @brief Allows to send appropriate message to mobile device.
+   * @param message The smart object which contains all neccesary info to send
+   * notification.
+   */
+  void SendMobileMessage(smart_objects::SmartObjectSPtr message);
+
  private:
   /*
    * NaviServiceStatusMap shows which navi service (audio/video) is opened
@@ -1553,6 +1581,14 @@ class ApplicationManagerImpl
    * @return protocol version depends on parameters from smartDeviceLink.ini.
    */
   protocol_handler::MajorProtocolVersion SupportedSDLVersion() const;
+
+  /**
+   * @brief Checks if driver distraction state is valid, creates message
+   * and puts it to postponed message.
+   * @param application contains registered application.
+   */
+  void PutDriverDistractionMessageToPostponed(
+      ApplicationSharedPtr application) const;
 
   /**
    * @brief Types of directories used by Application Manager
@@ -1668,7 +1704,7 @@ class ApplicationManagerImpl
   bool audio_pass_thru_active_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
-  bool is_distracting_driver_;
+  hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
@@ -1792,10 +1828,6 @@ class ApplicationManagerImpl
 
 DEPRECATED bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;
-}
-
-bool ApplicationManagerImpl::driver_distraction() const {
-  return is_distracting_driver_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
