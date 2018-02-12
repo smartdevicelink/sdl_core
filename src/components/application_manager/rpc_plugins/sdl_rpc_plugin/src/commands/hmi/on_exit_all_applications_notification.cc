@@ -117,7 +117,7 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
   (*message)[strings::params][strings::correlation_id] =
       application_manager_.GetNextHMICorrelationID();
 
-  application_manager_.GetRPCService().ManageHMICommand(message);
+  rpc_service_.ManageHMICommand(message);
 }
 
 }  // namespace commands

@@ -462,7 +462,7 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
+      policy_handler_;
   if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
                                            request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
@@ -557,7 +557,7 @@ void SystemRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string& file =
         (*message_)[strings::msg_params][strings::file_name].asString();
-    application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file,
+    policy_handler_.ReceiveMessageFromSDK(file,
                                                                   binary_data);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;

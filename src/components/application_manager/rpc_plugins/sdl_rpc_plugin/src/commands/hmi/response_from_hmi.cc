@@ -77,7 +77,7 @@ void ResponseFromHMI::SendResponseToMobile(
     ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
-  application_manager_.GetRPCService().ManageMobileCommand(message, SOURCE_SDL);
+  rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
 }
 
 void ResponseFromHMI::CreateHMIRequest(
@@ -105,7 +105,7 @@ void ResponseFromHMI::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }
