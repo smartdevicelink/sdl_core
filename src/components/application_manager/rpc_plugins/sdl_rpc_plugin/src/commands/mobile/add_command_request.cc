@@ -49,8 +49,15 @@ namespace custom_str = utils::custom_string;
 
 AddCommandRequest::AddCommandRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager)
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler)
     , send_ui_(false)
     , send_vr_(false)
     , is_ui_received_(false)

@@ -41,8 +41,15 @@ namespace commands {
 
 DiagnosticMessageResponse::DiagnosticMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {}
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
 DiagnosticMessageResponse::~DiagnosticMessageResponse() {}
 
