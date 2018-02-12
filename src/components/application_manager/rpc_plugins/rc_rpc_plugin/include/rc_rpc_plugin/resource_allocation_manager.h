@@ -5,6 +5,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
 //#include "remote_control/event_engine/event.h"
 //#include "functional_module/generic_module.h"
 
@@ -109,6 +110,9 @@ class ResourceAllocationManager {
    * @brief Remove all information about all allocations
    */
   virtual void ResetAllAllocations() = 0;
+
+  virtual RCAppExtensionPtr GetApplicationExtention(
+            application_manager::ApplicationSharedPtr application) = 0;
 
   virtual ~ResourceAllocationManager() {}
 };
