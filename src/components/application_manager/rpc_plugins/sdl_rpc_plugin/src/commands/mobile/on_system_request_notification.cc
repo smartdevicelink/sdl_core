@@ -79,8 +79,7 @@ void OnSystemRequestNotification::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
-
+      policy_handler_;
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(
           static_cast<rpc::policy_table_interface_base::RequestType>(
@@ -143,7 +142,7 @@ void OnSystemRequestNotification::Run() {
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t timeout =
-      application_manager_.GetPolicyHandler().TimeoutExchangeSec();
+      policy_handler_.TimeoutExchangeSec();
 
   size_t content_length;
   char size_str[24];

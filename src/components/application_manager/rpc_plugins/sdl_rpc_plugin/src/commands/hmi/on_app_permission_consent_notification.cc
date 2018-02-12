@@ -173,11 +173,10 @@ void OnAppPermissionConsentNotification::Run() {
                   system_external_consent_status->end(),
                   status_appender);
   }
-  application_manager_.GetPolicyHandler().OnAppPermissionConsent(
+  policy_handler_.OnAppPermissionConsent(
       connection_key, permission_consent, external_consent_status);
 #else
-  application_manager_.GetPolicyHandler().OnAppPermissionConsent(
-      connection_key, permission_consent);
+  policy_handler_.OnAppPermissionConsent(connection_key, permission_consent);
 #endif
 }
 }  // commands

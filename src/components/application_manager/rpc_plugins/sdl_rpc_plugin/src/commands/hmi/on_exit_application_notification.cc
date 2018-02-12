@@ -83,7 +83,7 @@ void OnExitApplicationNotification::Run() {
       break;
     }
     case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
-      application_manager_.GetRPCService().ManageMobileCommand(
+      rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
           SOURCE_SDL);
@@ -92,7 +92,7 @@ void OnExitApplicationNotification::Run() {
       return;
     }
     case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
-      application_manager_.GetRPCService().ManageMobileCommand(
+      rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE),
           SOURCE_SDL);

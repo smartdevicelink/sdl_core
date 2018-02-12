@@ -463,7 +463,7 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
+     policy_handler_;
 
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(
@@ -501,6 +501,8 @@ void SystemRequest::Run() {
   std::string file_name = kSYNC;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
+  } else {
+    file_name = kSYNC;
   }
 
   if (!CheckSyntax(file_name)) {
@@ -584,7 +586,7 @@ void SystemRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string& file =
         (*message_)[strings::msg_params][strings::file_name].asString();
-    application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file,
+    policy_handler_.ReceiveMessageFromSDK(file,
                                                                   binary_data);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;

@@ -142,7 +142,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       smart_objects::SmartObject msg_params = message[strings::msg_params];
       if (response_success) {
         HMICapabilities& hmi_capabilities =
-            application_manager_.hmi_capabilities();
+            hmi_capabilities_;
 
         // in case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {

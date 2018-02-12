@@ -61,7 +61,7 @@ void OnSystemInfoChangedNotification::Run() {
       application_manager::MessageHelper::CommonLanguageToString(
           static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  application_manager_.GetPolicyHandler().OnSystemInfoChanged(language);
+  policy_handler_.OnSystemInfoChanged(language);
 }
 
 }  // namespace commands

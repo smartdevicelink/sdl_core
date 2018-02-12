@@ -60,7 +60,7 @@ void GetSystemInfoResponse::Run() {
 
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  application_manager_.GetPolicyHandler().OnGetSystemInfo(
+  policy_handler_.OnGetSystemInfo(
       info.ccpu_version, info.wers_country_code, info.language);
 }
 
@@ -83,7 +83,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  application_manager_.hmi_capabilities().set_ccpu_version(info.ccpu_version);
+  hmi_capabilities_.set_ccpu_version(info.ccpu_version);
 
   return info;
 }

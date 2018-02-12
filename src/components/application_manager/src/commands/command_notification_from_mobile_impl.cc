@@ -72,7 +72,7 @@ void CommandNotificationFromMobileImpl::SendNotification() {
   LOG4CXX_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
-  application_manager_.GetRPCService().SendMessageToMobile(message_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

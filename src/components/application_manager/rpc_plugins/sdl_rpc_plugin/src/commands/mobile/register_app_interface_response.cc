@@ -84,7 +84,7 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandlerInterface& policy_handler =
-      application_manager_.GetPolicyHandler();
+      policy_handler_;
   if (policy_handler.PolicyEnabled()) {
     const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
