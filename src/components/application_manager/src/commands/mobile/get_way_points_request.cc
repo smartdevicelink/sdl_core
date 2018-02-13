@@ -8,7 +8,9 @@ namespace commands {
 
 GetWayPointsRequest::GetWayPointsRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {}
+    : CommandRequestImpl(message, application_manager) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
+}
 
 GetWayPointsRequest::~GetWayPointsRequest() {}
 
@@ -29,6 +31,7 @@ void GetWayPointsRequest::Run() {
 
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_GetWayPoints,
                  msg_params.empty() ? NULL : &msg_params,
                  true);
@@ -38,8 +41,15 @@ void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      application_manager_.updateRequestTimeout(
+          connection_key(), correlation_id(), default_timeout());
+      break;
+    }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_GetWayPoints event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

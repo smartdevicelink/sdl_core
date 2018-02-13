@@ -56,11 +56,9 @@ using am::commands::ShowRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -74,8 +72,7 @@ const uint32_t kFunctionID = 3u;
 
 class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  ShowRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
+  ShowRequestTest() {
     mock_app_ = CreateMockApp();
   }
   sync_primitives::Lock lock_;
@@ -151,16 +148,60 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
   }
 
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
+  void TestSetupHelperWithMetadata(
+      MessageSharedPtr msg,
+      hmi_apis::Common_TextFieldName::eType field_name,
+      const char* field,
+      size_t num_tags,
+      int32_t* field_tags,
+      bool set_field_text = true) {
+    SmartObject msg_params(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg)[am::strings::params][am::strings::function_id] = kFunctionID;
+    if (set_field_text) {
+      msg_params[field] = text_field_;
+    }
+    msg_params[am::strings::metadata_tags][field] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (size_t i = 0; i < num_tags; ++i) {
+      const int32_t current_tag = field_tags[i];
+      msg_params[am::strings::metadata_tags][field][i] = current_tag;
+    }
+    (*msg)[am::strings::msg_params] = msg_params;
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    EXPECT_EQ((*msg)[am::strings::msg_params], msg_params);
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+
+    msg_params.erase(field);
+    msg_params.erase(am::strings::metadata_tags);
+
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::hmi_request::show_strings] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    if (set_field_text) {
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_name] =
+                    static_cast<int32_t>(field_name);
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_text] = text_field_;
+      msg_params[am::hmi_request::show_strings][0]
+                [am::hmi_request::field_types] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Array);
+      for (size_t i = 0; i < num_tags; ++i) {
+        const int32_t current_tag = field_tags[i];
+        msg_params[am::hmi_request::show_strings][0]
+                  [am::hmi_request::field_types][i] = current_tag;
+      }
+    }
+
+    EXPECT_CALL(app_mngr_, ManageHMICommand(_));
+    EXPECT_CALL(*mock_app_, set_show_command(msg_params));
   }
 
   MockAppPtr mock_app_;
-  MockMessageHelper& mock_message_helper_;
   std::string text_field_;
 };
 
@@ -177,13 +218,6 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
-      .WillByDefault(
-          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -192,10 +226,6 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
@@ -219,12 +249,9 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -253,13 +280,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -283,13 +306,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonNotExists_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -316,13 +335,9 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -347,13 +362,9 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -375,13 +386,9 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -402,13 +409,9 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -433,13 +436,9 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -461,13 +460,9 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
-
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -488,8 +483,6 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
 
   command->Run();
-
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(ShowRequestTest, Run_MainField1_SUCCESS) {
@@ -588,6 +581,132 @@ TEST_F(ShowRequestTest, Run_MainField4_WrongSyntax) {
                              hmi_apis::Common_TextFieldName::mainField4,
                              am::strings::main_field_4);
   command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MultipleMetadataTags) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 5;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaTitle,
+                            hmi_apis::Common_MetadataType::mediaArtist,
+                            hmi_apis::Common_MetadataType::rating,
+                            hmi_apis::Common_MetadataType::humidity,
+                            hmi_apis::Common_MetadataType::currentTemperature};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField2_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_2";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField2,
+                              am::strings::main_field_2,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField3_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_3";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField3,
+                              am::strings::main_field_3,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField4_MetadataTag) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_4";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField4,
+                              am::strings::main_field_4,
+                              num_tags,
+                              tags);
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  text_field_ = "Main_Field_1";
+  const size_t num_tags = 1;
+  int32_t tags[num_tags] = {hmi_apis::Common_MetadataType::mediaArtist};
+  TestSetupHelperWithMetadata(msg,
+                              hmi_apis::Common_TextFieldName::mainField1,
+                              am::strings::main_field_1,
+                              num_tags,
+                              tags,
+                              false);
+  command->Run();
+
+  MessageSharedPtr ev_msg = CreateMessage(smart_objects::SmartType_Map);
+  (*ev_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+  (*ev_msg)[am::strings::msg_params][am::strings::info] = "";
+
+  Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*ev_msg);
+
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  command->on_event(event);
+
+  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
+                .asBool(),
+            true);
+  EXPECT_EQ(
+      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
+          .asInt(),
+      static_cast<int32_t>(mobile_apis::Result::WARNINGS));
 }
 
 TEST_F(ShowRequestTest, Run_MediaClock_SUCCESS) {
@@ -760,15 +879,19 @@ TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
 TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
+      hmi_apis::Common_Result::eType::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
+
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
 
   command->on_event(event);
 }
@@ -786,6 +909,8 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
+
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
 
   command->on_event(event);
 }

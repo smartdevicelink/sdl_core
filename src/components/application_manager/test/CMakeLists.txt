@@ -31,12 +31,6 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-# TODO{ALeshin}: APPLINK-10792. Do not write tests which use
-# application manager(AM) singleton while refactoring of AM is finished.
-
-# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
-# cover with UT missed files.
-
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
@@ -45,12 +39,13 @@ include_directories(
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/utils/include/
   ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/policy/policy_regular/test/include
   ${POLICY_PATH}/policy/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/security_manager/include/
-  ${COMPONENTS_DIR}/policy/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 set(testSources
@@ -67,10 +62,20 @@ set(testSources
   ${AM_TEST_DIR}/application_state_test.cc
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
-  ${AM_TEST_DIR}/mock_message_helper.cc
- #${AM_TEST_DIR}/application_manager_impl_test.cc
-
+  ${AM_TEST_DIR}/application_manager_impl_test.cc
+  ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/command_holder_test.cc
 )
+
+set(testSourcesMockHmi
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+  ${AM_TEST_DIR}/application_manager_impl_mock_hmi_test.cc
+  ${AM_TEST_DIR}/mock_hmi_command_factory.cc
+)
+
+if(REMOTE_CONTROL)
+  list(APPEND testSources ${AM_TEST_DIR}/rc_policy_handler_test.cc)
+endif(REMOTE_CONTROL)
 
 set (RequestController_SOURCES
   ${AM_TEST_DIR}/request_controller/request_controller_test.cc
@@ -96,6 +101,8 @@ set(LIBRARIES
   MediaManager
   Resumption
   ProtocolHandler
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
 
 if(ENABLE_SECURITY)
@@ -128,9 +135,11 @@ set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
+create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
+add_dependencies("application_manager_test" libbson)
+
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
-# TODO [AKozoriz] : Fix not buildable tests
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
   ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
@@ -140,6 +149,8 @@ set(ResumptionData_SOURCES
 )
 
 file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)

@@ -67,7 +67,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
@@ -85,16 +84,9 @@ const uint32_t kConnectionKey = 5u;
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SpeakRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , request_(CreateMessage(smart_objects::SmartType_Map))
+      : request_(CreateMessage(smart_objects::SmartType_Map))
       , response_(CreateMessage(smart_objects::SmartType_Map))
-      , app_(CreateMockApp()) {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~SpeakRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
+      , app_(CreateMockApp()) {}
 
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
@@ -113,14 +105,8 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
     MessageSharedPtr response_to_mobile;
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillOnce(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
-        .WillOnce(Return(mobile_response));
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillRepeatedly(Return(state));
 
     EXPECT_CALL(app_mngr_,
                 ManageMobileCommand(
@@ -137,7 +123,6 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
               static_cast<int32_t>(mobile_response));
   }
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr request_;
   MessageSharedPtr response_;
   MockAppPtr app_;
@@ -159,9 +144,6 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
 
   MessageSharedPtr response_to_mobile;
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
@@ -352,8 +334,6 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
-      .WillOnce(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -372,8 +352,6 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
-      .WillOnce(Return(am::mobile_api::Result::WARNINGS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS), _));

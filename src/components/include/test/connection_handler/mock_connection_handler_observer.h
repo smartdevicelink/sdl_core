@@ -48,10 +48,16 @@ class MockConnectionHandlerObserver
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
   MOCK_METHOD1(RemoveDevice,
                void(const connection_handler::DeviceHandle& device_handle));
-  MOCK_METHOD3(OnServiceStartedCallback,
-               bool(const connection_handler::DeviceHandle& device_handle,
+  DEPRECATED MOCK_METHOD3(
+      OnServiceStartedCallback,
+      bool(const connection_handler::DeviceHandle& device_handle,
+           const int32_t& session_key,
+           const protocol_handler::ServiceType& type));
+  MOCK_METHOD4(OnServiceStartedCallback,
+               void(const connection_handler::DeviceHandle& device_handle,
                     const int32_t& session_key,
-                    const protocol_handler::ServiceType& type));
+                    const protocol_handler::ServiceType& type,
+                    const BsonObject* params));
   MOCK_METHOD3(
       OnServiceEndedCallback,
       void(const int32_t& session_key,
@@ -60,6 +66,12 @@ class MockConnectionHandlerObserver
   MOCK_CONST_METHOD1(
       GetHandshakeContext,
       security_manager::SSLContext::HandshakeContext(uint32_t key));
+
+  MOCK_METHOD2(OnDeviceSwitchingStart,
+               void(const connection_handler::Device& device_from,
+                    const connection_handler::Device& device_to));
+  MOCK_METHOD1(OnDeviceSwitchingFinish, void(const std::string& device_uid));
+  MOCK_CONST_METHOD1(CheckAppIsNavi, bool(const uint32_t app_id));
 };
 
 }  // namespace connection_handler_test

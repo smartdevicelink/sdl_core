@@ -340,7 +340,10 @@ const policy_table::AppHMITypes* CacheManager::GetHMITypes(
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
   if (i != apps.end()) {
-    return &(*i->second.AppHMIType);
+    const policy_table::AppHMITypes& app_hmi_types = *i->second.AppHMIType;
+    if (app_hmi_types.is_initialized()) {
+      return &app_hmi_types;
+    }
   }
   return NULL;
 }
@@ -630,7 +633,7 @@ void CacheManager::ProcessUpdate(
       *(initial_policy_iter->second.RequestType);
 
   const std::string& app_id = initial_policy_iter->first;
-  RequestTypes merged_pt_request_types;
+  bool update_request_types = true;
 
   if (app_id == kDefaultId || app_id == kPreDataConsentId) {
     if (new_request_types.is_omitted()) {
@@ -638,25 +641,28 @@ void CacheManager::ProcessUpdate(
                    "Application " << app_id
                                   << " has omitted RequestTypes."
                                      " Previous values will be kept.");
-      return;
-    }
-    if (new_request_types.empty()) {
+      update_request_types = false;
+    } else if (new_request_types.empty()) {
       if (new_request_types.is_cleaned_up()) {
         LOG4CXX_INFO(logger_,
                      "Application " << app_id
                                     << " has cleaned up all values."
                                        " Previous values will be kept.");
-        return;
+        update_request_types = false;
+      } else {
+        LOG4CXX_INFO(logger_,
+                     "Application " << app_id
+                                    << " has empty RequestTypes."
+                                       " Any parameter will be allowed.");
       }
-      LOG4CXX_INFO(logger_,
-                   "Application " << app_id
-                                  << " has empty RequestTypes."
-                                     " Any parameter will be allowed.");
     }
-    merged_pt_request_types = new_request_types;
-  } else {
-    merged_pt_request_types = new_request_types;
   }
+
+  const RequestTypes merged_pt_request_types =
+      update_request_types
+          ? new_request_types
+          : *(pt_->policy_table.app_policies_section.apps[app_id].RequestType);
+
   pt_->policy_table.app_policies_section.apps[app_id] =
       initial_policy_iter->second;
   *(pt_->policy_table.app_policies_section.apps[app_id].RequestType) =
@@ -682,15 +688,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      ProcessUpdate(iter_default);
     } else {
       ProcessUpdate(iter);
     }
@@ -2252,6 +2249,27 @@ void CacheManager::FillDeviceSpecificData() {
   }
 }
 
+void CacheManager::MakeLowerCaseAppNames(policy_table::Table& pt) const {
+  policy_table::ApplicationPolicies& apps =
+      pt.policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::iterator iter = apps.begin();
+       iter != apps.end();) {
+    std::string key = iter->first;
+    if (key == kDefaultId || key == kPreDataConsentId || key == kDeviceId) {
+      ++iter;
+      continue;
+    }
+
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (key.compare(iter->first) != 0) {
+      std::swap(apps[key], iter->second);
+      iter = apps.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
 bool CacheManager::LoadFromBackup() {
   sync_primitives::AutoLock lock(cache_lock_);
   pt_ = backup_->GenerateSnapshot();
@@ -2293,6 +2311,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
       logger_,
       "Policy table content loaded:" << s_writer.write(table.ToJsonValue()));
 #endif  // ENABLE_LOG
+
+  MakeLowerCaseAppNames(table);
 
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
@@ -2607,6 +2627,31 @@ const PolicySettings& CacheManager::get_settings() const {
   DCHECK(settings_);
 
   return *settings_;
+}
+
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  auto device_data = *(pt_->policy_table.device_data);
+
+  auto from = pt_->policy_table.device_data->find(device_id_from);
+  DCHECK_OR_RETURN_VOID(from != device_data.end());
+
+  auto to = pt_->policy_table.device_data->find(device_id_to);
+  DCHECK_OR_RETURN_VOID(to != device_data.end());
+
+  auto& consents_from = *(from->second.user_consent_records);
+  auto& consents_to = *(to->second.user_consent_records);
+
+  LOG4CXX_DEBUG(logger_,
+                "Merging user consents from device: "
+                    << device_id_from << " to device: " << device_id_to);
+  for (auto f = consents_from.begin(); f != consents_from.end(); ++f) {
+    const auto app_id = f->first;
+    LOG4CXX_DEBUG(logger_, "Updating permissions for key: " << app_id);
+    consents_to[app_id] = f->second;
+  }
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(

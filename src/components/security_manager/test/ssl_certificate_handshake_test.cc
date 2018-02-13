@@ -56,12 +56,12 @@ namespace custom_str = utils::custom_string;
 namespace {
 const std::string server_ca_cert_filename = "server";
 const std::string client_ca_cert_filename = "client";
-const std::string client_certificate = "client/client_credential.p12.enc";
-const std::string server_certificate = "server/spt_credential.p12.enc";
+const std::string client_certificate = "client/client_credential.pem";
+const std::string server_certificate = "server/spt_credential.pem";
 const std::string server_unsigned_cert_file =
-    "server/spt_credential_unsigned.p12.enc";
+    "server/spt_credential_unsigned.pem";
 const std::string server_expired_cert_file =
-    "server/spt_credential_expired.p12.enc";
+    "server/spt_credential_expired.pem";
 
 const bool verify_peer = true;
 const bool skip_peer_verification = false;
@@ -372,11 +372,8 @@ TEST_F(SSLHandshakeTest, CAVerification_ServerSide) {
 }
 
 TEST_F(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
-  ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
-                                 server_certificate,
-                                 "ALL",
-                                 verify_peer,
-                                 "unex"))
+  ASSERT_TRUE(InitServerManagers(
+      security_manager::TLSv1_2, "", "ALL", verify_peer, "unex"))
       << server_manager->LastError();
   ASSERT_TRUE(InitClientManagers(security_manager::TLSv1_2,
                                  client_certificate,
@@ -423,7 +420,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ClientSide_NoCACertificate) {
                                  ""))
       << server_manager->LastError();
   ASSERT_TRUE(InitClientManagers(security_manager::TLSv1_2,
-                                 client_certificate,
+                                 "",
                                  "ALL",
                                  verify_peer,
                                  "client_ca_cert_filename"))

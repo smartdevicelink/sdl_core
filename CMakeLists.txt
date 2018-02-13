@@ -39,7 +39,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
-option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
@@ -52,11 +51,11 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
-option(USE_DISTCC "Turn on distributed build_usage" ON)
+option(USE_DISTCC "Turn on distributed build_usage" OFF)
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
@@ -90,15 +89,12 @@ else ()
 endif()
 
 if (HMI_TYPE_OPTION)
-  if (${HMI_TYPE_OPTION} STREQUAL "HTML5")
-    message(STATUS "Jenkins integration: select HTML5 HMI")
-    set (HMI "web")
-  elseif (${HMI_TYPE_OPTION} STREQUAL "NONE")
+  if (${HMI_TYPE_OPTION} STREQUAL "NONE")
     message(STATUS "Jenkins integration: select HMI none")
     set (HMI "no")
   else ()
-    message(STATUS "Jenkins integration: select QML HMI none")
-    set (HMI "qt")
+    message(STATUS "Jenkins integration: select HTML5 HMI")
+    set (HMI "web")
   endif()
 endif()
 
@@ -158,6 +154,11 @@ if (OS_TYPE_OPTION)
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
   endif()
+endif()
+
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
 endif()
 
 #Jenkins integration section end
@@ -319,38 +320,10 @@ if (EXTENDED_MEDIA_MODE)
   add_definitions(${GLIB2_CFLAGS})
 endif()
 
-if(HMI STREQUAL "qt")
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(qt_version "4.8.5")
-  else()
-    set(qt_version "5.1.0")
-  endif()
-
-  execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
-    OUTPUT_VARIABLE qt_bin_dir
-  )
-  message(STATUS "Binary directory Qt ${qt_version} is ${qt_bin_dir}")
-  set(ENV{PATH} ${qt_bin_dir}:$ENV{PATH})
-
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
-  else ()
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5DBus REQUIRED)
-    find_package(Qt5Qml REQUIRED)
-    find_package(Qt5Quick REQUIRED)
-    set(qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
-  endif()
-endif()
-
 # Building application
 
 # --- Type HMI
-if (HMI STREQUAL "qt")
-    set(QT_HMI ON)
-    add_definitions(-DQT_HMI)
-elseif (HMI STREQUAL "web")
+if (HMI STREQUAL "web")
     set(WEB_HMI ON)
     add_definitions(-DWEB_HMI)
 else ()
@@ -358,9 +331,6 @@ else ()
     add_definitions(-DNO_HMI)
 endif ()
 
-if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
-    set(HMIADAPTER "dbus")
-endif()
 if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
@@ -369,7 +339,10 @@ if (HMIADAPTER STREQUAL "dbus")
     set(HMI_DBUS_API ON)
     add_definitions(-DDBUS_HMIADAPTER)
     add_definitions(-DHMI_DBUS_API)
-    set(install-3rd_party_dbus "install-3rd_party_dbus")
+
+    find_package(DBus REQUIRED)
+    set(DBUS_LIBS_DIRECTORY ${DBUS_LIBRARY_DIRS} PARENT_SCOPE)
+    message(${DBUS_INCLUDE_DIRS})
 endif()
 if (HMIADAPTER STREQUAL "messagebroker")
     set(HMI_JSON_API ON)
@@ -408,6 +381,18 @@ set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(RTLIB )
 endif()
+
+SET(RPATH_DIRECTORIES
+  ${CMAKE_INSTALL_PREFIX}/bin/plugins
+  /usr/local/lib
+  /usr/local
+  ${CMAKE_INSTALL_PREFIX}/bin
+)
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Building tests
 if(BUILD_TESTS)

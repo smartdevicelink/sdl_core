@@ -47,6 +47,13 @@ set(LIBRARIES
     Utils
 )
 
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+        FunctionalModule
+        ${LIBRARIES}
+    )
+endif(REMOTE_CONTROL)
+
 set(SOURCES
     ${COMPONENTS_DIR}/application_manager/test/message_helper/message_helper_test.cc
 )

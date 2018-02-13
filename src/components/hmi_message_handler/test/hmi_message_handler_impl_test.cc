@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::ReturnRef;
+using ::testing::Return;
 using ::testing::_;
 
 class HMIMessageHandlerImplTest : public ::testing::Test {
@@ -57,18 +57,19 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   MockHMIMessageObserver* mock_hmi_message_observer_;
+
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
 
   virtual void SetUp() OVERRIDE {
     ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
-        .WillByDefault(ReturnRef(stack_size));
+        .WillByDefault(Return(stack_size));
     hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
         mock_hmi_message_handler_settings);
     ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-        hmi_handler_, "localhost", 22);
+        hmi_handler_, "127.0.0.1", 8087);
     ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ = new MockHMIMessageObserver();
     ASSERT_TRUE(NULL != mock_hmi_message_observer_);

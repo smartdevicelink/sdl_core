@@ -484,6 +484,41 @@ bool CheckAppPolicy::IsRequestTypeChanged(
   return diff.size();
 }
 
+void FillActionsForAppPolicies::operator()(
+    const policy::CheckAppPolicyResults::value_type& value) {
+  const std::string app_id = value.first;
+  const policy_table::ApplicationPolicies::const_iterator app_policy =
+      app_policies_.find(app_id);
+
+  if (app_policies_.end() == app_policy) {
+    return;
+  }
+
+  if (IsPredefinedApp(*app_policy)) {
+    return;
+  }
+
+  switch (value.second) {
+    case RESULT_APP_REVOKED:
+    case RESULT_NICKNAME_MISMATCH:
+      actions_[app_id].is_notify_system = true;
+      return;
+    case RESULT_CONSENT_NEEDED:
+    case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED:
+      actions_[app_id].is_consent_needed = true;
+      break;
+    case RESULT_CONSENT_NOT_REQIURED:
+    case RESULT_PERMISSIONS_REVOKED:
+    case RESULT_REQUEST_TYPE_CHANGED:
+      break;
+    case RESULT_NO_CHANGES:
+    default:
+      return;
+  }
+  actions_[app_id].is_notify_system = true;
+  actions_[app_id].is_send_permissions_to_app = true;
+}
+
 FillNotificationData::FillNotificationData(Permissions& data,
                                            GroupConsent group_state,
                                            GroupConsent undefined_group_consent,
@@ -865,4 +900,5 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
-}
+
+}  // namespace policy

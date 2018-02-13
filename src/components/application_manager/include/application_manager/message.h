@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include "utils/shared_ptr.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
+#include "protocol/common.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -57,31 +58,24 @@ enum MessageType {
 // Map PrcType to corresponding MessageType
 MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type);
 
-enum ProtocolVersion {
-  kUnknownProtocol = -1,
-  kHMI = 0,
-  kV1 = 1,
-  kV2 = 2,
-  kV3 = 3,
-  kV4 = 4,
-  kV5 = 5
-};
-
 class Message {
  public:
-  Message(protocol_handler::MessagePriority priority);
+  explicit Message(protocol_handler::MessagePriority priority);
   Message(const Message& message);
   Message& operator=(const Message& message);
-  bool operator==(const Message& message);
+  bool operator==(const Message& message) const;
   ~Message();
 
   //! --------------------------------------------------------------------------
   int32_t function_id() const;
+#ifdef SDL_REMOTE_CONTROL
+  std::string function_name() const;
+#endif  // SDL_REMOTE_CONTROL
   int32_t correlation_id() const;
   int32_t connection_key() const;
 
   MessageType type() const;
-  ProtocolVersion protocol_version() const;
+  protocol_handler::MajorProtocolVersion protocol_version() const;
 
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
@@ -90,20 +84,26 @@ class Message {
   size_t payload_size() const;
   const smart_objects::SmartObject& smart_object() const;
 
-  //! --------------------------------------------------------------------------
+  //!
+  //--------------------------------------------------------------------------.
   void set_function_id(int32_t id);
+#ifdef SDL_REMOTE_CONTROL
+  void set_function_name(const std::string& name);
+#endif  // SDL_REMOTE_CONTROL
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
   void set_message_type(MessageType type);
-  void set_binary_data(BinaryData* data);
+  DEPRECATED void set_binary_data(BinaryData* data);
+  void set_binary_data(const BinaryData* data);
   void set_json_message(const std::string& json_message);
-  void set_protocol_version(ProtocolVersion version);
+  void set_protocol_version(protocol_handler::MajorProtocolVersion version);
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
 
-  static bool is_sufficient_version(ProtocolVersion minVersion,
-                                    ProtocolVersion version);
+  static bool is_sufficient_version(
+      protocol_handler::MajorProtocolVersion minVersion,
+      protocol_handler::MajorProtocolVersion version);
 
   protocol_handler::MessagePriority Priority() const {
     return priority_;
@@ -113,6 +113,9 @@ class Message {
   int32_t function_id_;     // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;        // @remark protocol V2.
+#ifdef SDL_REMOTE_CONTROL
+  std::string function_name_;
+#endif  // SDL_REMOTE_CONTROL
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first
@@ -126,8 +129,11 @@ class Message {
   BinaryData* binary_data_;
   size_t data_size_;
   size_t payload_size_;
-  ProtocolVersion version_;
+  protocol_handler::MajorProtocolVersion version_;
 };
+
+typedef utils::SharedPtr<application_manager::Message> MobileMessage;
+typedef utils::SharedPtr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

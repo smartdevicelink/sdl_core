@@ -39,6 +39,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
+#include "utils/macro.h"
 
 /**
  * \namespace connection_handler
@@ -175,10 +176,27 @@ class ConnectionHandler {
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) const = 0;
+  virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const = 0;
+
+  /**
+   * DEPRECATED
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  DEPRECATED virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      uint32_t* device_id) const = 0;
+
   /**
    * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
    * currently connected devices.
@@ -197,6 +215,22 @@ class ConnectionHandler {
   virtual const protocol_handler::SessionObserver& get_session_observer() = 0;
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
+
+  /**
+   * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
+   * \param result true if observer accepts starting service, false otherwise
+   * \param rejected_params list of rejected parameters' name. Only valid when
+   * result is false. Note that even if result is false, this may be empty.
+   *
+   * \note This is invoked only once but can be invoked by multiple threads.
+   * Also it can be invoked before OnServiceStartedCallback() returns.
+   **/
+  virtual void NotifyServiceStartedResult(
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params) = 0;
 
  protected:
   /**

@@ -94,6 +94,7 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
 }
 
@@ -103,6 +104,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_AddSubMenu: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
@@ -128,9 +130,6 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
                    MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
-      if (result) {
-        application->UpdateHash();
-      }
       break;
     }
     default: {
@@ -138,6 +137,11 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
+}
+
+bool AddSubMenuRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool AddSubMenuRequest::CheckSubMenuName() {

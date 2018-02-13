@@ -34,6 +34,7 @@
 #include <memory.h>
 #include <algorithm>  // std::find
 #include <bson_object.h>
+#include <protocol/bson_object_keys.h>
 
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
@@ -56,7 +57,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const size_t data_size);
 
-const size_t kStackSize = 32768;
+const size_t kStackSize = 65536;
 
 ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 0, 0);
 
@@ -76,10 +77,13 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     security_manager_(NULL)
     ,
 #endif  // ENABLE_SECURITY
-    raw_ford_messages_from_mobile_(
-        "PH FromMobile", this, threads::ThreadOptions(kStackSize))
+    is_ptu_triggered_(false)
+    , raw_ford_messages_from_mobile_(
+          "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
+    , start_session_frame_map_lock_()
+    , start_session_frame_map_()
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -187,38 +191,82 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
 
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
-                                              uint8_t protocol_version,
+                                              uint8_t input_protocol_version,
                                               uint32_t hash_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ProtocolPacket::ProtocolVersion* fullVersion =
-      new ProtocolPacket::ProtocolVersion();
+  ProtocolPacket::ProtocolVersion fullVersion;
   SendStartSessionAck(connection_id,
                       session_id,
-                      protocol_version,
+                      input_protocol_version,
                       hash_id,
                       service_type,
                       protection,
-                      *fullVersion);
-  delete fullVersion;
+                      fullVersion);
 }
 
 void ProtocolHandlerImpl::SendStartSessionAck(
     ConnectionID connection_id,
     uint8_t session_id,
-    uint8_t protocol_version,
+    uint8_t input_protocol_version,
     uint32_t hash_id,
     uint8_t service_type,
     bool protection,
     ProtocolPacket::ProtocolVersion& full_version) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
+  BsonObject empty_param;
+  bson_object_initialize_default(&empty_param);
+
+  SendStartSessionAck(connection_id,
+                      session_id,
+                      input_protocol_version,
+                      hash_id,
+                      service_type,
+                      protection,
+                      full_version,
+                      empty_param);
+
+  bson_object_deinitialize(&empty_param);
+}
+
+void ProtocolHandlerImpl::SendStartSessionAck(
+    ConnectionID connection_id,
+    uint8_t session_id,
+    uint8_t input_protocol_version,
+    uint32_t hash_id,
+    uint8_t service_type,
+    bool protection,
+    ProtocolPacket::ProtocolVersion& full_version,
+    BsonObject& params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint8_t ack_protocol_version = SupportedSDLProtocolVersion();
+
+  const bool proxy_supports_v5_protocol =
+      input_protocol_version >= PROTOCOL_VERSION_5 ||
+      (ServiceTypeFromByte(service_type) == kRpc &&
+       full_version.majorVersion >= PROTOCOL_VERSION_5);
+
+  if (kRpc != service_type) {
+    // In case if input protocol version os bigger then supported, SDL should
+    // respond with maximum supported protocol version
+    ack_protocol_version = input_protocol_version < ack_protocol_version
+                               ? input_protocol_version
+                               : ack_protocol_version;
+  }
+
+  // We can't send a V5+ packet if the proxy doesn't support it,
+  // so we manually set a maximum of V4 in that case
+  if (!proxy_supports_v5_protocol &&
+      ack_protocol_version >= PROTOCOL_VERSION_5) {
+    ack_protocol_version = PROTOCOL_VERSION_4;
+  }
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
-                                           maxProtocolVersion,
+                                           ack_protocol_version,
                                            protection,
                                            FRAME_TYPE_CONTROL,
                                            service_type,
@@ -228,36 +276,33 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                            message_counters_[session_id]++));
 
   // Cannot include a constructed payload if either side doesn't support it
-  if (maxProtocolVersion >= PROTOCOL_VERSION_5) {
+  if (ack_protocol_version >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
-    BsonObject payloadObj;
-    bson_object_initialize_default(&payloadObj);
     bson_object_put_int64(
-        &payloadObj,
-        "mtu",
+        &params,
+        strings::mtu,
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
     if (serviceTypeValue == kRpc) {
       // Hash ID is only used in RPC case
       bson_object_put_int32(
-          &payloadObj, "hashId", static_cast<int32_t>(hash_id));
+          &params, strings::hash_id, static_cast<int32_t>(hash_id));
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
               ? &defaultProtocolVersion
               : ProtocolPacket::ProtocolVersion::min(full_version,
                                                      defaultProtocolVersion);
-      char protocolVersionString[255];
+      char protocolVersionString[256];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
-          &payloadObj, "protocolVersion", protocolVersionString);
+          &params, strings::protocol_version, protocolVersionString);
     }
-    uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
-    ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
+    uint8_t* payloadBytes = bson_object_to_bytes(&params);
+    ptr->set_data(payloadBytes, bson_object_size(&params));
     free(payloadBytes);
-    bson_object_deinitialize(&payloadObj);
   } else {
     set_hash_id(hash_id, *ptr);
   }
@@ -277,7 +322,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
                                                uint8_t service_type) {
-  std::vector<std::string> rejectedParams(0, std::string(""));
+  std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
                        protocol_version,
@@ -317,7 +362,8 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
       strncpy(paramPtr, param.c_str(), 255);
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
-    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    bson_object_put_array(
+        &payloadObj, strings::rejected_params, &rejectedParamsArr);
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -338,12 +384,12 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
                                              uint8_t protocol_version,
                                              uint8_t service_type) {
-  std::vector<std::string> rejectedParams(0, std::string(""));
+  std::vector<std::string> rejectedParams;
   SendEndSessionNAck(connection_id,
-                       session_id,
-                       protocol_version,
-                       service_type,
-                       rejectedParams);
+                     session_id,
+                     protocol_version,
+                     service_type,
+                     rejectedParams);
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
@@ -378,7 +424,8 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
       strncpy(paramPtr, param.c_str(), 255);
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
-    bson_object_put_array(&payloadObj, "rejectedParams", &rejectedParamsArr);
+    bson_object_put_array(
+        &payloadObj, strings::rejected_params, &rejectedParamsArr);
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -792,6 +839,59 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   multiframe_builder_.RemoveConnection(connection_id);
 }
 
+void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_handlers_lock_);
+
+  if (!is_ptu_triggered_) {
+    LOG4CXX_ERROR(logger_,
+                  "PTU was not triggered by service starting. Ignored");
+    return;
+  }
+
+  const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired();
+  for (auto handler : ptu_pending_handlers_) {
+    security_manager::SSLContext* ssl_context =
+        is_cert_expired
+            ? NULL
+            : security_manager_->CreateSSLContext(handler->connection_key());
+
+    if (!ssl_context) {
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          handler->connection_key(),
+          security_manager::SecurityManager::ERROR_INTERNAL,
+          error);
+
+      handler->OnHandshakeDone(
+          handler->connection_key(),
+          security_manager::SSLContext::Handshake_Result_Fail);
+
+      continue;
+    }
+
+    if (ssl_context->IsInitCompleted()) {
+      handler->OnHandshakeDone(
+          handler->connection_key(),
+          security_manager::SSLContext::Handshake_Result_Success);
+    } else {
+      security_manager_->AddListener(new HandshakeHandler(*handler));
+      if (!ssl_context->IsHandshakePending()) {
+        // Start handshake process
+        security_manager_->StartHandshake(handler->connection_key());
+      }
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "Handshake handlers were notified");
+  ptu_pending_handlers_.clear();
+  is_ptu_triggered_ = false;
+#endif  // ENABLE_SECURITY
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1023,7 +1123,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   switch (packet->frame_data()) {
     case FRAME_DATA_START_SERVICE: {
       LOG4CXX_TRACE(logger_, "FrameData: StartService");
-      return HandleControlMessageStartSession(*packet);
+      return HandleControlMessageStartSession(packet);
     }
     case FRAME_DATA_END_SERVICE: {
       LOG4CXX_TRACE(logger_, "FrameData: StopService");
@@ -1066,7 +1166,8 @@ uint32_t get_hash_id(const ProtocolPacket& packet) {
   }
   if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
     BsonObject obj = bson_object_from_bytes(packet.data());
-    const uint32_t hash_id = (uint32_t)bson_object_get_int32(&obj, "hashId");
+    const uint32_t hash_id =
+        (uint32_t)bson_object_get_int32(&obj, strings::hash_id);
     bson_object_deinitialize(&obj);
     return hash_id;
   } else {
@@ -1102,9 +1203,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                  "Refused to end session " << static_cast<int>(service_type)
                                            << " type.");
     if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
-      std::vector<std::string> rejectedParams(0, std::string(""));
+      std::vector<std::string> rejectedParams;
       if (hash_id == protocol_handler::HASH_ID_WRONG) {
-        rejectedParams.push_back(std::string("hashId"));
+        rejectedParams.push_back(std::string(strings::hash_id));
       }
       SendEndSessionNAck(connection_id,
                          current_session_id,
@@ -1126,12 +1227,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const uint8_t current_session_id = packet.session_id();
-  const uint32_t hash_id = get_hash_id(packet);
+  uint32_t hash_id = get_hash_id(packet);
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const ConnectionID connection_id = packet.connection_id();
 
   const uint32_t session_key = session_observer_.OnSessionEndedCallback(
-      connection_id, current_session_id, hash_id, service_type);
+      connection_id, current_session_id, &hash_id, service_type);
 
   if (0 == session_key) {
     LOG4CXX_WARN(logger_, "Refused to end service");
@@ -1141,110 +1242,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
   return RESULT_OK;
 }
 
-#ifdef ENABLE_SECURITY
-namespace {
-/**
- * \brief SecurityManagerListener for send Ack/NAck on success or fail
- * SSL handshake
- */
-class StartSessionHandler : public security_manager::SecurityManagerListener {
- public:
-  StartSessionHandler(uint32_t connection_key,
-                      ProtocolHandlerImpl* protocol_handler,
-                      SessionObserver& session_observer,
-                      ConnectionID connection_id,
-                      int32_t session_id,
-                      uint8_t protocol_version,
-                      uint32_t hash_id,
-                      ServiceType service_type,
-                      const std::vector<int>& force_protected_service)
-      : connection_key_(connection_key)
-      , protocol_handler_(protocol_handler)
-      , session_observer_(session_observer)
-      , connection_id_(connection_id)
-      , session_id_(session_id)
-      , protocol_version_(protocol_version)
-      , hash_id_(hash_id)
-      , service_type_(service_type)
-      , force_protected_service_(force_protected_service)
-      , full_version_() {}
-  StartSessionHandler(uint32_t connection_key,
-                      ProtocolHandlerImpl* protocol_handler,
-                      SessionObserver& session_observer,
-                      ConnectionID connection_id,
-                      int32_t session_id,
-                      uint8_t protocol_version,
-                      uint32_t hash_id,
-                      ServiceType service_type,
-                      const std::vector<int>& force_protected_service,
-                      ProtocolPacket::ProtocolVersion& full_version)
-      : connection_key_(connection_key)
-      , protocol_handler_(protocol_handler)
-      , session_observer_(session_observer)
-      , connection_id_(connection_id)
-      , session_id_(session_id)
-      , protocol_version_(protocol_version)
-      , hash_id_(hash_id)
-      , service_type_(service_type)
-      , force_protected_service_(force_protected_service)
-      , full_version_(full_version) {}
-
-  bool OnHandshakeDone(
-      const uint32_t connection_key,
-      security_manager::SSLContext::HandshakeResult result) OVERRIDE {
-    if (connection_key != connection_key_) {
-      return false;
-    }
-    const bool success =
-        result == security_manager::SSLContext::Handshake_Result_Success;
-    // check current service protection
-    const bool was_service_protection_enabled =
-        session_observer_.GetSSLContext(connection_key_, service_type_) != NULL;
-    if (was_service_protection_enabled) {
-      if (!success) {
-        protocol_handler_->SendStartSessionNAck(
-            connection_id_, session_id_, protocol_version_, service_type_);
-      } else {
-        // Could not be success handshake and not already protected service
-        NOTREACHED();
-      }
-    } else {
-      if (success) {
-        session_observer_.SetProtectionFlag(connection_key_, service_type_);
-      }
-      protocol_handler_->SendStartSessionAck(connection_id_,
-                                             session_id_,
-                                             protocol_version_,
-                                             hash_id_,
-                                             service_type_,
-                                             success);
-    }
-    delete this;
-    return true;
-  }
-
-  void OnCertificateUpdateRequired() OVERRIDE {}
-
-  virtual const std::vector<int>& force_protected_service() const {
-    return force_protected_service_;
-  }
-
- private:
-  const uint32_t connection_key_;
-  ProtocolHandlerImpl* protocol_handler_;
-  SessionObserver& session_observer_;
-
-  const ConnectionID connection_id_;
-  const int32_t session_id_;
-  const uint8_t protocol_version_;
-  const uint32_t hash_id_;
-  const ServiceType service_type_;
-  const std::vector<int> force_protected_service_;
-  const ProtocolPacket::ProtocolVersion full_version_;
-};
-}  // namespace
-#endif  // ENABLE_SECURITY
-
+// Suppress warning for deprecated method used within another deprecated method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1339,16 +1339,18 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                           *fullVersion);
     } else {
       security_manager_->AddListener(
-          new StartSessionHandler(connection_key,
-                                  this,
-                                  session_observer_,
-                                  connection_id,
-                                  session_id,
-                                  packet.protocol_version(),
-                                  hash_id,
-                                  service_type,
-                                  get_settings().force_protected_service(),
-                                  *fullVersion));
+          new HandshakeHandler(*this,
+                               session_observer_,
+                               connection_key,
+                               connection_id,
+                               session_id,
+                               packet.protocol_version(),
+                               hash_id,
+                               service_type,
+                               get_settings().force_protected_service(),
+                               false,
+                               *fullVersion,
+                               NULL));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
@@ -1396,6 +1398,266 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                         PROTECTION_OFF);
   }
   return RESULT_OK;
+}
+#pragma GCC diagnostic pop
+
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
+    const ProtocolFramePtr packet) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Protocol version:" << static_cast<int>(packet->protocol_version()));
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
+  const uint8_t protocol_version = packet->protocol_version();
+  BsonObject bson_obj;
+  if (packet->data() != NULL) {
+    bson_obj = bson_object_from_bytes(packet->data());
+  } else {
+    bson_object_initialize_default(&bson_obj);
+  }
+
+#ifdef ENABLE_SECURITY
+  const bool protection =
+      // Protocolo version 1 is not support protection
+      (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
+                                              : false;
+#else
+  const bool protection = false;
+#endif  // ENABLE_SECURITY
+
+  const ConnectionID connection_id = packet->connection_id();
+  const uint8_t session_id = packet->session_id();
+
+  {
+    sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+    start_session_frame_map_[std::make_pair(connection_id, session_id)] =
+        packet;
+  }
+
+  session_observer_.OnSessionStartedCallback(
+      connection_id, packet->session_id(), service_type, protection, &bson_obj);
+  bson_object_deinitialize(&bson_obj);
+
+  return RESULT_OK;
+}
+
+void ProtocolHandlerImpl::NotifySessionStartedResult(
+    int32_t connection_id,
+    uint8_t session_id,
+    uint8_t generated_session_id,
+    uint32_t hash_id,
+    bool protection,
+    std::vector<std::string>& rejected_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  protocol_handler::SessionContext context(connection_id,
+                                           session_id,
+                                           generated_session_id,
+                                           ServiceType::kInvalidServiceType,
+                                           hash_id,
+                                           protection);
+  NotifySessionStarted(context, rejected_params);
+}
+
+void ProtocolHandlerImpl::NotifySessionStarted(
+    const SessionContext& context, std::vector<std::string>& rejected_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ProtocolFramePtr packet;
+  {
+    sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+    StartSessionFrameMap::iterator it = start_session_frame_map_.find(
+        std::make_pair(context.connection_id_, context.initial_session_id_));
+    if (it == start_session_frame_map_.end()) {
+      LOG4CXX_ERROR(logger_, "Cannot find Session Started packet");
+      return;
+    }
+    packet = it->second;
+    start_session_frame_map_.erase(it);
+  }
+
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
+  const uint8_t protocol_version = packet->protocol_version();
+
+  if (0 == context.new_session_id_) {
+    LOG4CXX_WARN(logger_,
+                 "Refused by session_observer to create service "
+                     << static_cast<int32_t>(service_type) << " type.");
+    SendStartSessionNAck(context.connection_id_,
+                         packet->session_id(),
+                         protocol_version,
+                         packet->service_type(),
+                         rejected_params);
+    return;
+  }
+
+  std::shared_ptr<BsonObject> start_session_ack_params(
+      new BsonObject(), [](BsonObject* obj) { bson_object_deinitialize(obj); });
+  bson_object_initialize_default(start_session_ack_params.get());
+  // when video service is successfully started, copy input parameters
+  // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
+  if (packet->service_type() == kMobileNav && packet->data() != NULL) {
+    BsonObject req_param = bson_object_from_bytes(packet->data());
+    BsonElement* element = NULL;
+
+    if ((element = bson_object_get(&req_param, strings::height)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(start_session_ack_params.get(),
+                            strings::height,
+                            bson_object_get_int32(&req_param, strings::height));
+    }
+    if ((element = bson_object_get(&req_param, strings::width)) != NULL &&
+        element->type == TYPE_INT32) {
+      bson_object_put_int32(start_session_ack_params.get(),
+                            strings::width,
+                            bson_object_get_int32(&req_param, strings::width));
+    }
+    char* protocol =
+        bson_object_get_string(&req_param, strings::video_protocol);
+    if (protocol != NULL) {
+      bson_object_put_string(
+          start_session_ack_params.get(), strings::video_protocol, protocol);
+    }
+    char* codec = bson_object_get_string(&req_param, strings::video_codec);
+    if (codec != NULL) {
+      bson_object_put_string(
+          start_session_ack_params.get(), strings::video_codec, codec);
+    }
+    bson_object_deinitialize(&req_param);
+  }
+
+  std::shared_ptr<ProtocolPacket::ProtocolVersion> fullVersion;
+
+  // Can't check protocol_version because the first packet is v1, but there
+  // could still be a payload, in which case we can get the real protocol
+  // version
+  if (packet->service_type() == kRpc && packet->data() != NULL) {
+    BsonObject request_params = bson_object_from_bytes(packet->data());
+    char* version_param =
+        bson_object_get_string(&request_params, strings::protocol_version);
+    std::string version_string(version_param == NULL ? "" : version_param);
+    fullVersion =
+        std::make_shared<ProtocolPacket::ProtocolVersion>(version_string);
+    // Constructed payloads added in Protocol v5
+    if (fullVersion->majorVersion < PROTOCOL_VERSION_5) {
+      rejected_params.push_back(std::string(strings::protocol_version));
+    }
+    bson_object_deinitialize(&request_params);
+  } else {
+    fullVersion = std::make_shared<ProtocolPacket::ProtocolVersion>();
+  }
+
+#ifdef ENABLE_SECURITY
+  // for packet is encrypted and security plugin is enable
+  if (context.is_protected_ && security_manager_) {
+    const uint32_t connection_key = session_observer_.KeyFromPair(
+        context.connection_id_, context.new_session_id_);
+
+    std::shared_ptr<uint8_t> bson_object_bytes(
+        bson_object_to_bytes(start_session_ack_params.get()),
+        [](uint8_t* p) { delete[] p; });
+
+    std::shared_ptr<HandshakeHandler> handler =
+        std::make_shared<HandshakeHandler>(*this,
+                                           session_observer_,
+                                           *fullVersion,
+                                           context,
+                                           packet->protocol_version(),
+                                           bson_object_bytes);
+
+    const bool is_certificate_empty =
+        security_manager_->IsPolicyCertificateDataEmpty();
+
+    const bool is_certificate_expired =
+        is_certificate_empty ||
+        security_manager_->IsCertificateUpdateRequired();
+
+    if (context.is_ptu_required_ && is_certificate_empty) {
+      LOG4CXX_DEBUG(logger_,
+                    "PTU for StartSessionHandler "
+                        << handler.get()
+                        << " is required and certificate data is empty");
+
+      sync_primitives::AutoLock lock(ptu_handlers_lock_);
+      if (!is_ptu_triggered_) {
+        LOG4CXX_DEBUG(logger_,
+                      "PTU is not triggered yet. "
+                          << "Starting PTU and postponing SSL handshake");
+
+        ptu_pending_handlers_.push_back(handler);
+        is_ptu_triggered_ = true;
+        security_manager_->NotifyOnCertificateUpdateRequired();
+      } else {
+        LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
+        ptu_pending_handlers_.push_back(handler);
+      }
+      return;
+    }
+
+    security_manager::SSLContext* ssl_context =
+        is_certificate_expired
+            ? NULL
+            : security_manager_->CreateSSLContext(connection_key);
+    if (!ssl_context) {
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          connection_key,
+          security_manager::SecurityManager::ERROR_INTERNAL,
+          error);
+
+      handler->OnHandshakeDone(
+          connection_key, security_manager::SSLContext::Handshake_Result_Fail);
+
+      return;
+    }
+
+    if (!rejected_params.empty()) {
+      SendStartSessionNAck(context.connection_id_,
+                           packet->session_id(),
+                           protocol_version,
+                           packet->service_type(),
+                           rejected_params);
+    } else if (ssl_context->IsInitCompleted()) {
+      // mark service as protected
+      session_observer_.SetProtectionFlag(connection_key, service_type);
+      // Start service as protected with current SSLContext
+      SendStartSessionAck(context.connection_id_,
+                          context.new_session_id_,
+                          packet->protocol_version(),
+                          context.hash_id_,
+                          packet->service_type(),
+                          PROTECTION_ON,
+                          *fullVersion,
+                          *start_session_ack_params);
+    } else {
+      security_manager_->AddListener(new HandshakeHandler(*handler));
+      if (!ssl_context->IsHandshakePending()) {
+        // Start handshake process
+        security_manager_->StartHandshake(connection_key);
+      }
+    }
+    LOG4CXX_DEBUG(logger_,
+                  "Protection establishing for connection "
+                      << connection_key << " is in progress");
+    return;
+  }
+#endif  // ENABLE_SECURITY
+  if (rejected_params.empty()) {
+    SendStartSessionAck(context.connection_id_,
+                        context.new_session_id_,
+                        packet->protocol_version(),
+                        context.hash_id_,
+                        packet->service_type(),
+                        PROTECTION_OFF,
+                        *fullVersion,
+                        *start_session_ack_params);
+  } else {
+    SendStartSessionNAck(context.connection_id_,
+                         packet->session_id(),
+                         protocol_version,
+                         packet->service_type(),
+                         rejected_params);
+  }
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
@@ -1564,6 +1826,9 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
 void ProtocolHandlerImpl::Stop() {
   raw_ford_messages_from_mobile_.Shutdown();
   raw_ford_messages_to_mobile_.Shutdown();
+
+  sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
+  start_session_frame_map_.clear();
 }
 
 #ifdef ENABLE_SECURITY
@@ -1604,11 +1869,11 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
         connection_key,
         security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED,
         error_text);
+
+    uint32_t hash_id = packet->message_id();
     // Close session to prevent usage unprotected service/session
-    session_observer_.OnSessionEndedCallback(packet->connection_id(),
-                                             packet->session_id(),
-                                             packet->message_id(),
-                                             kRpc);
+    session_observer_.OnSessionEndedCallback(
+        packet->connection_id(), packet->session_id(), &hash_id, kRpc);
     return RESULT_OK;
   }
   LOG4CXX_DEBUG(logger_,
@@ -1657,11 +1922,11 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
         connection_key,
         security_manager::SecurityManager::ERROR_DECRYPTION_FAILED,
         error_text);
+
+    uint32_t hash_id = packet->message_id();
     // Close session to prevent usage unprotected service/session
-    session_observer_.OnSessionEndedCallback(packet->connection_id(),
-                                             packet->session_id(),
-                                             packet->message_id(),
-                                             kRpc);
+    session_observer_.OnSessionEndedCallback(
+        packet->connection_id(), packet->session_id(), &hash_id, kRpc);
     return RESULT_ENCRYPTION_FAILED;
   }
   LOG4CXX_DEBUG(logger_,
@@ -1679,33 +1944,34 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   LOG4CXX_DEBUG(
       logger_, "SendFramesNumber MobileNaviAck for session " << connection_key);
 
-  // TODO(EZamakhov): add protocol version check - to avoid send for
-  // PROTOCOL_VERSION_1
   transport_manager::ConnectionUID connection_id = 0;
   uint8_t session_id = 0;
   session_observer_.PairFromKey(connection_key, &connection_id, &session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, session_id, protocol_version)) {
-    ProtocolFramePtr ptr(
-        new protocol_handler::ProtocolPacket(connection_id,
-                                             protocol_version,
-                                             PROTECTION_OFF,
-                                             FRAME_TYPE_CONTROL,
-                                             SERVICE_TYPE_NAVI,
-                                             FRAME_DATA_SERVICE_DATA_ACK,
-                                             session_id,
-                                             0,
-                                             message_counters_[session_id]++));
+    if (protocol_version > PROTOCOL_VERSION_1 &&
+        protocol_version < PROTOCOL_VERSION_5) {
+      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+          connection_id,
+          protocol_version,
+          PROTECTION_OFF,
+          FRAME_TYPE_CONTROL,
+          SERVICE_TYPE_NAVI,
+          FRAME_DATA_SERVICE_DATA_ACK,
+          session_id,
+          0,
+          message_counters_[session_id]++));
 
-    // Flow control data shall be 4 bytes according Ford Protocol
-    DCHECK(sizeof(number_of_frames) == 4);
-    number_of_frames = LE_TO_BE32(number_of_frames);
-    ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
-                  sizeof(number_of_frames));
-    raw_ford_messages_to_mobile_.PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+      // Flow control data shall be 4 bytes according Ford Protocol
+      DCHECK(sizeof(number_of_frames) == 4);
+      number_of_frames = LE_TO_BE32(number_of_frames);
+      ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
+                    sizeof(number_of_frames));
+      raw_ford_messages_to_mobile_.PostMessage(
+          impl::RawFordMessageToMobile(ptr, false));
+      LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+    }
   } else {
     LOG4CXX_WARN(
         logger_,
@@ -1739,21 +2005,6 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  bool heart_beat_support = (0 != get_settings().heart_beat_timeout());
-
-  bool sdl4_support = get_settings().enable_protocol_4();
-  bool sdl5_support = get_settings().enable_protocol_5();
-
-  if (sdl5_support) {
-    return PROTOCOL_VERSION_5;
-  }
-  if (sdl4_support) {
-    return PROTOCOL_VERSION_4;
-  }
-  if (heart_beat_support) {
-    return PROTOCOL_VERSION_3;
-  }
-  return PROTOCOL_VERSION_2;
+  return get_settings().max_supported_protocol_version();
 }
 }  // namespace protocol_handler

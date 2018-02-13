@@ -68,6 +68,10 @@ std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
 std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum;
 std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_enum;
 std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum;
+std::map<std::string, hmi_apis::Common_VideoStreamingProtocol::eType>
+    video_streaming_protocol_enum;
+std::map<std::string, hmi_apis::Common_VideoStreamingCodec::eType>
+    video_streaming_codec_enum;
 
 void InitCapabilities() {
   vr_enum_capabilities.insert(std::make_pair(
@@ -333,6 +337,28 @@ void InitCapabilities() {
       std::string("CID1SET"), hmi_apis::Common_CharacterSet::CID1SET));
   character_set_enum.insert(std::make_pair(
       std::string("CID2SET"), hmi_apis::Common_CharacterSet::CID2SET));
+
+  video_streaming_protocol_enum.insert(std::make_pair(
+      std::string("RAW"), hmi_apis::Common_VideoStreamingProtocol::RAW));
+  video_streaming_protocol_enum.insert(std::make_pair(
+      std::string("RTP"), hmi_apis::Common_VideoStreamingProtocol::RTP));
+  video_streaming_protocol_enum.insert(std::make_pair(
+      std::string("RTSP"), hmi_apis::Common_VideoStreamingProtocol::RTSP));
+  video_streaming_protocol_enum.insert(std::make_pair(
+      std::string("RTMP"), hmi_apis::Common_VideoStreamingProtocol::RTMP));
+  video_streaming_protocol_enum.insert(std::make_pair(
+      std::string("WEBM"), hmi_apis::Common_VideoStreamingProtocol::WEBM));
+
+  video_streaming_codec_enum.insert(std::make_pair(
+      std::string("H264"), hmi_apis::Common_VideoStreamingCodec::H264));
+  video_streaming_codec_enum.insert(std::make_pair(
+      std::string("H265"), hmi_apis::Common_VideoStreamingCodec::H265));
+  video_streaming_codec_enum.insert(std::make_pair(
+      std::string("Theora"), hmi_apis::Common_VideoStreamingCodec::Theora));
+  video_streaming_codec_enum.insert(std::make_pair(
+      std::string("VP8"), hmi_apis::Common_VideoStreamingCodec::VP8));
+  video_streaming_codec_enum.insert(std::make_pair(
+      std::string("VP9"), hmi_apis::Common_VideoStreamingCodec::VP9));
 }
 
 }  // namespace
@@ -343,6 +369,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_ui_cooperating_(false)
     , is_navi_cooperating_(false)
     , is_ivi_cooperating_(false)
+    , is_rc_cooperating_(false)
     , attenuated_supported_(false)
     , ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , vr_language_(hmi_apis::Common_Language::INVALID_ENUM)
@@ -363,8 +390,12 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , prerecorded_speech_(NULL)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
+    , is_video_streaming_supported_(false)
+    , is_rc_supported_(false)
     , navigation_capability_(NULL)
     , phone_capability_(NULL)
+    , video_streaming_capability_(NULL)
+    , rc_capability_(NULL)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -374,6 +405,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     is_ui_cooperating_ = true;
     is_navi_cooperating_ = true;
     is_ivi_cooperating_ = true;
+    is_rc_cooperating_ = true;
   }
 }
 
@@ -394,6 +426,8 @@ HMICapabilitiesImpl::~HMICapabilitiesImpl() {
   delete prerecorded_speech_;
   delete navigation_capability_;
   delete phone_capability_;
+  delete video_streaming_capability_;
+  delete rc_capability_;
 }
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
@@ -432,6 +466,10 @@ void HMICapabilitiesImpl::set_is_navi_cooperating(const bool value) {
 
 void HMICapabilitiesImpl::set_is_ivi_cooperating(const bool value) {
   is_ivi_cooperating_ = value;
+}
+
+void HMICapabilitiesImpl::set_is_rc_cooperating(const bool value) {
+  is_rc_cooperating_ = value;
 }
 
 void HMICapabilitiesImpl::set_attenuated_supported(const bool state) {
@@ -609,6 +647,14 @@ void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
   is_phone_call_supported_ = supported;
 }
 
+void HMICapabilitiesImpl::set_video_streaming_supported(const bool supported) {
+  is_video_streaming_supported_ = supported;
+}
+
+void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
+  is_rc_supported_ = supported;
+}
+
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
   if (navigation_capability_) {
@@ -624,6 +670,23 @@ void HMICapabilitiesImpl::set_phone_capability(
     delete phone_capability_;
   }
   phone_capability_ = new smart_objects::SmartObject(phone_capability);
+}
+
+void HMICapabilitiesImpl::set_video_streaming_capability(
+    const smart_objects::SmartObject& video_streaming_capability) {
+  if (video_streaming_capability_) {
+    delete video_streaming_capability_;
+  }
+  video_streaming_capability_ =
+      new smart_objects::SmartObject(video_streaming_capability);
+}
+
+void HMICapabilitiesImpl::set_rc_capability(
+    const smart_objects::SmartObject& rc_capability) {
+  if (rc_capability_) {
+    delete rc_capability_;
+  }
+  rc_capability_ = new smart_objects::SmartObject(rc_capability);
 }
 
 void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
@@ -655,6 +718,10 @@ bool HMICapabilitiesImpl::is_navi_cooperating() const {
 
 bool HMICapabilitiesImpl::is_ivi_cooperating() const {
   return is_ivi_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_rc_cooperating() const {
+  return is_rc_cooperating_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::ui_supported_languages()
@@ -737,6 +804,14 @@ bool HMICapabilitiesImpl::phone_call_supported() const {
   return is_phone_call_supported_;
 }
 
+bool HMICapabilitiesImpl::video_streaming_supported() const {
+  return is_video_streaming_supported_;
+}
+
+bool HMICapabilitiesImpl::rc_supported() const {
+  return is_rc_supported_;
+}
+
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
     const {
   return navigation_capability_;
@@ -745,6 +820,15 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
 const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability()
     const {
   return phone_capability_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::video_streaming_capability() const {
+  return video_streaming_capability_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
+  return rc_capability_;
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
@@ -1001,6 +1085,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
+          if (!navigation_capability_so.empty()) {
+            set_navigation_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "phoneCapability")) {
@@ -1010,6 +1097,71 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
           set_phone_capability(phone_capability_so);
+          if (!phone_capability_so.empty()) {
+            set_phone_call_supported(true);
+          }
+        }
+        if (check_existing_json_member(system_capabilities,
+                                       "videoStreamingCapability")) {
+          Json::Value vs_capability =
+              system_capabilities.get("videoStreamingCapability", "");
+          smart_objects::SmartObject vs_capability_so;
+          Formatters::CFormatterJsonBase::jsonValueToObj(vs_capability,
+                                                         vs_capability_so);
+
+          if (vs_capability_so.keyExists("supportedFormats")) {
+            smart_objects::SmartObject& supported_format_array =
+                vs_capability_so["supportedFormats"];
+            smart_objects::SmartObject converted_array(
+                smart_objects::SmartType_Array);
+            for (uint32_t i = 0, j = 0; i < supported_format_array.length();
+                 i++) {
+              if (!supported_format_array[i].keyExists("protocol") ||
+                  !supported_format_array[i].keyExists("codec")) {
+                continue;
+              }
+
+              std::map<std::string,
+                       hmi_apis::Common_VideoStreamingProtocol::eType>::
+                  const_iterator it_protocol =
+                      video_streaming_protocol_enum.find(
+                          supported_format_array[i]["protocol"].asString());
+
+              std::map<std::string,
+                       hmi_apis::Common_VideoStreamingCodec::eType>::
+                  const_iterator it_codec = video_streaming_codec_enum.find(
+                      supported_format_array[i]["codec"].asString());
+
+              // format is valid only if both protocol and codec are converted
+              // to enum values successfully
+              if (it_protocol != video_streaming_protocol_enum.end() &&
+                  it_codec != video_streaming_codec_enum.end()) {
+                smart_objects::SmartObject format_so =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+                format_so["protocol"] = it_protocol->second;
+                format_so["codec"] = it_codec->second;
+                converted_array[j++] = format_so;
+              }
+            }
+            vs_capability_so.erase("supportedFormats");
+            vs_capability_so["supportedFormats"] = converted_array;
+          }
+          set_video_streaming_capability(vs_capability_so);
+          if (!vs_capability_so.empty()) {
+            set_video_streaming_supported(true);
+          }
+        }
+        if (check_existing_json_member(system_capabilities,
+                                       "remoteControlCapability")) {
+          Json::Value rc_capability =
+              system_capabilities.get("remoteControlCapability", "");
+          smart_objects::SmartObject rc_capability_so;
+          Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
+                                                         rc_capability_so);
+          set_rc_capability(rc_capability_so);
+          if (!rc_capability_so.empty()) {
+            set_rc_supported(true);
+          }
         }
       }
     }  // UI end

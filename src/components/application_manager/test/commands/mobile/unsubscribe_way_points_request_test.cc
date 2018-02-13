@@ -72,20 +72,13 @@ class UnSubscribeWayPointsRequestTest
  public:
   UnSubscribeWayPointsRequestTest()
       : command_msg_(CreateMessage(smart_objects::SmartType_Map))
-      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_))
-      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_)) {
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
-  ~UnSubscribeWayPointsRequestTest() {
-    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
-  am::MockMessageHelper& mock_message_helper_;
 };
 
 TEST_F(UnSubscribeWayPointsRequestTest,
@@ -107,9 +100,9 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
@@ -124,9 +117,9 @@ TEST_F(UnSubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_,
@@ -152,7 +145,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
        OnEvent_ReceivedNavigationUnSubscribeWayPointsEvent_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillRepeatedly(Return(mock_app));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::msg_params] = 0;
@@ -161,13 +154,9 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId));
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(app_mngr_,
+              UnsubscribeAppFromWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)));
 
   EXPECT_CALL(
       app_mngr_,

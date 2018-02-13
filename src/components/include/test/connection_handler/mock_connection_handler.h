@@ -84,11 +84,18 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                void(uint32_t connection_key, uint8_t session_id));
   MOCK_METHOD2(BindProtocolVersionWithSession,
                void(uint32_t connection_key, uint8_t protocol_version));
+
+  // DEPRECATED
   MOCK_CONST_METHOD4(GetDataOnSessionKey,
                      int32_t(uint32_t key,
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
                              uint32_t* device_id));
+  MOCK_CONST_METHOD4(GetDataOnSessionKey,
+                     int32_t(uint32_t key,
+                             uint32_t* app_id,
+                             std::list<int32_t>* sessions_list,
+                             connection_handler::DeviceHandle* device_id));
   MOCK_CONST_METHOD0(get_settings,
                      const connection_handler::ConnectionHandlerSettings&());
   MOCK_METHOD0(get_session_observer,
@@ -96,6 +103,10 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(get_device_discovery_starter, DevicesDiscoveryStarter&());
   MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
                      void(std::vector<std::string>& macs));
+  MOCK_METHOD3(NotifyServiceStartedResult,
+               void(uint32_t session_key,
+                    bool result,
+                    std::vector<std::string>& rejected_params));
 };
 
 }  // namespace connection_handler_test

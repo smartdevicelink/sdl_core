@@ -37,15 +37,18 @@
 #include <map>
 #include <set>
 #include <list>
+#include <vector>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
+#include "application_manager/app_extension.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -159,7 +162,7 @@ typedef std::set<uint32_t> SoftButtonID;
 /**
  * @brief Defines set of vehicle info types
  */
-typedef std::set<uint32_t> VehicleInfoSubscriptions;
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
 /**
  * @brief Defines set of buttons subscription
@@ -383,7 +386,6 @@ class Application : public virtual InitialApplicationData,
  public:
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
- public:
   Application() : is_greyed_out_(false) {}
   virtual ~Application() {}
 
@@ -406,6 +408,20 @@ class Application : public virtual InitialApplicationData,
    * @return updated_hash
    */
   virtual void UpdateHash() = 0;
+
+  /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  virtual bool IsHashChangedDuringSuspend() const = 0;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  virtual void SetHashChangedDuringSuspend(const bool state) = 0;
 
   /**
    * @brief method is called when SDL is saving application data for resumption
@@ -439,6 +455,15 @@ class Application : public virtual InitialApplicationData,
   virtual void set_video_streaming_allowed(bool state) = 0;
   virtual bool audio_streaming_allowed() const = 0;
   virtual void set_audio_streaming_allowed(bool state) = 0;
+
+  /**
+   * @brief Sends SetVideoConfig request to HMI to configure streaming
+   * @param service_type Type of streaming service, should be kMobileNav
+   * @param params parameters of video streaming in key-value format
+   * @return true if SetVideoConfig is sent, false otherwise
+   */
+  virtual bool SetVideoConfig(protocol_handler::ServiceType service_type,
+                              const smart_objects::SmartObject& params) = 0;
 
   /**
    * @brief Starts streaming service for application
@@ -537,13 +562,14 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
-  virtual void set_device(connection_handler::DeviceHandle device) = 0;
+  DEPRECATED virtual void set_device(
+      connection_handler::DeviceHandle device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
 
   virtual void set_protocol_version(
-      const ProtocolVersion& protocol_version) = 0;
-  virtual ProtocolVersion protocol_version() const = 0;
+      const protocol_handler::MajorProtocolVersion& protocol_version) = 0;
+  virtual protocol_handler::MajorProtocolVersion protocol_version() const = 0;
 
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;
@@ -592,6 +618,13 @@ class Application : public virtual InitialApplicationData,
    * @return object for recording statistics
    */
   virtual UsageStatistics& usage_report() = 0;
+
+  /**
+   * @brief SetInitialState sets initial HMI state for application on
+   * registration
+   * @param state Hmi state value
+   */
+  virtual void SetInitialState(HmiStatePtr state) = 0;
 
   /**
    * @brief SetRegularState set permanent state of application
@@ -683,6 +716,16 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsAudioApplication() const = 0;
 
   /**
+   * DEPRECATED
+   * @brief GetDeviceId allows to obtain device id which posseses
+   * by this application.
+   * @return device the device id.
+   */
+  std::string GetDeviceId() const {
+    return device_id_;
+  }
+
+  /**
    * @brief IsRegistered allows to distinguish if this
    * application has been registered.
    *
@@ -740,16 +783,6 @@ class Application : public virtual InitialApplicationData,
   }
 
   /**
-   * @brief GetDeviceId allows to obtain device id which posseses
-   * by this application.
-   *
-   * @return device the device id.
-   */
-  std::string GetDeviceId() const {
-    return device_id_;
-  }
-
-  /**
    * @brief Returns is application should be greyed out on HMI
    */
   bool is_greyed_out() const {
@@ -776,6 +809,60 @@ class Application : public virtual InitialApplicationData,
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief set_system_context Set system context for application
+   * @param system_context Current context
+   */
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+
+  /**
+   * @brief set_audio_streaming_state Set audio streaming state for application
+   * @param state Current audio streaming state
+   */
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+
+  /**
+   * @brief set_hmi_level Set HMI level for application
+   * @param hmi_level Current HMI level
+   */
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+
+  /**
+   * @brief Removes all extensions
+   */
+  virtual void RemoveExtensions() = 0;
+
+  /**
+   * @brief Get list of subscriptions to vehicle info notifications
+   * @return list of subscriptions to vehicle info notifications
+   */
+  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
+#endif  // SDL_REMOTE_CONTROL
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 
@@ -790,6 +877,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

@@ -53,7 +53,6 @@ namespace mobile_commands_test {
 namespace delete_command_request {
 
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
@@ -75,9 +74,7 @@ const uint32_t kConnectionKey = 2u;
 class DeleteCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  DeleteCommandRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  DeleteCommandRequestTest() : mock_app_(CreateMockApp()) {}
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -134,12 +131,7 @@ class DeleteCommandRequestTest
         .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 
@@ -162,10 +154,10 @@ TEST_F(DeleteCommandRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(*mock_app_, FindCommand(kCommandId))
       .WillByDefault(Return(test_msg.get()));
   ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
@@ -175,7 +167,7 @@ TEST_F(DeleteCommandRequestTest,
       hmi_apis::Common_Result::SUCCESS;
   Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
   event_ui.set_smart_object(*msg);
-
+  command->Init();
   command->Run();
   command->on_event(event_ui);
 
@@ -222,10 +214,10 @@ TEST_F(DeleteCommandRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
   ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
 
@@ -235,6 +227,7 @@ TEST_F(DeleteCommandRequestTest,
   Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
   event_vr.set_smart_object(*msg);
 
+  command->Init();
   command->Run();
   command->on_event(event_vr);
 

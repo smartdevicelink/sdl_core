@@ -58,12 +58,17 @@ class SubscribeButtonRequest : public CommandRequestImpl {
   /**
    * @brief SubscribeButtonRequest class destructor
    **/
-  virtual ~SubscribeButtonRequest();
+  ~SubscribeButtonRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /**
@@ -84,12 +89,6 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    * to notify HMI that app subscribed on the button.
    */
   void SendSubscribeButtonNotification();
-
-  /**
-   * @brief Checks HMI capabilities for specified button support
-   * @param button Button to check
-   */
-  bool CheckHMICapabilities(mobile_apis::ButtonName::eType button);
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };

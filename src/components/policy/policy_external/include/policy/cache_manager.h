@@ -701,6 +701,15 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -730,6 +739,13 @@ class CacheManager : public CacheManagerInterface {
    * @brief Resets all calculated permissions for specified device in cache
    */
   void ResetCalculatedPermissionsForDevice(const std::string& device_id);
+
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
 
   void AddCalculatedPermissions(const std::string& device_id,
                                 const std::string& policy_app_id,
@@ -914,6 +930,14 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+
+  friend class AccessRemoteImpl;
+
+#ifdef BUILD_TESTS
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+#endif  // BUILD_TESTS
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_CACHE_MANAGER_H_

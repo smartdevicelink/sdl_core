@@ -57,7 +57,6 @@ using ::testing::Return;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::VIIsReadyRequest;
-using am::MockMessageHelper;
 using am::event_engine::Event;
 
 typedef SharedPtr<VIIsReadyRequest> VIIsReadyRequestPtr;
@@ -103,7 +102,7 @@ class VIIsReadyRequestTest
   void ExpectSendMessagesToHMI() {
     smart_objects::SmartObjectSPtr ivi_type;
     EXPECT_CALL(
-        *(MockMessageHelper::message_helper_mock()),
+        mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
         .WillOnce(Return(ivi_type));
     EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
@@ -121,7 +120,6 @@ class VIIsReadyRequestTest
   }
 
   VIIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };

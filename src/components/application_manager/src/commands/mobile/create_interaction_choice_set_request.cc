@@ -287,6 +287,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     sync_primitives::AutoLock commands_lock(vr_commands_lock_);
     const uint32_t vr_cmd_id = msg_params[strings::cmd_id].asUInt();
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     const uint32_t vr_corr_id =
         SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
 
@@ -356,6 +357,7 @@ void CreateInteractionChoiceSetRequest::on_event(
   uint32_t corr_id = static_cast<uint32_t>(
       message[strings::params][strings::correlation_id].asUInt());
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
+    EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     {
       sync_primitives::AutoLock commands_lock(vr_commands_lock_);
       if (is_no_error) {
@@ -376,6 +378,7 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
+  CommandRequestImpl::onTimeOut();
   DeleteChoices();
 
   // We have to keep request alive until receive all responses from HMI
@@ -384,6 +387,11 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   is_timed_out_ = true;
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());
+}
+
+bool CreateInteractionChoiceSetRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
@@ -421,14 +429,6 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
   if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
-
-    ApplicationSharedPtr application =
-        application_manager_.application(connection_key());
-    if (!application) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-    application->UpdateHash();
   } else {
     DeleteChoices();
   }

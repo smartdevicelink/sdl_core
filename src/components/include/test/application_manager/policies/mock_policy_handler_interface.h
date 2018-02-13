@@ -227,6 +227,39 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
 
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_METHOD3(CheckHMIType,
+               bool(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types));
+
+  MOCK_METHOD2(CheckModule,
+               bool(const policy::PTString& app_id,
+                    const policy::PTString& module));
+
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+
+  MOCK_METHOD3(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_CONST_METHOD2(GetModuleTypes,
+                     bool(const std::string& policy_app_id,
+                          std::vector<std::string>* modules));
+  MOCK_METHOD2(SetDefaultHmiTypes,
+               void(const std::string& application_id,
+                    const smart_objects::SmartObject* app_types));
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
+#endif  // SDL_REMOTE_CONTROL
+
  private:
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnAppPermissionConsentInternal,

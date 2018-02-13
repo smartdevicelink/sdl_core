@@ -33,6 +33,8 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 
@@ -40,6 +42,13 @@ void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
                                                ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
       app_id, app_mngr);
+}
+void MessageHelper::SendNaviSetVideoConfig(
+    int32_t app_id,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& video_params) {
+  MockMessageHelper::message_helper_mock()->SendNaviSetVideoConfig(
+      app_id, app_mngr, video_params);
 }
 void MessageHelper::SendNaviStartStream(int32_t connection_key,
                                         ApplicationManager& app_mngr) {
@@ -220,6 +229,25 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
       file_path, timeout, retries, app_mngr);
 }
 
+#ifdef SDL_REMOTE_CONTROL
+void MessageHelper::SendActivateAppToHMI(
+    uint32_t const app_id,
+    ApplicationManager& application_manager,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
+  MockMessageHelper::message_helper_mock()->SendActivateAppToHMI(
+      app_id, application_manager, level, send_policy_priority);
+}
+
+void MessageHelper::SendHMIStatusNotification(
+    const Application& application_impl,
+    ApplicationManager& application_manager) {
+  MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
+      application_impl, application_manager);
+}
+
+#endif  // SDL_REMOTE_CONTROL
+
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           uint32_t correlation_id,
                                           ApplicationManager& app_mngr) {
@@ -240,7 +268,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
 }
 
 MockMessageHelper* MockMessageHelper::message_helper_mock() {
-  static MockMessageHelper message_helper_mock;
+  static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
 void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
@@ -471,6 +499,48 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
     const uint32_t device_handle, const ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->GetDeviceMacAddressForHandle(
       device_handle, app_mngr);
+}
+
+void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
+                                             ApplicationSharedPtr application,
+                                             ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendDeleteCommandRequest(
+      cmd, application, app_mngr);
+}
+
+void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
+                                             ApplicationSharedPtr application,
+                                             ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendDeleteSubmenuRequest(
+      cmd, application, app_mngr);
+}
+
+void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
+                                               ApplicationSharedPtr application,
+                                               ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendDeleteChoiceSetRequest(
+      cmd, application, app_mngr);
+}
+
+void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
+                                               ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendResetPropertiesRequest(
+      application, app_mngr);
+}
+
+void MessageHelper::SendUnsubscribeButtonNotification(
+    mobile_apis::ButtonName::eType button,
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->SendUnsubscribeButtonNotification(button, application, app_mngr);
+}
+
+void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
+                                              ApplicationSharedPtr application,
+                                              ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendUnsubscribeIVIRequest(
+      ivi_id, application, app_mngr);
 }
 
 }  // namespace application_manager

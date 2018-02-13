@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
 
 #include <stdint.h>
 #include <string>
@@ -71,11 +71,36 @@ enum AppCounterId {
 class StatisticsManager {
  public:
   virtual ~StatisticsManager() {}
+
+  /**
+   * @brief Increments global counter
+   * @param type counter type
+   */
   virtual void Increment(GlobalCounterId type) = 0;
+
+  /**
+   * @brief Increments specified application counter
+   * @param app_id Unique ID of application
+   * @param type application counter type
+   */
   virtual void Increment(const std::string& app_id, AppCounterId type) = 0;
+
+  /**
+   * @brief Sets specified application info value
+   * @param app_id Unique ID of application
+   * @param type application info type
+   * @param value new value for counter
+   */
   virtual void Set(const std::string& app_id,
                    AppInfoId type,
                    const std::string& value) = 0;
+
+  /**
+   * @brief Add seconds for specified application stopwatch
+   * @param app_id Unique ID of application
+   * @param type application stopwatch type
+   * @param timespan_seconds seconds to add
+   */
   virtual void Add(const std::string& app_id,
                    AppStopwatchId type,
                    int32_t timespan_seconds) = 0;
@@ -83,4 +108,4 @@ class StatisticsManager {
 
 }  //  namespace usage_statistics
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_

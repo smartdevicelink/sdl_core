@@ -1,6 +1,9 @@
 # Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
+# Copyright (c) 2017 Xevo Inc.
+# All rights reserved.
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -12,7 +15,7 @@
 # disclaimer in the documentation and/or other materials provided with the
 # distribution.
 #
-# Neither the name of the Ford Motor Company nor the names of its contributors
+# Neither the name of the copyright holders nor the names of their contributors
 # may be used to endorse or promote products derived from this software
 # without specific prior written permission.
 #
@@ -38,6 +41,7 @@ set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 include_directories (
   include/
   ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -57,6 +61,7 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BSON_INCLUDE_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -306,6 +311,8 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_stop_stream_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_set_video_config_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_request_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_put_file_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_resume_audio_source_notification.cc
@@ -317,6 +324,7 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_error_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_on_awake_sdl.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_received_policy_update.cc
@@ -331,9 +339,12 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_set_icon_request.cc
-)
-
-set (HMI_COMMANDS_SOURCES_JSON
+  ${COMMANDS_SOURCE_DIR}/hmi/rc_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/rc_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/rc_get_capabilities_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/rc_get_capabilities_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_subscribe_vehicle_data_request.cc
@@ -341,6 +352,9 @@ set (HMI_COMMANDS_SOURCES_JSON
   ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vehicle_data_notification.cc
+)
+
+set (HMI_COMMANDS_SOURCES_JSON
 )
 
 set (HMI_COMMANDS_SOURCES_DBUS
@@ -386,6 +400,11 @@ set(PATHS
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
+if (NOT REMOTE_CONTROL)
+    list(REMOVE_ITEM SOURCES
+        ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
+endif()
+
 set(LIBRARIES
   HMI_API
   MOBILE_API
@@ -397,7 +416,16 @@ set(LIBRARIES
   formatters
   dbms
   Utils
+  bson -L${BSON_LIBS_DIRECTORY}
+  emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
+
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)
@@ -435,6 +463,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+add_dependencies("ApplicationManager" libbson)
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)

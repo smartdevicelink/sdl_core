@@ -69,9 +69,9 @@ typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
 typedef Array<Enum<Parameter>, 0, 100> Parameters;
 
-typedef Map<RpcParameters, 0, 65535> Rpc;
+typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 
-typedef Array<String<10, 65535>, 1, 3> URL;
+typedef Array<String<10, 255>, 1, 3> URL;
 
 typedef Map<URL, 1, 255> URLList;
 
@@ -101,6 +101,12 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
+
+#ifdef SDL_REMOTE_CONTROL
+typedef Map<Strings, 0, 255> RemoteRpcs;
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
+#endif  // SDL_REMOTE_CONTROL
 
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
@@ -169,6 +175,9 @@ struct ApplicationParams : PolicyBase {
   Optional<RequestTypes> RequestType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
+#ifdef SDL_REMOTE_CONTROL
+  mutable Optional<ModuleTypes> moduleType;
+#endif  // SDL_REMOTE_CONTROL
 
  public:
   ApplicationParams();
@@ -188,6 +197,9 @@ struct ApplicationParams : PolicyBase {
 
  private:
   bool Validate() const;
+#ifdef SDL_REMOTE_CONTROL
+  bool ValidateModuleTypes() const;
+#endif  // SDL_REMOTE_CONTROL
 };
 
 struct ApplicationPoliciesSection : CompositeType {
@@ -360,7 +372,7 @@ struct MessageLanguages : CompositeType {
 
  private:
   bool Validate() const;
-  static const std::string kMandatoryLanguage_;
+  static const std::string default_language_;
 };
 
 struct ConsumerFriendlyMessages : CompositeType {

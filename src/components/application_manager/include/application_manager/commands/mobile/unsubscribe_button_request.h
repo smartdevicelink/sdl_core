@@ -57,12 +57,17 @@ class UnsubscribeButtonRequest : public CommandRequestImpl {
   /**
    * @brief UnsubscribeButtonRequest class destructor
    **/
-  virtual ~UnsubscribeButtonRequest();
+  ~UnsubscribeButtonRequest() FINAL;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /**

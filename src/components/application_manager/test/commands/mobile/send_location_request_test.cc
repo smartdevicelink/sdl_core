@@ -54,7 +54,6 @@ using utils::SharedPtr;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
-using ::testing::Mock;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
@@ -92,16 +91,11 @@ class SendLocationRequestTest
 
   typedef SharedPtr<UnwrappedSendLocationRequest> CommandSPrt;
 
-  SendLocationRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
+  SendLocationRequestTest() {
     mock_app_ = CreateMockApp();
     disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void InitialSetup(MessageSharedPtr message_) {
@@ -158,7 +152,6 @@ class SendLocationRequestTest
 
   MockAppPtr mock_app_;
   MockHMICapabilities mock_hmi_capabilities_;
-  MockMessageHelper& mock_message_helper_;
   SharedPtr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;
@@ -351,11 +344,15 @@ TEST_F(SendLocationRequestTest, Run_HMIUINotCoop_Cancelled) {
 TEST_F(SendLocationRequestTest, OnEvent_Success) {
   mobile_apis::Result::eType response_code = mobile_apis::Result::SUCCESS;
   (*message_)[strings::params][hmi_response::code] = response_code;
+  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
+
   Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(app));
+
   command_->on_event(event);
 }
 

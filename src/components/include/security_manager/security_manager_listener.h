@@ -31,6 +31,9 @@
  */
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+
+#include <string>
+
 namespace security_manager {
 
 class SecurityManagerListener {
@@ -50,6 +53,14 @@ class SecurityManagerListener {
    * @brief Notify listeners that certificate update is required.
    */
   virtual void OnCertificateUpdateRequired() = 0;
+
+  /**
+   * @brief Get certificate data from policy
+   * @param reference to string where to save certificate data
+   * @return true if listener saved some data to string otherwise false
+   */
+  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
+
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager

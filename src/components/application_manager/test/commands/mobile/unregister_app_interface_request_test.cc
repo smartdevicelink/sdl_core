@@ -84,13 +84,13 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillRepeatedly(Return(mock_app));
 
   const mobile_apis::AppInterfaceUnregisteredReason::eType kUnregisterReason =
       mobile_apis::AppInterfaceUnregisteredReason::INVALID_ENUM;
 
   MessageSharedPtr dummy_msg(CreateMessage());
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(),
+  EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kConnectionKey, kUnregisterReason))
       .WillOnce(Return(dummy_msg));

@@ -134,7 +134,7 @@ void UnsubscribeVehicleDataRequest::Run() {
       if (is_key_enabled) {
         ++items_to_unsubscribe;
 
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (!app->IsSubscribedToIVI(key_type)) {
           ++unsubscribed_items;
           vi_already_unsubscribed_by_this_app_.insert(key_type);
@@ -234,6 +234,7 @@ void UnsubscribeVehicleDataRequest::Run() {
        ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
                  &msg_params,
                  true);
@@ -248,6 +249,15 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   if (hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData != event.id()) {
     LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+
+  ApplicationSharedPtr app =
+      application_manager_.application(CommandRequestImpl::connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
     return;
   }
 
@@ -306,7 +316,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     SendResponse(any_arg_success, status, NULL, &response_params);
     if (true == any_arg_success) {
-      UpdateHash();
+      app->UpdateHash();
     }
   }
 #else
@@ -342,9 +352,15 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
   if (result) {
-    UpdateHash();
+    application_manager_.TerminateRequest(
+        connection_key(), correlation_id(), function_id());
   }
 #endif  // #ifdef HMI_DBUS_API
+}
+
+bool UnsubscribeVehicleDataRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 struct SubscribedToIVIPredicate {
@@ -385,21 +401,6 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     response[*it_another_app][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
   }
-}
-
-void UnsubscribeVehicleDataRequest::UpdateHash() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-  if (application) {
-    application->UpdateHash();
-  } else {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection_key = " << connection_key()
-                                                       << " doesn't exist.");
-  }
-  application_manager_.TerminateRequest(
-      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

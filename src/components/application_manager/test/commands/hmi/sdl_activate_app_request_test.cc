@@ -62,7 +62,6 @@ using testing::Return;
 using testing::ReturnRef;
 using testing::Mock;
 using ::testing::NiceMock;
-using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
 using am::event_engine::Event;
 
@@ -102,15 +101,9 @@ MATCHER_P2(CheckMsgParams, result, corr_id, "") {
 class SDLActivateAppRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  protected:
-  SDLActivateAppRequestTest()
-      : message_helper_mock_(am::MockMessageHelper::message_helper_mock()) {
-    Mock::VerifyAndClearExpectations(message_helper_mock_);
-  }
-
   ~SDLActivateAppRequestTest() {
     // Fix DataAccessor release and WinQt crash
     Mock::VerifyAndClearExpectations(&app_mngr_);
-    Mock::VerifyAndClearExpectations(message_helper_mock_);
   }
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
@@ -127,7 +120,6 @@ class SDLActivateAppRequestTest
 
   ApplicationSet app_list_;
   ::sync_primitives::Lock lock_;
-  am::MockMessageHelper* message_helper_mock_;
   policy_test::MockPolicyHandlerInterface policy_handler_;
   application_manager_test::MockStateController mock_state_controller_;
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
@@ -209,16 +201,18 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   ON_CALL(*mock_app, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
 
   const std::string url = "url";
   ON_CALL(*mock_app_first, SchemaUrl()).WillByDefault(Return(url));
   const std::string package = "package";
   ON_CALL(*mock_app_first, PackageName()).WillByDefault(Return(package));
 
-  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_, SendLaunchApp(_, _, _, _));
 
   command->Run();
 }
@@ -291,12 +285,13 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
 
   app_list_.insert(mock_app_first);
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
 
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
 
-  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_, SendLaunchApp(_, _, _, _));
 
   command->Run();
 }
@@ -325,7 +320,6 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
 }
 
 TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
-  Mock::VerifyAndClearExpectations(&message_helper_mock_);
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -355,14 +349,14 @@ TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(true));
 
-  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, schema, package_name, _));
+  EXPECT_CALL(mock_message_helper_, SendLaunchApp(_, schema, package_name, _));
 
   command->Run();
-  Mock::VerifyAndClearExpectations(&message_helper_mock_);
 }
 
 TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
@@ -389,10 +383,11 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
 
-  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_, SendLaunchApp(_, _, _, _));
 
   command->Run();
 }
@@ -423,10 +418,11 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
 
   app_list_.insert(mock_app_first);
   ON_CALL(*mock_app_first, protocol_version())
-      .WillByDefault(Return(am::ProtocolVersion::kV5));
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
 
-  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_, SendLaunchApp(_, _, _, _));
 
   command->Run();
 }

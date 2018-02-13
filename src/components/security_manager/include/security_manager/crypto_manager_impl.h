@@ -80,6 +80,15 @@ class CryptoManagerImpl : public CryptoManager {
 
    private:
     void PrintCertInfo();
+
+    /**
+     * @brief Removes disallowed for printing certificate information from input
+     * data
+     * @param in_data input data with certificate information
+     * @return filtered string with allowed for printing information
+     */
+    const std::string RemoveDisallowedInfo(X509_NAME* in_data) const;
+
     HandshakeResult CheckCertContext();
     bool ReadHandshakeData(const uint8_t** const out_data,
                            size_t* out_data_size);
@@ -127,6 +136,11 @@ class CryptoManagerImpl : public CryptoManager {
 
   int pull_number_from_buf(char* buf, int* idx);
   void asn1_time_to_tm(ASN1_TIME* time);
+
+  /**
+   * @brief Sets initial certificate datetime
+   */
+  void InitCertExpTime();
 
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;

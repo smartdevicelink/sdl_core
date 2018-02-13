@@ -75,6 +75,7 @@ void OnExitAllApplicationsNotification::Run() {
       break;
     }
     case hmi_apis::Common_ApplicationsCloseReason::SUSPEND: {
+      application_manager_.resume_controller().OnSuspend();
       SendOnSDLPersistenceComplete();
       return;
     }
@@ -110,5 +111,4 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

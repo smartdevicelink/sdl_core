@@ -58,19 +58,24 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
   /**
    * @brief SubscribeButtonCommandRequest class destructor
    **/
-  virtual ~SubscribeVehicleDataRequest();
+  ~SubscribeVehicleDataRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
 #ifdef HMI_DBUS_API
  private:
@@ -142,6 +147,11 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * @brief VI parameters which had been subscribed already by particular app
    */
   VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
+
+  /**
+   * @brief VI parameters which wait for subscribe after HMI respond
+   */
+  VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

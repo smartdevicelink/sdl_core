@@ -67,8 +67,6 @@ class NaviStartStreamRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   NaviStartStreamRequestTest() {
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(app_mngr_settings_, start_stream_retry_amount())
         .WillByDefault(ReturnRef(start_stream_retry_amount_));
     msg_ = CreateMessage();
@@ -78,7 +76,6 @@ class NaviStartStreamRequestTest
   std::pair<uint32_t, int32_t> start_stream_retry_amount_;
   MessageSharedPtr msg_;
   SharedPtr<NaviStartStreamRequest> command_;
-  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
 };
 
 TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {

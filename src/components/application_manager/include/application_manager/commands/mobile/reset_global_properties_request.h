@@ -58,19 +58,24 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
   /**
    * @brief ResetGlobalPropertiesRequest class destructor
    **/
-  virtual ~ResetGlobalPropertiesRequest();
+  ~ResetGlobalPropertiesRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*
@@ -125,12 +130,6 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
   bool IsPendingResponseExist();
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
-
-  bool is_ui_send_;
-  bool is_tts_send_;
-
-  bool is_ui_received_;
-  bool is_tts_received_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;

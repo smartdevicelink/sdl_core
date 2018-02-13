@@ -36,8 +36,10 @@
 #include <string>
 #include <vector>
 
+#include "policy/policy_table/types.h"
+#include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
-#include "usage_statistics/counter.h"
+#include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
 
@@ -775,6 +777,15 @@ class CacheManagerInterface {
  */
   virtual void SetExternalConsentForApp(
       const PermissionConsent& permissions) = 0;
+
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
 
 #ifdef BUILD_TESTS
   /**

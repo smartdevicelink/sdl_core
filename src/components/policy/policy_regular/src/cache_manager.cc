@@ -36,6 +36,7 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <sstream>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -80,6 +81,21 @@ struct LanguageFinder {
 
  private:
   const std::string& language_;
+};
+
+struct PolicyTableUpdater {
+  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+      : default_params_(default_params) {}
+
+  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+    if (policy::kDefaultId == pt_value.second.get_string()) {
+      pt_value.second = default_params_;
+      pt_value.second.set_to_string(policy::kDefaultId);
+    }
+  }
+
+ private:
+  const policy_table::ApplicationParams& default_params_;
 };
 
 CacheManager::CacheManager()
@@ -127,6 +143,20 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   return result;
 }
 
+const policy_table::AppHMITypes* CacheManager::GetHMITypes(
+    const std::string& app_id) {
+  const policy_table::ApplicationPolicies& apps =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
+  if (i != apps.end()) {
+    const policy_table::AppHMITypes& app_hmi_types = *i->second.AppHMIType;
+    if (app_hmi_types.is_initialized()) {
+      return &app_hmi_types;
+    }
+  }
+  return NULL;
+}
+
 bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
@@ -136,8 +166,8 @@ bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
 bool CacheManager::GetDefaultHMI(const std::string& app_id,
                                  std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
-  bool result = true;
-  return result;
+  default_hmi = "NONE";
+  return true;
 }
 
 bool CacheManager::ResetUserConsent() {
@@ -222,21 +252,18 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
   for (; iter != iter_end; ++iter) {
     if (iter->second.is_null()) {
+      pt_->policy_table.app_policies_section.apps[iter->first] =
+          policy_table::ApplicationParams();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string(
           "");
-    } else if (policy::kDefaultId == (iter->second).get_string()) {
-      policy_table::ApplicationPolicies::const_iterator iter_default =
-          update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
-      if (update_pt.policy_table.app_policies_section.apps.end() ==
-          iter_default) {
-        LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
-        continue;
-      }
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
+      if (kDefaultId == iter->first) {
+        std::for_each(pt_->policy_table.app_policies_section.apps.begin(),
+                      pt_->policy_table.app_policies_section.apps.end(),
+                      PolicyTableUpdater(iter->second));
+      }
     }
   }
 
@@ -1391,6 +1418,27 @@ bool CacheManager::LoadFromBackup() {
   return true;
 }
 
+void CacheManager::MakeLowerCaseAppNames(policy_table::Table& pt) const {
+  policy_table::ApplicationPolicies& apps =
+      pt.policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::iterator iter = apps.begin();
+       iter != apps.end();) {
+    std::string key = iter->first;
+    if (key == kDefaultId || key == kPreDataConsentId || key == kDeviceId) {
+      ++iter;
+      continue;
+    }
+
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (key.compare(iter->first) != 0) {
+      std::swap(apps[key], iter->second);
+      iter = apps.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
 bool CacheManager::LoadFromFile(const std::string& file_name,
                                 policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1419,6 +1467,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   LOG4CXX_DEBUG(logger_, "PT out:");
   LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
 
+  MakeLowerCaseAppNames(table);
+
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
     table.ReportErrors(&report);
@@ -1426,6 +1476,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
                   "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
+
   return true;
 }
 
@@ -1579,6 +1630,12 @@ const PolicySettings& CacheManager::get_settings() const {
   DCHECK(settings_);
 
   return *settings_;
+}
+
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Implementation does not support user consents.");
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(

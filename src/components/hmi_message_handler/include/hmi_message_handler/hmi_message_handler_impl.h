@@ -89,14 +89,14 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   explicit HMIMessageHandlerImpl(const HMIMessageHandlerSettings& settings);
 
   ~HMIMessageHandlerImpl();
-  void OnMessageReceived(MessageSharedPointer message);
-  void SendMessageToHMI(MessageSharedPointer message);
+  void OnMessageReceived(MessageSharedPointer message) OVERRIDE;
+  void SendMessageToHMI(MessageSharedPointer message) OVERRIDE;
   void set_message_observer(HMIMessageObserver* observer);
-  void OnErrorSending(MessageSharedPointer message);
-  void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
-  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void OnErrorSending(MessageSharedPointer message) OVERRIDE;
+  void AddHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
+  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
 
-  virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
+  const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
   std::set<HMIMessageAdapter*> message_adapters() const {
@@ -120,15 +120,16 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   // threads::MessageLoopThread<*>::Handler implementations
 
   // CALLED ON messages_from_hmi_ THREAD!
-  virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
+  void Handle(const impl::MessageFromHmi message) OVERRIDE;
   // CALLED ON messages_to_hmi_ THREAD!
-  virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
+  void Handle(const impl::MessageToHmi message) OVERRIDE;
 
  private:
   const HMIMessageHandlerSettings& settings_;
   HMIMessageObserver* observer_;
-  mutable sync_primitives::Lock observer_locker_;
   std::set<HMIMessageAdapter*> message_adapters_;
+  mutable sync_primitives::Lock observer_locker_;
+  mutable sync_primitives::Lock message_adapters_locker_;
 
   // Construct message threads when everything is already created
 

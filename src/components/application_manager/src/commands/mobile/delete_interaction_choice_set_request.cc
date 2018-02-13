@@ -90,9 +90,11 @@ void DeleteInteractionChoiceSetRequest::Run() {
   // Checking of HMI responses will be implemented with APPLINK-14600
   const bool result = true;
   SendResponse(result, mobile_apis::Result::SUCCESS);
-  if (result) {
-    app->UpdateHash();
-  }
+}
+
+bool DeleteInteractionChoiceSetRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(

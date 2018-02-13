@@ -46,10 +46,6 @@ namespace commands {
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , is_ui_send_(false)
-    , is_tts_send_(false)
-    , is_ui_received_(false)
-    , is_tts_received_(false)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
@@ -111,11 +107,11 @@ void ResetGlobalPropertiesRequest::Run() {
 
   if (vr_help_title_items || menu_name || menu_icon ||
       is_key_board_properties) {
-    is_ui_send_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   if (timeout_prompt || helpt_promt) {
-    is_tts_send_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   }
 
   app->set_reset_global_properties_active(true);
@@ -242,13 +238,10 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
-      is_ui_received_ = true;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
@@ -256,7 +249,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
-      is_tts_received_ = true;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
@@ -281,15 +274,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                static_cast<mobile_apis::Result::eType>(result_code),
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
+}
 
-  if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  if (result) {
-    application->UpdateHash();
-  }
+bool ResetGlobalPropertiesRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
@@ -299,9 +288,10 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   using namespace helpers;
 
   bool result = false;
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
 
   HmiInterfaces::InterfaceState tts_interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
@@ -328,7 +318,8 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
 }
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
+  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
+         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 }  // namespace commands

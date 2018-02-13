@@ -141,6 +141,12 @@ class SecurityManagerImpl : public SecurityManager,
   void StartHandshake(uint32_t connection_key) OVERRIDE;
 
   /**
+   * @brief Checks whether certificate should be updated
+   * @return true if certificate should be updated otherwise false
+   */
+  bool IsCertificateUpdateRequired() OVERRIDE;
+
+  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   void AddListener(SecurityManagerListener* const listener) OVERRIDE;
@@ -158,7 +164,19 @@ class SecurityManagerImpl : public SecurityManager,
    * @brief Notifiers for listeners.
    * Allows to notify that certificate should be updated
    */
-  void NotifyOnCertififcateUpdateRequired();
+  DEPRECATED void NotifyOnCertififcateUpdateRequired();
+
+  /**
+   * @brief Notifiers for listeners.
+   * Allows to notify that certificate should be updated
+   */
+  void NotifyOnCertificateUpdateRequired() OVERRIDE;
+
+  /**
+   * @brief Check is policy certificate data is empty
+   * @return true if policy certificate data is not empty otherwise false
+   */
+  bool IsPolicyCertificateDataEmpty() OVERRIDE;
 
   /**
    * @brief SecurityConfigSection
