@@ -210,6 +210,7 @@ class ApplicationManagerImpl
   }
 
   virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
+    DCHECK(plugin_manager_);
     return *plugin_manager_;
   }
 
