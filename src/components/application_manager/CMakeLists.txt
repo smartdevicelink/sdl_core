@@ -181,7 +181,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_dependencies("ApplicationManager" libbson)
+#add_dependencies("ApplicationManager" libbson)
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)

@@ -42,9 +42,9 @@
 #include "utils/make_shared.h"
 #include "application_manager/mock_application_manager.h"
 #include "test/application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_hmi_interface.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/test/include/application_manager/mock_hmi_interface.h"
+#include "application_manager/test/include/application_manager/mock_application.h"
+#include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "application_manager/mock_rpc_service.h"
 namespace test {
 namespace components {

@@ -39,9 +39,10 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
+
 #include "application_manager/event_engine/event.h"
 
 namespace test {
