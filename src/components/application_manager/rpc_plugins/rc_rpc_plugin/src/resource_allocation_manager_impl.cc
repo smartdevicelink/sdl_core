@@ -65,12 +65,10 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
       acquiring_app->hmi_level();
 
   if (mobile_apis::HMILevel::HMI_FULL != acquiring_app_hmi_level) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Aquiring resources is not allowed in HMI level: "
-            << application_manager::MessageHelper::StringifiedHMILevel(
-                   acquiring_app_hmi_level) << ". App: " << app_id
-            << " is disallowed to acquire " << module_type);
+    LOG4CXX_DEBUG(logger_,
+                  "Aquiring resources is not allowed in HMI level: "
+                      << acquiring_app_hmi_level << ". App: " << app_id
+                      << " is disallowed to acquire " << module_type);
     return AcquireResult::REJECTED;
   }
 
@@ -128,6 +126,7 @@ void ResourceAllocationManagerImpl::ReleaseResource(
 
 void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+  LOG4CXX_AUTO_TRACE(logger_);
   Apps app_list = GetRCApplications();
 
   Apps::const_iterator app = app_list.begin();

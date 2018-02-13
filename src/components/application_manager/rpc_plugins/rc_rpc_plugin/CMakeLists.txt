@@ -61,6 +61,11 @@ endif()
 add_library("rc_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
 target_link_libraries("rc_rpc_plugin" ${LIBRARIES})
 
+add_library("RCRpcPluginStaticLib" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
+target_link_libraries("RCRpcPluginStaticLib" ${LIBRARIES})
+
+
+
 set(INSTALL_DESTINATION bin)
 
 install(TARGETS rc_rpc_plugin
