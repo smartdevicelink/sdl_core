@@ -33,9 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_SETTINGS_H_
 
+#include <stddef.h>
+#include <string>
+
 namespace security_manager {
 enum Mode { CLIENT, SERVER };
-enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2 };
+enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2, DTLSv1 };
 /**
  * \class ConnectionHandlerSettings
  * \brief Interface for connection handler component settings.
