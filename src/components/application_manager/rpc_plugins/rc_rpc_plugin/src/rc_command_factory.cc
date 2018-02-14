@@ -102,7 +102,7 @@ CommandSharedPtr RCCommandFactory::CreateMobileCommand(
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kRequest)) {
         command.reset(
-            new commands::GetInteriorVehicleDataRequest(message, app_manager_));
+            new commands::GetInteriorVehicleDataRequest(message, app_manager_, allocation_manager_));
       } else {
         command.reset(new commands::GetInteriorVehicleDataResponse(
             message, app_manager_));

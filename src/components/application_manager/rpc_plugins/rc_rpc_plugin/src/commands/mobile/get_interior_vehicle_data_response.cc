@@ -9,12 +9,12 @@ GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
     app_mngr::ApplicationManager& application_manager)
     : app_mngr::commands::CommandResponseImpl(message, application_manager) {}
 
-bool GetInteriorVehicleDataResponse::Init() {
-  return true;
+GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse(){}
+
+void GetInteriorVehicleDataResponse::Run() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
-void GetInteriorVehicleDataResponse::Run() {}
-void GetInteriorVehicleDataResponse::on_event(
-    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
