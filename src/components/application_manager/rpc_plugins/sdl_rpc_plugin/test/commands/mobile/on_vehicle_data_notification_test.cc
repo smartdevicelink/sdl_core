@@ -134,8 +134,8 @@ TEST_F(OnVehicleDataNotificationTest,
   ::utils::custom_string::CustomString dummy_name("test_app");
   ON_CALL(*mock_app, name()).WillByDefault(ReturnRef(dummy_name));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(
                   CheckMessageData(am::strings::fuel_level, kFuelLevel), _));
 

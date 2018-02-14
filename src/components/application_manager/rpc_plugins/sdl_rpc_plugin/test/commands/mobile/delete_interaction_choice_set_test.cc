@@ -123,9 +123,8 @@ class DeleteInteractionChoiceSetResponseTest
 TEST_F(DeleteInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, FindChoiceSet(_)).Times(0);
   command_->Run();
@@ -142,9 +141,8 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
 
   command_->Run();
@@ -172,9 +170,8 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_ChoiceSetInUse_SUCCESS) {
   EXPECT_CALL(*app_, is_perform_interaction_active()).WillOnce(Return(true));
   EXPECT_CALL(*app_, performinteraction_choice_set_map())
       .WillOnce(Return(accessor_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
 
   command_->Run();
@@ -209,7 +206,6 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
     EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
     EXPECT_CALL(*app_, UpdateHash());
   }
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
@@ -249,11 +245,9 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
     EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
     EXPECT_CALL(*app_, UpdateHash());
   }
-  EXPECT_CALL(app_mngr_, GetRPCService())
-      .Times(2)
-      .WillRepeatedly(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _));
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
@@ -264,8 +258,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
 
 TEST_F(DeleteInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::success] = false;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(false), false));
   command_->Run();
 }
@@ -273,8 +266,7 @@ TEST_F(DeleteInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
 TEST_F(DeleteInteractionChoiceSetResponseTest, Run_ValidResultCode_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::result_code] =
       hmi_apis::Common_Result::SUCCESS;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(true), false));
   command_->Run();
 }
@@ -283,8 +275,7 @@ TEST_F(DeleteInteractionChoiceSetResponseTest,
        Run_InvalidResultCode_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::result_code] =
       hmi_apis::Common_Result::INVALID_ENUM;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(false), false));
   command_->Run();
 }

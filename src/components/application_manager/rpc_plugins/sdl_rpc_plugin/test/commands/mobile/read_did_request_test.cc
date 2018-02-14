@@ -71,7 +71,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
   EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 
@@ -89,8 +89,9 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   (*event_msg)[am::strings::msg_params] = 0;
 
   event.set_smart_object(*event_msg);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   MockAppPtr app(CreateMockApp());

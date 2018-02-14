@@ -114,8 +114,8 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
                 SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
     EXPECT_CALL(mock_message_helper_, HMIToMobileResult(result_code))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
     EXPECT_CALL(*app, UpdateHash());
   }
 

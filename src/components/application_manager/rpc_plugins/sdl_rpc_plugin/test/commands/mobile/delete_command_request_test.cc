@@ -129,7 +129,6 @@ class DeleteCommandRequestTest
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(hmi_interfaces_));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   }
 
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
@@ -185,7 +184,7 @@ TEST_F(DeleteCommandRequestTest,
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 

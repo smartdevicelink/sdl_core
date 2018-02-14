@@ -108,9 +108,9 @@ class SystemRequestTest
 
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
     EXPECT_CALL(
-        rpc_service_,
+        mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
                             am::commands::Command::CommandSource::SOURCE_SDL));
   }

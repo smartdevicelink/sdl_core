@@ -125,7 +125,7 @@ class CommandsTest : public ::testing::Test {
     InitCommand(timeout);
     return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
                                         app_mngr_,
-                                        rpc_service_,
+                                        mock_rpc_service_,
                                         mock_hmi_capabilities_,
                                         mock_policy_handler_);
   }
@@ -141,7 +141,7 @@ class CommandsTest : public ::testing::Test {
     MessageSharedPtr msg = CreateMessage();
     return ::utils::MakeShared<Command>(msg,
                                         app_mngr_,
-                                        rpc_service_,
+                                        mock_rpc_service_,
                                         mock_hmi_capabilities_,
                                         mock_policy_handler_);
   }
@@ -149,12 +149,12 @@ class CommandsTest : public ::testing::Test {
   enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
+  MockRPCService mock_rpc_service_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
-  MockRPCService rpc_service_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {

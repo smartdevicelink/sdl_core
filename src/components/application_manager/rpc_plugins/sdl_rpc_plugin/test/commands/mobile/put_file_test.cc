@@ -108,21 +108,20 @@ class PutFileRequestTest
   void ExpectReceiveMessageFromSDK() {
     EXPECT_CALL(mock_policy_handler_,
                 ReceiveMessageFromSDK(kFileName, binary_data_))
-        .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
+        .WillOnce(Return(false));
   }
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
     EXPECT_CALL(app_mngr_, GetRPCService())
-        .WillRepeatedly(ReturnRef(rpc_service_));
+        .WillRepeatedly(ReturnRef(mock_rpc_service_));
     EXPECT_CALL(
-        rpc_service_,
+        mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
                             am::commands::Command::CommandSource::SOURCE_SDL));
   }
 
   MessageSharedPtr msg_;
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_;
   std::vector<uint8_t> binary_data_;
 };
 
@@ -147,9 +146,10 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   utils::SharedPtr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       SendMessageToMobile(
           MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
           _));
@@ -168,9 +168,10 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(application_sptr));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Run();
 }
@@ -323,8 +324,8 @@ TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
               SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, GetRPCService())
-      .WillRepeatedly(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+      .WillRepeatedly(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnPutFile)))
       .WillOnce(Return(true));

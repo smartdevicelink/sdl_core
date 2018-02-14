@@ -77,8 +77,9 @@ TEST_F(CommandResponseImplTest, SendResponse_MessageWithResultCode_SUCCESS) {
   // If `msg_params->result_code` exist in message,
   // then send message to mobile.
   (*msg)[strings::msg_params][strings::result_code] = kResultCode;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, kFinalResponse));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 }
@@ -93,8 +94,9 @@ TEST_F(CommandResponseImplTest,
   const mobile_apis::Result::eType kResultCode =
       mobile_apis::Result::eType::SUCCESS;
   const bool kFinalResponse = true;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, kFinalResponse));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   // If `msg_params->result_code` does not exist in message
   // and arg `result_code` not equals `INVALID_ENUM`,
@@ -121,8 +123,9 @@ TEST_F(CommandResponseImplTest,
   // then if `params->hmi_response::code` exist in message,
   // then set it to `msg_params->result_code` and send message to mobile.
   (*msg)[strings::params][hmi_response::code] = mobile_apis::Result::SUCCESS;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, kFinalResponse));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -146,8 +149,9 @@ TEST_F(CommandResponseImplTest,
   // then if `kSuccess` equals `true`,
   // then `msg_params->result_code` will be `SUCCESS`
   const bool kSuccess = true;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, kFinalResponse));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 
@@ -171,8 +175,9 @@ TEST_F(CommandResponseImplTest,
   // then if `kSuccess` equals `false`,
   // then `msg_params->result_code` will be `INVALID_ENUM`
   const bool kSuccess = false;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToMobile(msg, kFinalResponse));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, kFinalResponse));
 
   command->SendResponse(kSuccess, kResultCode, kFinalResponse);
 

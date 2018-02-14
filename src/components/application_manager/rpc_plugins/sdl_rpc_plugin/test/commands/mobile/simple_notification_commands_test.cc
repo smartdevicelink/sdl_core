@@ -88,8 +88,8 @@ TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
   ::utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->rpc_service_));
-  EXPECT_CALL(this->rpc_service_,
+      .WillOnce(ReturnRef(this->mock_rpc_service_));
+  EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(CheckNotificationMessage(), _));
   command->Run();
 }

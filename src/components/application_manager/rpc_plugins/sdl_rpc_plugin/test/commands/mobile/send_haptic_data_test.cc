@@ -99,8 +99,8 @@ TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
       .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_app_, is_navi()).WillOnce(Return(true));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_SendHapticData)))
       .WillOnce(Return(true));
@@ -118,8 +118,8 @@ TEST_F(SendHapticDataRequestTest, Run_DISALLOWED) {
   EXPECT_CALL(*mock_app_, is_navi()).WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app_, mobile_projection_enabled()).WillOnce(Return(false));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).WillOnce(Return(true));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).WillOnce(Return(true));
 
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
 
@@ -128,9 +128,9 @@ TEST_F(SendHapticDataRequestTest, Run_DISALLOWED) {
 }
 
 TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
                           am::commands::Command::SOURCE_SDL));
 
@@ -149,9 +149,9 @@ TEST_F(SendHapticDataResponseTest, Run_Success) {
   ::smart_objects::SmartObject& message_ref = *message_;
   message_ref[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::SUCCESS;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Init();
   command_sptr_->Run();

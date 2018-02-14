@@ -155,9 +155,10 @@ TEST_F(SetDisplayLayoutRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
@@ -174,8 +175,9 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_mock_app;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_mock_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
                   am::commands::Command::CommandSource::SOURCE_SDL));
@@ -201,8 +203,10 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(CheckMshCorrId(kCorrelationKey)))
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(CheckMshCorrId(kCorrelationKey)))
       .WillOnce(Return(true));
 
   command->Run();
@@ -239,9 +243,10 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(hmi_capabilities, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
                           am::commands::Command::CommandSource::SOURCE_SDL));
 

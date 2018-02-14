@@ -134,7 +134,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -156,7 +156,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
   EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -180,7 +180,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   EXPECT_CALL(this->app_mngr_, application(kAppId))
       .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -207,7 +207,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(false));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -234,8 +234,8 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(true));
   EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->rpc_service_));
-  EXPECT_CALL(this->rpc_service_,
+      .WillOnce(ReturnRef(this->mock_rpc_service_));
+  EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
@@ -258,7 +258,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_NoSubscribedApps_UNSUCCESS) {
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(empty_subscribed_apps_list));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -285,7 +285,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_InvalidHmiLevel_UNSUCCESS) {
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -313,7 +313,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
   EXPECT_CALL(this->app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(this->rpc_service_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -343,8 +343,8 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
   EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->rpc_service_));
-  EXPECT_CALL(this->rpc_service_,
+      .WillOnce(ReturnRef(this->mock_rpc_service_));
+  EXPECT_CALL(this->mock_rpc_service_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
