@@ -206,9 +206,9 @@ void RCCommandRequest::ProcessAccessResponse(
 
   bool is_allowed = false;
   if (result) {
-    if (message[app_mngr::strings::msg_params].keyExists(message_params::kAllowed)) {
+    if (message[json_keys::kResult].keyExists(message_params::kAllowed)) {
       is_allowed =
-          message[app_mngr::strings::msg_params][message_params::kAllowed].asBool();
+          message[json_keys::kResult][message_params::kAllowed].asBool();
     }
     if (is_allowed) {
       resource_allocation_manager_.ForceAcquireResource(module_type,

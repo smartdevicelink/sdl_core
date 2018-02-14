@@ -37,12 +37,12 @@ RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
     : AppExtension(uid) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(
-    const Json::Value& module_type) {
+    const std::string& module_type) {
   subscribed_interior_vehicle_data_.insert(module_type);
 }
 
 void RCAppExtension::UnsubscribeFromInteriorVehicleData(
-    const Json::Value& module_type) {
+    const std::string& module_type) {
   subscribed_interior_vehicle_data_.erase(module_type);
 }
 
@@ -51,8 +51,8 @@ void RCAppExtension::UnsubscribeFromInteriorVehicleData() {
 }
 
 bool RCAppExtension::IsSubscibedToInteriorVehicleData(
-    const Json::Value& module_type) {
-  std::set<Json::Value>::iterator it =
+    const std::string& module_type) {
+  std::set<std::string>::iterator it =
       subscribed_interior_vehicle_data_.find(module_type);
 
   return (it != subscribed_interior_vehicle_data_.end());
