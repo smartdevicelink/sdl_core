@@ -158,7 +158,7 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
       if (rc_extention) {
-        rc_extention->UnsubscribeFromInteriorVehicleData(Json::Value(*module));
+        rc_extention->UnsubscribeFromInteriorVehicleData(*module);
       }
     }
   }
