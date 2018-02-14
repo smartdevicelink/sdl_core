@@ -36,7 +36,6 @@
 #include <string>
 #include <set>
 #include "application_manager/app_extension.h"
-#include "json/json.h"
 
 namespace rc_rpc_plugin {
 class RCAppExtension : public application_manager::AppExtension {
@@ -48,13 +47,13 @@ class RCAppExtension : public application_manager::AppExtension {
    * @brief Subscribe to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void SubscribeToInteriorVehicleData(const Json::Value& module_type);
+  void SubscribeToInteriorVehicleData(const std::string& module_type);
 
   /**
    * @brief Unsubscribe from OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  void UnsubscribeFromInteriorVehicleData(const Json::Value& module_type);
+  void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
 
   /**
    * @brief UnsubscribeFromInteriorVehicleData removes all subscriptions for
@@ -66,10 +65,10 @@ class RCAppExtension : public application_manager::AppExtension {
    * @brief Check if application subscribed to OnInteriorVehicleDataNotification
    * @param module interior data specification(zone, data type)
    */
-  bool IsSubscibedToInteriorVehicleData(const Json::Value& module_type);
+  bool IsSubscibedToInteriorVehicleData(const std::string& module_type);
 
  private:
-  std::set<Json::Value> subscribed_interior_vehicle_data_;
+  std::set<std::string> subscribed_interior_vehicle_data_;
 };
 
 typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;

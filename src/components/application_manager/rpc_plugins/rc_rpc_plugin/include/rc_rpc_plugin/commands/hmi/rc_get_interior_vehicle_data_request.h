@@ -14,9 +14,11 @@ class RCGetInteriorVehicleDataRequest
   RCGetInteriorVehicleDataRequest(
           const app_mngr::commands::MessageSharedPtr& message,
           app_mngr::ApplicationManager& application_manager);
-  bool Init() OVERRIDE;
+  /**
+   * @brief Execute command
+   */
   void Run() OVERRIDE;
-  void on_event(const application_manager::event_engine::Event& event);
+  virtual ~RCGetInteriorVehicleDataRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
