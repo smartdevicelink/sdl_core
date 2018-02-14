@@ -5152,5 +5152,19 @@
     <description>The remote control access mode specified by the driver via HMI.</description>
   </param>
 </function>
+
+<function name="OnRCStatus" messagetype="notification">
+  <description>Issued by SDL to notify HMI about remote control status change on SDL</description>
+  <param name="appID" type="Integer" mandatory="true">
+    <description>ID of selected application.</description>
+  </param>
+  <param name="allocatedModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
+  </param>
+  <param name="freeModules" type="Common.ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
+    <description>Contains a list (zero or more) of module types that are free to access for the application.</description>
+  </param>
+</function>
+
 </interface>
 </interfaces>
