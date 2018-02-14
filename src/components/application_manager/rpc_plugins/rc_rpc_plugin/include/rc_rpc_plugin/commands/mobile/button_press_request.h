@@ -2,7 +2,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_BUTTON_PRESS_REQUEST_H
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
-#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -17,6 +16,9 @@ class ButtonPressRequest : public RCCommandRequest {
 
   /**
    * @brief Execute command
+   * send HMI request if message contains appropriate
+   * button name and module type
+   * otherwise sends negative sesponse to mobile
    */
   void Execute() FINAL;
 

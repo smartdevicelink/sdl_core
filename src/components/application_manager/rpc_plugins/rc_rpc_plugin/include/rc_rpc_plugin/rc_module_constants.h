@@ -44,7 +44,6 @@ const char kbuttonCapabilities[] = "buttonCapabilities";
 
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
-const char msg_params[] = "msg_params";
 }  //  strings
 
 namespace result_codes {

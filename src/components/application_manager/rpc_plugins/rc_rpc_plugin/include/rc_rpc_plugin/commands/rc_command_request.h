@@ -57,11 +57,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
   virtual ~RCCommandRequest();
 
-  virtual void OnTimeout();
+  void onTimeOut() OVERRIDE;
 
-  void Run();
+  void Run() OVERRIDE;
 
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  virtual void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  protected:
   ResourceAllocationManager& resource_allocation_manager_;
@@ -95,13 +95,18 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @brief SetResourceState changes state of resource
    * This is default implementation which has to be redefined for RPCs which
    * need to manage the resources
-   * @param Message containing type of module to extract
+   * @param module_type Resource name
    * @param State to set for resource
    */
   virtual void SetResourceState(const std::string& module_type,
                                 const ResourceState::eType) {}
 
-
+  /**
+   * Checks if module for application is present in policy table
+   * @param app_id id of application
+   * @param module type Resource name
+   * @return kAllowed if module is present, otherwise - kDisallowed
+   */
   TypeAccess CheckModule(const std::string& module_type,
                          application_manager::ApplicationSharedPtr app);
 
@@ -109,7 +114,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
     return auto_allowed_;
   }
 
-  void set_auto_allowed(bool value) {
+  void set_auto_allowed(const bool value) {
     auto_allowed_ = value;
   }
 
@@ -138,6 +143,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool AcquireResources();
   void SendDisallowed(TypeAccess access);
+
+  /**
+   * @brief SendGetUserConsent sends consent request to HMI
+   * @param module_type Resource name
+   */
   void SendGetUserConsent(const std::string& module_type);
   void ProcessAccessResponse(const app_mngr::event_engine::Event& event);
   bool IsInterfaceAvailable(

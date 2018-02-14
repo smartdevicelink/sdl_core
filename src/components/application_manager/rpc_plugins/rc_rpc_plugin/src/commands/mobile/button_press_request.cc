@@ -6,15 +6,14 @@
 #include "interfaces/MOBILE_API.h"
 
 namespace rc_rpc_plugin {
-
 namespace commands {
 
 using namespace json_keys;
 using namespace message_params;
 
-typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
+CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ButtonPressRequest")
+typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
 
 ButtonPressRequest::ButtonPressRequest(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -85,7 +84,7 @@ bool CheckIfButtonExistInRCCaps(
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =
         rc_capabilities[strings::kbuttonCapabilities];
-    smart_objects::SmartArray::iterator it = button_caps.asArray()->begin();
+    auto it = button_caps.asArray()->begin();
     for (; it != button_caps.asArray()->end(); ++it) {
       smart_objects::SmartObject& so = *it;
       int64_t current_id = so[message_params::kName].asInt();
@@ -143,9 +142,9 @@ void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string button_name =
-      (*message_)[strings::msg_params][message_params::kButtonName].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kButtonName].asString();
   const std::string module_type =
-      (*message_)[strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
 
   static ButtonsMap btn_map = buttons_map();
   mobile_apis::ButtonName::eType button_id =
@@ -164,7 +163,7 @@ void ButtonPressRequest::Execute() {
 
   if (button_name_matches_module_type && button_id_exist_in_caps) {
     SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress,
-                   &(*message_)[strings::msg_params],
+                   &(*message_)[app_mngr::strings::msg_params],
                    true);
   } else if (!button_name_matches_module_type) {
     LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
@@ -181,6 +180,7 @@ void ButtonPressRequest::Execute() {
 
 AcquireResult::eType ButtonPressRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
           .asString();
@@ -190,11 +190,13 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
 }
 
 bool ButtonPressRequest::IsResourceFree(const std::string& module_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return resource_allocation_manager_.IsResourceFree(module_type);
 }
 
 void ButtonPressRequest::SetResourceState(const std::string& module_type,
                                           const ResourceState::eType state) {
+  LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   resource_allocation_manager_.SetResourceState(module_type, app->app_id(), state);
@@ -203,11 +205,12 @@ void ButtonPressRequest::SetResourceState(const std::string& module_type,
 void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   RCCommandRequest::on_event(event);
-  DCHECK_OR_RETURN_VOID(
-      (hmi_apis::FunctionID::Buttons_ButtonPress == event.id()));
+
+  if (hmi_apis::FunctionID::Buttons_ButtonPress != event.id()){
+      return;
+  }
 
   const smart_objects::SmartObject& message = event.smart_object();
-
   mobile_apis::Result::eType result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[app_mngr::strings::params][app_mngr::hmi_response::code]

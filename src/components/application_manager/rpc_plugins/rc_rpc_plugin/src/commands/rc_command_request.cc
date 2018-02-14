@@ -35,7 +35,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/hmi_interfaces.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RCCommandRequest")
+CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -58,10 +58,10 @@ bool RCCommandRequest::IsInterfaceAvailable(
   return app_mngr::HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
-void RCCommandRequest::OnTimeout() {
+void RCCommandRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   SetResourceState(
-      (*message_)[strings::msg_params][message_params::kModuleType].asString(),
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString(),
       ResourceState::FREE);
   SendResponse(
       false, mobile_apis::Result::GENERIC_ERROR, "Request timeout expired");
@@ -73,13 +73,14 @@ bool RCCommandRequest::CheckDriverConsent() {
     application_manager_.application(CommandRequestImpl::connection_key());
   RCAppExtensionPtr extension = resource_allocation_manager_.GetApplicationExtention(app);
   if (!extension) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
     return false;
   }
   const std::string module_type =
-      (*message_)[strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
 
-  if (access == rc_rpc_plugin::kAllowed) {
+  if (rc_rpc_plugin::kAllowed == access) {
     set_auto_allowed(true);
     return true;
   } else {
@@ -100,16 +101,12 @@ rc_rpc_plugin::TypeAccess RCCommandRequest::CheckModule(
 void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string info;
-  switch (access) {
-    case rc_rpc_plugin::kAllowed:
-      return;
-    case rc_rpc_plugin::kDisallowed:
-      info = disallowed_info_.empty()
+  if (rc_rpc_plugin::kDisallowed == access) {
+     info = disallowed_info_.empty()
                  ? "The RPC is disallowed by vehicle settings"
                  : disallowed_info_;
-      break;
-    default:
-      info = "Unknown issue";
+  } else {
+    return;
   }
   LOG4CXX_ERROR(logger_, info);
   SendResponse(false, mobile_apis::Result::DISALLOWED, info.c_str());
@@ -138,7 +135,7 @@ void RCCommandRequest::Run() {
 bool RCCommandRequest::AcquireResources() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type =
-      (*message_)[strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
 
   if (!IsResourceFree(module_type)) {
     LOG4CXX_WARN(logger_, "Resource is busy.");
@@ -172,7 +169,7 @@ bool RCCommandRequest::AcquireResources() {
 void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type =
-      (*message_)[strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
 
   SetResourceState(module_type, ResourceState::FREE);
 
@@ -187,7 +184,7 @@ void RCCommandRequest::ProcessAccessResponse(
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   const std::string module_type =
-      (*message_)[strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
@@ -209,10 +206,9 @@ void RCCommandRequest::ProcessAccessResponse(
 
   bool is_allowed = false;
   if (result) {
-    if (true ==
-        message[strings::msg_params].keyExists(message_params::kAllowed)) {
+    if (message[app_mngr::strings::msg_params].keyExists(message_params::kAllowed)) {
       is_allowed =
-          message[strings::msg_params][message_params::kAllowed].asBool();
+          message[app_mngr::strings::msg_params][message_params::kAllowed].asBool();
     }
     if (is_allowed) {
       resource_allocation_manager_.ForceAcquireResource(module_type,
@@ -242,7 +238,7 @@ void RCCommandRequest::SendGetUserConsent(const std::string& module_type) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[json_keys::kAppId] = app->hmi_app_id();
-  msg_params[strings::msg_params][message_params::kModuleType] = module_type;
+  msg_params[app_mngr::strings::msg_params][message_params::kModuleType] = module_type;
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
                  &msg_params,
                  true);

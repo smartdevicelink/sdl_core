@@ -53,7 +53,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RCCommandFactory")
+CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 namespace rc_rpc_plugin {
 using namespace application_manager;
