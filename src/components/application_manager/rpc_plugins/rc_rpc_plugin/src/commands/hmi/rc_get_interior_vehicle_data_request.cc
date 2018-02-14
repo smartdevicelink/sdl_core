@@ -9,12 +9,12 @@ RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
     app_mngr::ApplicationManager& application_manager)
     : app_mngr::commands::RequestToHMI(message, application_manager) {}
 
-bool RCGetInteriorVehicleDataRequest::Init() {
-  return true;
+RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest(){}
+
+void RCGetInteriorVehicleDataRequest::Run() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    SendRequest();
 }
-void RCGetInteriorVehicleDataRequest::Run() {}
-void RCGetInteriorVehicleDataRequest::on_event(
-    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
