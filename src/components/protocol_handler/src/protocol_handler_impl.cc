@@ -1418,7 +1418,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
+      // Protocol version 1 does not support protection
       (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
                                               : false;
 #else

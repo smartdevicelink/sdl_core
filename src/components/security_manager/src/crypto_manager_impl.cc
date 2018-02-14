@@ -41,6 +41,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <ctime>
+#include <algorithm>
 #include "security_manager/security_manager.h"
 
 #include "utils/logger.h"
@@ -113,10 +114,35 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   }
 }
 
+bool CryptoManagerImpl::AreForceProtectionSettingsCorrect() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::vector<int>& forced_unprotected_services =
+      get_settings().force_unprotected_service();
+  const std::vector<int>& forced_protected_services =
+      get_settings().force_protected_service();
+
+  for (auto& item : forced_protected_services) {
+    if (0 == item) {
+      continue;
+    }
+
+    if (std::find(forced_unprotected_services.begin(),
+                  forced_unprotected_services.end(),
+                  item) != forced_unprotected_services.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CryptoManagerImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const Mode mode = get_settings().security_manager_mode();
+  if (!AreForceProtectionSettingsCorrect()) {
+    LOG4CXX_DEBUG(logger_, "Force protection settings of ini file are wrong!");
+    return false;
+  }
   const bool is_server = (mode == SERVER);
   if (is_server) {
     LOG4CXX_DEBUG(logger_, "Server mode");
