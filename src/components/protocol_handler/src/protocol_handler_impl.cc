@@ -1433,10 +1433,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
+<<<<<<< HEAD
       // Protocol version 1 is not support protection
       (packet->protocol_version() > PROTOCOL_VERSION_1)
           ? packet->protection_flag()
           : false;
+=======
+      // Protocol version 1 does not support protection
+      (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
+                                              : false;
+>>>>>>> Add handling of wrong force protection settings in ini file
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY

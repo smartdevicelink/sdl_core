@@ -35,13 +35,14 @@
 
 #include <stddef.h>
 #include <string>
+#include <vector>
 
 namespace security_manager {
 enum Mode { CLIENT, SERVER };
 enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2, DTLSv1 };
 /**
- * \class ConnectionHandlerSettings
- * \brief Interface for connection handler component settings.
+ * \class CryptoManagerSettings
+ * \brief Interface for crypto manager component settings.
  */
 class CryptoManagerSettings {
  public:
@@ -55,6 +56,8 @@ class CryptoManagerSettings {
   virtual const std::string& ca_cert_path() const = 0;
   virtual size_t update_before_hours() const = 0;
   virtual size_t maximum_payload_size() const = 0;
+  virtual const std::vector<int>& force_protected_service() const = 0;
+  virtual const std::vector<int>& force_unprotected_service() const = 0;
 };
 
 }  // namespace security_manager
