@@ -68,6 +68,14 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     return profile_.maximum_payload_size();
   }
 
+  const std::vector<int>& force_protected_service() const {
+    return profile_.force_protected_service();
+  }
+
+  const std::vector<int>& force_unprotected_service() const {
+    return profile_.force_unprotected_service();
+  }
+
  private:
   const profile::Profile& profile_;
   const std::string certificate_data_;
