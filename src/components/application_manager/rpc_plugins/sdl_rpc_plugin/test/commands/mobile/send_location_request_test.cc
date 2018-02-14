@@ -80,9 +80,15 @@ class SendLocationRequestTest
    public:
     UnwrappedSendLocationRequest(
         const MessageSharedPtr& message,
-        application_manager::ApplicationManager& application_manager)
-        : SendLocationRequest(message, application_manager) {}
-
+        application_manager::ApplicationManager& application_manager,
+        app_mngr::rpc_service::RPCService& rpc_service,
+        app_mngr::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+        : SendLocationRequest(message,
+                              application_manager,
+                              rpc_service,
+                              hmi_capabilities,
+                              policy_handler) {}
     ::application_manager::CommandParametersPermissions&
     get_parameters_permissions() {
       return parameters_permissions_;

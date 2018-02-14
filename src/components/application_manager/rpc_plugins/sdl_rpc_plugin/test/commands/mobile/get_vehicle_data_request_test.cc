@@ -75,8 +75,15 @@ class GetVehicleDataRequestTest
 class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
  public:
   UnwrappedGetVehicleDataRequest(const MessageSharedPtr& message,
-                                 am::ApplicationManager& application_manager)
-      : GetVehicleDataRequest(message, application_manager) {}
+                                 am::ApplicationManager& application_manager,
+                                 app_mngr::rpc_service::RPCService& rpc_service,
+                                 app_mngr::HMICapabilities& hmi_capabilities,
+                                 policy::PolicyHandlerInterface& policy_handler)
+      : GetVehicleDataRequest(message,
+                              application_manager,
+                              rpc_service,
+                              hmi_capabilities,
+                              policy_handler) {}
 
   policy::RPCParams& get_disallowed_params() {
     return removed_parameters_permissions_.disallowed_params;

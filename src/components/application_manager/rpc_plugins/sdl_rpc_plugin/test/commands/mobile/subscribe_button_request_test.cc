@@ -190,15 +190,18 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ASSERT_TRUE(command->Init());
   command->Run();
 
-  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-            static_cast<hmi_apis::FunctionID::eType>(
-                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
-                    .asInt()));
+  EXPECT_TRUE(false);
+  // --->need to fix segmentation fault (message empty)<---
+  //  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+  //            static_cast<hmi_apis::FunctionID::eType>(
+  //                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
+  //                    .asInt()));
 
-  EXPECT_EQ(mobile_apis::Result::SUCCESS,
-            static_cast<mobile_apis::Result::eType>(
-                (*mobile_result_msg)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt()));
+  //  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+  //            static_cast<mobile_apis::Result::eType>(
+  //                (*mobile_result_msg)[am::strings::msg_params]
+  //                                    [am::strings::result_code].asInt()));
+  // --->need to fix segmentation fault<---
 }
 
 }  // namespace subscribe_button_request

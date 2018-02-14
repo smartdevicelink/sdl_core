@@ -104,8 +104,12 @@ class CommandRequestImplTest
     using CommandRequestImpl::HasDisallowedParams;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
-                                ApplicationManager& am)
-        : CommandRequestImpl(message, am) {}
+                                ApplicationManager& am,
+                                app_mngr::rpc_service::RPCService& rpc_service,
+                                app_mngr::HMICapabilities& hmi_capabilities,
+                                policy::PolicyHandlerInterface& policy_handler)
+        : CommandRequestImpl(
+              message, am, rpc_service, hmi_capabilities, policy_handler) {}
 
     const RequestState current_state() const {
       return current_state_;

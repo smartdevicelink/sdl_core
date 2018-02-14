@@ -1075,6 +1075,10 @@ class ApplicationManagerImpl
     return *rpc_handler_;
   }
 
+  void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
+    rpc_service_ = std::move(rpc_service);
+  }
+
   bool is_stopping() const OVERRIDE;
 
   bool is_audio_pass_thru_active() const OVERRIDE;
