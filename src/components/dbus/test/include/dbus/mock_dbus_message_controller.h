@@ -40,8 +40,7 @@ namespace test {
 namespace components {
 namespace dbus_test {
 
-class MockDBusMessageController
-    : public ::dbus::DBusMessageController {
+class MockDBusMessageController : public ::dbus::DBusMessageController {
  public:
   MOCK_METHOD1(Recv, void(std::string&));
 

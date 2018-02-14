@@ -159,10 +159,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
-  /* flag display state of speak and ui perform audio
-  during perform audio pass thru*/
-  bool awaiting_tts_speak_response_;
-  bool awaiting_ui_response_;
   /**
    * @brief Pair of result_code and success for mobile app
    */
