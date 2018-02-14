@@ -58,7 +58,7 @@ void CommandHolderImpl::Suspend(
   } else {
     app_mobile_commands_[application].push_back(command);
     LOG4CXX_DEBUG(logger_,
-                  "Suspended mobile command(s): " << app_hmi_commands_.size());
+                  "Suspended mobile command(s): " << app_mobile_commands_.size());
   }
 }
 
