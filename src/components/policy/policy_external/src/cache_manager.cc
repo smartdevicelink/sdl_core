@@ -1630,8 +1630,10 @@ void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (backup_.valid()) {
     if (pt_.valid()) {
-      // Comma expression is used to hold the lock only during the constructor call
-      policy_table::Table copy_pt((sync_primitives::AutoLock(cache_lock_), *pt_));
+      // Comma expression is used to hold the lock only during the constructor
+      // call
+      policy_table::Table copy_pt(
+          (sync_primitives::AutoLock(cache_lock_), *pt_));
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);
 
@@ -2216,8 +2218,8 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
 bool CacheManager::SetVINValue(const std::string& value) {
   CACHE_MANAGER_CHECK(false);
   {
-  sync_primitives::AutoLock lock(cache_lock_);
-  *pt_->policy_table.module_meta->vin = value;
+    sync_primitives::AutoLock lock(cache_lock_);
+    *pt_->policy_table.module_meta->vin = value;
   }
   Backup();
   return true;

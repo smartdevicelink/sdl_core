@@ -935,8 +935,10 @@ void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (backup_.valid()) {
     if (pt_.valid()) {
-      // Comma expression is used to hold the lock only during the constructor call
-      policy_table::Table copy_pt((sync_primitives::AutoLock(cache_lock_), *pt_));
+      // Comma expression is used to hold the lock only during the constructor
+      // call
+      policy_table::Table copy_pt(
+          (sync_primitives::AutoLock(cache_lock_), *pt_));
 
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);

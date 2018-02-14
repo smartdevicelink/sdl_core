@@ -216,8 +216,7 @@ bool WebsocketSession::checkMessage(Json::Value& root, Json::Value& error) {
     return false;
   }
 
-  if (root.isMember("id") &&
-      (root["id"].isArray() || root["id"].isObject())) {
+  if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject())) {
     error["id"] = Json::Value::null;
     error["jsonrpc"] = "2.0";
     err["code"] = hmi_message_handler::INVALID_REQUEST;

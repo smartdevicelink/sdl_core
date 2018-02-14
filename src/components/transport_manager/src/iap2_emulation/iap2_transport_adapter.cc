@@ -100,7 +100,7 @@ void IAP2USBEmulationTransportAdapter::DeviceSwitched(
   auto out_ = open(out_signals_channel, O_WRONLY);
   LOG4CXX_DEBUG(logger_, "Out channel descriptor: " << out_);
 
-  if(out_ < 0) {
+  if (out_ < 0) {
     LOG4CXX_ERROR(logger_, "Failed to open out signals channel");
     return;
   }
@@ -134,7 +134,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
 
   in_ = open(in_signals_channel, O_RDONLY);
   LOG4CXX_DEBUG(logger_, "In channel descriptor: " << in_);
-  if(in_ < 0) {
+  if (in_ < 0) {
     LOG4CXX_ERROR(logger_, "Failed to open in signals channel");
     return;
   }
@@ -142,7 +142,7 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
   const auto size = 32;
   while (run_flag_) {
     char buffer[size];
-    auto bytes = read(in_, &buffer, size-1);
+    auto bytes = read(in_, &buffer, size - 1);
     if (0 == bytes) {
       continue;
     }

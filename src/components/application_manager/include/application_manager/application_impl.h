@@ -517,7 +517,7 @@ class ApplicationImpl : public virtual Application,
 
   sync_primitives::Lock mobile_message_lock_;
   MobileMessageQueue mobile_message_queue_;
-                          
+
   friend void SwitchApplicationParameters(ApplicationSharedPtr app,
                                           const uint32_t app_id,
                                           const size_t device_id,
