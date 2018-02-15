@@ -16,13 +16,15 @@ RCSetInteriorVehicleDataResponse::RCSetInteriorVehicleDataResponse(
                                                      hmi_capabilities,
                                                      policy_handle) {}
 
-bool RCSetInteriorVehicleDataResponse::Init() {
-  return true;
-}
-void RCSetInteriorVehicleDataResponse::Run() {}
+void RCSetInteriorVehicleDataResponse::Run() {
+    LOG4CXX_AUTO_TRACE(logger_);
 
-void RCSetInteriorVehicleDataResponse::on_event(
-    const application_manager::event_engine::Event& event) {}
+    app_mngr::event_engine::Event event(hmi_apis::FunctionID::RC_SetInteriorVehicleData);
+    event.set_smart_object(*message_);
+    event.raise(application_manager_.event_dispatcher());
+}
+
+RCSetInteriorVehicleDataResponse::~RCSetInteriorVehicleDataResponse(){}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
