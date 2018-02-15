@@ -1864,12 +1864,7 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 
-  bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
-              SaveAppGroup(app_id, default_groups));
-  if (ret) {
-    return SetIsDefault(app_id, true);
-  }
-  return false;
+  return SetIsDefault(app_id, true);
 }
 
 bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
