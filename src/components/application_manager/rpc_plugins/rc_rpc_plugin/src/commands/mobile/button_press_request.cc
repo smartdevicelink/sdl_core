@@ -16,11 +16,18 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
 
 ButtonPressRequest::ButtonPressRequest(
+    ResourceAllocationManager& resource_allocation_manager,
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
-    rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager)
-    : RCCommandRequest(
-          resource_allocation_manager, message, application_manager) {}
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : RCCommandRequest(resource_allocation_manager,
+                       message,
+                       application_manager,
+                       rpc_service,
+                       hmi_capabilities,
+                       policy_handle) {}
 
 ButtonPressRequest::~ButtonPressRequest() {}
 
@@ -142,9 +149,11 @@ void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string button_name =
-      (*message_)[app_mngr::strings::msg_params][message_params::kButtonName].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kButtonName]
+          .asString();
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
 
   static ButtonsMap btn_map = buttons_map();
   mobile_apis::ButtonName::eType button_id =
@@ -184,9 +193,10 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
   const std::string module_type =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
           .asString();
-    app_mngr::ApplicationSharedPtr app =
+  app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  return resource_allocation_manager_.AcquireResource(module_type, app->app_id());
+  return resource_allocation_manager_.AcquireResource(module_type,
+                                                      app->app_id());
 }
 
 bool ButtonPressRequest::IsResourceFree(const std::string& module_type) const {
@@ -199,15 +209,16 @@ void ButtonPressRequest::SetResourceState(const std::string& module_type,
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  resource_allocation_manager_.SetResourceState(module_type, app->app_id(), state);
+  resource_allocation_manager_.SetResourceState(
+      module_type, app->app_id(), state);
 }
 
 void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   RCCommandRequest::on_event(event);
 
-  if (hmi_apis::FunctionID::Buttons_ButtonPress != event.id()){
-      return;
+  if (hmi_apis::FunctionID::Buttons_ButtonPress != event.id()) {
+    return;
   }
 
   const smart_objects::SmartObject& message = event.smart_object();

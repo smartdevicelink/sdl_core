@@ -41,7 +41,7 @@ class RPCPlugin {
    * @return true if plugin is able to process this RPC, false if not
    */
   virtual bool IsAbleToProcess(
-      const int32_t function_icomponentsd,
+      const int32_t function_id,
       const commands::Command::CommandSource message_source) = 0;
 
   /**
