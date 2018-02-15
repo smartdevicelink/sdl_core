@@ -43,11 +43,18 @@ namespace commands {
 RCCommandRequest::RCCommandRequest(
     rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager,
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager)
-    : app_mngr::commands::CommandRequestImpl(message, application_manager)
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : application_manager::commands::CommandRequestImpl(message,
+                                                        application_manager,
+                                                        rpc_service,
+                                                        hmi_capabilities,
+                                                        policy_handle)
     , resource_allocation_manager_(resource_allocation_manager) {}
 
-RCCommandRequest::~RCCommandRequest(){}
+RCCommandRequest::~RCCommandRequest() {}
 
 bool RCCommandRequest::IsInterfaceAvailable(
     const app_mngr::HmiInterfaces::InterfaceID interface) const {
@@ -61,7 +68,8 @@ bool RCCommandRequest::IsInterfaceAvailable(
 void RCCommandRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   SetResourceState(
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString(),
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString(),
       ResourceState::FREE);
   SendResponse(
       false, mobile_apis::Result::GENERIC_ERROR, "Request timeout expired");
@@ -70,14 +78,16 @@ void RCCommandRequest::onTimeOut() {
 bool RCCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-    application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension = resource_allocation_manager_.GetApplicationExtention(app);
+      application_manager_.application(CommandRequestImpl::connection_key());
+  RCAppExtensionPtr extension =
+      resource_allocation_manager_.GetApplicationExtention(app);
   if (!extension) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     return false;
   }
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
 
   if (rc_rpc_plugin::kAllowed == access) {
@@ -102,9 +112,9 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string info;
   if (rc_rpc_plugin::kDisallowed == access) {
-     info = disallowed_info_.empty()
-                 ? "The RPC is disallowed by vehicle settings"
-                 : disallowed_info_;
+    info = disallowed_info_.empty()
+               ? "The RPC is disallowed by vehicle settings"
+               : disallowed_info_;
   } else {
     return;
   }
@@ -135,7 +145,8 @@ void RCCommandRequest::Run() {
 bool RCCommandRequest::AcquireResources() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
 
   if (!IsResourceFree(module_type)) {
     LOG4CXX_WARN(logger_, "Resource is busy.");
@@ -169,7 +180,8 @@ bool RCCommandRequest::AcquireResources() {
 void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
 
   SetResourceState(module_type, ResourceState::FREE);
 
@@ -184,7 +196,8 @@ void RCCommandRequest::ProcessAccessResponse(
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
@@ -238,7 +251,8 @@ void RCCommandRequest::SendGetUserConsent(const std::string& module_type) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[json_keys::kAppId] = app->hmi_app_id();
-  msg_params[app_mngr::strings::msg_params][message_params::kModuleType] = module_type;
+  msg_params[app_mngr::strings::msg_params][message_params::kModuleType] =
+      module_type;
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
                  &msg_params,
                  true);
