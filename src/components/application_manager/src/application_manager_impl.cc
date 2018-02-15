@@ -1663,22 +1663,10 @@ void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
 }
 
 void ApplicationManagerImpl::RemoveHMIFakeParameters(
-    application_manager::MessagePtr& message) {
+    application_manager::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  using namespace NsSmartDeviceLink::NsJSONHandler;
-  SmartObject so;
-
-  Formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
-                                           hmi_apis::messageType::eType>(
-      message->json_message(), so);
-
-  std::string formatted_message;
-  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
   hmi_apis::HMI_API factory;
-  factory.attachSchema(so, true);
-  Formatters::FormatterJsonRpc::ToString(so, formatted_message);
-  message->set_json_message(formatted_message);
+  factory.attachSchema(*message, true);
 }
 
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
