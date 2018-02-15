@@ -37,24 +37,23 @@
 #include "application_manager/application_manager.h"
 #include "interfaces/HMI_API.h"
 
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace application_manager {
 
 namespace commands {
 
-class ResponseFromHMI : public app_mngr::commands::CommandImpl {
+class ResponseFromHMI : public commands::CommandImpl {
  public:
-  ResponseFromHMI(const app_mngr::commands::MessageSharedPtr& message,
-                  app_mngr::ApplicationManager& application_manager,
-                  app_mngr::rpc_service::RPCService& rpc_service,
-                  app_mngr::HMICapabilities& hmi_capabilities,
+  ResponseFromHMI(const commands::MessageSharedPtr& message,
+                  ApplicationManager& application_manager,
+                  rpc_service::RPCService& rpc_service,
+                  HMICapabilities& hmi_capabilities,
                   policy::PolicyHandlerInterface& policy_handle);
   virtual ~ResponseFromHMI();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  void SendResponseToMobile(const app_mngr::commands::MessageSharedPtr& message,
-                            app_mngr::ApplicationManager& application_manager);
+  void SendResponseToMobile(const commands::MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /*
    * @brief Creates HMI request
