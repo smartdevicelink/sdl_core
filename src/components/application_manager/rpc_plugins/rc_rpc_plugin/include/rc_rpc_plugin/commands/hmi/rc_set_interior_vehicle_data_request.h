@@ -17,9 +17,8 @@ class RCSetInteriorVehicleDataRequest
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handle);
-  bool Init() OVERRIDE;
   void Run() OVERRIDE;
-  void on_event(const application_manager::event_engine::Event& event);
+  virtual ~RCSetInteriorVehicleDataRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

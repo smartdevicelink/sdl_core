@@ -16,12 +16,12 @@ RCGetInteriorVehicleDataResponse::RCGetInteriorVehicleDataResponse(
                                                      hmi_capabilities,
                                                      policy_handle) {}
 void RCGetInteriorVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+    LOG4CXX_AUTO_TRACE(logger_);
 
-  app_mngr::event_engine::Event event(
-      hmi_apis::FunctionID::Buttons_ButtonPress);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
+    app_mngr::event_engine::Event event(
+		hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+    event.set_smart_object(*message_);
+    event.raise(application_manager_.event_dispatcher());
 }
 
 RCGetInteriorVehicleDataResponse::~RCGetInteriorVehicleDataResponse() {}
