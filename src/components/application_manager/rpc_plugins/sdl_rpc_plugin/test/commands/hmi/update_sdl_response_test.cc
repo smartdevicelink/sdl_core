@@ -69,8 +69,7 @@ TEST_F(UpdateSDLResponseTest, RUN_SendRequest_SUCCESS) {
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
 
   UpdateSDLResponsePtr command(CreateCommand<UpdateSDLResponse>(command_msg));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 

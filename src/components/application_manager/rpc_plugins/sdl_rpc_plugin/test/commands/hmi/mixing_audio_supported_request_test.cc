@@ -74,8 +74,7 @@ TEST_F(MixingAudioSupportedRequestTest, RUN_SendRequest_SUCCESS) {
 
   RequestToHMIPtr command(
       CreateCommand<MixingAudioSupportedRequest>(command_msg));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 

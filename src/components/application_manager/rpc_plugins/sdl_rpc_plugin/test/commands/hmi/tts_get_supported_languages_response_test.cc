@@ -75,7 +75,6 @@ const uint32_t kConnectionKey = 2u;
 class TTSGetSupportedLanguageResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -94,9 +93,6 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<TTSGetSupportedLanguagesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_tts_supported_languages((

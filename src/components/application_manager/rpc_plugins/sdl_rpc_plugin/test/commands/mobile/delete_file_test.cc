@@ -119,6 +119,7 @@ class DeleteFileResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 TEST_F(DeleteFileRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
@@ -142,6 +143,7 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
   EXPECT_CALL(app_mngr_settings_, delete_file_in_none())
       .WillOnce(ReturnRef(num));
   EXPECT_CALL(*mock_app_, delete_file_in_none_count()).WillOnce(Return(1));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::REJECTED),
@@ -175,6 +177,7 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
   EXPECT_CALL(*mock_app_, GetFile(_)).WillOnce(Return(&file));
   EXPECT_CALL(*mock_app_, DeleteFile(_));
   EXPECT_CALL(*mock_app_, increment_delete_file_in_none_count());
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::SUCCESS),
@@ -196,6 +199,7 @@ TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
   const std::string kFullFilePath = file_system::CurrentWorkingDirectory();
   EXPECT_CALL(app_mngr_settings_, app_storage_folder())
       .WillOnce(ReturnRef(kFullFilePath));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED),
@@ -210,6 +214,7 @@ TEST_F(DeleteFileResponseTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_app));
+
   EXPECT_CALL(
       mock_rpc_service_,
       SendMessageToMobile(CheckMessageResultCode(
@@ -230,6 +235,7 @@ TEST_F(DeleteFileResponseTest, Run_ValidApp_SUCCESS) {
   const uint32_t kAvailableDiskSpace = 10u;
   EXPECT_CALL(*app, GetAvailableDiskSpace())
       .WillOnce(Return(kAvailableDiskSpace));
+
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(
                   CheckMessageResultCode(mobile_apis::Result::SUCCESS), _));

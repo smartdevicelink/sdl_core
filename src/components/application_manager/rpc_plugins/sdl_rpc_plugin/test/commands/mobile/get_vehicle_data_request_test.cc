@@ -220,6 +220,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);

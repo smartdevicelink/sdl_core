@@ -65,10 +65,7 @@ const uint32_t kStatisticType = 1u;
 }  // namespace
 
 class AddStatisticsInfoNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- protected:
-  MockPolicyHandlerInterface policy_handler_;
-};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(AddStatisticsInfoNotificationTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
@@ -76,9 +73,7 @@ TEST_F(AddStatisticsInfoNotificationTest, Run_SUCCESS) {
       kStatisticType;
   NotificationPtr command(CreateCommand<AddStatisticsInfoNotification>(msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler_));
-  EXPECT_CALL(policy_handler_, AddStatisticsInfo(kStatisticType));
+  EXPECT_CALL(mock_policy_handler_, AddStatisticsInfo(kStatisticType));
 
   command->Run();
 }

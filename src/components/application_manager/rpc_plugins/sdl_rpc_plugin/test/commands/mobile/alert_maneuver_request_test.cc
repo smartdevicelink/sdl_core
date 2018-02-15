@@ -90,7 +90,6 @@ class AlertManeuverRequestTest
         .WillRepeatedly(Return(state));
 
     MessageSharedPtr response_to_mobile;
-    .WillByDefault(ReturnRef(mock_rpc_service_));
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(
                     _, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -106,9 +105,6 @@ class AlertManeuverRequestTest
             .asInt(),
         static_cast<int32_t>(mobile_response));
   }
-
- protected:
-  NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
 };
 
 TEST_F(AlertManeuverRequestTest, Run_RequiredFieldsDoesNotExist_UNSUCCESS) {
@@ -147,9 +143,6 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(policy_interface_));
 
   const mobile_apis::Result::eType kProcessingResult =
       mobile_apis::Result::ABORTED;
@@ -197,9 +190,6 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(policy_interface_));
 
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));

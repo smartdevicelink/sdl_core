@@ -69,12 +69,7 @@ class RCIsReadyRequestTest
                          bool is_message_contain_param,
                          am::HmiInterfaces::InterfaceState state) {
     if (is_send_message_to_hmi) {
-      EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillRepeatedly(ReturnRef(mock_hmi_capabilities_));
       ExpectSendMessagesToHMI();
-    } else {
-      EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillOnce(ReturnRef(mock_hmi_capabilities_));
     }
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_rc_cooperating(is_rc_cooperating_available));
@@ -104,8 +99,7 @@ class RCIsReadyRequestTest
     EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::RC_GetCapabilities, _))
         .WillOnce(Return(capabilities));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(capabilities));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,
@@ -121,7 +115,6 @@ class RCIsReadyRequestTest
 
   RCIsReadyRequestPtr command_;
   am::MockHmiInterfaces mock_hmi_interfaces_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
 TEST_F(RCIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {

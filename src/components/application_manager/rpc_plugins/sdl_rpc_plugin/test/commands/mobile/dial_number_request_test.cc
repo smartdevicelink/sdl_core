@@ -75,6 +75,7 @@ TEST_F(DialNumberRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -93,6 +94,7 @@ TEST_F(DialNumberRequestTest, Run_InvalidNumber_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
@@ -110,6 +112,7 @@ TEST_F(DialNumberRequestTest, Run_EmptyNumber_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
@@ -127,6 +130,7 @@ TEST_F(DialNumberRequestTest, Run_SUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_DialNumber)));

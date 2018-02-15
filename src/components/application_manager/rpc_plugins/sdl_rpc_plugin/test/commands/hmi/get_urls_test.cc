@@ -60,6 +60,7 @@ using namespace hmi_apis;
 using namespace policy;
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
+using ::testing::_;
 using ::testing::SetArgReferee;
 using ::test::components::application_manager_test::MockApplication;
 namespace am = ::application_manager;
@@ -86,7 +87,6 @@ const std::string kPolicyAppId = "policy_app_id";
 
 class GetUrlsTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MessageSharedPtr command_msg_;
   RequestFromHMIPtr request_command_;
 
@@ -99,15 +99,12 @@ class GetUrlsTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         kInitialService;
 
     request_command_ = CreateCommand<GetUrls>(command_msg_);
-
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
   }
 };
 
 TEST_F(GetUrlsTest, RUN_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  //  EXPECT_CALL(mock_policy_handler_, GetUpdateUrls(_, _));
 
   request_command_->Run();
 }
@@ -115,8 +112,7 @@ TEST_F(GetUrlsTest, RUN_SUCCESS) {
 TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(false));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   request_command_->Run();
@@ -133,8 +129,7 @@ TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
       .WillOnce(SetArgReferee<1>(endpoints_));
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   request_command_->Run();
@@ -167,8 +162,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kAppIdForSending))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppIdForSending));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   request_command_->Run();
@@ -205,8 +199,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kInvalidAppId_));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, application(kInvalidAppId_)).Times(0);
@@ -235,8 +228,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_ApplicationIsNotValid_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kAppIdForSending))
       .WillOnce(Return(invalid_mock_app));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_)););
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   request_command_->Run();
@@ -271,8 +263,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
 
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(kPolicyAppId));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(command_msg_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
   request_command_->Run();
@@ -329,7 +320,6 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application_by_policy_id(_))
       .WillOnce(Return(mock_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   request_command_->Run();
 
   EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(

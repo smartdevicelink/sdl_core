@@ -89,15 +89,12 @@ class UpdateTurnListRequestTest
 
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UpdateTurnListRequest> command_;
-  TypeIf<kMocksAreNice,
-         NiceMock<policy_test::MockPolicyHandlerInterface>,
-         policy_test::MockPolicyHandlerInterface>::Result mock_policy_handler_;
 };
 
 TEST_F(UpdateTurnListRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -113,7 +110,7 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidNavigationText_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
@@ -131,7 +128,7 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidTurnIcon_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
@@ -151,9 +148,6 @@ TEST_F(UpdateTurnListRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
-
   const mobile_result::eType kExpectedResult = mobile_result::INVALID_ENUM;
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
@@ -161,7 +155,7 @@ TEST_F(UpdateTurnListRequestTest,
                                  Ref(mock_policy_handler_),
                                  Ref(app_mngr_)))
       .WillOnce(Return(kExpectedResult));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(MobileResultCodeIs(kExpectedResult), _));
 
@@ -173,16 +167,13 @@ TEST_F(UpdateTurnListRequestTest, Run_NoTurnList_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
-
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
                                  Eq(mock_app),
                                  Ref(mock_policy_handler_),
                                  Ref(app_mngr_)))
       .WillOnce(Return(mobile_result::SUCCESS));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
@@ -203,9 +194,6 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
 
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
@@ -255,7 +243,6 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
 
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command_->on_event(event);
@@ -272,7 +259,7 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
@@ -291,7 +278,7 @@ TEST_F(UpdateTurnListRequestTest,
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 

@@ -73,10 +73,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   SharedPtr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities, set_active_vr_language(kLanguage));
+  EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(kLanguage));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -92,10 +89,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   SharedPtr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities,
+  EXPECT_CALL(mock_hmi_capabilities_,
               set_active_vr_language(Common_Language::INVALID_ENUM));
 
   MockEventDispatcher mock_event_dispatcher;

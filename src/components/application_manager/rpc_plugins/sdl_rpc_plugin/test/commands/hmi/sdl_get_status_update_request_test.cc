@@ -67,10 +67,7 @@ TEST_F(SDLGetStatusUpdateRequestTest, Run_SUCCESS) {
   SharedPtr<SDLGetStatusUpdateRequest> command(
       CreateCommand<SDLGetStatusUpdateRequest>(msg));
 
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler));
-  EXPECT_CALL(mock_policy_handler, OnGetStatusUpdate(kCorrelationID));
+  EXPECT_CALL(mock_policy_handler_, OnGetStatusUpdate(kCorrelationID));
 
   command->Run();
 }

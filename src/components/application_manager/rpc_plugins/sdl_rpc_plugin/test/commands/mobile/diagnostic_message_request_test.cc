@@ -83,6 +83,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -110,6 +111,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_NotSupportedDiagnosticMode_UNSUCCESS) {
   const std::vector<uint32_t> empty_supported_diag_modes;
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(empty_supported_diag_modes));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
@@ -138,6 +140,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(supported_diag_modes));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage)));
@@ -150,6 +153,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_UNSUCCESS) {
 
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
@@ -166,6 +170,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
 
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

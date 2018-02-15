@@ -134,8 +134,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
       .WillOnce(Return(response_to_mobile));
 
   MessageSharedPtr vr_command_result;
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -191,8 +190,7 @@ TEST_F(PerformInteractionRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -241,8 +239,7 @@ TEST_F(PerformInteractionRequestTest,
   event_ui.set_smart_object(*response_msg_ui);
 
   MessageSharedPtr response_to_mobile;
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))

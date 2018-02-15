@@ -71,8 +71,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
 
   ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       SendMessageToMobile(ResultCodeIs(mobile_apis::Result::INVALID_ENUM), _));
@@ -86,8 +85,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   (*command_msg)[am::strings::msg_params][am::strings::success] = true;
   ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       SendMessageToMobile(ResultCodeIs(mobile_apis::Result::SUCCESS), _));
@@ -105,10 +103,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
       result_type;
   ::utils::SharedPtr<UnsubscribeVehicleDataResponse> command =
       CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_,
-              SendMessageToMobile(ResultCodeIs(result_type), _));
+
   command->Run();
 }
 

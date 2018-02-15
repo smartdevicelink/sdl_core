@@ -69,7 +69,6 @@ class OnHMIStatusNotificationTest
   void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
         .WillOnce(Return(false));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
     EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _));
   }
 

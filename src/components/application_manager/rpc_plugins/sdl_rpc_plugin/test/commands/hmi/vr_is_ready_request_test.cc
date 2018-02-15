@@ -70,12 +70,7 @@ class VRIsReadyRequestTest
                          am::HmiInterfaces::InterfaceState state) {
     const bool is_send_message_by_timeout = false;
     if (is_send_message_to_hmi) {
-      EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillRepeatedly(ReturnRef(mock_hmi_capabilities_));
       ExpectSendMessagesToHMI(is_send_message_by_timeout);
-    } else {
-      EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillOnce(ReturnRef(mock_hmi_capabilities_));
     }
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_vr_cooperating(is_vr_cooperating_available));
@@ -97,19 +92,13 @@ class VRIsReadyRequestTest
   }
 
   void ExpectSendMessagesToHMI(bool is_send_message_by_timeout) {
-    if (is_send_message_by_timeout) {
-      EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillOnce(ReturnRef(mock_hmi_capabilities_));
-    }
-
     smart_objects::SmartObjectSPtr language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
     EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
         .WillOnce(Return(language));
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(language));
 
     smart_objects::SmartObjectSPtr support_language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
@@ -117,16 +106,14 @@ class VRIsReadyRequestTest
         mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, _))
         .WillOnce(Return(support_language));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(support_language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(support_language));
 
     smart_objects::SmartObjectSPtr capabilities(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
     EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
         .WillOnce(Return(capabilities));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(capabilities));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,
@@ -141,7 +128,6 @@ class VRIsReadyRequestTest
   }
 
   VRIsReadyRequestPtr command_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
 TEST_F(VRIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {

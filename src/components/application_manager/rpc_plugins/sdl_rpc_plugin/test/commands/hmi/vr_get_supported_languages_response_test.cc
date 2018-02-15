@@ -74,7 +74,6 @@ const smart_objects::SmartObject supported_languages(kLanguage);
 class VRGetSupportedLanguagesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -91,9 +90,6 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
 
   VRGetSupportedLanguagesResponsePtr command(
       CreateCommand<VRGetSupportedLanguagesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_vr_supported_languages((supported_languages)));

@@ -72,11 +72,8 @@ TEST_F(UpdateSDLRequestTest, RUN_SUCCESS) {
   (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
 
   UpdateSDLRequestPtr command(CreateCommand<UpdateSDLRequest>(command_msg));
-  policy_test::MockPolicyHandlerInterface policy_handler;
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler, PTExchangeAtUserRequest(kCorrelationId));
+  EXPECT_CALL(mock_policy_handler_, PTExchangeAtUserRequest(kCorrelationId));
 
   command->Run();
 

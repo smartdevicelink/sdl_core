@@ -101,12 +101,11 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   ActivateAppRequestPtr command(CreateCommand<ActivateAppRequest>(msg));
 
   EXPECT_CALL(app_mngr_, set_application_id(kCorrelationId, kAppId));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
 #ifdef ENABLE_LOG
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToHMI(CheckMessage(mobile_apis::HMILevel::HMI_FULL)));
 #else
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               SendMessageToHMI(msg)));
 #endif
   command->Run();

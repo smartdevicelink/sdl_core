@@ -79,23 +79,18 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillRepeatedly(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
 #ifdef PROPRIETARY_MODE
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .Times(2)
-      .WillRepeatedly(ReturnRef(mock_policy_handler));
-  EXPECT_CALL(mock_policy_handler, TimeoutExchangeSec()).WillOnce(Return(5u));
+  EXPECT_CALL(mock_policy_handler_, TimeoutExchangeSec()).WillOnce(Return(5u));
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
       .WillOnce(Return(false));
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -123,16 +118,14 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
       .WillOnce(Return(false));
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -160,12 +153,11 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(*mock_app, policy_app_id()).Times(0);
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
@@ -184,15 +176,13 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(false));
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _)).Times(0);
   ;
 

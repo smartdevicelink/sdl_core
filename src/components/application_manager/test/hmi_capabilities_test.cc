@@ -577,9 +577,8 @@ void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
-  EXPECT_CALL(app_mngr_, GetRPCService())
-      .WillRepeatedly(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+      .WillRepeatedly(Return(true));
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {

@@ -106,8 +106,7 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(false));
 
   EXPECT_CALL(app_mngr_, IsHMICooperating()).Times(0);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 
@@ -132,8 +131,7 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, IsHMICooperating()).WillOnce(Return(true));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
 

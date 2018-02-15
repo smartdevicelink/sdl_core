@@ -123,6 +123,7 @@ class DeleteInteractionChoiceSetResponseTest
 TEST_F(DeleteInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
@@ -141,6 +142,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
   smart_objects::SmartObject* choice_set_id = NULL;
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
@@ -170,6 +172,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_ChoiceSetInUse_SUCCESS) {
   EXPECT_CALL(*app_, is_perform_interaction_active()).WillOnce(Return(true));
   EXPECT_CALL(*app_, performinteraction_choice_set_map())
       .WillOnce(Return(accessor_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
@@ -206,6 +209,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
     EXPECT_CALL(*app_, RemoveChoiceSet(kChoiceSetId));
     EXPECT_CALL(*app_, UpdateHash());
   }
+
 
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
@@ -258,6 +262,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
 
 TEST_F(DeleteInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::success] = false;
+
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(false), false));
   command_->Run();
@@ -266,6 +271,7 @@ TEST_F(DeleteInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
 TEST_F(DeleteInteractionChoiceSetResponseTest, Run_ValidResultCode_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::result_code] =
       hmi_apis::Common_Result::SUCCESS;
+
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(true), false));
   command_->Run();
@@ -275,6 +281,7 @@ TEST_F(DeleteInteractionChoiceSetResponseTest,
        Run_InvalidResultCode_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::result_code] =
       hmi_apis::Common_Result::INVALID_ENUM;
+
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckMessageSuccess(false), false));
   command_->Run();

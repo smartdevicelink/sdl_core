@@ -111,12 +111,9 @@ class ScrollableMessageRequestTest
 
   void SetUp() OVERRIDE {
     mock_app_ = CreateMockApp();
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
     command_ = CreateCommand<ScrollableMessageRequest>(msg_);
   }
 
-  MockPolicyHandlerInterface mock_policy_handler_;
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
   SharedPtr<ScrollableMessageRequest> command_;
@@ -137,10 +134,8 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
 
-  MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
-  ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -151,7 +146,7 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -195,7 +190,7 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -241,7 +236,6 @@ TEST_F(ScrollableMessageRequestTest, Run_SoftButtonProcessingResult_SUCCESS) {
 }
 
 TEST_F(ScrollableMessageRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   command_->on_event(event);
@@ -262,7 +256,7 @@ TEST_F(ScrollableMessageRequestTest,
 TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_ReceivedUIScrollableMessage_SUCCESS) {
   (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
@@ -275,7 +269,7 @@ TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_UnsupportedRCAndUICoop_SUCCESS) {
   (*msg_)[params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(

@@ -67,13 +67,9 @@ typedef SharedPtr<NaviIsReadyRequest> NaviIsReadyRequestPtr;
 class NaviIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  NaviIsReadyRequestTest() : command_(CreateCommand<NaviIsReadyRequest>()) {
-    ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
-  }
+  NaviIsReadyRequestTest() : command_(CreateCommand<NaviIsReadyRequest>()) {}
 
   NaviIsReadyRequestPtr command_;
-  MOCK(application_manager_test::MockHMICapabilities) mock_hmi_capabilities_;
 };
 
 TEST_F(NaviIsReadyRequestTest,

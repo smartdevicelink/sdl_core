@@ -85,7 +85,6 @@ class SDLGetUserFriendlyMessageRequestTest
         .WillOnce(Return(mock_app_));
   }
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
@@ -105,8 +104,6 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
       .WillOnce(Return(kLanguageEn));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
@@ -129,15 +126,10 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
   SharedPtr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities, active_ui_language())
+  EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(kLanguage));
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
       .WillOnce(Return(kLanguageEn));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
@@ -156,7 +148,6 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
   command->Run();

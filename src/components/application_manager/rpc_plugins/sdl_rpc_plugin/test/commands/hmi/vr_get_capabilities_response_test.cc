@@ -80,7 +80,6 @@ class VRGetCapabilitiesResponseTest
     return command_msg;
   }
 
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -93,9 +92,6 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
 
   VRGetCapabilitiesResponsePtr command(
       CreateCommand<VRGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject vr_capabilities_so =
       (*command_msg)[strings::msg_params][strings::vr_capabilities];

@@ -230,10 +230,9 @@ class HMICommandsNotificationsTest
   am::ApplicationSet application_set_;
   sync_primitives::Lock applications_lock_;
   DataAccessor<am::ApplicationSet> applications_;
-  MockHMICapabilities mock_hmi_capabilities_;
 
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
-  NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
+  NiceMock<policy_test::MockPolicyHandlerInterface> mock_policy_handler_;
 
   application_manager_test::MockStateController mock_state_controller_;
 
@@ -257,8 +256,6 @@ class HMICommandsNotificationsTest
         .WillOnce(ReturnRef(default_timeout));
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(policy_interface_));
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
   }
@@ -398,9 +395,7 @@ TYPED_TEST(HMIOnViNotifications, CommandsSendNotificationToMobile) {
       commands_test::CommandsTest<kIsNice>::CreateMessage();
   utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>(message);
-  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(commands_test::CommandsTest<kIsNice>::rpc_service_));
-  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::rpc_service_,
+  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(
@@ -415,9 +410,7 @@ TYPED_TEST(HMIOnNotificationsListToHMI, CommandsSendNotificationToHmi) {
       commands_test::CommandsTest<kIsNice>::CreateMessage();
   utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>(message);
-  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(commands_test::CommandsTest<kIsNice>::rpc_service_));
-  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::rpc_service_,
+  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::mock_rpc_service_,
               SendMessageToHMI(_));
   command->Run();
   EXPECT_EQ(
@@ -450,8 +443,7 @@ TEST_F(HMICommandsNotificationsTest, OnButtonEventSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnButtonEventNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::OnButtonEventID),
@@ -464,8 +456,7 @@ TEST_F(HMICommandsNotificationsTest, OnNaviTBTClientSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnNaviTBTClientStateNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::OnTBTClientStateID),
@@ -479,8 +470,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnNaviWayPointChangeNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::OnWayPointChangeID),
@@ -493,8 +483,7 @@ TEST_F(HMICommandsNotificationsTest, OnUICommandSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnUICommandNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID),
@@ -511,8 +500,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnUIKeyBoardInputNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::OnKeyboardInputID),
@@ -525,8 +513,7 @@ TEST_F(HMICommandsNotificationsTest, OnUITouchEventSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnUITouchEventNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::OnTouchEventID),
@@ -541,8 +528,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnAppRegisteredNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
@@ -564,8 +550,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnAppUnregisteredNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(_));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
@@ -586,8 +571,7 @@ TEST_F(HMICommandsNotificationsTest, OnButtonPressNotificationEventDispatcher) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnButtonPressNotification>(message);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
@@ -620,8 +604,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnIgnitionCycleOverNotification>(message);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnIgnitionCycleOver());
+  EXPECT_CALL(mock_policy_handler_, OnIgnitionCycleOver());
   command->Run();
 }
 
@@ -629,8 +612,7 @@ TEST_F(HMICommandsNotificationsTest, OnPolicyUpdateNotificationPolicyHandler) {
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command = CreateCommand<OnPolicyUpdate>(message);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnPTExchangeNeeded());
+  EXPECT_CALL(mock_policy_handler_, OnPTExchangeNeeded());
   command->Run();
 }
 
@@ -649,7 +631,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnReceivedPolicyUpdate>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, ReceiveMessageFromSDK(kFile, data));
+  EXPECT_CALL(mock_policy_handler_, ReceiveMessageFromSDK(kFile, data));
   command->Run();
   EXPECT_TRUE(file_system::DeleteFile(kFile));
 }
@@ -661,8 +643,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnReceivedPolicyUpdate>(message);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
-  EXPECT_CALL(policy_interface_, ReceiveMessageFromSDK(_, _)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, ReceiveMessageFromSDK(_, _)).Times(0);
   command->Run();
 }
 
@@ -681,11 +662,10 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnAppPermissionConsentNotification>(message);
 
   int32_t connection_id = -1;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _, _))
 #else
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _))
 #endif
       .WillOnce(GetArg(&connection_id));
   command->Run();
@@ -711,9 +691,9 @@ TEST_F(HMICommandsNotificationsTest,
   policy::PermissionConsent permission_consent;
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _, _))
 #else
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _))
 #endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
@@ -747,11 +727,10 @@ TEST_F(HMICommandsNotificationsTest,
 
   int32_t connection_id = -1;
   policy::PermissionConsent permission_consent;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _, _))
 #else
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _))
 #endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
@@ -789,11 +768,10 @@ TEST_F(HMICommandsNotificationsTest,
 
   int32_t connection_id = -1;
   policy::PermissionConsent permission_consent;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _, _))
 #else
-  EXPECT_CALL(policy_interface_, OnAppPermissionConsent(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAppPermissionConsent(_, _))
 #endif
       .WillOnce(
           GetConnectIdPermissionConsent(&connection_id, &permission_consent));
@@ -820,8 +798,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnSystemErrorNotification>(message);
 
   int32_t code = hmi_apis::Common_SystemError::INVALID_ENUM;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnSystemError(_)).WillOnce(GetArg(&code));
+  EXPECT_CALL(mock_policy_handler_, OnSystemError(_)).WillOnce(GetArg(&code));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(hmi_apis::Common_SystemError::SYNC_REBOOTED),
             code);
@@ -837,8 +814,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnSystemInfoChangedNotification>(message);
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnSystemInfoChanged(_));
+  EXPECT_CALL(mock_policy_handler_, OnSystemInfoChanged(_));
   command->Run();
 }
 
@@ -852,8 +828,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   bool value = false;
   std::string str;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnAllowSDLFunctionalityNotification(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAllowSDLFunctionalityNotification(_, _))
       .WillOnce(GetBoolValueAndString(&value, &str));
   command->Run();
   EXPECT_EQ(true, value);
@@ -871,8 +846,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   bool value;
   std::string str;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, OnAllowSDLFunctionalityNotification(_, _))
+  EXPECT_CALL(mock_policy_handler_, OnAllowSDLFunctionalityNotification(_, _))
       .WillOnce(GetBoolValueAndString(&value, &str));
   command->Run();
   EXPECT_EQ(true, value);
@@ -887,8 +861,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
-  EXPECT_CALL(policy_interface_, RemoveDevice(_)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_)).Times(0);
   command->Run();
 }
 
@@ -904,8 +877,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, RemoveDevice(_));
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_));
   command->Run();
 }
 
@@ -921,8 +893,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
   command->Run();
   EXPECT_EQ(empty_device_id, device_id);
 }
@@ -941,8 +912,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
   command->Run();
   EXPECT_EQ(id, device_id);
 }
@@ -1038,8 +1008,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(GetMessage(temp_message));
 
   command->Run();
@@ -1067,8 +1036,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, SetUnregisterAllApplicationsReason(_)).Times(0);
   EXPECT_CALL(app_mngr_, HeadUnitReset(_)).Times(0);
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID()).Times(0);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
   command->Run();
 }
 
@@ -1121,8 +1089,7 @@ TEST_F(HMICommandsNotificationsTest,
     EXPECT_CALL(mock_message_helper_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
                     kAppId_, *it_mobile_reason)).WillOnce(Return(notification));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_,
+    EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(notification, Command::SOURCE_SDL));
     EXPECT_CALL(app_mngr_,
                 UnregisterApplication(
@@ -1143,8 +1110,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnExitApplicationNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, state_controller()).Times(0);
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(app_));
@@ -1160,8 +1126,7 @@ TEST_F(HMICommandsNotificationsTest, OnExitApplicationNotificationInvalidApp) {
 
   am::ApplicationSharedPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, state_controller()).Times(0);
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(invalid_app));
@@ -1198,8 +1163,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
@@ -1285,8 +1249,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, get_settings())
       .WillOnce(ReturnRef(app_mngr_settings_));
   EXPECT_CALL(app_mngr_, event_dispatcher()).Times(0);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->Run();
 }
 
@@ -1310,8 +1273,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->Run();
   EXPECT_EQ(hmi_apis::FunctionID::VR_OnCommand, event_id);
 }
@@ -1336,8 +1298,7 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(kIsPerformInteractionActive));
 
   EXPECT_CALL(app_mngr_, event_dispatcher()).Times(0);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID),
@@ -1359,11 +1320,8 @@ TEST_F(HMICommandsNotificationsTest, OnVRLanguageChangeNotificationEmptyData) {
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   EXPECT_CALL(*app_ptr_, language()).Times(0);
   command->Run();
@@ -1382,10 +1340,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
@@ -1429,10 +1384,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
@@ -1445,8 +1397,7 @@ TEST_F(HMICommandsNotificationsTest,
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))
       .WillOnce(Return(notification));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(notification, Command::SOURCE_SDL));
   EXPECT_CALL(app_mngr_,
               UnregisterApplication(
@@ -1601,10 +1552,9 @@ TEST_F(HMICommandsNotificationsTest,
           testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
-  EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
+  EXPECT_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
       .WillOnce(Return(policy::kDeviceAllowed));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(am::MessageType::kNotification),
@@ -1626,8 +1576,7 @@ TEST_F(HMICommandsNotificationsTest,
   ApplicationSharedPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(invalid_app));
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->Run();
   EXPECT_EQ(
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID),
@@ -1640,8 +1589,8 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(ReturnRef(policy_interface_));
-  EXPECT_CALL(policy_interface_, GetAppIdForSending())
+      .WillByDefault(ReturnRef(mock_policy_handler_));
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kAppId_));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   ON_CALL(app_mngr_, connection_handler())
@@ -1655,10 +1604,9 @@ TEST_F(HMICommandsNotificationsTest,
           testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
-  EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
+  EXPECT_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
       .WillOnce(Return(policy::kDeviceAllowed));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
   EXPECT_EQ(static_cast<int32_t>(am::MessageType::kNotification),
@@ -1678,11 +1626,10 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
-  EXPECT_CALL(policy_interface_, GetAppIdForSending())
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kNullApppId));
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->Run();
 }
 
@@ -1697,11 +1644,8 @@ TEST_F(HMICommandsNotificationsTest, OnTTSLanguageChangeNotificationEmptyData) {
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   EXPECT_CALL(*app_ptr_, language()).Times(0);
   command->Run();
@@ -1721,10 +1665,7 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
@@ -1769,10 +1710,7 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
@@ -1781,8 +1719,7 @@ TEST_F(HMICommandsNotificationsTest,
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))
       .WillOnce(Return(notification));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(notification, Command::SOURCE_SDL));
   EXPECT_CALL(app_mngr_,
               UnregisterApplication(
@@ -1811,11 +1748,8 @@ TEST_F(HMICommandsNotificationsTest, OnUILanguageChangeNotificationEmptyData) {
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, active_vr_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   EXPECT_CALL(*app_ptr_, ui_language()).Times(0);
   command->Run();
@@ -1834,10 +1768,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, active_vr_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, ui_language()).WillRepeatedly(ReturnRef(kLang));
@@ -1881,10 +1812,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, active_vr_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, ui_language()).WillRepeatedly(ReturnRef(kLang));
@@ -1893,8 +1821,7 @@ TEST_F(HMICommandsNotificationsTest,
                   kAppId_,
                   mobile_apis::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE))
       .WillOnce(Return(notification));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(notification, Command::SOURCE_SDL));
   EXPECT_CALL(app_mngr_,
               UnregisterApplication(
@@ -1923,8 +1850,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
   EXPECT_CALL(app_mngr_, set_driver_distraction(state));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
 }
@@ -1941,8 +1867,7 @@ TEST_F(HMICommandsNotificationsTest,
   ApplicationSharedPtr invalid_app;
   application_set_.insert(invalid_app);
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
   command->Run();
 }
@@ -1958,8 +1883,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
   application_set_.insert(app_);
 
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))
       .WillOnce(GetMessage(message));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));

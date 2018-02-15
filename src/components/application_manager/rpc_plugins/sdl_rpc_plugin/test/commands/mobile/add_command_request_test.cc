@@ -182,6 +182,7 @@ class AddCommandRequestTest
         .WillOnce(Return(so_ptr_.get()));
     {
       InSequence dummy;
+
       EXPECT_CALL(mock_rpc_service_,
                   ManageHMICommand(
                       HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -199,8 +200,10 @@ class AddCommandRequestTest
     event.set_smart_object(*msg_);
     request_ptr->on_event(event);
     EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
+
         .WillOnce(Return(true));
     SmartObjectSPtr response = utils::MakeShared<SmartObject>(SmartType_Map);
     (*response)[strings::msg_params][strings::info] = "info";
@@ -208,6 +211,7 @@ class AddCommandRequestTest
         mock_message_helper_,
         CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
         .WillOnce(Return(response));
+
     EXPECT_CALL(
         mock_rpc_service_,
         ManageMobileCommand(response,
@@ -583,6 +587,7 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
 }
 
 TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -687,7 +692,6 @@ TEST_F(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   {
     InSequence dummy;
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -798,7 +802,6 @@ TEST_F(
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -828,7 +831,6 @@ TEST_F(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   {
     InSequence dummy;
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -849,7 +851,6 @@ TEST_F(
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -876,7 +877,6 @@ TEST_F(
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -930,7 +930,6 @@ TEST_F(
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -955,7 +954,6 @@ TEST_F(AddCommandRequestTest,
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   {
     InSequence dummy;
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -980,7 +978,6 @@ TEST_F(AddCommandRequestTest,
   event_ui.set_smart_object(*msg_ui);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg_);
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand)))
@@ -1005,7 +1002,6 @@ TEST_F(AddCommandRequestTest,
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   {
     InSequence dummy;
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -1025,7 +1021,6 @@ TEST_F(AddCommandRequestTest,
   Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
   event_ui.set_smart_object(*msg_);
   request_ptr->on_event(event_ui);
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand)))
@@ -1052,7 +1047,6 @@ TEST_F(AddCommandRequestTest,
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
       .WillOnce(Return(response));
-
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
@@ -1083,7 +1077,6 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       .WillOnce(Return(so_ptr_.get()));
   {
     InSequence dummy;
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -1104,7 +1097,6 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
       .WillOnce(Return(response));
-
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));

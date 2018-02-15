@@ -70,6 +70,7 @@ TEST_F(OnCommandNotificationTest, Run_AppNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->Run();
@@ -87,6 +88,7 @@ TEST_F(OnCommandNotificationTest, Run_NoAppsForTheCommand_UNSUCCESS) {
 
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->Run();
@@ -124,6 +126,7 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
       .WillOnce(Return(dummy_msg.get()));
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckNotificationMessage(), _));
+
 
   command->Run();
 }

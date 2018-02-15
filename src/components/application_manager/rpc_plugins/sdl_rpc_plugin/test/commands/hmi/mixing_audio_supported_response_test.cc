@@ -85,16 +85,12 @@ TEST_F(MixingAudioSupportedResponseTest, RUN_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<MixingAudioSupportedResponse>(command_msg));
-  MockHMICapabilities mock_hmi_capabilities;
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
 
   const bool hmiResponse =
       (*command_msg)[strings::msg_params][hmi_response::attenuated_supported]
           .asBool();
 
-  EXPECT_CALL(mock_hmi_capabilities, set_attenuated_supported(hmiResponse));
+  EXPECT_CALL(mock_hmi_capabilities_, set_attenuated_supported(hmiResponse));
 
   command->Run();
 }

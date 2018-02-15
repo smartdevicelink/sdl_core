@@ -139,8 +139,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         *mock_app_,
         AreCommandLimitsExceeded(kFunctionId, am::TLimitSource::POLICY_TABLE))
         .WillByDefault(Return(false));
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(*mock_app_, hmi_level())
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
     ON_CALL(*mock_app_, hmi_level())
@@ -183,7 +181,6 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
-  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
@@ -463,7 +460,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
@@ -491,7 +487,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
@@ -578,6 +573,7 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSuccess_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
 
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
@@ -623,6 +619,7 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
 
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
@@ -657,6 +654,7 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
@@ -667,6 +665,7 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
+
 
   EXPECT_CALL(
       mock_rpc_service_,

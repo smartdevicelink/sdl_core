@@ -143,16 +143,12 @@ class RegisterAppInterfaceRequestTest
 
   void InitGetters() {
     ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(app_mngr_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));
     ON_CALL(app_mngr_, connection_handler())
         .WillByDefault(ReturnRef(mock_connection_handler_));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(app_mngr_settings_, sdl_version())
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(mock_hmi_capabilities_, ccpu_version())
@@ -182,7 +178,6 @@ class RegisterAppInterfaceRequestTest
         mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   }
 
   void SetCommonExpectionsOnSwitchedApplication(
@@ -244,11 +239,9 @@ class RegisterAppInterfaceRequestTest
   typedef IsNiceMock<application_manager_test::MockHMICapabilities,
                      kMocksAreNice>::Result MockHMICapabilities;
 
-  MockPolicyHandlerInterface mock_policy_handler_;
   MockResumeCtrl mock_resume_crt_;
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
-  MockHMICapabilities mock_hmi_capabilities_;
   application_manager_test::MockApplicationHelper& mock_application_helper_;
 };
 
@@ -283,8 +276,6 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_, GetRPCService())
-      .WillRepeatedly(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
@@ -384,7 +375,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))

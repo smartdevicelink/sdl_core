@@ -84,8 +84,7 @@ TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
 
   const bool success = false;
   const uint32_t correlation_id = 1u;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(NotNull()));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(NotNull()));
 
   command->SendResponse(success,
                         correlation_id,

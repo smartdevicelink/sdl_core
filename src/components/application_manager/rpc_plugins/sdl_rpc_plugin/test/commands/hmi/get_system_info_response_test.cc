@@ -89,7 +89,6 @@ class GetSystemInfoResponseTest
     return command_msg;
   }
 
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -101,10 +100,6 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
       (capabilities_);
 
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
-  policy_test::MockPolicyHandlerInterface policy_handler;
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   std::string language;
   EXPECT_CALL(mock_message_helper_,
@@ -113,9 +108,7 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
       .WillOnce(Return(language));
   EXPECT_EQ(kLanguage, language);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler,
+  EXPECT_CALL(mock_policy_handler_,
               OnGetSystemInfo(ccpu_version, wers_country_code, kLanguage));
 
   command->Run();
@@ -129,18 +122,13 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
       (capabilities_);
 
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
-  policy_test::MockPolicyHandlerInterface policy_handler;
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).Times(0);
 
   EXPECT_CALL(mock_message_helper_,
               CommonLanguageToString(
                   static_cast<hmi_apis::Common_Language::eType>(lang_code)))
       .Times(0);
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler, OnGetSystemInfo("", "", ""));
+  EXPECT_CALL(mock_policy_handler_, OnGetSystemInfo("", "", ""));
 
   command->Run();
 }

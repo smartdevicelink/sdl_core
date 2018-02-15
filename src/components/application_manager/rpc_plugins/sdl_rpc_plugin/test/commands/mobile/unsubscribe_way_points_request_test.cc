@@ -85,7 +85,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
        Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -104,7 +104,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
               IsAppSubscribedForWayPoints(
                   ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(false));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
@@ -121,7 +121,7 @@ TEST_F(UnSubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
               IsAppSubscribedForWayPoints(
                   ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(true));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints)));
@@ -133,7 +133,6 @@ TEST_F(UnSubscribeWayPointsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
@@ -158,7 +157,6 @@ TEST_F(UnSubscribeWayPointsRequestTest,
               UnsubscribeAppFromWayPoints(
                   ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)));
 
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

@@ -69,10 +69,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   SharedPtr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities, set_active_tts_language(kLanguage));
+  EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(kLanguage));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -88,10 +85,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   SharedPtr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities,
+  EXPECT_CALL(mock_hmi_capabilities_,
               set_active_tts_language(Common_Language::INVALID_ENUM));
 
   MockEventDispatcher mock_event_dispatcher;

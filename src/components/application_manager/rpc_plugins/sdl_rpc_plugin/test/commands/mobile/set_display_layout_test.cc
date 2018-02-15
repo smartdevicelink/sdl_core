@@ -155,8 +155,6 @@ TEST_F(SetDisplayLayoutRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -175,8 +173,6 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_mock_app;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_mock_app));
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
@@ -203,8 +199,6 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(CheckMshCorrId(kCorrelationKey)))
       .WillOnce(Return(true));
@@ -219,7 +213,6 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 
   event.set_smart_object(msg);
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).Times(0);
   command->on_event(event);
 }
 
@@ -233,18 +226,12 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
-  MockHMICapabilities hmi_capabilities;
   MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
   (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities));
-
-  EXPECT_CALL(hmi_capabilities, display_capabilities())
+  EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),

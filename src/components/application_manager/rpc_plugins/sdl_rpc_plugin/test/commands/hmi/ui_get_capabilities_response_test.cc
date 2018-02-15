@@ -85,7 +85,6 @@ class UIGetCapabilitiesResponseTest
     return command_msg;
   }
 
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -98,9 +97,6 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject display_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::display_capabilities];
@@ -121,9 +117,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-
   smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
       [strings::msg_params][hmi_response::soft_button_capabilities];
 
@@ -143,9 +136,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-
   smart_objects::SmartObject hmi_zone_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities];
 
@@ -162,9 +152,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
       [strings::msg_params][strings::audio_pass_thru_capabilities];
@@ -185,9 +172,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -207,9 +191,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -228,9 +209,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreaming_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
@@ -255,9 +233,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
-
   smart_objects::SmartObject navigation_capability_so =
       (*command_msg)[strings::msg_params][strings::system_capabilities]
                     [strings::navigation_capability];
@@ -278,9 +253,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhonenCapability_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject phone_capability_so =
       (*command_msg)[strings::msg_params][strings::system_capabilities]
@@ -329,9 +301,6 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_capability(video_streaming_capability));

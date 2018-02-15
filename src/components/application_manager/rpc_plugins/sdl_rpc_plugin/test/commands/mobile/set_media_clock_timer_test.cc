@@ -104,7 +104,7 @@ class SetMediaClockRequestTest
         .WillOnce(Return(mock_app_));
     EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(is_media));
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   }
 
@@ -134,7 +134,7 @@ TEST_F(SetMediaClockRequestTest,
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
   MessageSharedPtr ui_command_result;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
@@ -175,7 +175,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
   ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
 
   command->Run();
@@ -211,7 +211,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
   ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
 
   command->Run();
@@ -262,7 +262,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   command->Run();
@@ -313,7 +313,7 @@ TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, is_media_application()).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   command->Run();
@@ -324,7 +324,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   MockAppPtr app(CreateMockApp());
@@ -342,7 +342,6 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
 
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
-  EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*msg);

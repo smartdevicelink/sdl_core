@@ -58,10 +58,7 @@ const std::string kText = "TEXT";
 }
 
 class TTSGetCapabilitiesResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  MockHMICapabilities mock_hmi_capabilities_;
-};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
@@ -69,8 +66,6 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
   (*msg)[strings::msg_params][hmi_response::prerecorded_speech_capabilities] =
       kText;
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_speech_capabilities(SmartObject(kText)));
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -86,8 +81,6 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlySpeech_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::speech_capabilities] = kText;
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_speech_capabilities(SmartObject(kText)));
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
@@ -103,8 +96,6 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlyPrerecorded_SUCCESS) {
   (*msg)[strings::msg_params][hmi_response::prerecorded_speech_capabilities] =
       kText;
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, set_speech_capabilities(_)).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_,
               set_prerecorded_speech(SmartObject(kText)));
@@ -118,8 +109,6 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlyPrerecorded_SUCCESS) {
 TEST_F(TTSGetCapabilitiesResponseTest, Run_Nothing_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, set_speech_capabilities(_)).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
 

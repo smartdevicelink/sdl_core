@@ -298,11 +298,7 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
       CreateCommand<sdl_rpc_plugin::commands::VIGetVehicleTypeResponse>(
           command_msg));
 
-  application_manager_test::MockHMICapabilities hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities));
-
-  EXPECT_CALL(hmi_capabilities,
+  EXPECT_CALL(mock_hmi_capabilities_,
               set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));
 
   command->Run();
@@ -345,9 +341,8 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 
   SharedPtr<sdl_rpc_plugin::commands::NotificationFromHMI> command(
       CreateCommand<commands::NotificationFromHMI>());
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
   EXPECT_CALL(
-      rpc_service_,
+      mock_rpc_service_,
       ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
                           am::commands::Command::CommandSource::SOURCE_SDL));
 
@@ -364,8 +359,7 @@ TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   const uint32_t correlation_id = 1u;
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(correlation_id));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(CheckMsgType(am::MessageType::kRequest)))
       .WillOnce(Return(false));
 

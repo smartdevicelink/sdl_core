@@ -80,7 +80,6 @@ class RCGetCapabilitiesResponseTest
     return command_msg;
   }
 
-  MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
 
@@ -161,9 +160,6 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
 
   RCGetCapabilitiesResponsePtr command(
       CreateCommand<RCGetCapabilitiesResponse>(command_msg));
-
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject rc_capability_so =
       (*command_msg)[strings::msg_params][strings::rc_capability];

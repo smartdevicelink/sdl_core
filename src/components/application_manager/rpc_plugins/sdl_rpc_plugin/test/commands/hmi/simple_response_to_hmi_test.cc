@@ -74,9 +74,7 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-  EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->rpc_service_));
-  EXPECT_CALL(this->rpc_service_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }
@@ -95,8 +93,7 @@ TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
 TEST_F(ResponseToHMITest, Run_SUCCESS) {
   SharedPtr<commands::ResponseToHMI> command(
       CreateCommand<commands::ResponseToHMI>());
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }

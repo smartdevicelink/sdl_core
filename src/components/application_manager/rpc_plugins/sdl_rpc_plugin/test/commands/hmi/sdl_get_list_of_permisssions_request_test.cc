@@ -85,10 +85,8 @@ TEST_F(SDLGetListOfPermissionsRequestTest, Run_SUCCESS) {
   SharedPtr<SDLGetListOfPermissionsRequest> command(
       CreateCommand<SDLGetListOfPermissionsRequest>(msg));
 
-  MockPolicyHandlerInterface policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler, OnGetListOfPermissions(kAppID, kCorrelationID));
+  EXPECT_CALL(mock_policy_handler_,
+              OnGetListOfPermissions(kAppID, kCorrelationID));
 
   command->Run();
 }
@@ -100,10 +98,7 @@ TEST_F(SDLGetListOfPermissionsRequestTest, Run_KeyDoesntExist_SUCCESS) {
   SharedPtr<SDLGetListOfPermissionsRequest> command(
       CreateCommand<SDLGetListOfPermissionsRequest>(msg));
 
-  MockPolicyHandlerInterface policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler,
+  EXPECT_CALL(mock_policy_handler_,
               OnGetListOfPermissions(kConnectionKey, kCorrelationID));
 
   command->Run();

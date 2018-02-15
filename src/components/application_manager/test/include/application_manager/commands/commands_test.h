@@ -149,6 +149,7 @@ class CommandsTest : public ::testing::Test {
   enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
+  MockRPCService mock_rpc_service_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;

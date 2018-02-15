@@ -110,10 +110,8 @@ TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
-  ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(false));
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::UNSUPPORTED_RESOURCE,
@@ -134,15 +132,13 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
-  MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
-  ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
 
-  ON_CALL(hmi_capabilities, button_capabilities())
+  ON_CALL(mock_hmi_capabilities_, button_capabilities())
       .WillByDefault(Return(button_caps_ptr.get()));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(true));
@@ -166,21 +162,19 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
-  MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
-  ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
 
-  ON_CALL(hmi_capabilities, button_capabilities())
+  ON_CALL(mock_hmi_capabilities_, button_capabilities())
       .WillByDefault(Return(button_caps_ptr.get()));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
   MessageSharedPtr hmi_result_msg;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
@@ -190,18 +184,15 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ASSERT_TRUE(command->Init());
   command->Run();
 
-  EXPECT_TRUE(false);
-  // --->need to fix segmentation fault (message empty)<---
-  //  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-  //            static_cast<hmi_apis::FunctionID::eType>(
-  //                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
-  //                    .asInt()));
+  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+            static_cast<hmi_apis::FunctionID::eType>(
+                (*hmi_result_msg)[am::strings::params][am::strings::function_id]
+                    .asInt()));
 
-  //  EXPECT_EQ(mobile_apis::Result::SUCCESS,
-  //            static_cast<mobile_apis::Result::eType>(
-  //                (*mobile_result_msg)[am::strings::msg_params]
-  //                                    [am::strings::result_code].asInt()));
-  // --->need to fix segmentation fault<---
+  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+            static_cast<mobile_apis::Result::eType>(
+                (*mobile_result_msg)[am::strings::msg_params]
+                                    [am::strings::result_code].asInt()));
 }
 
 }  // namespace subscribe_button_request

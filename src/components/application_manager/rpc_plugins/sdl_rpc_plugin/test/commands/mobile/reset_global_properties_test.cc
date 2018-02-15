@@ -95,8 +95,6 @@ class ResetGlobalPropertiesRequestTest
         .WillByDefault(Return(mock_app_));
     ON_CALL(app_mngr_, GetNextHMICorrelationID())
         .WillByDefault(Return(kCorrelationId));
-    ON_CALL(app_mngr_, GetRPCService())
-        .WillByDefault(ReturnRef(mock_rpc_service_));
   }
 
   MessageSharedPtr msg_;
@@ -254,7 +252,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
 
 TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  // EXPECT_CALL(app_mngr_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command_->on_event(event);
 }
@@ -350,8 +347,7 @@ TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
   MessageSharedPtr message(CreateMessage());
   ResetGlobalPropertiesResponsePtr command(
       CreateCommand<ResetGlobalPropertiesResponse>(message));
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message, _));
   command->Run();
 }

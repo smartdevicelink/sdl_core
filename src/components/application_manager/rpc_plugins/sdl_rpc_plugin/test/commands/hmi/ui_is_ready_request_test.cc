@@ -67,10 +67,6 @@ class UIIsReadyRequestTest
  public:
   UIIsReadyRequestTest() : command_(CreateCommand<UIIsReadyRequest>()) {}
 
-  void SetUp() OVERRIDE {
-    ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
-  }
   void SetUpExpectations(bool is_ui_cooperating_available,
                          bool is_send_message_to_hmi,
                          bool is_message_contain_param,
@@ -129,10 +125,9 @@ class UIIsReadyRequestTest
         .WillOnce(Return(get_capabilities));
 
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*get_language));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(get_language));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(get_all_language));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(get_capabilities));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_all_language));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,
@@ -147,7 +142,6 @@ class UIIsReadyRequestTest
   }
 
   UIIsReadyRequestPtr command_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 

@@ -70,8 +70,6 @@ class VIIsReadyRequestTest
                          bool is_send_message_to_hmi,
                          bool is_message_contain_param,
                          am::HmiInterfaces::InterfaceState state) {
-    EXPECT_CALL(app_mngr_, hmi_capabilities())
-        .WillOnce(ReturnRef(mock_hmi_capabilities_));
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_ivi_cooperating(is_vi_cooperating_available));
 
@@ -86,9 +84,7 @@ class VIIsReadyRequestTest
           .WillOnce(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_, SetInterfaceState(_, _)).Times(0);
     }
-    EXPECT_CALL(app_mngr_, GetPolicyHandler())
-        .WillOnce(ReturnRef(mock_policy_handler_interface_));
-    EXPECT_CALL(mock_policy_handler_interface_, OnVIIsReady());
+    EXPECT_CALL(mock_policy_handler_, OnVIIsReady());
 
     EXPECT_CALL(mock_hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo))
@@ -105,8 +101,7 @@ class VIIsReadyRequestTest
         mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
         .WillOnce(Return(ivi_type));
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-    EXPECT_CALL(rpc_service_, ManageHMICommand(ivi_type));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(ivi_type));
   }
 
   void PrepareEvent(bool is_message_contain_param,
@@ -121,8 +116,6 @@ class VIIsReadyRequestTest
   }
 
   VIIsReadyRequestPtr command_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
-  policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
 TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {

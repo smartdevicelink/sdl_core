@@ -90,10 +90,7 @@ TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
   event.set_smart_object(*command_msg);
 
-  policy_test::MockPolicyHandlerInterface policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler));
-  EXPECT_CALL(policy_handler, OnVehicleDataUpdated(*command_msg));
+  EXPECT_CALL(mock_policy_handler_, OnVehicleDataUpdated(*command_msg));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())

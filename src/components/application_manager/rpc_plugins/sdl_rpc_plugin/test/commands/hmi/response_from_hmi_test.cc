@@ -74,8 +74,7 @@ TEST_F(ResponseFromHMITest, SendResponseToMobile_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
 
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageMobileCommand(msg, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(msg, _));
 
   command->SendResponseToMobile(msg, app_mngr_);
 
@@ -90,8 +89,7 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
 
   MessageSharedPtr result_msg;
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(true)));
 
   const hmi_apis::FunctionID::eType posted_function_id =
@@ -120,8 +118,7 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_CantManageCommand_Covering) {
 
   MessageSharedPtr result_msg;
   ON_CALL(app_mngr_, GetNextHMICorrelationID()).WillByDefault(Return(1u));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
-  EXPECT_CALL(rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(false)));
 
   const hmi_apis::FunctionID::eType posted_function_id =

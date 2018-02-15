@@ -137,8 +137,6 @@ TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   ::utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->mock_rpc_service_));
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
   command->Run();
 }
@@ -169,8 +167,6 @@ TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
   SharedPtr<commands::GenericResponse> command(
       CreateCommand<commands::GenericResponse>(command_msg));
 
-  EXPECT_CALL(this->app_mngr_, GetRPCService())
-      .WillOnce(ReturnRef(this->mock_rpc_service_));
   EXPECT_CALL(
       this->mock_rpc_service_,
       SendMessageToMobile(
@@ -192,8 +188,6 @@ TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
   SharedPtr<commands::ScrollableMessageResponse> command(
       CreateCommand<commands::ScrollableMessageResponse>(message));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
-  ON_CALL(app_mngr_, GetRPCService())
-      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
   command->Run();
 }

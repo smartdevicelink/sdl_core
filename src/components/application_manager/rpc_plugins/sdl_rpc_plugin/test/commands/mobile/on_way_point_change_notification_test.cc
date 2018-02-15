@@ -103,7 +103,6 @@ TEST_F(OnWayPointChangeNotificationTest,
 
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
       .WillOnce(Return(apps_subscribed_for_way_points));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(CheckMessageData(), _));
 
   command_->Run();

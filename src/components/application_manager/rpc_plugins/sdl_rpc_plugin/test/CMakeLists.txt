@@ -14,7 +14,7 @@ file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  #${COMMANDS_TEST_DIR}/hmi/*
+  ${COMMANDS_TEST_DIR}/hmi/*
   ${COMMANDS_TEST_DIR}/mobile/*
   ${COMPONENTS_DIR}/application_manager/src/message.cc
   ${COMPONENTS_DIR}/application_manager/src/event_engine/*

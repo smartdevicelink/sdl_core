@@ -90,8 +90,6 @@ class SystemRequestTest
   void PreConditions() {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
 
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kAppPolicyId));
@@ -108,7 +106,7 @@ class SystemRequestTest
 
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
-    ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+
     EXPECT_CALL(
         mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
@@ -116,7 +114,6 @@ class SystemRequestTest
   }
 
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(SystemRequestTest, Run_HTTP_FileName_no_binary_data_REJECTED) {
