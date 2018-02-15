@@ -28,6 +28,13 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+
+  /**
+   * @brief GetInteriorVehicleDataRequest class destructor
+   */
+  virtual ~GetInteriorVehicleDataRequest();
+
+ private:
   /**
    * @brief Check if app wants to proceed with already setup subscription
    * @param request_params request parameters to check
@@ -37,12 +44,6 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   bool HasRequestExcessiveSubscription();
 
-  /**
-   * @brief GetInteriorVehicleDataRequest class destructor
-   */
-  virtual ~GetInteriorVehicleDataRequest();
-
- private:
   /**
     * @brief Handle subscription to vehicle data
     * @param hmi_response json message with response from HMI
