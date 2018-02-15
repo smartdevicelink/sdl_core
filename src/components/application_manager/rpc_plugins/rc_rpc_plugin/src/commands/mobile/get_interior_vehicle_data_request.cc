@@ -142,9 +142,8 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
-    const std::string module_type =
-        (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-            .asString();
+  const std::string module_type =
+          (*message_)[app_mngr::strings::msg_params][message_params::kModuleData][message_params::kModuleType].asString();
     if (response_subscribe) {
       LOG4CXX_DEBUG(logger_,
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
@@ -174,7 +173,7 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
     const bool is_app_already_subscribed =
         extension->IsSubscibedToInteriorVehicleData(
             (*message_)[app_mngr::strings::msg_params]
-                       [message_params::kModuleType].asString());
+					   [message_params::kModuleData][message_params::kModuleType].asString());
     const bool app_wants_to_subscribe =
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();
