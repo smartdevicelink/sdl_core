@@ -302,9 +302,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     protocol_handler::ServiceType service_type,
                     bool result,
                     std::vector<std::string>& rejected_params));
-  MOCK_METHOD1(ValidateMessageBySchema,
-               application_manager::MessageValidationResult(
-                   const application_manager::Message& message));
   MOCK_METHOD2(ProcessReconnection,
                void(application_manager::ApplicationSharedPtr application,
                     const uint32_t connection_key));
