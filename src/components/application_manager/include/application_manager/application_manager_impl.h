@@ -1277,9 +1277,6 @@ class ApplicationManagerImpl
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
 
-  MessageValidationResult ValidateMessageBySchema(
-      const Message& message) OVERRIDE;
-
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
                                 smart_objects::SmartObject& applications,

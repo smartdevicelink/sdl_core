@@ -317,9 +317,6 @@ class ApplicationManager {
   virtual void RemoveHMIFakeParameters(
       application_manager::commands::MessageSharedPtr& message) = 0;
 
-  virtual MessageValidationResult ValidateMessageBySchema(
-      const Message& message) = 0;
-
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**
