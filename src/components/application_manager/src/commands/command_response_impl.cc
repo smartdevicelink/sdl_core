@@ -39,8 +39,16 @@ namespace application_manager {
 namespace commands {
 
 CommandResponseImpl::CommandResponseImpl(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {}
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler) {}
 
 CommandResponseImpl::~CommandResponseImpl() {}
 
@@ -81,8 +89,7 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  application_manager_.GetRPCService().SendMessageToMobile(message_,
-                                                           final_message);
+  rpc_service_.SendMessageToMobile(message_, final_message);
 }
 
 }  // namespace commands

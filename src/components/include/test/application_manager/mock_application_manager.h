@@ -51,6 +51,8 @@
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/command_factory.h"
 
 namespace test {
 namespace components {
@@ -82,7 +84,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          const std::string& policy_app_id));
   MOCK_METHOD2(ChangeAppsHMILevel,
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
-  MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
+  MOCK_METHOD0(GetPluginManager,
+               application_manager::plugin_manager::RPCPluginManager&());
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
 #endif  // SDL_REMOTE_CONTROL
@@ -127,8 +130,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(hmi_capabilities, application_manager::HMICapabilities&());
   MOCK_CONST_METHOD0(hmi_capabilities,
                      const application_manager::HMICapabilities&());
-  MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
-  MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD2(ProcessQueryApp,
                void(const smart_objects::SmartObject& sm_object,
                     const uint32_t connection_key));
@@ -304,6 +305,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     const uint32_t connection_key));
   MOCK_CONST_METHOD1(IsAppInReconnectMode,
                      bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
+  MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
 };
 
 }  // namespace application_manager_test

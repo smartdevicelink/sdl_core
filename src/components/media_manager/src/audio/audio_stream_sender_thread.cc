@@ -38,7 +38,6 @@
 #include <string>
 #include <string.h>
 #include "application_manager/application_manager.h"
-#include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/commands/command.h"

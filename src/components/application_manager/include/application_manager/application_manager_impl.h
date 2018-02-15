@@ -41,7 +41,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
@@ -210,8 +209,9 @@ class ApplicationManagerImpl
     applications_.erase(app_to_remove);
   }
 
-  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
-    return plugin_manager_;
+  virtual plugin_manager::RPCPluginManager& GetPluginManager() OVERRIDE {
+    DCHECK(plugin_manager_);
+    return *plugin_manager_;
   }
 
   std::vector<std::string> devices(
@@ -1075,6 +1075,10 @@ class ApplicationManagerImpl
     return *rpc_handler_;
   }
 
+  void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
+    rpc_service_ = std::move(rpc_service);
+  }
+
   bool is_stopping() const OVERRIDE;
 
   bool is_audio_pass_thru_active() const OVERRIDE;
@@ -1554,7 +1558,7 @@ class ApplicationManagerImpl
   request_controller::RequestController request_ctrl_;
 
 #ifdef SDL_REMOTE_CONTROL
-  functional_modules::PluginManager plugin_manager_;
+  std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call

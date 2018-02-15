@@ -39,13 +39,11 @@
 #include <bson_object.h>
 
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service_impl.h"
 #include "application_manager/rpc_handler_impl.h"
-#include "application_manager/sdl_command_factory.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/hmi_capabilities_impl.h"
@@ -54,6 +52,7 @@
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/helpers/application_helper.h"
+#include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
@@ -75,12 +74,6 @@
 #include "policy/usage_statistics/counter.h"
 #include "utils/custom_string.h"
 #include <time.h>
-
-#ifdef SDL_REMOTE_CONTROL
-#include "policy/usage_statistics/counter.h"
-#include "functional_module/plugin_manager.h"
-#include "application_manager/core_service.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
@@ -193,6 +186,11 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   clearing_timer->Start(timeout_ms, timer::kSingleShot);
   timer_pool_.push_back(clearing_timer);
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
+  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
+                                                     request_ctrl_,
+                                                     protocol_handler_,
+                                                     hmi_handler_,
+                                                     *commands_holder_));
   commands_holder_.reset(new CommandHolderImpl(*this));
 }
 
@@ -1624,6 +1622,7 @@ bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
 void ApplicationManagerImpl::set_hmi_message_handler(
     hmi_message_handler::HMIMessageHandler* handler) {
   hmi_handler_ = handler;
+  rpc_service_->set_hmi_message_handler(handler);
 }
 
 void ApplicationManagerImpl::set_connection_handler(
@@ -1644,13 +1643,7 @@ protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler()
 void ApplicationManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
-  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
-                                                     request_ctrl_,
-                                                     protocol_handler_,
-                                                     hmi_handler_,
-                                                     *commands_holder_));
-  command_factory_.reset(new SDLCommandFactory(
-      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
+  rpc_service_->set_protocol_handler(handler);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1685,6 +1678,12 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
                                   media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
+  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
+      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_));
+  if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
+    LOG4CXX_ERROR(logger_, "Plugins are not loaded");
+    return false;
+  }
   const std::string app_storage_folder = get_settings().app_storage_folder();
   if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
@@ -1740,18 +1739,6 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
-
-#ifdef SDL_REMOTE_CONTROL
-  if (!hmi_handler_) {
-    LOG4CXX_ERROR(logger_, "HMI message handler was not initialized");
-    return false;
-  }
-  plugin_manager_.SetServiceHandler(utils::MakeShared<CoreService>(*this));
-  plugin_manager_.LoadPlugins(settings_.plugins_folder());
-  plugin_manager_.OnServiceStateChanged(
-      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
-#endif  // SDL_REMOTE_CONTROL
-
   return true;
 }
 
@@ -2506,12 +2493,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru(*this);
   }
-
-#ifdef SDL_REMOTE_CONTROL
-  plugin_manager_.OnApplicationEvent(
-      functional_modules::ApplicationEvent::kApplicationUnregistered,
-      app_to_remove);
-#endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
@@ -3299,15 +3280,7 @@ void ApplicationManagerImpl::ProcessReconnection(
   GetPolicyHandler().AddDevice(device_mac, connection_type);
 }
 
-void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
-#ifdef SDL_REMOTE_CONTROL
-  if (!ptu_result) {
-    return;
-  }
-  plugin_manager_.OnPolicyEvent(
-      functional_modules::PolicyEvent::kApplicationPolicyUpdated);
-#endif  // SDL_REMOTE_CONTROL
-}
+void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {}
 
 protocol_handler::MajorProtocolVersion
 ApplicationManagerImpl::SupportedSDLVersion() const {
@@ -3608,7 +3581,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     app->set_hmi_level(level);
     OnHMILevelChanged(app_id, old_level, level);
 
-    plugin_manager_.OnAppHMILevelChanged(app, old_level);
   } else {
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }

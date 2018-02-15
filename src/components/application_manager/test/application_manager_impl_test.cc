@@ -95,12 +95,15 @@ connection_handler::DeviceHandle kDeviceId = 12345u;
 class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
-      : mock_storage_(
+      : app_id_(0u)
+      , mock_storage_(
             ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
+      , mock_rpc_service_(new MockRPCService)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
-      , app_id_(0u) {
+
+  {
     logger::create_log_message_loop_thread();
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
@@ -115,7 +118,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-
+    app_manager_impl_->SetRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -175,17 +178,19 @@ class ApplicationManagerImplTest : public ::testing::Test {
                         SetArgPointee<4u>(connection_type),
                         Return(0)));
   }
-
+  uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
+
+  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
-  uint32_t app_id_;
+
   utils::SharedPtr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
@@ -194,7 +199,6 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
-
   app_data[am::json::name] = "application_manager_test";
   app_data[am::json::appId] = app_id_;
   app_data[am::json::android] = "bucket";

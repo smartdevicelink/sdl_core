@@ -134,15 +134,7 @@ void RPCHandlerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
-#ifdef SDL_REMOTE_CONTROL
-  if (app_manager_.GetPluginManager().IsMessageForPlugin(message)) {
-    if (functional_modules::ProcessResult::PROCESSED ==
-        app_manager_.GetPluginManager().ProcessMessage(message)) {
-      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-      return;
-    }
-  }
-#endif
+
   ProcessMessageFromMobile(message);
 }
 
@@ -153,19 +145,6 @@ void RPCHandlerImpl::Handle(const impl::MessageFromHmi message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
-
-#ifdef SDL_REMOTE_CONTROL
-  if (app_manager_.GetPluginManager().IsHMIMessageForPlugin(message)) {
-    functional_modules::ProcessResult result =
-        app_manager_.GetPluginManager().ProcessHMIMessage(message);
-    if (functional_modules::ProcessResult::PROCESSED == result ||
-        functional_modules::ProcessResult::FAILED == result) {
-      LOG4CXX_INFO(logger_, "Message is processed by plugin.");
-      return;
-    }
-  }
-#endif
-
   ProcessMessageFromHMI(message);
 }
 

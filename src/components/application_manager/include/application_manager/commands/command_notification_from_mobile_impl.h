@@ -42,8 +42,12 @@ namespace commands {
 
 class CommandNotificationFromMobileImpl : public CommandImpl {
  public:
-  CommandNotificationFromMobileImpl(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  CommandNotificationFromMobileImpl(
+      const MessageSharedPtr& message,
+      ApplicationManager& application_manager,
+      rpc_service::RPCService& rpc_service,
+      HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
   virtual ~CommandNotificationFromMobileImpl();
   virtual bool Init();
   virtual bool CleanUp();

@@ -194,9 +194,17 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager)
+CommandRequestImpl::CommandRequestImpl(
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler)
     , EventObserver(application_manager.event_dispatcher())
     , current_state_(kAwaitingHMIResponse)
     , hash_update_mode_(kSkipHashUpdate)
@@ -242,8 +250,7 @@ void CommandRequestImpl::onTimeOut() {
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
   AddTimeOutComponentInfoToMessage(*response);
-  application_manager_.GetRPCService().ManageMobileCommand(response,
-                                                           SOURCE_SDL);
+  rpc_service_.ManageMobileCommand(response, SOURCE_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -306,7 +313,7 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
-  application_manager_.GetRPCService().ManageMobileCommand(result, SOURCE_SDL);
+  rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
@@ -434,7 +441,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
+    if (!rpc_service_.ManageHMICommand(result)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -463,7 +470,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!application_manager_.GetRPCService().ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -630,7 +637,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             correlation_id(),
             app->app_id());
 
-    application_manager_.GetRPCService().SendMessageToMobile(response);
+    rpc_service_.SendMessageToMobile(response);
     return false;
   }
 
@@ -654,15 +661,13 @@ bool CommandRequestImpl::CheckHMICapabilities(
   using namespace smart_objects;
   using namespace mobile_apis;
 
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-  if (!hmi_capabilities.is_ui_cooperating()) {
+  if (!hmi_capabilities_.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported by HMI");
     return false;
   }
 
   const SmartObject* button_capabilities_so =
-      hmi_capabilities.button_capabilities();
+      hmi_capabilities_.button_capabilities();
   if (!button_capabilities_so) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;

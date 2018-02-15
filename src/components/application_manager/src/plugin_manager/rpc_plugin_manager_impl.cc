@@ -1,5 +1,4 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
-
 #include <dlfcn.h>
 
 #include "utils/file_system.h"
@@ -8,6 +7,16 @@ namespace application_manager {
 namespace plugin_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
+
+RPCPluginManagerImpl::RPCPluginManagerImpl(
+    ApplicationManager& app_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : app_manager_(app_manager)
+    , rpc_service_(rpc_service)
+    , hmi_capabilities_(hmi_capabilities)
+    , policy_handler_(policy_handler) {}
 
 bool IsLibraryFile(const std::string& file_path) {
   size_t pos = file_path.find_last_of(".");
@@ -48,8 +57,7 @@ RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) {
   return RPCPluginPtr(plugin);
 }
 
-uint32_t RPCPluginManagerImpl::LoadPlugins(
-    const std::string& plugins_path) {
+uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
   LOG4CXX_INFO(logger_, "Loading plugins from " << plugins_path);
   std::vector<std::string> plugin_files = file_system::ListFiles(plugins_path);
   for (auto& plugin_file : plugin_files) {
@@ -61,7 +69,8 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(
     LOG4CXX_DEBUG(logger_,
                   "Loaded " << plugin->PluginName() << " plugin from "
                             << full_name);
-    if (plugin->Init()) {
+    if (plugin->Init(
+            app_manager_, rpc_service_, hmi_capabilities_, policy_handler_)) {
       loaded_plugins_.push_back(std::move(plugin));
     } else {
       LOG4CXX_ERROR(logger_,
@@ -79,7 +88,7 @@ std::vector<RPCPluginPtr>& RPCPluginManagerImpl::GetPlugins() {
 
 utils::Optional<RPCPlugin> RPCPluginManagerImpl::FindPluginToProcess(
     const int32_t function_id,
-    const commands::Command::CommandOrigin message_source) {
+    const commands::Command::CommandSource message_source) {
   typedef utils::Optional<RPCPlugin> PluginOptional;
   for (auto& plugin : loaded_plugins_) {
     if (plugin->IsAbleToProcess(function_id, message_source)) {
