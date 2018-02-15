@@ -40,7 +40,6 @@
 #include <queue>
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_observer.h"
-#include "application_manager/core_service.h"
 #include "application_manager/application.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"

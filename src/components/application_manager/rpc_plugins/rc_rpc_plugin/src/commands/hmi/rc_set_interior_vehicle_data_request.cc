@@ -15,12 +15,12 @@ RCSetInteriorVehicleDataRequest::RCSetInteriorVehicleDataRequest(
                                                   rpc_service,
                                                   hmi_capabilities,
                                                   policy_handle) {}
-bool RCSetInteriorVehicleDataRequest::Init() {
-  return true;
+RCSetInteriorVehicleDataRequest::~RCSetInteriorVehicleDataRequest(){}
+
+void RCSetInteriorVehicleDataRequest::Run() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    SendRequest();
 }
-void RCSetInteriorVehicleDataRequest::Run() {}
-void RCSetInteriorVehicleDataRequest::on_event(
-    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

@@ -771,8 +771,7 @@ class ApplicationManagerImpl
 
   void StartDevicesDiscovery();
 
-  void RemoveHMIFakeParameters(
-      application_manager::MessagePtr& message) OVERRIDE;
+  void RemoveHMIFakeParameters(application_manager::commands::MessageSharedPtr &message) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
@@ -1299,9 +1298,6 @@ bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
-
-  MessageValidationResult ValidateMessageBySchema(
-      const Message& message) OVERRIDE;
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
