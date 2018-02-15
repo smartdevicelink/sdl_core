@@ -10,10 +10,12 @@ namespace commands {
 class GetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   GetInteriorVehicleDataRequest(
+      ResourceAllocationManager& resource_allocation_manager,
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager);
-
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
   /**
    * @brief Execute command
    */
@@ -46,13 +48,13 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
     * @param hmi_response json message with response from HMI
     */
   void ProccessSubscription(
-          const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response);
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response);
 
   /**
    * @brief Cuts off subscribe parameter
    * @param request_params request parameters to handle
    */
-   void RemoveExcessiveSubscription();
+  void RemoveExcessiveSubscription();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

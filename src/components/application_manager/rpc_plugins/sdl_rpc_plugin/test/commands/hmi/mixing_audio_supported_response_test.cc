@@ -45,7 +45,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "hmi/mixing_audio_supported_response.h"
+#include "sdl_rpc_plugin/commands/hmi/mixing_audio_supported_response.h"
 
 namespace test {
 namespace components {

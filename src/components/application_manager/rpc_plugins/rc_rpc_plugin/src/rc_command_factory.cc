@@ -83,107 +83,116 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
 CommandSharedPtr RCCommandFactory::CreateMobileCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  CommandSharedPtr command;
-  const int function_id =
-      (*message)[strings::params][strings::function_id].asInt();
-  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " << function_id);
-  switch (function_id) {
-    case mobile_apis::FunctionID::ButtonPressID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(new commands::ButtonPressRequest(
-            message, app_manager_, allocation_manager_));
-      } else {
-        command.reset(new commands::ButtonPressResponse(message, app_manager_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(
-            new commands::GetInteriorVehicleDataRequest(message, app_manager_, allocation_manager_));
-      } else {
-        command.reset(new commands::GetInteriorVehicleDataResponse(
-            message, app_manager_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(
-            new commands::SetInteriorVehicleDataRequest(message, app_manager_));
-      } else {
-        command.reset(new commands::SetInteriorVehicleDataResponse(
-            message, app_manager_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
-      command.reset(new commands::OnInteriorVehicleDataNotification(
-          message, app_manager_));
-      break;
-    }
-    default: { break; }
-  }
-  return command;
+  // TODO : rework factory same as in SDL commanf dactory
+  return CommandSharedPtr();
+
+  //  CommandSharedPtr command;
+  //  const int function_id =
+  //      (*message)[strings::params][strings::function_id].asInt();
+  //  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " <<
+  //  function_id);
+  //  switch (function_id) {
+  //    case mobile_apis::FunctionID::ButtonPressID: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(new commands::ButtonPressRequest(
+  //            message, app_manager_, allocation_manager_));
+  //      } else {
+  //        command.reset(new commands::ButtonPressResponse(message,
+  //        app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(
+  //            new commands::GetInteriorVehicleDataRequest(message,
+  //            app_manager_, allocation_manager_));
+  //      } else {
+  //        command.reset(new commands::GetInteriorVehicleDataResponse(
+  //            message, app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(
+  //            new commands::SetInteriorVehicleDataRequest(message,
+  //            app_manager_));
+  //      } else {
+  //        command.reset(new commands::SetInteriorVehicleDataResponse(
+  //            message, app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
+  //      command.reset(new commands::OnInteriorVehicleDataNotification(
+  //          message, app_manager_));
+  //      break;
+  //    }
+  //    default: { break; }
+  //  }
+  //  return command;
 }
 
 CommandSharedPtr RCCommandFactory::CreateHMICommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
   CommandSharedPtr command;
-  const int function_id =
-      (*message)[strings::params][strings::function_id].asInt();
-  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << function_id);
-  switch (function_id) {
-    case hmi_apis::FunctionID::Buttons_ButtonPress: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(
-            new commands::RCButtonPressRequest(message, app_manager_));
-      } else {
-        command.reset(
-            new commands::RCButtonPressResponse(message, app_manager_));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(new commands::RCGetInteriorVehicleDataRequest(
-            message, app_manager_));
-      } else {
-        command.reset(new commands::RCGetInteriorVehicleDataResponse(
-            message, app_manager_));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(new commands::RCSetInteriorVehicleDataRequest(
-            message, app_manager_));
-      } else {
-        command.reset(new commands::RCSetInteriorVehicleDataResponse(
-            message, app_manager_));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-      command.reset(new commands::RCOnInteriorVehicleDataNotification(
-          message, app_manager_));
-      break;
-    }
-    case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
-      command.reset(new commands::RCOnRemoteControlSettingsNotification(
-          message, app_manager_));
-      break;
-    }
-    default: { break; }
-  }
+  // TODO : rework factory same as in SDL commanf dactory
   return command;
+  //  const int function_id =
+  //      (*message)[strings::params][strings::function_id].asInt();
+  //  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << function_id);
+  //  switch (function_id) {
+  //    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(
+  //            new commands::RCButtonPressRequest(message, app_manager_));
+  //      } else {
+  //        command.reset(
+  //            new commands::RCButtonPressResponse(message, app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(new commands::RCGetInteriorVehicleDataRequest(
+  //            message, app_manager_));
+  //      } else {
+  //        command.reset(new commands::RCGetInteriorVehicleDataResponse(
+  //            message, app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
+  //      if ((*message)[strings::params][strings::message_type] ==
+  //          static_cast<int>(application_manager::MessageType::kRequest)) {
+  //        command.reset(new commands::RCSetInteriorVehicleDataRequest(
+  //            message, app_manager_));
+  //      } else {
+  //        command.reset(new commands::RCSetInteriorVehicleDataResponse(
+  //            message, app_manager_));
+  //      }
+  //      break;
+  //    }
+  //    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
+  //      command.reset(new commands::RCOnInteriorVehicleDataNotification(
+  //          message, app_manager_));
+  //      break;
+  //    }
+  //    case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
+  //      command.reset(new commands::RCOnRemoteControlSettingsNotification(
+  //          message, app_manager_));
+  //      break;
+  //    }
+  //    default: { break; }
+  //  }
+  //  return command;
 }
 
 }  // namespace application_manager
