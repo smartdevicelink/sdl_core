@@ -12,12 +12,18 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
-        const app_mngr::commands::MessageSharedPtr& message,
-        app_mngr::ApplicationManager& application_manager,
-        rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager)
-        : RCCommandRequest(
-              resource_allocation_manager, message, application_manager) {}
-
+    ResourceAllocationManager& resource_allocation_manager,
+    const app_mngr::commands::MessageSharedPtr& message,
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : RCCommandRequest(resource_allocation_manager,
+                       message,
+                       application_manager,
+                       rpc_service,
+                       hmi_capabilities,
+                       policy_handle) {}
 bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const std::string& module_type) {
@@ -42,10 +48,10 @@ void GetInteriorVehicleDataRequest::Execute() {
   const smart_objects::SmartObject* rc_capabilities =
       application_manager_.hmi_capabilities().rc_capability();
   const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
   if (rc_capabilities &&
-      !CheckIfModuleTypeExistInCapabilities(*rc_capabilities,
-                                            module_type)) {
+      !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
     LOG4CXX_WARN(logger_, "Accessing not supported module data");
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
@@ -57,32 +63,34 @@ void GetInteriorVehicleDataRequest::Execute() {
   }
 
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
-              &(*message_)[app_mngr::strings::msg_params], true);
+                 &(*message_)[app_mngr::strings::msg_params],
+                 true);
 }
 
-void GetInteriorVehicleDataRequest::on_event(const app_mngr::event_engine::Event& event)  {
+void GetInteriorVehicleDataRequest::on_event(
+    const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData != event.id()){
-      return;
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData != event.id()) {
+    return;
   }
 
-    const smart_objects::SmartObject& hmi_response = event.smart_object();
+  const smart_objects::SmartObject& hmi_response = event.smart_object();
 
-    mobile_apis::Result::eType result_code =
-        GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-            hmi_response[app_mngr::strings::params][app_mngr::hmi_response::code]
-                .asUInt()));
+  mobile_apis::Result::eType result_code =
+      GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          hmi_response[app_mngr::strings::params][app_mngr::hmi_response::code]
+              .asUInt()));
 
-    bool result =
-        helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
-            result_code,
-            mobile_apis::Result::SUCCESS,
-            mobile_apis::Result::WARNINGS);
+  bool result =
+      helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          result_code,
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::WARNINGS);
 
-    if (mobile_apis::Result::READ_ONLY == result_code) {
-      result = false;
-      result_code = mobile_apis::Result::GENERIC_ERROR;
-    }
+  if (mobile_apis::Result::READ_ONLY == result_code) {
+    result = false;
+    result_code = mobile_apis::Result::GENERIC_ERROR;
+  }
 
   if (result) {
     ProccessSubscription(hmi_response);
@@ -97,20 +105,23 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const bool is_subscribe_present_in_request =
-          (*message_)[app_mngr::strings::msg_params].keyExists(message_params::kSubscribe);
+      (*message_)[app_mngr::strings::msg_params].keyExists(
+          message_params::kSubscribe);
   const bool isSubscribed_present_in_response =
-           hmi_response[json_keys::kResult].keyExists(message_params::kIsSubscribed);
+      hmi_response[json_keys::kResult].keyExists(message_params::kIsSubscribed);
 
   if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     return;
   }
   app_mngr::ApplicationSharedPtr app =
-    application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension = resource_allocation_manager_.GetApplicationExtention(app);
+      application_manager_.application(CommandRequestImpl::connection_key());
+  RCAppExtensionPtr extension =
+      resource_allocation_manager_.GetApplicationExtention(app);
   if (is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "conditional mandatory parameter "
-                     << message_params::kIsSubscribed << " missed in hmi response");
+                     << message_params::kIsSubscribed
+                     << " missed in hmi response");
     return;
   }
 
@@ -124,25 +135,25 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   }
 
   const bool request_subscribe =
-          (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe].asBool();
+      (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
+          .asBool();
   const bool response_subscribe =
       hmi_response[json_keys::kResult][message_params::kIsSubscribed].asBool();
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
-  const std::string module_type =
-          (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
+    const std::string module_type =
+        (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+            .asString();
     if (response_subscribe) {
       LOG4CXX_DEBUG(logger_,
-                    "SubscribeToInteriorVehicleData "
-                        << app->app_id() << " "
-                        << module_type);
+                    "SubscribeToInteriorVehicleData " << app->app_id() << " "
+                                                      << module_type);
       extension->SubscribeToInteriorVehicleData(module_type);
     } else {
       LOG4CXX_DEBUG(logger_,
                     "UnsubscribeFromInteriorVehicleData "
-                        << app->app_id() << " "
-                        << module_type);
+                        << app->app_id() << " " << module_type);
       extension->UnsubscribeFromInteriorVehicleData(module_type);
     }
   }
@@ -151,18 +162,22 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
   LOG4CXX_AUTO_TRACE(logger_);
   const bool is_subscribe_present_in_request =
-          (*message_)[app_mngr::strings::msg_params].keyExists(message_params::kSubscribe);
+      (*message_)[app_mngr::strings::msg_params].keyExists(
+          message_params::kSubscribe);
 
   if (is_subscribe_present_in_request) {
-      app_mngr::ApplicationSharedPtr app =
+    app_mngr::ApplicationSharedPtr app =
         application_manager_.application(CommandRequestImpl::connection_key());
-      RCAppExtensionPtr extension = resource_allocation_manager_.GetApplicationExtention(app);
+    RCAppExtensionPtr extension =
+        resource_allocation_manager_.GetApplicationExtention(app);
 
     const bool is_app_already_subscribed =
         extension->IsSubscibedToInteriorVehicleData(
-            (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString());
+            (*message_)[app_mngr::strings::msg_params]
+                       [message_params::kModuleType].asString());
     const bool app_wants_to_subscribe =
-            (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe].asBool();
+        (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
+            .asBool();
     if (!app_wants_to_subscribe && !is_app_already_subscribed) {
       return true;
     }

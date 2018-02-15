@@ -55,7 +55,7 @@ using ::utils::SharedPtr;
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 
 typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
 

@@ -42,7 +42,7 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/commands/response_to_hmi.h"
-#include "hmi/get_urls_response.h"
+#include "sdl_rpc_plugin/commands/hmi/get_urls_response.h"
 
 namespace test {
 namespace components {
@@ -56,7 +56,7 @@ using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::GetUrlsResponse;
-using sdl_rpc_plugin::commands::ResponseToHMI;
+using application_manager::commands::ResponseToHMI;
 using am::commands::CommandImpl;
 
 typedef SharedPtr<ResponseToHMI> ResponseToHMIPtr;

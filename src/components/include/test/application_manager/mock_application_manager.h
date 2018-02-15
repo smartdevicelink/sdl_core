@@ -309,7 +309,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppInReconnectMode,
                      bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
-  MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
 };
 
 }  // namespace application_manager_test

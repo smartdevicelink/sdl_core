@@ -46,7 +46,7 @@ namespace simple_notifications_test {
 using namespace application_manager;
 
 using ::testing::Types;
-using sdl_rpc_plugin::commands::NotificationToHMI;
+using application_manager::commands::NotificationToHMI;
 template <typename Command>
 class SimpleNotificationsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {

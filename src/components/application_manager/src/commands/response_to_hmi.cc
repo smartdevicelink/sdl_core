@@ -34,17 +34,14 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
-
+namespace application_manager {
 namespace commands {
 
-ResponseToHMI::ResponseToHMI(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+ResponseToHMI::ResponseToHMI(const commands::MessageSharedPtr& message,
+                             ApplicationManager& application_manager,
+                             rpc_service::RPCService& rpc_service,
+                             HMICapabilities& hmi_capabilities,
+                             policy::PolicyHandlerInterface& policy_handle)
     : CommandImpl(message,
                   application_manager,
                   rpc_service,

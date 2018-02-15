@@ -9,7 +9,6 @@ set (RC_TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 )
 
-
 set(LIBRARIES
   RCRpcPluginStaticLib
   ApplicationManager
