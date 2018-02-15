@@ -45,7 +45,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "hmi/mixing_audio_supported_response.h"
+#include "sdl_rpc_plugin/commands/hmi/mixing_audio_supported_response.h"
 
 namespace test {
 namespace components {
@@ -60,7 +60,7 @@ using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::MixingAudioSupportedResponse;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using am::commands::CommandImpl;
 using am::HMICapabilities;
 namespace hmi_response = ::application_manager::hmi_response;

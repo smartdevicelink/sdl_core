@@ -326,8 +326,8 @@ class NotificationFromHMITest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(NotificationFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<sdl_rpc_plugin::commands::NotificationFromHMI> command(
-      CreateCommand<sdl_rpc_plugin::commands::NotificationFromHMI>());
+  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+      CreateCommand<application_manager::commands::NotificationFromHMI>());
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
@@ -339,8 +339,8 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::message_type] =
       static_cast<int32_t>(am::MessageType::kNotification);
 
-  SharedPtr<sdl_rpc_plugin::commands::NotificationFromHMI> command(
-      CreateCommand<commands::NotificationFromHMI>());
+  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+      CreateCommand<application_manager::commands::NotificationFromHMI>());
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
@@ -352,8 +352,8 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params] = 0;
-  SharedPtr<sdl_rpc_plugin::commands::NotificationFromHMI> command(
-      CreateCommand<sdl_rpc_plugin::commands::NotificationFromHMI>(
+  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+      CreateCommand<application_manager::commands::NotificationFromHMI>(
           command_msg));
 
   const uint32_t correlation_id = 1u;
