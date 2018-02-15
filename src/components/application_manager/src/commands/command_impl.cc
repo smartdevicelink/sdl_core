@@ -35,6 +35,16 @@
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
+
+namespace {
+struct AppExtensionPredicate {
+  AppExtensionUID uid;
+  bool operator()(const ApplicationSharedPtr app) {
+    return app ? app->QueryInterface(uid).valid() : false;
+  }
+};
+}
+
 namespace commands {
 
 CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")
@@ -202,6 +212,22 @@ DEPRECATED void CommandImpl::ReplaceHMIByMobileAppId(
   if (!ReplaceHMIWithMobileAppId(message)) {
     LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");
   }
+}
+
+std::vector<ApplicationSharedPtr> CommandImpl::GetApplications(
+    AppExtensionUID uid) {
+  ApplicationSet accessor = application_manager_.applications().GetData();
+  AppExtensionPredicate predicate;
+  predicate.uid = uid;
+
+  std::vector<ApplicationSharedPtr> result;
+  ApplicationSetConstIt it =
+      std::find_if(accessor.begin(), accessor.end(), predicate);
+  while (it != accessor.end()) {
+    result.push_back(*it);
+    it = std::find_if(++it, accessor.end(), predicate);
+  }
+  return result;
 }
 
 }  // namespace commands
