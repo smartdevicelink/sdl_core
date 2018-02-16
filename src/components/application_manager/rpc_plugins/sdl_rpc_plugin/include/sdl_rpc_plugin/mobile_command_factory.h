@@ -52,7 +52,17 @@ class MobileCommandFactory : public app_mngr::CommandFactory {
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
+  bool IsAbleToProcess(
+      const int32_t,
+      const application_manager::commands::Command::CommandSource)
+      const OVERRIDE;
+
  private:
+  app_mngr::ICommandCreator& get_creator_factory(
+      mobile_apis::FunctionID::eType id,
+      mobile_apis::messageType::eType message_type,
+      app_mngr::commands::Command::CommandSource source) const;
+
   app_mngr::ApplicationManager& application_manager_;
   app_mngr::rpc_service::RPCService& rpc_service_;
   app_mngr::HMICapabilities& hmi_capabilities_;
