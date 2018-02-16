@@ -61,7 +61,7 @@ void UnsubscribeFromInteriorVehicleDataForAllModules(
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
-  Apps apps = GetApplications(RCRPCPlugin::kRCPluginID);
+  Apps apps = RCRPCPlugin::GetRCApplications(application_manager_);
   for (Apps::iterator it = apps.begin(); it != apps.end(); ++it) {
     application_manager::ApplicationSharedPtr app = *it;
     DCHECK(app);
