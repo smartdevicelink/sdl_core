@@ -29,7 +29,7 @@ void OnInteriorVehicleDataNotification::Run() {
         (*message_)[app_mngr::strings::msg_params][message_params::kModuleType].asString();
 
     typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
-    AppPtrs apps = GetApplications(RCRPCPlugin::kRCPluginID);
+    AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
 
     for (AppPtrs::iterator it = apps.begin(); it != apps.end(); ++it) {
       DCHECK(*it);

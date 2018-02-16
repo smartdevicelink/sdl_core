@@ -172,8 +172,6 @@ class CommandImpl : public Command {
    */
   void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
 
-  std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid);
-
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
