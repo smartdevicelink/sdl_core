@@ -59,6 +59,15 @@ const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1000;
 #endif
 const uint32_t kMqueueMessageSize = 4095;
 
+// Size of RIFF header contained in a .wav file: 12 bytes for 'RIFF' chunk
+// descriptor, 24 bytes for 'fmt ' sub-chunk and 8 bytes for 'data' sub-chunk
+// header.
+// The correct format of audio stream for AudioPassThru feature is to include
+// only audio sample data. Since both pre-recorded file (audio.8bit.wav) and
+// GStreamer-generated file contain RIFF header, we will skip it when reading
+// the files.
+static const uint32_t kRIFFHeaderSize = 44;
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
@@ -67,7 +76,7 @@ AudioStreamSenderThread::AudioStreamSenderThread(
     application_manager::ApplicationManager& app_mngr)
     : session_key_(session_key)
     , fileName_(fileName)
-    , offset_(0)
+    , offset_(kRIFFHeaderSize)
     , shouldBeStoped_(false)
     , shouldBeStoped_lock_()
     , shouldBeStoped_cv_()
@@ -80,7 +89,7 @@ AudioStreamSenderThread::~AudioStreamSenderThread() {}
 void AudioStreamSenderThread::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  offset_ = 0;
+  offset_ = kRIFFHeaderSize;
 
   while (false == getShouldBeStopped()) {
     AutoLock auto_lock(shouldBeStoped_lock_);
@@ -123,7 +132,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   }
 #if !defined(EXTENDED_MEDIA_MODE)
   // without recording stream restart reading 1-sec file
-  offset_ = 0;
+  offset_ = kRIFFHeaderSize;
 #endif
 }
 
