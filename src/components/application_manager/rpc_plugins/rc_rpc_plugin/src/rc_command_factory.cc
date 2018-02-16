@@ -53,7 +53,77 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
+#include "rc_rpc_plugin/resource_allocation_manager.h"
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+namespace application_manager {
+using rc_rpc_plugin::ResourceAllocationManager;
+
+template <typename RCCommandType>
+class RCCommandCreator : public ICommandCreator {
+ public:
+  RCCommandCreator(ResourceAllocationManager& resource_allocation_manager,
+                   ApplicationManager& application_manager,
+                   rpc_service::RPCService& rpc_service,
+                   HMICapabilities& hmi_capabilities,
+                   PolicyHandlerInterface& policy_handler)
+      : resource_allocation_manager_(resource_allocation_manager)
+      , application_manager_(application_manager)
+      , rpc_service_(rpc_service)
+      , hmi_capabilities_(hmi_capabilities)
+      , policy_handler_(policy_handler)
+      , able_(true) {}
+
+ private:
+  bool isAble() const override;
+  CommandSharedPtr create(
+      const commands::MessageSharedPtr& message) const override {
+    CommandSharedPtr command(new RCCommandType(resource_allocation_manager_,
+                                               message,
+                                               application_manager_,
+                                               rpc_service_,
+                                               hmi_capabilities_,
+                                               policy_handler_));
+    return command;
+  }
+
+  ResourceAllocationManager& resource_allocation_manager_;
+  ApplicationManager& application_manager_;
+  RPCService& rpc_service_;
+  HMICapabilities& hmi_capabilities_;
+  PolicyHandlerInterface& policy_handler_;
+  bool able_;
+};
+
+struct RCCommandCreatorFacotry {
+  RCCommandCreatorFacotry(
+      ResourceAllocationManager& resource_allocation_manager,
+      ApplicationManager& application_manager,
+      rpc_service::RPCService& rpc_service,
+      HMICapabilities& hmi_capabilities,
+      PolicyHandlerInterface& policy_handler)
+      : resource_allocation_manager_(resource_allocation_manager)
+      , application_manager_(application_manager)
+      , rpc_service_(rpc_service)
+      , hmi_capabilities_(hmi_capabilities)
+      , policy_handler_(policy_handler) {}
+
+  template <typename RCCommandType>
+  ICommandCreator& GetCreator() {
+    static RCCommandCreator<RCCommandType> res(resource_allocation_manager_,
+                                               application_manager_,
+                                               rpc_service_,
+                                               hmi_capabilities_,
+                                               policy_handler_);
+    return res;
+  }
+  ResourceAllocationManager& resource_allocation_manager_;
+  ApplicationManager& application_manager_;
+  RPCService& rpc_service_;
+  HMICapabilities& hmi_capabilities_;
+  PolicyHandlerInterface& policy_handler_;
+};
+}
 
 namespace rc_rpc_plugin {
 using namespace application_manager;
@@ -74,9 +144,26 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
   if (app_mngr::commands::Command::SOURCE_HMI == source) {
-    return CreateHMICommand(message, source);
+    mobile_apis::messageType::eType message_type =
+        static_cast<mobile_apis::messageType::eType>(
+            (*message)[strings::params][strings::message_type].asInt());
+
+    mobile_apis::FunctionID::eType function_id =
+        static_cast<mobile_apis::FunctionID::eType>(
+            (*message)[strings::params][strings::function_id].asInt());
+
+    return get_mobile_creator_factory(function_id, message_type)
+        .create(message);
   } else {
-    return CreateMobileCommand(message, source);
+    hmi_apis::messageType::eType message_type =
+        static_cast<hmi_apis::messageType::eType>(
+            (*message)[strings::params][strings::message_type].asInt());
+
+    hmi_apis::FunctionID::eType function_id =
+        static_cast<hmi_apis::FunctionID::eType>(
+            (*message)[strings::params][strings::function_id].asInt());
+
+    return get_hmi_creator_factory(function_id, message_type).create(message);
   }
 }
 
@@ -84,130 +171,98 @@ bool RCCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource message_source)
     const {
-  return get_creator_factory(
-             static_cast<hmi_apis::FunctionID::eType>(function_id),
-             hmi_apis::messageType::INVALID_ENUM,
-             message_source).isAble();
+  using app_mngr::commands::Command;
+  if (Command::SOURCE_HMI == message_source) {
+    return get_mobile_creator_factory(
+               static_cast<mobile_api::FunctionID::eType>(function_id),
+               mobile_api::messageType::INVALID_ENUM).isAble();
+  } else {
+    return get_hmi_creator_factory(
+               static_cast<hmi_apis::FunctionID::eType>(function_id),
+               hmi_apis::messageType::INVALID_ENUM).isAble();
+  }
 }
 
-ICommandCreator& RCCommandFactory::get_creator_factory(
+ICommandCreator& RCCommandFactory::get_mobile_creator_factory(
+    mobile_api::FunctionID::eType id,
+    mobile_api::messageType::eType message_type) const {
+  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " << id);
+  RCCommandCreatorFacotry rc_factory(allocation_manager_,
+                                     app_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_);
+  CommandCreatorFacotry factory(
+      app_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+
+  switch (id) {
+    case mobile_apis::FunctionID::ButtonPressID: {
+      return mobile_api::messageType::request == message_type
+                 ? rc_factory.GetCreator<commands::ButtonPressRequest>()
+                 : factory.GetCreator<commands::ButtonPressResponse>();
+    }
+    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? rc_factory
+                       .GetCreator<commands::GetInteriorVehicleDataRequest>()
+                 : factory
+                       .GetCreator<commands::GetInteriorVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? rc_factory
+                       .GetCreator<commands::SetInteriorVehicleDataRequest>()
+                 : factory
+                       .GetCreator<commands::SetInteriorVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
+      return factory.GetCreator<commands::OnInteriorVehicleDataNotification>();
+    }
+    default: { return factory.GetCreator<InvalidCommand>(); }
+  }
+}
+
+ICommandCreator& RCCommandFactory::get_hmi_creator_factory(
     hmi_apis::FunctionID::eType id,
-    hmi_apis::messageType::eType message_type,
-    application_manager::commands::Command::CommandSource source) const {}
+    hmi_apis::messageType::eType message_type) const {
+  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << id);
+  CommandCreatorFacotry factory(
+      app_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  RCCommandCreatorFacotry rc_factory(allocation_manager_,
+                                     app_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_);
 
-CommandSharedPtr RCCommandFactory::CreateMobileCommand(
-    const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::commands::Command::CommandSource source) {
-  // TODO : rework factory same as in SDL commanf dactory
-  return CommandSharedPtr();
-
-  //  CommandSharedPtr command;
-  //  const int function_id =
-  //      (*message)[strings::params][strings::function_id].asInt();
-  //  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " <<
-  //  function_id);
-  //  switch (function_id) {
-  //    case mobile_apis::FunctionID::ButtonPressID: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(new commands::ButtonPressRequest(
-  //            message, app_manager_, allocation_manager_));
-  //      } else {
-  //        command.reset(new commands::ButtonPressResponse(message,
-  //        app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(
-  //            new commands::GetInteriorVehicleDataRequest(message,
-  //            app_manager_, allocation_manager_));
-  //      } else {
-  //        command.reset(new commands::GetInteriorVehicleDataResponse(
-  //            message, app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(
-  //            new commands::SetInteriorVehicleDataRequest(message,
-  //            app_manager_));
-  //      } else {
-  //        command.reset(new commands::SetInteriorVehicleDataResponse(
-  //            message, app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
-  //      command.reset(new commands::OnInteriorVehicleDataNotification(
-  //          message, app_manager_));
-  //      break;
-  //    }
-  //    default: { break; }
-  //  }
-  //  return command;
+  switch (id) {
+    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::RCButtonPressRequest>()
+                 : factory.GetCreator<commands::RCButtonPressResponse>();
+    }
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::RCGetInteriorVehicleDataRequest>()
+                 : factory.GetCreator<
+                       commands::RCGetInteriorVehicleDataResponse>();
+    }
+    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::RCSetInteriorVehicleDataRequest>()
+                 : factory.GetCreator<
+                       commands::RCSetInteriorVehicleDataResponse>();
+    }
+    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
+      return factory
+          .GetCreator<commands::RCOnInteriorVehicleDataNotification>();
+    }
+    case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
+      return rc_factory
+          .GetCreator<commands::RCOnRemoteControlSettingsNotification>();
+    }
+    default: { return factory.GetCreator<InvalidCommand>(); }
+  }
 }
-
-CommandSharedPtr RCCommandFactory::CreateHMICommand(
-    const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::commands::Command::CommandSource source) {
-  CommandSharedPtr command;
-  // TODO : rework factory same as in SDL commanf dactory
-  return command;
-  //  const int function_id =
-  //      (*message)[strings::params][strings::function_id].asInt();
-  //  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << function_id);
-  //  switch (function_id) {
-  //    case hmi_apis::FunctionID::Buttons_ButtonPress: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(
-  //            new commands::RCButtonPressRequest(message, app_manager_));
-  //      } else {
-  //        command.reset(
-  //            new commands::RCButtonPressResponse(message, app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(new commands::RCGetInteriorVehicleDataRequest(
-  //            message, app_manager_));
-  //      } else {
-  //        command.reset(new commands::RCGetInteriorVehicleDataResponse(
-  //            message, app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
-  //      if ((*message)[strings::params][strings::message_type] ==
-  //          static_cast<int>(application_manager::MessageType::kRequest)) {
-  //        command.reset(new commands::RCSetInteriorVehicleDataRequest(
-  //            message, app_manager_));
-  //      } else {
-  //        command.reset(new commands::RCSetInteriorVehicleDataResponse(
-  //            message, app_manager_));
-  //      }
-  //      break;
-  //    }
-  //    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-  //      command.reset(new commands::RCOnInteriorVehicleDataNotification(
-  //          message, app_manager_));
-  //      break;
-  //    }
-  //    case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
-  //      command.reset(new commands::RCOnRemoteControlSettingsNotification(
-  //          message, app_manager_));
-  //      break;
-  //    }
-  //    default: { break; }
-  //  }
-  //  return command;
 }
-
-}  // namespace application_manager

@@ -475,8 +475,6 @@ bool MobileCommandFactory::IsAbleToProcess(
 CommandSharedPtr MobileCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  CommandSharedPtr command;
-
   mobile_apis::messageType::eType message_type =
       static_cast<mobile_apis::messageType::eType>(
           (*message)[strings::params][strings::message_type].asInt());
