@@ -17,7 +17,8 @@ class OnInteriorVehicleDataNotification
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      policy::PolicyHandlerInterface& policy_handler,
+      ResourceAllocationManager& resource_allocation_manager);
 
   void Run() OVERRIDE;
 

@@ -16,12 +16,12 @@ std::map<std::string, hmi_apis::Common_RCAccessMode::eType> access_modes{
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
-    ResourceAllocationManager& resource_allocation_manager,
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    policy::PolicyHandlerInterface& policy_handle,
+    ResourceAllocationManager& resource_allocation_manager)
     : application_manager::commands::NotificationFromHMI(message,
                                                          application_manager,
                                                          rpc_service,

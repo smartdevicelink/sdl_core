@@ -9,12 +9,12 @@ namespace app_mngr = application_manager;
 namespace commands {
 class ButtonPressRequest : public RCCommandRequest {
  public:
-  ButtonPressRequest(ResourceAllocationManager& resource_allocation_manager,
-                     const app_mngr::commands::MessageSharedPtr& message,
+  ButtonPressRequest(const app_mngr::commands::MessageSharedPtr& message,
                      app_mngr::ApplicationManager& application_manager,
                      app_mngr::rpc_service::RPCService& rpc_service,
                      app_mngr::HMICapabilities& hmi_capabilities,
-                     policy::PolicyHandlerInterface& policy_handle);
+                     policy::PolicyHandlerInterface& policy_handle,
+                     ResourceAllocationManager& resource_allocation_manager);
 
   /**
    * @brief Execute command

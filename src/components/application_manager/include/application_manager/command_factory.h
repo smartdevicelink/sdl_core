@@ -81,11 +81,13 @@ class CommandCreator : public ICommandCreator {
       : application_manager_(application_manager)
       , rpc_service_(rpc_service)
       , hmi_capabilities_(hmi_capabilities)
-      , policy_handler_(policy_handler)
-      , able_(true) {}
+      , policy_handler_(policy_handler) {}
 
  private:
-  bool isAble() const override;
+  bool isAble() const override {
+    return true;
+  }
+
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     CommandSharedPtr command(new CommandType(message,
@@ -100,7 +102,6 @@ class CommandCreator : public ICommandCreator {
   RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
-  bool able_;
 };
 
 struct InvalidCommand {};
@@ -111,26 +112,22 @@ class CommandCreator<InvalidCommand> : public ICommandCreator {
   CommandCreator(ApplicationManager& application_manager,
                  RPCService& rpc_service,
                  HMICapabilities& hmi_capabilities,
-                 PolicyHandlerInterface& policy_handler)
-      : application_manager_(application_manager)
-      , rpc_service_(rpc_service)
-      , hmi_capabilities_(hmi_capabilities)
-      , policy_handler_(policy_handler)
-      , able_(false) {}
+                 PolicyHandlerInterface& policy_handler) {
+    UNUSED(application_manager);
+    UNUSED(rpc_service);
+    UNUSED(hmi_capabilities);
+    UNUSED(policy_handler);
+  }
 
  private:
-  bool isAble() const override;
+  bool isAble() const override {
+    return false;
+  }
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     UNUSED(message);
     return CommandSharedPtr();
   }
-
-  ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
-  HMICapabilities& hmi_capabilities_;
-  PolicyHandlerInterface& policy_handler_;
-  bool able_;
 };
 
 struct CommandCreatorFacotry {
