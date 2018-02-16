@@ -44,10 +44,14 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
+#include "config_profile/profile_default_values.h"
 
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>
 #endif  // ENABLE_SECURITY
+
+using namespace profile::default_values;
+
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
@@ -65,359 +69,113 @@ namespace {
                                    << "'.");                                   \
   }
 
-const char* kDefaultConfigFileName = "smartDeviceLink.ini";
-
-const char* kMainSection = "MAIN";
-#ifdef ENABLE_SECURITY
-const char* kSecuritySection = "Security Manager";
-const char* kForceProtectedService = "ForceProtectedService";
-const char* kForceUnprotectedService = "ForceUnprotectedService";
-#endif
-const char* kPolicySection = "Policy";
-const char* kHmiSection = "HMI";
-const char* kAppInfoSection = "AppInfo";
-const char* kMediaManagerSection = "MEDIA MANAGER";
-const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
-const char* kVrCommandsSection = "VR COMMANDS";
-const char* kTransportManagerSection = "TransportManager";
-const char* kApplicationManagerSection = "ApplicationManager";
-const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
-const char* kIAPSection = "IAP";
-const char* kProtocolHandlerSection = "ProtocolHandler";
-const char* kSDL4Section = "SDL4";
-const char* kSDL5Section = "SDL5";
-const char* kResumptionSection = "Resumption";
-const char* kAppLaunchSection = "AppLaunch";
-
-const char* kSDLVersionKey = "SDLVersion";
-const char* kHmiCapabilitiesKey = "HMICapabilities";
-const char* kPathToSnapshotKey = "PathToSnapshot";
-const char* kPreloadedPTKey = "PreloadedPT";
-const char* kAttemptsToOpenPolicyDBKey = "AttemptsToOpenPolicyDB";
-const char* kOpenAttemptTimeoutMsKey = "OpenAttemptTimeoutMs";
-const char* kServerAddressKey = "ServerAddress";
-const char* kAppInfoStorageKey = "AppInfoStorage";
-const char* kAppStorageFolderKey = "AppStorageFolder";
-const char* kAppResourseFolderKey = "AppResourceFolder";
-const char* kLogsEnabledKey = "LogsEnabled";
-const char* kAppConfigFolderKey = "AppConfigFolder";
-const char* kAppIconsFolderKey = "AppIconsFolder";
-const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
-const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
-const char* kMaximumControlPayloadSizeKey = "MaximumControlPayloadSize";
-const char* kMaximumRpcPayloadSizeKey = "MaximumRpcPayloadSize";
-const char* kMaximumAudioPayloadSizeKey = "MaximumAudioPayloadSize";
-const char* kMaximumVideoPayloadSizeKey = "MaximumVideoPayloadSize";
-const char* kLaunchHMIKey = "LaunchHMI";
-const char* kDefaultSDLVersion = "";
-#ifdef WEB_HMI
-const char* kLinkToWebHMI = "LinkToWebHMI";
-#endif  // WEB_HMI
-const char* kStartStreamRetry = "StartStreamRetry";
-const char* kEnableRedecodingKey = "EnableRedecoding";
-const char* kVideoStreamConsumerKey = "VideoStreamConsumer";
-const char* kAudioStreamConsumerKey = "AudioStreamConsumer";
-const char* kNamedVideoPipePathKey = "NamedVideoPipePath";
-const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
-const char* kVideoStreamFileKey = "VideoStreamFile";
-const char* kAudioStreamFileKey = "AudioStreamFile";
-
-#ifdef ENABLE_SECURITY
-const char* kSecurityProtocolKey = "Protocol";
-const char* kSecurityCertificatePathKey = "CertificatePath";
-const char* kSecurityCACertificatePathKey = "CACertificatePath";
-const char* kSecuritySSLModeKey = "SSLMode";
-const char* kSecurityKeyPathKey = "KeyPath";
-const char* kSecurityCipherListKey = "CipherList";
-const char* kSecurityVerifyPeerKey = "VerifyPeer";
-const char* kBeforeUpdateHours = "UpdateBeforeHours";
-#endif
-
-const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
-const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
-const char* kMixingAudioSupportedKey = "MixingAudioSupported";
-const char* kHelpPromptKey = "HelpPromt";
-const char* kTimeoutPromptKey = "TimeOutPromt";
-const char* kHelpTitleKey = "HelpTitle";
-const char* kHelpCommandKey = "HelpCommand";
-const char* kSystemFilesPathKey = "SystemFilesPath";
-const char* kPluginsFolderKey = "PluginFolder";
-const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
-const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
-const char* kUseLastStateKey = "UseLastState";
-const char* kTCPAdapterPortKey = "TCPAdapterPort";
-const char* kServerPortKey = "ServerPort";
-const char* kVideoStreamingPortKey = "VideoStreamingPort";
-const char* kAudioStreamingPortKey = "AudioStreamingPort";
-const char* kStopStreamingTimeout = "StopStreamingTimeout";
-const char* kTimeTestingPortKey = "TimeTestingPort";
-const char* kThreadStackSizeKey = "ThreadStackSize";
-const char* kMaxCmdIdKey = "MaxCmdID";
-const char* kPutFileRequestKey = "PutFileRequest";
-const char* kDeleteFileRequestKey = "DeleteFileRequest";
-const char* kListFilesRequestKey = "ListFilesRequest";
-const char* kListFilesResponseSizeKey = "ListFilesResponseSize";
-const char* kDefaultTimeoutKey = "DefaultTimeout";
-const char* kAppResumingTimeoutKey = "ApplicationResumingTimeout";
-const char* kAppSavePersistentDataTimeoutKey = "AppSavePersistentDataTimeout";
-const char* kResumptionDelayBeforeIgnKey = "ResumptionDelayBeforeIgn";
-const char* kResumptionDelayAfterIgnKey = "ResumptionDelayAfterIgn";
-const char* kAppDirectoryQuotaKey = "AppDirectoryQuota";
-const char* kAppTimeScaleMaxRequestsKey = "AppTimeScaleMaxRequests";
-const char* kAppRequestsTimeScaleKey = "AppRequestsTimeScale";
-const char* kAppHmiLevelNoneTimeScaleMaxRequestsKey =
-    "AppHMILevelNoneTimeScaleMaxRequests";
-const char* kAppHmiLevelNoneRequestsTimeScaleKey =
-    "AppHMILevelNoneRequestsTimeScale";
-const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
-const char* kSupportedDiagModesKey = "SupportedDiagModes";
-const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
-const char* kTTSDelimiterKey = "TTSDelimiter";
-const char* kRecordingFileNameKey = "RecordingFileName";
-const char* kRecordingFileSourceKey = "RecordingFileSource";
-const char* kEnablePolicy = "EnablePolicy";
-const char* kEventMQKey = "EventMQ";
-const char* kAckMQKey = "AckMQ";
-const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
-const char* kReadDIDFrequencykey = "ReadDIDRequest";
-const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
-const char* kLegacyProtocolMaskKey = "LegacyProtocol";
-const char* kHubProtocolMaskKey = "HubProtocol";
-const char* kPoolProtocolMaskKey = "PoolProtocol";
-const char* kIAPSystemConfigKey = "IAPSystemConfig";
-const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
-const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
-const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
-const char* kDefaultHubProtocolIndexKey = "DefaultHubProtocolIndex";
-const char* kTTSGlobalPropertiesTimeoutKey = "TTSGlobalPropertiesTimeout";
-const char* kMaximumPayloadSizeKey = "MaximumPayloadSize";
-const char* kFrequencyCount = "FrequencyCount";
-const char* kFrequencyTime = "FrequencyTime";
-const char* kMalformedMessageFiltering = "MalformedMessageFiltering";
-const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
-const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
-const char* kExpectedConsecutiveFramesTimeout =
-    "ExpectedConsecutiveFramesTimeout";
-const char* kHashStringSizeKey = "HashStringSize";
-const char* kUseDBForResumptionKey = "UseDBForResumption";
-const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
-const char* kOpenAttemptTimeoutMsResumptionDBKey =
-    "OpenAttemptTimeoutMsResumptionDB";
-
-const char* kAppLaunchWaitTimeKey = "AppLaunchWaitTime";
-const char* kAppLaunchMaxRetryAttemptKey = "AppLaunchMaxRetryAttempt";
-const char* kAppLaunchRetryWaitTimeKey = "AppLaunchRetryWaitTime";
-const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
-const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
-const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
-const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
-const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
-const char* kAppTransportChangeTimerAdditionKey =
-    "AppTransportChangeTimerAddition";
-#ifdef WEB_HMI
-const char* kDefaultLinkToWebHMI = "HMI/index.html";
-#endif  // WEB_HMI
-const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
-const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
-const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
-const char* kDefaultServerAddress = "127.0.0.1";
-const char* kDefaultAppInfoFileName = "app_info.dat";
-const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
-const char* kDefaultPluginsPath = "plugins";
-const char* kDefaultTtsDelimiter = ",";
-const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
-const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
-const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
-const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
-const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
-const char* kDefaultRecordingFileName = "record.wav";
-const char* kDefaultThreadPoolSize = "ThreadPoolSize";
-const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot";
-const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
-const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
-const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
-const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
-
-#ifdef ENABLE_SECURITY
-const char* kDefaultSecurityProtocol = "TLSv1.2";
-const char* kDefaultSSLMode = "CLIENT";
-const bool kDefaultVerifyPeer = false;
-const uint32_t kDefaultBeforeUpdateHours = 24;
-#endif  // ENABLE_SECURITY
-
-const uint32_t kDefaultHubProtocolIndex = 0;
-const uint32_t kDefaultHeartBeatTimeout = 0;
-const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
-const uint16_t kDefautTransportManagerTCPPort = 12345;
-const uint16_t kDefaultServerPort = 8087;
-const uint16_t kDefaultVideoStreamingPort = 5050;
-const uint16_t kDefaultAudioStreamingPort = 5080;
-const uint32_t kDefaultStopStreamingTimeout = 1;
-const uint16_t kDefaultTimeTestingPort = 5090;
-const uint32_t kDefaultMaxCmdId = 2000000000;
-const uint32_t kDefaultPutFileRequestInNone = 5;
-const uint32_t kDefaultDeleteFileRequestInNone = 5;
-const uint32_t kDefaultListFilesRequestInNone = 5;
-const uint32_t kDefaultTimeout = 10000;
-const uint32_t kDefaultAppResumingTimeout = 3000;
-const uint32_t kDefaultAppSavePersistentDataTimeout = 10000;
-const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
-const uint32_t kDefaultResumptionDelayAfterIgn = 30;
-const uint32_t kDefaultHashStringSize = 32;
-const uint32_t kDefaultListFilesResponseSize = 1000;
-
-const uint32_t kDefaultDirQuota = 104857600;
-const uint32_t kDefaultAppTimeScaleMaxRequests = 0;
-const uint32_t kDefaultAppRequestsTimeScale = 0;
-const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100;
-const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
-const uint32_t kDefaultPendingRequestsAmount = 0;
-const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
-const uint32_t kDefaultApplicationListUpdateTimeout = 1;
-const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5, 1};
-const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5, 1};
-const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3, 1};
-const uint32_t kDefaultMaxThreadPoolSize = 2;
-const int kDefaultIAP2HubConnectAttempts = 0;
-const int kDefaultIAPHubConnectionWaitTimeout = 10000;
-const int kDefaultIAPArmEventTimeout = 500;
-const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
-// TCP MTU - header size = 1500 - 12
-const size_t kDefaultMaximumPayloadSize = 1500 - 12;
-const size_t kDefaultFrequencyCount = 1000;
-const size_t kDefaultFrequencyTime = 1000;
-const bool kDefaulMalformedMessageFiltering = true;
-const size_t kDefaultMalformedFrequencyCount = 10;
-const size_t kDefaultMalformedFrequencyTime = 1000;
-const uint32_t kDefaultExpectedConsecutiveFramesTimeout = 10000;
-const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
-const uint16_t kDefaultOpenAttemptTimeoutMs = 500;
-const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
-const uint32_t kDefaultAppIconsAmountToRemove = 1;
-const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
-const size_t kDefaultMaximumControlPayloadSize = 0;
-const size_t kDefaultMaximumRpcPayloadSize = 0;
-const size_t kDefaultMaximumAudioPayloadSize = 0;
-const size_t kDefaultMaximumVideoPayloadSize = 0;
-const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
-const uint16_t kDefaultAppLaunchWaitTime = 5000;
-const uint16_t kDefaultAppLaunchMaxRetryAttempt = 3;
-const uint16_t kDefaultAppLaunchRetryWaitTime = 15000;
-const uint16_t kDefaultRemoveBundleIDattempts = 3;
-const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
-const uint16_t kDefaultWaitTimeBetweenApps = 4000;
-const bool kDefaultEnableAppLaunchIOS = true;
-const uint32_t kDefaultAppTransportChangeTimer = 500u;
-const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
-const std::string kAllowedSymbols =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
-}  // namespace
+}
 
 namespace profile {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-    : sdl_version_(kDefaultSDLVersion)
+    : sdl_version_(default_values::kDefaultSDLVersion)
     , launch_hmi_(true)
     ,
 #ifdef WEB_HMI
-    link_to_web_hmi_(kDefaultLinkToWebHMI)
+    link_to_web_hmi_(default_values::kDefaultLinkToWebHMI)
     ,
 #endif  // WEB_HMI
     app_config_folder_()
     , app_storage_folder_()
     , app_resource_folder_()
     , app_icons_folder_()
-    , app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize)
-    , app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove)
-    , maximum_control_payload_size_(kDefaultMaximumControlPayloadSize)
-    , maximum_rpc_payload_size_(kDefaultMaximumRpcPayloadSize)
-    , maximum_audio_payload_size_(kDefaultMaximumAudioPayloadSize)
-    , maximum_video_payload_size_(kDefaultMaximumVideoPayloadSize)
-    , config_file_name_(kDefaultConfigFileName)
-    , server_address_(kDefaultServerAddress)
-    , server_port_(kDefaultServerPort)
-    , video_streaming_port_(kDefaultVideoStreamingPort)
-    , audio_streaming_port_(kDefaultAudioStreamingPort)
-    , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
-    , time_testing_port_(kDefaultTimeTestingPort)
-    , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
+    , app_icons_folder_max_size_(default_values::kDefaultAppIconsFolderMaxSize)
+    , app_icons_amount_to_remove_(default_values::kDefaultAppIconsAmountToRemove)
+    , maximum_control_payload_size_(default_values::kDefaultMaximumControlPayloadSize)
+    , maximum_rpc_payload_size_(default_values::kDefaultMaximumRpcPayloadSize)
+    , maximum_audio_payload_size_(default_values::kDefaultMaximumAudioPayloadSize)
+    , maximum_video_payload_size_(default_values::kDefaultMaximumVideoPayloadSize)
+    , config_file_name_(default_values::kDefaultConfigFileName)
+    , server_address_(default_values::kDefaultServerAddress)
+    , server_port_(default_values::kDefaultServerPort)
+    , video_streaming_port_(default_values::kDefaultVideoStreamingPort)
+    , audio_streaming_port_(default_values::kDefaultAudioStreamingPort)
+    , stop_streaming_timeout_(default_values::kDefaultStopStreamingTimeout)
+    , time_testing_port_(default_values::kDefaultTimeTestingPort)
+    , hmi_capabilities_file_name_(default_values::kDefaultHmiCapabilitiesFileName)
     , help_prompt_()
     , time_out_promt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
     , is_mixing_audio_supported_(false)
     , is_redecoding_enabled_(false)
-    , max_cmd_id_(kDefaultMaxCmdId)
-    , default_timeout_(kDefaultTimeout)
-    , app_resuming_timeout_(kDefaultAppResumingTimeout)
+    , max_cmd_id_(default_values::kDefaultMaxCmdId)
+    , default_timeout_(default_values::kDefaultTimeout)
+    , app_resuming_timeout_(default_values::kDefaultAppResumingTimeout)
     , app_resumption_save_persistent_data_timeout_(
-          kDefaultAppSavePersistentDataTimeout)
-    , app_dir_quota_(kDefaultDirQuota)
+          default_values::kDefaultAppSavePersistentDataTimeout)
+    , app_dir_quota_(default_values::kDefaultDirQuota)
     , app_hmi_level_none_time_scale_max_requests_(
-          kDefaultAppHmiLevelNoneTimeScaleMaxRequests)
+          default_values::kDefaultAppHmiLevelNoneTimeScaleMaxRequests)
     , app_hmi_level_none_requests_time_scale_(
-          kDefaultAppHmiLevelNoneRequestsTimeScale)
-    , app_time_scale_max_requests_(kDefaultAppTimeScaleMaxRequests)
-    , app_requests_time_scale_(kDefaultAppRequestsTimeScale)
-    , pending_requests_amount_(kDefaultPendingRequestsAmount)
-    , put_file_in_none_(kDefaultPutFileRequestInNone)
-    , delete_file_in_none_(kDefaultDeleteFileRequestInNone)
-    , list_files_in_none_(kDefaultListFilesRequestInNone)
-    , list_files_response_size_(kDefaultListFilesResponseSize)
-    , app_info_storage_(kDefaultAppInfoFileName)
-    , heart_beat_timeout_(kDefaultHeartBeatTimeout)
-    , max_supported_protocol_version_(kDefaultMaxSupportedProtocolVersion)
-    , policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName)
+          default_values::kDefaultAppHmiLevelNoneRequestsTimeScale)
+    , app_time_scale_max_requests_(default_values::kDefaultAppTimeScaleMaxRequests)
+    , app_requests_time_scale_(default_values::kDefaultAppRequestsTimeScale)
+    , pending_requests_amount_(default_values::kDefaultPendingRequestsAmount)
+    , put_file_in_none_(default_values::kDefaultPutFileRequestInNone)
+    , delete_file_in_none_(default_values::kDefaultDeleteFileRequestInNone)
+    , list_files_in_none_(default_values::kDefaultListFilesRequestInNone)
+    , list_files_response_size_(default_values::kDefaultListFilesResponseSize)
+    , app_info_storage_(default_values::kDefaultAppInfoFileName)
+    , heart_beat_timeout_(default_values::kDefaultHeartBeatTimeout)
+    , max_supported_protocol_version_(default_values::kDefaultMaxSupportedProtocolVersion)
+    , policy_snapshot_file_name_(default_values::kDefaultPoliciesSnapshotFileName)
     , enable_policy_(false)
     , transport_manager_disconnect_timeout_(
-          kDefaultTransportManagerDisconnectTimeout)
+          default_values::kDefaultTransportManagerDisconnectTimeout)
     , use_last_state_(false)
     , supported_diag_modes_()
-    , system_files_path_(kDefaultSystemFilesPath)
+    , system_files_path_(default_values::kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
-    , tts_delimiter_(kDefaultTtsDelimiter)
-    , audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout)
-    , video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout)
-    , event_mq_name_(kDefaultEventMQ)
-    , ack_mq_name_(kDefaultAckMQ)
-    , recording_file_source_(kDefaultRecordingFileSourceName)
-    , recording_file_name_(kDefaultRecordingFileName)
-    , application_list_update_timeout_(kDefaultApplicationListUpdateTimeout)
-    , max_thread_pool_size_(kDefaultMaxThreadPoolSize)
-    , default_hub_protocol_index_(kDefaultHubProtocolIndex)
-    , iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask)
-    , iap_hub_protocol_mask_(kDefaultHubProtocolMask)
-    , iap_pool_protocol_mask_(kDefaultPoolProtocolMask)
-    , iap_system_config_(kDefaultIAPSystemConfig)
-    , iap2_system_config_(kDefaultIAP2SystemConfig)
-    , iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts)
-    , iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout)
-    , tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout)
-    , attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB)
-    , open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB)
-    , resumption_delay_before_ign_(kDefaultResumptionDelayBeforeIgn)
-    , resumption_delay_after_ign_(kDefaultResumptionDelayAfterIgn)
-    , hash_string_size_(kDefaultHashStringSize)
+    , tts_delimiter_(default_values::kDefaultTtsDelimiter)
+    , audio_data_stopped_timeout_(default_values::kDefaultAudioDataStoppedTimeout)
+    , video_data_stopped_timeout_(default_values::kDefaultVideoDataStoppedTimeout)
+    , event_mq_name_(default_values::kDefaultEventMQ)
+    , ack_mq_name_(default_values::kDefaultAckMQ)
+    , recording_file_source_(default_values::kDefaultRecordingFileSourceName)
+    , recording_file_name_(default_values::kDefaultRecordingFileName)
+    , application_list_update_timeout_(default_values::kDefaultApplicationListUpdateTimeout)
+    , max_thread_pool_size_(default_values::kDefaultMaxThreadPoolSize)
+    , default_hub_protocol_index_(default_values::kDefaultHubProtocolIndex)
+    , iap_legacy_protocol_mask_(default_values::kDefaultLegacyProtocolMask)
+    , iap_hub_protocol_mask_(default_values::kDefaultHubProtocolMask)
+    , iap_pool_protocol_mask_(default_values::kDefaultPoolProtocolMask)
+    , iap_system_config_(default_values::kDefaultIAPSystemConfig)
+    , iap2_system_config_(default_values::kDefaultIAP2SystemConfig)
+    , iap2_hub_connect_attempts_(default_values::kDefaultIAP2HubConnectAttempts)
+    , iap_hub_connection_wait_timeout_(default_values::kDefaultIAPHubConnectionWaitTimeout)
+    , tts_global_properties_timeout_(default_values::kDefaultTTSGlobalPropertiesTimeout)
+    , attempts_to_open_policy_db_(default_values::kDefaultAttemptsToOpenPolicyDB)
+    , open_attempt_timeout_ms_(default_values::kDefaultAttemptsToOpenPolicyDB)
+    , resumption_delay_before_ign_(default_values::kDefaultResumptionDelayBeforeIgn)
+    , resumption_delay_after_ign_(default_values::kDefaultResumptionDelayAfterIgn)
+    , hash_string_size_(default_values::kDefaultHashStringSize)
     , use_db_for_resumption_(false)
-    , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
+    , attempts_to_open_resumption_db_(default_values::kDefaultAttemptsToOpenResumptionDB)
     , open_attempt_timeout_ms_resumption_db_(
-          kDefaultOpenAttemptTimeoutMsResumptionDB)
-    , app_launch_wait_time_(kDefaultAppLaunchWaitTime)
-    , app_launch_max_retry_attempt_(kDefaultAppLaunchMaxRetryAttempt)
-    , app_launch_retry_wait_time_(kDefaultAppLaunchRetryWaitTime)
-    , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
-    , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
-    , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
-    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
-    , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
+          default_values::kDefaultOpenAttemptTimeoutMsResumptionDB)
+    , app_launch_wait_time_(default_values::kDefaultAppLaunchWaitTime)
+    , app_launch_max_retry_attempt_(default_values::kDefaultAppLaunchMaxRetryAttempt)
+    , app_launch_retry_wait_time_(default_values::kDefaultAppLaunchRetryWaitTime)
+    , remove_bundle_id_attempts_(default_values::kDefaultRemoveBundleIDattempts)
+    , max_number_of_ios_device_(default_values::kDefaultMaxNumberOfiOSDevice)
+    , wait_time_between_apps_(default_values::kDefaultWaitTimeBetweenApps)
+    , enable_app_launch_ios_(default_values::kDefaultEnableAppLaunchIOS)
+    , app_tranport_change_timer_(default_values::kDefaultAppTransportChangeTimer)
     , app_tranport_change_timer_addition_(
-          kDefaultAppTransportChangeTimerAddition)
+          default_values::kDefaultAppTransportChangeTimerAddition)
     , error_occured_(false)
     , error_description_() {
   // SDL version
   ReadStringValue(
-      &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
+      &sdl_version_, default_values::kDefaultSDLVersion, kMainSection, kSDLVersionKey);
 }
 
 Profile::~Profile() {}
@@ -757,7 +515,7 @@ uint32_t Profile::iap_hub_connection_wait_timeout() const {
 size_t Profile::maximum_payload_size() const {
   size_t maximum_payload_size = 0;
   ReadUIntValue(&maximum_payload_size,
-                kDefaultMaximumPayloadSize,
+                default_values::kDefaultMaximumPayloadSize,
                 kProtocolHandlerSection,
                 kMaximumPayloadSizeKey);
   return maximum_payload_size;
@@ -766,7 +524,7 @@ size_t Profile::maximum_payload_size() const {
 size_t Profile::message_frequency_count() const {
   size_t message_frequency_count = 0;
   ReadUIntValue(&message_frequency_count,
-                kDefaultFrequencyCount,
+                default_values::kDefaultFrequencyCount,
                 kProtocolHandlerSection,
                 kFrequencyCount);
   return message_frequency_count;
@@ -775,7 +533,7 @@ size_t Profile::message_frequency_count() const {
 size_t Profile::message_frequency_time() const {
   size_t message_frequency_time = 0;
   ReadUIntValue(&message_frequency_time,
-                kDefaultFrequencyTime,
+                default_values::kDefaultFrequencyTime,
                 kProtocolHandlerSection,
                 kFrequencyTime);
   return message_frequency_time;
@@ -793,7 +551,7 @@ bool Profile::malformed_message_filtering() const {
 size_t Profile::malformed_frequency_count() const {
   size_t malformed_frequency_count = 0;
   ReadUIntValue(&malformed_frequency_count,
-                kDefaultMalformedFrequencyCount,
+                default_values::kDefaultMalformedFrequencyCount,
                 kProtocolHandlerSection,
                 kMalformedFrequencyCount);
   return malformed_frequency_count;
@@ -802,7 +560,7 @@ size_t Profile::malformed_frequency_count() const {
 size_t Profile::malformed_frequency_time() const {
   size_t malformed_frequency_time = 0;
   ReadUIntValue(&malformed_frequency_time,
-                kDefaultMalformedFrequencyTime,
+                default_values::kDefaultMalformedFrequencyTime,
                 kProtocolHandlerSection,
                 kMalformedFrequencyTime);
   return malformed_frequency_time;
@@ -810,7 +568,7 @@ size_t Profile::malformed_frequency_time() const {
 uint32_t Profile::multiframe_waiting_timeout() const {
   uint32_t multiframe_waiting_timeout = 0;
   ReadUIntValue(&multiframe_waiting_timeout,
-                kDefaultExpectedConsecutiveFramesTimeout,
+                default_values::kDefaultExpectedConsecutiveFramesTimeout,
                 kProtocolHandlerSection,
                 kExpectedConsecutiveFramesTimeout);
   return multiframe_waiting_timeout;
@@ -955,7 +713,7 @@ void Profile::UpdateValues() {
 
   // SDL version
   ReadStringValue(
-      &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
+      &sdl_version_, default_values::kDefaultSDLVersion, kMainSection, kSDLVersionKey);
 
   LOG_UPDATED_VALUE(sdl_version_, kSDLVersionKey, kMainSection);
 
@@ -973,7 +731,7 @@ void Profile::UpdateValues() {
 #ifdef WEB_HMI
   // Link to web HMI parameter
   ReadStringValue(
-      &link_to_web_hmi_, kDefaultLinkToWebHMI, kHmiSection, kLinkToWebHMI);
+      &link_to_web_hmi_, default_values::kDefaultLinkToWebHMI, kHmiSection, kLinkToWebHMI);
   LOG_UPDATED_BOOL_VALUE(link_to_web_hmi_, kLinkToWebHMI, kHmiSection);
 #endif  // WEB_HMI
 
@@ -986,7 +744,7 @@ void Profile::UpdateValues() {
       ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
 
   ReadStringValue(&security_manager_protocol_name_,
-                  kDefaultSecurityProtocol,
+                  default_values::kDefaultSecurityProtocol,
                   kSecuritySection,
                   kSecurityProtocolKey);
 
@@ -996,7 +754,7 @@ void Profile::UpdateValues() {
       &ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
 
   ReadStringValue(
-      &ssl_mode_, kDefaultSSLMode, kSecuritySection, kSecuritySSLModeKey);
+      &ssl_mode_, default_values::kDefaultSSLMode, kSecuritySection, kSecuritySSLModeKey);
 
   ReadStringValue(&key_path_, "", kSecuritySection, kSecurityKeyPathKey);
 
@@ -1004,12 +762,12 @@ void Profile::UpdateValues() {
       &ciphers_list_, SSL_TXT_ALL, kSecuritySection, kSecurityCipherListKey);
 
   ReadBoolValue(&verify_peer_,
-                kDefaultVerifyPeer,
+                default_values::kDefaultVerifyPeer,
                 kSecuritySection,
                 kSecurityVerifyPeerKey);
 
   ReadUIntValue(&update_before_hours_,
-                kDefaultBeforeUpdateHours,
+                default_values::kDefaultBeforeUpdateHours,
                 kSecuritySection,
                 kBeforeUpdateHours);
 
@@ -1070,12 +828,12 @@ void Profile::UpdateValues() {
 
   // Application icon folder maximum size
   ReadUIntValue(&app_icons_folder_max_size_,
-                kDefaultAppIconsFolderMaxSize,
+                default_values::kDefaultAppIconsFolderMaxSize,
                 kSDL4Section,
                 kAppIconsFolderMaxSizeKey);
 
-  if (app_icons_folder_max_size_ < kDefaultAppIconsFolderMaxSize) {
-    app_icons_folder_max_size_ = kDefaultAppIconsFolderMaxSize;
+  if (app_icons_folder_max_size_ < default_values::kDefaultAppIconsFolderMaxSize) {
+    app_icons_folder_max_size_ = default_values::kDefaultAppIconsFolderMaxSize;
   }
 
   LOG_UPDATED_VALUE(
@@ -1083,7 +841,7 @@ void Profile::UpdateValues() {
 
   // Application icon folder maximum size
   ReadUIntValue(&app_icons_amount_to_remove_,
-                kDefaultAppIconsAmountToRemove,
+                default_values::kDefaultAppIconsAmountToRemove,
                 kSDL4Section,
                 kAppIconsAmountToRemoveKey);
 
@@ -1091,7 +849,7 @@ void Profile::UpdateValues() {
       app_icons_amount_to_remove_, kAppIconsAmountToRemoveKey, kSDL4Section);
 
   ReadUIntValue(&maximum_control_payload_size_,
-                kDefaultMaximumControlPayloadSize,
+                default_values::kDefaultMaximumControlPayloadSize,
                 kSDL5Section,
                 kMaximumControlPayloadSizeKey);
 
@@ -1100,7 +858,7 @@ void Profile::UpdateValues() {
                     kSDL5Section);
 
   ReadUIntValue(&maximum_rpc_payload_size_,
-                kDefaultMaximumRpcPayloadSize,
+                default_values::kDefaultMaximumRpcPayloadSize,
                 kSDL5Section,
                 kMaximumRpcPayloadSizeKey);
 
@@ -1108,7 +866,7 @@ void Profile::UpdateValues() {
       maximum_rpc_payload_size_, kMaximumRpcPayloadSizeKey, kSDL5Section);
 
   ReadUIntValue(&maximum_audio_payload_size_,
-                kDefaultMaximumAudioPayloadSize,
+                default_values::kDefaultMaximumAudioPayloadSize,
                 kSDL5Section,
                 kMaximumAudioPayloadSizeKey);
 
@@ -1116,7 +874,7 @@ void Profile::UpdateValues() {
       maximum_audio_payload_size_, kMaximumAudioPayloadSizeKey, kSDL5Section);
 
   ReadUIntValue(&maximum_video_payload_size_,
-                kDefaultMaximumVideoPayloadSize,
+                default_values::kDefaultMaximumVideoPayloadSize,
                 kSDL5Section,
                 kMaximumVideoPayloadSizeKey);
 
@@ -1125,7 +883,7 @@ void Profile::UpdateValues() {
 
   // Application info file name
   ReadStringValue(&app_info_storage_,
-                  kDefaultAppInfoFileName,
+                  default_values::kDefaultAppInfoFileName,
                   kAppInfoSection,
                   kAppInfoStorageKey);
 
@@ -1133,13 +891,13 @@ void Profile::UpdateValues() {
 
   // Server address
   ReadStringValue(
-      &server_address_, kDefaultServerAddress, kHmiSection, kServerAddressKey);
+      &server_address_, default_values::kDefaultServerAddress, kHmiSection, kServerAddressKey);
 
   LOG_UPDATED_VALUE(server_address_, kServerAddressKey, kHmiSection);
 
   // HMI capabilities
   ReadStringValue(&hmi_capabilities_file_name_,
-                  kDefaultHmiCapabilitiesFileName,
+                  default_values::kDefaultHmiCapabilitiesFileName,
                   kMainSection,
                   kHmiCapabilitiesKey);
 
@@ -1150,20 +908,20 @@ void Profile::UpdateValues() {
       hmi_capabilities_file_name_, kHmiCapabilitiesKey, kMainSection);
 
   // Server port
-  ReadUIntValue(&server_port_, kDefaultServerPort, kHmiSection, kServerPortKey);
+  ReadUIntValue(&server_port_, default_values::kDefaultServerPort, kHmiSection, kServerPortKey);
 
   LOG_UPDATED_VALUE(server_port_, kServerPortKey, kHmiSection);
 
   // Video streaming port
   ReadUIntValue(&video_streaming_port_,
-                kDefaultVideoStreamingPort,
+                default_values::kDefaultVideoStreamingPort,
                 kHmiSection,
                 kVideoStreamingPortKey);
 
   LOG_UPDATED_VALUE(video_streaming_port_, kVideoStreamingPortKey, kHmiSection);
   // Audio streaming port
   ReadUIntValue(&audio_streaming_port_,
-                kDefaultAudioStreamingPort,
+                default_values::kDefaultAudioStreamingPort,
                 kHmiSection,
                 kAudioStreamingPortKey);
 
@@ -1171,19 +929,19 @@ void Profile::UpdateValues() {
 
   // Streaming timeout
   ReadUIntValue(&stop_streaming_timeout_,
-                kDefaultStopStreamingTimeout,
+                default_values::kDefaultStopStreamingTimeout,
                 kMediaManagerSection,
                 kStopStreamingTimeout);
 
   stop_streaming_timeout_ =
-      std::max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
+      std::max(default_values::kDefaultStopStreamingTimeout, stop_streaming_timeout_);
 
   LOG_UPDATED_VALUE(
       stop_streaming_timeout_, kStopStreamingTimeout, kHmiSection);
 
   // Time testing port
   ReadUIntValue(&time_testing_port_,
-                kDefaultTimeTestingPort,
+                default_values::kDefaultTimeTestingPort,
                 kMainSection,
                 kTimeTestingPortKey);
 
@@ -1275,7 +1033,7 @@ void Profile::UpdateValues() {
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);
 
   ReadUIntValue(&audio_data_stopped_timeout_,
-                kDefaultAudioDataStoppedTimeout,
+                default_values::kDefaultAudioDataStoppedTimeout,
                 kMediaManagerSection,
                 kAudioDataStoppedTimeoutKey);
 
@@ -1284,7 +1042,7 @@ void Profile::UpdateValues() {
                     kMediaManagerSection);
 
   ReadUIntValue(&video_data_stopped_timeout_,
-                kDefaultVideoDataStoppedTimeout,
+                default_values::kDefaultVideoDataStoppedTimeout,
                 kMediaManagerSection,
                 kVideoDataStoppedTimeoutKey);
 
@@ -1305,13 +1063,13 @@ void Profile::UpdateValues() {
       is_mixing_audio_supported_, kMixingAudioSupportedKey, kMainSection);
 
   // Maximum command id value
-  ReadUIntValue(&max_cmd_id_, kDefaultMaxCmdId, kMainSection, kMaxCmdIdKey);
+  ReadUIntValue(&max_cmd_id_, default_values::kDefaultMaxCmdId, kMainSection, kMaxCmdIdKey);
 
   LOG_UPDATED_VALUE(max_cmd_id_, kMaxCmdIdKey, kMainSection);
 
   // PutFile restrictions
   ReadUIntValue(&put_file_in_none_,
-                kDefaultPutFileRequestInNone,
+                default_values::kDefaultPutFileRequestInNone,
                 kFilesystemRestrictionsSection,
                 kPutFileRequestKey);
 
@@ -1320,7 +1078,7 @@ void Profile::UpdateValues() {
 
   // DeleteFileRestrictions
   ReadUIntValue(&delete_file_in_none_,
-                kDefaultDeleteFileRequestInNone,
+                default_values::kDefaultDeleteFileRequestInNone,
                 kFilesystemRestrictionsSection,
                 kDeleteFileRequestKey);
 
@@ -1330,7 +1088,7 @@ void Profile::UpdateValues() {
 
   // ListFiles restrictions
   ReadUIntValue(&list_files_in_none_,
-                kDefaultListFilesRequestInNone,
+                default_values::kDefaultListFilesRequestInNone,
                 kFilesystemRestrictionsSection,
                 kListFilesRequestKey);
 
@@ -1340,7 +1098,7 @@ void Profile::UpdateValues() {
 
   // ListFiles request size
   ReadUIntValue(&list_files_response_size_,
-                kDefaultListFilesResponseSize,
+                default_values::kDefaultListFilesResponseSize,
                 kFilesystemRestrictionsSection,
                 kListFilesResponseSizeKey);
 
@@ -1350,22 +1108,22 @@ void Profile::UpdateValues() {
 
   // Default timeout
   ReadUIntValue(
-      &default_timeout_, kDefaultTimeout, kMainSection, kDefaultTimeoutKey);
+      &default_timeout_, default_values::kDefaultTimeout, kMainSection, default_values::kDefaultTimeoutKey);
 
   if (default_timeout_ == 0) {
-    default_timeout_ = kDefaultTimeout;
+    default_timeout_ = default_values::kDefaultTimeout;
   }
 
-  LOG_UPDATED_VALUE(default_timeout_, kDefaultTimeoutKey, kMainSection);
+  LOG_UPDATED_VALUE(default_timeout_, default_values::kDefaultTimeoutKey, kMainSection);
 
   // Application resuming timeout
   ReadUIntValue(&app_resuming_timeout_,
-                kDefaultAppResumingTimeout,
+                default_values::kDefaultAppResumingTimeout,
                 kResumptionSection,
                 kAppResumingTimeoutKey);
 
   if (app_resuming_timeout_ == 0) {
-    app_resuming_timeout_ = kDefaultAppResumingTimeout;
+    app_resuming_timeout_ = default_values::kDefaultAppResumingTimeout;
   }
   // Save resumption info to File System
   LOG_UPDATED_VALUE(app_resuming_timeout_,
@@ -1373,18 +1131,18 @@ void Profile::UpdateValues() {
                     kResumptionSection);
 
   ReadUIntValue(&app_resumption_save_persistent_data_timeout_,
-                kDefaultAppSavePersistentDataTimeout,
+                default_values::kDefaultAppSavePersistentDataTimeout,
                 kResumptionSection,
                 kAppSavePersistentDataTimeoutKey);
   if (app_resuming_timeout_ == 0) {
-    app_resuming_timeout_ = kDefaultAppSavePersistentDataTimeout;
+    app_resuming_timeout_ = default_values::kDefaultAppSavePersistentDataTimeout;
   }
 
   LOG_UPDATED_VALUE(
       app_resuming_timeout_, kAppResumingTimeoutKey, kResumptionSection);
   // Open attempt timeout in ms
   ReadUIntValue(&resumption_delay_before_ign_,
-                kDefaultResumptionDelayBeforeIgn,
+                default_values::kDefaultResumptionDelayBeforeIgn,
                 kResumptionSection,
                 kResumptionDelayBeforeIgnKey);
 
@@ -1394,7 +1152,7 @@ void Profile::UpdateValues() {
 
   // Open attempt timeout in ms
   ReadUIntValue(&resumption_delay_after_ign_,
-                kDefaultResumptionDelayAfterIgn,
+                default_values::kDefaultResumptionDelayAfterIgn,
                 kResumptionSection,
                 kResumptionDelayAfterIgnKey);
 
@@ -1404,10 +1162,10 @@ void Profile::UpdateValues() {
 
   // Application directory quota
   ReadUIntValue(
-      &app_dir_quota_, kDefaultDirQuota, kMainSection, kAppDirectoryQuotaKey);
+      &app_dir_quota_, default_values::kDefaultDirQuota, kMainSection, kAppDirectoryQuotaKey);
 
   if (app_dir_quota_ == 0) {
-    app_dir_quota_ = kDefaultDirQuota;
+    app_dir_quota_ = default_values::kDefaultDirQuota;
   }
 
   LOG_UPDATED_VALUE(app_dir_quota_, kAppDirectoryQuotaKey, kMainSection);
@@ -1415,7 +1173,7 @@ void Profile::UpdateValues() {
   // TTS delimiter
   // Should be gotten before any TTS prompts, since it should be appended back
   ReadStringValue(&tts_delimiter_,
-                  kDefaultTtsDelimiter,
+                  default_values::kDefaultTtsDelimiter,
                   kGlobalPropertiesSection,
                   kTTSDelimiterKey);
 
@@ -1486,7 +1244,7 @@ void Profile::UpdateValues() {
 
   // TTS GlobalProperties timeout
   ReadUIntValue(&tts_global_properties_timeout_,
-                kDefaultTTSGlobalPropertiesTimeout,
+                default_values::kDefaultTTSGlobalPropertiesTimeout,
                 kGlobalPropertiesSection,
                 kTTSGlobalPropertiesTimeoutKey);
 
@@ -1496,7 +1254,7 @@ void Profile::UpdateValues() {
 
   // Application time scale maximum requests
   ReadUIntValue(&app_time_scale_max_requests_,
-                kDefaultAppTimeScaleMaxRequests,
+                default_values::kDefaultAppTimeScaleMaxRequests,
                 kMainSection,
                 kAppTimeScaleMaxRequestsKey);
 
@@ -1505,7 +1263,7 @@ void Profile::UpdateValues() {
 
   // Application time scale
   ReadUIntValue(&app_requests_time_scale_,
-                kDefaultAppRequestsTimeScale,
+                default_values::kDefaultAppRequestsTimeScale,
                 kMainSection,
                 kAppRequestsTimeScaleKey);
 
@@ -1514,7 +1272,7 @@ void Profile::UpdateValues() {
 
   // Application HMI level NONE time scale maximum requests
   ReadUIntValue(&app_hmi_level_none_time_scale_max_requests_,
-                kDefaultAppHmiLevelNoneTimeScaleMaxRequests,
+                default_values::kDefaultAppHmiLevelNoneTimeScaleMaxRequests,
                 kMainSection,
                 kAppHmiLevelNoneTimeScaleMaxRequestsKey);
 
@@ -1524,7 +1282,7 @@ void Profile::UpdateValues() {
 
   // Application HMI level NONE requests time scale
   ReadUIntValue(&app_hmi_level_none_requests_time_scale_,
-                kDefaultAppHmiLevelNoneRequestsTimeScale,
+                default_values::kDefaultAppHmiLevelNoneRequestsTimeScale,
                 kMainSection,
                 kAppHmiLevelNoneRequestsTimeScaleKey);
 
@@ -1534,12 +1292,12 @@ void Profile::UpdateValues() {
 
   // Amount of pending requests
   ReadUIntValue(&pending_requests_amount_,
-                kDefaultPendingRequestsAmount,
+                default_values::kDefaultPendingRequestsAmount,
                 kMainSection,
                 kPendingRequestsAmoundKey);
 
   if (pending_requests_amount_ == 0) {
-    pending_requests_amount_ = kDefaultPendingRequestsAmount;
+    pending_requests_amount_ = default_values::kDefaultPendingRequestsAmount;
   }
 
   LOG_UPDATED_VALUE(
@@ -1571,7 +1329,7 @@ void Profile::UpdateValues() {
 
   // System files path
   ReadStringValue(&system_files_path_,
-                  kDefaultSystemFilesPath,
+                  default_values::kDefaultSystemFilesPath,
                   kMainSection,
                   kSystemFilesPathKey);
 
@@ -1579,11 +1337,11 @@ void Profile::UpdateValues() {
 
   // Plugins folder
   ReadStringValue(
-      &plugins_folder_, kDefaultPluginsPath, kMainSection, kPluginsFolderKey);
+      &plugins_folder_, default_values::kDefaultPluginsPath, kMainSection, kPluginsFolderKey);
   LOG_UPDATED_VALUE(plugins_folder_, kPluginsFolderKey, kMainSection);
   // Heartbeat timeout
   ReadUIntValue(&heart_beat_timeout_,
-                kDefaultHeartBeatTimeout,
+                default_values::kDefaultHeartBeatTimeout,
                 kMainSection,
                 kHeartBeatTimeoutKey);
 
@@ -1612,19 +1370,19 @@ void Profile::UpdateValues() {
 
   // Event MQ
   ReadStringValue(
-      &event_mq_name_, kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
+      &event_mq_name_, default_values::kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
 
   LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
 
   // Ack MQ
   ReadStringValue(
-      &ack_mq_name_, kDefaultAckMQ, kTransportManagerSection, kAckMQKey);
+      &ack_mq_name_, default_values::kDefaultAckMQ, kTransportManagerSection, kAckMQKey);
 
   LOG_UPDATED_VALUE(ack_mq_name_, kAckMQKey, kTransportManagerSection);
 
   // Transport manager disconnect timeout
   ReadUIntValue(&transport_manager_disconnect_timeout_,
-                kDefaultTransportManagerDisconnectTimeout,
+                default_values::kDefaultTransportManagerDisconnectTimeout,
                 kTransportManagerSection,
                 kTransportManagerDisconnectTimeoutKey);
 
@@ -1634,7 +1392,7 @@ void Profile::UpdateValues() {
 
   // Recording file
   ReadStringValue(&recording_file_name_,
-                  kDefaultRecordingFileName,
+                  default_values::kDefaultRecordingFileName,
                   kMediaManagerSection,
                   kRecordingFileNameKey);
 
@@ -1643,7 +1401,7 @@ void Profile::UpdateValues() {
 
   // Recording file source
   ReadStringValue(&recording_file_source_,
-                  kDefaultRecordingFileSourceName,
+                  default_values::kDefaultRecordingFileSourceName,
                   kMediaManagerSection,
                   kRecordingFileSourceKey);
 
@@ -1652,7 +1410,7 @@ void Profile::UpdateValues() {
 
   // Policy preloaded file
   ReadStringValue(&preloaded_pt_file_,
-                  kDefaultPreloadedPTFileName,
+                  default_values::kDefaultPreloadedPTFileName,
                   kPolicySection,
                   kPreloadedPTKey);
 
@@ -1662,7 +1420,7 @@ void Profile::UpdateValues() {
 
   // Policy snapshot file
   ReadStringValue(&policy_snapshot_file_name_,
-                  kDefaultPoliciesSnapshotFileName,
+                  default_values::kDefaultPoliciesSnapshotFileName,
                   kPolicySection,
                   kPathToSnapshotKey);
 
@@ -1676,7 +1434,7 @@ void Profile::UpdateValues() {
 
   // Attempts number for opening policy DB
   ReadUIntValue(&attempts_to_open_policy_db_,
-                kDefaultAttemptsToOpenPolicyDB,
+                default_values::kDefaultAttemptsToOpenPolicyDB,
                 kPolicySection,
                 kAttemptsToOpenPolicyDBKey);
 
@@ -1685,7 +1443,7 @@ void Profile::UpdateValues() {
 
   // Open attempt timeout in ms
   ReadUIntValue(&open_attempt_timeout_ms_,
-                kDefaultOpenAttemptTimeoutMs,
+                default_values::kDefaultOpenAttemptTimeoutMs,
                 kPolicySection,
                 kOpenAttemptTimeoutMsKey);
 
@@ -1703,21 +1461,21 @@ void Profile::UpdateValues() {
 
   // Max protocol version
   ReadUIntValue(&max_supported_protocol_version_,
-                kDefaultMaxSupportedProtocolVersion,
+                default_values::kDefaultMaxSupportedProtocolVersion,
                 kProtocolHandlerSection,
                 kMaxSupportedProtocolVersionKey);
 
   if (max_supported_protocol_version_ < 1) {
     max_supported_protocol_version_ = 1;
   } else if (max_supported_protocol_version_ >
-             kDefaultMaxSupportedProtocolVersion) {
-    max_supported_protocol_version_ = kDefaultMaxSupportedProtocolVersion;
+             default_values::kDefaultMaxSupportedProtocolVersion) {
+    max_supported_protocol_version_ = default_values::kDefaultMaxSupportedProtocolVersion;
   }
 
   LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);
 
   ReadUIntValue(&application_list_update_timeout_,
-                kDefaultApplicationListUpdateTimeout,
+                default_values::kDefaultApplicationListUpdateTimeout,
                 kApplicationManagerSection,
                 kApplicationListUpdateTimeoutKey);
 
@@ -1736,18 +1494,18 @@ void Profile::UpdateValues() {
                        kGetVehicleDataFrequencyKey);
 
   ReadUIntValue(&max_thread_pool_size_,
-                kDefaultMaxThreadPoolSize,
+                default_values::kDefaultMaxThreadPoolSize,
                 kApplicationManagerSection,
-                kDefaultThreadPoolSize);
-  if (max_thread_pool_size_ > kDefaultMaxThreadPoolSize) {
-    max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
+                default_values::kDefaultThreadPoolSize);
+  if (max_thread_pool_size_ > default_values::kDefaultMaxThreadPoolSize) {
+    max_thread_pool_size_ = default_values::kDefaultMaxThreadPoolSize;
   }
   LOG_UPDATED_VALUE(max_thread_pool_size_,
-                    kDefaultMaxThreadPoolSize,
+                    default_values::kDefaultMaxThreadPoolSize,
                     kApplicationManagerSection);
 
   ReadStringValue(&iap_legacy_protocol_mask_,
-                  kDefaultLegacyProtocolMask,
+                  default_values::kDefaultLegacyProtocolMask,
                   kIAPSection,
                   kLegacyProtocolMaskKey);
 
@@ -1755,35 +1513,35 @@ void Profile::UpdateValues() {
       iap_legacy_protocol_mask_, kLegacyProtocolMaskKey, kIAPSection);
 
   ReadStringValue(&iap_hub_protocol_mask_,
-                  kDefaultHubProtocolMask,
+                  default_values::kDefaultHubProtocolMask,
                   kIAPSection,
                   kHubProtocolMaskKey);
 
   LOG_UPDATED_VALUE(iap_hub_protocol_mask_, kHubProtocolMaskKey, kIAPSection);
 
   ReadStringValue(&iap_pool_protocol_mask_,
-                  kDefaultPoolProtocolMask,
+                  default_values::kDefaultPoolProtocolMask,
                   kIAPSection,
                   kPoolProtocolMaskKey);
 
   LOG_UPDATED_VALUE(iap_pool_protocol_mask_, kPoolProtocolMaskKey, kIAPSection);
 
   ReadStringValue(&iap_system_config_,
-                  kDefaultIAPSystemConfig,
+                  default_values::kDefaultIAPSystemConfig,
                   kIAPSection,
                   kIAPSystemConfigKey);
 
   LOG_UPDATED_VALUE(iap_system_config_, kIAPSystemConfigKey, kIAPSection);
 
   ReadStringValue(&iap2_system_config_,
-                  kDefaultIAP2SystemConfig,
+                  default_values::kDefaultIAP2SystemConfig,
                   kIAPSection,
                   kIAP2SystemConfigKey);
 
   LOG_UPDATED_VALUE(iap2_system_config_, kIAP2SystemConfigKey, kIAPSection);
 
   ReadIntValue(&iap2_hub_connect_attempts_,
-               kDefaultIAP2HubConnectAttempts,
+               default_values::kDefaultIAP2HubConnectAttempts,
                kIAPSection,
                kIAP2HubConnectAttemptskey);
 
@@ -1791,7 +1549,7 @@ void Profile::UpdateValues() {
       iap2_hub_connect_attempts_, kIAP2HubConnectAttemptskey, kIAPSection);
 
   ReadIntValue(&iap_hub_connection_wait_timeout_,
-               kDefaultIAPHubConnectionWaitTimeout,
+               default_values::kDefaultIAPHubConnectionWaitTimeout,
                kIAPSection,
                kIAPHubConnectionWaitTimeoutKey);
 
@@ -1800,15 +1558,15 @@ void Profile::UpdateValues() {
                     kIAPSection);
 
   ReadUIntValue(&default_hub_protocol_index_,
-                kDefaultHubProtocolIndex,
+                default_values::kDefaultHubProtocolIndex,
                 kIAPSection,
-                kDefaultHubProtocolIndexKey);
+                default_values::kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(
-      default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);
+      default_hub_protocol_index_, default_values::kDefaultHubProtocolIndexKey, kIAPSection);
 
   ReadUIntValue(&hash_string_size_,
-                kDefaultHashStringSize,
+                default_values::kDefaultHashStringSize,
                 kApplicationManagerSection,
                 kHashStringSizeKey);
 
@@ -1824,7 +1582,7 @@ void Profile::UpdateValues() {
       use_db_for_resumption_, kUseDBForResumptionKey, kResumptionSection);
 
   ReadUIntValue(&attempts_to_open_resumption_db_,
-                kDefaultAttemptsToOpenResumptionDB,
+                default_values::kDefaultAttemptsToOpenResumptionDB,
                 kResumptionSection,
                 kAttemptsToOpenResumptionDBKey);
 
@@ -1833,7 +1591,7 @@ void Profile::UpdateValues() {
                     kResumptionSection);
 
   ReadUIntValue(&open_attempt_timeout_ms_resumption_db_,
-                kDefaultOpenAttemptTimeoutMsResumptionDB,
+                default_values::kDefaultOpenAttemptTimeoutMsResumptionDB,
                 kResumptionSection,
                 kOpenAttemptTimeoutMsResumptionDBKey);
 
@@ -1843,7 +1601,7 @@ void Profile::UpdateValues() {
 
   // Read parameters from App Launch section
   ReadUIntValue(&app_launch_wait_time_,
-                kDefaultAppLaunchWaitTime,
+                default_values::kDefaultAppLaunchWaitTime,
                 kAppLaunchSection,
                 kAppLaunchWaitTimeKey);
 
@@ -1851,7 +1609,7 @@ void Profile::UpdateValues() {
       app_launch_wait_time_, kAppLaunchWaitTimeKey, kAppLaunchSection);
 
   ReadUIntValue(&app_launch_max_retry_attempt_,
-                kDefaultAppLaunchMaxRetryAttempt,
+                default_values::kDefaultAppLaunchMaxRetryAttempt,
                 kAppLaunchSection,
                 kAppLaunchMaxRetryAttemptKey);
 
@@ -1860,7 +1618,7 @@ void Profile::UpdateValues() {
                     kAppLaunchSection);
 
   ReadUIntValue(&app_launch_retry_wait_time_,
-                kDefaultAppLaunchRetryWaitTime,
+                default_values::kDefaultAppLaunchRetryWaitTime,
                 kAppLaunchSection,
                 kAppLaunchRetryWaitTimeKey);
 
@@ -1869,7 +1627,7 @@ void Profile::UpdateValues() {
                     kAppLaunchSection);
 
   ReadUIntValue(&remove_bundle_id_attempts_,
-                kDefaultRemoveBundleIDattempts,
+                default_values::kDefaultRemoveBundleIDattempts,
                 kAppLaunchSection,
                 kRemoveBundleIDattemptsKey);
 
@@ -1878,7 +1636,7 @@ void Profile::UpdateValues() {
                     kAppLaunchSection);
 
   ReadUIntValue(&max_number_of_ios_device_,
-                kDefaultMaxNumberOfiOSDevice,
+                default_values::kDefaultMaxNumberOfiOSDevice,
                 kAppLaunchSection,
                 kMaxNumberOfiOSDeviceKey);
 
@@ -1886,7 +1644,7 @@ void Profile::UpdateValues() {
       max_number_of_ios_device_, kMaxNumberOfiOSDeviceKey, kAppLaunchSection);
 
   ReadUIntValue(&wait_time_between_apps_,
-                kDefaultWaitTimeBetweenApps,
+                default_values::kDefaultWaitTimeBetweenApps,
                 kAppLaunchSection,
                 kWaitTimeBetweenAppsKey);
 
@@ -1894,7 +1652,7 @@ void Profile::UpdateValues() {
       wait_time_between_apps_, kWaitTimeBetweenAppsKey, kAppLaunchSection);
 
   ReadBoolValue(&enable_app_launch_ios_,
-                kDefaultEnableAppLaunchIOS,
+                default_values::kDefaultEnableAppLaunchIOS,
                 kAppLaunchSection,
                 kEnableAppLaunchIOSKey);
 
@@ -1902,7 +1660,7 @@ void Profile::UpdateValues() {
       enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
 
   ReadUIntValue(&app_tranport_change_timer_,
-                kDefaultAppTransportChangeTimer,
+                default_values::kDefaultAppTransportChangeTimer,
                 kMainSection,
                 kAppTransportChangeTimerKey);
 
@@ -1910,7 +1668,7 @@ void Profile::UpdateValues() {
       app_tranport_change_timer_, kAppTransportChangeTimerKey, kMainSection);
 
   ReadUIntValue(&app_tranport_change_timer_addition_,
-                kDefaultAppTransportChangeTimerAddition,
+                default_values::kDefaultAppTransportChangeTimerAddition,
                 kMainSection,
                 kAppTransportChangeTimerAdditionKey);
 
