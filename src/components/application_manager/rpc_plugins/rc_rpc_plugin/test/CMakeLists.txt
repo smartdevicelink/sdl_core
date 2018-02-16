@@ -14,6 +14,8 @@ set(LIBRARIES
   ApplicationManager
   SmartObjects
   ProtocolHandler
+  MessageHelper
+  connectionHandler
   Utils
   jsoncpp
   gmock_main

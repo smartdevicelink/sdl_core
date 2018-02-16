@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_HMI_RC_BUTTON_PRESS_REQUEST_H
 
 #include "application_manager/commands/request_to_hmi.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -15,12 +16,13 @@ class RCButtonPressRequest
                        app_mngr::ApplicationManager& application_manager,
                        app_mngr::rpc_service::RPCService& rpc_service,
                        app_mngr::HMICapabilities& hmi_capabilities,
-                       policy::PolicyHandlerInterface& policy_handle);
+                       policy::PolicyHandlerInterface& policy_handle,
+                       ResourceAllocationManager& resource_allocation_manager);
   /**
    * @brief Execute command
    */
   void Run() OVERRIDE;
-  virtual ~RCButtonPressRequest();
+  ~RCButtonPressRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

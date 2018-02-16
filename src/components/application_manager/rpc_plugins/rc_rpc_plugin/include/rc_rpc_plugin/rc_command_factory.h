@@ -13,6 +13,7 @@
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
+using policy::PolicyHandlerInterface;
 class RCCommandFactory : public application_manager::CommandFactory {
  public:
   RCCommandFactory(app_mngr::ApplicationManager& app_manager,
@@ -30,23 +31,18 @@ class RCCommandFactory : public application_manager::CommandFactory {
       const OVERRIDE;
 
  private:
-  app_mngr::ICommandCreator& get_creator_factory(
+  app_mngr::CommandCreator& get_mobile_creator_factory(
+      mobile_apis::FunctionID::eType id,
+      mobile_apis::messageType::eType message_type) const;
+
+  app_mngr::CommandCreator& get_hmi_creator_factory(
       hmi_apis::FunctionID::eType id,
-      hmi_apis::messageType::eType message_type,
-      app_mngr::commands::Command::CommandSource source) const;
-
-  application_manager::CommandSharedPtr CreateMobileCommand(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::commands::Command::CommandSource source);
-
-  application_manager::CommandSharedPtr CreateHMICommand(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::commands::Command::CommandSource source);
+      hmi_apis::messageType::eType message_type) const;
 
   app_mngr::ApplicationManager& app_manager_;
   app_mngr::rpc_service::RPCService& rpc_service_;
   app_mngr::HMICapabilities& hmi_capabilities_;
-  policy::PolicyHandlerInterface& policy_handler_;
+  PolicyHandlerInterface& policy_handler_;
   ResourceAllocationManager& allocation_manager_;
 };
 }  // namespace rc_rpc_plugin
