@@ -81,6 +81,26 @@ void RCRPCPlugin::OnApplicationEvent(
   }
 }
 
+RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(application_manager::ApplicationManager& app_mngr){
+  using application_manager::ApplicationSharedPtr;
+  using application_manager::ApplicationSet;
+  ApplicationSet accessor = app_mngr.applications().GetData();
+
+  auto predicate = [](const ApplicationSharedPtr& app) {
+    auto uid = RCRPCPlugin::kRCPluginID;
+    return app ? app->QueryInterface(uid).valid() : false;
+  };
+
+  auto it = std::find_if(accessor.begin(), accessor.end(), predicate);
+
+  std::vector<ApplicationSharedPtr> result;
+  while (it != accessor.end()) {
+    result.push_back(*it);
+    it = std::find_if(++it, accessor.end(), predicate);
+  }
+  return result;
+}
+
 }  // namespace rc_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
