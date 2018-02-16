@@ -6,7 +6,6 @@
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 int main(int argc, char** argv) {
   namespace custom_str = utils::custom_string;
-  INIT_LOGGER("./log4cxx.properties", true);
   testing::InitGoogleMock(&argc, argv);
   ::testing::DefaultValue<custom_str::CustomString>::Set(
       custom_str::CustomString(""));
