@@ -50,7 +50,7 @@ bool SDLRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource
         message_source) {
-  return true;
+  return command_factory_->IsAbleToProcess(function_id, message_source);
 }
 
 std::string SDLRPCPlugin::PluginName() {
