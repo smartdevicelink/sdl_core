@@ -307,3420 +307,1461 @@ HMICommandFactory::HMICommandFactory(
 CommandSharedPtr HMICommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  const int function_id =
-      (*message)[strings::params][strings::function_id].asInt();
+  const hmi_apis::FunctionID::eType function_id =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
   LOG4CXX_DEBUG(
       logger_, "HMICommandFactory::CreateCommand function_id: " << function_id);
 
-  CommandSharedPtr command(
-      new application_manager::commands::CommandImpl(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
+  const hmi_apis::messageType::eType message_type =
+      static_cast<hmi_apis::messageType::eType>(
+          (*message)[strings::params][strings::message_type].asInt());
 
-  bool is_response = false;
-  const int msg_type =
-      (*message)[strings::params][strings::message_type].asInt();
-  if (msg_type ==
-      static_cast<int>(application_manager::MessageType::kResponse)) {
-    is_response = true;
+  if (hmi_apis::messageType::response == message_type) {
     LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type] ==
-             static_cast<int>(
-                 application_manager::MessageType::kErrorResponse)) {
-    is_response = true;
+             hmi_apis::messageType::error_response) {
     LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
     LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand request");
   }
 
-  switch (function_id) {
+  return get_creator_factory(function_id, message_type, source).create(message);
+}
+
+bool HMICommandFactory::IsAbleToProcess(
+    const int32_t function_id,
+    const application_manager::commands::Command::CommandSource message_source)
+    const {
+  using app_mngr::commands::Command;
+  return get_creator_factory(
+             static_cast<hmi_apis::FunctionID::eType>(function_id),
+             hmi_apis::messageType::INVALID_ENUM,
+             message_source).CanBeCreated();
+}
+
+CommandCreator& HMICommandFactory::get_creator_factory(
+    hmi_apis::FunctionID::eType id,
+    hmi_apis::messageType::eType message_type,
+    application_manager::commands::Command::CommandSource source) const {
+  CommandCreatorFactory factory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+
+  switch (static_cast<int32_t>(id)) {
     case hmi_apis::FunctionID::BasicCommunication_OnStartDeviceDiscovery: {
-      command.reset(new commands::OnStartDeviceDiscovery(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnStartDeviceDiscovery>();
     }
     case hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList: {
-      if (is_response) {
-        command.reset(
-            new commands::UpdateDeviceListResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::UpdateDeviceListRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UpdateDeviceListRequest>()
+                 : factory.GetCreator<commands::UpdateDeviceListResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_ActivateApp: {
-      if (is_response) {
-        command.reset(new commands::ActivateAppResponse(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(new commands::ActivateAppRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::ActivateAppRequest>()
+                 : factory.GetCreator<commands::ActivateAppResponse>();
     }
 #ifdef EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {
-      if (is_response) {
-        command.reset(
-            new commands::DecryptCertificateResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::DecryptCertificateRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::DecryptCertificateRequest>()
+                 : factory.GetCreator<commands::DecryptCertificateResponse>();
     }
 #endif  // EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
-      if (is_response) {
-        command.reset(new commands::GetSystemInfoResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::GetSystemInfoRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetSystemInfoRequest>()
+                 : factory.GetCreator<commands::GetSystemInfoResponse>();
     }
     case hmi_apis::FunctionID::SDL_ActivateApp: {
-      if (is_response) {
-        command.reset(new commands::SDLActivateAppResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::SDLActivateAppRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::SDLActivateAppRequest>()
+                 : factory.GetCreator<commands::SDLActivateAppResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_PolicyUpdate: {
-      if (is_response) {
-        command.reset(
-            new commands::SDLPolicyUpdateResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::SDLPolicyUpdate(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::SDLPolicyUpdate>()
+                 : factory.GetCreator<commands::SDLPolicyUpdateResponse>();
     }
     case hmi_apis::FunctionID::SDL_GetURLS: {
-      if (is_response) {
-        command.reset(new commands::GetUrlsResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(new commands::GetUrls(message,
-                                            application_manager_,
-                                            rpc_service_,
-                                            hmi_capabilities_,
-                                            policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetUrls>()
+                 : factory.GetCreator<commands::GetUrlsResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnAppPermissionChanged: {
-      command.reset(
-          new commands::OnAppPermissionChangedNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppPermissionChangedNotification>();
     }
     case hmi_apis::FunctionID::SDL_GetListOfPermissions: {
-      if (is_response) {
-        command.reset(
-            new commands::SDLGetListOfPermissionsResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(
-            new commands::SDLGetListOfPermissionsRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::SDLGetListOfPermissionsRequest>()
+                 : factory
+                       .GetCreator<commands::SDLGetListOfPermissionsResponse>();
     }
     case hmi_apis::FunctionID::SDL_GetUserFriendlyMessage: {
-      if (is_response) {
-        command.reset(new commands::SDLGetUserFriendlyMessageResponse(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      } else {
-        command.reset(
-            new commands::SDLGetUserFriendlyMessageRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::SDLGetUserFriendlyMessageRequest>()
+                 : factory.GetCreator<
+                       commands::SDLGetUserFriendlyMessageResponse>();
     }
     case hmi_apis::FunctionID::SDL_GetStatusUpdate: {
-      if (is_response) {
-        command.reset(
-            new commands::SDLGetStatusUpdateResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::SDLGetStatusUpdateRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::SDLGetStatusUpdateRequest>()
+                 : factory.GetCreator<commands::SDLGetStatusUpdateResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
-      command.reset(
-          new commands::OnStatusUpdateNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnStatusUpdateNotification>();
     }
     case hmi_apis::FunctionID::SDL_OnAppPermissionConsent: {
-      command.reset(
-          new commands::OnAppPermissionConsentNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppPermissionConsentNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {
-      if (is_response) {
-        command.reset(
-            new commands::MixingAudioSupportedResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::MixingAudioSupportedRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::MixingAudioSupportedRequest>()
+                 : factory.GetCreator<commands::MixingAudioSupportedResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitAllApplications: {
-      command.reset(
-          new commands::OnExitAllApplicationsNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnExitAllApplicationsNotification>();
     }
     case hmi_apis::FunctionID::UI_AddCommand: {
-      if (is_response) {
-        command.reset(new commands::UIAddCommandResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(new commands::UIAddCommandRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIAddCommandRequest>()
+                 : factory.GetCreator<commands::UIAddCommandResponse>();
     }
     case hmi_apis::FunctionID::UI_DeleteCommand: {
-      if (is_response) {
-        command.reset(
-            new commands::UIDeleteCommandResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::UIDeleteCommandRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIDeleteCommandRequest>()
+                 : factory.GetCreator<commands::UIDeleteCommandResponse>();
     }
     case hmi_apis::FunctionID::UI_AddSubMenu: {
-      if (is_response) {
-        command.reset(new commands::UIAddSubmenuResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(new commands::UIAddSubmenuRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIAddSubmenuRequest>()
+                 : factory.GetCreator<commands::UIAddSubmenuResponse>();
     }
     case hmi_apis::FunctionID::UI_DeleteSubMenu: {
-      if (is_response) {
-        command.reset(
-            new commands::UIDeleteSubmenuResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::UIDeleteSubmenuRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIDeleteSubmenuRequest>()
+                 : factory.GetCreator<commands::UIDeleteSubmenuResponse>();
     }
     case hmi_apis::FunctionID::UI_SetMediaClockTimer: {
-      if (is_response) {
-        command.reset(
-            new commands::UISetMediaClockTimerResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::UISetMediaClockTimerRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISetMediaClockTimerRequest>()
+                 : factory.GetCreator<commands::UISetMediaClockTimerResponse>();
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
-      if (is_response) {
-        command.reset(
-            new commands::UIPerformInteractionResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIPerformInteractionRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIPerformInteractionRequest>()
+                 : factory.GetCreator<commands::UIPerformInteractionResponse>();
     }
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      if (is_response) {
-        command.reset(
-            new commands::UISetGlobalPropertiesResponse(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(
-            new commands::UISetGlobalPropertiesRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISetGlobalPropertiesRequest>()
+                 : factory
+                       .GetCreator<commands::UISetGlobalPropertiesResponse>();
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
-      if (is_response) {
-        command.reset(
-            new commands::UIScrollableMessageResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIScrollableMessageRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIScrollableMessageRequest>()
+                 : factory.GetCreator<commands::UIScrollableMessageResponse>();
     }
     case hmi_apis::FunctionID::UI_SetAppIcon: {
-      if (is_response) {
-        command.reset(new commands::UISetAppIconResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(new commands::UISetAppIconRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISetAppIconRequest>()
+                 : factory.GetCreator<commands::UISetAppIconResponse>();
     }
     case hmi_apis::FunctionID::UI_GetSupportedLanguages: {
-      if (is_response) {
-        command.reset(
-            new commands::UIGetSupportedLanguagesResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIGetSupportedLanguagesRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::UIGetSupportedLanguagesRequest>()
+                 : factory
+                       .GetCreator<commands::UIGetSupportedLanguagesResponse>();
     }
     case hmi_apis::FunctionID::UI_GetLanguage: {
-      if (is_response) {
-        command.reset(new commands::UIGetLanguageResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::UIGetLanguageRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIGetLanguageRequest>()
+                 : factory.GetCreator<commands::UIGetLanguageResponse>();
     }
     case hmi_apis::FunctionID::UI_GetCapabilities: {
-      if (is_response) {
-        command.reset(
-            new commands::UIGetCapabilitiesResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIGetCapabilitiesRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIGetCapabilitiesRequest>()
+                 : factory.GetCreator<commands::UIGetCapabilitiesResponse>();
     }
     case hmi_apis::FunctionID::UI_ChangeRegistration: {
-      if (is_response) {
-        command.reset(
-            new commands::UIChangeRegistratioResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIChangeRegistrationRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIChangeRegistrationRequest>()
+                 : factory.GetCreator<commands::UIChangeRegistratioResponse>();
     }
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
-      if (is_response) {
-        command.reset(
-            new commands::UIPerformAudioPassThruResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIPerformAudioPassThruRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIPerformAudioPassThruRequest>()
+                 : factory
+                       .GetCreator<commands::UIPerformAudioPassThruResponse>();
     }
     case hmi_apis::FunctionID::UI_EndAudioPassThru: {
-      if (is_response) {
-        command.reset(
-            new commands::UIEndAudioPassThruResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::UIEndAudioPassThruRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIEndAudioPassThruRequest>()
+                 : factory.GetCreator<commands::UIEndAudioPassThruResponse>();
     }
     case hmi_apis::FunctionID::UI_Alert: {
-      if (is_response) {
-        command.reset(new commands::UIAlertResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(new commands::UIAlertRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIAlertRequest>()
+                 : factory.GetCreator<commands::UIAlertResponse>();
     }
     case hmi_apis::FunctionID::VR_IsReady: {
-      if (is_response) {
-        command.reset(new commands::VRIsReadyResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::VRIsReadyRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRIsReadyRequest>()
+                 : factory.GetCreator<commands::VRIsReadyResponse>();
     }
     case hmi_apis::FunctionID::VR_AddCommand: {
-      if (is_response) {
-        command.reset(new commands::VRAddCommandResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(new commands::VRAddCommandRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRAddCommandRequest>()
+                 : factory.GetCreator<commands::VRAddCommandResponse>();
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
-      if (is_response) {
-        command.reset(
-            new commands::VRDeleteCommandResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::VRDeleteCommandRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRDeleteCommandRequest>()
+                 : factory.GetCreator<commands::VRDeleteCommandResponse>();
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
-      if (is_response) {
-        command.reset(
-            new commands::VRChangeRegistrationResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::VRChangeRegistrationRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRChangeRegistrationRequest>()
+                 : factory.GetCreator<commands::VRChangeRegistrationResponse>();
     }
     case hmi_apis::FunctionID::VR_GetSupportedLanguages: {
-      if (is_response) {
-        command.reset(
-            new commands::VRGetSupportedLanguagesResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(
-            new commands::VRGetSupportedLanguagesRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::VRGetSupportedLanguagesRequest>()
+                 : factory
+                       .GetCreator<commands::VRGetSupportedLanguagesResponse>();
     }
     case hmi_apis::FunctionID::VR_GetLanguage: {
-      if (is_response) {
-        command.reset(new commands::VRGetLanguageResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::VRGetLanguageRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRGetLanguageRequest>()
+                 : factory.GetCreator<commands::VRGetLanguageResponse>();
     }
     case hmi_apis::FunctionID::VR_GetCapabilities: {
-      if (is_response) {
-        command.reset(
-            new commands::VRGetCapabilitiesResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::VRGetCapabilitiesRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRGetCapabilitiesRequest>()
+                 : factory.GetCreator<commands::VRGetCapabilitiesResponse>();
     }
     case hmi_apis::FunctionID::TTS_IsReady: {
-      if (is_response) {
-        command.reset(new commands::TTSIsReadyResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::TTSIsReadyRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSIsReadyRequest>()
+                 : factory.GetCreator<commands::TTSIsReadyResponse>();
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
-      if (is_response) {
-        command.reset(
-            new commands::TTSChangeRegistratioResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::TTSChangeRegistrationRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSChangeRegistrationRequest>()
+                 : factory.GetCreator<commands::TTSChangeRegistratioResponse>();
     }
     case hmi_apis::FunctionID::TTS_GetSupportedLanguages: {
-      if (is_response) {
-        command.reset(
-            new commands::TTSGetSupportedLanguagesResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(
-            new commands::TTSGetSupportedLanguagesRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::TTSGetSupportedLanguagesRequest>()
+                 : factory.GetCreator<
+                       commands::TTSGetSupportedLanguagesResponse>();
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
-      if (is_response) {
-        command.reset(
-            new commands::TTSStopSpeakingResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::TTSStopSpeakingRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSStopSpeakingRequest>()
+                 : factory.GetCreator<commands::TTSStopSpeakingResponse>();
     }
     case hmi_apis::FunctionID::TTS_GetLanguage: {
-      if (is_response) {
-        command.reset(new commands::TTSGetLanguageResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::TTSGetLanguageRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSGetLanguageRequest>()
+                 : factory.GetCreator<commands::TTSGetLanguageResponse>();
     }
     case hmi_apis::FunctionID::TTS_Speak: {
-      if (is_response) {
-        command.reset(new commands::TTSSpeakResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(new commands::TTSSpeakRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSSpeakRequest>()
+                 : factory.GetCreator<commands::TTSSpeakResponse>();
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      if (is_response) {
-        command.reset(
-            new commands::TTSSetGlobalPropertiesResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(
-            new commands::TTSSetGlobalPropertiesRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSSetGlobalPropertiesRequest>()
+                 : factory
+                       .GetCreator<commands::TTSSetGlobalPropertiesResponse>();
     }
     case hmi_apis::FunctionID::TTS_GetCapabilities: {
-      if (is_response) {
-        command.reset(
-            new commands::TTSGetCapabilitiesResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::TTSGetCapabilitiesRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::TTSGetCapabilitiesRequest>()
+                 : factory.GetCreator<commands::TTSGetCapabilitiesResponse>();
     }
     case hmi_apis::FunctionID::TTS_Started: {
-      command.reset(new commands::OnTTSStartedNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnTTSStartedNotification>();
     }
     case hmi_apis::FunctionID::TTS_Stopped: {
-      command.reset(new commands::OnTTSStoppedNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnTTSStoppedNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
-      command.reset(
-          new commands::OnAppActivatedNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppActivatedNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL: {
-      command.reset(new commands::OnAwakeSDLNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAwakeSDLNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {
-      command.reset(
-          new commands::OnExitApplicationNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnExitApplicationNotification>();
     }
     case hmi_apis::FunctionID::UI_Show: {
-      if (is_response) {
-        command.reset(new commands::UIShowResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(new commands::UIShowRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIShowRequest>()
+                 : factory.GetCreator<commands::UIShowResponse>();
     }
     case hmi_apis::FunctionID::UI_Slider: {
-      if (is_response) {
-        command.reset(new commands::UISliderResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(new commands::UISliderRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISliderRequest>()
+                 : factory.GetCreator<commands::UISliderResponse>();
     }
     case hmi_apis::FunctionID::UI_ClosePopUp: {
-      if (is_response) {
-        command.reset(new commands::ClosePopupResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::ClosePopupRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::ClosePopupRequest>()
+                 : factory.GetCreator<commands::ClosePopupResponse>();
     }
     case hmi_apis::FunctionID::UI_IsReady: {
-      if (is_response) {
-        command.reset(new commands::UIIsReadyResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::UIIsReadyRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UIIsReadyRequest>()
+                 : factory.GetCreator<commands::UIIsReadyResponse>();
     }
     case hmi_apis::FunctionID::VehicleInfo_IsReady: {
-      if (is_response) {
-        command.reset(new commands::VIIsReadyResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::VIIsReadyRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIIsReadyRequest>()
+                 : factory.GetCreator<commands::VIIsReadyResponse>();
     }
     case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
-      if (is_response) {
-        command.reset(new commands::VIReadDIDResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::VIReadDIDRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIReadDIDRequest>()
+                 : factory.GetCreator<commands::VIReadDIDResponse>();
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetGpsData>(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetGpsData>(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetGpsData> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetGpsData> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetSpeed: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetSpeed>(message,
-                                                        application_manager_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetSpeed>(message,
-                                                        application_manager_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetSpeed> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetSpeed> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetRpm: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetRpm>(message,
-                                                      application_manager_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetRpm>(message,
-                                                      application_manager_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehitcleInfo_GetRpm> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetRpm> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevel: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetFuelLevel> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetFuelLevel> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState> >();
+          : factory.GetCreator<
+                commands::VIGetVehicleDataResponseTemplate<hmi_apis::
+                    FunctionID::VehicleInfo_GetFuelLevelState>> ()
     }
     case hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::
+                           VehicleInfo_GetInstantFuelConsumption> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetInstantFuelConsumption> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::
+                           VehicleInfo_GetExternalTemperature> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetExternalTemperature> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetPrndl: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetPrndl>(message,
-                                                        application_manager_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetPrndl>(message,
-                                                        application_manager_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetPrndl> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetPrndl> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetVin: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetVin>(message,
-                                                      application_manager_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetVin>(message,
-                                                      application_manager_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetVin> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetVin> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetTirePressure: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetTirePressure> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetTirePressure> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetOdometer>(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetOdometer>(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetOdometer> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetOdometer> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBeltStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetBeltStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetBeltStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBodyInformation: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetBodyInformation> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetBodyInformation> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetDeviceStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDriverBraking: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetDriverBraking> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetDriverBraking> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetWiperStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetWiperStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetWiperStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetHeadLampStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetEngineTorque: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetEngineTorque> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetEngineTorque> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::
+                           VehicleInfo_GetAccPedalPosition> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetAccPedalPosition> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::
+                           VehicleInfo_GetSteeringWheelAngle> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetSteeringWheelAngle> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetECallInfo: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetECallInfo> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetECallInfo> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetAirbagStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetEmergencyEvent> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::
+                           VehicleInfo_GetClusterModeStatus> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetClusterModeStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetMyKey: {
-      if (is_response)
-        command.reset(new commands::VIGetVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetMyKey>(message,
-                                                        application_manager_));
-      else
-        command.reset(new commands::VIGetVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_GetMyKey>(message,
-                                                        application_manager_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetMyKey> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetMyKey> >();
     }
 #else
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      if (is_response) {
-        command.reset(
-            new commands::VIGetVehicleDataResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::VIGetVehicleDataRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequest>()
+                 : factory.GetCreator<commands::VIGetVehicleDataResponse>();
     }
 #endif  // #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
-      if (is_response) {
-        command.reset(new commands::VIGetDTCsResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::VIGetDTCsRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetDTCsRequest>()
+                 : factory.GetCreator<commands::VIGetDTCsResponse>();
     }
     case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage: {
-      if (is_response) {
-        command.reset(
-            new commands::VIDiagnosticMessageResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::VIDiagnosticMessageRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIDiagnosticMessageRequest>()
+                 : factory.GetCreator<commands::VIDiagnosticMessageResponse>();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleType: {
-      if (is_response) {
-        command.reset(
-            new commands::VIGetVehicleTypeResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::VIGetVehicleTypeRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleTypeRequest>()
+                 : factory.GetCreator<commands::VIGetVehicleTypeResponse>();
     }
     case hmi_apis::FunctionID::Navigation_IsReady: {
-      if (is_response) {
-        command.reset(new commands::NaviIsReadyResponse(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(new commands::NaviIsReadyRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviIsReadyRequest>()
+                 : factory.GetCreator<commands::NaviIsReadyResponse>();
     }
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviAlertManeuverResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviAlertManeuverRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviAlertManeuverRequest>()
+                 : factory.GetCreator<commands::NaviAlertManeuverResponse>();
     }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviGetWayPointsResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviGetWayPointsRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviGetWayPointsRequest>()
+                 : factory.GetCreator<commands::NaviGetWayPointsResponse>();
     }
     case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviUpdateTurnListResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviUpdateTurnListRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviUpdateTurnListRequest>()
+                 : factory.GetCreator<commands::NaviUpdateTurnListResponse>();
     }
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviShowConstantTBTResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviShowConstantTBTRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviShowConstantTBTRequest>()
+                 : factory.GetCreator<commands::NaviShowConstantTBTResponse>();
     }
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviSubscribeWayPointsResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviSubscribeWayPointsRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviSubscribeWayPointsRequest>()
+                 : factory
+                       .GetCreator<commands::NaviSubscribeWayPointsResponse>();
     }
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviUnsubscribeWayPointsResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviUnSubscribeWayPointsRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::NaviUnSubscribeWayPointsRequest>()
+                 : factory.GetCreator<
+                       commands::NaviUnsubscribeWayPointsResponse>();
     }
     case hmi_apis::FunctionID::Buttons_GetCapabilities: {
-      if (is_response) {
-        command.reset(
-            new commands::ButtonGetCapabilitiesResponse(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(
-            new commands::ButtonGetCapabilitiesRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::ButtonGetCapabilitiesRequest>()
+                 : factory
+                       .GetCreator<commands::ButtonGetCapabilitiesResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
-      command.reset(new commands::OnAllowSDLFunctionalityNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::OnAllowSDLFunctionalityNotification>();
     }
     case hmi_apis::FunctionID::SDL_OnSDLConsentNeeded: {
-      command.reset(
-          new commands::OnSDLConsentNeededNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSDLConsentNeededNotification>();
     }
     case hmi_apis::FunctionID::SDL_UpdateSDL: {
-      if (is_response) {
-        command.reset(new commands::UpdateSDLResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::UpdateSDLRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UpdateSDLRequest>()
+                 : factory.GetCreator<commands::UpdateSDLResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnIgnitionCycleOver: {
-      command.reset(
-          new commands::OnIgnitionCycleOverNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnIgnitionCycleOverNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemInfoChanged: {
-      command.reset(
-          new commands::OnSystemInfoChangedNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSystemInfoChangedNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      command.reset(new commands::OnReadyNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnReadyNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnDeviceChosen: {
-      command.reset(
-          new commands::OnDeviceChosenNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnDeviceChosenNotification>();
     }
     case hmi_apis::FunctionID::UI_OnSystemContext: {
-      command.reset(
-          new commands::OnSystemContextNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSystemContextNotification>();
     }
     case hmi_apis::FunctionID::UI_OnDriverDistraction: {
-      command.reset(new commands::hmi::OnDriverDistractionNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::hmi::OnDriverDistractionNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnUpdateDeviceList: {
-      command.reset(new commands::OnUpdateDeviceList(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnUpdateDeviceList>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered: {
-      command.reset(
-          new commands::OnAppRegisteredNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppRegisteredNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
-      command.reset(
-          new commands::OnAppUnregisteredNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppUnregisteredNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnFindApplications: {
-      command.reset(new commands::OnFindApplications(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnFindApplications>();
     }
     case hmi_apis::FunctionID::BasicCommunication_UpdateAppList: {
-      if (is_response) {
-        command.reset(new commands::UpdateAppListResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::UpdateAppListRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UpdateAppListRequest>()
+                 : factory.GetCreator<commands::UpdateAppListResponse>();
     }
     case hmi_apis::FunctionID::VR_Started: {
-      command.reset(new commands::OnVRStartedNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVRStartedNotification>();
     }
     case hmi_apis::FunctionID::VR_Stopped: {
-      command.reset(new commands::OnVRStoppedNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVRStoppedNotification>();
     }
     case hmi_apis::FunctionID::VR_OnCommand: {
-      command.reset(new commands::OnVRCommandNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVRCommandNotification>();
     }
     case hmi_apis::FunctionID::UI_OnCommand: {
-      command.reset(new commands::OnUICommandNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnUICommandNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated: {
-      command.reset(
-          new commands::OnAppDeactivatedNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAppDeactivatedNotification>();
     }
     case hmi_apis::FunctionID::UI_OnLanguageChange: {
-      command.reset(
-          new commands::OnUILanguageChangeNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnUILanguageChangeNotification>();
     }
     case hmi_apis::FunctionID::VR_OnLanguageChange: {
-      command.reset(
-          new commands::OnVRLanguageChangeNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVRLanguageChangeNotification>();
     }
     case hmi_apis::FunctionID::TTS_OnLanguageChange: {
-      command.reset(
-          new commands::OnTTSLanguageChangeNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnTTSLanguageChangeNotification>();
     }
     case hmi_apis::FunctionID::Buttons_OnButtonEvent: {
-      command.reset(
-          new commands::hmi::OnButtonEventNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnButtonEventNotification>();
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
-      command.reset(
-          new commands::hmi::OnButtonPressNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnButtonPressNotification>();
     }
     case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
-      command.reset(new commands::hmi::OnButtonSubscriptionNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::hmi::OnButtonSubscriptionNotification>();
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeGps>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeGps>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeGps> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeGps> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeSpeed> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeRpm: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeRpm>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeRpm>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeRpm> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeRpm> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeFuelLevel> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeFuelLevel> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeFuelLevel_State> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeFuelLevel_State> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeInstantFuelConsumption> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeInstantFuelConsumption> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeExternalTemperature> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeExternalTemperature> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribePrndl: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribePrndl>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribePrndl>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribePrndl> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribePrndl> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeVin: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeVin>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeVin>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeVin> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeVin> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeTirePressure> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeTirePressure> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeOdometer> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeOdometer> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeBeltStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeBeltStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeBodyInformation> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeBodyInformation> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeDeviceStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeDeviceStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeDeviceStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeDriverBraking: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeDriverBraking> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeDriverBraking> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeWiperStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeWiperStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeWiperStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeHeadLampStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeHeadLampStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeHeadLampStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeEngineTorque: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeEngineTorque> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeEngineTorque> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeAccPedalPosition: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeAccPedalPosition> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeAccPedalPosition> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeSteeringWheelAngle: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeSteeringWheelAngle> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeSteeringWheelAngle> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeECallInfo: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeECallInfo> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeECallInfo> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeAirbagStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeAirbagStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeAirbagStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeEmergencyEvent: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeEmergencyEvent> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeEmergencyEvent> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeClusterModeStatus> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeClusterModeStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey: {
-      if (is_response)
-        command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VISubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey> >()
+                 : factory.GetCreator<
+                       commands::VISubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_SubscribeMyKey> >();
     }
 #else
     case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData: {
-      if (is_response) {
-        command.reset(
-            new commands::VISubscribeVehicleDataResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(
-            new commands::VISubscribeVehicleDataRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VISubscribeVehicleDataRequest>()
+                 : factory
+                       .GetCreator<commands::VISubscribeVehicleDataResponse>();
     }
 #endif  // #ifdef HMI_DBUS_API
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator <
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps>()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeGps> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeSpeed: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeSpeed>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeSpeed>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeSpeed> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeSpeed> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeRpm: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeRpm>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeRpm>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_UnsubscribeRpm> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeRpm> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeFuelLevel> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeFuelLevel> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel_State: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel_State>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeFuelLevel_State>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeFuelLevel_State> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeFuelLevel_State> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeInstantFuelConsumption: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::
-                VehicleInfo_UnsubscribeInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::
-                VehicleInfo_UnsubscribeInstantFuelConsumption>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeInstantFuelConsumption> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeInstantFuelConsumption> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeExternalTemperature: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeExternalTemperature>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeExternalTemperature> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeExternalTemperature> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribePrndl: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribePrndl>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribePrndl>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribePrndl> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribePrndl> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVin: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeVin>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeVin>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_UnsubscribeVin> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeVin> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeTirePressure: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeTirePressure>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeTirePressure> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeTirePressure> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeOdometer: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeOdometer>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeOdometer>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeOdometer> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeOdometer> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeBeltStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeBeltStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeBeltStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeBeltStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeBodyInformation: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeBodyInformation>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeBodyInformation> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeBodyInformation> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeDeviceStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeDeviceStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeDeviceStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeDeviceStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeDriverBraking: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeDriverBraking>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeDriverBraking> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeDriverBraking> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeWiperStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeWiperStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeWiperStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeWiperStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeHeadLampStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeHeadLampStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeHeadLampStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeHeadLampStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeEngineTorque: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeEngineTorque>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeEngineTorque> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeEngineTorque> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeAccPedalPosition: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeAccPedalPosition>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeAccPedalPosition> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeAccPedalPosition> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeSteeringWheelAngle: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeSteeringWheelAngle>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeSteeringWheelAngle> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeSteeringWheelAngle> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeECallInfo: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeECallInfo>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeECallInfo> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeECallInfo> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeAirbagStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeAirbagStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeAirbagStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeAirbagStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeEmergencyEvent: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeEmergencyEvent>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeEmergencyEvent> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeEmergencyEvent> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeClusterModeStatus: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeClusterModeStatus>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeClusterModeStatus> >()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeClusterModeStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey: {
-      if (is_response)
-        command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      else
-        command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-            hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::>(
+                       VIUnsubscribeVehicleDataRequestTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey>)
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_UnsubscribeMyKey> >();
     }
 #else
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData: {
-      if (is_response) {
-        command.reset(
-            new commands::VIUnsubscribeVehicleDataResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(
-            new commands::VIUnsubscribeVehicleDataRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::VIUnsubscribeVehicleDataRequest>()
+                 : factory.GetCreator<
+                       commands::VIUnsubscribeVehicleDataResponse>();
     }
 #endif  // #ifdef HMI_DBUS_API
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_OnGpsData: {
-      command.reset(new commands::OnVIGpsDataNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIGpsDataNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnSpeed: {
-      command.reset(new commands::OnVISpeedNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVISpeedNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnRpm: {
-      command.reset(new commands::OnVIRpmNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIRpmNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnFuelLevel: {
-      command.reset(
-          new commands::OnVIFuelLevelNotification(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVifuelLevelNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnFuelLevelState: {
-      command.reset(
-          new commands::OnVIFuelLevelStateNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVifuelLevelStateNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnInstantFuelConsumption: {
-      command.reset(new commands::OnVIInstantFuelConsumptionNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::OnVIInstantFuelConsumptionNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnExternalTemperature: {
-      command.reset(new commands::OnVIExternalTemperatureNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::OnVIExternalTemperatureNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnVin: {
-      command.reset(new commands::OnVIVinNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIVinNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnPrndl: {
-      command.reset(new commands::OnVIPrndlNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIPrndlNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnTirePressure: {
-      command.reset(
-          new commands::OnVITirePressureNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVITirePressureNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnOdometer: {
-      command.reset(new commands::OnVIOdometerNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIOdometerNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnBeltStatus: {
-      command.reset(
-          new commands::OnVIBeltStatusNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIBeltStatusNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnBodyInformation: {
-      command.reset(
-          new commands::OnVIBodyInformationNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIBodyInformationNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnDeviceStatus: {
-      command.reset(
-          new commands::OnVIDeviceStatusNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIDeviceStatusNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnDriverBraking: {
-      command.reset(
-          new commands::OnVIDriverBrakingNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIDriverBrakingNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnWiperStatus: {
-      command.reset(
-          new commands::OnVIWiperStatusNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIWiperStatusNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnHeadLampStatus: {
-      command.reset(
-          new commands::OnVIHeadLampStatusNotification(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIHeadLampStatusNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnEngineTorque: {
-      command.reset(
-          new commands::OnVIEngineTorqueNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIEngineTorqueNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnAccPedalPosition: {
-      command.reset(
-          new commands::OnVIAccPedalPositionNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIAccPedalPositionNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnSteeringWheelAngle: {
-      command.reset(
-          new commands::OnVISteeringWheelAngleNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVISteeringWheelAngleNotification>();
     }
     case hmi_apis::FunctionID::VehicleInfo_OnMyKey: {
-      command.reset(new commands::OnVIMyKeyNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIMyKeyNotification>();
     }
 #else
     case hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
-      command.reset(
-          new commands::OnVIVehicleDataNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVIVehicleDataNotification>();
     }
 #endif  // #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {
-      command.reset(
-          new commands::OnNaviTBTClientStateNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnNaviTBTClientStateNotification>();
     }
     case hmi_apis::FunctionID::UI_OnKeyboardInput: {
-      command.reset(
-          new commands::hmi::OnUIKeyBoardInputNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnUIKeyBoardInputNotification>();
     }
     case hmi_apis::FunctionID::UI_OnTouchEvent: {
-      command.reset(
-          new commands::hmi::OnUITouchEventNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnUITouchEventNotification>();
     }
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      command.reset(
-          new commands::hmi::OnUIResetTimeoutNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnUIResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::Navigation_SetVideoConfig: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviSetVideoConfigResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviSetVideoConfigRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviSetVideoConfigRequest>()
+                 : factory.GetCreator<commands::NaviSetVideoConfigResponse>();
     }
     case hmi_apis::FunctionID::Navigation_StartStream: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviStartStreamResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::NaviStartStreamRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviStartStreamRequest>()
+                 : factory.GetCreator<commands::NaviStartStreamResponse>();
     }
     case hmi_apis::FunctionID::Navigation_StopStream: {
-      if (is_response) {
-        command.reset(new commands::NaviStopStreamResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::NaviStopStreamRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviStopStreamRequest>()
+                 : factory.GetCreator<commands::NaviStopStreamResponse>();
     }
     case hmi_apis::FunctionID::Navigation_StartAudioStream: {
-      if (is_response) {
-        command.reset(
-            new commands::AudioStartStreamResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::AudioStartStreamRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::AudioStartStreamRequest>()
+                 : factory.GetCreator<commands::AudioStartStreamResponse>();
     }
     case hmi_apis::FunctionID::Navigation_StopAudioStream: {
-      if (is_response) {
-        command.reset(
-            new commands::AudioStopStreamResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::AudioStopStreamRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::AudioStopStreamRequest>()
+                 : factory.GetCreator<commands::AudioStopStreamResponse>();
     }
     case hmi_apis::FunctionID::Navigation_OnAudioDataStreaming: {
-      command.reset(
-          new commands::OnAudioDataStreamingNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnAudioDataStreamingNotification>();
     }
     case hmi_apis::FunctionID::Navigation_OnVideoDataStreaming: {
-      command.reset(
-          new commands::OnVideoDataStreamingNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnVideoDataStreamingNotification>();
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
-      if (is_response) {
-        command.reset(
-            new commands::VRPerformInteractionResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::VRPerformInteractionRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VRPerformInteractionRequest>()
+                 : factory.GetCreator<commands::VRPerformInteractionResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemRequest: {
-      command.reset(
-          new commands::OnSystemRequestNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSystemRequestNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnPutFile: {
-      command.reset(new commands::OnPutFileNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnPutFileNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnResumeAudioSource: {
-      command.reset(
-          new commands::OnResumeAudioSourceNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnResumeAudioSourceNotification>();
     }
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
-      if (is_response) {
-        command.reset(
-            new commands::UiSetDisplayLayoutResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::UiSetDisplayLayoutRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UiSetDisplayLayoutRequest>()
+                 : factory.GetCreator<commands::UiSetDisplayLayoutResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
-      command.reset(new commands::OnSDLCloseNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSDLCloseNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete: {
-      command.reset(new commands::OnSDLPersistenceCompleteNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
+      return factory
+          .GetCreator<commands::OnSDLPersistenceCompleteNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnFileRemoved: {
-      command.reset(
-          new commands::OnFileRemovedNotification(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnFileRemovedNotification>();
     }
     case hmi_apis::FunctionID::UI_OnRecordStart: {
-      command.reset(
-          new commands::OnRecordStartdNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnRecordStartdNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
-      if (is_response) {
-        command.reset(
-            new commands::BasicCommunicationSystemResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(
-            new commands::BasicCommunicationSystemRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory
+                       .GetCreator<commands::BasicCommunicationSystemRequest>()
+                 : factory.GetCreator<
+                       commands::BasicCommunicationSystemResponse>();
     }
     case hmi_apis::FunctionID::Navigation_SendLocation: {
-      if (is_response) {
-        command.reset(
-            new commands::NaviSendLocationResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::NaviSendLocationRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::NaviSendLocationRequest>()
+                 : factory.GetCreator<commands::NaviSendLocationResponse>();
     }
     case hmi_apis::FunctionID::SDL_AddStatisticsInfo: {
-      command.reset(
-          new commands::AddStatisticsInfoNotification(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      break;
+      return factory.GetCreator<commands::AddStatisticsInfoNotification>();
     }
     case hmi_apis::FunctionID::SDL_OnSystemError: {
-      command.reset(
-          new commands::OnSystemErrorNotification(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnSystemErrorNotification>();
     }
     case hmi_apis::FunctionID::SDL_OnReceivedPolicyUpdate: {
-      command.reset(new commands::OnReceivedPolicyUpdate(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnReceivedPolicyUpdate>();
     }
     case hmi_apis::FunctionID::SDL_OnPolicyUpdate: {
-      command.reset(new commands::OnPolicyUpdate(message,
-                                                 application_manager_,
-                                                 rpc_service_,
-                                                 hmi_capabilities_,
-                                                 policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnPolicyUpdate>();
     }
     case hmi_apis::FunctionID::SDL_OnDeviceStateChanged: {
-      command.reset(
-          new commands::OnDeviceStateChangedNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnDeviceStateChangedNotification>();
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      command.reset(
-          new commands::hmi::OnTTSResetTimeoutNotification(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      break;
+      return factory.GetCreator<commands::hmi::OnTTSResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
-      command.reset(
-          new commands::OnEventChangedNotification(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnEventChangedNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
-      if (is_response) {
-        command.reset(
-            new commands::hmi::DialNumberResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::hmi::DialNumberRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::hmi::DialNumberRequest>()
+                 : factory.GetCreator<commands::hmi::DialNumberResponse>();
     }
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
-      command.reset(
-          new commands::OnNaviWayPointChangeNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
+      return factory.GetCreator<commands::OnNaviWayPointChangeNotification>();
     }
     case hmi_apis::FunctionID::RC_IsReady: {
-      if (is_response) {
-        command.reset(new commands::RCIsReadyResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::RCIsReadyRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::RCIsReadyRequest>()
+                 : factory.GetCreator<commands::RCIsReadyResponse>();
     }
     case hmi_apis::FunctionID::RC_GetCapabilities: {
-      if (is_response) {
-        command.reset(
-            new commands::RCGetCapabilitiesResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::RCGetCapabilitiesRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::RCGetCapabilitiesRequest>()
+                 : factory.GetCreator<commands::RCGetCapabilitiesResponse>();
     }
     case hmi_apis::FunctionID::UI_SendHapticData: {
-      if (is_response) {
-        command.reset(
-            new commands::UISendHapticDataResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::UISendHapticDataRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISendHapticDataRequest>()
+                 : factory.GetCreator<commands::UISendHapticDataResponse>();
     }
+    default: { return factory.GetCreator<InvalidCommand>(); }
   }
-  return command;
 }
 
 }  // namespace application_manager
