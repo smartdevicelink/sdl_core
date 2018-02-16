@@ -58,7 +58,7 @@ class HMICommandFactory : public app_mngr::CommandFactory {
       const OVERRIDE;
 
  private:
-  app_mngr::ICommandCreator& get_creator_factory(
+  app_mngr::CommandCreator& get_creator_factory(
       hmi_apis::FunctionID::eType id,
       hmi_apis::messageType::eType message_type,
       app_mngr::commands::Command::CommandSource source) const;

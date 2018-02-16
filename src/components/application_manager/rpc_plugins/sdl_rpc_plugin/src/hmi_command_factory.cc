@@ -337,14 +337,14 @@ bool HMICommandFactory::IsAbleToProcess(
   return get_creator_factory(
              static_cast<hmi_apis::FunctionID::eType>(function_id),
              hmi_apis::messageType::INVALID_ENUM,
-             message_source).isAble();
+             message_source).CanBeCreated();
 }
 
-ICommandCreator& HMICommandFactory::get_creator_factory(
+CommandCreator& HMICommandFactory::get_creator_factory(
     hmi_apis::FunctionID::eType id,
     hmi_apis::messageType::eType message_type,
     application_manager::commands::Command::CommandSource source) const {
-  CommandCreatorFacotry factory(
+  CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
   switch (static_cast<int32_t>(id)) {
@@ -380,8 +380,8 @@ ICommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::BasicCommunication_PolicyUpdate: {
       return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::SDLPolicyUpdateResponse>()
-                 : factory.GetCreator<commands::SDLPolicyUpdate>();
+                 ? factory.GetCreator<commands::SDLPolicyUpdate>()
+                 : factory.GetCreator<commands::SDLPolicyUpdateResponse>();
     }
     case hmi_apis::FunctionID::SDL_GetURLS: {
       return hmi_apis::messageType::request == message_type
@@ -647,29 +647,32 @@ ICommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetSpeed> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetSpeed> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetSpeed> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetRpm: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehitcleInfo_GetRpm> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetRpm> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetRpm> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevel: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetFuelLevel> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetFuelLevel> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetFuelLevel> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState: {
       return hmi_apis::messageType::request == message_type
           ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                 hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState> >();
           : factory.GetCreator<
-                commands::VIGetVehicleDataRequestTemplate<hmi_apis::
+                commands::VIGetVehicleDataResponseTemplate<hmi_apis::
                     FunctionID::VehicleInfo_GetFuelLevelState>> ()
     }
     case hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption: {
@@ -677,151 +680,179 @@ ICommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::
                            VehicleInfo_GetInstantFuelConsumption> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetInstantFuelConsumption> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetInstantFuelConsumption> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::
                            VehicleInfo_GetExternalTemperature> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetExternalTemperature> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetExternalTemperature> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetPrndl: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetPrndl> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetPrndl> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetPrndl> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetVin: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetVin> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetVin> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetVin> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetTirePressure: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetTirePressure> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetTirePressure> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetTirePressure> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetOdometer> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetOdometer> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetOdometer> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBeltStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetBeltStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetBeltStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetBeltStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBodyInformation: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetBodyInformation> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetBodyInformation> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetBodyInformation> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetDeviceStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDriverBraking: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetDriverBraking> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetDriverBraking> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetDriverBraking> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetWiperStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetWiperStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetWiperStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetWiperStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetHeadLampStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetEngineTorque: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetEngineTorque> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetEngineTorque> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetEngineTorque> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::
                            VehicleInfo_GetAccPedalPosition> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetAccPedalPosition> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetAccPedalPosition> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::
                            VehicleInfo_GetSteeringWheelAngle> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetSteeringWheelAngle> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetSteeringWheelAngle> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetECallInfo: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetECallInfo> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetECallInfo> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetECallInfo> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetAirbagStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetEmergencyEvent> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::
                            VehicleInfo_GetClusterModeStatus> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::
-                           VehicleInfo_GetClusterModeStatus> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetClusterModeStatus> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetMyKey: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
                        hmi_apis::FunctionID::VehicleInfo_GetMyKey> >()
-                 : factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                       hmi_apis::FunctionID::VehicleInfo_GetMyKey> >();
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::VehicleInfo_GetMyKey> >();
     }
 #else
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
@@ -1632,8 +1663,8 @@ ICommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::Navigation_StopAudioStream: {
       return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::AudioStopStreamResponse>()
-                 : factory.GetCreator<commands::AudioStopStreamRequest>();
+                 ? factory.GetCreator<commands::AudioStopStreamRequest>()
+                 : factory.GetCreator<commands::AudioStopStreamResponse>();
     }
     case hmi_apis::FunctionID::Navigation_OnAudioDataStreaming: {
       return factory.GetCreator<commands::OnAudioDataStreamingNotification>();

@@ -9,17 +9,20 @@ SetInteriorVehicleDataResponse::SetInteriorVehicleDataResponse(
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    policy::PolicyHandlerInterface& policy_handle,
+    ResourceAllocationManager& resource_allocation_manager)
     : application_manager::commands::CommandResponseImpl(message,
                                                          application_manager,
                                                          rpc_service,
                                                          hmi_capabilities,
-                                                         policy_handle) {}
-SetInteriorVehicleDataResponse::~SetInteriorVehicleDataResponse(){}
+                                                         policy_handle) {
+  UNUSED(resource_allocation_manager);
+}
+SetInteriorVehicleDataResponse::~SetInteriorVehicleDataResponse() {}
 
 void SetInteriorVehicleDataResponse::Run() {
-    LOG4CXX_AUTO_TRACE(logger_);
-    application_manager_.GetRPCService().SendMessageToMobile(message_);
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 
 }  // namespace commands
