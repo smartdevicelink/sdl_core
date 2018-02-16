@@ -9,22 +9,26 @@ RCSetInteriorVehicleDataResponse::RCSetInteriorVehicleDataResponse(
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    policy::PolicyHandlerInterface& policy_handle,
+    ResourceAllocationManager& resource_allocation_manager)
     : application_manager::commands::ResponseFromHMI(message,
                                                      application_manager,
                                                      rpc_service,
                                                      hmi_capabilities,
-                                                     policy_handle) {}
-
-void RCSetInteriorVehicleDataResponse::Run() {
-    LOG4CXX_AUTO_TRACE(logger_);
-
-    app_mngr::event_engine::Event event(hmi_apis::FunctionID::RC_SetInteriorVehicleData);
-    event.set_smart_object(*message_);
-    event.raise(application_manager_.event_dispatcher());
+                                                     policy_handle) {
+  UNUSED(resource_allocation_manager);
 }
 
-RCSetInteriorVehicleDataResponse::~RCSetInteriorVehicleDataResponse(){}
+void RCSetInteriorVehicleDataResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  app_mngr::event_engine::Event event(
+      hmi_apis::FunctionID::RC_SetInteriorVehicleData);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
+
+RCSetInteriorVehicleDataResponse::~RCSetInteriorVehicleDataResponse() {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

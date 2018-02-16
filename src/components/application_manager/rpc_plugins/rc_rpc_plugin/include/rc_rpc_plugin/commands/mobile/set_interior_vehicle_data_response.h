@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_RESPONSE_H
 
 #include "application_manager/commands/command_response_impl.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -16,11 +17,12 @@ class SetInteriorVehicleDataResponse
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+      policy::PolicyHandlerInterface& policy_handle,
+      ResourceAllocationManager& resource_allocation_manager);
 
   void Run() OVERRIDE;
 
-  virtual ~SetInteriorVehicleDataResponse();
+  ~SetInteriorVehicleDataResponse();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
