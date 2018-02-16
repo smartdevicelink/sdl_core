@@ -56,6 +56,11 @@ class SDLCommandFactory : public app_mngr::CommandFactory {
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
+  bool IsAbleToProcess(
+      const int32_t,
+      const application_manager::commands::Command::CommandSource)
+      const OVERRIDE;
+
  private:
   app_mngr::ApplicationManager& app_manager_;
   app_mngr::rpc_service::RPCService& rpc_service_;
