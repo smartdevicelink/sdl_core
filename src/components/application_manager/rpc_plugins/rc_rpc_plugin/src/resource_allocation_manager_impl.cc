@@ -125,14 +125,12 @@ void ResourceAllocationManagerImpl::ReleaseResource(
 }
 
 void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
-  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
   LOG4CXX_AUTO_TRACE(logger_);
-  Apps app_list = GetRCApplications();
+  Apps app_list = RCRPCPlugin::GetRCApplications(app_mngr_);
 
   Apps::const_iterator app = app_list.begin();
   for (; app_list.end() != app; ++app) {
-    application_manager::ApplicationSharedPtr app_ptr = *app;
-    const uint32_t application_id = app_ptr->app_id();
+    application_manager::ApplicationSharedPtr app_ptr = *app;    const uint32_t application_id = app_ptr->app_id();
     Resources acquired_modules = GetAcquiredResources(application_id);
     std::sort(acquired_modules.begin(), acquired_modules.end());
 
@@ -355,7 +353,7 @@ void ResourceAllocationManagerImpl::OnPolicyEvent(
 
   if (PolicyEvent::kApplicationsDisabled == event) {
     ResetAllAllocations();
-    Apps app_list = GetRCApplications();
+    Apps app_list = RCRPCPlugin::GetRCApplications(app_mngr_);
     RemoveAppsSubscriptions(app_list);
     return;
   }
@@ -375,28 +373,6 @@ void ResourceAllocationManagerImpl::ResetAllAllocations() {
     sync_primitives::AutoLock lock(rejected_resources_for_application_lock_);
     rejected_resources_for_application_.clear();
   }
-}
-
-ResourceAllocationManagerImpl::Apps
-ResourceAllocationManagerImpl::GetRCApplications() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using application_manager::ApplicationSharedPtr;
-  using application_manager::ApplicationSet;
-  ApplicationSet accessor = app_mngr_.applications().GetData();
-
-  auto predicate = [](const ApplicationSharedPtr& app) {
-    auto uid = RCRPCPlugin::kRCPluginID;
-    return app ? app->QueryInterface(uid).valid() : false;
-  };
-
-  auto it = std::find_if(accessor.begin(), accessor.end(), predicate);
-
-  std::vector<ApplicationSharedPtr> result;
-  while (it != accessor.end()) {
-    result.push_back(*it);
-    it = std::find_if(++it, accessor.end(), predicate);
-  }
-  return result;
 }
 
 }  // namespace rc_rpc_plugin
