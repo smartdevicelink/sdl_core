@@ -147,6 +147,310 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
+CommandCreator& MobileCommandFactory::get_creator_factory(
+    mobile_apis::FunctionID::eType id,
+    mobile_apis::messageType::eType message_type,
+    app_mngr::commands::Command::CommandSource source) const {
+  CommandCreatorFactory factory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+
+  switch (id) {
+    case mobile_apis::FunctionID::RegisterAppInterfaceID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::RegisterAppInterfaceRequest>()
+                 : factory.GetCreator<commands::RegisterAppInterfaceResponse>();
+    }
+    case mobile_apis::FunctionID::UnregisterAppInterfaceID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::UnregisterAppInterfaceRequest>()
+                 : factory
+                       .GetCreator<commands::UnregisterAppInterfaceResponse>();
+    }
+    case mobile_apis::FunctionID::SetGlobalPropertiesID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SetGlobalPropertiesRequest>()
+                 : factory.GetCreator<commands::SetGlobalPropertiesResponse>();
+    }
+    case mobile_apis::FunctionID::ResetGlobalPropertiesID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ResetGlobalPropertiesRequest>()
+                 : factory
+                       .GetCreator<commands::ResetGlobalPropertiesResponse>();
+    }
+    case mobile_apis::FunctionID::AddCommandID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::AddCommandRequest>()
+                 : factory.GetCreator<commands::AddCommandResponse>();
+    }
+    case mobile_apis::FunctionID::DeleteCommandID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DeleteCommandRequest>()
+                 : factory.GetCreator<commands::DeleteCommandResponse>();
+    }
+    case mobile_apis::FunctionID::AddSubMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::AddSubMenuRequest>()
+                 : factory.GetCreator<commands::AddSubMenuResponse>();
+    }
+
+    case mobile_apis::FunctionID::DeleteSubMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DeleteSubMenuRequest>()
+                 : factory.GetCreator<commands::DeleteSubMenuResponse>();
+    }
+    case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::DeleteInteractionChoiceSetRequest>()
+                 : factory.GetCreator<
+                       commands::DeleteInteractionChoiceSetResponse>();
+    }
+    case mobile_apis::FunctionID::AlertID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::AlertRequest>()
+                 : factory.GetCreator<commands::AlertResponse>();
+    }
+    case mobile_apis::FunctionID::SpeakID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SpeakRequest>()
+                 : factory.GetCreator<commands::SpeakResponse>();
+    }
+    case mobile_apis::FunctionID::SliderID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SliderRequest>()
+                 : factory.GetCreator<commands::SliderResponse>();
+    }
+    case mobile_apis::FunctionID::PerformAudioPassThruID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::PerformAudioPassThruRequest>()
+                 : factory.GetCreator<commands::PerformAudioPassThruResponse>();
+    }
+
+    case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::CreateInteractionChoiceSetRequest>()
+                 : factory.GetCreator<
+                       commands::CreateInteractionChoiceSetResponse>();
+    }
+    case mobile_apis::FunctionID::PerformInteractionID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::PerformInteractionRequest>()
+                 : factory.GetCreator<commands::PerformInteractionResponse>();
+    }
+    case mobile_apis::FunctionID::EndAudioPassThruID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::EndAudioPassThruRequest>()
+                 : factory.GetCreator<commands::EndAudioPassThruResponse>();
+    }
+    case mobile_apis::FunctionID::PutFileID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::PutFileRequest>()
+                 : factory.GetCreator<commands::PutFileResponse>();
+    }
+    case mobile_apis::FunctionID::DeleteFileID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DeleteFileRequest>()
+                 : factory.GetCreator<commands::DeleteFileResponse>();
+    }
+    case mobile_apis::FunctionID::ListFilesID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ListFilesRequest>()
+                 : factory.GetCreator<commands::ListFilesResponse>();
+    }
+    case mobile_apis::FunctionID::SubscribeButtonID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SubscribeButtonRequest>()
+                 : factory.GetCreator<commands::SubscribeButtonResponse>();
+    }
+    case mobile_apis::FunctionID::UnsubscribeButtonID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::UnsubscribeButtonRequest>()
+                 : factory.GetCreator<commands::UnsubscribeButtonResponse>();
+    }
+    case mobile_apis::FunctionID::ShowConstantTBTID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowConstantTBTRequest>()
+                 : factory.GetCreator<commands::ShowConstantTBTResponse>();
+    }
+    case mobile_apis::FunctionID::ShowID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowRequest>()
+                 : factory.GetCreator<commands::ShowResponse>();
+    }
+    case mobile_apis::FunctionID::GetWayPointsID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowConstantTBTRequest>()
+                 : factory.GetCreator<commands::GetWayPointsResponse>();
+    }
+    case mobile_apis::FunctionID::SubscribeVehicleDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
+                 : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
+                 : factory
+                       .GetCreator<commands::UnsubscribeVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::SubscribeWayPointsID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SubscribeWayPointsRequest>()
+                 : factory.GetCreator<commands::SubscribeWayPointsResponse>();
+    }
+    case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowConstantTBTRequest>()
+                 : factory.GetCreator<commands::ShowConstantTBTResponse>();
+    }
+    case mobile_apis::FunctionID::GetSystemCapabilityID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetSystemCapabilityRequest>()
+                 : factory.GetCreator<commands::GetSystemCapabilityResponse>();
+    }
+    case mobile_apis::FunctionID::ReadDIDID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ReadDIDRequest>()
+                 : factory.GetCreator<commands::ReadDIDResponse>();
+    }
+    case mobile_apis::FunctionID::GetVehicleDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetVehicleDataRequest>()
+                 : factory.GetCreator<commands::GetVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::ScrollableMessageID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ScrollableMessageRequest>()
+                 : factory.GetCreator<commands::ScrollableMessageResponse>();
+    }
+
+    case mobile_apis::FunctionID::AlertManeuverID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::AlertManeuverRequest>()
+                 : factory.GetCreator<commands::AlertManeuverResponse>();
+    }
+    case mobile_apis::FunctionID::SetAppIconID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SetAppIconRequest>()
+                 : factory.GetCreator<commands::SetAppIconResponse>();
+    }
+    case mobile_apis::FunctionID::SetDisplayLayoutID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SetDisplayLayoutRequest>()
+                 : factory.GetCreator<commands::SetDisplayLayoutResponse>();
+    }
+    case mobile_apis::FunctionID::UpdateTurnListID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::UpdateTurnListRequest>()
+                 : factory.GetCreator<commands::UpdateTurnListResponse>();
+    }
+    case mobile_apis::FunctionID::ChangeRegistrationID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ChangeRegistrationRequest>()
+                 : factory.GetCreator<commands::ChangeRegistrationResponse>();
+    }
+    case mobile_apis::FunctionID::GetDTCsID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::GetDTCsRequest>()
+                 : factory.GetCreator<commands::GetDTCsResponse>();
+    }
+    case mobile_apis::FunctionID::DiagnosticMessageID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DiagnosticMessageRequest>()
+                 : factory.GetCreator<commands::DiagnosticMessageResponse>();
+    }
+    case mobile_apis::FunctionID::SetMediaClockTimerID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SetMediaClockRequest>()
+                 : factory.GetCreator<commands::SetMediaClockTimerResponse>();
+    }
+    case mobile_apis::FunctionID::SystemRequestID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SystemRequest>()
+                 : factory.GetCreator<commands::SystemResponse>();
+    }
+    case mobile_apis::FunctionID::SendLocationID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SendLocationRequest>()
+                 : factory.GetCreator<commands::SendLocationResponse>();
+    }
+    case mobile_apis::FunctionID::DialNumberID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DialNumberRequest>()
+                 : factory.GetCreator<commands::DialNumberResponse>();
+    }
+    case mobile_apis::FunctionID::SendHapticDataID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SendHapticDataRequest>()
+                 : factory.GetCreator<commands::SendHapticDataResponse>();
+    }
+    case mobile_apis::FunctionID::OnButtonEventID: {
+      return factory.GetCreator<commands::mobile::OnButtonEventNotification>();
+    }
+    case mobile_apis::FunctionID::OnButtonPressID: {
+      return factory.GetCreator<commands::mobile::OnButtonPressNotification>();
+    }
+    case mobile_apis::FunctionID::OnAudioPassThruID: {
+      return factory.GetCreator<commands::OnAudioPassThruNotification>();
+    }
+    case mobile_apis::FunctionID::OnVehicleDataID: {
+      return factory.GetCreator<commands::OnVehicleDataNotification>();
+    }
+    case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
+      return factory
+          .GetCreator<commands::OnAppInterfaceUnregisteredNotification>();
+    }
+    case mobile_apis::FunctionID::OnCommandID: {
+      return factory.GetCreator<commands::OnCommandNotification>();
+    }
+    case mobile_apis::FunctionID::OnTBTClientStateID: {
+      return factory.GetCreator<commands::OnTBTClientStateNotification>();
+    }
+    case mobile_apis::FunctionID::OnDriverDistractionID: {
+      return factory
+          .GetCreator<commands::mobile::OnDriverDistractionNotification>();
+    }
+    case mobile_apis::FunctionID::OnLanguageChangeID: {
+      return factory.GetCreator<commands::OnLanguageChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnPermissionsChangeID: {
+      return factory.GetCreator<commands::OnPermissionsChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnHMIStatusID: {
+      using app_mngr::commands::Command;
+      return Command::CommandSource::SOURCE_MOBILE == source
+                 ? factory.GetCreator<
+                       commands::OnHMIStatusNotificationFromMobile>()
+                 : factory.GetCreator<commands::OnHMIStatusNotification>();
+    }
+    case mobile_apis::FunctionID::OnKeyboardInputID: {
+      return factory
+          .GetCreator<commands::mobile::OnKeyBoardInputNotification>();
+    }
+    case mobile_apis::FunctionID::OnTouchEventID: {
+      return factory.GetCreator<commands::mobile::OnTouchEventNotification>();
+    }
+    case mobile_apis::FunctionID::OnSystemRequestID: {
+      return factory
+          .GetCreator<commands::mobile::OnSystemRequestNotification>();
+    }
+    case mobile_apis::FunctionID::OnHashChangeID: {
+      using app_mngr::commands::Command;
+      return factory.GetCreator<commands::mobile::OnHashChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnWayPointChangeID: {
+      using app_mngr::commands::Command;
+      return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::GenericResponseID: {
+      using app_mngr::commands::Command;
+      return factory.GetCreator<commands::GenericResponse>();
+    }
+    default: { return factory.GetCreator<InvalidCommand>(); }
+  }
+}
+
 MobileCommandFactory::MobileCommandFactory(
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -157,972 +461,33 @@ MobileCommandFactory::MobileCommandFactory(
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler) {}
 
+bool MobileCommandFactory::IsAbleToProcess(
+    const int32_t function_id,
+    const application_manager::commands::Command::CommandSource message_source)
+    const {
+  using app_mngr::commands::Command;
+  return get_creator_factory(
+             static_cast<mobile_apis::FunctionID::eType>(function_id),
+             mobile_apis::messageType::INVALID_ENUM,
+             message_source).CanBeCreated();
+}
+
 CommandSharedPtr MobileCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  CommandSharedPtr command;
-  const int function_id =
-      (*message)[strings::params][strings::function_id].asInt();
+  mobile_apis::messageType::eType message_type =
+      static_cast<mobile_apis::messageType::eType>(
+          (*message)[strings::params][strings::message_type].asInt());
+
+  mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asInt());
+
   LOG4CXX_DEBUG(
       logger_,
       "MobileCommandFactory::CreateCommand function_id: " << function_id);
 
-  switch (function_id) {
-    case mobile_apis::FunctionID::RegisterAppInterfaceID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(
-            new commands::RegisterAppInterfaceRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-
-      } else {
-        command.reset(
-            new commands::RegisterAppInterfaceResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::UnregisterAppInterfaceID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kRequest)) {
-        command.reset(
-            new commands::UnregisterAppInterfaceRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(
-            new commands::UnregisterAppInterfaceResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SetGlobalPropertiesResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::SetGlobalPropertiesRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ResetGlobalPropertiesID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::ResetGlobalPropertiesResponse(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      } else {
-        command.reset(
-            new commands::ResetGlobalPropertiesRequest(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::AddCommandID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::AddCommandResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::AddCommandRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DeleteCommandID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::DeleteCommandResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::DeleteCommandRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::AddSubMenuID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::AddSubMenuResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::AddSubMenuRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DeleteSubMenuID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::DeleteSubMenuResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::DeleteSubMenuRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::DeleteInteractionChoiceSetResponse(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      } else {
-        command.reset(new commands::DeleteInteractionChoiceSetRequest(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::AlertID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::AlertResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::AlertRequest(message,
-                                                 application_manager_,
-                                                 rpc_service_,
-                                                 hmi_capabilities_,
-                                                 policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SpeakID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SpeakResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::SpeakRequest(message,
-                                                 application_manager_,
-                                                 rpc_service_,
-                                                 hmi_capabilities_,
-                                                 policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SliderID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SliderResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(new commands::SliderRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::PerformAudioPassThruID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::PerformAudioPassThruResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::PerformAudioPassThruRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::CreateInteractionChoiceSetResponse(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      } else {
-        command.reset(new commands::CreateInteractionChoiceSetRequest(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::PerformInteractionID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::PerformInteractionResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::PerformInteractionRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::EndAudioPassThruID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::EndAudioPassThruResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::EndAudioPassThruRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::PutFileID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::PutFileResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(new commands::PutFileRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DeleteFileID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::DeleteFileResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::DeleteFileRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ListFilesID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::ListFilesResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(new commands::ListFilesRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SubscribeButtonID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SubscribeButtonResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::SubscribeButtonRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::UnsubscribeButtonID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::UnsubscribeButtonResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::UnsubscribeButtonRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ShowConstantTBTID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::ShowConstantTBTResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::ShowConstantTBTRequest(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ShowID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::ShowResponse(message,
-                                                 application_manager_,
-                                                 rpc_service_,
-                                                 hmi_capabilities_,
-                                                 policy_handler_));
-      } else {
-        command.reset(new commands::ShowRequest(message,
-                                                application_manager_,
-                                                rpc_service_,
-                                                hmi_capabilities_,
-                                                policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::GetWayPointsID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::GetWayPointsResponse>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      } else {
-        command = utils::MakeShared<commands::GetWayPointsRequest>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SubscribeVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SubscribeVehicleDataResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(
-            new commands::SubscribeVehicleDataRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::UnsubscribeVehicleDataResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(
-            new commands::UnsubscribeVehicleDataRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SubscribeWayPointsID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::SubscribeWayPointsResponse>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      } else {
-        command = utils::MakeShared<commands::SubscribeWayPointsRequest>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::UnsubscribeWayPointsResponse>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      } else {
-        command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_);
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::GetSystemCapabilityID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::GetSystemCapabilityResponse(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      } else {
-        command.reset(
-            new commands::GetSystemCapabilityRequest(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ReadDIDID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::ReadDIDResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(new commands::ReadDIDResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::GetVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::GetVehicleDataResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::GetVehicleDataRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ScrollableMessageID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::ScrollableMessageResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::ScrollableMessageRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::AlertManeuverID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::AlertManeuverResponse(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      } else {
-        command.reset(new commands::AlertManeuverRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SetAppIconID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SetAppIconResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::SetAppIconRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SetDisplayLayoutID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SetDisplayLayoutResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(
-            new commands::SetDisplayLayoutRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::UpdateTurnListID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::UpdateTurnListResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::UpdateTurnListRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::ChangeRegistrationID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::ChangeRegistrationResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(
-            new commands::ChangeRegistrationRequest(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::GetDTCsID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::GetDTCsResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(new commands::GetDTCsRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DiagnosticMessageID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::DiagnosticMessageResponse(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      } else {
-        command.reset(
-            new commands::DiagnosticMessageRequest(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SetMediaClockTimerID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(
-            new commands::SetMediaClockTimerResponse(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      } else {
-        command.reset(new commands::SetMediaClockRequest(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SystemRequestID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SystemResponse(message,
-                                                   application_manager_,
-                                                   rpc_service_,
-                                                   hmi_capabilities_,
-                                                   policy_handler_));
-      } else {
-        command.reset(new commands::SystemRequest(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SendLocationID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SendLocationResponse(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      } else {
-        command.reset(new commands::SendLocationRequest(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::DialNumberID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::DialNumberResponse(message,
-                                                       application_manager_,
-                                                       rpc_service_,
-                                                       hmi_capabilities_,
-                                                       policy_handler_));
-      } else {
-        command.reset(new commands::DialNumberRequest(message,
-                                                      application_manager_,
-                                                      rpc_service_,
-                                                      hmi_capabilities_,
-                                                      policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::SendHapticDataID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SendHapticDataResponse(message,
-                                                           application_manager_,
-                                                           rpc_service_,
-                                                           hmi_capabilities_,
-                                                           policy_handler_));
-      } else {
-        command.reset(new commands::SendHapticDataRequest(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::OnButtonEventID: {
-      command.reset(
-          new commands::mobile::OnButtonEventNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(
-          new commands::mobile::OnButtonPressNotification(message,
-                                                          application_manager_,
-                                                          rpc_service_,
-                                                          hmi_capabilities_,
-                                                          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnAudioPassThruID: {
-      command.reset(
-          new commands::OnAudioPassThruNotification(message,
-                                                    application_manager_,
-                                                    rpc_service_,
-                                                    hmi_capabilities_,
-                                                    policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnVehicleDataID: {
-      command.reset(
-          new commands::OnVehicleDataNotification(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
-      command.reset(new commands::OnAppInterfaceUnregisteredNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnCommandID: {
-      command.reset(new commands::OnCommandNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnTBTClientStateID: {
-      command.reset(
-          new commands::OnTBTClientStateNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnDriverDistractionID: {
-      command.reset(new commands::mobile::OnDriverDistractionNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnLanguageChangeID: {
-      command.reset(
-          new commands::OnLanguageChangeNotification(message,
-                                                     application_manager_,
-                                                     rpc_service_,
-                                                     hmi_capabilities_,
-                                                     policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnPermissionsChangeID: {
-      command.reset(
-          new commands::OnPermissionsChangeNotification(message,
-                                                        application_manager_,
-                                                        rpc_service_,
-                                                        hmi_capabilities_,
-                                                        policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnHMIStatusID: {
-      if (app_mngr::commands::Command::SOURCE_SDL == source) {
-        command.reset(
-            new commands::OnHMIStatusNotification(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-      } else {
-        command.reset(new commands::OnHMIStatusNotificationFromMobile(
-            message,
-            application_manager_,
-            rpc_service_,
-            hmi_capabilities_,
-            policy_handler_));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::OnKeyboardInputID: {
-      command.reset(new commands::mobile::OnKeyBoardInputNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnTouchEventID: {
-      command.reset(
-          new commands::mobile::OnTouchEventNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnSystemRequestID: {
-      command.reset(new commands::mobile::OnSystemRequestNotification(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnHashChangeID: {
-      command.reset(
-          new commands::mobile::OnHashChangeNotification(message,
-                                                         application_manager_,
-                                                         rpc_service_,
-                                                         hmi_capabilities_,
-                                                         policy_handler_));
-      break;
-    }
-    case mobile_apis::FunctionID::OnWayPointChangeID: {
-      command = utils::MakeShared<commands::OnWayPointChangeNotification>(
-          message,
-          application_manager_,
-          rpc_service_,
-          hmi_capabilities_,
-          policy_handler_);
-      break;
-    }
-    default: {
-      (*message)[strings::params][strings::function_id] =
-          static_cast<int32_t>(mobile_apis::FunctionID::GenericResponseID);
-      command.reset(new commands::GenericResponse(message,
-                                                  application_manager_,
-                                                  rpc_service_,
-                                                  hmi_capabilities_,
-                                                  policy_handler_));
-    }
-  }
-  return command;
+  return get_creator_factory(function_id, message_type, source).create(message);
 }
 
 }  // namespace application_manager

@@ -49,6 +49,10 @@ class MockCommandFactory : public application_manager::CommandFactory {
                application_manager::CommandSharedPtr(
                    const application_manager::commands::MessageSharedPtr&,
                    application_manager::commands::Command::CommandSource));
+  MOCK_CONST_METHOD2(
+      IsAbleToProcess,
+      bool(const int32_t,
+           const application_manager::commands::Command::CommandSource));
 
   //               const commands::MessageSharedPtr& message,
   //                   application_manager::commands::Command::CommandSource));

@@ -65,4 +65,17 @@ app_mngr::CommandSharedPtr SDLCommandFactory::CreateCommand(
   }
 }
 
+bool SDLCommandFactory::IsAbleToProcess(
+    const int32_t FunctionID,
+    const application_manager::commands::Command::CommandSource source) const {
+  bool is_hmi_command_factory_able_to_process =
+      hmi_command_factory_->IsAbleToProcess(FunctionID, source);
+  bool is_mobile_command_factory_able_to_process =
+      mobile_command_factory_->IsAbleToProcess(FunctionID, source);
+
+  return app_mngr::commands::Command::SOURCE_HMI == source
+             ? is_hmi_command_factory_able_to_process
+             : is_mobile_command_factory_able_to_process;
+}
+
 }  // namespace application_manager
