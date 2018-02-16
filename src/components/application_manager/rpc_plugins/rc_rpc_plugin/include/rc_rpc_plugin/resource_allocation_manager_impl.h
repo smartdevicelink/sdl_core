@@ -8,8 +8,7 @@
 
 namespace rc_rpc_plugin {
 
-// typedef rc_event_engine::EventDispatcher<application_manager::MessagePtr,
-//                                         std::string> RCEventDispatcher;
+typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
 class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
@@ -65,9 +64,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       application_manager::ApplicationSharedPtr application) FINAL;
 
  private:
-  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
-
-  Apps GetRCApplications();
 
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
@@ -136,6 +132,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
+
 };
 }  // rc_rpc_plugin
 
