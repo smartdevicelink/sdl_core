@@ -24,7 +24,17 @@ class RCCommandFactory : public application_manager::CommandFactory {
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
+  virtual bool IsAbleToProcess(
+      const int32_t,
+      const application_manager::commands::Command::CommandSource)
+      const OVERRIDE;
+
  private:
+  app_mngr::ICommandCreator& get_creator_factory(
+      hmi_apis::FunctionID::eType id,
+      hmi_apis::messageType::eType message_type,
+      app_mngr::commands::Command::CommandSource source) const;
+
   application_manager::CommandSharedPtr CreateMobileCommand(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::commands::Command::CommandSource source);

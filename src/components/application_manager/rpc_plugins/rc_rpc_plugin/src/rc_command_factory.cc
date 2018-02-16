@@ -80,6 +80,21 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
   }
 }
 
+bool RCCommandFactory::IsAbleToProcess(
+    const int32_t function_id,
+    const application_manager::commands::Command::CommandSource message_source)
+    const {
+  return get_creator_factory(
+             static_cast<hmi_apis::FunctionID::eType>(function_id),
+             hmi_apis::messageType::INVALID_ENUM,
+             message_source).isAble();
+}
+
+ICommandCreator& RCCommandFactory::get_creator_factory(
+    hmi_apis::FunctionID::eType id,
+    hmi_apis::messageType::eType message_type,
+    application_manager::commands::Command::CommandSource source) const {}
+
 CommandSharedPtr RCCommandFactory::CreateMobileCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
