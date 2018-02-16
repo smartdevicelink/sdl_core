@@ -35,6 +35,16 @@
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
+
+namespace {
+struct AppExtensionPredicate {
+  AppExtensionUID uid;
+  bool operator()(const ApplicationSharedPtr app) {
+    return app ? app->QueryInterface(uid).valid() : false;
+  }
+};
+}
+
 namespace commands {
 
 CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")

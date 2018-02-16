@@ -1663,22 +1663,10 @@ void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
 }
 
 void ApplicationManagerImpl::RemoveHMIFakeParameters(
-    application_manager::MessagePtr& message) {
+    application_manager::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  using namespace NsSmartDeviceLink::NsJSONHandler;
-  SmartObject so;
-
-  Formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
-                                           hmi_apis::messageType::eType>(
-      message->json_message(), so);
-
-  std::string formatted_message;
-  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
   hmi_apis::HMI_API factory;
-  factory.attachSchema(so, true);
-  Formatters::FormatterJsonRpc::ToString(so, formatted_message);
-  message->set_json_message(formatted_message);
+  factory.attachSchema(*message, true);
 }
 
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
@@ -1866,60 +1854,6 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
   return true;
-}
-
-MessageValidationResult ApplicationManagerImpl::ValidateMessageBySchema(
-    const Message& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject so;
-  using namespace protocol_handler;
-  switch (message.protocol_version()) {
-    case MajorProtocolVersion::PROTOCOL_VERSION_5:
-    case MajorProtocolVersion::PROTOCOL_VERSION_4:
-    case MajorProtocolVersion::PROTOCOL_VERSION_3:
-    case MajorProtocolVersion::PROTOCOL_VERSION_2: {
-      const bool conversion_result =
-          formatters::CFormatterJsonSDLRPCv2::fromString(
-              message.json_message(),
-              so,
-              message.function_id(),
-              message.type(),
-              message.correlation_id());
-      if (!conversion_result) {
-        return INVALID_JSON;
-      }
-
-      if (!mobile_so_factory().attachSchema(so, true)) {
-        return INVALID_METADATA;
-      }
-
-      if (so.validate() != smart_objects::Errors::OK) {
-        return SCHEMA_MISMATCH;
-      }
-      break;
-    }
-    case MajorProtocolVersion::PROTOCOL_VERSION_HMI: {
-      const int32_t conversion_result = formatters::FormatterJsonRpc::
-          FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
-              message.json_message(), so);
-      if (0 != conversion_result) {
-        LOG4CXX_WARN(logger_,
-                     "Failed to parse json from HMI: " << conversion_result);
-        return INVALID_JSON;
-      }
-
-      if (!hmi_so_factory().attachSchema(so, true)) {
-        return INVALID_METADATA;
-      }
-
-      if (so.validate() != smart_objects::Errors::OK) {
-        return SCHEMA_MISMATCH;
-      }
-      break;
-    }
-    default: { return UNSUPPORTED_PROTOCOL; }
-  }
-  return SUCCESS;
 }
 
 hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
