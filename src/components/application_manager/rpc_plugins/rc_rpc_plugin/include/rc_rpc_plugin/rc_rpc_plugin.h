@@ -56,6 +56,9 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 
   static const uint32_t kRCPluginID = 153;
 
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+  static Apps GetRCApplications(application_manager::ApplicationManager& app_mngr);
+
  private:
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;

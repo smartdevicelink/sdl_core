@@ -214,21 +214,5 @@ DEPRECATED void CommandImpl::ReplaceHMIByMobileAppId(
   }
 }
 
-std::vector<ApplicationSharedPtr> CommandImpl::GetApplications(
-    AppExtensionUID uid) {
-  ApplicationSet accessor = application_manager_.applications().GetData();
-  AppExtensionPredicate predicate;
-  predicate.uid = uid;
-
-  std::vector<ApplicationSharedPtr> result;
-  ApplicationSetConstIt it =
-      std::find_if(accessor.begin(), accessor.end(), predicate);
-  while (it != accessor.end()) {
-    result.push_back(*it);
-    it = std::find_if(++it, accessor.end(), predicate);
-  }
-  return result;
-}
-
 }  // namespace commands
 }  // namespace application_manager

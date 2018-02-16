@@ -1008,7 +1008,8 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
@@ -1061,7 +1062,8 @@ TEST_F(PolicyHandlerTest,
                   kAppId1_,
                   mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
-  ON_CALL(app_manager_, GetRPCService()).WillByDefault(ReturnRef(mock_rpc_service_));
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, commands::Command::SOURCE_SDL));
 
