@@ -12,18 +12,18 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
-    ResourceAllocationManager& resource_allocation_manager,
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : RCCommandRequest(resource_allocation_manager,
-                       message,
+    policy::PolicyHandlerInterface& policy_handle,
+    ResourceAllocationManager& resource_allocation_manager)
+    : RCCommandRequest(message,
                        application_manager,
                        rpc_service,
                        hmi_capabilities,
-                       policy_handle) {}
+                       policy_handle,
+                       resource_allocation_manager) {}
 bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const std::string& module_type) {
@@ -100,6 +100,8 @@ void GetInteriorVehicleDataRequest::on_event(
   SendResponse(result, result_code, response_info.c_str());
 }
 
+GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
+
 void GetInteriorVehicleDataRequest::ProccessSubscription(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -142,8 +144,9 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
-  const std::string module_type =
-          (*message_)[app_mngr::strings::msg_params][message_params::kModuleData][message_params::kModuleType].asString();
+    const std::string module_type =
+        (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                   [message_params::kModuleType].asString();
     if (response_subscribe) {
       LOG4CXX_DEBUG(logger_,
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
@@ -173,7 +176,8 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
     const bool is_app_already_subscribed =
         extension->IsSubscibedToInteriorVehicleData(
             (*message_)[app_mngr::strings::msg_params]
-					   [message_params::kModuleData][message_params::kModuleType].asString());
+                       [message_params::kModuleData]
+                       [message_params::kModuleType].asString());
     const bool app_wants_to_subscribe =
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();
