@@ -159,7 +159,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   if (module_type_and_data_match) {
     const smart_objects::SmartObject* rc_capabilities =
-        application_manager_.hmi_capabilities().rc_capability();
+        hmi_capabilities_.rc_capability();
     if (rc_capabilities &&
         !CheckIfModuleDataExistInCapabilities(*rc_capabilities, module_data)) {
       LOG4CXX_WARN(logger_, "Accessing not supported module data");
