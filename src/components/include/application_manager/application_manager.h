@@ -186,8 +186,13 @@ class ApplicationManager {
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
 
-  virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
 #endif  // SDL_REMOTE_CONTROL
+  virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+#ifdef BUILD_TESTS
+  virtual void SetPluginManager(
+      std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager) = 0;
+#endif
 
   virtual std::vector<ApplicationSharedPtr>
   applications_with_mobile_projection() = 0;
