@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "gmock/gmock.h"
 
@@ -57,6 +58,7 @@
 namespace test {
 namespace components {
 namespace application_manager_test {
+using application_manager::plugin_manager::RPCPluginManager;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
@@ -84,11 +86,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                          const std::string& policy_app_id));
   MOCK_METHOD2(ChangeAppsHMILevel,
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
-  MOCK_METHOD0(GetPluginManager,
-               application_manager::plugin_manager::RPCPluginManager&());
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
 #endif  // SDL_REMOTE_CONTROL
+  MOCK_METHOD0(GetPluginManager, RPCPluginManager&());
+
+  MOCK_METHOD1(SetPluginManager,
+               void(std::unique_ptr<RPCPluginManager>& plugin_manager));
 
   MOCK_CONST_METHOD1(
       application_by_hmi_app,
