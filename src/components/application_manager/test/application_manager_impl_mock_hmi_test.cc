@@ -50,6 +50,9 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/mock_protocol_handler.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_plugin.h"
+#include "utils/optional.h"
 
 namespace test {
 namespace components {
@@ -162,6 +165,8 @@ TEST_F(ApplicationManagerImplMockHmiTest,
   const std::string mac_address = "MA:CA:DD:RE:SS";
   const connection_handler::DeviceHandle device_id = 1u;
   const custom_str::CustomString app_name("");
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
 
   utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
       application_id,
@@ -172,6 +177,10 @@ TEST_F(ApplicationManagerImplMockHmiTest,
       utils::SharedPtr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager()),
       *app_manager_impl_);
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
 
   app_manager_impl_->AddMockApplication(app_impl);
 
@@ -183,9 +192,19 @@ TEST_F(ApplicationManagerImplMockHmiTest,
 
   MockCommandFactory mock_command_factory;
 
-  // Skip sending notification on device switching as it is not the goal here
+  //  // Skip sending notification on device switching as it is not the goal
+  //  here
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(utils::SharedPtr<commands::Command>()));
+
+  plugin_manager::MockRPCPlugin mock_rpc_plugin;
+  utils::Optional<plugin_manager::RPCPlugin> mock_rpc_plugin_opt =
+      mock_rpc_plugin;
+
+  EXPECT_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
+      .WillRepeatedly(Return(mock_rpc_plugin_opt));
+  ON_CALL(mock_rpc_plugin, GetCommandFactory())
+      .WillByDefault(ReturnRef(mock_command_factory));
 
   app_manager_impl_->OnDeviceSwitchingStart(bt, usb);
 

@@ -1,3 +1,9 @@
+# Copyright (c) 2017, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
 # Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
 #
@@ -24,20 +30,15 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
+include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${COMPONENTS_DIR}/application_manager/test/include
-  ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/include/
-  ${COMPONENTS_DIR}/include/test/application_manager/
+  ${COMPONENTS_DIR}/rc_rpc_plugin/include/
+  ${COMPONENTS_DIR}/rc_rpc_plugin/include/rc_rpc_plugin/
+  ${COMPONENTS_DIR}/rc_rpc_plugin/include/rc_rpc_plugin/commands/
   ${COMPONENTS_DIR}/rc_rpc_plugin/test/include
-  )
-
-set (RC_TEST_SOURCES
-${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 )
 
-set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
+set(RC_COMMANDS_TEST_DIR ${RC_TEST_DIR}/commands)
 
 file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
@@ -45,25 +46,17 @@ file(GLOB SOURCES
 )
 
 set(LIBRARIES
-  RCRpcPluginStaticLib
-  ApplicationManager
-  SmartObjects
-  ProtocolHandler
-  MessageHelper
-  connectionHandler
+  gmock
+  RemoteControlModule
   Utils
+  SmartObjects
   jsoncpp
-  gmock_main
-  dl
+  HMI_API
+  MOBILE_API
+  ApplicationManager
+  AMHMICommandsLibrary
+  AMMobileCommandsLibrary
+  connectionHandler
 )
 
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
-endif()
-
 create_test("rc_commands_test" "${SOURCES}" "${LIBRARIES}" )
-create_test("resourse_allocation_manager_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
-
