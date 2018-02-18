@@ -1610,9 +1610,9 @@ class ApplicationManagerImpl
   std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
+  std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
 
 #ifdef SDL_REMOTE_CONTROL
-  std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
 
   /**
    * @brief Map contains apps with HMI state before incoming call
@@ -1709,6 +1709,12 @@ class ApplicationManagerImpl
    * @param mock_app the mock app to be registered
    */
   void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
+
+  virtual void SetPluginManager(
+      std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager)
+      OVERRIDE {
+    plugin_manager_.reset(plugin_manager.release());
+  }
 
  private:
 #endif
