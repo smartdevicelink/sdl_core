@@ -48,7 +48,7 @@ void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject* rc_capabilities =
-      application_manager_.hmi_capabilities().rc_capability();
+      hmi_capabilities_.rc_capability();
   const std::string module_type = ModuleType();
   if (rc_capabilities &&
       !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
