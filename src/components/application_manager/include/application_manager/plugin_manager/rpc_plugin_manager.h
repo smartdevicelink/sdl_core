@@ -12,6 +12,7 @@ namespace plugin_manager {
 
 class RPCPluginManager {
  public:
+  virtual ~RPCPluginManager() {}
   /**
    * @brief LoadPlugins load plugins from plugin folder.
    * Already loaded plugins should continue be loaded.
