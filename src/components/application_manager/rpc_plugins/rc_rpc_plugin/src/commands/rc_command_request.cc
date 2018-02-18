@@ -100,8 +100,7 @@ bool RCCommandRequest::CheckDriverConsent() {
 rc_rpc_plugin::TypeAccess RCCommandRequest::CheckModule(
     const std::string& module_type,
     application_manager::ApplicationSharedPtr app) {
-  return application_manager_.GetPolicyHandler().CheckModule(
-             app->policy_app_id(), module_type)
+  return policy_handler_.CheckModule(app->policy_app_id(), module_type)
              ? rc_rpc_plugin::TypeAccess::kAllowed
              : rc_rpc_plugin::TypeAccess::kDisallowed;
 }
