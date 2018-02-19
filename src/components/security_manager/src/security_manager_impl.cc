@@ -143,7 +143,7 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
 
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
-  // return exists SSLCOntext for current connection/session
+  // return existed SSLCOntext for current connection/session
   if (ssl_context) {
     return ssl_context;
   }
