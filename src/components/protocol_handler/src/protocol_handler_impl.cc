@@ -1688,6 +1688,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 }
 
 void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
+  LOG4CXX_AUTO_TRACE(logger_);
   const ProtocolFramePtrList& frame_list = multiframe_builder_.PopMultiframes();
   for (ProtocolFramePtrList::const_iterator it = frame_list.begin();
        it != frame_list.end();
@@ -1934,6 +1935,11 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
                              << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
+  // Special handling for decrypted FIRST_FRAME
+  if (packet->frame_type() == FRAME_TYPE_FIRST && packet->protection_flag()) {
+    packet->HandleRawFirstFrameData(out_data);
+    return RESULT_OK;
+  }
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
 }

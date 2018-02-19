@@ -403,25 +403,32 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
                                                 size_t in_data_size,
                                                 const uint8_t** const out_data,
                                                 size_t* out_data_size) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock locker(bio_locker);
   if (!SSL_is_init_finished(connection_)) {
+    LOG4CXX_ERROR(logger_, "SSL initilization is not finished");
     return false;
   }
 
-  if (!in_data || !in_data_size) {
+  if (!in_data || (0 == in_data_size)) {
+    LOG4CXX_ERROR(logger_, "IN data ptr or IN data size is 0");
     return false;
   }
+
   BIO_write(bioIn_, in_data, in_data_size);
   int len = BIO_ctrl_pending(bioFilter_);
+
   ptrdiff_t offset = 0;
 
   *out_data_size = 0;
-  while (len) {
+  *out_data = NULL;
+  while (len > 0) {
     EnsureBufferSizeEnough(len + offset);
     len = BIO_read(bioFilter_, buffer_ + offset, len);
     // TODO(EZamakhov): investigate BIO_read return 0, -1 and -2 meanings
     if (len <= 0) {
       // Reset filter and connection deinitilization instead
+      LOG4CXX_ERROR(logger_, "Read error occured. Read data lenght : " << len);
       BIO_ctrl(bioFilter_, BIO_CTRL_RESET, 0, NULL);
       return false;
     }
