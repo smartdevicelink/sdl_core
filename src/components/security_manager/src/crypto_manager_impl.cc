@@ -274,13 +274,14 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if (context_ == NULL) {
+  if (NULL == context_) {
     return NULL;
   }
 
   SSL* conn = SSL_new(context_);
-  if (conn == NULL)
+  if (NULL == conn) {
     return NULL;
+  }
 
   if (get_settings().security_manager_mode() == SERVER) {
     SSL_set_accept_state(conn);
