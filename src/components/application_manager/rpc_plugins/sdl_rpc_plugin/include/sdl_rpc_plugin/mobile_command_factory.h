@@ -58,7 +58,7 @@ class MobileCommandFactory : public app_mngr::CommandFactory {
       const OVERRIDE;
 
  private:
-  app_mngr::ICommandCreator& get_creator_factory(
+  app_mngr::CommandCreator& get_creator_factory(
       mobile_apis::FunctionID::eType id,
       mobile_apis::messageType::eType message_type,
       app_mngr::commands::Command::CommandSource source) const;

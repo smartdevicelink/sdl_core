@@ -22,7 +22,7 @@ class ButtonPressResponse
   /**
    * @brief ButtonPressResponse class destructor
    */
-  virtual ~ButtonPressResponse();
+  ~ButtonPressResponse();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

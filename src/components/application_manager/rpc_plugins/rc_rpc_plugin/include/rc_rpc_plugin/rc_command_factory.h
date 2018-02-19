@@ -31,11 +31,11 @@ class RCCommandFactory : public application_manager::CommandFactory {
       const OVERRIDE;
 
  private:
-  app_mngr::ICommandCreator& get_mobile_creator_factory(
+  app_mngr::CommandCreator& get_mobile_creator_factory(
       mobile_apis::FunctionID::eType id,
       mobile_apis::messageType::eType message_type) const;
 
-  app_mngr::ICommandCreator& get_hmi_creator_factory(
+  app_mngr::CommandCreator& get_hmi_creator_factory(
       hmi_apis::FunctionID::eType id,
       hmi_apis::messageType::eType message_type) const;
 

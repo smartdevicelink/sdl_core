@@ -118,5 +118,8 @@ void RCOnRemoteControlSettingsNotification::Run() {
   }
 }
 
+RCOnRemoteControlSettingsNotification::
+    ~RCOnRemoteControlSettingsNotification() {}
+
 }  // namespace commands
 }  // namespace rc_rpc_plugin

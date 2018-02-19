@@ -31,7 +31,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   /**
    * @brief GetInteriorVehicleDataRequest class destructor
    */
-  virtual ~GetInteriorVehicleDataRequest();
+  ~GetInteriorVehicleDataRequest();
 
  private:
   /**

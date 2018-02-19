@@ -58,36 +58,69 @@ class CommandFactory {
   virtual CommandSharedPtr CreateCommand(
       const commands::MessageSharedPtr& message,
       commands::Command::CommandSource source) = 0;
+  /**
+  * @param int32_t command id
+  * @param CommandSource source
+  * @return return true if command can be create, else return false
+  **/
   virtual bool IsAbleToProcess(
       const int32_t,
       const application_manager::commands::Command::CommandSource) const = 0;
 };
 
-class ICommandCreator {
+/**
+ * @brief Command creator interface for create commands
+ **/
+class CommandCreator {
  public:
-  virtual ~ICommandCreator() {}
-  virtual bool isAble() const = 0;
+  /**
+   * @brief ~CommandCreator destructor
+   **/
+  virtual ~CommandCreator() {}
+  /**
+   * @return return true if command can be create, else return false
+   **/
+  virtual bool CanBeCreated() const = 0;
+  /**
+   * @brief Create command object and return pointer to it
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
   virtual CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const = 0;
 };
 
+/**
+ * @brief DefaultCommandCreator concrete command creator
+ **/
 template <typename CommandType>
-class CommandCreator : public ICommandCreator {
+class DefaultCommandCreator : public CommandCreator {
  public:
-  CommandCreator(ApplicationManager& application_manager,
-                 RPCService& rpc_service,
-                 HMICapabilities& hmi_capabilities,
-                 PolicyHandlerInterface& policy_handler)
+  /**
+   * @brief DefaultCommandCreator constructor
+   */
+  DefaultCommandCreator(ApplicationManager& application_manager,
+                        RPCService& rpc_service,
+                        HMICapabilities& hmi_capabilities,
+                        PolicyHandlerInterface& policy_handler)
       : application_manager_(application_manager)
       , rpc_service_(rpc_service)
       , hmi_capabilities_(hmi_capabilities)
       , policy_handler_(policy_handler) {}
 
  private:
-  bool isAble() const override {
+  /**
+   * @return return true
+   **/
+  bool CanBeCreated() const override {
     return true;
   }
 
+  /**
+   * @brief Create command object and return pointer to it
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     CommandSharedPtr command(new CommandType(message,
@@ -106,13 +139,19 @@ class CommandCreator : public ICommandCreator {
 
 struct InvalidCommand {};
 
+/**
+ * @brief DefaultCommandCreator<InvalidCommand> creator for invalid commands
+ **/
 template <>
-class CommandCreator<InvalidCommand> : public ICommandCreator {
+class DefaultCommandCreator<InvalidCommand> : public CommandCreator {
  public:
-  CommandCreator(ApplicationManager& application_manager,
-                 RPCService& rpc_service,
-                 HMICapabilities& hmi_capabilities,
-                 PolicyHandlerInterface& policy_handler) {
+  /**
+   * @brief DefaultCommandCreator constructor
+   */
+  DefaultCommandCreator(ApplicationManager& application_manager,
+                        RPCService& rpc_service,
+                        HMICapabilities& hmi_capabilities,
+                        PolicyHandlerInterface& policy_handler) {
     UNUSED(application_manager);
     UNUSED(rpc_service);
     UNUSED(hmi_capabilities);
@@ -120,9 +159,17 @@ class CommandCreator<InvalidCommand> : public ICommandCreator {
   }
 
  private:
-  bool isAble() const override {
+  /**
+   * @return return false
+   **/
+  bool CanBeCreated() const override {
     return false;
   }
+  /**
+   * @brief Create command object and return pointer to it
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created empty command object.
+   **/
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     UNUSED(message);
@@ -130,8 +177,8 @@ class CommandCreator<InvalidCommand> : public ICommandCreator {
   }
 };
 
-struct CommandCreatorFacotry {
-  CommandCreatorFacotry(ApplicationManager& application_manager,
+struct CommandCreatorFactory {
+  CommandCreatorFactory(ApplicationManager& application_manager,
                         rpc_service::RPCService& rpc_service,
                         HMICapabilities& hmi_capabilities,
                         PolicyHandlerInterface& policy_handler)
@@ -141,8 +188,8 @@ struct CommandCreatorFacotry {
       , policy_handler_(policy_handler) {}
 
   template <typename CommandType>
-  ICommandCreator& GetCreator() {
-    static CommandCreator<CommandType> res(
+  CommandCreator& GetCreator() {
+    static DefaultCommandCreator<CommandType> res(
         application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
     return res;
   }

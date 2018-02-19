@@ -56,7 +56,7 @@ class ButtonPressRequest : public RCCommandRequest {
   /**
    * @brief ButtonPressRequest class destructor
    */
-  virtual ~ButtonPressRequest();
+  ~ButtonPressRequest();
 };
 
 }  // namespace commands

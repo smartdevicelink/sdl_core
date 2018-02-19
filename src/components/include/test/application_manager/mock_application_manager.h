@@ -122,7 +122,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       SendHMIStatusNotification,
       void(const utils::SharedPtr<application_manager::Application> app));
   MOCK_METHOD1(RemoveHMIFakeParameters,
-               void(application_manager::MessagePtr& message));
+               void(smart_objects::SmartObjectSPtr& message));
   MOCK_CONST_METHOD1(
       GetDefaultHmiLevel,
       mobile_apis::HMILevel::eType(

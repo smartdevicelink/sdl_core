@@ -19,6 +19,9 @@ class RCOnInteriorVehicleDataNotification
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handle,
       ResourceAllocationManager& resource_allocation_manager);
+
+  ~RCOnInteriorVehicleDataNotification();
+
   bool Init() OVERRIDE;
   void Run() OVERRIDE;
   void on_event(const application_manager::event_engine::Event& event);

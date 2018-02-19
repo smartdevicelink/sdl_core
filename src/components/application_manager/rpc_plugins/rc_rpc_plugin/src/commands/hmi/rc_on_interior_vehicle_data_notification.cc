@@ -18,6 +18,9 @@ RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
                                                          policy_handle) {
   UNUSED(resource_allocation_manager);
 }
+
+RCOnInteriorVehicleDataNotification::~RCOnInteriorVehicleDataNotification() {}
+
 bool RCOnInteriorVehicleDataNotification::Init() {
   return true;
 }

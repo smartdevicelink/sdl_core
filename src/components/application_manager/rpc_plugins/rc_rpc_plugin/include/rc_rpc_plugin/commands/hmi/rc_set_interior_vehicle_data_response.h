@@ -22,7 +22,7 @@ class RCSetInteriorVehicleDataResponse
 
   void Run() OVERRIDE;
 
-  virtual ~RCSetInteriorVehicleDataResponse();
+  ~RCSetInteriorVehicleDataResponse();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

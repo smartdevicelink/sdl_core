@@ -23,7 +23,7 @@ class RCGetInteriorVehicleDataRequest
    * @brief Execute command
    */
   void Run() OVERRIDE;
-  virtual ~RCGetInteriorVehicleDataRequest();
+  ~RCGetInteriorVehicleDataRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

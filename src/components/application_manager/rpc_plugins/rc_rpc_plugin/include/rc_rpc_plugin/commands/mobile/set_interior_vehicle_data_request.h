@@ -74,7 +74,7 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   /**
    * @brief SetInteriorVehicleDataRequest class destructor
    */
-  virtual ~SetInteriorVehicleDataRequest();
+  ~SetInteriorVehicleDataRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

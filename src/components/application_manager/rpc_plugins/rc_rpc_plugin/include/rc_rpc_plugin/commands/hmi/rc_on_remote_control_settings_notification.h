@@ -24,7 +24,7 @@ class RCOnRemoteControlSettingsNotification
    **/
   void Run() OVERRIDE;
 
-  virtual ~RCOnRemoteControlSettingsNotification();
+  ~RCOnRemoteControlSettingsNotification();
 
  private:
   ResourceAllocationManager& resource_allocation_manager_;

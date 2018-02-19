@@ -60,7 +60,7 @@ namespace application_manager {
 using rc_rpc_plugin::ResourceAllocationManager;
 
 template <typename RCCommandType>
-class RCCommandCreator : public ICommandCreator {
+class RCCommandCreator : public CommandCreator {
  public:
   RCCommandCreator(ApplicationManager& application_manager,
                    rpc_service::RPCService& rpc_service,
@@ -71,11 +71,13 @@ class RCCommandCreator : public ICommandCreator {
       , rpc_service_(rpc_service)
       , hmi_capabilities_(hmi_capabilities)
       , policy_handler_(policy_handler)
-      , resource_allocation_manager_(resource_allocation_manager)
-      , able_(true) {}
+      , resource_allocation_manager_(resource_allocation_manager) {}
 
  private:
-  bool isAble() const override;
+  bool CanBeCreated() const override {
+    return true;
+  }
+
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     CommandSharedPtr command(new RCCommandType(message,
@@ -92,13 +94,12 @@ class RCCommandCreator : public ICommandCreator {
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
   ResourceAllocationManager& resource_allocation_manager_;
-  bool able_;
 };
 
 struct RCInvalidCommand {};
 
 template <>
-class RCCommandCreator<RCInvalidCommand> : public ICommandCreator {
+class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
  public:
   RCCommandCreator(ApplicationManager& application_manager,
                    RPCService& rpc_service,
@@ -113,9 +114,10 @@ class RCCommandCreator<RCInvalidCommand> : public ICommandCreator {
   }
 
  private:
-  bool isAble() const override {
+  bool CanBeCreated() const override {
     return false;
   }
+
   CommandSharedPtr create(
       const commands::MessageSharedPtr& message) const override {
     UNUSED(message);
@@ -123,8 +125,8 @@ class RCCommandCreator<RCInvalidCommand> : public ICommandCreator {
   }
 };
 
-struct RCCommandCreatorFacotry {
-  RCCommandCreatorFacotry(
+struct RCCommandCreatorFactory {
+  RCCommandCreatorFactory(
       ApplicationManager& application_manager,
       rpc_service::RPCService& rpc_service,
       HMICapabilities& hmi_capabilities,
@@ -137,7 +139,7 @@ struct RCCommandCreatorFacotry {
       , resource_allocation_manager_(resource_allocation_manager) {}
 
   template <typename RCCommandType>
-  ICommandCreator& GetCreator() {
+  CommandCreator& GetCreator() {
     static RCCommandCreator<RCCommandType> res(application_manager_,
                                                rpc_service_,
                                                hmi_capabilities_,
@@ -172,6 +174,16 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
   if (app_mngr::commands::Command::SOURCE_HMI == source) {
+    hmi_apis::messageType::eType message_type =
+        static_cast<hmi_apis::messageType::eType>(
+            (*message)[strings::params][strings::message_type].asInt());
+
+    hmi_apis::FunctionID::eType function_id =
+        static_cast<hmi_apis::FunctionID::eType>(
+            (*message)[strings::params][strings::function_id].asInt());
+
+    return get_hmi_creator_factory(function_id, message_type).create(message);
+  } else {
     mobile_apis::messageType::eType message_type =
         static_cast<mobile_apis::messageType::eType>(
             (*message)[strings::params][strings::message_type].asInt());
@@ -182,16 +194,6 @@ CommandSharedPtr RCCommandFactory::CreateCommand(
 
     return get_mobile_creator_factory(function_id, message_type)
         .create(message);
-  } else {
-    hmi_apis::messageType::eType message_type =
-        static_cast<hmi_apis::messageType::eType>(
-            (*message)[strings::params][strings::message_type].asInt());
-
-    hmi_apis::FunctionID::eType function_id =
-        static_cast<hmi_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asInt());
-
-    return get_hmi_creator_factory(function_id, message_type).create(message);
   }
 }
 
@@ -201,91 +203,98 @@ bool RCCommandFactory::IsAbleToProcess(
     const {
   using app_mngr::commands::Command;
   if (Command::SOURCE_HMI == message_source) {
-    return get_mobile_creator_factory(
-               static_cast<mobile_api::FunctionID::eType>(function_id),
-               mobile_api::messageType::INVALID_ENUM).isAble();
-  } else {
     return get_hmi_creator_factory(
                static_cast<hmi_apis::FunctionID::eType>(function_id),
-               hmi_apis::messageType::INVALID_ENUM).isAble();
+               hmi_apis::messageType::INVALID_ENUM).CanBeCreated();
+  } else {
+    return get_mobile_creator_factory(
+               static_cast<mobile_api::FunctionID::eType>(function_id),
+               mobile_api::messageType::INVALID_ENUM).CanBeCreated();
   }
 }
 
-ICommandCreator& RCCommandFactory::get_mobile_creator_factory(
+CommandCreator& RCCommandFactory::get_mobile_creator_factory(
     mobile_api::FunctionID::eType id,
     mobile_api::messageType::eType message_type) const {
-  LOG4CXX_DEBUG(logger_, "CreateMobileCommand function_id: " << id);
-  RCCommandCreatorFacotry factory(app_manager_,
-                                  rpc_service_,
-                                  hmi_capabilities_,
-                                  policy_handler_,
-                                  allocation_manager_);
+  LOG4CXX_DEBUG(logger_,
+                "CreateMobileCommand function_id: " << id << " message_type: "
+                                                    << message_type);
+  RCCommandCreatorFactory rc_factory(app_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     allocation_manager_);
 
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
       return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::ButtonPressRequest>()
-                 : factory.GetCreator<commands::ButtonPressResponse>();
+                 ? rc_factory.GetCreator<commands::ButtonPressRequest>()
+                 : rc_factory.GetCreator<commands::ButtonPressResponse>();
     }
     case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
       return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::GetInteriorVehicleDataRequest>()
-                 : factory
+                 ? rc_factory
+                       .GetCreator<commands::GetInteriorVehicleDataRequest>()
+                 : rc_factory
                        .GetCreator<commands::GetInteriorVehicleDataResponse>();
     }
     case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
       return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::SetInteriorVehicleDataRequest>()
-                 : factory
+                 ? rc_factory
+                       .GetCreator<commands::SetInteriorVehicleDataRequest>()
+                 : rc_factory
                        .GetCreator<commands::SetInteriorVehicleDataResponse>();
     }
     case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
-      return factory.GetCreator<commands::OnInteriorVehicleDataNotification>();
+      return rc_factory
+          .GetCreator<commands::OnInteriorVehicleDataNotification>();
     }
-    default: { return factory.GetCreator<RCInvalidCommand>(); }
+    default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
   }
 }
 
-ICommandCreator& RCCommandFactory::get_hmi_creator_factory(
+CommandCreator& RCCommandFactory::get_hmi_creator_factory(
     hmi_apis::FunctionID::eType id,
     hmi_apis::messageType::eType message_type) const {
-  LOG4CXX_DEBUG(logger_, "CreateHMICommand function_id: " << id);
+  LOG4CXX_DEBUG(logger_,
+                "CreateHMICommand function_id: " << id << " message_type: "
+                                                 << message_type);
 
-  RCCommandCreatorFacotry factory(app_manager_,
-                                  rpc_service_,
-                                  hmi_capabilities_,
-                                  policy_handler_,
-                                  allocation_manager_);
+  RCCommandCreatorFactory rc_factory(app_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     allocation_manager_);
 
   switch (id) {
     case hmi_apis::FunctionID::Buttons_ButtonPress: {
       return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::RCButtonPressRequest>()
-                 : factory.GetCreator<commands::RCButtonPressResponse>();
+                 ? rc_factory.GetCreator<commands::RCButtonPressRequest>()
+                 : rc_factory.GetCreator<commands::RCButtonPressResponse>();
     }
     case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
       return hmi_apis::messageType::request == message_type
-                 ? factory
+                 ? rc_factory
                        .GetCreator<commands::RCGetInteriorVehicleDataRequest>()
-                 : factory.GetCreator<
+                 : rc_factory.GetCreator<
                        commands::RCGetInteriorVehicleDataResponse>();
     }
     case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
       return hmi_apis::messageType::request == message_type
-                 ? factory
+                 ? rc_factory
                        .GetCreator<commands::RCSetInteriorVehicleDataRequest>()
-                 : factory.GetCreator<
+                 : rc_factory.GetCreator<
                        commands::RCSetInteriorVehicleDataResponse>();
     }
     case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-      return factory
+      return rc_factory
           .GetCreator<commands::RCOnInteriorVehicleDataNotification>();
     }
     case hmi_apis::FunctionID::RC_OnRemoteControlSettings: {
-      return factory
+      return rc_factory
           .GetCreator<commands::RCOnRemoteControlSettingsNotification>();
     }
-    default: { return factory.GetCreator<RCInvalidCommand>(); }
+    default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
   }
 }
 }

@@ -21,7 +21,7 @@ class RCButtonPressResponse
 
   void Run() OVERRIDE;
 
-  virtual ~RCButtonPressResponse();
+  ~RCButtonPressResponse();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

@@ -147,11 +147,11 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
-ICommandCreator& MobileCommandFactory::get_creator_factory(
+CommandCreator& MobileCommandFactory::get_creator_factory(
     mobile_apis::FunctionID::eType id,
     mobile_apis::messageType::eType message_type,
     app_mngr::commands::Command::CommandSource source) const {
-  CommandCreatorFacotry factory(
+  CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
   switch (id) {
@@ -469,7 +469,7 @@ bool MobileCommandFactory::IsAbleToProcess(
   return get_creator_factory(
              static_cast<mobile_apis::FunctionID::eType>(function_id),
              mobile_apis::messageType::INVALID_ENUM,
-             message_source).isAble();
+             message_source).CanBeCreated();
 }
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(

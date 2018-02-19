@@ -20,7 +20,7 @@ class RCSetInteriorVehicleDataRequest
       policy::PolicyHandlerInterface& policy_handle,
       ResourceAllocationManager& resource_allocation_manager);
   void Run() OVERRIDE;
-  virtual ~RCSetInteriorVehicleDataRequest();
+  ~RCSetInteriorVehicleDataRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

@@ -22,7 +22,7 @@ class RCButtonPressRequest
    * @brief Execute command
    */
   void Run() OVERRIDE;
-  virtual ~RCButtonPressRequest();
+  ~RCButtonPressRequest();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

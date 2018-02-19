@@ -22,7 +22,7 @@ class OnInteriorVehicleDataNotification
 
   void Run() OVERRIDE;
 
-  virtual ~OnInteriorVehicleDataNotification();
+  ~OnInteriorVehicleDataNotification();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

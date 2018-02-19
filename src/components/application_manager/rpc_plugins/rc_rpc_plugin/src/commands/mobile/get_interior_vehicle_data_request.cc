@@ -100,6 +100,8 @@ void GetInteriorVehicleDataRequest::on_event(
   SendResponse(result, result_code, response_info.c_str());
 }
 
+GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
+
 void GetInteriorVehicleDataRequest::ProccessSubscription(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response) {
   LOG4CXX_AUTO_TRACE(logger_);
