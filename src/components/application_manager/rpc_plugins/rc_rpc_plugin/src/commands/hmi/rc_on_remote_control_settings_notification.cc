@@ -29,7 +29,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
                                                          policy_handle)
     , resource_allocation_manager_(resource_allocation_manager) {}
 
-RCOnRemoteControlSettingsNotification::~RCOnRemoteControlSettingsNotification() {}
+RCOnRemoteControlSettingsNotification::
+    ~RCOnRemoteControlSettingsNotification() {}
 
 hmi_apis::Common_RCAccessMode::eType AccessModeFromString(
     const std::string& access_mode) {

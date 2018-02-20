@@ -74,7 +74,8 @@ void RCRPCPlugin::OnApplicationEvent(
   }
 }
 
-RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(application_manager::ApplicationManager& app_mngr){
+RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
+    application_manager::ApplicationManager& app_mngr) {
   using application_manager::ApplicationSharedPtr;
   using application_manager::ApplicationSet;
   ApplicationSet accessor = app_mngr.applications().GetData();
