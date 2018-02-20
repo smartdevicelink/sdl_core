@@ -34,6 +34,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/hmi_interfaces.h"
+#include "smart_objects/enum_schema_item.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
@@ -67,10 +68,8 @@ bool RCCommandRequest::IsInterfaceAvailable(
 
 void RCCommandRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  SetResourceState(
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString(),
-      ResourceState::FREE);
+  const std::string module_type = ModuleType();
+  SetResourceState(module_type, ResourceState::FREE);
   SendResponse(
       false, mobile_apis::Result::GENERIC_ERROR, "Request timeout expired");
 }
@@ -85,9 +84,8 @@ bool RCCommandRequest::CheckDriverConsent() {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     return false;
   }
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+
+  const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
 
   if (rc_rpc_plugin::kAllowed == access) {
@@ -119,19 +117,34 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
     return;
   }
   LOG4CXX_ERROR(logger_, info);
+  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(false, mobile_apis::Result::DISALLOWED, info.c_str());
 }
 
 void RCCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  app_mngr::ApplicationSharedPtr app =
+      application_manager_.application(CommandRequestImpl::connection_key());
+
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
     LOG4CXX_WARN(logger_, "HMI interface RC is not available");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Remote control is not supported by system");
     return;
   }
   LOG4CXX_TRACE(logger_, "RC interface is available!");
+  if (!policy_handler_.CheckHMIType(
+          app->policy_app_id(),
+          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
+          app->app_types())) {
+    LOG4CXX_WARN(logger_, "Application has no remote control functions");
+    SetResourceState(ModuleType(), ResourceState::FREE);
+    SendResponse(false, mobile_apis::Result::DISALLOWED, "");
+    return;
+  }
+
   if (CheckDriverConsent()) {
     if (AcquireResources()) {
       Execute();  // run child's logic
@@ -144,12 +157,11 @@ void RCCommandRequest::Run() {
 
 bool RCCommandRequest::AcquireResources() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+  const std::string module_type = ModuleType();
 
   if (!IsResourceFree(module_type)) {
     LOG4CXX_WARN(logger_, "Resource is busy.");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, mobile_apis::Result::IN_USE, "");
     return false;
   }
@@ -161,6 +173,7 @@ bool RCCommandRequest::AcquireResources() {
       return true;
     }
     case AcquireResult::IN_USE: {
+      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false, mobile_apis::Result::IN_USE, "");
       return false;
     }
@@ -170,6 +183,7 @@ bool RCCommandRequest::AcquireResources() {
       return false;
     }
     case AcquireResult::REJECTED: {
+      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false, mobile_apis::Result::REJECTED, "");
       return false;
     }
@@ -179,10 +193,8 @@ bool RCCommandRequest::AcquireResources() {
 
 void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
 
+  const std::string module_type = ModuleType();
   SetResourceState(module_type, ResourceState::FREE);
 
   if (event.id() == hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent) {
@@ -195,11 +207,10 @@ void RCCommandRequest::ProcessAccessResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+  const std::string module_type = ModuleType();
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
     return;
   }
@@ -230,6 +241,7 @@ void RCCommandRequest::ProcessAccessResponse(
     } else {
       resource_allocation_manager_.OnDriverDisallowed(module_type,
                                                       app->app_id());
+      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(
           false,
           mobile_apis::Result::REJECTED,
@@ -239,6 +251,7 @@ void RCCommandRequest::ProcessAccessResponse(
   } else {
     std::string response_info;
     GetInfo(message, response_info);
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, result_code, response_info.c_str());
   }
 }
@@ -250,7 +263,7 @@ void RCCommandRequest::SendGetUserConsent(const std::string& module_type) {
   DCHECK(app);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[json_keys::kAppId] = app->hmi_app_id();
+  msg_params[app_mngr::strings::app_id] = app->app_id();
   msg_params[app_mngr::strings::msg_params][message_params::kModuleType] =
       module_type;
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
