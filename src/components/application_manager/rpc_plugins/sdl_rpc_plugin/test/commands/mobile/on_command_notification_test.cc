@@ -127,7 +127,6 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckNotificationMessage(), _));
 
-
   command->Run();
 }
 

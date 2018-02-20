@@ -45,7 +45,8 @@ namespace commands {
  * @brief OnVIVehicleDataNotification command class
  * Sent by HMI for the periodic and non periodic vehicle data
  **/
-class OnVIVehicleDataNotification : public app_mngr::commands::NotificationFromHMI {
+class OnVIVehicleDataNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIVehicleDataNotification class constructor

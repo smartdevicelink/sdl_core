@@ -46,7 +46,8 @@ namespace hmi {
 /**
  * @brief OnUITouchEventNotification command class
  **/
-class OnUITouchEventNotification : public app_mngr::commands::NotificationFromHMI {
+class OnUITouchEventNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnUITouchEventNotification class constructor

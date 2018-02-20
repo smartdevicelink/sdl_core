@@ -71,8 +71,7 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
           message,
           HmiInterfaces::HMI_INTERFACE_Navigation);
 
-      HMICapabilities& hmi_capabilities =
-          hmi_capabilities_;
+      HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_navi_cooperating(is_available);
       break;
     }

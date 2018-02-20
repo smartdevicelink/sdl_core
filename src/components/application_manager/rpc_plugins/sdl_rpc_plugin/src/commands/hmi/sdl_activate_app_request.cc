@@ -126,8 +126,7 @@ void SDLActivateAppRequest::Run() {
                       "HMIDeactivate is active");
   } else {
     const uint32_t application_id = app_id();
-    policy_handler_.OnActivateApp(application_id,
-                                                          correlation_id());
+    policy_handler_.OnActivateApp(application_id, correlation_id());
   }
 }
 
@@ -180,8 +179,7 @@ void SDLActivateAppRequest::Run() {
 
   if (app_to_activate->IsRegistered()) {
     LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
-    policy_handler_.OnActivateApp(application_id,
-                                                          correlation_id());
+    policy_handler_.OnActivateApp(application_id, correlation_id());
     return;
   }
 
@@ -250,8 +248,7 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  policy_handler_.OnActivateApp(app->app_id(),
-                                                        correlation_id());
+  policy_handler_.OnActivateApp(app->app_id(), correlation_id());
 }
 
 uint32_t SDLActivateAppRequest::hmi_app_id(
