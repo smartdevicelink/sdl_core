@@ -1,5 +1,6 @@
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -24,6 +25,7 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
                        hmi_capabilities,
                        policy_handle,
                        resource_allocation_manager) {}
+
 bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const std::string& module_type) {
@@ -47,20 +49,29 @@ void GetInteriorVehicleDataRequest::Execute() {
 
   const smart_objects::SmartObject* rc_capabilities =
       application_manager_.hmi_capabilities().rc_capability();
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+  const std::string module_type = ModuleType();
   if (rc_capabilities &&
       !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
     LOG4CXX_WARN(logger_, "Accessing not supported module data");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Accessing not supported module data");
     return;
   }
+
+  app_mngr::ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+
   if (HasRequestExcessiveSubscription()) {
     RemoveExcessiveSubscription();
+    is_subscribed =
+        (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
+            .asBool();
   }
+
+  (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
+      app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                  &(*message_)[app_mngr::strings::msg_params],
@@ -70,11 +81,14 @@ void GetInteriorVehicleDataRequest::Execute() {
 void GetInteriorVehicleDataRequest::on_event(
     const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  RCCommandRequest::on_event(event);
+
   if (hmi_apis::FunctionID::RC_GetInteriorVehicleData != event.id()) {
     return;
   }
 
-  const smart_objects::SmartObject& hmi_response = event.smart_object();
+  smart_objects::SmartObject& hmi_response =
+      const_cast<smart_objects::SmartObject&>(event.smart_object());
 
   mobile_apis::Result::eType result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
@@ -94,10 +108,19 @@ void GetInteriorVehicleDataRequest::on_event(
 
   if (result) {
     ProccessSubscription(hmi_response);
+    if (!hmi_response[app_mngr::strings::msg_params].keyExists(
+            message_params::kIsSubscribed)) {
+      hmi_response[app_mngr::strings::msg_params]
+                  [message_params::kIsSubscribed] = is_subscribed;
+    }
   }
   std::string response_info;
   GetInfo(hmi_response, response_info);
-  SendResponse(result, result_code, response_info.c_str());
+  SetResourceState(ModuleType(), ResourceState::FREE);
+  SendResponse(result,
+               result_code,
+               response_info.c_str(),
+               &hmi_response[app_mngr::strings::msg_params]);
 }
 
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
@@ -109,8 +132,10 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   const bool is_subscribe_present_in_request =
       (*message_)[app_mngr::strings::msg_params].keyExists(
           message_params::kSubscribe);
+
   const bool isSubscribed_present_in_response =
-      hmi_response[json_keys::kResult].keyExists(message_params::kIsSubscribed);
+      hmi_response[app_mngr::strings::msg_params].keyExists(
+          message_params::kIsSubscribed);
 
   if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     return;
@@ -124,6 +149,15 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                  "conditional mandatory parameter "
                      << message_params::kIsSubscribed
                      << " missed in hmi response");
+
+    const char* module_type;
+    NsSmartDeviceLink::NsSmartObjects::
+        EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
+            static_cast<mobile_apis::ModuleType::eType>(
+                hmi_response[app_mngr::strings::msg_params]
+                            [message_params::kModuleType].asUInt()),
+            &module_type);
+    is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
     return;
   }
 
@@ -140,13 +174,14 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
       (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
           .asBool();
   const bool response_subscribe =
-      hmi_response[json_keys::kResult][message_params::kIsSubscribed].asBool();
+      hmi_response[app_mngr::strings::msg_params][message_params::kIsSubscribed]
+          .asBool();
+  is_subscribed = response_subscribe;
+
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
-    const std::string module_type =
-        (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
-                   [message_params::kModuleType].asString();
+    const std::string module_type = ModuleType();
     if (response_subscribe) {
       LOG4CXX_DEBUG(logger_,
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
@@ -174,10 +209,7 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
         resource_allocation_manager_.GetApplicationExtention(app);
 
     const bool is_app_already_subscribed =
-        extension->IsSubscibedToInteriorVehicleData(
-            (*message_)[app_mngr::strings::msg_params]
-                       [message_params::kModuleData]
-                       [message_params::kModuleType].asString());
+        extension->IsSubscibedToInteriorVehicleData(ModuleType());
     const bool app_wants_to_subscribe =
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();
@@ -192,6 +224,17 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
 void GetInteriorVehicleDataRequest::RemoveExcessiveSubscription() {
   LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[app_mngr::strings::msg_params].erase(message_params::kSubscribe);
+}
+
+std::string GetInteriorVehicleDataRequest::ModuleType() {
+  mobile_apis::ModuleType::eType module_type = static_cast<
+      mobile_apis::ModuleType::eType>(
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asUInt());
+  const char* str;
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+      mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
+  return ok ? str : "unknown";
 }
 
 }  // namespace commands

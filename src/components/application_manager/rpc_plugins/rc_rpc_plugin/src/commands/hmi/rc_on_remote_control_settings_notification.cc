@@ -98,12 +98,12 @@ void RCOnRemoteControlSettingsNotification::Run() {
     LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
     if ((*message_)[app_mngr::strings::msg_params].keyExists(
             message_params::kAccessMode)) {
-      const std::string access_mode_str =
+      access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
           (*message_)[app_mngr::strings::msg_params]
-                     [message_params::kAccessMode].asString();
-
-      access_mode = AccessModeFromString(access_mode_str);
-      LOG4CXX_DEBUG(logger_, "Setting up access mode : " << access_mode_str);
+                     [message_params::kAccessMode].asUInt());
+      LOG4CXX_DEBUG(
+          logger_,
+          "Setting up access mode : " << AccessModeToString(access_mode));
     } else {
       access_mode = resource_allocation_manager_.GetAccessMode();
       LOG4CXX_DEBUG(logger_,
