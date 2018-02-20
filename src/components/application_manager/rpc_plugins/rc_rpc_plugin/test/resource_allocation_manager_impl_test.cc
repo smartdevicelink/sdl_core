@@ -147,7 +147,7 @@ TEST_F(RAManagerTest,
        AcquireResource_AppRegisteredAnyHmiLevelResourceFree_Expect_Allowed) {
   // Arrange
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
-        .WillOnce(Return(mock_app_1_));
+      .WillOnce(Return(mock_app_1_));
   ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
   // Act & Assert
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
