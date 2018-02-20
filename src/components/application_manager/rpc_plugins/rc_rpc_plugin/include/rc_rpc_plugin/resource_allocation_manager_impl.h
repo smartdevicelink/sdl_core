@@ -64,7 +64,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       application_manager::ApplicationSharedPtr application) FINAL;
 
  private:
-
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
