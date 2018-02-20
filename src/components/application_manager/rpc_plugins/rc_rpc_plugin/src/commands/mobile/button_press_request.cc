@@ -1,5 +1,6 @@
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
 #include "utils/helpers.h"
@@ -148,13 +149,15 @@ bool CheckButtonName(const std::string& module_type,
 void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const std::string button_name =
-      (*message_)[app_mngr::strings::msg_params][message_params::kButtonName]
-          .asString();
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+  const char* button_name;
+  NsSmartDeviceLink::NsSmartObjects::
+      EnumConversionHelper<mobile_apis::ButtonName::eType>::EnumToCString(
+          static_cast<mobile_apis::ButtonName::eType>(
+              (*message_)[app_mngr::strings::msg_params]
+                         [message_params::kButtonName].asUInt()),
+          &button_name);
 
+  const std::string module_type = ModuleType();
   static ButtonsMap btn_map = buttons_map();
   mobile_apis::ButtonName::eType button_id =
       mobile_apis::ButtonName::INVALID_ENUM;
@@ -170,17 +173,25 @@ void ButtonPressRequest::Execute() {
       rc_capabilities &&
       CheckIfButtonExistInRCCaps(*rc_capabilities, button_id);
 
+  app_mngr::ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+
+  (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
+      app->app_id();
+
   if (button_name_matches_module_type && button_id_exist_in_caps) {
     SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
   } else if (!button_name_matches_module_type) {
     LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
+    SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type and button name mismatch!");
   } else {
     LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
+    SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Requested button is not exists in capabilities!");
@@ -190,9 +201,7 @@ void ButtonPressRequest::Execute() {
 AcquireResult::eType ButtonPressRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asString();
+  const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   return resource_allocation_manager_.AcquireResource(module_type,
@@ -239,7 +248,19 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   }
   std::string response_info;
   GetInfo(message, response_info);
+  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(result, result_code, response_info.c_str());
+}
+
+std::string ButtonPressRequest::ModuleType() {
+  mobile_apis::ModuleType::eType module_type = static_cast<
+      mobile_apis::ModuleType::eType>(
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asUInt());
+  const char* str;
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+      mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
+  return ok ? str : "unknown";
 }
 
 }  // namespace commands
