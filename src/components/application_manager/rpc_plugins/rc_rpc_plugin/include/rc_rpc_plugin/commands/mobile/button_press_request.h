@@ -53,6 +53,8 @@ class ButtonPressRequest : public RCCommandRequest {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+  std::string ModuleType() FINAL;
+
   /**
    * @brief ButtonPressRequest class destructor
    */

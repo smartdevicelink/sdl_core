@@ -71,10 +71,21 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
+  std::string ModuleType() FINAL;
+
   /**
    * @brief SetInteriorVehicleDataRequest class destructor
    */
   ~SetInteriorVehicleDataRequest();
+
+ private:
+  /**
+   * @brief ControlData
+   * @param module_data received params
+   * @return value of module data depending on module type
+   */
+  const smart_objects::SmartObject& ControlData(
+      const smart_objects::SmartObject& module_data);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

@@ -1,5 +1,6 @@
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
 #include "utils/helpers.h"
@@ -143,8 +144,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   auto module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
-  const std::string module_type =
-      module_data[message_params::kModuleType].asString();
+  const std::string module_type = ModuleType();
   bool module_type_and_data_match = true;
 
   if (enums_value::kRadio == module_type) {
@@ -181,6 +181,12 @@ void SetInteriorVehicleDataRequest::Execute() {
       CutOffReadOnlyParams(module_data);
     }
     application_manager_.RemoveHMIFakeParameters(message_);
+
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
+        app->app_id();
+
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
@@ -195,6 +201,8 @@ void SetInteriorVehicleDataRequest::Execute() {
 void SetInteriorVehicleDataRequest::on_event(
     const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  RCCommandRequest::on_event(event);
+
   if (hmi_apis::FunctionID::RC_SetInteriorVehicleData != event.id()) {
     return;
   }
@@ -220,10 +228,9 @@ void SetInteriorVehicleDataRequest::on_event(
   SendResponse(result, result_code, info.c_str());
 }
 
-const smart_objects::SmartObject& ControlData(
+const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
-  const std::string module =
-      module_data[message_params::kModuleType].asString();
+  const std::string module = ModuleType();
 
   if (enums_value::kRadio == module) {
     return module_data[message_params::kRadioControlData];
@@ -238,8 +245,7 @@ bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(
-      module_data[message_params::kModuleType].asString());
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
   for (; it != module_type_params.map_end(); ++it) {
     if (!helpers::in_range(ro_params, it->first)) {
       return false;
@@ -254,8 +260,7 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(
-      module_data[message_params::kModuleType].asString());
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
       return true;
@@ -270,8 +275,7 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  const std::string module_type =
-      module_data[message_params::kModuleType].asString();
+  const std::string module_type = ModuleType();
   std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
@@ -288,12 +292,22 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   }
 }
 
+std::string SetInteriorVehicleDataRequest::ModuleType() {
+  mobile_apis::ModuleType::eType module_type =
+      static_cast<mobile_apis::ModuleType::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kModuleData][message_params::kModuleType]
+                         .asUInt());
+  const char* str;
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
+      mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
+  return ok ? str : "unknown";
+}
+
 AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string module_type =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
-                 [message_params::kModuleType].asString();
+  const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   return resource_allocation_manager_.AcquireResource(module_type,
