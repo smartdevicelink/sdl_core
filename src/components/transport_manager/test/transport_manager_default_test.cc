@@ -51,6 +51,8 @@ const std::string kDeviceAddress = "address";
 const std::string kDeviceApplications = "applications";
 const std::string kApplicationPort = "port";
 const std::string kApplicationPortValue = "12345";
+const std::string kApplicationRfcomm = "rfcomm_channel";
+const std::string kApplicationRfcommValue = "7";
 const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
@@ -86,13 +88,13 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "57.48.0.1";
+  tcp_device[kDeviceAddress] = "127.0.0.1";
   tcp_device[kDeviceApplications][0][kApplicationPort] = kApplicationPortValue;
   Json::Value bluetooth_device;
   bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
-  bluetooth_device[kDeviceAddress] = "57.48.0.2";
-  bluetooth_device[kDeviceApplications][0][kApplicationPort] =
-      kApplicationPortValue;
+  bluetooth_device[kDeviceAddress] = "AB:CD:EF:GH:IJ:KL";
+  bluetooth_device[kDeviceApplications][0][kApplicationRfcomm] =
+      kApplicationRfcommValue;
   custom_dictionary[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
@@ -104,7 +106,6 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
-
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
