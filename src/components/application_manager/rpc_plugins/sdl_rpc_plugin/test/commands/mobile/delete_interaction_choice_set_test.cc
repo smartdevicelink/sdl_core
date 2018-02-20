@@ -210,7 +210,6 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
     EXPECT_CALL(*app_, UpdateHash());
   }
 
-
   DeleteInteractionChoiceSetRequestPtr command =
       CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
 

@@ -73,8 +73,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
           message,
           HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
-      HMICapabilities& hmi_capabilities =
-          hmi_capabilities_;
+      HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_ivi_cooperating(is_available);
       policy_handler_.OnVIIsReady();
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(

@@ -771,7 +771,8 @@ class ApplicationManagerImpl
 
   void StartDevicesDiscovery();
 
-  void RemoveHMIFakeParameters(application_manager::commands::MessageSharedPtr &message) OVERRIDE;
+  void RemoveHMIFakeParameters(
+      application_manager::commands::MessageSharedPtr& message) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request

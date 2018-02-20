@@ -64,7 +64,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       application_manager::ApplicationSharedPtr application) FINAL;
 
  private:
-
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
@@ -132,7 +131,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
-
 };
 }  // rc_rpc_plugin
 
