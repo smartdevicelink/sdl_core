@@ -893,7 +893,8 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
-  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_))
+      .WillOnce(GetArg(&device_id));
   command->Run();
   EXPECT_EQ(empty_device_id, device_id);
 }
@@ -912,7 +913,8 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
-  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
+  EXPECT_CALL(mock_policy_handler_, RemoveDevice(_))
+      .WillOnce(GetArg(&device_id));
   command->Run();
   EXPECT_EQ(id, device_id);
 }

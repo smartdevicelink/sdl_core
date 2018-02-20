@@ -130,7 +130,8 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
 
   Apps::const_iterator app = app_list.begin();
   for (; app_list.end() != app; ++app) {
-    application_manager::ApplicationSharedPtr app_ptr = *app;    const uint32_t application_id = app_ptr->app_id();
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    const uint32_t application_id = app_ptr->app_id();
     Resources acquired_modules = GetAcquiredResources(application_id);
     std::sort(acquired_modules.begin(), acquired_modules.end());
 

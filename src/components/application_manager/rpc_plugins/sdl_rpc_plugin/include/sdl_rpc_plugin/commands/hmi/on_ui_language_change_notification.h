@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnUILanguageChangeNotification command class
  **/
-class OnUILanguageChangeNotification : public app_mngr::commands::NotificationFromHMI {
+class OnUILanguageChangeNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnUILanguageChangeNotification class constructor

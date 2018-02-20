@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnDeviceStateChangedNotification command class
  **/
-class OnDeviceStateChangedNotification : public app_mngr::commands::NotificationFromHMI {
+class OnDeviceStateChangedNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnDeviceStateChangedNotification class constructor

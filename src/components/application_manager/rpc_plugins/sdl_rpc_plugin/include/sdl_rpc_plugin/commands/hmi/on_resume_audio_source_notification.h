@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnResumeAudioSourceNotification command class
  **/
-class OnResumeAudioSourceNotification : public app_mngr::commands::NotificationToHMI {
+class OnResumeAudioSourceNotification
+    : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnResumeAudioSourceNotification class constructor
