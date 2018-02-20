@@ -27,34 +27,7 @@ bool RCRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource
         message_source) {
-  namespace MobileFunctions = mobile_apis::FunctionID;
-  namespace HMIFunctions = hmi_apis::FunctionID;
-  namespace commands = application_manager::commands;
-  using helpers::in_range;
-  std::vector<MobileFunctions::eType> mobile_functions;
-  mobile_functions.push_back(MobileFunctions::GetInteriorVehicleDataID);
-  mobile_functions.push_back(MobileFunctions::SetInteriorVehicleDataID);
-  mobile_functions.push_back(MobileFunctions::OnInteriorVehicleDataID);
-  mobile_functions.push_back(MobileFunctions::ButtonPressID);
-  //  mobile_functions.push_back(MobileFunctions::OnRCStatusID);
-
-  std::vector<HMIFunctions::eType> hmi_functions;
-  hmi_functions.push_back(HMIFunctions::RC_GetInteriorVehicleData);
-  hmi_functions.push_back(HMIFunctions::RC_SetInteriorVehicleData);
-  hmi_functions.push_back(HMIFunctions::RC_OnInteriorVehicleData);
-  hmi_functions.push_back(HMIFunctions::RC_OnRemoteControlSettings);
-  hmi_functions.push_back(HMIFunctions::Buttons_OnButtonPress);
-  //  hmi_functions.push_back(HMIFunctions::RC_OnRCStatus);
-
-  if (commands::Command::SOURCE_MOBILE == message_source) {
-    return in_range(mobile_functions,
-                    static_cast<MobileFunctions::eType>(function_id));
-  }
-  if (commands::Command::SOURCE_HMI == message_source) {
-    return in_range(hmi_functions,
-                    static_cast<HMIFunctions::eType>(function_id));
-  }
-  return false;
+  return command_factory_->IsAbleToProcess(function_id, message_source);
 }
 
 std::string RCRPCPlugin::PluginName() {

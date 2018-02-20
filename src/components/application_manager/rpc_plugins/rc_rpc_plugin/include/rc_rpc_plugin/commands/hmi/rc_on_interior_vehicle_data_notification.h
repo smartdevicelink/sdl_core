@@ -22,9 +22,10 @@ class RCOnInteriorVehicleDataNotification
 
   ~RCOnInteriorVehicleDataNotification();
 
-  bool Init() OVERRIDE;
+  /**
+   * @brief Execute command
+   **/
   void Run() OVERRIDE;
-  void on_event(const application_manager::event_engine::Event& event);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

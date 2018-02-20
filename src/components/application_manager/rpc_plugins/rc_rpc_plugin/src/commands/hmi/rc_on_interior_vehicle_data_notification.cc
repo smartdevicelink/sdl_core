@@ -21,12 +21,12 @@ RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
 
 RCOnInteriorVehicleDataNotification::~RCOnInteriorVehicleDataNotification() {}
 
-bool RCOnInteriorVehicleDataNotification::Init() {
-  return true;
+void RCOnInteriorVehicleDataNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  (*message_)[app_mngr::strings::params][app_mngr::strings::function_id] =
+      static_cast<int>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
+  SendNotificationToMobile(message_);
 }
-void RCOnInteriorVehicleDataNotification::Run() {}
-void RCOnInteriorVehicleDataNotification::on_event(
-    const application_manager::event_engine::Event& event) {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin

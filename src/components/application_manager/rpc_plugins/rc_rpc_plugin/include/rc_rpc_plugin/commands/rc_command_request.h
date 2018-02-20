@@ -67,6 +67,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  protected:
+  bool is_subscribed;
   ResourceAllocationManager& resource_allocation_manager_;
   bool auto_allowed_;
 
@@ -129,6 +130,8 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
   void set_disallowed_info(const std::string& info) {
     disallowed_info_ = info;
   }
+
+  virtual std::string ModuleType() = 0;
 
  private:
   /**
