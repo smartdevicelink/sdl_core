@@ -73,6 +73,21 @@ bool CheckIfModuleTypeExistInCapabilities(
     LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
     return false;
   }
+  if (enums_value::kAudio == module_type &&
+      !rc_capabilities.keyExists(strings::kaudioControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " Audio control capabilities not present");
+    return false;
+  }
+  if (enums_value::kLight == module_type &&
+      !rc_capabilities.keyExists(strings::klightControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " Light control capabilities not present");
+    return false;
+  }
+  if (enums_value::kHmiSettings == module_type &&
+      !rc_capabilities.keyExists(strings::khmiSettingsControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " HmiSettings control capabilities not present");
+    return false;
+  }
 
   return true;
 }
