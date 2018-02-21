@@ -22,6 +22,8 @@ class OnInteriorVehicleDataNotification
 
   void Run() OVERRIDE;
 
+  std::string ModuleType();
+
   ~OnInteriorVehicleDataNotification();
 };
 }  // namespace commands
