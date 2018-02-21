@@ -144,7 +144,8 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   auto module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
-  const std::string module_type = ModuleType();
+  const std::string module_type =
+      module_data[message_params::kModuleType].asString();
   bool module_type_and_data_match = true;
 
   if (enums_value::kRadio == module_type) {
@@ -159,7 +160,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   if (module_type_and_data_match) {
     const smart_objects::SmartObject* rc_capabilities =
-        application_manager_.hmi_capabilities().rc_capability();
+        hmi_capabilities_.rc_capability();
     if (rc_capabilities &&
         !CheckIfModuleDataExistInCapabilities(*rc_capabilities, module_data)) {
       LOG4CXX_WARN(logger_, "Accessing not supported module data");
@@ -245,7 +246,8 @@ bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(
+      module_data[message_params::kModuleType].asString());
   for (; it != module_type_params.map_end(); ++it) {
     if (!helpers::in_range(ro_params, it->first)) {
       return false;
@@ -260,7 +262,8 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(
+      module_data[message_params::kModuleType].asString());
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
       return true;
@@ -275,7 +278,8 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  const std::string module_type = ModuleType();
+  const std::string module_type =
+      module_data[message_params::kModuleType].asString();
   std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
@@ -307,7 +311,9 @@ std::string SetInteriorVehicleDataRequest::ModuleType() {
 AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string module_type = ModuleType();
+  const std::string module_type =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [message_params::kModuleType].asString();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   return resource_allocation_manager_.AcquireResource(module_type,

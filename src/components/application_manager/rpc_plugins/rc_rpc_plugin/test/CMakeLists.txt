@@ -36,19 +36,13 @@ include_directories (
 
 #add_subdirectory(commands)
 set (RC_TEST_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
 
 file(GLOB SOURCES
-
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/button_press_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/get_interior_vehicle_data_request_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/set_interior_vehicle_data_request_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/on_interior_vehicle_data_notification_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/on_remote_control_settings_test.cc
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${RC_COMMANDS_TEST_DIR}/*
 )

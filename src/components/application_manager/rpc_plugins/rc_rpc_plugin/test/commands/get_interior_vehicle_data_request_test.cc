@@ -64,31 +64,9 @@ using test::components::commands_test::HMIResultCodeIs;
 using test::components::commands_test::MobileResultCodeIs;
 
 namespace {
-const int32_t kConnectionKey = 5;
-const uint32_t kAppId = 0;
-const int kModuleId = 153;
-const std::string kInvalidMobileRequest = "{{\"moduleTip\":\"LUXOFT\"}}";
-const std::string kValidMobileRequest =
-    "{\"subscribe\":true,\"moduleDescription\":{\"moduleType\":\"CLIMATE\"}}";
-const std::string kValidHmiResponse =
-    "{\"jsonrpc\":\"2.0\",\"id\":51,\"result\":{\"code\":0,\"method\":\"RC."
-    "GetInteriorVehicleData\",\"moduleData\":{\"moduleType\":\"CLIMATE\","
-    "\"climateControlData\":{\"fanSpeed\":0,\"currentTemperature\":{\"unit\":"
-    "\"CELSIUS\",\"value\":20},\"desiredTemperature\":{\"unit\":\"CELSIUS\","
-    "\"value\":25},\"acEnable\":true,\"circulateAirEnable\":true,"
-    "\"autoModeEnable\":true,\"defrostZone\":\"ALL\",\"dualModeEnable\":true,"
-    "\"acMaxEnable\":true,\"ventilationMode\":\"BOTH\"}},\"isSubscribed\":"
-    "true}}";
-const std::string kInvalidHmiResponse =
-    "{\"jsonrpc\":\"2.0\",\"id\":51,\"result\":{\"code\":21,\"method\":\"RC."
-    "GetInteriorVehicleData\",\"moduleData\":{\"moduleType\":\"CLIMATE\","
-    "\"ControlData\":{\"Speed\":0,\"outsideTemperature\":{\"unit\":"
-    "\"CELSIUS\",\"value\":\"high\"},\"desiredTemperature\":{\"unit\":"
-    "\"CELSIUS\","
-    "\"value\":25},\"acEnable\":true,\"circulateAirEnable\":true,"
-    "\"autoModeEnable\":true,\"defrostZone\":\"ALL\",\"dualModeEnable\":true,"
-    "\"acMaxEnable\":true,\"ventilationMode\":\"BOTH\"}},\"isSubscribed\":"
-    "false}}";
+const int32_t kConnectionKey = 5u;
+const uint32_t kAppId = 0u;
+const int kModuleId = 153u;
 }
 
 namespace rc_rpc_plugin_test {

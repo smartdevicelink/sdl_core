@@ -48,8 +48,10 @@ void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject* rc_capabilities =
-      application_manager_.hmi_capabilities().rc_capability();
-  const std::string module_type = ModuleType();
+      hmi_capabilities_.rc_capability();
+  const std::string module_type =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
+          .asString();
   if (rc_capabilities &&
       !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
     LOG4CXX_WARN(logger_, "Accessing not supported module data");
@@ -181,7 +183,9 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
-    const std::string module_type = ModuleType();
+    const std::string module_type =
+        (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                   [message_params::kModuleType].asString();
     if (response_subscribe) {
       LOG4CXX_DEBUG(logger_,
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
@@ -209,7 +213,10 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
         resource_allocation_manager_.GetApplicationExtention(app);
 
     const bool is_app_already_subscribed =
-        extension->IsSubscibedToInteriorVehicleData(ModuleType());
+        extension->IsSubscibedToInteriorVehicleData(
+            (*message_)[app_mngr::strings::msg_params]
+                       [message_params::kModuleData]
+                       [message_params::kModuleType].asString());
     const bool app_wants_to_subscribe =
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();

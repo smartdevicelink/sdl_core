@@ -198,7 +198,7 @@ void ButtonPressRequest::Execute() {
   }
 
   const smart_objects::SmartObject* rc_capabilities =
-      application_manager_.hmi_capabilities().rc_capability();
+      hmi_capabilities_.rc_capability();
   const bool button_name_matches_module_type =
       CheckButtonName(module_type, button_name, rc_capabilities);
   const bool button_id_exist_in_caps =

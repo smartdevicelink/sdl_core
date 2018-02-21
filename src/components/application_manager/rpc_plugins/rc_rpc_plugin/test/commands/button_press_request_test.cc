@@ -63,9 +63,9 @@ using application_manager::commands::MessageSharedPtr;
 using ::protocol_handler::MessagePriority;
 
 namespace {
-const int kModuleId = 153;
+const int kModuleId = 153u;
 const uint32_t kConnectionKey = 1u;
-const uint32_t kAppId = 0;
+const uint32_t kAppId = 0u;
 }
 
 namespace rc_rpc_plugin_test {
@@ -91,25 +91,24 @@ class ButtonPressRequestTest
   void SetUp() OVERRIDE {
     using namespace mobile_apis;
 
-    std::vector<ButtonName::eType> button_names;
-    button_names.push_back(ButtonName::AC_MAX);
-    button_names.push_back(ButtonName::AC);
-    button_names.push_back(ButtonName::RECIRCULATE);
-    button_names.push_back(ButtonName::FAN_UP);
-    button_names.push_back(ButtonName::FAN_DOWN);
-    button_names.push_back(ButtonName::TEMP_UP);
-    button_names.push_back(ButtonName::TEMP_DOWN);
-    button_names.push_back(ButtonName::DEFROST_MAX);
-    button_names.push_back(ButtonName::DEFROST);
-    button_names.push_back(ButtonName::DEFROST_REAR);
-    button_names.push_back(ButtonName::UPPER_VENT);
-    button_names.push_back(ButtonName::LOWER_VENT);
-    button_names.push_back(ButtonName::VOLUME_UP);
-    button_names.push_back(ButtonName::VOLUME_DOWN);
-    button_names.push_back(ButtonName::EJECT);
-    button_names.push_back(ButtonName::SOURCE);
-    button_names.push_back(ButtonName::SHUFFLE);
-    button_names.push_back(ButtonName::REPEAT);
+    std::vector<ButtonName::eType> button_names = {ButtonName::AC_MAX,
+                                                   ButtonName::AC,
+                                                   ButtonName::RECIRCULATE,
+                                                   ButtonName::FAN_UP,
+                                                   ButtonName::FAN_DOWN,
+                                                   ButtonName::TEMP_UP,
+                                                   ButtonName::TEMP_DOWN,
+                                                   ButtonName::DEFROST_MAX,
+                                                   ButtonName::DEFROST,
+                                                   ButtonName::DEFROST_REAR,
+                                                   ButtonName::UPPER_VENT,
+                                                   ButtonName::LOWER_VENT,
+                                                   ButtonName::VOLUME_UP,
+                                                   ButtonName::VOLUME_DOWN,
+                                                   ButtonName::EJECT,
+                                                   ButtonName::SOURCE,
+                                                   ButtonName::SHUFFLE,
+                                                   ButtonName::REPEAT};
 
     smart_objects::SmartObject button_caps(smart_objects::SmartType_Array);
     for (size_t i = 0; i < button_names.size(); i++) {
@@ -190,6 +189,7 @@ TEST_F(ButtonPressRequestTest,
   application_manager::SharedPtr<rc_rpc_plugin::commands::ButtonPressRequest>
       command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -227,6 +227,7 @@ TEST_F(
   application_manager::SharedPtr<rc_rpc_plugin::commands::ButtonPressRequest>
       command = CreateRCCommand<rc_rpc_plugin::commands::ButtonPressRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
