@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief SDLGetUserFriendlyMessageResponse command class
  **/
-class SDLGetUserFriendlyMessageResponse : public ResponseToHMI {
+class SDLGetUserFriendlyMessageResponse
+    : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief SDLGetUserFriendlyMessageResponse class constructor

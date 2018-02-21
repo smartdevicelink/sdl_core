@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnTTSLanguageChangeNotification command class
  **/
-class OnTTSLanguageChangeNotification : public NotificationFromHMI {
+class OnTTSLanguageChangeNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnTTSLanguageChangeNotification class constructor

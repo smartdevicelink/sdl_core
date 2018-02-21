@@ -122,11 +122,11 @@ void ShowRequest::Run() {
   mobile_apis::Result::eType processing_result = mobile_apis::Result::SUCCESS;
   if (((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
-    processing_result = MessageHelper::ProcessSoftButtons(
-        (*message_)[strings::msg_params],
-        app,
-        policy_handler_,
-        application_manager_);
+    processing_result =
+        MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+                                          app,
+                                          policy_handler_,
+                                          application_manager_);
   }
 
   if (mobile_apis::Result::SUCCESS != processing_result) {

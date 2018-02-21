@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIExternalTemperatureNotification command class
  **/
-class OnVIExternalTemperatureNotification : public NotificationFromHMI {
+class OnVIExternalTemperatureNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIExternalTemperatureNotification class constructor

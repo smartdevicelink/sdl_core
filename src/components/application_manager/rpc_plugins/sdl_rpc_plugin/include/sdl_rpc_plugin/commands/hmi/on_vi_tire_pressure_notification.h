@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVITirePressureNotification command class
  **/
-class OnVITirePressureNotification : public NotificationFromHMI {
+class OnVITirePressureNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVITirePressureNotification class constructor

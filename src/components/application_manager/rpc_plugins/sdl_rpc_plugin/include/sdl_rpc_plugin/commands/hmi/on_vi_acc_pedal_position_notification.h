@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIAccPedalPositionNotification command class
  **/
-class OnVIAccPedalPositionNotification : public NotificationFromHMI {
+class OnVIAccPedalPositionNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIAccPedalPositionNotification class constructor

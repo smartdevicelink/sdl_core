@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief SDLGetStatusUpdateResponse command class
  **/
-class SDLGetStatusUpdateResponse : public ResponseToHMI {
+class SDLGetStatusUpdateResponse : public app_mngr::commands::ResponseToHMI {
  public:
   /**
    * @brief SDLGetStatusUpdateResponse class constructor

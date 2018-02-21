@@ -47,7 +47,8 @@ namespace hmi {
 /**
  * @brief OnButtonEventNotification command class
  **/
-class OnButtonEventNotification : public NotificationFromHMI {
+class OnButtonEventNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnButtonEventNotification class constructor

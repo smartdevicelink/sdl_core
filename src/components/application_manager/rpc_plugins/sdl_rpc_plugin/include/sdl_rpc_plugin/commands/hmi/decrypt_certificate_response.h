@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief DecryptCertificateResponse command class
  **/
-class DecryptCertificateResponse : public ResponseFromHMI {
+class DecryptCertificateResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief DecryptCertificateResponse class constructor

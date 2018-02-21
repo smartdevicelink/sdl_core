@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief UISetGlobalPropertiesResponse command class
  **/
-class UISetGlobalPropertiesResponse : public ResponseFromHMI {
+class UISetGlobalPropertiesResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UISetGlobalPropertiesResponse class constructor

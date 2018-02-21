@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief UISetIconResponse command class
  **/
-class UISetAppIconResponse : public ResponseFromHMI {
+class UISetAppIconResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UISetIconResponse class constructor

@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief TTSGetSupportedLanguagesResponse command class
  **/
-class TTSGetSupportedLanguagesResponse : public ResponseFromHMI {
+class TTSGetSupportedLanguagesResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSGetSupportedLanguagesResponse class constructor

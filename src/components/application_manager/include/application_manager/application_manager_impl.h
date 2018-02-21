@@ -753,7 +753,7 @@ class ApplicationManagerImpl
   void StartDevicesDiscovery();
 
   void RemoveHMIFakeParameters(
-      application_manager::MessagePtr& message) OVERRIDE;
+      application_manager::commands::MessageSharedPtr& message) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
@@ -1063,10 +1063,6 @@ class ApplicationManagerImpl
     return *policy_handler_;
   }
 
-  CommandFactory& GetCommandFactory() const OVERRIDE {
-    return *command_factory_;
-  }
-
   rpc_service::RPCService& GetRPCService() const OVERRIDE {
     return *rpc_service_;
   }
@@ -1281,9 +1277,6 @@ class ApplicationManagerImpl
 
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
-
-  MessageValidationResult ValidateMessageBySchema(
-      const Message& message) OVERRIDE;
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
@@ -1636,7 +1629,7 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
-  std::unique_ptr<CommandFactory> command_factory_;
+
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
 

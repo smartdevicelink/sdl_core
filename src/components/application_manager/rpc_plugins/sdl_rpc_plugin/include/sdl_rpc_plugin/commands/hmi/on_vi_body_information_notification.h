@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIBodyInformationNotification command class
  **/
-class OnVIBodyInformationNotification : public NotificationFromHMI {
+class OnVIBodyInformationNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIBodyInformationNotification class constructor

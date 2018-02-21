@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief UIPerformInteractionResponse command class
  **/
-class UIPerformInteractionResponse : public ResponseFromHMI {
+class UIPerformInteractionResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief UIPerformInteractionResponse class constructor

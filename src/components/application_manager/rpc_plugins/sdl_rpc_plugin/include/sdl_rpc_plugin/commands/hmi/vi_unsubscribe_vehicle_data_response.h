@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief VIUnsubscribeVehicleDataResponse command class
  **/
-class VIUnsubscribeVehicleDataResponse : public ResponseFromHMI {
+class VIUnsubscribeVehicleDataResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief VIUnsubscribeVehicleDataResponse class constructor

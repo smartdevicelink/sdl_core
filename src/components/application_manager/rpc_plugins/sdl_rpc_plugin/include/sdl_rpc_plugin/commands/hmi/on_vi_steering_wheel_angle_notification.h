@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVISteeringWheelAngleNotification command class
  **/
-class OnVISteeringWheelAngleNotification : public NotificationFromHMI {
+class OnVISteeringWheelAngleNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVISteeringWheelAngleNotification class constructor

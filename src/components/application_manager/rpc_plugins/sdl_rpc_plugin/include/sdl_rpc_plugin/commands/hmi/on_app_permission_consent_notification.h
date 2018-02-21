@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnAppPermissionConsentNotification command class
  **/
-class OnAppPermissionConsentNotification : public NotificationFromHMI {
+class OnAppPermissionConsentNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnAppPermissionConsentNotification class constructor

@@ -47,7 +47,8 @@ namespace hmi {
 /**
  * @brief OnDriverDistractionNotification command class
  **/
-class OnDriverDistractionNotification : public NotificationFromHMI {
+class OnDriverDistractionNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnDriverDistractionNotification class constructor

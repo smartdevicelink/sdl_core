@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnSystemRequestNotification command class
  **/
-class OnSystemRequestNotification : public NotificationFromHMI {
+class OnSystemRequestNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnSystemRequestNotification class constructor

@@ -35,8 +35,7 @@
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace application_manager {
 
 namespace commands {
 

@@ -315,10 +315,7 @@ class ApplicationManager {
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
   virtual void RemoveHMIFakeParameters(
-      application_manager::MessagePtr& message) = 0;
-
-  virtual MessageValidationResult ValidateMessageBySchema(
-      const Message& message) = 0;
+      application_manager::commands::MessageSharedPtr& message) = 0;
 
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
@@ -376,7 +373,7 @@ class ApplicationManager {
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
-  virtual CommandFactory& GetCommandFactory() const = 0;
+
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
   virtual bool is_stopping() const = 0;

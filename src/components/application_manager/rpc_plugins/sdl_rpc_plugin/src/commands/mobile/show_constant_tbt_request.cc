@@ -92,10 +92,8 @@ void ShowConstantTBTRequest::Run() {
   // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params,
-                                        app,
-                                        policy_handler_,
-                                        application_manager_);
+      MessageHelper::ProcessSoftButtons(
+          msg_params, app, policy_handler_, application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");

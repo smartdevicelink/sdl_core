@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIEngineTorqueNotification command class
  **/
-class OnVIEngineTorqueNotification : public NotificationFromHMI {
+class OnVIEngineTorqueNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIEngineTorqueNotification class constructor

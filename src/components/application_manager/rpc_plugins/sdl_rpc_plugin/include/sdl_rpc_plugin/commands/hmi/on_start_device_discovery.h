@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief OnStartDeviceDiscovery command class
  **/
-class OnStartDeviceDiscovery : public NotificationFromHMI {
+class OnStartDeviceDiscovery : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnStartDeviceDiscovery class constructor

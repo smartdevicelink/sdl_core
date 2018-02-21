@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnIgnitionCycleOverNotification command class
  **/
-class OnIgnitionCycleOverNotification : public NotificationFromHMI {
+class OnIgnitionCycleOverNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnIgnitionCycleOverNotification class constructor
