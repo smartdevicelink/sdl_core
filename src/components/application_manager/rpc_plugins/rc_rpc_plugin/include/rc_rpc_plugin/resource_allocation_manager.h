@@ -112,7 +112,7 @@ class ResourceAllocationManager {
   virtual void ResetAllAllocations() = 0;
 
   virtual RCAppExtensionPtr GetApplicationExtention(
-            application_manager::ApplicationSharedPtr application) = 0;
+      application_manager::ApplicationSharedPtr application) = 0;
 
   virtual ~ResourceAllocationManager() {}
 };

@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief AddStatisticsInfoNotification command class
  **/
-class AddStatisticsInfoNotification : public app_mngr::commands::NotificationFromHMI {
+class AddStatisticsInfoNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief AddStatisticsInfoNotification class constructor

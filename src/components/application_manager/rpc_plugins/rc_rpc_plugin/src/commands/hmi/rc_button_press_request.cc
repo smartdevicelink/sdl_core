@@ -9,12 +9,15 @@ RCButtonPressRequest::RCButtonPressRequest(
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    policy::PolicyHandlerInterface& policy_handle,
+    ResourceAllocationManager& resource_allocation_manager)
     : application_manager::commands::RequestToHMI(message,
                                                   application_manager,
                                                   rpc_service,
                                                   hmi_capabilities,
-                                                  policy_handle) {}
+                                                  policy_handle) {
+  UNUSED(resource_allocation_manager);
+}
 
 RCButtonPressRequest::~RCButtonPressRequest() {}
 

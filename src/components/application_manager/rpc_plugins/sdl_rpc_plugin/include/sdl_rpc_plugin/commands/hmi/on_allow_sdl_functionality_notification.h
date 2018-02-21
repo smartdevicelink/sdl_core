@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnAllowSDLFunctionalityNotification command class
  **/
-class OnAllowSDLFunctionalityNotification : public app_mngr::commands::NotificationFromHMI {
+class OnAllowSDLFunctionalityNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnAllowSDLFunctionalityNotification class constructor

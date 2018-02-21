@@ -106,7 +106,6 @@ class SystemRequestTest
 
   void ExpectManageMobileCommandWithResultCode(
       const mobile_apis::Result::eType code) {
-
     EXPECT_CALL(
         mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),

@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnSDLPersistenceCompleteNotification command class
  **/
-class OnSDLPersistenceCompleteNotification : public app_mngr::commands::NotificationToHMI {
+class OnSDLPersistenceCompleteNotification
+    : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnSDLPersistenceCompleteNotification class constructor

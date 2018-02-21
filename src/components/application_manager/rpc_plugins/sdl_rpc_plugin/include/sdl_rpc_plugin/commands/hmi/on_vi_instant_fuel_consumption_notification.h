@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIInstantFuelConsumptionNotification command class
  **/
-class OnVIInstantFuelConsumptionNotification : public app_mngr::commands::NotificationFromHMI {
+class OnVIInstantFuelConsumptionNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIInstantFuelConsumptionNotification class constructor

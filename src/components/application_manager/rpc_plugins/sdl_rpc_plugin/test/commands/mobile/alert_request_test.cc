@@ -573,7 +573,6 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSuccess_SUCCESS) {
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
 
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
@@ -618,7 +617,6 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
 
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
-
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -665,7 +663,6 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::INVALID_ENUM;
-
 
   EXPECT_CALL(
       mock_rpc_service_,

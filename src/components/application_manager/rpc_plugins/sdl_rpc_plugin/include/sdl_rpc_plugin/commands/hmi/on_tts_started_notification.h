@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnTTSStartedNotification command class
  **/
-class OnTTSStartedNotification : public app_mngr::commands::NotificationFromHMI {
+class OnTTSStartedNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnTTSStartedNotification class constructor
