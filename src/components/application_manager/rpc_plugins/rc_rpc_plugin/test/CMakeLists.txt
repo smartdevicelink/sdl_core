@@ -27,28 +27,19 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands
   ${COMPONENTS_DIR}/application_manager/test/include
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/include/
   ${COMPONENTS_DIR}/include/test/application_manager/
   ${COMPONENTS_DIR}/rc_rpc_plugin/test/include
   )
 
-#add_subdirectory(commands)
 set (RC_TEST_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
-
+${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
 
 file(GLOB SOURCES
-
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/button_press_request_test.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/get_interior_vehicle_data_request_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/set_interior_vehicle_data_request_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/on_interior_vehicle_data_notification_test.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/commands/on_remote_control_settings_test.cc
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${RC_COMMANDS_TEST_DIR}/*
 )
