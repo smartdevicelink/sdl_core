@@ -82,6 +82,7 @@ TransportAdapterImpl::TransportAdapterImpl(
 }
 
 TransportAdapterImpl::~TransportAdapterImpl() {
+  listeners_.clear();
   Terminate();
 
   if (device_scanner_) {
@@ -158,7 +159,7 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
 
   initialised_ = (error == OK);
 
-  if (get_settings().use_last_state()) {
+  if (get_settings().use_last_state() && initialised_) {
     if (!Restore()) {
       LOG4CXX_WARN(logger_, "could not restore transport adapter state");
       error = FAIL;

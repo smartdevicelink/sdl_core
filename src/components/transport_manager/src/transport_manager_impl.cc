@@ -435,16 +435,17 @@ int TransportManagerImpl::AddTransportAdapter(
     return E_ADAPTER_EXISTS;
   }
 
-  transport_adapter_listeners_[transport_adapter] =
+  auto listener =
       new TransportAdapterListenerImpl(this, transport_adapter);
-  transport_adapter->AddListener(
-      transport_adapter_listeners_[transport_adapter]);
+
+  transport_adapter->AddListener(listener);
   
   if (transport_adapter->IsInitialised() ||
       transport_adapter->Init() == TransportAdapter::OK) {
+    transport_adapter_listeners_[transport_adapter] = listener;
     transport_adapters_.push_back(transport_adapter);
   } else {
-    transport_adapter_listeners_.erase(transport_adapter);
+    delete listener;
     delete transport_adapter;
   }
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
