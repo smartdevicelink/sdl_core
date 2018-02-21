@@ -437,6 +437,10 @@
                         "defrostZoneAvailable": true,
                         "desiredTemperatureAvailable": true,
                         "dualModeEnableAvailable": true,
+                        "heatedMirrorsAvailable":true,
+                        "heatedRearWindowAvailable":true,
+                        "heatedSteeringWheelAvailable":true,
+                        "heatedWindshieldAvailable":true,
                         "fanSpeedAvailable": true,
                         "moduleName": "primary_climate",
                         "ventilationMode": [
@@ -459,7 +463,78 @@
                         "rdsDataAvailable": true,
                         "signalChangeThresholdAvailable": true,
                         "signalStrengthAvailable": true,
+                        "sisDataAvailable":true,
                         "stateAvailable": true
+                    }
+                ],
+                "audioControlCapabilities": [
+                {
+                        "sourceAvailable": true,
+                        "volumeAvailable": true,
+                        "equalizerAvailable": true,
+                        "equalizerMaxChannelId": 80
+
+                    }
+                ],
+                "lightControlCapabilities": [
+                {
+                        "supportedLights": [
+                            {
+                                "name": [
+                                "FRONT_LEFT_HIGH_BEAM",
+                                "FRONT_RIGHT_HIGH_BEAM",
+                                "FRONT_LEFT_LOW_BEAM",
+                                "FRONT_RIGHT_LOW_BEAM",
+                                "FRONT_LEFT_PARKING_LIGHT",
+                                "FRONT_RIGHT_PARKING_LIGHT",
+                                "FRONT_LEFT_FOG_LIGHT",
+                                "FRONT_RIGHT_FOG_LIGHT",
+                                "FRONT_LEFT_DAYTIME_RUNNING_LIGHT",
+                                "FRONT_RIGHT_DAYTIME_RUNNING_LIGHT",
+                                "FRONT_LEFT_TURN_LIGHT",
+                                "FRONT_RIGHT_TURN_LIGHT",
+                                "REAR_LEFT_FOG_LIGHT",
+                                "REAR_RIGHT_FOG_LIGHT",
+                                "REAR_LEFT_TAIL_LIGHT",
+                                "REAR_RIGHT_TAIL_LIGHT",
+                                "REAR_LEFT_BREAK_LIGHT",
+                                "REAR_RIGHT_BREAK_LIGHT",
+                                "REAR_LEFT_TURN_LIGHT",
+                                "REAR_RIGHT_TURN_LIGHT",
+                                "REAR_REGISTRATION_PLATE_LIGHT",
+                                "HIGH_BEAMS",
+                                "LOW_BEAMS",
+                                "FOG_LIGHTS",
+                                "RUNNING_LIGHTS",
+                                "PARKING_LIGHTS",
+                                "BRAKE_LIGHTS",
+                                "REAR_REVERSING_LIGHTS",
+                                "SIDE_MARKER_LIGHTS",
+                                "LEFT_TURN_LIGHTS",
+                                "RIGHT_TURN_LIGHTS",
+                                "HAZARD_LIGHTS",
+                                "AMBIENT_LIGHTS",
+                                "OVERHEAD_LIGHTS",
+                                "READING_LIGHTS",
+                                "TRUNK_LIGHTS",
+                                "EXTERIOR_FRONT_LIGHTS",
+                                "EXTERIOR_REAR_LIGHTS",
+                                "EXTERIOR_LEFT_LIGHTS",
+                                "EXTERIOR_RIGHT_LIGHTS"
+                                ],
+                                "densityAvailable": true,
+                                "sRGBColorSpaceAvailable": true
+                            }
+                        ]
+
+                    }
+                ],
+                "hmiSettingsControlCapabilities": [
+                {
+                        "distanceUnitAvailable": true,
+                        "temperatureUnitAvailable": true,
+                        "displayModeUnitAvailable": true
+
                     }
                 ]
             }
