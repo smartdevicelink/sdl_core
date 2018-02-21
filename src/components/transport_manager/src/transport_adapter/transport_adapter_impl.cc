@@ -162,7 +162,6 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
   if (get_settings().use_last_state() && initialised_) {
     if (!Restore()) {
       LOG4CXX_WARN(logger_, "could not restore transport adapter state");
-      error = FAIL;
     }
   }
   LOG4CXX_TRACE(logger_, "exit with error: " << error);
