@@ -46,7 +46,6 @@ bool CheckIfModuleTypeExistInCapabilities(
 
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   const smart_objects::SmartObject* rc_capabilities =
       application_manager_.hmi_capabilities().rc_capability();
   const std::string module_type = ModuleType();
@@ -65,14 +64,10 @@ void GetInteriorVehicleDataRequest::Execute() {
 
   if (HasRequestExcessiveSubscription()) {
     RemoveExcessiveSubscription();
-    is_subscribed =
-        (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
-            .asBool();
   }
 
   (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
       app->app_id();
-
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                  &(*message_)[app_mngr::strings::msg_params],
                  true);
@@ -108,12 +103,8 @@ void GetInteriorVehicleDataRequest::on_event(
 
   if (result) {
     ProccessSubscription(hmi_response);
-    if (!hmi_response[app_mngr::strings::msg_params].keyExists(
-            message_params::kIsSubscribed)) {
-      hmi_response[app_mngr::strings::msg_params]
-                  [message_params::kIsSubscribed] = is_subscribed;
-    }
   }
+
   std::string response_info;
   GetInfo(hmi_response, response_info);
   SetResourceState(ModuleType(), ResourceState::FREE);
@@ -126,7 +117,7 @@ void GetInteriorVehicleDataRequest::on_event(
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
 
 void GetInteriorVehicleDataRequest::ProccessSubscription(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response) {
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& hmi_response) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const bool is_subscribe_present_in_request =
@@ -144,6 +135,15 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
       application_manager_.application(CommandRequestImpl::connection_key());
   RCAppExtensionPtr extension =
       resource_allocation_manager_.GetApplicationExtention(app);
+  if (!is_subscribe_present_in_request && isSubscribed_present_in_response) {
+    LOG4CXX_WARN(logger_,
+                 "Parameter " << message_params::kIsSubscribed
+                              << " is ignored due to absence '"
+                              << message_params::kSubscribe
+                              << "' parameter in request");
+    hmi_response[app_mngr::strings::msg_params].erase(message_params::kIsSubscribed);
+    return;
+  }
   if (is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "conditional mandatory parameter "
@@ -157,16 +157,9 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                 hmi_response[app_mngr::strings::msg_params]
                             [message_params::kModuleType].asUInt()),
             &module_type);
-    is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
-    return;
-  }
-
-  if (!is_subscribe_present_in_request && isSubscribed_present_in_response) {
-    LOG4CXX_WARN(logger_,
-                 "Parameter " << message_params::kIsSubscribed
-                              << " is ignored due to absence '"
-                              << message_params::kSubscribe
-                              << "' parameter in request");
+    hmi_response[app_mngr::strings::msg_params]
+                [message_params::kIsSubscribed] =
+            extension->IsSubscibedToInteriorVehicleData(module_type);
     return;
   }
 
@@ -176,8 +169,6 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
   const bool response_subscribe =
       hmi_response[app_mngr::strings::msg_params][message_params::kIsSubscribed]
           .asBool();
-  is_subscribed = response_subscribe;
-
   LOG4CXX_TRACE(logger_, "request_subscribe = " << request_subscribe);
   LOG4CXX_TRACE(logger_, "response_subscribe = " << response_subscribe);
   if (request_subscribe == response_subscribe) {
@@ -198,11 +189,6 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 
 bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const bool is_subscribe_present_in_request =
-      (*message_)[app_mngr::strings::msg_params].keyExists(
-          message_params::kSubscribe);
-
-  if (is_subscribe_present_in_request) {
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(CommandRequestImpl::connection_key());
     RCAppExtensionPtr extension =
@@ -217,8 +203,6 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
       return true;
     }
     return app_wants_to_subscribe && is_app_already_subscribed;
-  }
-  return false;
 }
 
 void GetInteriorVehicleDataRequest::RemoveExcessiveSubscription() {
