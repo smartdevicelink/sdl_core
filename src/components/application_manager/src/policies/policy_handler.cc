@@ -42,6 +42,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "policy/policy_manager_impl.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
@@ -55,9 +56,6 @@
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
 #include "policy/policy_manager.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 
@@ -852,6 +850,13 @@ uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
   return 0;
 }
 
+void PolicyHandler::OnDeviceSwitching(const std::string& device_id_from,
+                                      const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1006,11 +1011,11 @@ void PolicyHandler::OnPendingPermissionChange(
       MessageHelper::SendOnAppPermissionsChangedNotification(
           app->app_id(), permissions, application_manager_);
     }
-    application_manager_.ManageMobileCommand(
+    application_manager_.GetRPCService().ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
             app->app_id(),
             mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
-        commands::Command::ORIGIN_SDL);
+        commands::Command::SOURCE_SDL);
 
     application_manager_.OnAppUnauthorized(app->app_id());
 
@@ -1170,7 +1175,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
         continue;
       }
       policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
-      uint32_t device_handle = 0;
+      connection_handler::DeviceHandle device_handle = 0;
       if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
         LOG4CXX_WARN(logger_,
                      "Device handle with mac " << device_id
@@ -1187,10 +1192,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
             accessor.GetData().end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
-#ifdef SDL_REMOTE_CONTROL
-        application_manager_.GetPluginManager().OnPolicyEvent(
-            functional_modules::PolicyEvent::kApplicationsDisabled);
-#endif  // SDL_REMOTE_CONTROL
       } else {
         std::for_each(
             accessor.GetData().begin(),
@@ -1204,7 +1205,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
   // Case, when specific device was changed
-  uint32_t device_handle = 0u;
+  connection_handler::DeviceHandle device_handle = 0u;
   if (device_specific) {
     policy_manager_->SetUserConsentForDevice(device_mac, is_allowed);
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
@@ -1768,7 +1769,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
-  HandlersCollection::const_iterator it = listeners_.begin();
+
   std::for_each(
       listeners_.begin(),
       listeners_.end(),

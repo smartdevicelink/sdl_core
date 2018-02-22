@@ -32,6 +32,7 @@
 
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/rpc_service.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
 #include "connection_handler/connection_handler.h"
@@ -123,7 +124,7 @@ void StateControllerImpl::SetRegularState(
   HmiStatePtr prev_regular = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_regular);
   HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(audio_state);
@@ -144,7 +145,7 @@ void StateControllerImpl::SetRegularState(
     return;
   }
   const HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
 
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
@@ -166,7 +167,7 @@ void StateControllerImpl::SetRegularState(
     return;
   }
   HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(audio_state);
@@ -184,7 +185,7 @@ void StateControllerImpl::SetRegularState(
   }
   HmiStatePtr prev_state = app->RegularHmiState();
   HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
@@ -206,7 +207,7 @@ void StateControllerImpl::SetRegularState(
   HmiStatePtr prev_regular = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_regular);
   HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(prev_regular->hmi_level());
   hmi_state->set_audio_streaming_state(
@@ -227,7 +228,7 @@ void StateControllerImpl::SetRegularState(
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr hmi_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(prev_state->hmi_level());
   hmi_state->set_audio_streaming_state(audio_state);
@@ -325,7 +326,7 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
                     << state->system_context());
 
   HmiStatePtr available_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN(available_state, HmiStatePtr());
   available_state->set_hmi_level(state->hmi_level());
   available_state->set_audio_streaming_state(state->audio_streaming_state());
@@ -502,7 +503,7 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
                              << ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(old_state);
   old_state->set_hmi_level(curr_state->hmi_level());
   old_state->set_audio_streaming_state(curr_state->audio_streaming_state());
@@ -533,7 +534,7 @@ void StateControllerImpl::SetupRegularHmiState(
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr new_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(new_state);
   new_state->set_hmi_level(hmi_level);
   new_state->set_audio_streaming_state(audio_state);
@@ -716,7 +717,7 @@ void StateControllerImpl::OnApplicationRegistered(
   active_states_lock_.Acquire();
   StateIDList::iterator it = active_states_.begin();
   for (; it != active_states_.end(); ++it) {
-    HmiStatePtr new_state = CreateHmiState(app->app_id(), *it);
+    HmiStatePtr new_state = CreateHmiState(app, *it);
     DCHECK_OR_RETURN_VOID(new_state);
     DCHECK_OR_RETURN_VOID(new_state->state_id() != HmiState::STATE_ID_REGULAR);
     HmiStatePtr old_hmi_state = app->CurrentHmiState();
@@ -726,7 +727,7 @@ void StateControllerImpl::OnApplicationRegistered(
   active_states_lock_.Release();
 
   HmiStatePtr default_state =
-      CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+      CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(default_state);
   default_state->set_hmi_level(default_level);
   default_state->set_audio_streaming_state(CalcAudioState(app, default_level));
@@ -758,7 +759,7 @@ int64_t StateControllerImpl::SendBCActivateApp(
     LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
     return -1;
   }
-  if (!app_mngr_.ManageHMICommand(bc_activate_app_request)) {
+  if (!app_mngr_.GetRPCService().ManageHMICommand(bc_activate_app_request)) {
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
     return -1;
   }
@@ -896,49 +897,49 @@ bool StateControllerImpl::IsStateActive(HmiState::StateID state_id) const {
 }
 
 HmiStatePtr StateControllerImpl::CreateHmiState(
-    uint32_t app_id, HmiState::StateID state_id) const {
+    utils::SharedPtr<Application> app, HmiState::StateID state_id) const {
   using namespace utils;
   LOG4CXX_AUTO_TRACE(logger_);
   HmiStatePtr new_state;
   switch (state_id) {
     case HmiState::STATE_ID_PHONE_CALL: {
-      new_state = MakeShared<PhoneCallHmiState>(app_id, app_mngr_);
+      new_state = MakeShared<PhoneCallHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_SAFETY_MODE: {
-      new_state = MakeShared<SafetyModeHmiState>(app_id, app_mngr_);
+      new_state = MakeShared<SafetyModeHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_VR_SESSION: {
-      new_state = MakeShared<VRHmiState>(app_id, app_mngr_);
+      new_state = MakeShared<VRHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_TTS_SESSION: {
-      new_state = MakeShared<TTSHmiState>(app_id, app_mngr_);
+      new_state = MakeShared<TTSHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_NAVI_STREAMING: {
-      new_state = MakeShared<NaviStreamingHmiState>(app_id, app_mngr_);
+      new_state = MakeShared<NaviStreamingHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_REGULAR: {
-      new_state = MakeShared<HmiState>(app_id, app_mngr_);
+      new_state = MakeShared<HmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_POSTPONED: {
-      new_state = MakeShared<HmiState>(app_id, app_mngr_, state_id);
+      new_state = MakeShared<HmiState>(app, app_mngr_, state_id);
       break;
     }
     case HmiState::STATE_ID_DEACTIVATE_HMI: {
-      new_state = MakeShared<DeactivateHMI>(app_id, app_mngr_);
+      new_state = MakeShared<DeactivateHMI>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_AUDIO_SOURCE: {
-      new_state = MakeShared<AudioSource>(app_id, app_mngr_);
+      new_state = MakeShared<AudioSource>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_EMBEDDED_NAVI: {
-      new_state = MakeShared<EmbeddedNavi>(app_id, app_mngr_);
+      new_state = MakeShared<EmbeddedNavi>(app, app_mngr_);
       break;
     }
     default:

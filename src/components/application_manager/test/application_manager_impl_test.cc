@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 #include <bson_object.h>
 
 #include "gtest/gtest.h"
@@ -41,6 +43,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -49,11 +52,13 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
 #include "utils/make_shared.h"
 #include "utils/push_log.h"
+#include "encryption/hashing.h"
 
 namespace test {
 namespace components {
@@ -64,6 +69,7 @@ namespace policy_test = test::components::policy_handler_test;
 namespace con_test = connection_handler_test;
 
 using testing::_;
+using ::testing::Matcher;
 using ::testing::ByRef;
 using ::testing::DoAll;
 using ::testing::Mock;
@@ -83,19 +89,21 @@ ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
 namespace {
 const std::string kDirectoryName = "./test_storage";
 const uint32_t kTimeout = 10000u;
-sync_primitives::Lock state_lock_;
-sync_primitives::ConditionalVariable state_condition_;
+connection_handler::DeviceHandle kDeviceId = 12345u;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
-      : mock_storage_(
+      : app_id_(0u)
+      , mock_storage_(
             ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
-                app_mngr_))
+                mock_app_mngr_))
+      , mock_rpc_service_(new MockRPCService)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
-      , app_id_(0u) {
+
+  {
     logger::create_log_message_loop_thread();
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
@@ -106,12 +114,11 @@ class ApplicationManagerImplTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
-
-    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, _))
+    ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-
+    app_manager_impl_->SetRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -128,15 +135,16 @@ class ApplicationManagerImplTest : public ::testing::Test {
     ON_CALL(mock_application_manager_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kDirectoryName));
     ON_CALL(mock_application_manager_settings_, launch_hmi())
-        .WillByDefault(Return(true));
+        .WillByDefault(Return(false));
     ON_CALL(mock_application_manager_settings_, stop_streaming_timeout())
         .WillByDefault(Return(stop_streaming_timeout));
     ON_CALL(mock_application_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(kTimeout));
+
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -145,25 +153,52 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->AddMockApplication(mock_app_ptr_);
   }
 
+  void SetCommonExpectationOnAppReconnection(
+      const connection_handler::DeviceHandle new_device_id,
+      const uint32_t new_application_id,
+      const std::string& mac_address) {
+    EXPECT_CALL(
+        mock_session_observer_,
+        GetDataOnSessionKey(new_application_id,
+                            _,
+                            _,
+                            testing::An<connection_handler::DeviceHandle*>()))
+        .WillOnce(DoAll(SetArgPointee<3u>(new_device_id), Return(0)));
+
+    const std::string connection_type = "MyConnectionType";
+    EXPECT_CALL(
+        mock_session_observer_,
+        GetDataOnDeviceID(
+            ::testing::Matcher<connection_handler::DeviceHandle>(new_device_id),
+            _,
+            _,
+            _,
+            _))
+        .WillOnce(DoAll(SetArgPointee<3u>(mac_address),
+                        SetArgPointee<4u>(connection_type),
+                        Return(0)));
+  }
+  uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
+
+  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager app_mngr_;
+  application_manager_test::MockApplicationManager mock_app_mngr_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
-  uint32_t app_id_;
-  application_manager::MessageHelper* message_helper_;
+
   utils::SharedPtr<MockApplication> mock_app_ptr_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
-
   app_data[am::json::name] = "application_manager_test";
   app_data[am::json::appId] = app_id_;
   app_data[am::json::android] = "bucket";
@@ -181,16 +216,20 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
-  app_manager_impl_->UnsubscribeAppFromWayPoints(app_id_);
-  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
+  app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
+  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   const std::set<int32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
@@ -207,10 +246,12 @@ TEST_F(
 TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
-  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  auto app_ptr =
+      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
-  EXPECT_TRUE(result.find(app_id_) != result.end());
+  EXPECT_TRUE(result.find(app_ptr) != result.end());
 }
 
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
@@ -637,6 +678,156 @@ TEST_F(ApplicationManagerImplTest,
   // check: return value is true and list is empty
   EXPECT_TRUE(result);
   EXPECT_TRUE(rejected_params.empty());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnDeviceSwitchingStart_ExpectPutAppsInWaitList) {
+  utils::SharedPtr<MockApplication> switching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string switching_device_id = "switching";
+  const std::string switching_device_id_hash =
+      encryption::MakeHash(switching_device_id);
+  app_manager_impl_->AddMockApplication(switching_app_ptr);
+  EXPECT_CALL(*switching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(switching_device_id_hash));
+
+  const std::string policy_app_id_switch = "abc";
+  EXPECT_CALL(*switching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_switch));
+
+  const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
+  EXPECT_CALL(*switching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_switching_app));
+
+  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string nonswitching_device_id = "nonswitching";
+  const std::string nonswitching_device_id_hash =
+      encryption::MakeHash(nonswitching_device_id);
+  app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
+  EXPECT_CALL(*nonswitching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(nonswitching_device_id_hash));
+
+  const std::string policy_app_id_nonswitch = "efg";
+  EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_nonswitch));
+
+  const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_nonswitching_app));
+
+  // Act
+  const connection_handler::DeviceHandle switching_handle = 1;
+  const connection_handler::Device switching_device(
+      switching_handle, "switching_device", switching_device_id, "BLUETOOTH");
+
+  const connection_handler::DeviceHandle non_switching_handle = 2;
+  const connection_handler::Device non_switching_device(non_switching_handle,
+                                                        "non_switching_device",
+                                                        nonswitching_device_id,
+                                                        "USB");
+
+  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
+      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device,
+                                            non_switching_device);
+  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+  EXPECT_FALSE(
+      app_manager_impl_->IsAppInReconnectMode(policy_app_id_nonswitch));
+}
+
+TEST_F(ApplicationManagerImplTest,
+       OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
+  utils::SharedPtr<MockApplication> switching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string switching_device_id = "switching";
+  const std::string switching_device_id_hash =
+      encryption::MakeHash(switching_device_id);
+  app_manager_impl_->AddMockApplication(switching_app_ptr);
+  EXPECT_CALL(*switching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(switching_device_id_hash));
+
+  const std::string policy_app_id_switch = "abc";
+  EXPECT_CALL(*switching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_switch));
+
+  const auto hmi_level_switching_app = mobile_apis::HMILevel::HMI_FULL;
+  EXPECT_CALL(*switching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_switching_app));
+
+  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
+      utils::MakeShared<MockApplication>();
+
+  const std::string nonswitching_device_id = "nonswitching";
+  const std::string nonswitching_device_id_hash =
+      encryption::MakeHash(nonswitching_device_id);
+  app_manager_impl_->AddMockApplication(nonswitching_app_ptr);
+  EXPECT_CALL(*nonswitching_app_ptr, mac_address())
+      .WillRepeatedly(ReturnRef(nonswitching_device_id_hash));
+
+  const std::string policy_app_id_nonswitch = "efg";
+  EXPECT_CALL(*nonswitching_app_ptr, policy_app_id())
+      .WillRepeatedly(Return(policy_app_id_nonswitch));
+
+  const auto hmi_level_nonswitching_app = mobile_apis::HMILevel::HMI_LIMITED;
+  EXPECT_CALL(*nonswitching_app_ptr, hmi_level())
+      .WillRepeatedly(Return(hmi_level_nonswitching_app));
+
+  // Act
+  const connection_handler::DeviceHandle switching_handle = 1;
+  const connection_handler::Device switching_device(
+      switching_handle, "switching_device", switching_device_id, "BLUETOOTH");
+
+  const connection_handler::DeviceHandle non_switching_handle = 2;
+  const connection_handler::Device non_switching_device(non_switching_handle,
+                                                        "non_switching_device",
+                                                        nonswitching_device_id,
+                                                        "USB");
+
+  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
+      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
+  app_manager_impl_->OnDeviceSwitchingStart(switching_device,
+                                            non_switching_device);
+
+  EXPECT_TRUE(app_manager_impl_->IsAppInReconnectMode(policy_app_id_switch));
+
+  app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
+  EXPECT_FALSE(
+      app_manager_impl_->application_by_policy_id(policy_app_id_switch));
+}
+
+TEST_F(ApplicationManagerImplTest,
+       ProcessReconnection_ExpectChangeAppIdDeviceId) {
+  const uint32_t application_id = 1;
+  const std::string policy_app_id = "p_app_id";
+  const std::string mac_address = "MA:CA:DD:RE:SS";
+  const connection_handler::DeviceHandle device_id = 1;
+  const custom_str::CustomString app_name("");
+
+  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+      application_id,
+      policy_app_id,
+      mac_address,
+      device_id,
+      app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager()),
+      *app_manager_impl_);
+
+  app_manager_impl_->AddMockApplication(app_impl);
+
+  const connection_handler::DeviceHandle new_device_id = 2;
+  const uint32_t new_application_id = 2;
+  SetCommonExpectationOnAppReconnection(
+      new_device_id, new_application_id, mac_address);
+
+  // Act
+  app_manager_impl_->ProcessReconnection(app_impl, new_application_id);
+  EXPECT_EQ(new_device_id, app_impl->device());
+  EXPECT_EQ(new_application_id, app_impl->app_id());
 }
 
 }  // application_manager_test

@@ -127,7 +127,7 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
-  hmi_handler_->set_message_observer(app_manager_);
+  hmi_handler_->set_message_observer(&(app_manager_->GetRPCHandler()));
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
@@ -151,6 +151,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->AddListener(app_manager_);
 
   app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
@@ -161,7 +162,7 @@ bool LifeCycle::StartComponents() {
   transport_manager_->AddEventListener(connection_handler_);
 
   protocol_handler_->AddProtocolObserver(media_manager_);
-  protocol_handler_->AddProtocolObserver(app_manager_);
+  protocol_handler_->AddProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   media_manager_->SetProtocolHandler(protocol_handler_);
 
@@ -179,7 +180,6 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
@@ -333,7 +333,7 @@ void LifeCycle::StopComponents() {
   connection_handler_->set_connection_handler_observer(NULL);
 
   DCHECK_OR_RETURN_VOID(protocol_handler_);
-  protocol_handler_->RemoveProtocolObserver(app_manager_);
+  protocol_handler_->RemoveProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();

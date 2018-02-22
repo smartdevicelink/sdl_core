@@ -83,6 +83,21 @@ struct LanguageFinder {
   const std::string& language_;
 };
 
+struct PolicyTableUpdater {
+  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+      : default_params_(default_params) {}
+
+  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+    if (policy::kDefaultId == pt_value.second.get_string()) {
+      pt_value.second = default_params_;
+      pt_value.second.set_to_string(policy::kDefaultId);
+    }
+  }
+
+ private:
+  const policy_table::ApplicationParams& default_params_;
+};
+
 CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
@@ -244,6 +259,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
           "");
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
+      if (kDefaultId == iter->first) {
+        std::for_each(pt_->policy_table.app_policies_section.apps.begin(),
+                      pt_->policy_table.app_policies_section.apps.end(),
+                      PolicyTableUpdater(iter->second));
+      }
     }
   }
 
@@ -1398,6 +1418,27 @@ bool CacheManager::LoadFromBackup() {
   return true;
 }
 
+void CacheManager::MakeLowerCaseAppNames(policy_table::Table& pt) const {
+  policy_table::ApplicationPolicies& apps =
+      pt.policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::iterator iter = apps.begin();
+       iter != apps.end();) {
+    std::string key = iter->first;
+    if (key == kDefaultId || key == kPreDataConsentId || key == kDeviceId) {
+      ++iter;
+      continue;
+    }
+
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (key.compare(iter->first) != 0) {
+      std::swap(apps[key], iter->second);
+      iter = apps.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
 bool CacheManager::LoadFromFile(const std::string& file_name,
                                 policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1426,6 +1467,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   LOG4CXX_DEBUG(logger_, "PT out:");
   LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
 
+  MakeLowerCaseAppNames(table);
+
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
     table.ReportErrors(&report);
@@ -1433,6 +1476,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
                   "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
+
   return true;
 }
 
@@ -1586,6 +1630,12 @@ const PolicySettings& CacheManager::get_settings() const {
   DCHECK(settings_);
 
   return *settings_;
+}
+
+void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
+                                     const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Implementation does not support user consents.");
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(

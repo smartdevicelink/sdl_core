@@ -41,9 +41,11 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace {
 
@@ -75,10 +77,23 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
 
+void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                 const uint32_t app_id,
+                                 const size_t device_id,
+                                 const std::string& mac_address) {
+  utils::SharedPtr<ApplicationImpl> application =
+      ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);
+  DCHECK_OR_RETURN_VOID(application);
+  application->app_id_ = app_id;
+  application->device_id_ = device_id;
+  application->mac_address_ = mac_address;
+}
+
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
     const std::string& mobile_app_id,
     const std::string& mac_address,
+    const connection_handler::DeviceHandle device_id,
     const custom_str::CustomString& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
     ApplicationManager& application_manager)
@@ -104,13 +119,14 @@ ApplicationImpl::ApplicationImpl(
     , put_file_in_none_count_(0)
     , delete_file_in_none_count_(0)
     , list_files_in_none_count_(0)
-    , device_(0)
     , mac_address_(mac_address)
+    , device_id_(device_id)
     , usage_report_(mobile_app_id, statistics_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
     , video_stream_suspend_timer_(
@@ -135,12 +151,6 @@ ApplicationImpl::ApplicationImpl(
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
   // load persistent files
   LoadPersistentFiles();
-  HmiStatePtr initial_state = application_manager_.CreateRegularState(
-      app_id(),
-      mobile_apis::HMILevel::INVALID_ENUM,
-      mobile_apis::AudioStreamingState::INVALID_ENUM,
-      mobile_api::SystemContext::SYSCTXT_MAIN);
-  state_.InitState(initial_state);
 
   video_stream_suspend_timeout_ =
       application_manager_.get_settings().video_data_stopped_timeout();
@@ -345,7 +355,7 @@ const std::string& ApplicationImpl::bundle_id() const {
 }
 
 connection_handler::DeviceHandle ApplicationImpl::device() const {
-  return device_;
+  return device_id_;
 }
 
 const std::string& ApplicationImpl::mac_address() const {
@@ -605,7 +615,7 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
 }
 
 void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
-  device_ = device;
+  device_id_ = device;
 }
 
 uint32_t ApplicationImpl::get_grammar_id() const {
@@ -720,19 +730,23 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.insert(vehicle_info_type).second;
+  return subscribed_vehicle_info_
+      .insert(
+           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+      .second;
 }
 
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it =
-      subscribed_vehicle_info_.find(vehicle_info_type);
+  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
   return (subscribed_vehicle_info_.end() != it);
 }
 
 bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(vehicle_info_type);
+  return subscribed_vehicle_info_.erase(
+      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
@@ -857,6 +871,10 @@ bool ApplicationImpl::is_application_data_changed() const {
   return is_application_data_changed_;
 }
 
+void ApplicationImpl::SetInitialState(HmiStatePtr state) {
+  state_.InitState(state);
+}
+
 void ApplicationImpl::set_is_application_data_changed(
     bool state_application_data) {
   is_application_data_changed_ = state_application_data;
@@ -868,7 +886,19 @@ void ApplicationImpl::UpdateHash() {
       utils::gen_hash(application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
 
-  MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  if (!application_manager_.resume_controller().is_suspended()) {
+    MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  } else {
+    is_hash_changed_during_suspend_ = true;
+  }
+}
+
+bool ApplicationImpl::IsHashChangedDuringSuspend() const {
+  return is_hash_changed_during_suspend_;
+}
+
+void ApplicationImpl::SetHashChangedDuringSuspend(const bool state) {
+  is_hash_changed_during_suspend_ = state;
 }
 
 void ApplicationImpl::CleanupFiles() {
@@ -1045,7 +1075,7 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
 
@@ -1081,7 +1111,7 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 }
 
 void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+  //  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
 }
 #endif  // SDL_REMOTE_CONTROL
 

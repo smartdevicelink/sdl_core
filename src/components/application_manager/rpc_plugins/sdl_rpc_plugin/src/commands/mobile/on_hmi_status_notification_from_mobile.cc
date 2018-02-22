@@ -1,0 +1,135 @@
+/*
+
+ Copyright (c) 2013, Ford Motor Company
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
+
+ Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following
+ disclaimer in the documentation and/or other materials provided with the
+ distribution.
+
+ Neither the name of the Ford Motor Company nor the names of its contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification_from_mobile.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/message.h"
+
+namespace sdl_rpc_plugin {
+using namespace application_manager;
+namespace commands {
+
+OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandNotificationFromMobileImpl(message,
+                                        application_manager,
+                                        rpc_service,
+                                        hmi_capabilities,
+                                        policy_handler) {}
+
+OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {}
+
+void OnHMIStatusNotificationFromMobile::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  (*message_)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app.valid()) {
+    LOG4CXX_ERROR(
+        logger_, "OnHMIStatusNotificationFromMobile application doesn't exist");
+    return;
+  }
+
+  mobile_apis::HMILevel::eType current_hmi_state =
+      static_cast<mobile_apis::HMILevel::eType>(
+          (*message_)[strings::msg_params][strings::hmi_level].asUInt());
+
+  bool is_current_state_foreground =
+      mobile_apis::HMILevel::HMI_FULL == current_hmi_state;
+
+  app->set_foreground(is_current_state_foreground);
+
+  connection_handler::DeviceHandle handle = app->device();
+  bool is_apps_requested_before =
+      application_manager_.IsAppsQueriedFrom(handle);
+
+  LOG4CXX_DEBUG(logger_,
+                "Mobile HMI state notication came for connection key:"
+                    << connection_key() << " and handle: " << handle);
+
+  if (!is_apps_requested_before &&
+      Message::is_sufficient_version(
+          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4,
+          app->protocol_version()) &&
+      app->is_foreground()) {
+    // In case this notification will be received from mobile side with
+    // foreground level for app on mobile, this should trigger remote
+    // apps list query for SDL 4.0+ app
+    MessageHelper::SendQueryApps(connection_key(), application_manager_);
+    return;
+  }
+
+  if (is_apps_requested_before) {
+    LOG4CXX_DEBUG(logger_,
+                  "Remote apps list had been requested already "
+                  " for handle: "
+                      << handle);
+
+    if (Message::is_sufficient_version(
+            protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4,
+            app->protocol_version())) {
+      const ApplicationSet& accessor =
+          application_manager_.applications().GetData();
+
+      bool is_another_foreground_sdl4_app = false;
+      ApplicationSetConstIt it = accessor.begin();
+      for (; accessor.end() != it; ++it) {
+        if (connection_key() != (*it)->app_id() &&
+            Message::is_sufficient_version(
+                protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4,
+                (*it)->protocol_version()) &&
+            (*it)->is_foreground()) {
+          is_another_foreground_sdl4_app = true;
+          break;
+        }
+      }
+
+      if (!is_another_foreground_sdl4_app) {
+        application_manager_.MarkAppsGreyOut(handle,
+                                             !is_current_state_foreground);
+        application_manager_.SendUpdateAppList();
+      }
+    }
+    return;
+  }
+}
+
+}  // namespace commands
+
+}  // namespace application_manager

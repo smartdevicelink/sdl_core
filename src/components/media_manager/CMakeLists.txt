@@ -43,7 +43,6 @@ include_directories(
     ${COMPONENTS_DIR}/smart_objects/include/
     ${COMPONENTS_DIR}/policy/include/
     ${COMPONENTS_DIR}/rpc_base/include/
-    ${COMPONENTS_DIR}/functional_module/include/
     ${COMPONENTS_DIR}/hmi_message_handler/include/
     ${COMPONENTS_DIR}/formatters/include/
     ${COMPONENTS_DIR}/config_profile/include/

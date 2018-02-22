@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
+#include <string>
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
@@ -123,9 +124,38 @@ class ConnectionHandlerObserver {
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) = 0;
 
+  /**
+   * @brief OnDeviceSwitchingStart is invoked on device transport switching
+   * start (e.g. from Bluetooth to USB)
+   * @param device_from device params being switched to new transport
+   * @param device_to device params on the new transport
+   */
+  virtual void OnDeviceSwitchingStart(const Device& device_from,
+                                      const Device& device_to) = 0;
+
+  /**
+   * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end
+   * i.e. timeout for switching is expired
+   * @param device_uid UID of device being switched
+   */
+  virtual void OnDeviceSwitchingFinish(const std::string& device_uid) = 0;
+
 #ifdef ENABLE_SECURITY
+  /**
+   * @brief Get unique handshake context by application id
+   * @param key id of application
+   * @return generated handshake context or empty context if application with
+   * provided id does not exist
+   */
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
+
+  /**
+   * @brief Check if application with specified app_id has NAVIGATION HMI type
+   * @param app_id id of application to check
+   * @return true if application is navi otherwise returns false
+   */
+  virtual bool CheckAppIsNavi(const uint32_t app_id) const = 0;
 #endif  // ENABLE_SECURITY
  protected:
   /**

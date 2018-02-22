@@ -36,6 +36,7 @@
 #include <list>
 #include <string>
 #include "transport_manager/transport_manager.h"
+#include "utils/macro.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
@@ -53,6 +54,60 @@ namespace protocol_handler {
  * these constants (Session identifier shall be greater than zero)
  */
 enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
+
+/**
+ * @brief Struct with data containing attributes of starting session
+ **/
+struct SessionContext {
+  transport_manager::ConnectionUID connection_id_;
+  uint8_t initial_session_id_;
+  uint8_t new_session_id_;
+  protocol_handler::ServiceType service_type_;
+  uint32_t hash_id_;
+  bool is_protected_;
+  bool is_new_service_;
+  bool is_ptu_required_;
+
+  /**
+   * @brief Constructor
+   */
+  SessionContext()
+      : connection_id_(0)
+      , initial_session_id_(0)
+      , new_session_id_(0)
+      , service_type_(protocol_handler::kInvalidServiceType)
+      , hash_id_(0)
+      , is_protected_(false)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+
+  /**
+   * @brief Constructor
+   * @param connection_id_ Connection identifier within which session is
+   * started.
+   * @param session_id Session ID specified to OnSessionStartedCallback()
+   * @param new_session_id Session ID generated
+   * @param service_type Type of service
+   * @param hash_id Hash ID generated from connection_handle and
+   * new_session_id
+   * @param is_protected Whether service will be protected
+   * @param is_new_service Whether service was already established
+   **/
+  SessionContext(transport_manager::ConnectionUID connection_id,
+                 uint8_t session_id,
+                 uint8_t new_session_id,
+                 protocol_handler::ServiceType service_type,
+                 uint32_t hash_id,
+                 const bool is_protected)
+      : connection_id_(connection_id)
+      , initial_session_id_(session_id)
+      , new_session_id_(new_session_id)
+      , service_type_(service_type)
+      , hash_id_(hash_id)
+      , is_protected_(is_protected)
+      , is_new_service_(false)
+      , is_ptu_required_(false) {}
+};
 
 /**
  * \class SessionObserver
@@ -75,9 +130,9 @@ class SessionObserver {
    * \param is_protected would be service protected
    * \param hash_id pointer for session hash identifier, uint32_t* hash_id
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \deprecated
    */
-  // DEPRECATED
-  virtual uint32_t OnSessionStartedCallback(
+  DEPRECATED virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
@@ -87,7 +142,7 @@ class SessionObserver {
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * Result must be notified through NotifySessionStartedResult().
+   * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
    * \param sessionId Identifier of the session to be start
@@ -103,8 +158,19 @@ class SessionObserver {
       const bool is_protected,
       const BsonObject* params) = 0;
 
-  // DEPRECATED
-  virtual uint32_t OnSessionEndedCallback(
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connection_handle Connection identifier within which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink
+   * protocol.
+   * If not equal to hash assigned to session on start then operation fails.
+   * \param service_type Type of service
+   * \return uint32_t 0 if operation fails, session key otherwise
+   * \deprecated
+   */
+  DEPRECATED virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t sessionId,
       const uint32_t& hashCode,
@@ -116,7 +182,7 @@ class SessionObserver {
    * \param connection_handle Connection identifier within which session exists
    * \param sessionId Identifier of the session to be ended
    * \param hashCode Hash used only in second version of SmartDeviceLink
-   * protocol.
+   * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
    * \param service_type Type of service
    * \return uint32_t 0 if operation fails, session key otherwise
@@ -165,6 +231,7 @@ class SessionObserver {
                            uint8_t* sessionId) const = 0;
 
   /**
+   * DEPRECATED
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID
@@ -176,6 +243,20 @@ class SessionObserver {
                                       uint32_t* app_id,
                                       std::list<int32_t>* sessions_list,
                                       uint32_t* device_id) const = 0;
+
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      transport_manager::DeviceHandle* device_id) const = 0;
 
   /**
    * \brief information about device
@@ -245,6 +326,16 @@ class SessionObserver {
   virtual void SetProtectionFlag(
       const uint32_t& key,
       const protocol_handler::ServiceType& service_type) = 0;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  virtual bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const = 0;
 
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
