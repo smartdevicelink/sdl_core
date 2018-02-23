@@ -29,6 +29,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
                                                          policy_handle)
     , resource_allocation_manager_(resource_allocation_manager) {}
 
+RCOnRemoteControlSettingsNotification::~RCOnRemoteControlSettingsNotification() {}
+
 hmi_apis::Common_RCAccessMode::eType AccessModeFromString(
     const std::string& access_mode) {
   std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator
@@ -117,9 +119,6 @@ void RCOnRemoteControlSettingsNotification::Run() {
     resource_allocation_manager_.ResetAllAllocations();
   }
 }
-
-RCOnRemoteControlSettingsNotification::
-    ~RCOnRemoteControlSettingsNotification() {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
