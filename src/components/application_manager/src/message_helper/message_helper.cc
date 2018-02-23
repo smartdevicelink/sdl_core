@@ -365,6 +365,20 @@ void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
   app_mngr.ManageHMICommand(message);
 }
 
+void MessageHelper::SendGetSystemTimeRequest(const uint32_t correlation_id,
+                                             ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  SmartObjectSPtr message =
+      CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
+
+  DCHECK(message);
+
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime;
+
+  app_mngr.ManageHMICommand(message);
+}
+
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
                                                ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
