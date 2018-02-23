@@ -106,6 +106,15 @@ class MessageHelper {
   static void SendDecryptCertificateToHMI(const std::string& file_name,
                                           ApplicationManager& app_mngr);
 
+  /**
+    * @brief SendGetSystemTimeRequest sends mentioned request to HMI.
+    * @param correlation_id the message correlation id, required for proper
+    * response processing.
+    * @param app_mngr
+    */
+  static void SendGetSystemTimeRequest(const uint32_t correlation_id,
+                                       ApplicationManager& app_mngr);
+
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType
