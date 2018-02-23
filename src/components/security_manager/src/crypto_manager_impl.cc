@@ -299,24 +299,17 @@ std::string CryptoManagerImpl::LastError() const {
   return std::string(reason ? reason : "");
 }
 
-bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
+bool CryptoManagerImpl::IsCertificateUpdateRequired(
+    const time_t system_time, const time_t certificates_time) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const time_t cert_date = mktime(&expiration_time_);
+  const double seconds = difftime(certificates_time, system_time);
 
-  if (cert_date == -1) {
-    LOG4CXX_WARN(logger_,
-                 "The certifiacte expiration time cannot be represented.");
-    return false;
-  }
-  const time_t now = time(NULL);
-  const double seconds = difftime(cert_date, now);
+  LOG4CXX_DEBUG(
+      logger_, "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
 
-  LOG4CXX_DEBUG(logger_,
-                "Certificate expiration time: " << asctime(&expiration_time_));
-  LOG4CXX_DEBUG(logger_,
-                "Host time: " << asctime(localtime(&now))
-                              << ". Seconds before expiration: " << seconds);
+  LOG4CXX_DEBUG(logger_, "Host UTC time: " << asctime(gmtime(&system_time)));
+  LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
   if (seconds < 0) {
     LOG4CXX_WARN(logger_, "Certificate is already expired.");
     return true;
@@ -366,7 +359,7 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     return false;
   }
 
-  asn1_time_to_tm(X509_get_notAfter(cert));
+  // asn1_time_to_tm(X509_get_notAfter(cert));
 
   if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
     LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
@@ -394,7 +387,8 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   return true;
 }
 
-int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
+int CryptoManagerImpl::SSLContextImpl::pull_number_from_buf(char* buf,
+                                                            int* idx) const {
   if (!idx) {
     return 0;
   }
@@ -403,39 +397,81 @@ int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
   return val;
 }
 
-void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
-  char* buf = (char*)time->data;
-  int index = 0;
-  const int year = pull_number_from_buf(buf, &index);
-  if (V_ASN1_GENERALIZEDTIME == time->type) {
-    expiration_time_.tm_year =
-        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
-  } else {
-    expiration_time_.tm_year = year < 50 ? year + 100 : year;
-  }
+// void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
+//  char* buf = (char*)time->data;
+//  int index = 0;
+//  const int year = pull_number_from_buf(buf, &index);
+//  if (V_ASN1_GENERALIZEDTIME == time->type) {
+//    expiration_time_.tm_year =
+//        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
+//  } else {
+//    expiration_time_.tm_year = year < 50 ? year + 100 : year;
+//  }
 
-  const int mon = pull_number_from_buf(buf, &index);
-  const int day = pull_number_from_buf(buf, &index);
-  const int hour = pull_number_from_buf(buf, &index);
-  const int mn = pull_number_from_buf(buf, &index);
+//  const int mon = pull_number_from_buf(buf, &index);
+//  const int day = pull_number_from_buf(buf, &index);
+//  const int hour = pull_number_from_buf(buf, &index);
+//  const int mn = pull_number_from_buf(buf, &index);
 
-  expiration_time_.tm_mon = mon - 1;
-  expiration_time_.tm_mday = day;
-  expiration_time_.tm_hour = hour;
-  expiration_time_.tm_min = mn;
+//  expiration_time_.tm_mon = mon - 1;
+//  expiration_time_.tm_mday = day;
+//  expiration_time_.tm_hour = hour;
+//  expiration_time_.tm_min = mn;
 
-  if (buf[index] == 'Z') {
-    expiration_time_.tm_sec = 0;
-  }
-  if ((buf[index] == '+') || (buf[index] == '-')) {
-    const int mn = pull_number_from_buf(buf, &index);
-    const int mn1 = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
-  } else {
-    const int sec = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = sec;
-  }
-}
+//  if (buf[index] == 'Z') {
+//    expiration_time_.tm_sec = 0;
+//  }
+//  if ((buf[index] == '+') || (buf[index] == '-')) {
+//    const int mn = pull_number_from_buf(buf, &index);
+//    const int mn1 = pull_number_from_buf(buf, &index);
+//    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
+//  } else {
+//    const int sec = pull_number_from_buf(buf, &index);
+//    expiration_time_.tm_sec = sec;
+//  }
+//}
+
+// time_t CryptoManagerImpl::SSLContextImpl::asn1_time_to_tm(
+//    ASN1_TIME* time) const {
+//  struct tm cert_time;
+//  memset(&cert_time, 0, sizeof(struct tm));
+//  // the minimum value for day of month is 1, otherwise exception will be
+//  thrown
+//  cert_time.tm_mday = 1;
+//  char* buf = reinterpret_cast<char*>(time->data);
+//  int index = 0;
+//  const int year = pull_number_from_buf(buf, &index);
+//  if (V_ASN1_GENERALIZEDTIME == time->type) {
+//    cert_time.tm_year = (year * 100 - 1900) + pull_number_from_buf(buf,
+//    &index);
+//  } else {
+//    cert_time.tm_year = year < 50 ? year + 100 : year;
+//  }
+
+//  const int mon = pull_number_from_buf(buf, &index);
+//  const int day = pull_number_from_buf(buf, &index);
+//  const int hour = pull_number_from_buf(buf, &index);
+//  const int mn = pull_number_from_buf(buf, &index);
+
+//  cert_time.tm_mon = mon - 1;
+//  cert_time.tm_mday = day;
+//  cert_time.tm_hour = hour;
+//  cert_time.tm_min = mn;
+
+//  if (buf[index] == 'Z') {
+//    cert_time.tm_sec = 0;
+//  }
+//  if ((buf[index] == '+') || (buf[index] == '-')) {
+//    const int mn = pull_number_from_buf(buf, &index);
+//    const int mn1 = pull_number_from_buf(buf, &index);
+//    cert_time.tm_sec = (mn * 3600) + (mn1 * 60);
+//  } else {
+//    const int sec = pull_number_from_buf(buf, &index);
+//    cert_time.tm_sec = sec;
+//  }
+
+//  return mktime(&cert_time);
+//}
 
 void CryptoManagerImpl::InitCertExpTime() {
   strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);

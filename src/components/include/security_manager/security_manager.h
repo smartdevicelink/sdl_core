@@ -41,6 +41,7 @@
 #include "protocol_handler/session_observer.h"
 
 #include "security_manager/security_manager_listener.h"
+#include "application_manager/policies/policy_handler_observer.h"
 
 namespace security_manager {
 
@@ -50,7 +51,8 @@ class CryptoManager;
  * protocol_handler::ProtocolObserver
  * and provide interface for handling Security queries from mobile side
  */
-class SecurityManager : public protocol_handler::ProtocolObserver {
+class SecurityManager : public protocol_handler::ProtocolObserver,
+                        public policy::PolicyHandlerObserver {
  public:
   /**
    * \brief InternalErrors is 1 byte identifier of internal error
@@ -70,6 +72,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
     ERROR_INTERNAL = 0xFF,
     ERROR_UNKNOWN_INTERNAL_ERROR = 0xFE  // error value for testing
   };
+
+  enum ContextCreationStrategy { kUseExisting = 0, kForceRecreation };
+
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
@@ -120,7 +125,8 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    * identifier
    * @return new \c  SSLContext or \c NULL on any error
    */
-  virtual SSLContext* CreateSSLContext(const uint32_t& connection_key) = 0;
+  virtual SSLContext* CreateSSLContext(const uint32_t& connection_key,
+                                       ContextCreationStrategy cc_strategy) = 0;
 
   /**
    * \brief Start handshake as SSL client
@@ -128,10 +134,18 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
   virtual void StartHandshake(uint32_t connection_key) = 0;
 
   /**
+   * @brief PostponeHandshake allows to postpone handshake. It notifies
+   * cryptomanager that certificate should be updated and adds specified
+   * connection key to the list of the certificate awaiting connections.
+   * @param connection_key the identifier for connection to postpone handshake.
+   */
+  virtual void PostponeHandshake(const uint32_t connection_key) = 0;
+
+  /**
    * @brief Check whether certificate should be updated
    * @return true if certificate should be updated otherwise false
    */
-  virtual bool IsCertificateUpdateRequired() = 0;
+  virtual bool IsCertificateUpdateRequired(const uint32_t connection_key) = 0;
 
   /**
    * @brief Notify all listeners that certificate update required
@@ -150,6 +164,18 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;
   virtual void RemoveListener(SecurityManagerListener* const listener) = 0;
+
+  /**
+   * @brief OnCertificateUpdated allows to obtain notification when certificate
+   * has been updated with policy table update. Pass this certificate to crypto
+   * manager for further processing. Also process postopnes handshake for the
+   * certain connection key.
+   *
+   * @param data the certificates content.
+   *
+   * @return always true.
+   */
+  virtual bool OnCertificateUpdated(const std::string& data) = 0;
 };
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_H_

@@ -851,12 +851,14 @@ void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
     return;
   }
 
-  const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired();
   for (auto handler : ptu_pending_handlers_) {
+    const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired(
+        handler->connection_key());
     security_manager::SSLContext* ssl_context =
-        is_cert_expired
-            ? NULL
-            : security_manager_->CreateSSLContext(handler->connection_key());
+        is_cert_expired ? NULL
+                        : security_manager_->CreateSSLContext(
+                              handler->connection_key(),
+                              security_manager::SecurityManager::kUseExisting);
 
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
@@ -1286,7 +1288,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         session_observer_.KeyFromPair(connection_id, session_id);
 
     security_manager::SSLContext* ssl_context =
-        security_manager_->CreateSSLContext(connection_key);
+        security_manager_->CreateSSLContext(
+            connection_key, security_manager::SecurityManager::kUseExisting);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
@@ -1567,9 +1570,9 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     const bool is_certificate_empty =
         security_manager_->IsPolicyCertificateDataEmpty();
 
-    const bool is_certificate_expired =
-        is_certificate_empty ||
-        security_manager_->IsCertificateUpdateRequired();
+    //    const bool is_certificate_expired =
+    //        is_certificate_empty ||
+    //        security_manager_->IsCertificateUpdateRequired(connection_key);
 
     if (context.is_ptu_required_ && is_certificate_empty) {
       LOG4CXX_DEBUG(logger_,
@@ -1586,6 +1589,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         ptu_pending_handlers_.push_back(handler);
         is_ptu_triggered_ = true;
         security_manager_->NotifyOnCertificateUpdateRequired();
+        security_manager_->PostponeHandshake(connection_key);
       } else {
         LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
         ptu_pending_handlers_.push_back(handler);
@@ -1594,9 +1598,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     }
 
     security_manager::SSLContext* ssl_context =
-        is_certificate_expired
+        is_certificate_empty
             ? NULL
-            : security_manager_->CreateSSLContext(connection_key);
+            : security_manager_->CreateSSLContext(
+                  connection_key,
+                  security_manager::SecurityManager::kUseExisting);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);

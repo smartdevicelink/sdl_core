@@ -174,6 +174,7 @@ const std::string CryptoManagerImpl::SSLContextImpl::RemoveDisallowedInfo(
 
 void CryptoManagerImpl::SSLContextImpl::PrintCertData(
     X509* cert, const std::string& cert_owner) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!cert) {
     LOG4CXX_DEBUG(logger_, "Empty certificate data");
     return;
@@ -206,6 +207,7 @@ void CryptoManagerImpl::SSLContextImpl::PrintCertData(
 }
 
 void CryptoManagerImpl::SSLContextImpl::PrintCertInfo() {
+  LOG4CXX_AUTO_TRACE(logger_);
   PrintCertData(SSL_get_certificate(connection_), "HU's");
 
   STACK_OF(X509)* peer_certs = SSL_get_peer_cert_chain(connection_);
@@ -217,11 +219,41 @@ void CryptoManagerImpl::SSLContextImpl::PrintCertInfo() {
 
 SSLContext::HandshakeResult
 CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
+  LOG4CXX_AUTO_TRACE(logger_);
   X509* cert = SSL_get_peer_certificate(connection_);
   if (!cert) {
     // According to the openssl documentation the peer certificate
     // might be ommitted for the SERVER but required for the cient.
     return CLIENT == mode_ ? Handshake_Result_Fail : Handshake_Result_Success;
+  }
+  ASN1_TIME* notBefore = X509_get_notBefore(cert);
+  ASN1_TIME* notAfter = X509_get_notAfter(cert);
+
+  time_t start = asn1_time_to_tm(notBefore);
+  time_t end = asn1_time_to_tm(notAfter);
+
+  const double start_seconds = difftime(hsh_context_.system_time, start);
+  const double end_seconds = difftime(end, hsh_context_.system_time);
+
+  if (start_seconds < 0) {
+    LOG4CXX_ERROR(logger_,
+                  "Certificate is not yet valid. Time before validity "
+                      << start_seconds << " seconds");
+    return Handshake_Result_NotYetValid;
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Time since certificate validity " << start_seconds
+                                                     << "seconds");
+  }
+
+  if (end_seconds < 0) {
+    LOG4CXX_ERROR(logger_,
+                  "Certificate already expired. Time after expiration "
+                      << end_seconds << " seconds");
+    return Handshake_Result_CertExpired;
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Time until expiration " << end_seconds << "seconds");
   }
 
   X509_NAME* subj_name = X509_get_subject_name(cert);
@@ -245,6 +277,46 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
     return Handshake_Result_AppIDMismatch;
   }
   return Handshake_Result_Success;
+}
+
+time_t CryptoManagerImpl::SSLContextImpl::asn1_time_to_tm(
+    ASN1_TIME* time) const {
+  struct tm cert_time;
+  memset(&cert_time, 0, sizeof(struct tm));
+  // the minimum value for day of month is 1, otherwise exception will be thrown
+  cert_time.tm_mday = 1;
+  char* buf = reinterpret_cast<char*>(time->data);
+  int index = 0;
+  const int year = pull_number_from_buf(buf, &index);
+  if (V_ASN1_GENERALIZEDTIME == time->type) {
+    cert_time.tm_year = (year * 100 - 1900) + pull_number_from_buf(buf, &index);
+  } else {
+    cert_time.tm_year = year < 50 ? year + 100 : year;
+  }
+
+  const int mon = pull_number_from_buf(buf, &index);
+  const int day = pull_number_from_buf(buf, &index);
+  const int hour = pull_number_from_buf(buf, &index);
+  const int mn = pull_number_from_buf(buf, &index);
+
+  cert_time.tm_mon = mon - 1;
+  cert_time.tm_mday = day;
+  cert_time.tm_hour = hour;
+  cert_time.tm_min = mn;
+
+  if (buf[index] == 'Z') {
+    cert_time.tm_sec = 0;
+  }
+  if ((buf[index] == '+') || (buf[index] == '-')) {
+    const int mn = pull_number_from_buf(buf, &index);
+    const int mn1 = pull_number_from_buf(buf, &index);
+    cert_time.tm_sec = (mn * 3600) + (mn1 * 60);
+  } else {
+    const int sec = pull_number_from_buf(buf, &index);
+    cert_time.tm_sec = sec;
+  }
+
+  return mktime(&cert_time);
 }
 
 bool CryptoManagerImpl::SSLContextImpl::ReadHandshakeData(
@@ -288,6 +360,7 @@ bool CryptoManagerImpl::SSLContextImpl::WriteHandshakeData(
 
 SSLContext::HandshakeResult
 CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
+  LOG4CXX_AUTO_TRACE(logger_);
   const int handshake_result = SSL_do_handshake(connection_);
   if (handshake_result == 1) {
     const HandshakeResult result = CheckCertContext();
@@ -452,6 +525,25 @@ size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
 
 bool CryptoManagerImpl::SSLContextImpl::IsHandshakePending() const {
   return is_handshake_pending_;
+}
+
+bool CryptoManagerImpl::SSLContextImpl::GetCertificateDueDate(
+    time_t& due_date) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  X509* cert = SSL_get_certificate(connection_);
+  if (!cert) {
+    LOG4CXX_DEBUG(logger_, "Get certificate failed.");
+    return false;
+  }
+
+  due_date = asn1_time_to_tm(X509_get_notAfter(cert));
+
+  return true;
+}
+
+bool CryptoManagerImpl::SSLContextImpl::HasCertificate() const {
+  return SSL_get_certificate(connection_) != NULL;
 }
 
 CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {

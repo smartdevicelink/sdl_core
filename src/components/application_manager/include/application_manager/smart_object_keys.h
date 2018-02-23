@@ -406,7 +406,19 @@ extern const char* kFull;
 extern const char* kLimited;
 extern const char* kBackground;
 extern const char* kNone;
-}
+}  // namespace hmi_levels
+
+namespace time_keys {
+extern const char* millisecond;
+extern const char* second;
+extern const char* minute;
+extern const char* hour;
+extern const char* day;
+extern const char* month;
+extern const char* year;
+extern const char* tz_hour;
+extern const char* tz_minute;
+}  // namespace time_keys
 
 namespace hmi_request {
 extern const char* parent_id;
@@ -478,7 +490,7 @@ extern const char* num_custom_presets_available;
 extern const char* urls;
 extern const char* policy_app_id;
 extern const char* enabled;
-
+extern const char* system_time;
 }  // namespace hmi_response
 
 namespace hmi_notification {

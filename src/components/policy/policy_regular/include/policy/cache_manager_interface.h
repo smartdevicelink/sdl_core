@@ -277,6 +277,13 @@ class CacheManagerInterface {
   virtual bool IsDefaultPolicy(const std::string& app_id) const = 0;
 
   /**
+   * @brief Sets decrypted certificate in policy table
+   * @param certificate content of certificate
+   */
+  virtual void SetDecryptedCertificate(
+      const std::string& certificate) const = 0;
+
+  /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
    * @return  true in case opperation was done successfully.
