@@ -1027,6 +1027,13 @@ bool PolicyManagerImpl::HasCertificate() const {
   return !cache_->GetCertificate().empty();
 }
 
+void PolicyManagerImpl::SetDecryptedCertificate(
+    const std::string& certificate) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetDecryptedCertificate(certificate);
+  cache_->Backup();
+}
+
 class CallStatusChange : public utils::Callable {
  public:
   CallStatusChange(UpdateStatusManager& upd_manager,

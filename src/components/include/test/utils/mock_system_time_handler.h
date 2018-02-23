@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +30,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SSL_CONTEXT_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SSL_CONTEXT_H_
-
-#include <string>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H
+#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H
 
 #include "gmock/gmock.h"
-#include "security_manager/ssl_context.h"
+#include "utils/system_time_handler.h"
 
 namespace test {
 namespace components {
 namespace security_manager_test {
 
-class MockSSLContext : public ::security_manager::SSLContext {
+class MockSystemTimeHandler : public ::utils::SystemTimeHandler {
  public:
-  MOCK_METHOD2(StartHandshake,
-               HandshakeResult(const uint8_t** const out_data,
-                               size_t* out_data_size));
-  MOCK_METHOD4(DoHandshakeStep,
-               HandshakeResult(const uint8_t* const in_data,
-                               size_t in_data_size,
-                               const uint8_t** const out_data,
-                               size_t* out_data_size));
-  MOCK_METHOD4(Encrypt,
-               bool(const uint8_t* const in_data,
-                    size_t in_data_size,
-                    const uint8_t** const out_data,
-                    size_t* out_data_size));
-  MOCK_METHOD4(Decrypt,
-               bool(const uint8_t* const in_data,
-                    size_t in_data_size,
-                    const uint8_t** const out_data,
-                    size_t* out_data_size));
-  MOCK_CONST_METHOD0(IsInitCompleted, bool());
-  MOCK_CONST_METHOD0(IsHandshakePending, bool());
-  MOCK_CONST_METHOD1(get_max_block_size, size_t(size_t mtu));
-  MOCK_CONST_METHOD0(LastError, std::string());
-  MOCK_METHOD0(ResetConnection, void());
-  MOCK_METHOD1(SetHandshakeContext, void(const HandshakeContext& hsh_ctx));
-  MOCK_CONST_METHOD0(HasCertificate, bool());
-  MOCK_CONST_METHOD1(GetCertificateDueDate, bool(time_t& due_date));
+  MockSystemTimeHandler() {}
+  MOCK_METHOD0(QuerySystemTime, void());
+  MOCK_METHOD1(SubscribeOnSystemTime,
+               void(utils::SystemTimeListener* listener));
+  MOCK_METHOD1(UnSubscribeFromSystemTime,
+               void(utils::SystemTimeListener* listener));
+  MOCK_METHOD0(GetUTCTime, time_t());
+  MOCK_CONST_METHOD0(system_time_can_be_received, bool());
+  ~MockSystemTimeHandler() {}
+
+ private:
+  void DoSubscribe(utils::SystemTimeListener*) {}
+  void DoSystemTimeQuery() {}
+  void DoUnsubscribe(utils::SystemTimeListener* listener) {}
+  bool utc_time_can_be_received() const {
+    return true;
+  }
+  time_t FetchSystemTime() {
+    return 0;
+  }
 };
 }  // namespace security_manager_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SSL_CONTEXT_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H

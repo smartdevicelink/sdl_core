@@ -362,7 +362,7 @@ const char* instance_follow_redirect = "InstanceFollowRedirect";
 const char* charset = "charset";
 const char* content_lenght = "Content_Lenght";
 const char* GET = "GET";
-}  // http_request
+}  // namespace http_request
 
 namespace mobile_notification {
 const char* state = "state";
@@ -375,7 +375,17 @@ const char* kFull = "FULL";
 const char* kLimited = "LIMITED";
 const char* kBackground = "BACKGROUND";
 const char* kNone = "NONE";
-}
+}  // namespace hmi_levels
+
+namespace time_keys {
+const char* millisecond = "millisecond";
+const char* second = "second";
+const char* minute = "minute";
+const char* hour = "hour";
+const char* day = "day";
+const char* month = "month";
+const char* year = "year";
+}  // namespace time_keys
 
 namespace hmi_request {
 const char* parent_id = "parentID";
@@ -447,7 +457,7 @@ const char* num_custom_presets_available = "numCustomPresetsAvailable";
 const char* urls = "urls";
 const char* policy_app_id = "policyAppID";
 const char* enabled = "enabled";
-
+const char* system_time = "systemTime";
 }  // namespace hmi_response
 
 namespace hmi_notification {
@@ -462,7 +472,6 @@ const char* policyfile = "policyfile";
 const char* is_active = "isActive";
 const char* is_deactivated = "isDeactivated";
 const char* event_name = "eventName";
-
 }  // namespace hmi_notification
 
 }  // namespace application_manager
