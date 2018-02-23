@@ -90,6 +90,13 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
       security_manager::SSLContext::HandshakeResult result) OVERRIDE;
 
   /**
+   * @brief Notification about handshake failure
+   * Gets parameters from payload and processes
+   * handshake failure procedure
+   */
+  void OnHandshakeFailed() OVERRIDE;
+
+  /**
    * @brief Notification that certificate update is required.
    */
   void OnCertificateUpdateRequired() OVERRIDE;

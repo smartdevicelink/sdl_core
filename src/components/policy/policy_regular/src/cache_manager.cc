@@ -1291,6 +1291,13 @@ bool CacheManager::IsDefaultPolicy(const std::string& app_id) const {
   return result;
 }
 
+void CacheManager::SetDecryptedCertificate(
+    const std::string& certificate) const {
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  *pt_->policy_table.module_config.certificate = certificate;
+}
+
 bool CacheManager::SetIsDefault(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);

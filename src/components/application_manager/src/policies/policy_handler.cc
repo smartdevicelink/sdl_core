@@ -1772,11 +1772,11 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
-  HandlersCollection::const_iterator it = listeners_.begin();
-  for (; it != listeners_.end(); ++it) {
-    PolicyHandlerObserver* observer = *it;
-    observer->OnCertificateUpdated(certificate_data);
-  }
+  std::for_each(
+      listeners_.begin(),
+      listeners_.end(),
+      std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertificateUpdated),
+                   certificate_data));
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

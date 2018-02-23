@@ -296,6 +296,12 @@ class CacheManager : public CacheManagerInterface {
   bool IsDefaultPolicy(const std::string& app_id) const OVERRIDE;
 
   /**
+   * @brief Sets decrypted certificate in policy table
+   * @param certificate content of certificate
+   */
+  void SetDecryptedCertificate(const std::string& certificate) const OVERRIDE;
+
+  /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
    * @return  true in case opperation was done successfully.
