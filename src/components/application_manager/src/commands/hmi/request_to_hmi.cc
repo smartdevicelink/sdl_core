@@ -74,7 +74,9 @@ bool RequestToHMI::CleanUp() {
   return true;
 }
 
-void RequestToHMI::Run() {}
+void RequestToHMI::Run() {
+  SendRequest();
+}
 
 void RequestToHMI::SendRequest() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
