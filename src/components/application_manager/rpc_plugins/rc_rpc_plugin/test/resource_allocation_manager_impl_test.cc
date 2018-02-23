@@ -411,6 +411,7 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
             ra_manager.AcquireResource(kModuleType1, kAppId2));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType2, kAppId2));
+  Mock::VerifyAndClearExpectations(&mock_app_mngr_);
 }
 
 TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
@@ -467,6 +468,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
             ra_manager.AcquireResource(kModuleType1, kAppId2));
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType2, kAppId2));
+  Mock::VerifyAndClearExpectations(&mock_app_mngr_);
 }
 
 TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {
