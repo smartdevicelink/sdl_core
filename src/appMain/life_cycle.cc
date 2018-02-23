@@ -34,6 +34,7 @@
 #include "utils/signals.h"
 #include "utils/make_shared.h"
 #include "config_profile/profile.h"
+#include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
 
 #ifdef ENABLE_SECURITY
@@ -119,7 +120,10 @@ bool LifeCycle::StartComponents() {
   }
 
 #ifdef ENABLE_SECURITY
-  security_manager_ = new security_manager::SecurityManagerImpl();
+  system_time_handler_ =
+      new application_manager::SystemTimeHandlerImpl(*app_manager_);
+  security_manager_ =
+      new security_manager::SecurityManagerImpl(system_time_handler_);
   crypto_manager_ = new security_manager::CryptoManagerImpl(
       utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
           profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
@@ -131,7 +135,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->set_crypto_manager(crypto_manager_);
   security_manager_->AddListener(app_manager_);
 
-  app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(security_manager_);
   app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
@@ -269,6 +273,8 @@ void LifeCycle::StopComponents() {
     LOG4CXX_INFO(logger_, "Destroying Security Manager");
     delete security_manager_;
     security_manager_ = NULL;
+    delete system_time_handler_;
+    system_time_handler_ = NULL;
   }
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();

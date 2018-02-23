@@ -335,6 +335,9 @@ class SSLHandshakeTest : public testing::Test {
   std::string client_certificate_;
   std::string client_ciphers_list_;
   std::string client_ca_certificate_path_;
+
+  std::vector<int> forced_protected_services_;
+  std::vector<int> forced_unprotected_services_;
 };
 
 TEST_F(SSLHandshakeTest, NoVerification) {
