@@ -41,8 +41,8 @@ DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
                                              const std::string& sdlObjectPath,
                                              const std::string& hmiServiceName,
                                              const std::string& hmiObjectPath)
-    : DBusAdapter(
-          sdlServiceName, sdlObjectPath, hmiServiceName, hmiObjectPath) {}
+    : DBusAdapter(sdlServiceName, sdlObjectPath, hmiServiceName, hmiObjectPath)
+    , shutdown_(false) {}
 
 void DBusMessageController::SubscribeTo(const std::string& interface,
                                         const std::string& signal) {
@@ -67,7 +67,12 @@ void DBusMessageController::SubscribeTo(const std::string& interface,
 DBusMessageController::~DBusMessageController() {}
 
 void* DBusMessageController::MethodForReceiverThread(void*) {
-  while (true) {
+  Run();
+  return NULL;
+}
+
+bool DBusMessageController::Run() {
+  while (!shutdown_) {
     smart_objects::SmartObject obj(smart_objects::SmartType_Map);
     obj[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
     obj[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
@@ -75,7 +80,11 @@ void* DBusMessageController::MethodForReceiverThread(void*) {
       SendMessageToCore(obj);
     }
   }
-  return NULL;
+  return true;
+}
+
+void DBusMessageController::Shutdown() {
+  shutdown_ = true;
 }
 
 }  // namespace dbus

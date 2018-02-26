@@ -32,13 +32,13 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
+#include <thread>
 #include "utils/macro.h"
 #include "unistd.h"
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER
-#include "system.h"
 #include "hmi_message_handler/dbus_message_adapter.h"
 #endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
@@ -100,7 +100,7 @@ class LifeCycle {
 #endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
   hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  System::Thread* dbus_adapter_thread_;
+  std::thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER

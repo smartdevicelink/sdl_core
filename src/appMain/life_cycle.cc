@@ -202,12 +202,8 @@ bool LifeCycle::InitMessageSystem() {
   dbus_adapter_->SubscribeTo();
 
   LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
-  dbus_adapter_thread_ = new System::Thread(
-      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-          *dbus_adapter_,
-          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-          NULL));
-  dbus_adapter_thread_->Start(false);
+  dbus_adapter_thread_ = new std::thread(
+      &hmi_message_handler::DBusMessageAdapter::Run, dbus_adapter_);
 
   return true;
 }
@@ -319,9 +315,12 @@ void LifeCycle::StopComponents() {
   if (dbus_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
     hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    StopThread(dbus_adapter_thread_);
+    dbus_adapter_->Shutdown();
+    dbus_adapter_thread_->join();
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
+    delete dbus_adapter_thread_;
+    dbus_adapter_thread_ = NULL;
   }
 #endif  // DBUS_HMIADAPTER
 
