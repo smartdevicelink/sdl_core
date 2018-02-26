@@ -319,6 +319,8 @@ void LifeCycle::StopComponents() {
     dbus_adapter_thread_->join();
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
+    delete dbus_adapter_thread_;
+    dbus_adapter_thread_ = NULL;
   }
 #endif  // DBUS_HMIADAPTER
 
