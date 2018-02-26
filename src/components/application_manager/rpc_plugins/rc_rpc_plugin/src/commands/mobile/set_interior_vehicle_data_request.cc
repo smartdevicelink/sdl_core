@@ -166,6 +166,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       SendResponse(false,
                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
                    "Accessing not supported module data");
+      SetResourceState(ModuleType(), ResourceState::FREE);
       return;
     }
     if (AreAllParamsReadOnly(module_data)) {
@@ -173,6 +174,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       SendResponse(false,
                    mobile_apis::Result::READ_ONLY,
                    "All request params in module type are READ ONLY!");
+      SetResourceState(ModuleType(), ResourceState::FREE);
       return;
     }
     if (AreReadOnlyParamsPresent(module_data)) {
