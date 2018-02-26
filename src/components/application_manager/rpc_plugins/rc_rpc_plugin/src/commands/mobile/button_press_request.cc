@@ -217,16 +217,16 @@ void ButtonPressRequest::Execute() {
                    true);
   } else if (!button_name_matches_module_type) {
     LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
-    SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type and button name mismatch!");
+    SetResourceState(module_type, ResourceState::FREE);
   } else {
     LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
-    SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Requested button is not exists in capabilities!");
+    SetResourceState(module_type, ResourceState::FREE);
   }
 }
 
@@ -280,8 +280,8 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   }
   std::string response_info;
   GetInfo(message, response_info);
-  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(result, result_code, response_info.c_str());
+  SetResourceState(ModuleType(), ResourceState::FREE);
 }
 
 std::string ButtonPressRequest::ModuleType() {

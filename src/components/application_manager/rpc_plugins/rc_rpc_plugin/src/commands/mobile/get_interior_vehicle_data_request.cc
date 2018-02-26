@@ -53,10 +53,10 @@ void GetInteriorVehicleDataRequest::Execute() {
   if (rc_capabilities &&
       !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
     LOG4CXX_WARN(logger_, "Accessing not supported module data");
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Accessing not supported module data");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     return;
   }
 
@@ -116,11 +116,11 @@ void GetInteriorVehicleDataRequest::on_event(
   }
   std::string response_info;
   GetInfo(hmi_response, response_info);
-  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(result,
                result_code,
                response_info.c_str(),
                &hmi_response[app_mngr::strings::msg_params]);
+  SetResourceState(ModuleType(), ResourceState::FREE);
 }
 
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
