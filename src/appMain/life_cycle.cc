@@ -316,7 +316,9 @@ void LifeCycle::StopComponents() {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
     hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
     dbus_adapter_->Shutdown();
-    dbus_adapter_thread_->join();
+    if (dbus_adapter_thread_ != NULL) {
+      dbus_adapter_thread_->join();
+    }
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
     delete dbus_adapter_thread_;
@@ -330,17 +332,19 @@ void LifeCycle::StopComponents() {
     hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
     mb_adapter_->exitReceivingThread();
-    mb_adapter_thread_->join();
+    if (mb_adapter_thread_ != NULL) {
+      mb_adapter_thread_->join();
+    }
     delete mb_adapter_;
     mb_adapter_ = NULL;
+    delete mb_adapter_thread_;
+    mb_adapter_thread_ = NULL;
   }
-
+  LOG4CXX_INFO(logger_, "Destroying Message Broker");
+#endif  // MESSAGEBROKER_HMIADAPTER
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   delete hmi_handler_;
   hmi_handler_ = NULL;
-
-  LOG4CXX_INFO(logger_, "Destroying Message Broker");
-#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction
