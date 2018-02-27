@@ -4616,7 +4616,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.3.0" date="2018-09-05">
+<interface name="UI" version="1.4.0" date="2019-07-24">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -4853,7 +4853,17 @@
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true">
       <description>Information about the capabilities of the display: its type, text field supported, etc. See DisplayCapabilities. </description>
     </param>
-    <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
+    <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true">
+      <description>
+        Describes an audio configuration that the system supports for PerformAudioPassThru.
+        Note: please fill out both audioPassThruCapabilities and audioPassThruCapabilitiesList parameters, as:
+        - Newer SDL Core uses audioPassThruCapabilitiesList instead of audioPassThruCapabilities, and
+        - audioPassThruCapabilities is a mandatory field and cannot be omitted.
+      </description>
+    </param>
+    <param name="audioPassThruCapabilitiesList" type="Common.AudioPassThruCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Describes the audio configurations that the system supports for PerformAudioPassThru.</description>
+    </param>
     <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
     <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
