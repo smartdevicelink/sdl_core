@@ -54,10 +54,9 @@ void OnInteriorVehicleDataNotification::Run() {
 }
 
 std::string OnInteriorVehicleDataNotification::ModuleType() {
-  mobile_apis::ModuleType::eType module_type = static_cast<
-      mobile_apis::ModuleType::eType>(
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleType]
-          .asUInt());
+  auto module_type = static_cast<mobile_apis::ModuleType::eType>(
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [message_params::kModuleType].asUInt());
   const char* str;
   const bool ok = NsSmartDeviceLink::NsSmartObjects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);

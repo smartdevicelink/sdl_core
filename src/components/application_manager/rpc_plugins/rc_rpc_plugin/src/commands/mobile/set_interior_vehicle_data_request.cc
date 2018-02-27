@@ -35,7 +35,8 @@ const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
       {enums_value::kClimate, message_params::kClimateControlData},
       {enums_value::kAudio, message_params::kAudioControlData},
       {enums_value::kLight, message_params::kLightControlData},
-      {enums_value::kHmiSettings, message_params::kHmiSettingsControlData}};
+      {enums_value::kHmiSettings, message_params::kHmiSettingsControlData},
+      {enums_value::kSeat, message_params::kSeatControlData}};
   return mapping;
 }
 
@@ -84,6 +85,24 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["temperatureUnit"] = "temperatureUnitAvailable";
   mapping["displayMode"] = "displayModeUnitAvailable";
 
+  // seat
+  mapping["id"] = "moduleName";
+  mapping["heatingEnabled"] = "distanceUnitAvailable";
+  mapping["coolingEnabled"] = "temperatureUnitAvailable";
+  mapping["heatingLevel"] = "displayModeUnitAvailable";
+  mapping["coolingLevel"] = "radioBandAvailable";
+  mapping["horizontalPosition"] = "radioFrequencyAvailable";
+  mapping["verticalPosition"] = "radioFrequencyAvailable";
+  mapping["frontVerticalPosition"] = "rdsDataAvailable";
+  mapping["backVerticalPosition"] = "availableHDsAvailable";
+  mapping["backTiltAngle"] = "availableHDsAvailable";
+  mapping["headSupportHorizontalPosition"] = "signalStrengthAvailable";
+  mapping["headSupportVerticalPosition"] = "signalChangeThresholdAvailable";
+  mapping["massageEnabled"] = "radioEnableAvailable";
+  mapping["massageMode"] = "stateAvailable";
+  mapping["massageCushionFirmness"] = "sisDataAvailable";
+  mapping["memory"] = "sisDataAvailable";
+
   return mapping;
 }
 }  // namespace
@@ -106,16 +125,21 @@ SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
+const std::string LightName(const smart_objects::SmartObject& light_name) {
+  const char* name;
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::
+      EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
+          static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
+          &name);
+  return ok ? name : "unknown";
+}
+
 bool CheckLightNameByCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& light_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   bool is_name_valid = false;
-  const char* name;
-  NsSmartDeviceLink::NsSmartObjects::
-      EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
-          static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
-          &name);
+  const std::string name = LightName(light_name);
   for (size_t i = 0; i != capabilities.length(); ++i) {
     if (capabilities[i] == name) {
       is_name_valid = true;
@@ -128,9 +152,9 @@ bool CheckLightDataByCapabilities(
     const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& light_data) {
   std::map<std::string, std::string> lightCapsMapping = {
-      {message_params::kId, "name"},
-      {message_params::kDensity, "densityAvailable"},
-      {message_params::kSRGBColor, "sRGBColorSpaceAvailable"}};
+      {message_params::kId, strings::kName},
+      {message_params::kDensity, strings::kDensityAvailable},
+      {message_params::kSRGBColor, strings::kSRGBColorSpaceAvailable}};
   auto it = light_data.map_begin();
   for (; it != light_data.map_end(); ++it) {
     if (message_params::kStatus == it->first) {
@@ -210,25 +234,25 @@ bool CheckIfModuleDataExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> params = {
+  const std::map<std::string, std::string> params = {
       {message_params::kRadioControlData, strings::kradioControlCapabilities},
       {message_params::kClimateControlData,
        strings::kclimateControlCapabilities},
       {message_params::kAudioControlData, strings::kaudioControlCapabilities},
       {message_params::kLightControlData, strings::klightControlCapabilities},
       {message_params::kHmiSettingsControlData,
-       strings::khmiSettingsControlCapabilities}};
+       strings::khmiSettingsControlCapabilities},
+      {message_params::kSeatControlData, strings::kseatControlCapabilities}};
   bool is_module_data_valid = false;
-  auto it = params.begin();
-  for (; params.end() != it; ++it) {
-    if (module_data.keyExists(it->first)) {
-      if (!rc_capabilities.keyExists(it->second)) {
-        LOG4CXX_DEBUG(logger_, it->first << " capabilities not present");
+  for (const auto& param : params) {
+    if (module_data.keyExists(param.first)) {
+      if (!rc_capabilities.keyExists(param.second)) {
+        LOG4CXX_DEBUG(logger_, param.first << " capabilities not present");
         return false;
       }
-      const smart_objects::SmartObject& caps = rc_capabilities[it->second];
+      const smart_objects::SmartObject& caps = rc_capabilities[param.second];
       is_module_data_valid =
-          CheckControlDataByCapabilities(caps, module_data[it->first]);
+          CheckControlDataByCapabilities(caps, module_data[param.first]);
     }
   }
   return is_module_data_valid;
@@ -240,10 +264,9 @@ bool isModuleTypeAndDataMatch(const std::string& module_type,
   std::map<std::string, std::string> data_mapping =
       GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
-  auto it = data_mapping.begin();
-  for (; data_mapping.end() != it; ++it) {
-    if (it->first == module_type) {
-      module_type_and_data_match = module_data.keyExists(it->second);
+  for (const auto& data : data_mapping) {
+    if (data.first == module_type) {
+      module_type_and_data_match = module_data.keyExists(data.second);
     }
   }
   return module_type_and_data_match;
@@ -333,16 +356,15 @@ void SetInteriorVehicleDataRequest::on_event(
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
   const std::string module_type = ModuleType();
-  smart_objects::SmartObject data();
   std::map<std::string, std::string> data_mapping =
       GetModuleTypeToDataMapping();
-  auto it = data_mapping.begin();
-  for (; data_mapping.end() != it; ++it) {
-    if (it->first == module_type) {
-      return module_data[it->second];
+  for (const auto& data : data_mapping) {
+    if (data.first == module_type) {
+      return module_data[data.second];
     }
   }
-  return NULL;
+  NOTREACHED();
+  return module_data[0];
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
