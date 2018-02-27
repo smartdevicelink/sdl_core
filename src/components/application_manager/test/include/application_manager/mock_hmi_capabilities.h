@@ -198,6 +198,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD2(convert_json_languages_to_obj,
                      void(const Json::Value& json_languages,
                           smart_objects::SmartObject& languages));
+  MOCK_CONST_METHOD2(convert_audio_capability_to_obj,
+                     void(const Json::Value& capability,
+                          smart_objects::SmartObject& output_so));
 };
 
 }  // namespace application_manager_test
