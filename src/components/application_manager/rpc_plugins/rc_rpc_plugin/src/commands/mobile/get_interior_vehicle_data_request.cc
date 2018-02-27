@@ -63,18 +63,19 @@ bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (enums_value::kRadio == module_type &&
-      !rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
-    LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
-    return false;
+  const std::map<std::string, std::string> params = {
+      {enums_value::kRadio, strings::kradioControlCapabilities},
+      {enums_value::kClimate, strings::kclimateControlCapabilities},
+      {enums_value::kSeat, strings::kseatControlCapabilities}};
+  bool is_module_type_valid = false;
+  for (const auto& param : params) {
+    if (param.first == module_type) {
+      if (rc_capabilities.keyExists(param.second)) {
+        is_module_type_valid = true;
+      }
+    }
   }
-  if (enums_value::kClimate == module_type &&
-      !rc_capabilities.keyExists(strings::kclimateControlCapabilities)) {
-    LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
-    return false;
-  }
-
-  return true;
+  return is_module_type_valid;
 }
 
 void GetInteriorVehicleDataRequest::Execute() {

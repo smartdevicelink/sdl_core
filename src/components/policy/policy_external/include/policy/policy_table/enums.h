@@ -166,10 +166,7 @@ bool IsValidEnum(Input val);
 const char* EnumToJsonString(Input val);
 bool EnumFromJsonString(const std::string& literal, Input* result);
 
-enum ModuleType {
-  MT_CLIMATE,
-  MT_RADIO,
-};
+enum ModuleType { MT_CLIMATE, MT_RADIO, MT_SEAT };
 bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);
 bool EnumFromJsonString(const std::string& literal, ModuleType* result);
