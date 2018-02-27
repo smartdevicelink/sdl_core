@@ -1088,26 +1088,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-        if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
-          pcm_capabilities_so["samplingRate"] =
-              sampling_rate_enum
-                  .find(pcm_capabilities.get("samplingRate", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
-          pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum
-                  .find(pcm_capabilities.get("bitsPerSample", "").asString())
-                  ->second;
-        }
-        if (check_existing_json_member(pcm_capabilities, "audioType")) {
-          pcm_capabilities_so["audioType"] =
-              audio_type_enum
-                  .find(pcm_capabilities.get("audioType", "").asString())
-                  ->second;
-        }
-
+        convert_audio_capability_to_obj(pcm_capabilities, pcm_capabilities_so);
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
