@@ -1,5 +1,6 @@
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
@@ -291,6 +292,10 @@ void SetInteriorVehicleDataRequest::Execute() {
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
+
+    if (enums_value::kAudio == module_type) {
+      CheckAudioSource(module_data[message_params::kAudioControlData]);
+    }
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
     SendResponse(false,
@@ -343,6 +348,25 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     }
   }
   return NULL;
+}
+
+void SetInteriorVehicleDataRequest::CheckAudioSource(
+    const smart_objects::SmartObject& audio_data) {
+  if (mobile_apis::PrimaryAudioSource::MOBILE_APP !=
+      audio_data[message_params::kSource].asInt()) {
+    if (!audio_data.keyExists(message_params::kKeepContext) ||
+        !audio_data[message_params::kKeepContext].asBool()) {
+      if (mobile_apis::PrimaryAudioSource::MOBILE_APP ==
+          RCRPCPlugin::get_current_audio_source()) {
+        app_mngr::ApplicationSharedPtr app =
+            application_manager_.application(connection_key());
+        application_manager_.ChangeAppsHMILevel(
+            app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+      }
+    }
+  }
+  RCRPCPlugin::set_current_audio_source(
+      audio_data[message_params::kSource].asUInt());
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
