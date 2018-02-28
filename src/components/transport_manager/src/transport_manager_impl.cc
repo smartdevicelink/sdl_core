@@ -657,6 +657,7 @@ void TransportManagerImpl::RemoveConnection(
     if (transport_adapter) {
       transport_adapter->RemoveFinalizedConnection(it->device, it->application);
     }
+    connections_.erase(it);
   }
 }
 
