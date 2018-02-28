@@ -125,4 +125,4 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
-}
+}  // namespace rc_rpc_plugin
