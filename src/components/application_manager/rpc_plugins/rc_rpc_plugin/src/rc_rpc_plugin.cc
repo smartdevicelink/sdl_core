@@ -13,7 +13,7 @@ bool RCRPCPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
   resource_allocation_manager_.reset(
-      new ResourceAllocationManagerImpl(app_manager));
+      new ResourceAllocationManagerImpl(app_manager, rpc_service));
   command_factory_.reset(
       new rc_rpc_plugin::RCCommandFactory(app_manager,
                                           rpc_service,
@@ -89,4 +89,4 @@ void RCRPCPlugin::set_current_audio_source(uint32_t source) {
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
-}
+}  // namespace rc_rpc_plugin
