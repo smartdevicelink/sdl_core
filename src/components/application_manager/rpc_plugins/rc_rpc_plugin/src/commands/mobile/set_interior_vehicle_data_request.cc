@@ -377,9 +377,27 @@ void SetInteriorVehicleDataRequest::Execute() {
     (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
         app->app_id();
 
+    const bool app_wants_to_set_audio_src =
+        module_data.keyExists(message_params::kAudioControlData) &&
+        module_data[message_params::kAudioControlData].keyExists(
+            message_params::kSource);
+
+    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
+      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::REJECTED,
+                   "App is not allowed to change audio source");
+      return;
+    }
+
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
+
+    if (enums_value::kAudio == module_type) {
+      CheckAudioSource(module_data[message_params::kAudioControlData]);
+    }
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
     SendResponse(false,
@@ -431,6 +449,26 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
   }
   NOTREACHED();
   return module_data[0];
+}
+
+void SetInteriorVehicleDataRequest::CheckAudioSource(
+    const smart_objects::SmartObject& audio_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (mobile_apis::PrimaryAudioSource::MOBILE_APP !=
+      audio_data[message_params::kSource].asInt()) {
+    if (!audio_data.keyExists(message_params::kKeepContext) ||
+        !audio_data[message_params::kKeepContext].asBool()) {
+      if (mobile_apis::PrimaryAudioSource::MOBILE_APP ==
+          application_manager_.get_current_audio_source()) {
+        app_mngr::ApplicationSharedPtr app =
+            application_manager_.application(connection_key());
+        application_manager_.ChangeAppsHMILevel(
+            app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+      }
+    }
+  }
+  application_manager_.set_current_audio_source(
+      audio_data[message_params::kSource].asUInt());
 }
 
 bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(

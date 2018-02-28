@@ -179,6 +179,10 @@ const char kStatus[] = "status";
 const char kDensity[] = "density";
 const char kColor[] = "color";
 
+// AudioControlData
+const char kSource[] = "source";
+const char kKeepContext[] = "keepContext";
+
 // ModuleData struct
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
