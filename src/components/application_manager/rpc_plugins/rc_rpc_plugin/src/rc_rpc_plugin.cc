@@ -121,6 +121,16 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
   return result;
 }
 
+uint32_t RCRPCPlugin::current_audio_source_ = 0u;
+
+uint32_t RCRPCPlugin::get_current_audio_source() {
+  return current_audio_source_;
+}
+
+void RCRPCPlugin::set_current_audio_source(uint32_t source) {
+  current_audio_source_ = source;
+}
+
 }  // namespace rc_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
