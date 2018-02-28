@@ -273,6 +273,41 @@ static VehicleInfo_Requests ivi_subrequests[] = {
 }
 #endif  // #ifdef HMI_DBUS_API
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    uint32_t function_id, uint32_t app_id) {
+  using smart_objects::SmartObject;
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr object(
+      new SmartObject(smart_objects::SmartType_Map));
+  (*object)[strings::params][strings::message_type] =
+      static_cast<int>(kNotification);
+  (*object)[strings::params][strings::function_id] = function_id;
+  (*object)[strings::params][strings::connection_key] = app_id;
+  (*object)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  return object;
+}
+
+NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
+  using smart_objects::SmartObject;
+  using smart_objects::SmartObjectSPtr;
+  using smart_objects::SmartType_Map;
+  LOG4CXX_AUTO_TRACE(logger_);
+  SmartObjectSPtr notification_ptr =
+      utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObject& notification = *notification_ptr;
+  notification[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  notification[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  notification[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  notification[strings::params][strings::function_id] = function_id;
+
+  return notification_ptr;
+}
+
 const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   CommonAppPriorityMap::const_iterator it = app_priority_values.find(priority);
   if (app_priority_values.end() != it) {

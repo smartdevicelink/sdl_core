@@ -46,7 +46,9 @@ file(GLOB SOURCES
 
 set(LIBRARIES
   RCRpcPluginStaticLib
+  MessageHelper
   ApplicationManager
+  connectionHandler
   SmartObjects
   ProtocolHandler
   MessageHelper

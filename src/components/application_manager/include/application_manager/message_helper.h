@@ -67,6 +67,12 @@ typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
  **/
 class MessageHelper {
  public:
+  static smart_objects::SmartObjectSPtr CreateNotification(uint32_t function_id,
+                                                           uint32_t app_id);
+
+  static smart_objects::SmartObjectSPtr CreateHMINotification(
+      hmi_apis::FunctionID::eType function_id);
+
   /**
    * @brief Creates request for different interfaces(JSON, DBUS)
    * @param correlation_id unique ID
