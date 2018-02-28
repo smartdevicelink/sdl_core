@@ -114,6 +114,11 @@ const char kButtonName[] = "buttonName";
 const char kButtonPressMode[] = "buttonPressMode";
 // ButtonPress request
 
+// OnRCStatusNotification
+const char kAllocatedModules[] = "allocatedModules";
+const char kFreeModules[] = "freeModules";
+// OnRCStatusNotification
+
 // RdsData struct
 const char kPS[] = "PS";
 const char kRT[] = "RT";

@@ -119,6 +119,20 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       application_manager::ApplicationSharedPtr application) FINAL;
 
  private:
+  typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
+
+  /**
+   * @brief Create OnRCStatusNotification creates OnRCStatus notification smart
+   * object for mobile application
+   * @param app_id application to send OnRCStatusNotification
+   * @return smart object with mobile OnRCStatusNotification
+   */
+  smart_objects::SmartObjectSPtr CreateOnRCStatusNotification(
+      const uint32_t app_id);
+
+  smart_objects::SmartObjectSPtr CreateOnRCStatusNotification();
+
+
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
