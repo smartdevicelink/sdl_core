@@ -91,7 +91,11 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);
 
+  static uint32_t get_current_audio_source();
+  static void set_current_audio_source(uint32_t source);
+
  private:
+  static uint32_t current_audio_source_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
 };
