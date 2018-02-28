@@ -3,8 +3,8 @@
 #include "application_manager/application_manager.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-
 #include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "json/json.h"
@@ -19,9 +19,11 @@ namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 ResourceAllocationManagerImpl::ResourceAllocationManagerImpl(
-    application_manager::ApplicationManager& app_mngr)
+    application_manager::ApplicationManager& app_mngr,
+    application_manager::rpc_service::RPCService& rpc_service)
     : current_access_mode_(hmi_apis::Common_RCAccessMode::AUTO_ALLOW)
-    , app_mngr_(app_mngr) {}
+    , app_mngr_(app_mngr)
+    , rpc_service_(rpc_service) {}
 
 ResourceAllocationManagerImpl::~ResourceAllocationManagerImpl() {}
 
@@ -39,7 +41,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module_type);
   if (allocated_resources_.end() == allocated_it) {
-    allocated_resources_[module_type] = app_id;
+    SetResourceAquired(module_type, app_id);
     LOG4CXX_DEBUG(logger_,
                   "Resource is not acquired yet. "
                       << "App: " << app_id << " is allowed to acquire "
@@ -93,7 +95,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
                         << "App: " << app_id << " is allowed to acquire "
                         << module_type);
 
-      allocated_resources_[module_type] = app_id;
+      SetResourceAquired(module_type, app_id);
       return AcquireResult::ALLOWED;
     }
     default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
@@ -104,24 +106,7 @@ void ResourceAllocationManagerImpl::ReleaseResource(
     const std::string& module_type, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Release " << module_type << " by " << application_id);
-  AllocatedResources::const_iterator allocation =
-      allocated_resources_.find(module_type);
-  if (allocated_resources_.end() == allocation) {
-    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
-    return;
-  }
-
-  if (application_id != allocation->second) {
-    LOG4CXX_DEBUG(logger_,
-                  "Resource " << module_type
-                              << " is allocated by different application "
-                              << allocation->second);
-    return;
-  }
-
-  allocated_resources_.erase(allocation);
-  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-  return;
+  SetResourceFree(module_type, application_id);
 }
 
 void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
@@ -197,6 +182,128 @@ void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
       rc_extention->UnsubscribeFromInteriorVehicleData();
     }
   }
+}
+
+template <typename EnumType>
+std::string EnumToString(EnumType enum_type) {
+  using smart_objects::EnumConversionHelper;
+  const char* str = 0;
+  if (EnumConversionHelper<EnumType>::EnumToCString(enum_type, &str)) {
+    return str;
+  }
+  return std::string("INVALID_ENUM");
+}
+
+template <typename EnumType>
+EnumType StringToEnum(const std::string& str) {
+  using smart_objects::EnumConversionHelper;
+  EnumType val;
+  EnumConversionHelper<EnumType>::StringToEnum(str, &val);
+  return val;
+}
+
+void ConstructOnRCStatusNotificationParams(
+    smart_objects::SmartObject msg_params,
+    const std::map<std::string, uint32_t>& allocated_resources,
+    const std::vector<std::string>& supported_resources) {
+  namespace strings = application_manager::strings;
+  namespace message_params = rc_rpc_plugin::message_params;
+  using smart_objects::SmartObject;
+  using smart_objects::SmartType_Map;
+  using smart_objects::SmartType_Map;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto modules_inserter = [](SmartObject& result_modules) {
+    return [&result_modules](const std::string& module_name) {
+      smart_objects::SmartObject module_data =
+          SmartObject(smart_objects::SmartType_Map);
+      auto module_type =
+          StringToEnum<mobile_apis::ModuleType::eType>(module_name);
+      module_data[message_params::kModuleType] = module_type;
+    };
+  };
+  SmartObject allocated_modules = SmartObject(SmartType_Map);
+  for (auto& module : allocated_resources) {
+    modules_inserter(allocated_modules)(module.first);
+  }
+  SmartObject free_modules = SmartObject(SmartType_Map);
+  for (auto& module : supported_resources) {
+    if (allocated_resources.find(module) == allocated_resources.end()) {
+      modules_inserter(free_modules)(module);
+    }
+  }
+  msg_params[message_params::kAllocatedModules] = allocated_modules;
+  msg_params[message_params::kFreeModules] = free_modules;
+}
+
+smart_objects::SmartObjectSPtr
+ResourceAllocationManagerImpl::CreateOnRCStatusNotification(
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using application_manager::MessageHelper;
+  auto to_mobile_msg = MessageHelper::CreateNotification(
+      mobile_apis::FunctionID::OnRCStatusID, app_id);
+  auto& msg_params = (*to_mobile_msg)[application_manager::strings::msg_params];
+  ConstructOnRCStatusNotificationParams(
+      msg_params, allocated_resources_, all_supported_modules());
+  return to_mobile_msg;
+}
+
+smart_objects::SmartObjectSPtr
+ResourceAllocationManagerImpl::CreateOnRCStatusNotification() {
+  using application_manager::MessageHelper;
+  auto to_hmi_msg =
+      MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
+  auto& msg_params = (*to_hmi_msg)[application_manager::strings::msg_params];
+  ConstructOnRCStatusNotificationParams(
+      msg_params, allocated_resources_, all_supported_modules());
+  return to_hmi_msg;
+}
+
+void ResourceAllocationManagerImpl::SetResourceAquired(
+    const std::string& module_type, const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
+  for (auto& rc_app : rc_apps) {
+    auto notification = CreateOnRCStatusNotification(rc_app->app_id());
+    rpc_service_.SendMessageToMobile(notification);
+  }
+  auto notification = CreateOnRCStatusNotification();
+  rpc_service_.SendMessageToHMI(notification);
+  allocated_resources_[module_type] = app_id;
+}
+
+void ResourceAllocationManagerImpl::SetResourceFree(
+    const std::string& module_type, const uint32_t app_id) {
+  AllocatedResources::const_iterator allocation =
+      allocated_resources_.find(module_type);
+  if (allocated_resources_.end() == allocation) {
+    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
+    return;
+  }
+  if (app_id != allocation->second) {
+    LOG4CXX_ERROR(logger_,
+                  "Resource " << module_type
+                              << " is allocated by different application "
+                              << allocation->second);
+  }
+  allocated_resources_.erase(allocation);
+  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
+  auto rc_apps =RCRPCPlugin::GetRCApplications(app_mngr_);
+  for (auto& rc_app : rc_apps) {
+    auto notification = CreateOnRCStatusNotification(rc_app->app_id());
+    rpc_service_.SendMessageToMobile(notification);
+  }
+  auto notification = CreateOnRCStatusNotification();
+  rpc_service_.SendMessageToHMI(notification);
+}
+
+std::vector<std::string>
+ResourceAllocationManagerImpl::all_supported_modules() {
+  std::vector<std::string> result;
+  result.push_back(enums_value::kClimate);
+  result.push_back(enums_value::kRadio);
+  return result;
 }
 
 std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
@@ -285,7 +392,7 @@ void ResourceAllocationManagerImpl::ForceAcquireResource(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Force " << app_id << " acquiring " << module_type);
   sync_primitives::AutoLock lock(allocated_resources_lock_);
-  allocated_resources_[module_type] = app_id;
+  SetResourceAquired(module_type, app_id);
 }
 
 bool ResourceAllocationManagerImpl::IsModuleTypeRejected(
