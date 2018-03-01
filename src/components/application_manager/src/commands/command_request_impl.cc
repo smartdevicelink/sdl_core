@@ -580,6 +580,10 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       mobile_result = mobile_apis::Result::SAVED;
       break;
     }
+    case hmi_apis::Common_Result::READ_ONLY: {
+      mobile_result = mobile_apis::Result::READ_ONLY;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
