@@ -213,7 +213,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
     std::make_pair(strings::steering_wheel_angle,
                    mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-};
+    std::make_pair(strings::fuel_range,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
