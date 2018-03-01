@@ -142,7 +142,7 @@ bool CheckIfModuleDataExistInCapabilities(
 void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto module_data =
+  smart_objects::SmartObject& module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
   const std::string module_type = ModuleType();
   bool module_type_and_data_match = true;
@@ -163,6 +163,7 @@ void SetInteriorVehicleDataRequest::Execute() {
     if (rc_capabilities &&
         !CheckIfModuleDataExistInCapabilities(*rc_capabilities, module_data)) {
       LOG4CXX_WARN(logger_, "Accessing not supported module data");
+      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false,
                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
                    "Accessing not supported module data");
@@ -170,6 +171,7 @@ void SetInteriorVehicleDataRequest::Execute() {
     }
     if (AreAllParamsReadOnly(module_data)) {
       LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");
+      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false,
                    mobile_apis::Result::READ_ONLY,
                    "All request params in module type are READ ONLY!");
@@ -219,13 +221,14 @@ void SetInteriorVehicleDataRequest::on_event(
           mobile_apis::Result::SUCCESS,
           mobile_apis::Result::WARNINGS);
 
-  //  if (result) {
-  //    response_params_[message_params::kModuleData] =
-  //        value[json_keys::kResult][message_params::kModuleData];
-  //  }
+  smart_objects::SmartObject response_params;
+  if (result) {
+    response_params = hmi_response[app_mngr::strings::msg_params];
+  }
   std::string info;
   GetInfo(hmi_response, info);
-  SendResponse(result, result_code, info.c_str());
+  SendResponse(
+      result, result_code, info.c_str(), result ? &response_params : nullptr);
 }
 
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
@@ -274,19 +277,17 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
-  auto it = module_type_params.map_begin();
   const std::string module_type = ModuleType();
   std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
-  for (; it != module_type_params.map_end(); ++it) {
-    if (helpers::in_range(ro_params, it->first)) {
+
+  for (auto& it : ro_params) {
+    if (module_type_params.keyExists(it)) {
       if (enums_value::kClimate == module_type) {
-        module_data[message_params::kClimateControlData].erase(it->first);
-        LOG4CXX_DEBUG(logger_,
-                      "Cutting-off READ ONLY parameter: " << it->first);
+        module_data[message_params::kClimateControlData].erase(it);
+        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
       } else if (enums_value::kRadio == module_type) {
-        module_data[message_params::kRadioControlData].erase(it->first);
-        LOG4CXX_DEBUG(logger_,
-                      "Cutting-off READ ONLY parameter: " << it->first);
+        module_data[message_params::kRadioControlData].erase(it);
+        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
       }
     }
   }
