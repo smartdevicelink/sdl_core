@@ -64,10 +64,16 @@ class GetVehicleDataRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Adds specific message to response info for current RPC
+   * @param response Response message, which info should be updated
+   */
+  void AddSpecificInfoToResponse(smart_objects::SmartObject& response) FINAL;
 
  protected:
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
 
 #ifdef HMI_DBUS_API
  private:

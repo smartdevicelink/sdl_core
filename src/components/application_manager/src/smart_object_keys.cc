@@ -238,6 +238,7 @@ const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
+const char* engine_oil_life = "engineOilLife";
 
 // resuming
 const char* application_commands = "applicationCommands";

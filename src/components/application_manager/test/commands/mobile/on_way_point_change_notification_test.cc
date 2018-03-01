@@ -101,6 +101,15 @@ TEST_F(OnWayPointChangeNotificationTest,
   std::set<int32_t> apps_subscribed_for_way_points;
   apps_subscribed_for_way_points.insert(kAppId);
 
+  MockAppPtr mock_app(CreateMockApp());
+
+  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
+
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
       .WillOnce(Return(apps_subscribed_for_way_points));
 
