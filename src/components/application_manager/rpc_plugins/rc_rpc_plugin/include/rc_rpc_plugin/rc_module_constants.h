@@ -40,10 +40,20 @@ namespace strings {
 const char kclimateControlCapabilities[] = "climateControlCapabilities";
 const char kradioControlCapabilities[] = "radioControlCapabilities";
 const char kbuttonCapabilities[] = "buttonCapabilities";
+const char kaudioControlCapabilities[] = "audioControlCapabilities";
+const char klightControlCapabilities[] = "lightControlCapabilities";
+const char khmiSettingsControlCapabilities[] = "hmiSettingsControlCapabilities";
+const char kseatControlCapabilities[] = "seatControlCapabilities";
 // RemoteControlCapabilities constants
 
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
+const char kSupportedLights[] = "supportedLights";
+
+// LightControlCapabilities
+const char kName[] = "name";
+const char kDensityAvailable[] = "densityAvailable";
+const char kSRGBColorSpaceAvailable[] = "sRGBColorSpaceAvailable";
 }  //  strings
 
 namespace result_codes {
@@ -136,6 +146,7 @@ const char kSignalStrength[] = "signalStrength";
 const char kSignalChangeThreshold[] = "signalChangeThreshold";
 const char kRadioEnable[] = "radioEnable";
 const char kState[] = "state";
+const char kSisData[] = "sisData";
 // RadioControlData struct
 
 // ClimateControlData struct
@@ -150,11 +161,30 @@ const char kDefrostZone[] = "defrostZone";
 const char kDualModeEnable[] = "dualModeEnable";
 const char kACMaxEnable[] = "acMaxEnable";
 const char kVentilationMode[] = "ventilationMode";
+const char kHeatedSteeringWheelEnable[] = "heatedSteeringWheelEnable";
+const char kHeatedWindshieldEnable[] = "heatedWindshieldEnable";
+const char kHeatedRearWindowEnable[] = "heatedRearWindowEnable";
+const char kHeatedMirrorsEnable[] = "heatedMirrorsEnable";
 // ClimateControlData struct
+
+// LightControlData
+const char kLightState[] = "lightState";
+const char kId[] = "id";
+const char kStatus[] = "status";
+const char kDensity[] = "density";
+const char kSRGBColor[] = "sRGBColor";
+
+// AudioControlData
+const char kSource[] = "source";
+const char kKeepContext[] = "keepContext";
 
 // ModuleData struct
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
+const char kAudioControlData[] = "audioControlData";
+const char kLightControlData[] = "lightControlData";
+const char kHmiSettingsControlData[] = "hmiSettingsControlData";
+const char kSeatControlData[] = "seatControlData";
 // ModuleData struct
 
 const char kHMIAppID[] = "appID";
@@ -168,6 +198,10 @@ namespace enums_value {
 // ModuleType enum
 const char kClimate[] = "CLIMATE";
 const char kRadio[] = "RADIO";
+const char kAudio[] = "AUDIO";
+const char kLight[] = "LIGHT";
+const char kHmiSettings[] = "HMI_SETTINGS";
+const char kSeat[] = "SEAT";
 // ModuleType enum
 
 // RadioBand enum

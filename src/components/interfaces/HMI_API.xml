@@ -869,6 +869,8 @@
   <description>Reflects the current primary audio source (if selected).</description>
   <element name="NO_SOURCE_SELECTED">
   </element>
+  <element name="CD">
+  </element>
   <element name="USB">
   </element>
   <element name="USB2">
@@ -880,6 +882,9 @@
   <element name="IPOD">
   </element>
   <element name="MOBILE_APP">
+  </element>
+  <element name="RADIO_TUNER">
+    <description>Radio may be on AM, FM or XM</description>
   </element>
 </enum>
 
@@ -1459,7 +1464,136 @@
 <enum name="ModuleType">
    <element name="CLIMATE"/>
    <element name="RADIO"/>
- </enum>
+   <element name="AUDIO"/>
+   <element name="LIGHT"/>
+   <element name="HMI_SETTINGS"/>
+   <element name="SEAT"/>
+</enum>
+
+    <enum name="MassageZone">
+      <description>List possible zones of a multi-contour massage seat.</description>
+      <element name="LUMBAR">
+        <description>The back of a multi-contour massage seat. or SEAT_BACK</description>
+      </element>
+      <element name="SEAT_CUSHION">
+        <description>The bottom a multi-contour massage seat. or SEAT_BOTTOM </description>
+      </element>
+    </enum>
+
+    <enum name="MassageMode">
+      <description>List possible modes of a massage zone.</description>
+      <element name="OFF"/>
+      <element name="LOW"/>
+      <element name="HIGH"/>
+    </enum>
+
+    <struct name="MassageModeData">
+      <description>Specify the mode of a massage zone.</description>
+      <param name="massageZone" type="MassageZone" mandatory="true"></param>
+      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+    </struct>
+
+    <enum name="MassageCushion">
+      <description>List possible cushions of a multi-contour massage seat.</description>
+      <element name="TOP_LUMBAR"/>
+      <element name="MIDDLE_LUMBAR"/>
+      <element name="BOTTOM_LUMBAR"/>
+      <element name="BACK_BOLSTERS"/>
+      <element name="SEAT_BOLSTERS"/>
+    </enum>
+
+    <struct name="MassageCushionFirmness">
+      <description>The intensity or firmness of a cushion.</description>
+      <param name="cushion" type="MassageCushion" mandatory="true"></param>
+      <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+    </struct>
+
+    <enum name="SeatMemoryActionType">
+      <element name="SAVE">
+        <description>Save current seat postions and settings to seat memory.</description>
+      </element>
+      <element name="RESTORE">
+        <description>Restore / apply the seat memory settings to the current seat. </description>
+      </element>
+      <element name="NONE">
+        <description>No action to be performed.</description>
+      </element>
+    </enum>
+
+    <struct name="SeatMemoryAction">
+      <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
+      <param name="label" type="String" maxlength="100" mandatory="false"/>
+      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+    </struct>
+
+    <enum name="SupportedSeat">
+      <description>List possible seats that is a remote controllable seat.</description>
+      <element name="DRIVER"/>
+      <element name="FRONT_PASSENGER"/>
+    </enum>
+
+    <struct name="SeatControlData">
+      <description>Seat control data corresponds to "SEAT" ModuleType. </description>
+      <param name="id" type="SupportedSeat" mandatory="true"></param>
+
+      <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
+      <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="coolingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="horizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="verticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="frontVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="backTiltAngle" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="headSupportHorizontalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+      <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
+
+      <param name="massageEnabled" type="Boolean" mandatory="false"></param>
+      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+    </struct>
+
+    <struct name="SeatControlCapabilities">
+      <param name="moduleName" type="String" maxlength="100"  mandatory="true">
+        <description>
+        The short friendly name of the light control module.
+        It should not be used to identify a module by mobile application.
+        </description>
+      </param>
+      <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="heatingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="coolingLevelAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="horizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="verticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="frontVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="backTiltAngleAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportHorizontalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="headSupportVerticalPositionAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageEnabledAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageModeAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="massageCushionFirmnessAvailable" type="Boolean" mandatory="false">
+      </param>
+      <param name="memoryAvailable" type="Boolean" mandatory="false">
+      </param>
+    </struct>
 
  <enum name="RadioBand">
    <element name="AM"/>
@@ -1501,6 +1635,42 @@
    <element name="NOT_FOUND"/>
  </enum>
 
+ <struct name="StationIDNumber">
+     <param name="countryCode" type="Integer" minvalue="0" maxvalue="999"  mandatory="false">
+         <description>Binary Representation of ITU Country Code. USA Code is 001.</description>
+     </param>
+     <param name="fccFacilityId" type="Integer" minvalue="0" maxvalue="999999"  mandatory="false">
+         <description>Binary representation  of unique facility ID assigned by the FCC; FCC controlled for U.S. territory</description>
+     </param>
+ </struct>
+
+ <struct name="GPSLocation">
+     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+     </param>
+     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+     </param>
+     <param name="altitudeMeters" type="Float" minvalue="-99999" maxvalue="99999" mandatory="false">
+     </param>
+ </struct>
+
+ <struct name="SisData">
+     <param name="stationShortName" type="String" minlength="4" maxlength="7"  mandatory="false">
+         <description>Identifies the 4-alpha-character station call sign plus an optional (-FM) extension</description>
+     </param>
+     <param name="stationIDNumber" type="StationIDNumber"  mandatory="false">
+         <description>Used for network Application. Consists of Country Code and FCC Facility ID.</description>
+     </param>
+     <param name="stationLongName" type="String" minlength="0" maxlength="56"  mandatory="false">
+         <description>Identifies the station call sign or other identifying information in the long format.</description>
+     </param>
+     <param name="stationLocation" type="GPSLocation" mandatory="false">
+         <description>Provides the 3-dimensional geographic station location.</description>
+     </param>
+     <param name="stationMessage" type="String" minlength="0" maxlength="56"  mandatory="false">
+         <description>May be used to convey textual information of general interest to the consumer such as weather forecasts or public service announcements. Includes a high priority delivery feature to convey emergencies that may be in the listening area.</description>
+     </param>
+ </struct>
+
  <struct name="RadioControlData">
    <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
      <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
@@ -1527,6 +1697,9 @@
      <description> True if the radio is on, false is the radio is off</description>
    </param>
    <param name="state" type="Common.RadioState" mandatory="false">
+   </param>
+   <param name="sisData" type="SisData" mandatory="false">
+       <description>Read-only Station Information Service (SIS) data provides basic information about the station such as call sign, as well as information not displayable to the consumer such as the station identification number</description>
    </param>
  </struct>
 
@@ -1589,6 +1762,12 @@
        True: Available, False: Not Available, Not present: Not Available.
      </description>
    </param>
+   <param name="sisDataAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the getting HD radio Station Information Service (SIS) data.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
  </struct>
 
  <enum name="DefrostZone">
@@ -1639,6 +1818,18 @@
    <param name="acMaxEnable" type="Boolean" mandatory="false">
    </param>
    <param name="ventilationMode" type="Common.VentilationMode" mandatory="false">
+   </param>
+   <param name="heatedSteeringWheelEnable" type="Boolean" mandatory="false">
+     <description>value false means disabled/turn off, value true means enabled/turn on.</description>
+   </param>
+   <param name="heatedWindshieldEnable" type="Boolean" mandatory="false">
+     <description>value false means disabled, value true means enabled.</description>
+   </param>
+   <param name="heatedRearWindowEnable" type="Boolean" mandatory="false">
+     <description>value false means disabled, value true means enabled.</description>
+   </param>
+   <param name="heatedMirrorsEnable" type="Boolean" mandatory="false">
+     <description>value false means disabled, value true means enabled.</description>
    </param>
  </struct>
 
@@ -1717,6 +1908,249 @@
        A set of all ventilation modes that are controllable.
      </description>
    </param>
+   <param name="heatedSteeringWheelAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control (enable/disable) of heated Steering Wheel.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="heatedWindshieldAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control (enable/disable) of heated Windshield.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="heatedRearWindowAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control (enable/disable) of heated Rear Window.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="heatedMirrorsAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control (enable/disable) of heated Mirrors.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+ </struct>
+
+ <struct name="EqualizerSettings">
+     <description>Defines the each Equalizer channel settings.</description>
+     <param name="channelId" type="Integer" minvalue="1" maxvalue="100" mandatory="true"></param>
+     <param name="channelName" type="String" mandatory="false" maxlength="50">
+        <description>read-only channel / frequency name (e.i. "Treble, Midrange, Bass" or "125 Hz")</description>
+     </param>
+     <param name="channelSetting" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+ </struct>
+
+ <struct name="AudioControlData">
+     <param name="source" type="PrimaryAudioSource" mandatory="false">
+         <description>
+         In a getter response or a notification, it is the current primary audio source of the system.
+         In a setter request, it is the target audio source that the system shall switch to.
+         If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
+     </description>
+     </param>
+     <param name="keepContext" type="Boolean" mandatory="false">
+         <description>
+         This parameter shall not be present in any getter responses or notifications.
+         This parameter is optional in a setter request. The default value is false.
+         If it is true, the system not only changes the audio source but also brings the default application
+         or system UI associated with the audio source to foreground.
+         If it is false, the system changes the audio source, but still keeps the current application in foreground.
+         </description>
+     </param>
+     <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
+         <description>Reflects the volume of audio, from 0%-100%.</description>
+     </param>
+     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array ="true">
+             <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
+     </param>
+ </struct>
+
+ <struct name="AudioControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+         The short friendly name of the light control module.
+         It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="sourceAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of audio source. </description>
+     </param>
+     <param name="volumeAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of audio volume.</description>
+     </param>
+     <param name="equalizerAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of Equalizer Settings.</description>
+     </param>
+     <param name="equalizerMaxChannelId" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+         <description>Must be included if equalizerAvailable=true, and assume all IDs starting from 1 to this value are valid</description>
+     </param>
+ </struct>
+
+ <enum name="LightName">
+     <!-- Common Single Light 0~500 -->
+     <element name="FRONT_LEFT_HIGH_BEAM" value="0"/>
+     <element name="FRONT_RIGHT_HIGH_BEAM" value="1"/>
+     <element name="FRONT_LEFT_LOW_BEAM" value="2"/>
+     <element name="FRONT_RIGHT_LOW_BEAM" value="3"/>
+     <element name="FRONT_LEFT_PARKING_LIGHT" value="4"/>
+     <element name="FRONT_RIGHT_PARKING_LIGHT" value="5"/>
+     <element name="FRONT_LEFT_FOG_LIGHT" value="6"/>
+     <element name="FRONT_RIGHT_FOG_LIGHT" value="7"/>
+     <element name="FRONT_LEFT_DAYTIME_RUNNING_LIGHT" value="8"/>
+     <element name="FRONT_RIGHT_DAYTIME_RUNNING_LIGHT" value="9"/>
+     <element name="FRONT_LEFT_TURN_LIGHT" value="10"/>
+     <element name="FRONT_RIGHT_TURN_LIGHT" value="11"/>
+     <element name="REAR_LEFT_FOG_LIGHT" value="12"/>
+     <element name="REAR_RIGHT_FOG_LIGHT" value="13"/>
+     <element name="REAR_LEFT_TAIL_LIGHT" value="14"/>
+     <element name="REAR_RIGHT_TAIL_LIGHT" value="15"/>
+     <element name="REAR_LEFT_BREAK_LIGHT" value="16"/>
+     <element name="REAR_RIGHT_BREAK_LIGHT" value="17"/>
+     <element name="REAR_LEFT_TURN_LIGHT" value="18"/>
+     <element name="REAR_RIGHT_TURN_LIGHT" value="19"/>
+     <element name="REAR_REGISTRATION_PLATE_LIGHT" value="20"/>
+
+     <!-- Exterior Lights by common function groups 501~800 -->
+     <element name="HIGH_BEAMS" value="501">
+         <description>Include all high beam lights: front_left and front_right.</description>
+     </element>
+     <element name="LOW_BEAMS" value="502">
+         <description>Include all low beam lights: front_left and front_right.</description>
+     </element>
+     <element name="FOG_LIGHTS" value="503">
+         <description>Include all fog lights: front_left, front_right, rear_left and rear_right.</description>
+     </element>
+     <element name="RUNNING_LIGHTS" value="504">
+         <description>Include all daytime running lights: front, left and right.</description>
+     </element>
+     <element name="PARKING_LIGHTS" value="505">
+         <description>Include all parking lights: front_left and front_right.</description>
+     </element>
+     <element name="BRAKE_LIGHTS" value="506">
+         <description>Include all brake lights: rear_left and rear_right.</description>
+     </element>
+     <element name="REAR_REVERSING_LIGHTS" value="507"/>
+     <element name="SIDE_MARKER_LIGHTS" value="508"/>
+     <element name="LEFT_TURN_LIGHTS" value="509">
+         <description>Include all left turn signal lights: front_left, rear_left, left_side and mirror_mounted.</description>
+     </element>
+     <element name="RIGHT_TURN_LIGHTS" value="510">
+         <description>Include all right turn signal lights: front_right, rear_right, right_side and mirror_mounted.</description>
+     </element>
+     <element name="HAZARD_LIGHTS" value="511">
+         <description>Include all hazard lights: front_left, front_right, rear_left and rear_right.</description>
+     </element>
+
+     <!-- Interior Lights by common function groups 801~900 -->
+     <element name="AMBIENT_LIGHTS" value="801"/>
+     <element name="OVERHEAD_LIGHTS" value="802"/>
+     <element name="READING_LIGHTS" value="803"/>
+     <element name="TRUNK_LIGHTS" value="804"/>
+
+     <!-- Lights by location 901~1000-->
+     <element name="EXTERIOR_FRONT_LIGHTS" value="901">
+         <description>Include exterior lights located in front of the vehicle. For example, fog lights and low beams.</description>
+     </element>
+     <element name="EXTERIOR_REAR_LIGHTS" value="902">
+         <description>Include exterior lights located at the back of the vehicle. For example, license plate lights, reverse lights, cargo lights, bed lights an trailer assist lights.</description>
+     </element>
+     <element name="EXTERIOR_LEFT_LIGHTS" value="903">
+         <description>Include exterior lights located at the left side of the vehicle. For example, left puddle lights and spot lights.</description>
+     </element>
+     <element name="EXTERIOR_RIGHT_LIGHTS" value="902">
+         <description>Include exterior lights located at the right side of the vehicle. For example, right puddle lights and spot lights.</description>
+     </element>
+ </enum>
+
+ <enum name="LightStatus">
+     <element name="ON"/>
+     <element name="OFF"/>
+ </enum>
+
+ <struct name="SRGBColor">
+     <param name="red" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+     <param name="green" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+     <param name="blue" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+ </struct>
+
+ <struct name="LightCapabilities">
+     <param name="name" type="LightName" mandatory="true" />
+     <!-- Assuming light ON/OFF status is always available -->
+     <param name="densityAvailable" type="Boolean" mandatory="false">
+         <description>
+         Indicates if the light's density can be set remotely (similar to a dimmer).
+         </description>
+     </param>
+     <param name="sRGBColorSpaceAvailable" type="Boolean" mandatory="false">
+         <description>
+         Indicates if the light's color can be set remotely by using the sRGB color space.
+         </description>
+     </param>
+ </struct>
+
+ <struct name="LightControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+         The short friendly name of the light control module.
+         It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
+     <description> An array of available light names that are controllable. </description>
+     </param>
+ </struct>
+
+ <struct name="LightState">
+     <param name="id" type="LightName" mandatory="true">
+         <description>The name of a light or a group of lights. </description>
+     </param>
+     <param name="status" type="LightStatus" mandatory="true"/>
+     <param name="density" type="Float" minvalue="0" maxvalue="1" mandatory="false" />
+     <param name="sRGBColor" type="SRGBColor" mandatory="false" />
+ </struct>
+
+ <struct name="LightControlData">
+     <param name="lightState" type="LightState" mandatory="true" minsize="1" maxsize="100" array="true">
+         <description>An array of LightNames and their current or desired status. No change to the status of the LightNames that are not listed in the array.</description>
+     </param>
+ </struct>
+
+ <enum name="DisplayMode">
+     <element name="DAY"/>
+     <element name="NIGHT"/>
+     <element name="AUTO"/>
+ </enum>
+ <enum name="DistanceUnit">
+     <element name="MILES"/>
+     <element name="KILOMETERS"/>
+ </enum>
+
+ <struct name="HMISettingsControlData">
+     <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
+     <param name="displayMode" type="DisplayMode" mandatory="false"></param>
+     <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
+     <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
+ </struct>
+
+ <struct name="HMISettingsControlCapabilities">
+     <param name="moduleName" type="String" maxlength="100" mandatory="true">
+         <description>
+         The short friendly name of the hmi setting module.
+         It should not be used to identify a module by mobile application.
+         </description>
+     </param>
+     <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of distance unit. </description>
+     </param>
+     <param name="temperatureUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of temperature unit. </description>
+     </param>
+     <param name="displayModeUnitAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the control of HMI display mode. </description>
+     </param>
  </struct>
 
  <struct name="ModuleData">
@@ -1726,6 +2160,14 @@
    <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
    </param>
    <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
+   </param>
+   <param name="audioControlData" type="AudioControlData" mandatory="false">
+   </param>
+   <param name="lightControlData" type="LightControlData" mandatory="false">
+   </param>
+   <param name="hmiSettingsControlData" type="HMISettingsControlData" mandatory="false">
+   </param>
+   <param name="seatControlData" type="SeatControlData" mandatory="false">
    </param>
  </struct>
 
@@ -2632,6 +3074,20 @@
     </param>
     <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
       <description>If included, the platform supports RC button controls with the included button names.</description >
+    </param>
+    <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+        <description> If included, the platform supports audio controls. </description >
+    </param>
+    <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false">
+        <description> If included, the platform supports hmi setting controls. </description >
+    </param>
+    <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false">
+        <description> If included, the platform supports light controls. </description >
+    </param>
+    <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+        <description>
+            If included, the platform supports seat controls.
+        </description >
     </param>
   </struct>
 
@@ -4925,7 +5381,7 @@
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
-  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+  <param name="subscribe" type="Boolean" mandatory="false">
     <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
   </param>
   <param name="appID" type="Integer" mandatory="true">

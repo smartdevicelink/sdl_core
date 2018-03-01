@@ -165,6 +165,10 @@ bool EnumFromJsonString(const std::string& literal, Input* result);
 enum ModuleType {
   MT_CLIMATE,
   MT_RADIO,
+  MT_AUDIO,
+  MT_LIGHT,
+  MT_HMI_SETTINGS,
+  MT_SEAT
 };
 bool IsValidEnum(ModuleType val);
 const char* EnumToJsonString(ModuleType val);
