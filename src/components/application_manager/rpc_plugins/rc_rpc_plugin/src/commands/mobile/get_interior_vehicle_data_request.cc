@@ -149,12 +149,11 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                  "conditional mandatory parameter "
                      << message_params::kIsSubscribed
                      << " missed in hmi response");
-
     const char* module_type;
     NsSmartDeviceLink::NsSmartObjects::
         EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
             static_cast<mobile_apis::ModuleType::eType>(
-                hmi_response[app_mngr::strings::msg_params]
+                hmi_response[app_mngr::strings::msg_params][message_params::kModuleData]
                             [message_params::kModuleType].asUInt()),
             &module_type);
     is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
