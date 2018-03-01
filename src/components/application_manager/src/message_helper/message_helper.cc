@@ -274,7 +274,7 @@ static VehicleInfo_Requests ivi_subrequests[] = {
 #endif  // #ifdef HMI_DBUS_API
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
-    uint32_t function_id, uint32_t app_id) {
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
   using smart_objects::SmartObject;
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr object(

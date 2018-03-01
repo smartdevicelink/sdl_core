@@ -77,7 +77,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotification();
 
-  Apps GetRCApplications();
 
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by

@@ -263,7 +263,7 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotification() {
 void ResourceAllocationManagerImpl::SetResourceAquired(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_apps = GetRCApplications();
+  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
   for (auto& rc_app : rc_apps) {
     auto notification = CreateOnRCStatusNotification(rc_app->app_id());
     rpc_service_.SendMessageToMobile(notification);
@@ -289,7 +289,7 @@ void ResourceAllocationManagerImpl::SetResourceFree(
   }
   allocated_resources_.erase(allocation);
   LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-  auto rc_apps = GetRCApplications();
+  auto rc_apps =RCRPCPlugin::GetRCApplications(app_mngr_);
   for (auto& rc_app : rc_apps) {
     auto notification = CreateOnRCStatusNotification(rc_app->app_id());
     rpc_service_.SendMessageToMobile(notification);
@@ -301,9 +301,8 @@ void ResourceAllocationManagerImpl::SetResourceFree(
 std::vector<std::string>
 ResourceAllocationManagerImpl::all_supported_modules() {
   std::vector<std::string> result;
-  result.push_back("climate");
-  result.push_back("radio");
-  result.push_back("light");
+  result.push_back(enums_value::kClimate);
+  result.push_back(enums_value::kRadio);
   return result;
 }
 
