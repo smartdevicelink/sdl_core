@@ -161,11 +161,10 @@ class CommandImpl : public Command {
   bool ReplaceMobileWithHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * DEPRECATED
    * @brief Parses mobile message and replaces mobile app id with HMI app id
    * @param message Message to replace its ids
    */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
+  DEPRECATED void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
    * @brief Parses message from HMI and replaces HMI app id with mobile app id
@@ -175,16 +174,16 @@ class CommandImpl : public Command {
   bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
 
   /**
-   * DEPRECATED
    * @brief Parses message from HMI and replaces HMI app id with mobile app id
    * @param message Message to replace its ids
    */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+  DEPRECATED void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
 
   /**
    * @brief Validate string syntax in smart object
    * @param obj Smart object to check
-   * @return true if syntax if all object strings is correct otherwise false
+   * @return true if syntax of all strings in the smart object is valid
+   * otherwise returns false
    */
   bool ValidateSmartObjectStrings(const smart_objects::SmartObject& obj) const;
 
@@ -192,7 +191,8 @@ class CommandImpl : public Command {
    * @brief Validate string syntax in smart map
    * @param obj Smart map to check
    * @param key Map iterator
-   * @return true if syntax if all map strings is correct otherwise false
+   * @return true if syntax of all strings in the smart object is valid
+   * otherwise returns false
    */
   bool ValidateSmartMapStrings(const smart_objects::SmartObject& obj,
                                std::set<std::string>::const_iterator key) const;
@@ -200,7 +200,8 @@ class CommandImpl : public Command {
   /**
    * @brief Check string syntax
    * @param obj Smart string object
-   * @return true if syntax of string is correct otherwise false
+   * @return true if syntax of string in smart object is valid otherwise returns
+   * false
    */
   bool ValidateSmartString(const smart_objects::SmartObject& obj) const;
 

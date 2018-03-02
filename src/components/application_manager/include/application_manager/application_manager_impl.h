@@ -1142,7 +1142,6 @@ class ApplicationManagerImpl
    */
   DEPRECATED void ResetPhoneCallAppList();
 
-  // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
