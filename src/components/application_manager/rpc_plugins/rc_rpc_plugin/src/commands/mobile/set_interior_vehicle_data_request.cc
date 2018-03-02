@@ -158,34 +158,27 @@ SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
-bool CheckLightNameByCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& light_name) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  bool is_name_valid = false;
+const std::string LightName(const smart_objects::SmartObject& light_name) {
   const char* name;
-  NsSmartDeviceLink::NsSmartObjects::
+  const bool ok = NsSmartDeviceLink::NsSmartObjects::
       EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
           static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
           &name);
-  for (size_t i = 0; i != capabilities.length(); ++i) {
-    if (capabilities[i] == name) {
-      is_name_valid = true;
-    }
-  }
-  return is_name_valid;
+  return ok ? name : "unknown";
 }
 
 bool CheckLightDataByCapabilities(
-    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& light_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::map<std::string, std::string> lightCapsMapping = {
-      {message_params::kId, "name"},
-      {message_params::kDensity, "densityAvailable"},
-      {message_params::kSRGBColor, "sRGBColorSpaceAvailable"}};
+      {message_params::kId, strings::kName},
+      {message_params::kDensity, strings::kDensityAvailable},
+      {message_params::kSRGBColor, strings::kSRGBColorSpaceAvailable}};
   auto it = light_data.map_begin();
   for (; it != light_data.map_end(); ++it) {
-    if (message_params::kStatus == it->first) {
+    if (message_params::kStatus == it->first ||
+        message_params::kId == it->first) {
       continue;
     }
     const std::string& caps_key = lightCapsMapping[it->first];
@@ -194,22 +187,14 @@ bool CheckLightDataByCapabilities(
                       << it->first << " with capabilities. Appropriate key is "
                       << caps_key);
 
-    if (!capabilities_status[0].keyExists(caps_key)) {
+    if (!capabilities.keyExists(caps_key)) {
       LOG4CXX_DEBUG(logger_,
                     "Capability "
                         << caps_key
                         << " is missed in RemoteControl capabilities");
       return false;
     }
-    if (message_params::kId == it->first) {
-      if (!CheckLightNameByCapabilities(capabilities_status[0][caps_key],
-                                        it->second)) {
-        LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
-        return false;
-      }
-      continue;
-    }
-    if (!capabilities_status[0][caps_key].asBool()) {
+    if (!capabilities[caps_key].asBool()) {
       LOG4CXX_DEBUG(logger_,
                     "Capability "
                         << caps_key
@@ -220,30 +205,76 @@ bool CheckLightDataByCapabilities(
   return true;
 }
 
+bool CheckLightNameByCapabilities(
+    const smart_objects::SmartObject& capabilities_status,
+    const smart_objects::SmartObject& light_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it = capabilities_status.asArray()->begin();
+  for (; it != capabilities_status.asArray()->end(); ++it) {
+    const smart_objects::SmartObject& so = *it;
+    const int64_t current_id = so[message_params::kName].asInt();
+    if (current_id == light_data[message_params::kId].asInt()) {
+      return CheckLightDataByCapabilities(so, light_data);
+    }
+  }
+  LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
+  return false;
+}
+
 bool CheckControlDataByCapabilities(
     const smart_objects::SmartObject& module_caps,
     const smart_objects::SmartObject& control_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::map<std::string, std::string> mapping =
       GetModuleDataToCapabilitiesMapping();
   const smart_objects::SmartObject& capabilities_status = module_caps[0];
   auto it = control_data.map_begin();
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
-    if (message_params::kId == request_parameter) {
-      continue;
+    if (message_params::kLightState == request_parameter) {
+      return CheckLightNameByCapabilities(
+          module_caps[strings::kSupportedLights],
+          control_data[request_parameter][0]);
     }
     const std::string& caps_key = mapping[request_parameter];
-    const smart_objects::SmartObject& capabilities_status = module_caps[0];
     LOG4CXX_DEBUG(logger_,
                   "Checking request parameter "
                       << request_parameter
                       << " with capabilities. Appropriate key is " << caps_key);
 
-    if (message_params::kLightState == request_parameter) {
-      return CheckLightDataByCapabilities(
-          capabilities_status[strings::kSupportedLights],
-          control_data[request_parameter][0]);
+    if (!capabilities_status.keyExists(caps_key)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is missed in RemoteControl capabilities");
+      return false;
     }
+    if (!capabilities_status[caps_key].asBool()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Capability "
+                        << caps_key
+                        << " is switched off in RemoteControl capabilities");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CheckHmiControlDataByCapabilities(
+    const smart_objects::SmartObject& module_caps,
+    const smart_objects::SmartObject& control_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::map<std::string, std::string> mapping =
+      GetModuleDataToCapabilitiesMapping();
+  const smart_objects::SmartObject& capabilities_status = module_caps;
+  auto it = control_data.map_begin();
+  for (; it != control_data.map_end(); ++it) {
+    const std::string& request_parameter = it->first;
+    const std::string& caps_key = mapping[request_parameter];
+    LOG4CXX_DEBUG(logger_,
+                  "Checking request parameter "
+                      << request_parameter
+                      << " with capabilities. Appropriate key is " << caps_key);
     if (!capabilities_status.keyExists(caps_key)) {
       LOG4CXX_DEBUG(logger_,
                     "Capability "
@@ -272,9 +303,9 @@ bool CheckIfModuleDataExistInCapabilities(
        strings::kclimateControlCapabilities},
       {message_params::kAudioControlData, strings::kaudioControlCapabilities},
       {message_params::kLightControlData, strings::klightControlCapabilities},
-      {message_params::kSeatControlData, strings::kseatControlCapabilities} {
-          message_params::kHmiSettingsControlData,
-          strings::khmiSettingsControlCapabilities}};
+      {message_params::kSeatControlData, strings::kseatControlCapabilities},
+      {message_params::kHmiSettingsControlData,
+       strings::khmiSettingsControlCapabilities}};
   bool is_module_data_valid = false;
   for (const auto& param : params) {
     if (module_data.keyExists(param.first)) {
@@ -283,8 +314,13 @@ bool CheckIfModuleDataExistInCapabilities(
         return false;
       }
       const smart_objects::SmartObject& caps = rc_capabilities[param.second];
-      is_module_data_valid =
-          CheckControlDataByCapabilities(caps, module_data[param.first]);
+      if (message_params::kHmiSettingsControlData == param.first) {
+        is_module_data_valid =
+            CheckHmiControlDataByCapabilities(caps, module_data[param.first]);
+      } else {
+        is_module_data_valid =
+            CheckControlDataByCapabilities(caps, module_data[param.first]);
+      }
     }
   }
   return is_module_data_valid;
@@ -394,7 +430,6 @@ void SetInteriorVehicleDataRequest::on_event(
 const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
     const smart_objects::SmartObject& module_data) {
   const std::string module_type = ModuleType();
-  smart_objects::SmartObject data();
   std::map<std::string, std::string> data_mapping =
       GetModuleTypeToDataMapping();
   for (const auto& data : data_mapping) {
