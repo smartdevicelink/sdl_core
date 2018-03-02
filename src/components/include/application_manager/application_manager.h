@@ -241,6 +241,18 @@ class ApplicationManager {
    */
   virtual void set_application_id(const int32_t correlation_id,
                                   const uint32_t app_id) = 0;
+  /**
+   * @brief get_current_audio_source
+   * @return current audio source
+   */
+  virtual uint32_t get_current_audio_source() const = 0;
+
+  /**
+   * @brief set_current_audio_source
+   * @param source
+   * set current audio source
+   */
+  virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
    * @brief OnHMILevelChanged the callback that allows SDL to react when
