@@ -203,14 +203,14 @@ EnumType StringToEnum(const std::string& str) {
 }
 
 void ConstructOnRCStatusNotificationParams(
-    smart_objects::SmartObject msg_params,
+    smart_objects::SmartObject& msg_params,
     const std::map<std::string, uint32_t>& allocated_resources,
     const std::vector<std::string>& supported_resources) {
   namespace strings = application_manager::strings;
   namespace message_params = rc_rpc_plugin::message_params;
   using smart_objects::SmartObject;
   using smart_objects::SmartType_Map;
-  using smart_objects::SmartType_Map;
+  using smart_objects::SmartType_Array;
   LOG4CXX_AUTO_TRACE(logger_);
 
   auto modules_inserter = [](SmartObject& result_modules) {
@@ -222,11 +222,11 @@ void ConstructOnRCStatusNotificationParams(
       module_data[message_params::kModuleType] = module_type;
     };
   };
-  SmartObject allocated_modules = SmartObject(SmartType_Map);
+  SmartObject allocated_modules = SmartObject(SmartType_Array);
   for (auto& module : allocated_resources) {
     modules_inserter(allocated_modules)(module.first);
   }
-  SmartObject free_modules = SmartObject(SmartType_Map);
+  SmartObject free_modules = SmartObject(SmartType_Array);
   for (auto& module : supported_resources) {
     if (allocated_resources.find(module) == allocated_resources.end()) {
       modules_inserter(free_modules)(module);
@@ -251,6 +251,7 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotification(
 
 smart_objects::SmartObjectSPtr
 ResourceAllocationManagerImpl::CreateOnRCStatusNotification() {
+  LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
   auto to_hmi_msg =
       MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
@@ -303,6 +304,10 @@ ResourceAllocationManagerImpl::all_supported_modules() {
   std::vector<std::string> result;
   result.push_back(enums_value::kClimate);
   result.push_back(enums_value::kRadio);
+  result.push_back(enums_value::kAudio);
+  result.push_back(enums_value::kLight);
+  result.push_back(enums_value::kHmiSettings);
+  result.push_back(enums_value::kSeat);
   return result;
 }
 
