@@ -262,7 +262,6 @@
 #include "application_manager/commands/hmi/on_vi_acc_pedal_position_notification.h"
 #include "application_manager/commands/hmi/on_vi_steering_wheel_angle_notification.h"
 #include "application_manager/commands/hmi/on_vi_my_key_notification.h"
-#include "application_manager/commands/hmi/ui_set_icon_request.h"
 
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"

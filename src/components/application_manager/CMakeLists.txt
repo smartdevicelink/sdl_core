@@ -338,7 +338,6 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_event_changed_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
-  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_icon_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/rc_is_ready_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/rc_is_ready_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/rc_get_capabilities_request.cc
