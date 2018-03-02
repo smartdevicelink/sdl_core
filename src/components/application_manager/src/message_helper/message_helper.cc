@@ -286,6 +286,10 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
       static_cast<int>(kNotification);
   (*object)[strings::params][strings::function_id] = function_id;
   (*object)[strings::params][strings::connection_key] = app_id;
+  (*object)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  (*object)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
   (*object)[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   return object;
