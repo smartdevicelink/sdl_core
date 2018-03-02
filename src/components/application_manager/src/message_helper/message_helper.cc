@@ -2,6 +2,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -1057,6 +1060,11 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
 }
 
 bool MessageHelper::SendIVISubscribtions(const uint32_t app_id,
+                                         ApplicationManager& app_mngr) {
+  return SendIVISubscriptions(app_id, app_mngr);
+}
+
+bool MessageHelper::SendIVISubscriptions(const uint32_t app_id,
                                          ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
 

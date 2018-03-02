@@ -683,7 +683,7 @@ class ResumptionDataDB : public ResumptionData {
                          smart_objects::SmartObject& saved_app) const;
 
   /**
-   * @brief Selects data from applicationSubscribtionsArray table
+   * @brief Selects data from applicationSubscriptionsArray table
    * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain subscriptions

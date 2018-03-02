@@ -375,8 +375,8 @@ TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   EXPECT_TRUE(app.keyExists(am::strings::application_global_properties) &&
               app[am::strings::application_global_properties].empty());
 
-  EXPECT_TRUE(app.keyExists(am::strings::application_subscribtions) &&
-              app[am::strings::application_subscribtions].empty());
+  EXPECT_TRUE(app.keyExists(am::strings::application_subscriptions) &&
+              app[am::strings::application_subscriptions].empty());
 
   EXPECT_TRUE(app.keyExists(am::strings::application_files) &&
               app[am::strings::application_files].empty());
