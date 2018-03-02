@@ -181,6 +181,10 @@ class ApplicationManagerImpl
   void set_application_id(const int32_t correlation_id,
                           const uint32_t app_id) OVERRIDE;
 
+  uint32_t get_current_audio_source() const OVERRIDE;
+
+  void set_current_audio_source(const uint32_t source) OVERRIDE;
+
   void OnHMILevelChanged(uint32_t app_id,
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
@@ -1585,6 +1589,7 @@ class ApplicationManagerImpl
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
+  uint32_t current_audio_source_;
 
   event_engine::EventDispatcherImpl event_dispatcher_;
   media_manager::MediaManager* media_manager_;
