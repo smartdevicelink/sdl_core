@@ -53,6 +53,7 @@ RCCommandRequest::RCCommandRequest(
                                                         rpc_service,
                                                         hmi_capabilities,
                                                         policy_handle)
+    , is_subscribed(false)
     , resource_allocation_manager_(resource_allocation_manager) {}
 
 RCCommandRequest::~RCCommandRequest() {}
