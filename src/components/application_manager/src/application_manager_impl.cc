@@ -2327,6 +2327,14 @@ void ApplicationManagerImpl::set_application_id(const int32_t correlation_id,
       std::pair<const int32_t, const uint32_t>(correlation_id, app_id));
 }
 
+uint32_t ApplicationManagerImpl::get_current_audio_source() const {
+    return current_audio_source_;
+}
+
+void ApplicationManagerImpl::set_current_audio_source(const uint32_t source){
+    current_audio_source_ = source;
+}
+
 void ApplicationManagerImpl::AddPolicyObserver(
     policy::PolicyHandlerObserver* listener) {
   GetPolicyHandler().add_listener(listener);

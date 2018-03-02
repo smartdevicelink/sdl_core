@@ -442,12 +442,13 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
 
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (mobile_apis::PrimaryAudioSource::MOBILE_APP !=
       audio_data[message_params::kSource].asInt()) {
     if (!audio_data.keyExists(message_params::kKeepContext) ||
         !audio_data[message_params::kKeepContext].asBool()) {
       if (mobile_apis::PrimaryAudioSource::MOBILE_APP ==
-          RCRPCPlugin::get_current_audio_source()) {
+          application_manager_.get_current_audio_source()) {
         app_mngr::ApplicationSharedPtr app =
             application_manager_.application(connection_key());
         application_manager_.ChangeAppsHMILevel(
@@ -455,7 +456,7 @@ void SetInteriorVehicleDataRequest::CheckAudioSource(
       }
     }
   }
-  RCRPCPlugin::set_current_audio_source(
+  application_manager_.set_current_audio_source(
       audio_data[message_params::kSource].asUInt());
 }
 
