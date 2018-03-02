@@ -24,7 +24,8 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
                        rpc_service,
                        hmi_capabilities,
                        policy_handle,
-                       resource_allocation_manager) {}
+                       resource_allocation_manager)
+    , excessive_subscription_occured_(false) {}
 
 bool CheckIfModuleTypeExistInCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
@@ -53,6 +54,7 @@ void GetInteriorVehicleDataRequest::Execute() {
 
   const smart_objects::SmartObject* rc_capabilities =
       hmi_capabilities_.rc_capability();
+
   const std::string module_type = ModuleType();
   if (rc_capabilities &&
       !CheckIfModuleTypeExistInCapabilities(*rc_capabilities, module_type)) {
@@ -68,10 +70,11 @@ void GetInteriorVehicleDataRequest::Execute() {
       application_manager_.application(connection_key());
 
   if (HasRequestExcessiveSubscription()) {
-    RemoveExcessiveSubscription();
+    excessive_subscription_occured_ = true;
     is_subscribed =
         (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
             .asBool();
+    RemoveExcessiveSubscription();
   }
 
   (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
@@ -112,11 +115,9 @@ void GetInteriorVehicleDataRequest::on_event(
 
   if (result) {
     ProccessSubscription(hmi_response);
-    if (!hmi_response[app_mngr::strings::msg_params].keyExists(
-            message_params::kIsSubscribed)) {
-      hmi_response[app_mngr::strings::msg_params]
-                  [message_params::kIsSubscribed] = is_subscribed;
-    }
+  } else {
+    hmi_response[app_mngr::strings::msg_params].erase(
+        message_params::kIsSubscribed);
   }
   std::string response_info;
   GetInfo(hmi_response, response_info);
@@ -135,32 +136,47 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 
   const bool is_subscribe_present_in_request =
       (*message_)[app_mngr::strings::msg_params].keyExists(
-          message_params::kSubscribe);
+          message_params::kSubscribe) ||
+      excessive_subscription_occured_;
 
   const bool isSubscribed_present_in_response =
       hmi_response[app_mngr::strings::msg_params].keyExists(
           message_params::kIsSubscribed);
 
-  if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
-    return;
-  }
+  smart_objects::SmartObject& temp_hmi_response =
+      const_cast<smart_objects::SmartObject&>(hmi_response);
+
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   RCAppExtensionPtr extension =
       resource_allocation_manager_.GetApplicationExtention(app);
+  const char* module_type;
+  NsSmartDeviceLink::NsSmartObjects::
+      EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
+          static_cast<mobile_apis::ModuleType::eType>(
+              hmi_response[app_mngr::strings::msg_params]
+                          [message_params::kModuleData]
+                          [message_params::kModuleType].asUInt()),
+          &module_type);
+  if (excessive_subscription_occured_) {
+    is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
+    temp_hmi_response[app_mngr::strings::msg_params]
+                     [message_params::kIsSubscribed] = is_subscribed;
+    return;
+  }
+  if (!is_subscribe_present_in_request && !isSubscribed_present_in_response) {
+    return;
+  }
+
   if (is_subscribe_present_in_request && !isSubscribed_present_in_response) {
     LOG4CXX_WARN(logger_,
                  "conditional mandatory parameter "
                      << message_params::kIsSubscribed
                      << " missed in hmi response");
-    const char* module_type;
-    NsSmartDeviceLink::NsSmartObjects::
-        EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
-            static_cast<mobile_apis::ModuleType::eType>(
-                hmi_response[app_mngr::strings::msg_params][message_params::kModuleData]
-                            [message_params::kModuleType].asUInt()),
-            &module_type);
+
     is_subscribed = extension->IsSubscibedToInteriorVehicleData(module_type);
+    temp_hmi_response[app_mngr::strings::msg_params]
+                     [message_params::kIsSubscribed] = is_subscribed;
     return;
   }
 
@@ -170,6 +186,10 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                               << " is ignored due to absence '"
                               << message_params::kSubscribe
                               << "' parameter in request");
+    smart_objects::SmartObject& temp_hmi_response =
+        const_cast<smart_objects::SmartObject&>(hmi_response);
+    temp_hmi_response[app_mngr::strings::msg_params].erase(
+        message_params::kIsSubscribed);
     return;
   }
 

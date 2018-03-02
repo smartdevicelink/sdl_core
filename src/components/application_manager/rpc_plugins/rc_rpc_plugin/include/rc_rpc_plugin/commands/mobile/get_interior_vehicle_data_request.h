@@ -57,6 +57,7 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   void RemoveExcessiveSubscription();
 
   std::string ModuleType() FINAL;
+  bool excessive_subscription_occured_;
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
