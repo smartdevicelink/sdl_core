@@ -92,9 +92,8 @@ bool RCCommandRequest::CheckDriverConsent() {
   if (rc_rpc_plugin::kAllowed == access) {
     set_auto_allowed(true);
     return true;
-  } else {
-    SendDisallowed(access);
   }
+  SendDisallowed(access);
   return false;
 }
 
@@ -230,9 +229,11 @@ void RCCommandRequest::ProcessAccessResponse(
 
   bool is_allowed = false;
   if (result) {
-    if (message[json_keys::kResult].keyExists(message_params::kAllowed)) {
+    if (message[app_mngr::strings::msg_params].keyExists(
+            message_params::kAllowed)) {
       is_allowed =
-          message[json_keys::kResult][message_params::kAllowed].asBool();
+          message[app_mngr::strings::msg_params][message_params::kAllowed]
+              .asBool();
     }
     if (is_allowed) {
       resource_allocation_manager_.ForceAcquireResource(module_type,
@@ -264,8 +265,7 @@ void RCCommandRequest::SendGetUserConsent(const std::string& module_type) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[app_mngr::strings::app_id] = app->app_id();
-  msg_params[app_mngr::strings::msg_params][message_params::kModuleType] =
-      module_type;
+  msg_params[message_params::kModuleType] = module_type;
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
                  &msg_params,
                  true);
