@@ -2162,7 +2162,7 @@ uint32_t ApplicationManagerImpl::get_current_audio_source() const {
     return current_audio_source_;
 }
 
-void ApplicationManagerImpl::set_current_audio_source(const uint32_t source){
+void ApplicationManagerImpl::set_current_audio_source(const uint32_t source) {
     current_audio_source_ = source;
 }
 
@@ -2477,6 +2477,15 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendStopAudioPathThru(*this);
   }
 
+#ifdef SDL_REMOTE_CONTROL
+  auto on_app_unregistered =
+      [app_to_remove](plugin_manager::RPCPlugin& plugin) {
+        plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,
+                                  app_to_remove);
+      };
+  plugin_manager_->ForEachPlugin(on_app_unregistered);
+#endif
+
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
   request_ctrl_.terminateAppRequests(app_id);
@@ -2493,7 +2502,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     const std::string& function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
-  LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
   if (!GetPolicyHandler().PolicyEnabled()) {
@@ -3298,7 +3307,17 @@ void ApplicationManagerImpl::ProcessReconnection(
   GetPolicyHandler().AddDevice(device_mac, connection_type);
 }
 
-void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {}
+void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!ptu_result) {
+    return;
+  }
+  auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
+  };
+
+  plugin_manager_->ForEachPlugin(on_app_policy_updated);
+}
 
 void ApplicationManagerImpl::PutDriverDistractionMessageToPostponed(
     ApplicationSharedPtr application) const {

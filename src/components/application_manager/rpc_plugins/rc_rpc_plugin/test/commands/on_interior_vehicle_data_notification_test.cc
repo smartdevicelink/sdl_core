@@ -119,6 +119,8 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   rc_extention_ptr->SubscribeToInteriorVehicleData(enums_value::kClimate);
   ON_CALL(*mock_app_, QueryInterface(_))
       .WillByDefault(Return(rc_extention_ptr));
+  ON_CALL(*mock_app_, is_remote_control_supported())
+      .WillByDefault(Return(true));
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
       .WillOnce(SaveArg<0>(&message));
