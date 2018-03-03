@@ -108,9 +108,9 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
         (*smart_object)[strings::params][strings::message_type].asInt()) {
       (*smart_object).erase(strings::msg_params);
       (*smart_object)[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::INVALID_DATA;
+          hmi_apis::Common_Result::GENERIC_ERROR;
       (*smart_object)[strings::msg_params][strings::info] =
-          std::string("Received invalid data on HMI response");
+          std::string("Invalid message received from vehicle");
     } else {
       LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
       return;

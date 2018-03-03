@@ -30,33 +30,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_request.h"
-#include "utils/macro.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
+#include "application_manager/event_engine/event.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
 
-RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
-    const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::RequestToHMI(message,
-                                                  application_manager,
-                                                  rpc_service,
-                                                  hmi_capabilities,
-                                                  policy_handle) {
+RCGetInteriorVehicleDataConsentResponse::
+    RCGetInteriorVehicleDataConsentResponse(
+        const app_mngr::commands::MessageSharedPtr& message,
+        app_mngr::ApplicationManager& application_manager,
+        app_mngr::rpc_service::RPCService& rpc_service,
+        app_mngr::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handle,
+        ResourceAllocationManager& resource_allocation_manager)
+    : application_manager::commands::ResponseFromHMI(message,
+                                                     application_manager,
+                                                     rpc_service,
+                                                     hmi_capabilities,
+                                                     policy_handle) {
   UNUSED(resource_allocation_manager);
 }
 
-RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest() {}
-
-void RCGetInteriorVehicleDataRequest::Run() {
+void RCGetInteriorVehicleDataConsentResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  SendRequest();
+
+  app_mngr::event_engine::Event event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent);
+
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
+
+RCGetInteriorVehicleDataConsentResponse::
+    ~RCGetInteriorVehicleDataConsentResponse() {}
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
