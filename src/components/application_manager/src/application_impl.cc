@@ -218,6 +218,14 @@ void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
 }
 
+bool ApplicationImpl::is_remote_control_supported() const {
+  return is_remote_control_supported_;
+}
+
+void ApplicationImpl::set_remote_control_supported(const bool allow) {
+  is_remote_control_supported_ = allow;
+}
+
 bool ApplicationImpl::is_voice_communication_supported() const {
   return is_voice_communication_application_;
 }
