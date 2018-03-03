@@ -354,20 +354,28 @@ void RegisterAppInterfaceRequest::Run() {
         msg_params.getElement(strings::app_hmi_type);
 
     for (size_t i = 0; i < app_type.length(); ++i) {
-      if (mobile_apis::AppHMIType::NAVIGATION ==
+      mobile_apis::AppHMIType::eType current_app_type =
           static_cast<mobile_apis::AppHMIType::eType>(
-              app_type.getElement(i).asUInt())) {
-        application->set_is_navi(true);
-      }
-      if (mobile_apis::AppHMIType::COMMUNICATION ==
-          static_cast<mobile_apis::AppHMIType::eType>(
-              app_type.getElement(i).asUInt())) {
-        application->set_voice_communication_supported(true);
-      }
-      if (mobile_apis::AppHMIType::PROJECTION ==
-          static_cast<mobile_apis::AppHMIType::eType>(
-              app_type.getElement(i).asUInt())) {
-        application->set_mobile_projection_enabled(true);
+              app_type.getElement(i).asUInt());
+
+      switch (current_app_type) {
+        case mobile_apis::AppHMIType::NAVIGATION: {
+          application->set_is_navi(true);
+          break;
+        }
+        case mobile_apis::AppHMIType::COMMUNICATION: {
+          application->set_voice_communication_supported(true);
+          break;
+        }
+        case mobile_apis::AppHMIType::PROJECTION: {
+          application->set_mobile_projection_enabled(true);
+          break;
+        }
+        case mobile_apis::AppHMIType::REMOTE_CONTROL: {
+          application->set_remote_control_supported(true);
+          break;
+        }
+        default: {}
       }
     }
   }
