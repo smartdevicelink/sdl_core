@@ -331,6 +331,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(RemoveExtensions, void());
   MOCK_CONST_METHOD0(SubscribesIVI,
                      const application_manager::VehicleInfoSubscriptions&());
+  MOCK_CONST_METHOD0(is_remote_control_supported, bool());
+  MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
 
 #endif  // SDL_REMOTE_CONTROL
 };
