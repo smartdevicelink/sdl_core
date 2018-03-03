@@ -121,6 +121,10 @@ class ApplicationImpl : public virtual Application,
   }
   void set_is_navi(bool allow);
 
+  virtual bool is_remote_control_supported() const;
+
+  void set_remote_control_supported(const bool allow);
+
   void set_mobile_projection_enabled(bool option);
 
   bool mobile_projection_enabled() const;
@@ -447,6 +451,7 @@ class ApplicationImpl : public virtual Application,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;

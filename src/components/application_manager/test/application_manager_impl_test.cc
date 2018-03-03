@@ -44,6 +44,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -742,6 +743,12 @@ TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
+
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
 
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =

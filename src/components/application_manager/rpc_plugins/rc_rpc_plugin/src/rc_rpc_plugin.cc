@@ -39,15 +39,35 @@ application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {
 }
 
 void RCRPCPlugin::OnPolicyEvent(
-    application_manager::plugin_manager::PolicyEvent event) {}
+    application_manager::plugin_manager::PolicyEvent event) {
+  switch (event) {
+    case plugins::kApplicationPolicyUpdated: {
+      resource_allocation_manager_->OnPolicyEvent(event);
+      break;
+    }
+    default:
+      break;
+  }
+}
 
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
+  if (!application->is_remote_control_supported()) {
+    return;
+  }
   switch (event) {
     case plugins::kApplicationRegistered: {
       application->AddExtension(new RCAppExtension(kRCPluginID));
       resource_allocation_manager_->SendOnRCStatusNotification();
+      break;
+    }
+    case plugins::kApplicationExit: {
+      resource_allocation_manager_->OnApplicationEvent(event, application);
+      break;
+    }
+    case plugins::kApplicationUnregistered: {
+      resource_allocation_manager_->OnApplicationEvent(event, application);
       break;
     }
     default:
@@ -61,17 +81,11 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
   using application_manager::ApplicationSet;
   ApplicationSet accessor = app_mngr.applications().GetData();
 
-  auto predicate = [](const ApplicationSharedPtr& app) {
-    auto uid = RCRPCPlugin::kRCPluginID;
-    return app ? app->QueryInterface(uid).valid() : false;
-  };
-
-  auto it = std::find_if(accessor.begin(), accessor.end(), predicate);
-
   std::vector<ApplicationSharedPtr> result;
-  while (it != accessor.end()) {
-    result.push_back(*it);
-    it = std::find_if(++it, accessor.end(), predicate);
+  for (const auto& it : accessor) {
+    if (it->is_remote_control_supported()) {
+      result.push_back(it);
+    }
   }
   return result;
 }
