@@ -30,33 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_RESPONSE_H_
+
+#include "application_manager/commands/response_from_hmi.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
+namespace app_mngr = application_manager;
+
 namespace commands {
+class RCGetInteriorVehicleDataConsentResponse
+    : public application_manager::commands::ResponseFromHMI {
+ public:
+  RCGetInteriorVehicleDataConsentResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle,
+      ResourceAllocationManager& resource_allocation_manager);
 
-RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
-    const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::RequestToHMI(message,
-                                                  application_manager,
-                                                  rpc_service,
-                                                  hmi_capabilities,
-                                                  policy_handle) {
-  UNUSED(resource_allocation_manager);
-}
+  void Run() OVERRIDE;
 
-RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest() {}
-
-void RCGetInteriorVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  SendRequest();
-}
+  ~RCGetInteriorVehicleDataConsentResponse();
+};
 
 }  // namespace commands
 }  // namespace rc_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_RESPONSE_H_

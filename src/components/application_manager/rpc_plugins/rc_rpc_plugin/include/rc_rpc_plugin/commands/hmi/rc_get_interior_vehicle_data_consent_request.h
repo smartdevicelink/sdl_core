@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
@@ -30,44 +30,33 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESPONSE_FROM_HMI_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESPONSE_FROM_HMI_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_REQUEST_H_
 
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/application_manager.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "utils/macro.h"
 
-namespace application_manager {
+namespace rc_rpc_plugin {
+namespace app_mngr = application_manager;
+
 namespace commands {
-
-class ResponseFromHMI : public CommandImpl {
+class RCGetInteriorVehicleDataConsentRequest
+    : public application_manager::commands::RequestToHMI {
  public:
-  ResponseFromHMI(const MessageSharedPtr& message,
-                  ApplicationManager& application_manager,
-                  rpc_service::RPCService& rpc_service,
-                  HMICapabilities& hmi_capabilities,
-                  policy::PolicyHandlerInterface& policy_handle);
-  virtual ~ResponseFromHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
-  void SendResponseToMobile(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
+  RCGetInteriorVehicleDataConsentRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle,
+      ResourceAllocationManager& resource_allocation_manager);
 
-  /*
-   * @brief Creates HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   */
-  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                        const smart_objects::SmartObject& msg_params) const;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);
+  void Run() OVERRIDE;
+  ~RCGetInteriorVehicleDataConsentRequest();
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESPONSE_FROM_HMI_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CONSENT_REQUEST_H_
