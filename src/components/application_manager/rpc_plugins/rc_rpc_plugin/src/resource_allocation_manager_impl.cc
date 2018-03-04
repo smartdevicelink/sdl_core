@@ -249,6 +249,7 @@ void ConstructOnRCStatusNotificationParams(
       auto module_type =
           StringToEnum<mobile_apis::ModuleType::eType>(module_name);
       module_data[message_params::kModuleType] = module_type;
+      result_modules.asArray()->push_back(module_data);
     };
   };
   SmartObject allocated_modules = SmartObject(SmartType_Array);
@@ -266,7 +267,7 @@ void ConstructOnRCStatusNotificationParams(
 }
 
 smart_objects::SmartObjectSPtr
-ResourceAllocationManagerImpl::CreateOnRCStatusNotification(
+ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
@@ -279,7 +280,8 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotification(
 }
 
 smart_objects::SmartObjectSPtr
-ResourceAllocationManagerImpl::CreateOnRCStatusNotification() {
+ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
+        const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
   auto to_hmi_msg =
@@ -287,20 +289,26 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotification() {
   auto& msg_params = (*to_hmi_msg)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(
       msg_params, allocated_resources_, all_supported_modules());
+  msg_params[application_manager::strings::app_id] = app_id;
   return to_hmi_msg;
 }
 
 void ResourceAllocationManagerImpl::SetResourceAquired(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  allocated_resources_[module_type] = app_id;
+  SendOnRCStatusNotification();
+}
+
+void ResourceAllocationManagerImpl::SendOnRCStatusNotification() {
+  LOG4CXX_AUTO_TRACE(logger_);
   auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
   for (auto& rc_app : rc_apps) {
-    auto notification = CreateOnRCStatusNotification(rc_app->app_id());
-    rpc_service_.SendMessageToMobile(notification);
+    auto to_mobile = CreateOnRCStatusNotificationToMobile(rc_app->app_id());
+    rpc_service_.SendMessageToMobile(to_mobile);
+    auto to_HMI = CreateOnRCStatusNotificationToHmi(rc_app->hmi_app_id());
+    rpc_service_.SendMessageToHMI(to_HMI);
   }
-  auto notification = CreateOnRCStatusNotification();
-  rpc_service_.SendMessageToHMI(notification);
-  allocated_resources_[module_type] = app_id;
 }
 
 void ResourceAllocationManagerImpl::SetResourceFree(
@@ -319,13 +327,7 @@ void ResourceAllocationManagerImpl::SetResourceFree(
   }
   allocated_resources_.erase(allocation);
   LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
-  for (auto& rc_app : rc_apps) {
-    auto notification = CreateOnRCStatusNotification(rc_app->app_id());
-    rpc_service_.SendMessageToMobile(notification);
-  }
-  auto notification = CreateOnRCStatusNotification();
-  rpc_service_.SendMessageToHMI(notification);
+  SendOnRCStatusNotification();
 }
 
 std::vector<std::string>
