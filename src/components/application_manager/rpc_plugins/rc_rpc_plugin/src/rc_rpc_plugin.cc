@@ -47,6 +47,7 @@ void RCRPCPlugin::OnApplicationEvent(
   switch (event) {
     case plugins::kApplicationRegistered: {
       application->AddExtension(new RCAppExtension(kRCPluginID));
+      resource_allocation_manager_->SendOnRCStatusNotification();
       break;
     }
     default:
@@ -73,16 +74,6 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
     it = std::find_if(++it, accessor.end(), predicate);
   }
   return result;
-}
-
-uint32_t RCRPCPlugin::current_audio_source_ = 0u;
-
-uint32_t RCRPCPlugin::get_current_audio_source() {
-  return current_audio_source_;
-}
-
-void RCRPCPlugin::set_current_audio_source(uint32_t source) {
-  current_audio_source_ = source;
 }
 
 }  // namespace rc_rpc_plugin

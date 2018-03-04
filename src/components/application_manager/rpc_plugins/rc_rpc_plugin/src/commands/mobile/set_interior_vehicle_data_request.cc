@@ -87,22 +87,21 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["displayMode"] = "displayModeUnitAvailable";
 
   // seat
-  mapping["id"] = "moduleName";
-  mapping["heatingEnabled"] = "distanceUnitAvailable";
-  mapping["coolingEnabled"] = "temperatureUnitAvailable";
-  mapping["heatingLevel"] = "displayModeUnitAvailable";
-  mapping["coolingLevel"] = "radioBandAvailable";
-  mapping["horizontalPosition"] = "radioFrequencyAvailable";
-  mapping["verticalPosition"] = "radioFrequencyAvailable";
-  mapping["frontVerticalPosition"] = "rdsDataAvailable";
-  mapping["backVerticalPosition"] = "availableHDsAvailable";
-  mapping["backTiltAngle"] = "availableHDsAvailable";
-  mapping["headSupportHorizontalPosition"] = "signalStrengthAvailable";
-  mapping["headSupportVerticalPosition"] = "signalChangeThresholdAvailable";
-  mapping["massageEnabled"] = "radioEnableAvailable";
-  mapping["massageMode"] = "stateAvailable";
-  mapping["massageCushionFirmness"] = "sisDataAvailable";
-  mapping["memory"] = "sisDataAvailable";
+  mapping["heatingEnabled"] = "heatingEnabledAvailable";
+  mapping["coolingEnabled"] = "coolingEnabledAvailable";
+  mapping["heatingLevel"] = "heatingLevelAvailable";
+  mapping["coolingLevel"] = "coolingLevelAvailable";
+  mapping["horizontalPosition"] = "horizontalPositionAvailable";
+  mapping["verticalPosition"] = "verticalPositionAvailable";
+  mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
+  mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
+  mapping["backTiltAngle"] = "backTiltAngleAvailable";
+  mapping["headSupportHorizontalPosition"] = "headSupportHorizontalPositionAvailable";
+  mapping["headSupportVerticalPosition"] = "headSupportVerticalPositionAvailable";
+  mapping["massageEnabled"] = "massageEnabledAvailable";
+  mapping["massageMode"] = "massageModeAvailable";
+  mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
+  mapping["memory"] = "memoryAvailable";
 
   return mapping;
 }
@@ -199,6 +198,9 @@ bool CheckControlDataByCapabilities(
   auto it = control_data.map_begin();
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
+    if (message_params::kId == request_parameter) {
+      continue;
+    }
     if (message_params::kLightState == request_parameter) {
       return CheckLightNameByCapabilities(
           module_caps[strings::kSupportedLights],
@@ -409,12 +411,13 @@ const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
 
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (mobile_apis::PrimaryAudioSource::MOBILE_APP !=
       audio_data[message_params::kSource].asInt()) {
     if (!audio_data.keyExists(message_params::kKeepContext) ||
         !audio_data[message_params::kKeepContext].asBool()) {
       if (mobile_apis::PrimaryAudioSource::MOBILE_APP ==
-          RCRPCPlugin::get_current_audio_source()) {
+          application_manager_.get_current_audio_source()) {
         app_mngr::ApplicationSharedPtr app =
             application_manager_.application(connection_key());
         application_manager_.ChangeAppsHMILevel(
@@ -422,7 +425,7 @@ void SetInteriorVehicleDataRequest::CheckAudioSource(
       }
     }
   }
-  RCRPCPlugin::set_current_audio_source(
+  application_manager_.set_current_audio_source(
       audio_data[message_params::kSource].asUInt());
 }
 
