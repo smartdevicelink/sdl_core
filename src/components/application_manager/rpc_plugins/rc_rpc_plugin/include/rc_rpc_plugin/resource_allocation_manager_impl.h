@@ -63,6 +63,8 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   RCAppExtensionPtr GetApplicationExtention(
       application_manager::ApplicationSharedPtr application) FINAL;
 
+  void SendOnRCStatusNotification() FINAL;
+
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
@@ -72,10 +74,11 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @param app_id application to send OnRCStatusNotification
    * @return smart object with mobile OnRCStatusNotification
    */
-  smart_objects::SmartObjectSPtr CreateOnRCStatusNotification(
+  smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToMobile(
       const uint32_t app_id);
 
-  smart_objects::SmartObjectSPtr CreateOnRCStatusNotification();
+  smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToHmi(
+      const uint32_t app_id);
 
 
   /**
