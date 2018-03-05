@@ -267,9 +267,8 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
 void ResourceAllocationManagerImpl::SetResourceAquired(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
-  SendOnRCStatusNotification();
   allocated_resources_[module_type] = app_id;
+  SendOnRCStatusNotification();
 }
 
 void ResourceAllocationManagerImpl::SendOnRCStatusNotification() {
