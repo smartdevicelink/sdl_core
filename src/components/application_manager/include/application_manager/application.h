@@ -443,6 +443,20 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
+  /**
+   * @brief Returns is_remote_control_supported_
+   * @return true if app supports remote control, else false
+   */
+  virtual bool is_remote_control_supported() const = 0;
+
+  /**
+   * @brief Sets remote control supported,
+   * which is used to determine app with remote control
+   * @param allow, if true - remote control is supported,
+   * else remote control is disable
+   */
+  virtual void set_remote_control_supported(const bool allow) = 0;
+
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
 
