@@ -38,6 +38,8 @@
 #include "rc_rpc_plugin/commands/mobile/button_press_response.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
@@ -278,6 +280,13 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
                        .GetCreator<commands::RCGetInteriorVehicleDataRequest>()
                  : rc_factory.GetCreator<
                        commands::RCGetInteriorVehicleDataResponse>();
+    }
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent: {
+      return hmi_apis::messageType::request == message_type
+                 ? rc_factory.GetCreator<
+                       commands::RCGetInteriorVehicleDataConsentRequest>()
+                 : rc_factory.GetCreator<
+                       commands::RCGetInteriorVehicleDataConsentResponse>();
     }
     case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
       return hmi_apis::messageType::request == message_type
