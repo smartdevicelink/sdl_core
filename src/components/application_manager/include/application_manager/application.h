@@ -452,7 +452,8 @@ class Application : public virtual InitialApplicationData,
   /**
    * @brief Sets remote control supported,
    * which is used to determine app with remote control
-   * @param allow
+   * @param allow, if true - remote control is supported,
+   * else remote control is disable
    */
   virtual void set_remote_control_supported(const bool allow) = 0;
 
