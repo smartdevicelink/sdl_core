@@ -71,6 +71,13 @@ void OnExitApplicationNotification::Run() {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
+
+  auto on_app_exit = [app_impl](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kApplicationExit, app_impl);
+  };
+
+  application_manager_.GetPluginManager().ForEachPlugin(on_app_exit);
+
   Common_ApplicationExitReason::eType reason;
   reason = static_cast<Common_ApplicationExitReason::eType>(
       (*message_)[strings::msg_params][strings::reason].asInt());

@@ -39,7 +39,16 @@ application_manager::CommandFactory& RCRPCPlugin::GetCommandFactory() {
 }
 
 void RCRPCPlugin::OnPolicyEvent(
-    application_manager::plugin_manager::PolicyEvent event) {}
+    application_manager::plugin_manager::PolicyEvent event) {
+  switch (event) {
+    case plugins::kApplicationPolicyUpdated: {
+      resource_allocation_manager_->OnPolicyEvent(event);
+      break;
+    }
+    default:
+      break;
+  }
+}
 
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
@@ -51,6 +60,14 @@ void RCRPCPlugin::OnApplicationEvent(
     case plugins::kApplicationRegistered: {
       application->AddExtension(new RCAppExtension(kRCPluginID));
       resource_allocation_manager_->SendOnRCStatusNotification();
+      break;
+    }
+    case plugins::kApplicationExit: {
+      resource_allocation_manager_->OnApplicationEvent(event, application);
+      break;
+    }
+    case plugins::kApplicationUnregistered: {
+      resource_allocation_manager_->OnApplicationEvent(event, application);
       break;
     }
     default:
