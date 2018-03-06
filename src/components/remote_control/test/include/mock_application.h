@@ -302,6 +302,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(IsRegistered, bool());
   MOCK_CONST_METHOD0(SchemaUrl, std::string());
   MOCK_CONST_METHOD0(PackageName, std::string());
+  MOCK_METHOD1(PushMobileMessage, void(smart_objects::SmartObjectSPtr message));
+  MOCK_METHOD1(
+      SwapMobileMessageQueue,
+      void(::application_manager::MobileMessageQueue& mobile_messages));
 
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD1(

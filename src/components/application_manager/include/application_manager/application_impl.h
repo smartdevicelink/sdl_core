@@ -382,6 +382,11 @@ class ApplicationImpl : public virtual Application,
   AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
 #endif
 
+  void PushMobileMessage(
+      smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
+
+  void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -509,6 +514,9 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
+  sync_primitives::Lock mobile_message_lock_;
+  MobileMessageQueue mobile_message_queue_;
 
   friend void SwitchApplicationParameters(ApplicationSharedPtr app,
                                           const uint32_t app_id,

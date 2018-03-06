@@ -484,6 +484,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
 }
 
 void ResumptionDataJson::Persist() {
+  // We lock the resumption data because SaveStateToFileSystem accesses
+  // the same dictionary that we use here in ResumptionDataJson
+  sync_primitives::AutoLock autolock(resumption_lock_);
   last_state().SaveStateToFileSystem();
 }
 

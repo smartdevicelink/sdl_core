@@ -202,12 +202,8 @@ bool LifeCycle::InitMessageSystem() {
   dbus_adapter_->SubscribeTo();
 
   LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
-  dbus_adapter_thread_ = new System::Thread(
-      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-          *dbus_adapter_,
-          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-          NULL));
-  dbus_adapter_thread_->Start(false);
+  dbus_adapter_thread_ = new std::thread(
+      &hmi_message_handler::DBusMessageAdapter::Run, dbus_adapter_);
 
   return true;
 }
@@ -319,9 +315,14 @@ void LifeCycle::StopComponents() {
   if (dbus_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
     hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-    StopThread(dbus_adapter_thread_);
+    dbus_adapter_->Shutdown();
+    if (dbus_adapter_thread_ != NULL) {
+      dbus_adapter_thread_->join();
+    }
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
+    delete dbus_adapter_thread_;
+    dbus_adapter_thread_ = NULL;
   }
 #endif  // DBUS_HMIADAPTER
 
@@ -331,17 +332,19 @@ void LifeCycle::StopComponents() {
     hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
     mb_adapter_->exitReceivingThread();
-    mb_adapter_thread_->join();
+    if (mb_adapter_thread_ != NULL) {
+      mb_adapter_thread_->join();
+    }
     delete mb_adapter_;
     mb_adapter_ = NULL;
+    delete mb_adapter_thread_;
+    mb_adapter_thread_ = NULL;
   }
-
+  LOG4CXX_INFO(logger_, "Destroying Message Broker");
+#endif  // MESSAGEBROKER_HMIADAPTER
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   delete hmi_handler_;
   hmi_handler_ = NULL;
-
-  LOG4CXX_INFO(logger_, "Destroying Message Broker");
-#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction

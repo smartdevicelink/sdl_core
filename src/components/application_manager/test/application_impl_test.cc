@@ -804,6 +804,29 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   EXPECT_FALSE(app_impl->audio_streaming_approved());
 }
 
+TEST_F(ApplicationImplTest, PushPopMobileMessage) {
+  smart_objects::SmartObjectSPtr on_driver_distraction =
+      utils::MakeShared<smart_objects::SmartObject>();
+  const hmi_apis::Common_DriverDistractionState::eType state =
+      hmi_apis::Common_DriverDistractionState::DD_ON;
+  (*on_driver_distraction)[strings::params][strings::function_id] =
+      mobile_api::FunctionID::OnDriverDistractionID;
+
+  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
+      state;
+
+  app_impl->PushMobileMessage(on_driver_distraction);
+  app_impl->PushMobileMessage(on_driver_distraction);
+
+  MobileMessageQueue messages;
+  app_impl->SwapMobileMessageQueue(messages);
+
+  EXPECT_EQ(2u, messages.size());
+
+  app_impl->SwapMobileMessageQueue(messages);
+  EXPECT_TRUE(messages.empty());
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test
