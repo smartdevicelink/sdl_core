@@ -606,30 +606,30 @@ void ResumeCtrlImpl::AddSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (saved_app.keyExists(strings::application_subscribtions)) {
-    const smart_objects::SmartObject& subscribtions =
-        saved_app[strings::application_subscribtions];
+  if (saved_app.keyExists(strings::application_subscriptions)) {
+    const smart_objects::SmartObject& subscriptions =
+        saved_app[strings::application_subscriptions];
 
-    if (subscribtions.keyExists(strings::application_buttons)) {
-      const smart_objects::SmartObject& subscribtions_buttons =
-          subscribtions[strings::application_buttons];
+    if (subscriptions.keyExists(strings::application_buttons)) {
+      const smart_objects::SmartObject& subscriptions_buttons =
+          subscriptions[strings::application_buttons];
       mobile_apis::ButtonName::eType btn;
-      for (size_t i = 0; i < subscribtions_buttons.length(); ++i) {
+      for (size_t i = 0; i < subscriptions_buttons.length(); ++i) {
         btn = static_cast<mobile_apis::ButtonName::eType>(
-            (subscribtions_buttons[i]).asInt());
+            (subscriptions_buttons[i]).asInt());
         application->SubscribeToButton(btn);
       }
     }
     MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
         application, application_manager_);
 
-    if (subscribtions.keyExists(strings::application_vehicle_info)) {
-      const smart_objects::SmartObject& subscribtions_ivi =
-          subscribtions[strings::application_vehicle_info];
+    if (subscriptions.keyExists(strings::application_vehicle_info)) {
+      const smart_objects::SmartObject& subscriptions_ivi =
+          subscriptions[strings::application_vehicle_info];
       mobile_apis::VehicleDataType::eType ivi;
-      for (size_t i = 0; i < subscribtions_ivi.length(); ++i) {
+      for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
         ivi = static_cast<mobile_apis::VehicleDataType::eType>(
-            (subscribtions_ivi[i]).asInt());
+            (subscriptions_ivi[i]).asInt());
         application->SubscribeToIVI(ivi);
       }
       ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(

@@ -95,7 +95,7 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::application_global_properties] = tmp;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationSubscriptions(application), tmp);
-  json_app[strings::application_subscribtions] = tmp;
+  json_app[strings::application_subscriptions] = tmp;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
@@ -473,7 +473,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_submenus].clear();
   application[strings::application_choice_sets].clear();
   application[strings::application_global_properties].clear();
-  application[strings::application_subscribtions].clear();
+  application[strings::application_subscriptions].clear();
   application[strings::application_files].clear();
   application.removeMember(strings::grammar_id);
   LOG4CXX_DEBUG(logger_,
