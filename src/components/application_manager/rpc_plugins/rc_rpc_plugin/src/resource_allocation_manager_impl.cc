@@ -3,8 +3,8 @@
 #include "application_manager/application_manager.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-
 #include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "json/json.h"
@@ -19,9 +19,11 @@ namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 ResourceAllocationManagerImpl::ResourceAllocationManagerImpl(
-    application_manager::ApplicationManager& app_mngr)
+    application_manager::ApplicationManager& app_mngr,
+    application_manager::rpc_service::RPCService& rpc_service)
     : current_access_mode_(hmi_apis::Common_RCAccessMode::AUTO_ALLOW)
-    , app_mngr_(app_mngr) {}
+    , app_mngr_(app_mngr)
+    , rpc_service_(rpc_service) {}
 
 ResourceAllocationManagerImpl::~ResourceAllocationManagerImpl() {}
 
@@ -39,7 +41,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   const AllocatedResources::const_iterator allocated_it =
       allocated_resources_.find(module_type);
   if (allocated_resources_.end() == allocated_it) {
-    allocated_resources_[module_type] = app_id;
+    SetResourceAquired(module_type, app_id);
     LOG4CXX_DEBUG(logger_,
                   "Resource is not acquired yet. "
                       << "App: " << app_id << " is allowed to acquire "
@@ -93,7 +95,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
                         << "App: " << app_id << " is allowed to acquire "
                         << module_type);
 
-      allocated_resources_[module_type] = app_id;
+      SetResourceAquired(module_type, app_id);
       return AcquireResult::ALLOWED;
     }
     default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
@@ -104,24 +106,7 @@ void ResourceAllocationManagerImpl::ReleaseResource(
     const std::string& module_type, const uint32_t application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Release " << module_type << " by " << application_id);
-  AllocatedResources::const_iterator allocation =
-      allocated_resources_.find(module_type);
-  if (allocated_resources_.end() == allocation) {
-    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
-    return;
-  }
-
-  if (application_id != allocation->second) {
-    LOG4CXX_DEBUG(logger_,
-                  "Resource " << module_type
-                              << " is allocated by different application "
-                              << allocation->second);
-    return;
-  }
-
-  allocated_resources_.erase(allocation);
-  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
-  return;
+  SetResourceFree(module_type, application_id);
 }
 
 void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
@@ -130,7 +115,8 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
 
   Apps::const_iterator app = app_list.begin();
   for (; app_list.end() != app; ++app) {
-    application_manager::ApplicationSharedPtr app_ptr = *app;    const uint32_t application_id = app_ptr->app_id();
+    application_manager::ApplicationSharedPtr app_ptr = *app;
+    const uint32_t application_id = app_ptr->app_id();
     Resources acquired_modules = GetAcquiredResources(application_id);
     std::sort(acquired_modules.begin(), acquired_modules.end());
 
@@ -284,7 +270,7 @@ void ResourceAllocationManagerImpl::ForceAcquireResource(
     const std::string& module_type, const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Force " << app_id << " acquiring " << module_type);
   sync_primitives::AutoLock lock(allocated_resources_lock_);
-  allocated_resources_[module_type] = app_id;
+  SetResourceAquired(module_type, app_id);
 }
 
 bool ResourceAllocationManagerImpl::IsModuleTypeRejected(
