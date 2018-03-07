@@ -39,6 +39,8 @@
 #include <limits.h>
 #include <stdint.h>
 
+#include "utils/logger.h"
+
 #ifndef _WIN32
 #include <unistd.h>
 #else
@@ -52,6 +54,8 @@
 #include <string>
 
 namespace profile {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 char* ini_write_inst(const char* fname, uint8_t flag) {
   FILE* fp = 0;
@@ -188,15 +192,18 @@ char ini_write_value(const char* fname,
 
       fd = mkstemp(temp_fname);
       if (-1 == fd) {
+        fclose(rd_fp);
         return FALSE;
       }
       wr_fp = fdopen(fd, "w");
       if (NULL == wr_fp) {
         unlink(temp_fname);
         close(fd);
+        fclose(rd_fp);
         return FALSE;
       }
     } else {
+      fclose(rd_fp);
       return FALSE;
     }
   }
@@ -269,9 +276,11 @@ char ini_write_value(const char* fname,
   fclose(wr_fp);
   fclose(rd_fp);
 
-  remove(fname);
   if (0 != rename(temp_fname, fname)) {
-    remove(temp_fname);
+    if (0 != remove(temp_fname)) {
+      LOG4CXX_WARN_WITH_ERRNO(
+          logger_, "Unable to remove temp file: " << std::string(temp_fname));
+    }
     return FALSE;
   }
 

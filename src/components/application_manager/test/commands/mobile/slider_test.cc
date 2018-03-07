@@ -43,37 +43,46 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace slider_request {
 
 namespace am = application_manager;
 using am::commands::SliderRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
+using policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+typedef SharedPtr<SliderRequest> CommandPtr;
 
 namespace {
 const int32_t kCommandId = 1;
 const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
+const uint32_t kDefaultTimeout = 1000u;
+const uint32_t kCorrelationId = 2u;
+const uint32_t kFunctionId = 3u;
+const uint32_t kNumTicks = 2u;
+const uint32_t kPositionGreaterTicks = 3u;
+const uint32_t kPositionLessTicks = 1u;
 }  // namespace
 
 class SliderRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SliderRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
-  sync_primitives::Lock lock_;
+      : mock_app_(CreateMockApp())
+      , msg_(CreateMessage(smart_objects::SmartType_Map)) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -94,6 +103,37 @@ class SliderRequestTest
 
     return msg;
   }
+
+  void PreConditions() {
+    (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg_)[am::strings::msg_params][am::strings::num_ticks] = kNumTicks;
+    (*msg_)[am::strings::msg_params][am::strings::position] =
+        kPositionLessTicks;
+    (*msg_)[am::strings::msg_params][am::strings::slider_footer][0] =
+        "slider_footer1";
+    (*msg_)[am::strings::msg_params][am::strings::slider_footer][1] =
+        "slider_footer2";
+    (*msg_)[am::strings::msg_params][am::strings::slider_header] =
+        "slider_header";
+
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+  }
+
+  void ExpectManageMobileCommandWithResultCode(
+      const mobile_apis::Result::eType code) {
+    EXPECT_CALL(
+        app_mngr_,
+        ManageMobileCommand(MobileResultCodeIs(code),
+                            am::commands::Command::CommandOrigin::ORIGIN_SDL));
+  }
+
+  sync_primitives::Lock lock_;
+
+  MockAppPtr mock_app_;
+  MessageSharedPtr msg_;
+  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
@@ -108,11 +148,6 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       .WillByDefault(Return(mock_app));
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -121,10 +156,6 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*msg);
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -148,9 +179,163 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+class CallOnTimeOut {
+ public:
+  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+
+  void operator()() {
+    command_.onTimeOut();
+  }
+
+  CommandRequestImpl& command_;
+};
+
+TEST_F(SliderRequestTest, Init_SUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  EXPECT_TRUE(command->Init());
+}
+
+TEST_F(SliderRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
+  PreConditions();
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(ApplicationSharedPtr()));
+  ExpectManageMobileCommandWithResultCode(
+      mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, Run_PositionGreaterTicks_UNSUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::position] =
+      kPositionGreaterTicks;
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, Run_SliderFooterNotEqToNumticks_UNSUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::slider_footer][2] =
+      "slider_footer3";
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, Run_InvalidSliderHeader_UNSUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::slider_header] =
+      "invalid_test_with_empty_str\\n";
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, Run_InvalidSliderFooter_UNSUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::slider_footer][0] =
+      "invalid_test_with_empty_str\\n";
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, Run_SUCCESS) {
+  PreConditions();
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_Slider)));
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
+  (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  EXPECT_TRUE(command->Init());
+
+  EXPECT_CALL(
+      app_mngr_,
+      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
+
+  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
+  event.set_smart_object(*msg_);
+  command->on_event(event);
+}
+
+TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {
+  PreConditions();
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  event.set_smart_object(*msg_);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->on_event(event);
+}
+
+TEST_F(SliderRequestTest, OnEvent_UISliderPositionExists_SUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::TIMED_OUT;
+  (*msg_)[am::strings::params][am::strings::data]
+         [am::strings::slider_position] = "position";
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::TIMED_OUT);
+
+  Event event(hmi_apis::FunctionID::UI_Slider);
+  event.set_smart_object(*msg_);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->on_event(event);
+}
+
+TEST_F(SliderRequestTest, OnEvent_UISliderAborted_SUCCESS) {
+  PreConditions();
+  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::ABORTED);
+
+  Event event(hmi_apis::FunctionID::UI_Slider);
+  event.set_smart_object(*msg_);
+
+  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  command->on_event(event);
+}
+
+}  // namespace slider_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

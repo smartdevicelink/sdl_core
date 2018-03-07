@@ -46,7 +46,10 @@ struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   bool operator()(const ApplicationSharedPtr app) const {
     return app
                ? handle_ == app->device() &&
-                     ProtocolVersion::kV4 == app->protocol_version()
+                     Message::is_sufficient_version(
+                         protocol_handler::MajorProtocolVersion::
+                             PROTOCOL_VERSION_4,
+                         app->protocol_version())
                : false;
   }
 };
@@ -84,6 +87,42 @@ SDLActivateAppRequest::SDLActivateAppRequest(
 
 SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
+uint32_t SDLActivateAppRequest::app_id() const {
+  using namespace strings;
+  if (!(*message_).keyExists(msg_params)) {
+    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
+    return 0;
+  }
+  if (!(*message_)[msg_params].keyExists(strings::app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  strings::app_id << " section is absent in the message.");
+    return 0;
+  }
+  return (*message_)[msg_params][strings::app_id].asUInt();
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void SDLActivateAppRequest::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace hmi_apis::FunctionID;
+
+  if (application_manager_.state_controller().IsStateActive(
+          HmiState::STATE_ID_DEACTIVATE_HMI)) {
+    LOG4CXX_DEBUG(logger_,
+                  "DeactivateHmi state is active. "
+                  "Sends response with result code REJECTED");
+    SendErrorResponse(correlation_id(),
+                      static_cast<eType>(function_id()),
+                      hmi_apis::Common_Result::REJECTED,
+                      "HMIDeactivate is active");
+  } else {
+    const uint32_t application_id = app_id();
+    application_manager_.GetPolicyHandler().OnActivateApp(application_id,
+                                                          correlation_id());
+  }
+}
+
+#else  // EXTERNAL_PROPRIETARY_MODE
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
@@ -118,6 +157,18 @@ void SDLActivateAppRequest::Run() {
                 "Found application to activate. Application id is "
                     << app_to_activate->app_id());
 
+  if (application_manager_.state_controller().IsStateActive(
+          HmiState::StateID::STATE_ID_DEACTIVATE_HMI)) {
+    LOG4CXX_WARN(logger_,
+                 "DeactivateHmi state is active. "
+                 "Sends response with result code REJECTED");
+    SendErrorResponse(correlation_id(),
+                      static_cast<hmi_apis::FunctionID::eType>(function_id()),
+                      hmi_apis::Common_Result::REJECTED,
+                      "HMIDeactivate is active");
+    return;
+  }
+
   if (app_to_activate->IsRegistered()) {
     LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
@@ -134,7 +185,8 @@ void SDLActivateAppRequest::Run() {
                   "Can't find regular foreground app with the same "
                   "connection id:"
                       << device_handle);
-    SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
+    SendErrorResponse(
+        correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED, "");
     return;
   }
 
@@ -160,13 +212,14 @@ void SDLActivateAppRequest::Run() {
   subscribe_on_event(BasicCommunication_OnAppRegistered);
 }
 
+#endif  // EXTERNAL_PROPRIETARY_MODE
 void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  SendResponse(
-      false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
+  SendErrorResponse(
+      correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED, "");
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
@@ -190,20 +243,6 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   }
   application_manager_.GetPolicyHandler().OnActivateApp(app->app_id(),
                                                         correlation_id());
-}
-
-uint32_t SDLActivateAppRequest::app_id() const {
-  using namespace strings;
-  if (!(*message_).keyExists(msg_params)) {
-    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
-    return 0;
-  }
-  if (!(*message_)[msg_params].keyExists(strings::app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  strings::app_id << " section is absent in the message.");
-    return 0;
-  }
-  return (*message_)[msg_params][strings::app_id].asUInt();
 }
 
 uint32_t SDLActivateAppRequest::hmi_app_id(

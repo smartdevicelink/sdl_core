@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,10 +70,9 @@ Json::Value& AppLaunchDataJson::GetApplicationData() const {
   using namespace application_manager;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(app_launch_json_lock_);
-  Json::Value& dictionary = last_state().dictionary;
+  Json::Value& dictionary = last_state().get_dictionary();
   if (!dictionary.isMember(strings::app_launch)) {
-    last_state().dictionary[strings::app_launch] =
-        Json::Value(Json::objectValue);
+    dictionary[strings::app_launch] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "app_launch section is missed");
   }
   Json::Value& app_launch = dictionary[strings::app_launch];
@@ -276,7 +275,7 @@ bool AppLaunchDataJson::DeleteOldestAppData() {
 bool AppLaunchDataJson::Persist() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(app_launch_json_lock_);
-  last_state().SaveToFileSystem();
+  last_state().SaveStateToFileSystem();
   return true;
 }
 

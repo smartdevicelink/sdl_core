@@ -38,17 +38,11 @@
 #include "json/json.h"
 #include "utils/macro.h"
 #include "application_manager/hmi_language_handler.h"
+#include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
 namespace resumption {
 class LastState;
 }
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;
@@ -95,6 +89,9 @@ class HMICapabilities {
 
   virtual bool is_ivi_cooperating() const = 0;
   virtual void set_is_ivi_cooperating(const bool value) = 0;
+
+  virtual bool is_rc_cooperating() const = 0;
+  virtual void set_is_rc_cooperating(const bool value) = 0;
 
   /*
    * @brief Interface used to store information about software version of the
@@ -414,6 +411,93 @@ class HMICapabilities {
    * @return TRUE if it supported, otherwise FALSE
    */
   virtual bool phone_call_supported() const = 0;
+
+  /*
+   * @brief Interface to store whether HMI supports video streaming
+   *
+   * @param supported Indicates whether video streaming is supported by HMI
+   */
+  virtual void set_video_streaming_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves whether HMI supports video streaming
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool video_streaming_supported() const = 0;
+
+  /*
+   * @brief Interface to store whether HMI supports remote control
+   *
+   * @param supported Indicates whether remote control is supported by HMI
+   */
+  virtual void set_rc_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves whether HMI supports remote control
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool rc_supported() const = 0;
+
+  /*
+   * @brief Interface used to store information regarding
+   * the navigation "System Capability"
+   *
+   * @param navigation_capability contains information related
+   * to the navigation system capability.
+   */
+  virtual void set_navigation_capability(
+      const smart_objects::SmartObject& navigation_capability) = 0;
+
+  /*
+   * @brief Retrieves information regarding the navigation system capability
+   *
+   * @return NAVIGATION system capability
+   */
+  virtual const smart_objects::SmartObject* navigation_capability() const = 0;
+
+  /*
+   * @brief Interface used to store information regarding
+   * the phone "System Capability"
+   *
+   * @param phone_capability contains information related
+   * to the phone system capability.
+   */
+  virtual void set_phone_capability(
+      const smart_objects::SmartObject& phone_capability) = 0;
+
+  /*
+   * @brief Retrieves information regarding the phone call system capability
+   *
+   * @return PHONE_CALL system capability
+   */
+  virtual const smart_objects::SmartObject* phone_capability() const = 0;
+
+  /*
+   * @brief Sets HMI's video streaming related capability information
+   *
+   * @param video_streaming_capability the video streaming related capabilities
+   */
+  virtual void set_video_streaming_capability(
+      const smart_objects::SmartObject& video_streaming_capability) = 0;
+
+  /*
+   * @brief Retrieves HMI's video streaming related capabilities
+   *
+   * @return HMI's video streaming related capability information
+   */
+  virtual const smart_objects::SmartObject* video_streaming_capability()
+      const = 0;
+
+  /**
+   * @brief Sets available RC capabilities for further usage by RC functionality
+   * @param rc_capability capabilities to set
+   */
+  virtual void set_rc_capability(
+      const smart_objects::SmartObject& rc_capability) = 0;
+
+  virtual const smart_objects::SmartObject* rc_capability() const = 0;
 
   virtual void Init(resumption::LastState* last_state) = 0;
 

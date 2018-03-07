@@ -49,16 +49,15 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace ui_is_ready_request {
 
 namespace am = ::application_manager;
 
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using am::commands::MessageSharedPtr;
 using am::commands::UIIsReadyRequest;
-using am::MockMessageHelper;
 using am::event_engine::Event;
 
 typedef SharedPtr<UIIsReadyRequest> UIIsReadyRequestPtr;
@@ -66,14 +65,11 @@ typedef SharedPtr<UIIsReadyRequest> UIIsReadyRequestPtr;
 class UIIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  UIIsReadyRequestTest()
-      : command_(CreateCommand<UIIsReadyRequest>())
-      , mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+  UIIsReadyRequestTest() : command_(CreateCommand<UIIsReadyRequest>()) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
   void SetUpExpectations(bool is_ui_cooperating_available,
                          bool is_send_message_to_hmi,
@@ -150,8 +146,6 @@ class UIIsReadyRequestTest
   }
 
   UIIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
-  MockMessageHelper& mock_message_helper_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
@@ -203,7 +197,8 @@ TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS) {
   command_->onTimeOut();
 }
 
-}  // namespace mobile_commands_test
+}  // namespace ui_is_ready_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

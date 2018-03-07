@@ -53,6 +53,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace update_turn_list_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -78,8 +79,7 @@ class UpdateTurnListRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   UpdateTurnListRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , command_msg_(CreateMessage(smart_objects::SmartType_Map))
+      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
       , command_(CreateCommand<UpdateTurnListRequest>(command_msg_)) {
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
@@ -87,7 +87,6 @@ class UpdateTurnListRequestTest
         kFunctionId;
   }
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UpdateTurnListRequest> command_;
   TypeIf<kMocksAreNice,
@@ -264,50 +263,42 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
+  const hmi_apis::Common_Result::eType hmi_response_code =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const mobile_result::eType mobile_response_code =
       mobile_result::UNSUPPORTED_RESOURCE;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_response_code;
   (*event_msg)[am::strings::msg_params] = 0;
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-
-  EXPECT_CALL(mock_hmi_capabilities, is_ui_cooperating())
-      .WillOnce(Return(true));
-
   EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _));
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   command_->on_event(event);
 }
 
 TEST_F(UpdateTurnListRequestTest,
        OnEvent_ReceivedNavigationUpdateTurnListEvent_SUCCESS) {
+  const hmi_apis::Common_Result::eType hmi_response_code =
+      hmi_apis::Common_Result::SUCCESS;
+  const mobile_result::eType mobile_response_code = mobile_result::SUCCESS;
+
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_result::SUCCESS;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_response_code;
   (*event_msg)[am::strings::msg_params] = 0;
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
 
-  MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-
-  EXPECT_CALL(mock_hmi_capabilities, is_ui_cooperating()).Times(0);
-
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   command_->on_event(event);
 }
 
+}  // namespace update_turn_list_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

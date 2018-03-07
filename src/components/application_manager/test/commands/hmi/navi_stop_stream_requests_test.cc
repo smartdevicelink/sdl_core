@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace navi_stop_stream_requests {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -72,7 +73,6 @@ class NaviStopStreamRequestsTest
 
   MessageSharedPtr msg_;
   SharedPtr<Command> command_;
-  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
 };
 
 typedef testing::Types<commands::AudioStopStreamRequest,
@@ -97,6 +97,7 @@ TYPED_TEST(NaviStopStreamRequestsTest, Run_HmiInterfaceAvailable_SentRequest) {
   TestFixture::command_->Run();
 }
 
+}  // namespace navi_stop_stream_requests
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

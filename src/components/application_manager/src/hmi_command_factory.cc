@@ -2,6 +2,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017 Xevo Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -13,7 +16,7 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
+ Neither the name of the copyright holders nor the names of their contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
 
@@ -157,6 +160,11 @@
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_event_changed_notification.h"
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "application_manager/commands/hmi/decrypt_certificate_request.h"
+#include "application_manager/commands/hmi/decrypt_certificate_response.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
 #ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response_template.h"
@@ -241,6 +249,8 @@
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/commands/hmi/navi_set_video_config_request.h"
+#include "application_manager/commands/hmi/navi_set_video_config_response.h"
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
@@ -259,6 +269,7 @@
 #include "application_manager/commands/hmi/on_system_error_notification.h"
 #include "application_manager/commands/hmi/basic_communication_system_request.h"
 #include "application_manager/commands/hmi/basic_communication_system_response.h"
+#include "application_manager/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "application_manager/commands/hmi/sdl_policy_update.h"
 #include "application_manager/commands/hmi/sdl_policy_update_response.h"
 #include "application_manager/commands/hmi/on_received_policy_update.h"
@@ -271,6 +282,13 @@
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_request.h"
+#include "application_manager/commands/hmi/ui_send_haptic_data_response.h"
+
+#include "application_manager/commands/hmi/rc_is_ready_request.h"
+#include "application_manager/commands/hmi/rc_is_ready_response.h"
+#include "application_manager/commands/hmi/rc_get_capabilities_request.h"
+#include "application_manager/commands/hmi/rc_get_capabilities_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
@@ -328,6 +346,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {
+      if (is_response) {
+        command.reset(new commands::DecryptCertificateResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::DecryptCertificateRequest(
+            message, application_manager));
+      }
+      break;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
       if (is_response) {
         command.reset(
@@ -750,6 +780,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
       command.reset(new commands::OnAppActivatedNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAwakeSDL: {
+      command.reset(
+          new commands::OnAwakeSDLNotification(message, application_manager));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {
@@ -2061,6 +2096,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
           message, application_manager));
       break;
     }
+    case hmi_apis::FunctionID::Navigation_SetVideoConfig: {
+      if (is_response) {
+        command.reset(new commands::NaviSetVideoConfigResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::NaviSetVideoConfigRequest(
+            message, application_manager));
+      }
+      break;
+    }
     case hmi_apis::FunctionID::Navigation_StartStream: {
       if (is_response) {
         command.reset(new commands::NaviStartStreamResponse(
@@ -2233,6 +2278,36 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       command.reset(new commands::OnNaviWayPointChangeNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::RC_IsReady: {
+      if (is_response) {
+        command.reset(
+            new commands::RCIsReadyResponse(message, application_manager));
+      } else {
+        command.reset(
+            new commands::RCIsReadyRequest(message, application_manager));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::RC_GetCapabilities: {
+      if (is_response) {
+        command.reset(new commands::RCGetCapabilitiesResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::RCGetCapabilitiesRequest(
+            message, application_manager));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::UI_SendHapticData: {
+      if (is_response) {
+        command.reset(new commands::UISendHapticDataResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::UISendHapticDataRequest(
+            message, application_manager));
+      }
       break;
     }
   }

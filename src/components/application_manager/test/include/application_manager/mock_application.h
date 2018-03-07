@@ -34,6 +34,7 @@
 #include <string>
 #include "gmock/gmock.h"
 #include "application_manager/application.h"
+#include "application_manager/app_extension.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/usage_statistics.h"
@@ -43,15 +44,17 @@ namespace components {
 namespace application_manager_test {
 
 namespace custom_str = utils::custom_string;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockApplication : public ::application_manager::Application {
  public:
   MockApplication() {}
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
-  MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
-  MOCK_METHOD1(set_flag_sending_hash_change_after_awake, void(bool flag));
+  DEPRECATED MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
+  DEPRECATED MOCK_METHOD1(set_flag_sending_hash_change_after_awake,
+                          void(bool flag));
+  MOCK_CONST_METHOD0(IsHashChangedDuringSuspend, bool());
+  MOCK_METHOD1(SetHashChangedDuringSuspend, void(const bool flag));
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
                void(bool state_application_data));
@@ -60,6 +63,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(ChangeSupportingAppHMIType, void());
   MOCK_CONST_METHOD0(is_navi, bool());
   MOCK_METHOD1(set_is_navi, void(bool allow));
+  MOCK_CONST_METHOD0(mobile_projection_enabled, bool());
+  MOCK_METHOD1(set_mobile_projection_enabled, void(bool allow));
   MOCK_CONST_METHOD0(video_streaming_approved, bool());
   MOCK_METHOD1(set_video_streaming_approved, void(bool state));
   MOCK_CONST_METHOD0(audio_streaming_approved, bool());
@@ -68,6 +73,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_video_streaming_allowed, void(bool state));
   MOCK_CONST_METHOD0(audio_streaming_allowed, bool());
   MOCK_METHOD1(set_audio_streaming_allowed, void(bool state));
+  MOCK_CONST_METHOD0(is_audio, bool());
+  MOCK_METHOD2(SetVideoConfig,
+               bool(protocol_handler::ServiceType service_type,
+                    const smart_objects::SmartObject& params));
   MOCK_METHOD1(StartStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));
@@ -121,9 +130,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_grammar_id, void(uint32_t value));
   MOCK_METHOD1(
       set_protocol_version,
-      void(const ::application_manager::ProtocolVersion& protocol_version));
+      void(const ::protocol_handler::MajorProtocolVersion& protocol_version));
   MOCK_CONST_METHOD0(protocol_version,
-                     ::application_manager::ProtocolVersion());
+                     ::protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
   MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
@@ -147,6 +156,7 @@ class MockApplication : public ::application_manager::Application {
                bool(mobile_apis::FunctionID::eType cmd_id,
                     ::application_manager::TLimitSource source));
   MOCK_METHOD0(usage_report, ::application_manager::UsageStatistics&());
+  MOCK_METHOD1(SetInitialState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetRegularState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(SetPostponedState,
                void(::application_manager::HmiStatePtr state));
@@ -275,10 +285,46 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(bundle_id, const std::string&());
   MOCK_METHOD1(set_bundle_id, void(const std::string& bundle_id));
   MOCK_METHOD0(GetAvailableDiskSpace, uint32_t());
+
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
   MOCK_CONST_METHOD0(IsRegistered, bool());
+  MOCK_CONST_METHOD0(SchemaUrl, std::string());
+  MOCK_CONST_METHOD0(PackageName, std::string());
+  MOCK_METHOD1(PushMobileMessage, void(smart_objects::SmartObjectSPtr message));
+  MOCK_METHOD1(
+      SwapMobileMessageQueue,
+      void(::application_manager::MobileMessageQueue& mobile_messages));
+
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD1(
+      set_system_context,
+      void(const application_manager::mobile_api::SystemContext::eType&));
+  MOCK_METHOD1(
+      set_audio_streaming_state,
+      void(const application_manager::mobile_api::AudioStreamingState::eType&
+               state));
+  MOCK_METHOD1(IsSubscribedToInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(SubscribeToInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(UnsubscribeFromInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(
+      set_hmi_level,
+      void(const application_manager::mobile_api::HMILevel::eType& hmi_level));
+  MOCK_METHOD1(QueryInterface,
+               application_manager::AppExtensionPtr(
+                   application_manager::AppExtensionUID uid));
+  MOCK_METHOD1(AddExtension,
+               bool(application_manager::AppExtensionPtr extention));
+  MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
+  MOCK_METHOD0(RemoveExtensions, void());
+  MOCK_CONST_METHOD0(SubscribesIVI,
+                     const application_manager::VehicleInfoSubscriptions&());
+
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace application_manager_test

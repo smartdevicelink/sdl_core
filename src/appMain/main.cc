@@ -58,11 +58,6 @@
 #endif
 
 #include "media_manager/media_manager_impl.h"
-// ----------------------------------------------------------------------------
-// Third-Party includes
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-
-// ----------------------------------------------------------------------------
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
@@ -90,23 +85,6 @@ bool InitHmi(std::string hmi_link) {
       .Execute();
 }
 #endif  // WEB_HMI
-
-#ifdef QT_HMI
-/**
- * Initialize HTML based HMI.
- * @return true if success otherwise false.
- */
-bool InitHmi() {
-  std::string kStartHmi = "./start_hmi.sh";
-  struct stat sb;
-  if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
-    return false;
-  }
-
-  return utils::System(kStartHmi).Execute();
-}
-#endif  // QT_HMI
 }
 
 /**
@@ -127,9 +105,9 @@ int32_t main(int32_t argc, char** argv) {
   profile::Profile profile_instance;
   main_namespace::LifeCycle life_cycle(profile_instance);
   if ((argc > 1) && (0 != argv)) {
-    profile_instance.config_file_name(argv[1]);
+    profile_instance.set_config_file_name(argv[1]);
   } else {
-    profile_instance.config_file_name("smartDeviceLink.ini");
+    profile_instance.set_config_file_name("smartDeviceLink.ini");
   }
 
   // --------------------------------------------------------------------------
@@ -146,6 +124,14 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
 
+  // Check if no error values were read from config file
+  if (profile_instance.ErrorOccured()) {
+    LOG4CXX_FATAL(logger_, profile_instance.ErrorDescription());
+    FLUSH_LOGGER();
+    DEINIT_LOGGER();
+    exit(EXIT_FAILURE);
+  }
+
   // --------------------------------------------------------------------------
   // Components initialization
   if (!life_cycle.StartComponents()) {
@@ -154,6 +140,7 @@ int32_t main(int32_t argc, char** argv) {
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
+  LOG4CXX_INFO(logger_, "Components Started");
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
@@ -165,18 +152,17 @@ int32_t main(int32_t argc, char** argv) {
     _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
-#ifndef NO_HMI
+#ifdef WEB_HMI
       if (!InitHmi(profile_instance.link_to_web_hmi())) {
         LOG4CXX_INFO(logger_, "InitHmi successful");
       } else {
         LOG4CXX_WARN(logger_, "Failed to init HMI");
       }
-#endif  // #ifndef NO_HMI
+#endif
     }
   }
   // --------------------------------------------------------------------------

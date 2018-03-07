@@ -50,6 +50,14 @@ void OnVIVehicleDataNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnVehicleDataID);
 
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  if (msg_params.keyExists(strings::odometer)) {
+    application_manager_.IviInfoUpdated(
+        mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER,
+        msg_params[strings::odometer].asInt());
+  }
+
   SendNotificationToMobile(message_);
 }
 

@@ -32,12 +32,14 @@
 #include "security_manager/crypto_manager_impl.h"
 
 #include <assert.h>
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <memory.h>
 #include <map>
 #include <algorithm>
+#include <vector>
+
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include "utils/macro.h"
 
@@ -55,7 +57,8 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL* conn,
     , buffer_size_(maximum_payload_size)
     , buffer_(new uint8_t[buffer_size_])
     , is_handshake_pending_(false)
-    , mode_(mode) {
+    , mode_(mode)
+    , max_block_size_(0) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
@@ -136,32 +139,69 @@ std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
     CryptoManagerImpl::SSLContextImpl::max_block_sizes =
         CryptoManagerImpl::SSLContextImpl::create_max_block_sizes();
 
+const std::string CryptoManagerImpl::SSLContextImpl::RemoveDisallowedInfo(
+    X509_NAME* in_data) const {
+  if (!in_data) {
+    return std::string();
+  }
+
+  char* tmp_char_str = X509_NAME_oneline(in_data, NULL, 0);
+  std::string out_str(tmp_char_str);
+  OPENSSL_free(tmp_char_str);
+
+  typedef std::vector<std::string> StringVector;
+  StringVector disallowed_params;
+  disallowed_params.push_back("CN");
+  disallowed_params.push_back("serialNumber");
+
+  const char str_delimiter = '/', param_delimiter = '=';
+  for (StringVector::const_iterator it = disallowed_params.begin();
+       it != disallowed_params.end();
+       ++it) {
+    const std::string search_str = str_delimiter + (*it) + param_delimiter;
+    const size_t occurence_start = out_str.find(search_str);
+    if (std::string::npos == occurence_start) {
+      continue;
+    }
+
+    const size_t occurence_end =
+        out_str.find(str_delimiter, occurence_start + 1);
+    out_str.erase(occurence_start, occurence_end - occurence_start);
+  }
+
+  return out_str;
+}
+
 void CryptoManagerImpl::SSLContextImpl::PrintCertData(
     X509* cert, const std::string& cert_owner) {
-  if (cert) {
-    X509_NAME* subj_name = X509_get_subject_name(cert);
-    char* subj = X509_NAME_oneline(subj_name, NULL, 0);
-    if (subj) {
-      std::replace(subj, subj + strlen(subj), '/', ' ');
-      LOG4CXX_DEBUG(logger_, cert_owner << " subject:" << subj);
-      OPENSSL_free(subj);
-    }
-    char* issuer = X509_NAME_oneline(X509_get_issuer_name(cert), NULL, 0);
-    if (issuer) {
-      std::replace(issuer, issuer + strlen(issuer), '/', ' ');
-      LOG4CXX_DEBUG(logger_, cert_owner << " issuer:" << issuer);
-      OPENSSL_free(issuer);
-    }
+  if (!cert) {
+    LOG4CXX_DEBUG(logger_, "Empty certificate data");
+    return;
+  }
 
-    ASN1_TIME* notBefore = X509_get_notBefore(cert);
-    ASN1_TIME* notAfter = X509_get_notAfter(cert);
+  std::string subj = RemoveDisallowedInfo(X509_get_subject_name(cert));
+  if (!subj.empty()) {
+    std::replace(subj.begin(), subj.end(), '/', ' ');
+    LOG4CXX_DEBUG(logger_, cert_owner << " subject:" << subj);
+  }
 
-    if (notBefore) {
-      LOG4CXX_DEBUG(logger_, " Start date: " << (char*)notBefore->data);
-    }
-    if (notAfter) {
-      LOG4CXX_DEBUG(logger_, " End date: " << (char*)notAfter->data);
-    }
+  std::string issuer = RemoveDisallowedInfo(X509_get_issuer_name(cert));
+  if (!issuer.empty()) {
+    std::replace(issuer.begin(), issuer.end(), '/', ' ');
+    LOG4CXX_DEBUG(logger_, cert_owner << " issuer:" << issuer);
+  }
+
+  ASN1_TIME* not_before = X509_get_notBefore(cert);
+  if (not_before) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Start date: " << static_cast<unsigned char*>(not_before->data));
+  }
+
+  ASN1_TIME* not_after = X509_get_notAfter(cert);
+  if (not_after) {
+    LOG4CXX_DEBUG(logger_,
+                  "End date: " << static_cast<unsigned char*>(not_after->data));
   }
 }
 

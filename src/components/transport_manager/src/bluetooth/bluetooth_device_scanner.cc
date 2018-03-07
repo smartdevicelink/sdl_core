@@ -255,9 +255,11 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
 
     if (hci_read_remote_name_ret != 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
+      int name_len = sizeof(deviceName) / sizeof(deviceName[0]);
       strncpy(deviceName,
               BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
-              sizeof(deviceName) / sizeof(deviceName[0]));
+              name_len - 1);
+      deviceName[name_len - 1] = '\0';
     }
 
     Device* bluetooth_device =

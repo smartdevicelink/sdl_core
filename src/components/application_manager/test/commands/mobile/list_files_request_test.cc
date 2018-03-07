@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace list_files_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -60,7 +61,12 @@ using am::commands::ListFilesRequest;
 using am::commands::MessageSharedPtr;
 
 class ListFilesRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  ListFilesRequestTest() : kStoragePath_("storage"), kResponseSize_(1) {}
+  const std::string kStoragePath_;
+  const uint32_t kResponseSize_;
+};
 
 TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
@@ -104,7 +110,17 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillRepeatedly(ReturnRef(app_mngr_settings_));
+
+  ON_CALL(app_mngr_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kStoragePath_));
+
+  ON_CALL(app_mngr_settings_, list_files_response_size())
+      .WillByDefault(ReturnRef(kResponseSize_));
+
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
 
@@ -122,6 +138,7 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
                     .asInt()));
 }
 
+}  // namespace list_files_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

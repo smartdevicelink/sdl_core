@@ -118,8 +118,7 @@ class QueryAppsDataValidator {
     smart_objects::SmartArray::iterator applications_iterator =
         objects_array->begin();
 
-    for (; applications_iterator != objects_array->end();
-         ++applications_iterator) {
+    for (; applications_iterator != objects_array->end();) {
       const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
@@ -133,7 +132,8 @@ class QueryAppsDataValidator {
         LOG4CXX_WARN(logger_,
                      "Application hasn`t some of mandatory parameters. "
                      "Application will be skipped.");
-        objects_array->erase(applications_iterator);
+
+        applications_iterator = objects_array->erase(applications_iterator);
         continue;
       }
 
@@ -186,6 +186,7 @@ class QueryAppsDataValidator {
         return false;
       }
       has_response_valid_application = true;
+      ++applications_iterator;
     }
     return has_response_valid_application;
   }
@@ -466,6 +467,20 @@ void SystemRequest::Run() {
     file_name = kSYNC;
   }
 
+  if (!CheckSyntax(file_name)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming request contains \t\n \\t \\n or whitespace");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if (!file_system::IsFileNameValid(file_name)) {
+    const std::string err_msg = "Sync file name contains forbidden symbols.";
+    LOG4CXX_ERROR(logger_, err_msg);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+    return;
+  }
+
   bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
                         std::string::npos != file_name.find(kIVSU);
 
@@ -520,19 +535,8 @@ void SystemRequest::Run() {
     if (!file || !file->is_download_complete ||
         !file_system::MoveFile(app_full_file_path, file_dst_path)) {
       LOG4CXX_DEBUG(logger_, "Binary data not found.");
-
-      std::string origin_file_name;
-      if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
-        origin_file_name =
-            (*message_)[strings::msg_params][strings::file_name].asString();
-      }
-      if (!(mobile_apis::RequestType::HTTP == request_type &&
-            0 == origin_file_name.compare(kIVSU))) {
-        LOG4CXX_DEBUG(logger_, "Binary data required. Reject");
-        SendResponse(false, mobile_apis::Result::REJECTED);
-        return;
-      }
-      LOG4CXX_DEBUG(logger_, "IVSU does not require binary data. Continue");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
     }
     processing_file_ = file_dst_path;
   }
@@ -578,11 +582,12 @@ void SystemRequest::Run() {
     msg_params[strings::file_name] = file_dst_path;
   }
 
-  if (mobile_apis::RequestType::PROPRIETARY != request_type) {
-    msg_params[strings::app_id] = (application->policy_app_id());
-  }
+  // expected int, mandatory=true, all Policies flow (HTTP,Proprietary,External)
+  msg_params[strings::app_id] = application->hmi_app_id();
+
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_SystemRequest,
                  &msg_params,
                  true);
@@ -596,6 +601,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));

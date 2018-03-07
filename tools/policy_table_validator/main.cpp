@@ -15,7 +15,8 @@ enum ResultCode {
   PT_TYPE_ERROR
 };
 
-rpc::policy_table_interface_base::PolicyTableType StringToPolicyTableType(const std::string& str_pt_type) {
+rpc::policy_table_interface_base::PolicyTableType StringToPolicyTableType(
+    const std::string& str_pt_type) {
   if (str_pt_type == "PT_PRELOADED") {
     return rpc::policy_table_interface_base::PT_PRELOADED;
   }
@@ -29,10 +30,11 @@ rpc::policy_table_interface_base::PolicyTableType StringToPolicyTableType(const 
 }
 
 void help() {
-  std::cout << "Usage:" << std::endl <<
-               "./policy_validator {Policy table type} {file_name}" << std::endl;
+  std::cout << "Usage:" << std::endl
+            << "./policy_validator {Policy table type} {file_name}"
+            << std::endl;
   std::cout << "Policy table types:"
-               "\t PT_PRELOADED , PT_UPDATE , PT_SNAPSHOT" <<std::endl;
+               "\t PT_PRELOADED , PT_UPDATE , PT_SNAPSHOT" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -46,8 +48,8 @@ int main(int argc, char** argv) {
   std::string json_string;
   rpc::policy_table_interface_base::PolicyTableType pt_type;
   pt_type = StringToPolicyTableType(pt_type_str);
-  if (rpc::policy_table_interface_base::PolicyTableType::INVALID_PT_TYPE
-      == pt_type) {
+  if (rpc::policy_table_interface_base::PolicyTableType::INVALID_PT_TYPE ==
+      pt_type) {
     std::cout << "Invalid policy table type: " << pt_type_str << std::endl;
     exit(PT_TYPE_ERROR);
   }
@@ -69,7 +71,7 @@ int main(int argc, char** argv) {
   policy_table::Table table(&value);
   table.SetPolicyTableType(pt_type);
   bool is_valid = table.is_valid();
-  if (true == is_valid ) {
+  if (true == is_valid) {
     std::cout << "Table is valid" << std::endl;
     exit(SUCCES);
   }
@@ -77,7 +79,8 @@ int main(int argc, char** argv) {
   std::cout << "Table is not valid" << std::endl;
   rpc::ValidationReport report("policy_table");
   table.ReportErrors(&report);
-  std::cout << "Errors: " << std::endl << rpc::PrettyFormat(report) << std::endl;
+  std::cout << "Errors: " << std::endl
+            << rpc::PrettyFormat(report) << std::endl;
 
   return SUCCES;
 }

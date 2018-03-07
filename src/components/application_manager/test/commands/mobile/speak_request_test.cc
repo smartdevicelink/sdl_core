@@ -34,8 +34,9 @@
 #include <string>
 #include "gtest/gtest.h"
 #include "mobile/speak_request.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
+#include "utils/shared_ptr.h"
+#include "commands/commands_test.h"
+#include "commands/command_request_test.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
@@ -43,6 +44,7 @@
 #include "utils/make_shared.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
+#include "application_manager/application.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -53,8 +55,11 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace speak_request {
 
 namespace am = application_manager;
+namespace mobile_result = mobile_apis::Result;
 namespace hmi_response = ::application_manager::hmi_response;
 namespace strings = ::application_manager::strings;
 using am::commands::CommandImpl;
@@ -62,7 +67,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
@@ -70,44 +74,39 @@ using ::testing::ReturnRef;
 using am::commands::SpeakRequest;
 using ::test::components::application_manager_test::MockApplication;
 
+typedef SharedPtr<SpeakRequest> CommandPtr;
+
+namespace {
+const uint32_t kAppId = 10u;
+const uint32_t kConnectionKey = 5u;
+}
+
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SpeakRequestTest()
       : request_(CreateMessage(smart_objects::SmartType_Map))
-      , response_(CreateMessage(smart_objects::SmartType_Map)) {}
-
-  MessageSharedPtr ManageResponse() {
-    return response_;
-  }
-  MessageSharedPtr ManageRequest() {
-    return request_;
-  }
+      , response_(CreateMessage(smart_objects::SmartType_Map))
+      , app_(CreateMockApp()) {}
 
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
                          const bool success) {
     utils::SharedPtr<SpeakRequest> command =
-        CreateCommand<SpeakRequest>(ManageRequest());
+        CreateCommand<SpeakRequest>(request_);
 
-    (*ManageResponse())[strings::params][hmi_response::code] = hmi_response;
-    (*ManageResponse())[strings::msg_params] = 0;
+    (*response_)[strings::params][hmi_response::code] = hmi_response;
+    (*response_)[strings::msg_params] = 0;
 
     am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
-    event_tts.set_smart_object(*ManageResponse());
+    event_tts.set_smart_object(*response_);
 
     MockAppPtr mock_app(CreateMockApp());
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
     MessageSharedPtr response_to_mobile;
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillOnce(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
-        .WillOnce(Return(mobile_response));
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillRepeatedly(Return(state));
 
     EXPECT_CALL(app_mngr_,
                 ManageMobileCommand(
@@ -124,21 +123,21 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
               static_cast<int32_t>(mobile_response));
   }
 
- private:
   MessageSharedPtr request_;
   MessageSharedPtr response_;
+  MockAppPtr app_;
 };
 
 TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
   utils::SharedPtr<SpeakRequest> command =
-      CreateCommand<SpeakRequest>(ManageRequest());
+      CreateCommand<SpeakRequest>(request_);
 
-  (*ManageResponse())[strings::params][hmi_response::code] =
+  (*response_)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
-  (*ManageResponse())[strings::msg_params] = 0;
+  (*response_)[strings::msg_params] = 0;
 
   am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
-  event_tts.set_smart_object(*ManageResponse());
+  event_tts.set_smart_object(*response_);
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -184,6 +183,216 @@ TEST_F(SpeakRequestTest,
                     true);
 }
 
+TEST_F(SpeakRequestTest, Run_ApplicationIsNotRegistered) {
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_))
+      .WillByDefault(Return(ApplicationSharedPtr()));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithWhiteSpace_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = " ";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar1_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "sd\\t";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar2_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "sd\\n";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar3_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "sd\tdf";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar4_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "sd\n rer";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithIncorrectCharInfirstPlace_InvalidData) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "\n";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
+  (*request_)[am::strings::msg_params][am::strings::tts_chunks][0]
+             [am::strings::text] = "asda";
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+
+  command->Run();
+}
+
+TEST_F(SpeakRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
+  Event event(Event::EventID::INVALID_ENUM);
+  CommandPtr command(CreateCommand<SpeakRequest>());
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  command->on_event(event);
+}
+
+TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
+  Event event(Event::EventID::TTS_Speak);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  hmi_apis::Common_Result::eType hmi_result = hmi_apis::Common_Result::SUCCESS;
+  (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
+              [am::strings::text] = "1234";
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result;
+  (*event_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  event.set_smart_object(*event_msg);
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+  command->on_event(event);
+}
+
+TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
+  Event event(Event::EventID::TTS_Speak);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  hmi_apis::Common_Result::eType hmi_result = hmi_apis::Common_Result::WARNINGS;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result;
+  (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
+              [am::strings::text] = "asda";
+  event.set_smart_object(*event_msg);
+  CommandPtr command(CreateCommand<SpeakRequest>());
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS), _));
+  command->on_event(event);
+}
+
+TEST_F(SpeakRequestTest, OnEvent_TTS_OnResetTimeout_UpdateTimeout) {
+  Event event(Event::EventID::TTS_OnResetTimeout);
+  (*request_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*request_)[am::strings::params][am::strings::correlation_id] = kAppId;
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey, kAppId, _));
+
+  command->on_event(event);
+}
+
+TEST_F(SpeakRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
+  const hmi_apis::Common_Result::eType hmi_result =
+      hmi_apis::Common_Result::SUCCESS;
+
+  Event event(Event::EventID::TTS_Speak);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
+              [am::strings::text] = "text";
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result;
+  (*event_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  event.set_smart_object(*event_msg);
+  CommandPtr command(CreateCommand<SpeakRequest>(request_));
+
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillOnce(Return(ApplicationSharedPtr()));
+
+  command->on_event(event);
+}
+
+}  // namespace speak_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace component
 }  // namespace test

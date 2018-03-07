@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H
-#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H_
 
 #include "gmock/gmock.h"
 #include "protocol_handler/protocol_handler.h"
@@ -59,10 +59,12 @@ class MockTransportManagerSettings
   MOCK_CONST_METHOD0(iap_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap2_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap_hub_connection_wait_timeout, uint32_t());
+  MOCK_CONST_METHOD0(app_transport_change_timer, uint32_t());
+  MOCK_CONST_METHOD0(app_transport_change_timer_addition, uint32_t());
 };
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H_

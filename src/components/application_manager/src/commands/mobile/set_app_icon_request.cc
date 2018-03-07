@@ -71,6 +71,13 @@ void SetAppIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
+  if (!file_system::IsFileNameValid(sync_file_name)) {
+    const std::string err_msg = "Sync file name contains forbidden symbols.";
+    LOG4CXX_ERROR(logger_, err_msg);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+    return;
+  }
+
   std::string full_file_path =
       application_manager_.get_settings().app_storage_folder() + "/";
   full_file_path += app->folder_name();
@@ -107,15 +114,16 @@ void SetAppIconRequest::Run() {
   // for further use in on_event function
   (*message_)[strings::msg_params][strings::sync_file_name] =
       msg_params[strings::sync_file_name];
-
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, &msg_params, true);
 }
 
 void SetAppIconRequest::CopyToIconStorage(
     const std::string& path_to_file) const {
-  if (!application_manager_.protocol_handler()
-           .get_settings()
-           .enable_protocol_4()) {
+  if (!(application_manager_.protocol_handler()
+            .get_settings()
+            .max_supported_protocol_version() >=
+        protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4)) {
     LOG4CXX_WARN(logger_,
                  "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;
@@ -234,6 +242,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

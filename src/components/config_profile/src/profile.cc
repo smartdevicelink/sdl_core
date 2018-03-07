@@ -38,6 +38,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <string>
+
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -83,6 +85,7 @@ const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
 const char* kProtocolHandlerSection = "ProtocolHandler";
 const char* kSDL4Section = "SDL4";
+const char* kSDL5Section = "SDL5";
 const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
 
@@ -98,10 +101,13 @@ const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
 const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
-const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
+const char* kMaximumControlPayloadSizeKey = "MaximumControlPayloadSize";
+const char* kMaximumRpcPayloadSizeKey = "MaximumRpcPayloadSize";
+const char* kMaximumAudioPayloadSizeKey = "MaximumAudioPayloadSize";
+const char* kMaximumVideoPayloadSizeKey = "MaximumVideoPayloadSize";
 const char* kLaunchHMIKey = "LaunchHMI";
 const char* kDefaultSDLVersion = "";
 #ifdef WEB_HMI
@@ -135,6 +141,7 @@ const char* kTimeoutPromptKey = "TimeOutPromt";
 const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
+const char* kPluginsFolderKey = "PluginFolder";
 const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
 const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
@@ -204,6 +211,9 @@ const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
 const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
 const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
 const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
+const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
+const char* kAppTransportChangeTimerAdditionKey =
+    "AppTransportChangeTimerAddition";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -213,6 +223,7 @@ const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
+const char* kDefaultPluginsPath = "plugins";
 const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
@@ -236,7 +247,7 @@ const uint32_t kDefaultBeforeUpdateHours = 24;
 
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
-const uint16_t kDefaultMaxSupportedProtocolVersion = 3;
+const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
@@ -284,6 +295,10 @@ const uint16_t kDefaultOpenAttemptTimeoutMs = 500;
 const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
+const size_t kDefaultMaximumControlPayloadSize = 0;
+const size_t kDefaultMaximumRpcPayloadSize = 0;
+const size_t kDefaultMaximumAudioPayloadSize = 0;
+const size_t kDefaultMaximumVideoPayloadSize = 0;
 const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
 const uint16_t kDefaultAppLaunchWaitTime = 5000;
 const uint16_t kDefaultAppLaunchMaxRetryAttempt = 3;
@@ -292,6 +307,10 @@ const uint16_t kDefaultRemoveBundleIDattempts = 3;
 const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
 const uint16_t kDefaultWaitTimeBetweenApps = 4000;
 const bool kDefaultEnableAppLaunchIOS = true;
+const uint32_t kDefaultAppTransportChangeTimer = 500u;
+const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
+const std::string kAllowedSymbols =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 }  // namespace
 
 namespace profile {
@@ -309,15 +328,19 @@ Profile::Profile()
     app_config_folder_()
     , app_storage_folder_()
     , app_resource_folder_()
-    , enable_protocol_4_(false)
     , app_icons_folder_()
     , app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize)
     , app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove)
+    , maximum_control_payload_size_(kDefaultMaximumControlPayloadSize)
+    , maximum_rpc_payload_size_(kDefaultMaximumRpcPayloadSize)
+    , maximum_audio_payload_size_(kDefaultMaximumAudioPayloadSize)
+    , maximum_video_payload_size_(kDefaultMaximumVideoPayloadSize)
     , config_file_name_(kDefaultConfigFileName)
     , server_address_(kDefaultServerAddress)
     , server_port_(kDefaultServerPort)
     , video_streaming_port_(kDefaultVideoStreamingPort)
     , audio_streaming_port_(kDefaultAudioStreamingPort)
+    , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
     , help_prompt_()
@@ -328,6 +351,8 @@ Profile::Profile()
     , max_cmd_id_(kDefaultMaxCmdId)
     , default_timeout_(kDefaultTimeout)
     , app_resuming_timeout_(kDefaultAppResumingTimeout)
+    , app_resumption_save_persistent_data_timeout_(
+          kDefaultAppSavePersistentDataTimeout)
     , app_dir_quota_(kDefaultDirQuota)
     , app_hmi_level_none_time_scale_max_requests_(
           kDefaultAppHmiLevelNoneTimeScaleMaxRequests)
@@ -359,6 +384,8 @@ Profile::Profile()
     , recording_file_source_(kDefaultRecordingFileSourceName)
     , recording_file_name_(kDefaultRecordingFileName)
     , application_list_update_timeout_(kDefaultApplicationListUpdateTimeout)
+    , max_thread_pool_size_(kDefaultMaxThreadPoolSize)
+    , default_hub_protocol_index_(kDefaultHubProtocolIndex)
     , iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask)
     , iap_hub_protocol_mask_(kDefaultHubProtocolMask)
     , iap_pool_protocol_mask_(kDefaultPoolProtocolMask)
@@ -369,6 +396,8 @@ Profile::Profile()
     , tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout)
     , attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB)
     , open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB)
+    , resumption_delay_before_ign_(kDefaultResumptionDelayBeforeIgn)
+    , resumption_delay_after_ign_(kDefaultResumptionDelayAfterIgn)
     , hash_string_size_(kDefaultHashStringSize)
     , use_db_for_resumption_(false)
     , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
@@ -380,7 +409,12 @@ Profile::Profile()
     , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
-    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS) {
+    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
+    , app_tranport_change_timer_addition_(
+          kDefaultAppTransportChangeTimerAddition)
+    , error_occured_(false)
+    , error_description_() {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -388,9 +422,9 @@ Profile::Profile()
 
 Profile::~Profile() {}
 
-void Profile::config_file_name(const std::string& fileName) {
-  if (false == fileName.empty()) {
-    config_file_name_ = fileName;
+void Profile::set_config_file_name(const std::string& file_name) {
+  if (false == file_name.empty()) {
+    config_file_name_ = file_name;
     UpdateValues();
   }
 }
@@ -426,7 +460,7 @@ const std::string& Profile::app_resource_folder() const {
 }
 
 bool Profile::enable_protocol_4() const {
-  return enable_protocol_4_;
+  return max_supported_protocol_version_ >= 4;
 }
 
 const std::string& Profile::app_icons_folder() const {
@@ -439,6 +473,22 @@ const uint32_t& Profile::app_icons_folder_max_size() const {
 
 const uint32_t& Profile::app_icons_amount_to_remove() const {
   return app_icons_amount_to_remove_;
+}
+
+size_t Profile::maximum_control_payload_size() const {
+  return maximum_control_payload_size_;
+}
+
+size_t Profile::maximum_rpc_payload_size() const {
+  return maximum_rpc_payload_size_;
+}
+
+size_t Profile::maximum_audio_payload_size() const {
+  return maximum_audio_payload_size_;
+}
+
+size_t Profile::maximum_video_payload_size() const {
+  return maximum_video_payload_size_;
 }
 
 const std::string& Profile::hmi_capabilities_file_name() const {
@@ -501,7 +551,7 @@ const uint16_t& Profile::time_testing_port() const {
   return time_testing_port_;
 }
 
-const uint64_t& Profile::thread_min_stack_size() const {
+const uint64_t Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
 }
 
@@ -621,6 +671,9 @@ const std::string& Profile::system_files_path() const {
   return system_files_path_;
 }
 
+const std::string& Profile::plugins_folder() const {
+  return plugins_folder_;
+}
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
   return supported_diag_modes_;
 }
@@ -862,6 +915,14 @@ const bool Profile::enable_app_launch_ios() const {
   return enable_app_launch_ios_;
 }
 
+uint32_t Profile::app_transport_change_timer() const {
+  return app_tranport_change_timer_;
+}
+
+uint32_t Profile::app_transport_change_timer_addition() const {
+  return app_tranport_change_timer_addition_;
+}
+
 const uint16_t Profile::max_number_of_ios_device() const {
   return max_number_of_ios_device_;
 }
@@ -872,6 +933,21 @@ const uint16_t Profile::remove_bundle_id_attempts() const {
 
 const uint16_t Profile::wait_time_between_apps() const {
   return wait_time_between_apps_;
+}
+
+const bool Profile::ErrorOccured() const {
+  return error_occured_;
+}
+
+const std::string Profile::ErrorDescription() const {
+  return error_description_;
+}
+
+bool Profile::IsFileNamePortable(const std::string& file_name) const {
+  if (file_name.find_first_not_of(kAllowedSymbols) != std::string::npos) {
+    return false;
+  }
+  return true;
 }
 
 void Profile::UpdateValues() {
@@ -980,17 +1056,6 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(app_resource_folder_, kAppResourseFolderKey, kMainSection);
 
-  // Enable protocol ver.4 parameter
-  std::string enable_protocol_4_value;
-  if (ReadValue(&enable_protocol_4_value, kSDL4Section, kEnableProtocol4Key) &&
-      0 == strcmp("true", enable_protocol_4_value.c_str())) {
-    enable_protocol_4_ = true;
-  } else {
-    enable_protocol_4_ = false;
-  }
-
-  LOG_UPDATED_BOOL_VALUE(enable_protocol_4_, kEnableProtocol4Key, kSDL4Section);
-
   // Application icon folder
   ReadStringValue(&app_icons_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
@@ -1024,6 +1089,39 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(
       app_icons_amount_to_remove_, kAppIconsAmountToRemoveKey, kSDL4Section);
+
+  ReadUIntValue(&maximum_control_payload_size_,
+                kDefaultMaximumControlPayloadSize,
+                kSDL5Section,
+                kMaximumControlPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(maximum_control_payload_size_,
+                    kMaximumControlPayloadSizeKey,
+                    kSDL5Section);
+
+  ReadUIntValue(&maximum_rpc_payload_size_,
+                kDefaultMaximumRpcPayloadSize,
+                kSDL5Section,
+                kMaximumRpcPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_rpc_payload_size_, kMaximumRpcPayloadSizeKey, kSDL5Section);
+
+  ReadUIntValue(&maximum_audio_payload_size_,
+                kDefaultMaximumAudioPayloadSize,
+                kSDL5Section,
+                kMaximumAudioPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_audio_payload_size_, kMaximumAudioPayloadSizeKey, kSDL5Section);
+
+  ReadUIntValue(&maximum_video_payload_size_,
+                kDefaultMaximumVideoPayloadSize,
+                kSDL5Section,
+                kMaximumVideoPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_video_payload_size_, kMaximumVideoPayloadSizeKey, kSDL5Section);
 
   // Application info file name
   ReadStringValue(&app_info_storage_,
@@ -1479,6 +1577,10 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
 
+  // Plugins folder
+  ReadStringValue(
+      &plugins_folder_, kDefaultPluginsPath, kMainSection, kPluginsFolderKey);
+  LOG_UPDATED_VALUE(plugins_folder_, kPluginsFolderKey, kMainSection);
   // Heartbeat timeout
   ReadUIntValue(&heart_beat_timeout_,
                 kDefaultHeartBeatTimeout,
@@ -1567,6 +1669,11 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(
       policy_snapshot_file_name_, kPathToSnapshotKey, kPolicySection);
 
+  if (!IsFileNamePortable(policy_snapshot_file_name_)) {
+    error_occured_ = true;
+    error_description_ = "PathToSnapshot has forbidden(non-portable) symbols";
+  }
+
   // Attempts number for opening policy DB
   ReadUIntValue(&attempts_to_open_policy_db_,
                 kDefaultAttemptsToOpenPolicyDB,
@@ -1600,10 +1707,11 @@ void Profile::UpdateValues() {
                 kProtocolHandlerSection,
                 kMaxSupportedProtocolVersionKey);
 
-  // if .ini file contains protocol version less than 2 or more than 3
-  // max_supported_protocol_version_ = 3
-  if (max_supported_protocol_version_ < 2) {
-    max_supported_protocol_version_ = 3;
+  if (max_supported_protocol_version_ < 1) {
+    max_supported_protocol_version_ = 1;
+  } else if (max_supported_protocol_version_ >
+             kDefaultMaxSupportedProtocolVersion) {
+    max_supported_protocol_version_ = kDefaultMaxSupportedProtocolVersion;
   }
 
   LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);
@@ -1792,6 +1900,23 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_BOOL_VALUE(
       enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
+
+  ReadUIntValue(&app_tranport_change_timer_,
+                kDefaultAppTransportChangeTimer,
+                kMainSection,
+                kAppTransportChangeTimerKey);
+
+  LOG_UPDATED_VALUE(
+      app_tranport_change_timer_, kAppTransportChangeTimerKey, kMainSection);
+
+  ReadUIntValue(&app_tranport_change_timer_addition_,
+                kDefaultAppTransportChangeTimerAddition,
+                kMainSection,
+                kAppTransportChangeTimerAdditionKey);
+
+  LOG_UPDATED_VALUE(app_tranport_change_timer_addition_,
+                    kAppTransportChangeTimerAdditionKey,
+                    kMainSection);
 }
 
 bool Profile::ReadValue(bool* value,

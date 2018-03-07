@@ -58,7 +58,9 @@ void OnKeyBoardInputNotification::Run() {
   for (; accessor.GetData().end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
     ApplicationSharedPtr app = *it;
-    if (app->is_perform_interaction_active()) {
+    if (app->is_perform_interaction_active() &&
+        (*it)->perform_interaction_layout() ==
+            mobile_apis::LayoutMode::KEYBOARD) {
       LOG4CXX_INFO(logger_,
                    "There is application with active PerformInteraction");
       app_to_notify = app;

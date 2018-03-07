@@ -109,7 +109,7 @@ void ScrollableMessageRequest::Run() {
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
   }
-
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, &msg_params, true);
 }
 
@@ -126,6 +126,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
       LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(

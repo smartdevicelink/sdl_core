@@ -64,31 +64,36 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   /**
    * @brief CreateInteractionChoiceSetRequest class destructor
    **/
-  virtual ~CreateInteractionChoiceSetRequest();
+  ~CreateInteractionChoiceSetRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
 
   /**
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
+
+ private:
   /**
    * @brief DeleteChoices allows to walk through the sent commands collection
    * in order to sent appropriate DeleteCommand request.
    */
-
- private:
   void DeleteChoices();
 
   /**
@@ -104,7 +109,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * processing deleting sent commands if error from HMI received
    */
   struct VRCommandInfo {
-    VRCommandInfo() {}
+    VRCommandInfo() : cmd_id_(0), succesful_response_received_(false) {}
     VRCommandInfo(uint32_t cmd_id)
         : cmd_id_(cmd_id), succesful_response_received_(false) {}
     uint32_t cmd_id_;

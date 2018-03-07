@@ -42,7 +42,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 // Pair of values <second, msecond>
 typedef std::pair<int, int> TimePair;
@@ -126,7 +126,8 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   }
 }
 
-TEST_P(MessageMeterTest, TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
+TEST_P(MessageMeterTest,
+       DISABLED_TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
   size_t messages = 0;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   // Add messages for less range period
@@ -150,7 +151,7 @@ TEST_P(MessageMeterTest, TrackMessage_AddingOverPeriod_CorrectCountOfMessages) {
 }
 
 TEST_P(MessageMeterTest,
-       TrackMessage_AddingOverPeriodMultiIds_CorrectCountOfMessages) {
+       DISABLED_TrackMessage_AddingOverPeriodMultiIds_CorrectCountOfMessages) {
   size_t messages = 0;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   // Add messages for less range period
@@ -184,7 +185,8 @@ TEST_P(MessageMeterTest,
   }
 }
 
-TEST_P(MessageMeterTest, Frequency_CountingOverPeriod_CorrectCountOfMessages) {
+TEST_P(MessageMeterTest,
+       DISABLED_Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   const size_t one_message = 1;
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
   EXPECT_EQ(one_message, meter.TrackMessage(id1));
@@ -206,7 +208,7 @@ TEST_P(MessageMeterTest, Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   }
 }
 
-TEST_P(MessageMeterTest, CountingOutOfPeriod) {
+TEST_P(MessageMeterTest, DISABLED_CountingOutOfPeriod) {
   const size_t one_message = 1;
   EXPECT_EQ(one_message, meter.TrackMessage(id1));
   EXPECT_EQ(one_message, meter.TrackMessage(id2));
@@ -261,6 +263,6 @@ INSTANTIATE_TEST_CASE_P(MessageMeterTestCase,
                         MessageMeterTest,
                         ::testing::ValuesIn(testing_time_pairs));
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

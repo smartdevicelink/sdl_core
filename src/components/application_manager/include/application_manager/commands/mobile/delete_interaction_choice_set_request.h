@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
@@ -58,12 +58,17 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
    **/
-  virtual ~DeleteInteractionChoiceSetRequest();
+  ~DeleteInteractionChoiceSetRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*
@@ -81,4 +86,4 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_

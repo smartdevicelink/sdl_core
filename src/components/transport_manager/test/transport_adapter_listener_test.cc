@@ -31,9 +31,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "transport_manager/transport_adapter_mock.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/mock_transport_manager.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 
 namespace test {
 namespace components {
@@ -45,16 +45,16 @@ using namespace ::transport_manager;
 class TransportAdapterListenerTest : public ::testing::Test {
  public:
   TransportAdapterListenerTest()
-      : app_handle(1)
-      , dev_id("device_id")
-      , transport_listener(&tr_mock, &adapter_mock) {}
+      : dev_id("device_id")
+      , transport_listener(&tr_mock, &adapter_mock)
+      , app_handle(1) {}
 
  protected:
-  const int app_handle;
   const std::string dev_id;
   MockTransportManager tr_mock;
   MockTransportAdapter adapter_mock;
   TransportAdapterListenerImpl transport_listener;
+  const int app_handle;
 };
 
 MATCHER_P4(IsEvent, eventType, adapter, dev_id, app_id, "") {
@@ -73,33 +73,30 @@ MATCHER_P5(IsEvent, eventType, adapter, dev_id, app_id, data, "") {
 TEST_F(TransportAdapterListenerTest, OnCommunicationError) {
   EXPECT_CALL(
       tr_mock,
-      ReceiveEventFromDevice(IsEvent(
-          TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-          &adapter_mock,
-          dev_id,
-          app_handle))).WillOnce(Return(E_SUCCESS));
+      ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_COMMUNICATION_ERROR,
+                                     &adapter_mock,
+                                     dev_id,
+                                     app_handle))).WillOnce(Return(E_SUCCESS));
   transport_listener.OnCommunicationError(&adapter_mock, dev_id, app_handle);
 }
 
 TEST_F(TransportAdapterListenerTest, OnConnectDone) {
-  EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(
+      tr_mock,
+      ReceiveEventFromDevice(IsEvent(
+          EventTypeEnum::ON_CONNECT_DONE, &adapter_mock, dev_id, app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnConnectDone(&adapter_mock, dev_id, app_handle);
 }
 
 TEST_F(TransportAdapterListenerTest, OnConnectFailed) {
   ConnectError er;
 
-  EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(
+      tr_mock,
+      ReceiveEventFromDevice(IsEvent(
+          EventTypeEnum::ON_CONNECT_FAIL, &adapter_mock, dev_id, app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnConnectFailed(&adapter_mock, dev_id, app_handle, er);
 }
 
@@ -107,12 +104,12 @@ TEST_F(TransportAdapterListenerTest, OnDataReceiveDone) {
   ::protocol_handler::RawMessagePtr data_container;
 
   EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle,
-                  data_container))).WillOnce(Return(E_SUCCESS));
+              ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_RECEIVED_DONE,
+                                             &adapter_mock,
+                                             dev_id,
+                                             app_handle,
+                                             data_container)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDataReceiveDone(
       &adapter_mock, dev_id, app_handle, data_container);
 }
@@ -120,12 +117,11 @@ TEST_F(TransportAdapterListenerTest, OnDataReceiveDone) {
 TEST_F(TransportAdapterListenerTest, OnDataReceiveFailed) {
   DataReceiveError err;
 
-  EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(
+      tr_mock,
+      ReceiveEventFromDevice(IsEvent(
+          EventTypeEnum::ON_RECEIVED_FAIL, &adapter_mock, dev_id, app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDataReceiveFailed(
       &adapter_mock, dev_id, app_handle, err);
 }
@@ -136,12 +132,12 @@ TEST_F(TransportAdapterListenerTest, OnDataSendDone) {
       new ::protocol_handler::RawMessage(1, 1, data, 3);
 
   EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle,
-                  data_container))).WillOnce(Return(E_SUCCESS));
+              ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_SEND_DONE,
+                                             &adapter_mock,
+                                             dev_id,
+                                             app_handle,
+                                             data_container)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDataSendDone(
       &adapter_mock, dev_id, app_handle, data_container);
 }
@@ -153,56 +149,50 @@ TEST_F(TransportAdapterListenerTest, OnDataSendFailed) {
   DataSendError err;
 
   EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
-                  &adapter_mock,
-                  dev_id,
-                  app_handle,
-                  data_container))).WillOnce(Return(E_SUCCESS));
+              ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_SEND_FAIL,
+                                             &adapter_mock,
+                                             dev_id,
+                                             app_handle,
+                                             data_container)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDataSendFailed(
       &adapter_mock, dev_id, app_handle, data_container, err);
 }
 
 TEST_F(TransportAdapterListenerTest, OnDeviceListUpdated) {
-  EXPECT_CALL(
-      tr_mock,
-      ReceiveEventFromDevice(IsEvent(
-          TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
-          &adapter_mock,
-          "",
-          0))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(tr_mock,
+              ReceiveEventFromDevice(IsEvent(
+                  EventTypeEnum::ON_DEVICE_LIST_UPDATED, &adapter_mock, "", 0)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDeviceListUpdated(&adapter_mock);
 }
 
 TEST_F(TransportAdapterListenerTest, OnDisconnectDeviceDone) {
-  EXPECT_CALL(
-      tr_mock,
-      ReceiveEventFromDevice(IsEvent(
-          TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-          &adapter_mock,
-          dev_id,
-          app_handle))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(tr_mock,
+              ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_DISCONNECT_DONE,
+                                             &adapter_mock,
+                                             dev_id,
+                                             app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDisconnectDone(&adapter_mock, dev_id, app_handle);
 }
 
 TEST_F(TransportAdapterListenerTest, OnDisconnectFailed) {
   DisconnectError err;
 
-  EXPECT_CALL(
-      tr_mock,
-      ReceiveEventFromDevice(IsEvent(
-          TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-          &adapter_mock,
-          dev_id,
-          app_handle))).WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(tr_mock,
+              ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_DISCONNECT_FAIL,
+                                             &adapter_mock,
+                                             dev_id,
+                                             app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnDisconnectFailed(&adapter_mock, dev_id, app_handle, err);
 }
 
 TEST_F(TransportAdapterListenerTest, OnFindNewApplicationsRequest) {
   EXPECT_CALL(tr_mock,
               ReceiveEventFromDevice(
-                  IsEvent(TransportAdapterListenerImpl::EventTypeEnum::
-                              ON_FIND_NEW_APPLICATIONS_REQUEST,
+                  IsEvent(EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST,
                           &adapter_mock,
                           "",
                           0))).WillOnce(Return(E_SUCCESS));
@@ -211,11 +201,9 @@ TEST_F(TransportAdapterListenerTest, OnFindNewApplicationsRequest) {
 
 TEST_F(TransportAdapterListenerTest, OnSearchDeviceDone) {
   EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
-                  &adapter_mock,
-                  "",
-                  0))).WillOnce(Return(E_SUCCESS));
+              ReceiveEventFromDevice(
+                  IsEvent(EventTypeEnum::ON_SEARCH_DONE, &adapter_mock, "", 0)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnSearchDeviceDone(&adapter_mock);
 }
 
@@ -223,11 +211,9 @@ TEST_F(TransportAdapterListenerTest, OnSearchDeviceFailed) {
   SearchDeviceError er;
 
   EXPECT_CALL(tr_mock,
-              ReceiveEventFromDevice(IsEvent(
-                  TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
-                  &adapter_mock,
-                  "",
-                  0))).WillOnce(Return(E_SUCCESS));
+              ReceiveEventFromDevice(
+                  IsEvent(EventTypeEnum::ON_SEARCH_FAIL, &adapter_mock, "", 0)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnSearchDeviceFailed(&adapter_mock, er);
 }
 
@@ -236,11 +222,10 @@ TEST_F(TransportAdapterListenerTest, OnUnexpectedDisconnect) {
 
   EXPECT_CALL(
       tr_mock,
-      ReceiveEventFromDevice(IsEvent(
-          TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
-          &adapter_mock,
-          dev_id,
-          app_handle))).WillOnce(Return(E_SUCCESS));
+      ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
+                                     &adapter_mock,
+                                     dev_id,
+                                     app_handle))).WillOnce(Return(E_SUCCESS));
   transport_listener.OnUnexpectedDisconnect(
       &adapter_mock, dev_id, app_handle, err);
 }

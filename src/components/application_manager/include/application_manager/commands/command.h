@@ -37,7 +37,6 @@
 #include "utils/shared_ptr.h"
 
 namespace application_manager {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace commands {
 

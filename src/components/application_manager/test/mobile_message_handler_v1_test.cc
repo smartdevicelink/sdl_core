@@ -45,9 +45,11 @@
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
+using application_manager::MobileMessageHandler;
 
-namespace application_manager {
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 const int32_t connection_key_p1 = 1;
 const int32_t protocol_version_1 = 1;
@@ -105,10 +107,12 @@ TEST(MobileMessageHandlerTestV1Test,
      HandleOutgoingMessageProtocol_SendMessage_ExpectEqual) {
   uint32_t connection_key = 1;
 
-  MobileMessage message =
-      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
+  application_manager::MobileMessage message =
+      utils::MakeShared<application_manager::Message>(
+          protocol_handler::MessagePriority::kDefault);
 
-  message->set_protocol_version(application_manager::ProtocolVersion::kV1);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1);
   message->set_json_message(data_json);
   message->set_connection_key(connection_key_p1);
 
@@ -118,9 +122,11 @@ TEST(MobileMessageHandlerTestV1Test,
   ASSERT_TRUE(ptr);
 
   EXPECT_EQ(connection_key, ptr->connection_key());
-  EXPECT_EQ(static_cast<uint32_t>(application_manager::ProtocolVersion::kV1),
+  EXPECT_EQ(static_cast<uint32_t>(
+                protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1),
             ptr->protocol_version());
 }
 
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

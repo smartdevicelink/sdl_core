@@ -30,17 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
 
 #include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 class HmiState;
 class ApplicationManager;
+class Application;
 
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
 
@@ -70,7 +72,39 @@ class HmiState {
     STATE_ID_EMBEDDED_NAVI
   };
 
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   */
+  HmiState(utils::SharedPtr<Application> app,
+           const ApplicationManager& app_mngr);
+
+  /**
+   * @brief HmiState constructor
+   * @param app Application pointer
+   * @param app_mngr Application manager
+   * @param state_id HMI state to assign
+   */
+  HmiState(utils::SharedPtr<Application> app,
+           const ApplicationManager& app_mngr,
+           StateID state_id);
+
+  /**
+   * DEPRECATED
+   * @brief HmiState constructor
+   * @param app_id Application id
+   * @param app_mngr Application manager
+   */
   HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+
+  /**
+   * DEPRECATED
+   * @brief HmiState constructor
+   * @param app_id Application id
+   * @param app_mngr Application manager
+   * @param state_id HMI state to assign
+   */
   HmiState(uint32_t app_id,
            const ApplicationManager& app_mngr,
            StateID state_id);
@@ -166,7 +200,7 @@ class HmiState {
   }
 
  protected:
-  uint32_t app_id_;
+  utils::SharedPtr<Application> app_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
@@ -177,24 +211,28 @@ class HmiState {
  protected:
   /**
    * @brief is_navi_app check if app is navi
-   * @param app_id application id
    * @return true if app is navi, otherwise return false
    */
-  bool is_navi_app(const uint32_t app_id) const;
+  bool is_navi_app() const;
 
   /**
    * @brief is_media_app check if app is media
-   * @param app_id application id
    * @return true if media_app, otherwise return false
    */
-  bool is_media_app(const uint32_t app_id) const;
+  bool is_media_app() const;
 
   /**
    * @brief is_voice_communicationn_app check if app is voice comunication
-   * @param app_id application id
    * @return true if voice_communicationn_app, otherwise return false
    */
-  bool is_voice_communication_app(const uint32_t app_id) const;
+  bool is_voice_communication_app() const;
+
+  /**
+   * @brief is_mobile_projection_app checks if application of 'projection'
+   * HMI type
+   * @return True if application is of 'projection' HMI type, otherwise - false
+   */
+  bool is_mobile_projection_app() const;
 
  private:
   void operator=(const HmiState&);
@@ -207,7 +245,10 @@ class VRHmiState : public HmiState {
  public:
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
-  VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  VRHmiState(utils::SharedPtr<Application> app,
+             const ApplicationManager& app_mngr);
+
+  DEPRECATED VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
 /**
@@ -215,7 +256,11 @@ class VRHmiState : public HmiState {
  */
 class TTSHmiState : public HmiState {
  public:
-  TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  TTSHmiState(utils::SharedPtr<Application> app,
+              const ApplicationManager& app_mngr);
+
+  DEPRECATED TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
 };
@@ -226,7 +271,12 @@ class TTSHmiState : public HmiState {
  */
 class NaviStreamingHmiState : public HmiState {
  public:
-  NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  NaviStreamingHmiState(utils::SharedPtr<Application> app,
+                        const ApplicationManager& app_mngr);
+
+  DEPRECATED NaviStreamingHmiState(uint32_t app_id,
+                                   const ApplicationManager& app_mngr);
+
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
 };
@@ -237,7 +287,12 @@ class NaviStreamingHmiState : public HmiState {
  */
 class PhoneCallHmiState : public HmiState {
  public:
-  PhoneCallHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  PhoneCallHmiState(utils::SharedPtr<Application> app,
+                    const ApplicationManager& app_mngr);
+
+  DEPRECATED PhoneCallHmiState(uint32_t app_id,
+                               const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -251,7 +306,12 @@ class PhoneCallHmiState : public HmiState {
  */
 class SafetyModeHmiState : public HmiState {
  public:
-  SafetyModeHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  SafetyModeHmiState(utils::SharedPtr<Application> app,
+                     const ApplicationManager& app_mngr);
+
+  DEPRECATED SafetyModeHmiState(uint32_t app_id,
+                                const ApplicationManager& app_mngr);
+
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
@@ -264,7 +324,11 @@ class SafetyModeHmiState : public HmiState {
  */
 class DeactivateHMI : public HmiState {
  public:
-  DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
+  DeactivateHMI(utils::SharedPtr<Application> app,
+                const ApplicationManager& app_mngr);
+
+  DEPRECATED DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -278,7 +342,11 @@ class DeactivateHMI : public HmiState {
  */
 class AudioSource : public HmiState {
  public:
-  AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
+  AudioSource(utils::SharedPtr<Application> app,
+              const ApplicationManager& app_mngr);
+
+  DEPRECATED AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -293,7 +361,11 @@ class AudioSource : public HmiState {
  */
 class EmbeddedNavi : public HmiState {
  public:
-  EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
+  EmbeddedNavi(utils::SharedPtr<Application> app,
+               const ApplicationManager& app_mngr);
+
+  DEPRECATED EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
+
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -301,4 +373,4 @@ class EmbeddedNavi : public HmiState {
   }
 };
 }
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_

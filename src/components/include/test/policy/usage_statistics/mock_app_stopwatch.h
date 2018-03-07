@@ -34,7 +34,6 @@
 
 #include "gmock/gmock.h"
 #include "policy/usage_statistics/app_stopwatch.h"
-#include "policy/usage_statistics/statistics_manager.h"
 
 namespace test {
 namespace components {

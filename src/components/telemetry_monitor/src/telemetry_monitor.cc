@@ -1,34 +1,34 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided with the
- * distribution.
- *
- * Neither the name of the Ford Motor Company nor the names of its contributors
- * may be used to endorse or promote products derived from this software
- * without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+* Copyright (c) 2014, Ford Motor Company
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following
+* disclaimer in the documentation and/or other materials provided with the
+* distribution.
+*
+* Neither the name of the Ford Motor Company nor the names of its contributors
+* may be used to endorse or promote products derived from this software
+* without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include "telemetry_monitor/telemetry_monitor.h"
 
@@ -42,6 +42,8 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"
+#include "utils/make_shared.h"
+#include "utils/shared_ptr.h"
 #include "telemetry_monitor/telemetry_observable.h"
 
 namespace telemetry_monitor {
@@ -53,24 +55,22 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
     : server_address_(server_address)
     , port_(port)
     , thread_(NULL)
-    , streamer_(NULL)
     , app_observer(this)
     , tm_observer(this)
     , ph_observer(this) {}
 
 void TelemetryMonitor::Start() {
-  streamer_ = new Streamer(this);
-  thread_ = threads::CreateThread("TelemetryMonitor", streamer_);
+  streamer_ = streamer_ ? streamer_ : utils::MakeShared<Streamer>(this);
+  thread_ = threads::CreateThread("TelemetryMonitor", streamer_.get());
 }
 
-void TelemetryMonitor::set_streamer(Streamer* streamer) {
+void TelemetryMonitor::set_streamer(Streamer* streamer) {}
+
+void TelemetryMonitor::set_streamer(utils::SharedPtr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_ && !thread_->is_running()) {
-    thread_->set_delegate(streamer);
-    if (streamer_) {
-      delete streamer_;
-    }
     streamer_ = streamer;
+    thread_->set_delegate(streamer_.get());
   } else {
     LOG4CXX_ERROR(logger_, "Unable to replace streamer if it is active");
   }
@@ -116,7 +116,7 @@ void TelemetryMonitor::Stop() {
 }
 
 void TelemetryMonitor::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
-  if ((NULL != streamer_) && streamer_->is_client_connected_) {
+  if (streamer_ && streamer_->is_client_connected_) {
     streamer_->PushMessage(metric);
   }
 }
@@ -170,6 +170,7 @@ void Streamer::exitThreadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   Stop();
   messages_.Shutdown();
+  ThreadDelegate::exitThreadMain();
 }
 
 void Streamer::Start() {

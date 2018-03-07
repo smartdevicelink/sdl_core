@@ -31,8 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_
+
 #include <string>
 
 #include "application_manager/commands/command_request_impl.h"
@@ -58,19 +59,24 @@ class DeleteCommandRequest : public CommandRequestImpl {
   /**
    * @brief DeleteCommandRequest class destructor
    **/
-  virtual ~DeleteCommandRequest();
+  ~DeleteCommandRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
@@ -106,4 +112,4 @@ class DeleteCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_COMMAND_REQUEST_H_

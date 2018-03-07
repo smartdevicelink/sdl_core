@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -57,19 +57,24 @@ class AddSubMenuRequest : public CommandRequestImpl {
   /**
    * @brief AddSubMenuRequest class destructor
    **/
-  virtual ~AddSubMenuRequest();
+  ~AddSubMenuRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*
@@ -85,4 +90,4 @@ class AddSubMenuRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_

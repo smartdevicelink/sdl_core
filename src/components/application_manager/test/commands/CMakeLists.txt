@@ -28,36 +28,43 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/hmi/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/mobile/
   ${COMPONENTS_DIR}/application_manager/test/include/
-  ${COMPONENTS_DIR}/application_manager/test/include/commands/
+  ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
 )
 
-set(COMMANDS_TEST_SOURCE_DIR
-  ${COMPONENTS_DIR}/application_manager/test/commands
-)
+set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 
-set (SOURCES
+file(GLOB SOURCES
+  ${COMMANDS_TEST_DIR}/*
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_response_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_request_impl_test.cc
+  ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
+  ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
+  ${COMPONENTS_DIR}/application_manager/src/message.cc
+  ${COMMANDS_TEST_DIR}/hmi/*
+  ${COMMANDS_TEST_DIR}/hmi/hmi_notifications/*
+  ${COMMANDS_TEST_DIR}/mobile/*
 )
 
 set(LIBRARIES
   gmock
   Utils
-  ApplicationManager
-  connectionHandler
+  SmartObjects
   HMI_API
   MOBILE_API
-  SmartObjects
+  ApplicationManager
+  AMHMICommandsLibrary
+  AMMobileCommandsLibrary
+  connectionHandler
   jsoncpp
 )
 
-create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
-
-add_subdirectory(mobile)
-add_subdirectory(hmi)
+create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )

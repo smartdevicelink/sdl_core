@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,9 @@ BluetoothSocketConnection::BluetoothSocketConnection(
     TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-BluetoothSocketConnection::~BluetoothSocketConnection() {}
+BluetoothSocketConnection::~BluetoothSocketConnection() {
+  StopAndJoinThread();
+}
 
 bool BluetoothSocketConnection::Establish(ConnectError** error) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -104,14 +106,12 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     if (0 == connect_status) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect ok");
       break;
-    }
-    if (errno != 111 && errno != 104) {
-      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      break;
-    }
-    if (errno) {
-      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      close(rfcomm_socket);
+    } else {  // If connect_status is not 0, an errno is returned
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "rfcomm Connect failed");
+      close(rfcomm_socket);  // Always close the socket upon error
+      if (errno != ECONNREFUSED && errno != ECONNRESET) {
+        break;
+      }
     }
     sleep(2);
   } while (--attempts > 0);

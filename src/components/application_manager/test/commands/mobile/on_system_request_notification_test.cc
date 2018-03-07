@@ -45,6 +45,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_system_request_notification {
 
 namespace strings = application_manager::strings;
 
@@ -63,20 +64,7 @@ const uint32_t kConnectionKey = 1u;
 }  // namespace
 
 class OnSystemRequestNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  OnSystemRequestNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-  MockMessageHelper& message_helper_;
-};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   const RequestType::eType kRequestType = RequestType::PROPRIETARY;
@@ -99,14 +87,15 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));
-  EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
-#endif
+  EXPECT_CALL(mock_policy_handler, TimeoutExchangeSec()).WillOnce(Return(5u));
+#endif  // PROPRIETARY_MODE
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -142,7 +131,8 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -175,7 +165,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   MockPolicyHandlerInterface mock_policy_handler;
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _)).Times(0);
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
@@ -202,13 +192,14 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
   ;
 
   command->Run();
 }
 
+}  // namespace on_system_request_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

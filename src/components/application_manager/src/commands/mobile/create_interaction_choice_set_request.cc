@@ -49,9 +49,11 @@ namespace commands {
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
+    , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
     , error_from_hmi_(false)
+    , is_timed_out_(false)
     , vr_commands_lock_(true) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
@@ -129,22 +131,31 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
   const SmartArray* choice_set =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
 
-  SmartArray::const_iterator choice_set_it = choice_set->begin();
+  SmartArray::const_iterator current_choice_set_it = choice_set->begin();
+  SmartArray::const_iterator next_choice_set_it;
 
-  for (; choice_set->end() != choice_set_it; ++choice_set_it) {
+  for (; choice_set->end() != current_choice_set_it; ++current_choice_set_it) {
     std::pair<std::set<uint32_t>::iterator, bool> ins_res =
-        choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
+        choice_id_set.insert(
+            (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
                     "Choise with ID "
-                        << (*choice_set_it)[strings::choice_id].asInt()
+                        << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
-    if (IsWhiteSpaceExist(*choice_set_it)) {
+    if (IsWhiteSpaceExist(*current_choice_set_it)) {
       LOG4CXX_ERROR(logger_, "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
+    }
+    for (next_choice_set_it = current_choice_set_it + 1;
+         choice_set->end() != next_choice_set_it;
+         ++next_choice_set_it) {
+      if (compareSynonyms(*current_choice_set_it, *next_choice_set_it)) {
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
     }
   }
   return mobile_apis::Result::SUCCESS;
@@ -276,6 +287,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     sync_primitives::AutoLock commands_lock(vr_commands_lock_);
     const uint32_t vr_cmd_id = msg_params[strings::cmd_id].asUInt();
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     const uint32_t vr_corr_id =
         SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
 
@@ -345,6 +357,7 @@ void CreateInteractionChoiceSetRequest::on_event(
   uint32_t corr_id = static_cast<uint32_t>(
       message[strings::params][strings::correlation_id].asUInt());
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
+    EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     {
       sync_primitives::AutoLock commands_lock(vr_commands_lock_);
       if (is_no_error) {
@@ -365,6 +378,7 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
+  CommandRequestImpl::onTimeOut();
   DeleteChoices();
 
   // We have to keep request alive until receive all responses from HMI
@@ -373,6 +387,11 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   is_timed_out_ = true;
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());
+}
+
+bool CreateInteractionChoiceSetRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
@@ -410,14 +429,6 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
   if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
-
-    ApplicationSharedPtr application =
-        application_manager_.application(connection_key());
-    if (!application) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-    application->UpdateHash();
   } else {
     DeleteChoices();
   }

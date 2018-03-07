@@ -175,6 +175,51 @@
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
     </element>
+    <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+    </element>
+    <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+    </element>
+    <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+    </element>
+    <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+    </element>
+    <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
+    </element>
+    <element name="EN-IN" internal_name="EN_IN">
+      <description>English - India</description>
+    </element>
+    <element name="TH-TH" internal_name="TH_TH">
+      <description>Thai - Thailand</description>
+    </element>
+    <element name="EN-SA" internal_name="EN_SA">
+      <description>English - Middle East</description>
+    </element>
+    <element name="HE-IL" internal_name="HE_IL">
+      <description>Hebrew - Israel</description>
+    </element>
+    <element name="RO-RO" internal_name="RO_RO">
+      <description>Romanian - Romania</description>
+    </element>
+    <element name="UK-UA" internal_name="UK_UA">
+      <description>Ukrainian - Ukraine</description>
+    </element>
+    <element name="ID-ID" internal_name="ID_ID">
+      <description>Indonesian - Indonesia</description>
+    </element>
+    <element name="VI-VN" internal_name="VI_VN">
+      <description>Vietnamese - Vietnam</description>
+    </element>
+    <element name="MS-MY" internal_name="MS_MY">
+      <description>Malay - Malaysia</description>
+    </element>
+    <element name="HI-IN" internal_name="HI_IN">
+      <description>Hindi - India</description>
+    </element>
 </enum>
 
 <enum name="SoftButtonType">

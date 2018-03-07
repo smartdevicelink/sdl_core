@@ -31,8 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+
 #include <string>
 
 #include "application_manager/application.h"
@@ -59,25 +60,30 @@ class AddCommandRequest : public CommandRequestImpl {
   /**
    * @brief AddCommandRequest class destructor
    **/
-  virtual ~AddCommandRequest();
+  ~AddCommandRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
 
   /**
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /*
@@ -156,4 +162,4 @@ class AddCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_

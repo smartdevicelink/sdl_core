@@ -64,6 +64,58 @@ class ProtocolPacket {
   };
 
   /**
+   * \class ProtocolVersion
+   * \brief Used for storing the full protocol version of a service
+   *        (major.minor.patch).
+   */
+  class ProtocolVersion {
+   public:
+    ProtocolVersion();
+    ProtocolVersion(uint8_t majorVersion,
+                    uint8_t minorVersion,
+                    uint8_t patchVersion);
+    ProtocolVersion(ProtocolVersion& other);
+    ProtocolVersion(std::string versionString);
+    uint8_t majorVersion;
+    uint8_t minorVersion;
+    uint8_t patchVersion;
+    static inline int16_t cmp(const ProtocolVersion& version1,
+                              const ProtocolVersion& version2) {
+      int16_t diff =
+          static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
+      if (diff == 0) {
+        diff =
+            static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
+        if (diff == 0) {
+          diff = static_cast<int16_t>(version1.patchVersion -
+                                      version2.patchVersion);
+        }
+      }
+      return diff;
+    }
+    inline bool operator==(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) == 0;
+    }
+    inline bool operator<(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) < 0;
+    }
+    bool operator>(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) > 0;
+    }
+    inline bool operator<=(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) <= 0;
+    }
+    bool operator>=(const ProtocolVersion& other) {
+      return ProtocolVersion::cmp(*this, other) >= 0;
+    }
+    static inline ProtocolVersion* min(ProtocolVersion& version1,
+                                       ProtocolVersion& version2) {
+      return (version1 < version2) ? &version1 : &version2;
+    }
+    std::string to_string();
+  };
+
+  /**
    * \class ProtocolHeader
    * \brief Used for storing protocol header of a message.
    */
@@ -99,7 +151,19 @@ class ProtocolPacket {
      * \brief Setter/getter maximum payload size of packets
      */
     void set_max_payload_size(const size_t max_payload_size);
+    void set_max_control_payload_size(const size_t max_payload_size);
+    void set_max_rpc_payload_size(const size_t max_payload_size);
+    void set_max_audio_payload_size(const size_t max_payload_size);
+    void set_max_video_payload_size(const size_t max_payload_size);
+
     size_t max_payload_size() const;
+    size_t max_control_payload_size() const;
+    size_t max_rpc_payload_size() const;
+    size_t max_audio_payload_size() const;
+    size_t max_video_payload_size() const;
+
+    size_t max_payload_size_by_service_type(const ServiceType type) const;
+
     /**
      * \brief Check ProtocolHeader according to protocol requiements
      */
@@ -107,6 +171,10 @@ class ProtocolPacket {
 
    private:
     size_t max_payload_size_;
+    size_t max_control_payload_size_;
+    size_t max_rpc_payload_size_;
+    size_t max_audio_payload_size_;
+    size_t max_video_payload_size_;
   };
 
   /**

@@ -34,8 +34,8 @@
 #include <sstream>
 #include "utils/logger.h"
 #include "formatters/CSmartFactory.h"
+#include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {
@@ -126,8 +126,6 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemRequest");
   DBusMessageController::SubscribeTo("BasicCommunication",
                                      "OnSystemInfoChanged");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnPhoneCall");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnEmergencyEvent");
   DBusMessageController::SubscribeTo("TTS", "Started");
   DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
@@ -181,7 +179,8 @@ void DBusMessageAdapter::SendMessageToCore(
                                                      // merge
   // MessagePriority::FromServiceType(message.servicetype)
   // shall be used instead
-  message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+  message->set_protocol_version(
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");

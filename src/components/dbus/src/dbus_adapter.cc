@@ -33,12 +33,14 @@
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
 #include <sstream>
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "utils/logger.h"
+#include "smart_objects/smart_object.h"
+#include "introspection_xml.cc"
+#include "message_descriptions.cc"
 
 using ford_message_descriptions::ParameterDescription;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 extern char introspection_xml[];
 
@@ -516,7 +518,8 @@ bool DBusAdapter::SetValue(
   dbus_int32_t integerValue = 0;
   double floatValue = 0;
   dbus_bool_t booleanValue = false;
-  const char* stringValue;
+  std::string stringValue;
+  const char* cStringValue;
   switch (rules->type) {
     case ford_message_descriptions::ParameterType::Array:
       return SetArrayValue(
@@ -550,8 +553,9 @@ bool DBusAdapter::SetValue(
       break;
     case ford_message_descriptions::ParameterType::String:
       type = DBUS_TYPE_STRING;
-      stringValue = param.asString().c_str();
-      value = &stringValue;
+      stringValue = param.asString();
+      cStringValue = stringValue.c_str();
+      value = &cStringValue;
       break;
     default:
       LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument");

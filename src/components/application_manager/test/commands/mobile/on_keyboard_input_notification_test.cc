@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_keyboard_input_notification {
 
 namespace strings = application_manager::strings;
 
@@ -60,11 +61,9 @@ using testing::_;
 class OnKeyBoardInputNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnKeyBoardInputNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
   void SetSendNotificationExpectations(MessageSharedPtr msg) {
-    EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
+    EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+        .WillOnce(Return(false));
     EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
   }
 
@@ -77,14 +76,6 @@ class OnKeyBoardInputNotificationTest
               (*msg)[strings::params][strings::protocol_version].asInt());
   }
 
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
   MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {
     app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
@@ -94,7 +85,6 @@ class OnKeyBoardInputNotificationTest
     return app;
   }
 
-  MockMessageHelper& message_helper_;
   SharedPtr<ApplicationSet> app_set_;
   sync_primitives::Lock lock_;
 };
@@ -107,6 +97,8 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
 
   MockAppPtr mock_app(InitAppSetDataAccessor(app_set_));
   EXPECT_CALL(*mock_app, is_perform_interaction_active()).WillOnce(Return(1));
+  EXPECT_CALL(*mock_app, perform_interaction_layout())
+      .WillOnce(Return(mobile_apis::LayoutMode::KEYBOARD));
   EXPECT_CALL(*mock_app, hmi_level()).Times(0);
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
@@ -159,12 +151,13 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(*mock_app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::eType::HMI_BACKGROUND));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
 }
 
+}  // namespace on_keyboard_input_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

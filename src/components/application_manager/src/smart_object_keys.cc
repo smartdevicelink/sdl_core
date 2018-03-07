@@ -36,6 +36,7 @@ const char* success = "success";
 const char* sync_msg_version = "syncMsgVersion";
 const char* major_version = "majorVersion";
 const char* minor_version = "minorVersion";
+const char* patch_version = "patchVersion";
 const char* app_name = "appName";
 const char* ngn_media_screen_app_name = "ngnMediaScreenAppName";
 const char* vr_synonyms = "vrSynonyms";
@@ -56,6 +57,7 @@ const char* main_field_1 = "mainField1";
 const char* main_field_2 = "mainField2";
 const char* main_field_3 = "mainField3";
 const char* main_field_4 = "mainField4";
+const char* metadata_tags = "metadataTags";
 const char* eta = "eta";
 const char* time_to_destination = "timeToDestination";
 const char* total_distance = "totalDistance";
@@ -131,6 +133,16 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
+const char* system_capability = "systemCapability";
+const char* system_capability_type = "systemCapabilityType";
+const char* system_capabilities = "systemCapabilities";
+const char* navigation_capability = "navigationCapability";
+const char* phone_capability = "phoneCapability";
+const char* video_streaming_capability = "videoStreamingCapability";
+const char* rc_capability = "remoteControlCapability";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
@@ -221,6 +233,8 @@ const char* supported_diag_modes = "supportedDiagModes";
 const char* hmi_capabilities = "hmiCapabilities";
 const char* navigation = "navigation";
 const char* phone_call = "phoneCall";
+const char* video_streaming = "videoStreaming";
+const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
@@ -232,7 +246,7 @@ const char* application_choice_sets = "applicationChoiceSets";
 const char* application_global_properties = "globalProperties";
 const char* application_vehicle_info = "vehicleInfo";
 const char* application_buttons = "buttons";
-const char* application_subscribtions = "subscribtions";
+const char* application_subscriptions = "subscriptions";
 const char* application_files = "applicationFiles";
 const char* application_show = "applicationShow";
 const char* resumption = "resumption";
@@ -273,6 +287,38 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
+
+const char* audio_streaming_indicator = "audioStreamingIndicator";
+
+const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
+const char* const language_supported = "languageSupported";
+const char* const keyboard_layout_supported = "keyboardLayoutSupported";
+const char* const keypress_mode_supported = "keypressModeSupported";
+const char* const limited_characters_list_supported =
+    "limitedCharactersListSupported";
+const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const entity_type = "entityType";
+const char* const entity_id = "entityID";
+const char* const status = "status";
+const char* const external_consent_status = "externalConsentStatus";
+const char* const consented_functions = "consentedFunctions";
+const char* const source = "source";
+const char* const config = "config";
+const char* const protocol = "protocol";
+const char* const codec = "codec";
+const char* const width = "width";
+const char* const height = "height";
+const char* const rejected_params = "rejectedParams";
+const char* const preferred_resolution = "preferredResolution";
+const char* const resolution_width = "resolutionWidth";
+const char* const resolution_height = "resolutionHeight";
+const char* const max_bitrate = "maxBitrate";
+const char* const supported_formats = "supportedFormats";
+const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
+const char* const haptic_rect_data = "hapticRectData";
+const char* const rect = "rect";
+const char* const x = "x";
+const char* const y = "y";
 }  // namespace strings
 
 namespace json {
@@ -324,6 +370,7 @@ namespace hmi_request {
 const char* parent_id = "parentID";
 const char* field_name = "fieldName";
 const char* field_text = "fieldText";
+const char* field_types = "fieldTypes";
 const char* alert_strings = "alertStrings";
 const char* duration = "duration";
 const char* soft_buttons = "softButtons";
@@ -346,6 +393,7 @@ const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
 const char* file = "file";
+const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
 }  // namespace hmi_request

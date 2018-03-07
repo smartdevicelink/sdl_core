@@ -37,7 +37,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::StlCollectionDeleter;
 using ::utils::StlMapDeleter;
@@ -94,6 +94,6 @@ TEST(StlDeleter, DestructVectorWithSeveralElements) {
   EXPECT_EQ(NULL, test_vector[1]);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

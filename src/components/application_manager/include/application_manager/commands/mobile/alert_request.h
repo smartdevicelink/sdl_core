@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_REQUEST_H_
 
 #include <string>
 
@@ -71,13 +71,6 @@ class AlertRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
-
-  /*
-   * @brief Will caled by request controller, when default will be expired.
-   * If Alert request has soft buttons, timeout response should not be sent to
-   * mobile
-   */
-  virtual void onTimeOut();
 
   /**
    * @brief Interface method that is called whenever new event received
@@ -154,4 +147,4 @@ class AlertRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_REQUEST_H_

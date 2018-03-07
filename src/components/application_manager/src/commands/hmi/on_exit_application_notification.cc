@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,9 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#ifdef SDL_REMOTE_CONTROL
+#include "functional_module/plugin_manager.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace application_manager {
 
@@ -62,17 +65,17 @@ void OnExitApplicationNotification::Run() {
     return;
   }
 
+#ifdef SDL_REMOTE_CONTROL
+  application_manager_.GetPluginManager().OnApplicationEvent(
+      functional_modules::ApplicationEvent::kApplicationExit, app_impl);
+#endif  // SDL_REMOTE_CONTROL
+
   Common_ApplicationExitReason::eType reason;
   reason = static_cast<Common_ApplicationExitReason::eType>(
       (*message_)[strings::msg_params][strings::reason].asInt());
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
-      application_manager_.ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app_id,
-              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION),
-          commands::Command::ORIGIN_SDL);
       break;
     }
     case Common_ApplicationExitReason::USER_EXIT: {
@@ -100,13 +103,9 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
-  ApplicationSharedPtr app = application_manager_.application(app_id);
-  if (app) {
-    application_manager_.state_controller().SetRegularState(
-        app, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
-  }
+
+  application_manager_.state_controller().SetRegularState(
+      app_impl, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
 }
 
 }  // namespace commands

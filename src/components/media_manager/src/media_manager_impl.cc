@@ -96,13 +96,15 @@ void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
 
 #endif  // EXTENDED_MEDIA_MODE
 
-void MediaManagerImpl::set_mock_streamer(protocol_handler::ServiceType stype,
-                                         MediaAdapterImpl* mock_stream) {
+void MediaManagerImpl::set_mock_streamer(
+    protocol_handler::ServiceType stype,
+    ::utils::SharedPtr<MediaAdapterImpl> mock_stream) {
   streamer_[stype] = mock_stream;
 }
 
 void MediaManagerImpl::set_mock_streamer_listener(
-    protocol_handler::ServiceType stype, MediaAdapterListener* mock_stream) {
+    protocol_handler::ServiceType stype,
+    ::utils::SharedPtr<MediaAdapterListener> mock_stream) {
   streamer_listener_[stype] = mock_stream;
 }
 

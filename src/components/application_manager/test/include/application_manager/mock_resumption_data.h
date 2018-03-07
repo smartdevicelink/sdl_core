@@ -37,13 +37,13 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace resumption_test {
 
 namespace app_mngr = application_manager;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockResumptionData : public ::resumption::ResumptionData {
  public:
@@ -60,11 +60,13 @@ class MockResumptionData : public ::resumption::ResumptionData {
                      uint32_t(const std::string& policy_app_id,
                               const std::string& device_id));
   MOCK_METHOD0(OnSuspend, void());
+  MOCK_METHOD0(IncrementIgnOffCount, void());
   MOCK_CONST_METHOD3(GetHashId,
                      bool(const std::string& policy_app_id,
                           const std::string& device_id,
                           std::string& hash_id));
   MOCK_METHOD0(OnAwake, void());
+  MOCK_METHOD0(DecrementIgnOffCount, void());
   MOCK_CONST_METHOD3(GetSavedApplication,
                      bool(const std::string& policy_app_id,
                           const std::string& device_id,

@@ -38,6 +38,7 @@
 #include <vector>
 #include <utility>
 #include <list>
+#include <forward_list>
 #include <stdint.h>
 
 #include "utils/date_time.h"
@@ -51,6 +52,7 @@
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
 #include "utils/timer.h"
+#include "utils/macro.h"
 
 namespace usage_statistics {
 
@@ -64,10 +66,33 @@ using namespace timer;
 namespace mobile_api = mobile_apis;
 namespace custom_str = custom_string;
 
-class ApplicationImpl : public virtual InitialApplicationDataImpl,
+/**
+ * @brief SwitchApplicationParameters updates application internal parameters
+ * on transport switch. Must be used only for switching flow.
+ * @param app Pointer to switched application
+ * @param app_id New application id (connection key)
+ * @param device_id New device id
+ * @param mac_address New device MAC address
+ */
+void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                 const uint32_t app_id,
+                                 const size_t device_id,
+                                 const std::string& mac_address);
+
+class ApplicationImpl : public virtual Application,
+                        public virtual InitialApplicationDataImpl,
                         public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(
+      uint32_t application_id,
+      const std::string& policy_app_id,
+      const std::string& mac_address,
+      const connection_handler::DeviceHandle device_id,
+      const custom_str::CustomString& app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      ApplicationManager& application_manager);
+
+  DEPRECATED ApplicationImpl(
       uint32_t application_id,
       const std::string& policy_app_id,
       const std::string& mac_address,
@@ -96,6 +121,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   }
   void set_is_navi(bool allow);
 
+  void set_mobile_projection_enabled(bool option);
+
+  bool mobile_projection_enabled() const;
+
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);
   bool audio_streaming_approved() const;
@@ -106,6 +135,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
+  bool SetVideoConfig(protocol_handler::ServiceType service_type,
+                      const smart_objects::SmartObject& params);
   void StartStreaming(protocol_handler::ServiceType service_type);
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);
@@ -156,9 +187,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
+  bool is_audio() const OVERRIDE;
 
-  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
-  virtual ProtocolVersion protocol_version() const;
+  virtual void set_protocol_version(
+      const protocol_handler::MajorProtocolVersion& protocol_version);
+  virtual protocol_handler::MajorProtocolVersion protocol_version() const;
 
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
@@ -183,21 +216,32 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
-  virtual void ResetDataInNone();
+  virtual void ResetDataInNone() OVERRIDE;
 
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
-#ifdef CUSTOMER_PASA
-  virtual bool flag_sending_hash_change_after_awake() const;
-  virtual void set_flag_sending_hash_change_after_awake(bool flag);
-#endif  // CUSTOMER_PASA
-        /**
-         * @brief Change Hash for current application
-         * and send notification to mobile
-         * @return updated_hash
-         */
+
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
   virtual void UpdateHash();
+
+  /**
+   * @brief checks is hashID was changed during suspended state
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  bool IsHashChangedDuringSuspend() const OVERRIDE;
+
+  /**
+   * @brief changes state of the flag which tracks is hashID was changed during
+   * suspended state or not
+   * @param state new state of the flag
+   */
+  void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
 
@@ -220,6 +264,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
+
+  /**
+   * @brief SetInitialState sets initial HMI state for application on
+   * registration
+   * @param state Hmi state value
+   */
+  void SetInitialState(HmiStatePtr state) FINAL;
 
   /**
   * @brief SetRegularState set permanent state of application
@@ -298,6 +349,44 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Sets current system context
+   * @param system_context new system context
+   */
+  void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) OVERRIDE;
+  /**
+   * @brief Sets current audio streaming state
+   * @param state new audio streaming state
+   */
+  void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) OVERRIDE;
+  /**
+   * @brief Sets current HMI level
+   * @param hmi_level new HMI level
+   */
+  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+
+  /**
+   * @brief Get list of subscriptions to vehicle info notifications
+   * @return list of subscriptions to vehicle info notifications
+   */
+  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+#endif
+
+  void PushMobileMessage(
+      smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
+
+  void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -327,6 +416,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void OnAudioStreamSuspend();
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention) OVERRIDE;
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
+
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions() OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   std::string hash_val_;
   uint32_t grammar_id_;
 
@@ -337,6 +447,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;
@@ -357,16 +468,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t delete_file_in_none_count_;
   uint32_t list_files_in_none_count_;
   std::string app_icon_path_;
-  connection_handler::DeviceHandle device_;
-  const std::string mac_address_;
+  std::string mac_address_;
+  connection_handler::DeviceHandle device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
-  ProtocolVersion protocol_version_;
+  protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
+  bool is_hash_changed_during_suspend_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;
@@ -374,6 +486,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t audio_stream_suspend_timeout_;
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
+
+#ifdef SDL_REMOTE_CONTROL
+  std::list<AppExtensionPtr> extensions_;
+#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Defines number per time in seconds limits
@@ -398,6 +514,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
+  sync_primitives::Lock mobile_message_lock_;
+  MobileMessageQueue mobile_message_queue_;
+
+  friend void SwitchApplicationParameters(ApplicationSharedPtr app,
+                                          const uint32_t app_id,
+                                          const size_t device_id,
+                                          const std::string& mac_address);
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

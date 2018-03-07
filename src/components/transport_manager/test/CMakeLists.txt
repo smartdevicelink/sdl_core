@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2017, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-set(TM_TEST_DIR ${COMPONENTS_DIR}/transport_manager/test)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   include
@@ -42,10 +41,16 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
+set(EXCLUDE_PATHS
+  raw_message_matcher.cc
+)
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+
 set(LIBRARIES
   gmock
   ConfigProfile
-  transport_manager
+  TransportManager
   Utils
   ConfigProfile
   ProtocolLibrary
@@ -54,24 +59,15 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND LIBRARIES Libusb-1.0.16)
+  list(APPEND LIBRARIES libusb-1.0.so)
 endif()
 
 if (BUILD_BT_SUPPORT)
+ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES bluetooth)
+ endif()
 endif()
-
-set(SOURCES
-  ${TM_TEST_DIR}/transport_manager_impl_test.cc
-  ${TM_TEST_DIR}/transport_adapter_test.cc
-  ${TM_TEST_DIR}/transport_adapter_listener_test.cc
-  ${TM_TEST_DIR}/tcp_transport_adapter_test.cc
-  ${TM_TEST_DIR}/tcp_device_test.cc
-  ${TM_TEST_DIR}/tcp_client_listener_test.cc
-  ${TM_TEST_DIR}/transport_manager_default_test.cc
-)
 
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
+
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY app_info_storage2 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif()

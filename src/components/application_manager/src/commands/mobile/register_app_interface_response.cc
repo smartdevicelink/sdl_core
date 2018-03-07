@@ -77,15 +77,6 @@ void RegisterAppInterfaceResponse::Run() {
   }
 
   SetHeartBeatTimeout(connection_key(), application->policy_app_id());
-
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  application_manager_.OnApplicationRegistered(application);
-
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  application_manager_.GetPolicyHandler().OnAppRegisteredOnMobile(
-      application->policy_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(

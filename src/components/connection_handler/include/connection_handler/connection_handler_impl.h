@@ -49,6 +49,7 @@
 
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/message_queue.h"
 #include "utils/lock.h"
 #include "utils/stl_utils.h"
 #include "utils/rwlock.h"
@@ -136,6 +137,24 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  /**
+   * @brief OnDeviceSwitchingStart notifies listeners on device transport
+   * switching start
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  void OnDeviceSwitchingStart(const std::string& device_uid_from,
+                              const std::string& device_uid_to) FINAL;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listeners on device transport
+   * switching completion
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  void OnDeviceSwitchingFinish(
+      const transport_manager::DeviceUID& device_uid) FINAL;
+
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
@@ -181,6 +200,7 @@ class ConnectionHandlerImpl
    * \param is_protected would be service protected
    * \param hash_id pointer for session hash identifier
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \deprecated
    */
   virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
@@ -191,6 +211,24 @@ class ConnectionHandlerImpl
 
   /**
    * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates start of new session.
+   * Result must be notified through NotifySessionStartedContext().
+   * \param connection_handle Connection identifier within which session
+   * has to be started.
+   * \param sessionId Identifier of the session to be start
+   * \param service_type Type of service
+   * \param protocol_version Version of protocol
+   * \param is_protected would be service protected
+   * \param params configuration parameters specified by mobile
+   */
+  virtual void OnSessionStartedCallback(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t session_id,
+      const protocol_handler::ServiceType& service_type,
+      const bool is_protected,
+      const BsonObject* params);
+  /**
+   * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
    * \param connection_handle Connection identifier within which session exists
    * \param sessionId Identifier of the session to be ended
@@ -198,11 +236,27 @@ class ConnectionHandlerImpl
    * protocol.
    * If not equal to hash assigned to session on start then operation fails.
    * \return uint32_t 0 if operation fails, session key otherwise
+   * \deprecated
    */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const uint32_t& hashCode,
+      const protocol_handler::ServiceType& service_type) OVERRIDE;
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connection_handle Connection identifier within which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink
+   * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
+   * If not equal to hash assigned to session on start then operation fails.
+   * \return uint32_t 0 if operation fails, session key otherwise
+   */
+  uint32_t OnSessionEndedCallback(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t session_id,
+      uint32_t* hashCode,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
 
   /**
@@ -295,6 +349,16 @@ class ConnectionHandlerImpl
   void SetProtectionFlag(
       const uint32_t& key,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const OVERRIDE;
 
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
@@ -425,6 +489,29 @@ class ConnectionHandlerImpl
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
 
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const OVERRIDE;
+
+  /**
+   * DEPRECATED
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
   int32_t GetDataOnSessionKey(uint32_t key,
                               uint32_t* app_id,
                               std::list<int32_t>* sessions_list,
@@ -434,6 +521,22 @@ class ConnectionHandlerImpl
 
   const protocol_handler::SessionObserver& get_session_observer();
   DevicesDiscoveryStarter& get_device_discovery_starter();
+
+  /**
+   * \brief Invoked when observer's OnServiceStartedCallback is completed
+   * \param session_key the key of started session passed to
+   * OnServiceStartedCallback().
+   * \param result true if observer accepts starting service, false otherwise
+   * \param rejected_params list of rejected parameters' name. Only valid when
+   * result is false. Note that even if result is false, this may be empty.
+   *
+   * \note This is invoked only once but can be invoked by multiple threads.
+   * Also it can be invoked before OnServiceStartedCallback() returns.
+   **/
+  virtual void NotifyServiceStartedResult(
+      uint32_t session_key,
+      bool result,
+      std::vector<std::string>& rejected_params);
 
  private:
   /**
@@ -479,6 +582,10 @@ class ConnectionHandlerImpl
    * \brief Cleans connection list on destruction
    */
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
+
+  sync_primitives::Lock start_service_context_map_lock_;
+  std::map<uint32_t, protocol_handler::SessionContext>
+      start_service_context_map_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage

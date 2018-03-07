@@ -2,6 +2,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017 Xevo Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -13,7 +16,7 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
+ Neither the name of the copyright holders nor the names of their contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
 
@@ -69,6 +72,7 @@ extern const char* success;
 extern const char* sync_msg_version;
 extern const char* major_version;
 extern const char* minor_version;
+extern const char* patch_version;
 extern const char* app_name;
 extern const char* ngn_media_screen_app_name;
 extern const char* vr_synonyms;
@@ -89,6 +93,7 @@ extern const char* main_field_1;
 extern const char* main_field_2;
 extern const char* main_field_3;
 extern const char* main_field_4;
+extern const char* metadata_tags;
 extern const char* eta;
 extern const char* time_to_destination;
 extern const char* total_distance;
@@ -164,6 +169,15 @@ extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
+extern const char* audio_pass_thru_icon;
+extern const char* way_points;
+extern const char* system_capability;
+extern const char* system_capability_type;
+extern const char* system_capabilities;
+extern const char* navigation_capability;
+extern const char* phone_capability;
+extern const char* video_streaming_capability;
+extern const char* rc_capability;
 
 // PutFile
 extern const char* sync_file_name;
@@ -255,6 +269,8 @@ extern const char* supported_diag_modes;
 extern const char* hmi_capabilities;
 extern const char* navigation;
 extern const char* phone_call;
+extern const char* video_streaming;
+extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
@@ -266,7 +282,7 @@ extern const char* application_choice_sets;
 extern const char* application_global_properties;
 extern const char* application_vehicle_info;
 extern const char* application_buttons;
-extern const char* application_subscribtions;
+extern const char* application_subscriptions;
 extern const char* application_files;
 extern const char* application_show;
 extern const char* resumption;
@@ -307,6 +323,44 @@ extern const char* is_suscribed;
 extern const char* message_data;
 
 extern const char* delivery_mode;
+
+extern const char* audio_streaming_indicator;
+
+// keys for default parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_default;
+extern const char* const language_default;
+extern const char* const keyboard_layout_default;
+extern const char* const keypress_mode_default;
+
+// keys for supported parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_supported;
+extern const char* const language_supported;
+extern const char* const keyboard_layout_supported;
+extern const char* const keypress_mode_supported;
+extern const char* const limited_characters_list_supported;
+extern const char* const auto_complete_text_supported;
+extern const char* const entity_type;
+extern const char* const entity_id;
+extern const char* const status;
+extern const char* const external_consent_status;
+extern const char* const consented_functions;
+extern const char* const source;
+extern const char* const config;
+extern const char* const protocol;
+extern const char* const codec;
+extern const char* const width;
+extern const char* const height;
+extern const char* const rejected_params;
+extern const char* const preferred_resolution;
+extern const char* const resolution_width;
+extern const char* const resolution_height;
+extern const char* const max_bitrate;
+extern const char* const supported_formats;
+extern const char* const haptic_spatial_data_supported;
+extern const char* const haptic_rect_data;
+extern const char* const rect;
+extern const char* const x;
+extern const char* const y;
 }  // namespace strings
 
 namespace json {
@@ -358,6 +412,7 @@ namespace hmi_request {
 extern const char* parent_id;
 extern const char* field_name;
 extern const char* field_text;
+extern const char* field_types;
 extern const char* alert_strings;
 extern const char* duration;
 extern const char* soft_buttons;
@@ -380,6 +435,7 @@ extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
 extern const char* file;
+extern const char* file_name;
 extern const char* retry;
 extern const char* service;
 }  // namespace hmi_request

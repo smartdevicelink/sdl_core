@@ -44,6 +44,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -51,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace diagnostic_message_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -176,6 +178,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace diagnostic_message_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

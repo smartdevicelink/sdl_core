@@ -43,6 +43,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_hash_change_notification {
 
 namespace strings = application_manager::strings;
 
@@ -55,19 +56,7 @@ using testing::ReturnRef;
 using testing::_;
 
 class OnHashChangeNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  OnHashChangeNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-  MockMessageHelper& message_helper_;
-};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   const uint32_t kConnectionKey = 1u;
@@ -82,7 +71,8 @@ TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, curHash()).WillOnce(ReturnRef(return_string));
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -111,7 +101,7 @@ TEST_F(OnHashChangeNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app, curHash()).Times(0);
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
@@ -120,6 +110,7 @@ TEST_F(OnHashChangeNotificationTest, Run_InvalidApp_NoNotification) {
             (*msg)[strings::params][strings::message_type].asInt());
 }
 
+}  // namespace on_hash_change_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

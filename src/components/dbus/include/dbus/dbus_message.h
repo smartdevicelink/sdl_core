@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DBUS_DBUS_MESSAGE_H
-#define DBUS_DBUS_MESSAGE_H
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_
 
 #include <stdint.h>
 #include <string>
@@ -176,4 +176,4 @@ MessageRef Signal(const char* path, const char* interface, const char* name);
 
 #include "dbus/dbus_message_inl.h"
 
-#endif  // DBUS_DBUS_MESSAGE_H
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_

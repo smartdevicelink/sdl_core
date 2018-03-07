@@ -41,16 +41,18 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/mobile/read_did_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
-#include "event_engine/event.h"
+#include "application_manager/event_engine/event.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace read_did_request {
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -78,19 +80,23 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
-  const mobile_apis::Result::eType kResultCode = mobile_apis::Result::SUCCESS;
+  const hmi_apis::Common_Result::eType hmi_response_code =
+      hmi_apis::Common_Result::SUCCESS;
+  const mobile_apis::Result::eType mobile_response_code =
+      mobile_apis::Result::SUCCESS;
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] = kResultCode;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_response_code;
   (*event_msg)[am::strings::msg_params] = 0;
 
   event.set_smart_object(*event_msg);
 
-  MessageSharedPtr result_msg(
-      CatchMobileCommandResult(CallOnEvent(*command, event)));
-  EXPECT_EQ(kResultCode,
-            static_cast<mobile_apis::Result::eType>(
-                (*result_msg)[am::strings::msg_params][am::strings::result_code]
-                    .asInt()));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+
+  command->on_event(event);
 }
 
 TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
@@ -153,6 +159,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
                     .asInt()));
 }
 
+}  // namespace read_did_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

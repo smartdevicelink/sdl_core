@@ -48,13 +48,13 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace vr_is_ready_request {
 
 using ::testing::_;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::VRIsReadyRequest;
-using am::MockMessageHelper;
 using am::event_engine::Event;
 
 typedef SharedPtr<VRIsReadyRequest> VRIsReadyRequestPtr;
@@ -104,7 +104,7 @@ class VRIsReadyRequestTest
 
     smart_objects::SmartObjectSPtr language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
-    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+    EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
         .WillOnce(Return(language));
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
@@ -113,14 +113,14 @@ class VRIsReadyRequestTest
     smart_objects::SmartObjectSPtr support_language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
     EXPECT_CALL(
-        *(MockMessageHelper::message_helper_mock()),
+        mock_message_helper_,
         CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, _))
         .WillOnce(Return(support_language));
     EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
 
     smart_objects::SmartObjectSPtr capabilities(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
-    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+    EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
         .WillOnce(Return(capabilities));
     EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
@@ -138,7 +138,6 @@ class VRIsReadyRequestTest
   }
 
   VRIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
@@ -187,7 +186,8 @@ TEST_F(VRIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   command_->onTimeOut();
 }
 
-}  // namespace mobile_commands_test
+}  // namespace vr_is_ready_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

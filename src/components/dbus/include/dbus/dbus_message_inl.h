@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DBUS_MESSAGE_INL_H
-#define DBUS_MESSAGE_INL_H
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_
 
 #include "dbus/dbus_message.h"
 
@@ -211,4 +211,4 @@ inline void MessageWriter::PutString(const std::string& value) {
 
 }  // namespace dbus
 
-#endif  // DBUS_MESSAGE_INL_H
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_

@@ -54,6 +54,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace alert_maneuver_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -62,8 +63,6 @@ namespace am = ::application_manager;
 using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using am::MockHmiInterfaces;
-using am::MockMessageHelper;
 
 typedef SharedPtr<AlertManeuverRequest> CommandPtr;
 
@@ -87,15 +86,7 @@ class AlertManeuverRequestTest
     MockAppPtr mock_app(CreateMockApp());
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
-        .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
-    MockHmiInterfaces hmi_interfaces;
-    EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillRepeatedly(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+    EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
 
     MessageSharedPtr response_to_mobile;
@@ -148,7 +139,8 @@ TEST_F(AlertManeuverRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
 TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+  (*msg)[am::strings::msg_params][am::strings::soft_buttons][0]
+        [am::strings::text] = "text";
 
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
@@ -161,8 +153,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   const mobile_apis::Result::eType kProcessingResult =
       mobile_apis::Result::ABORTED;
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              ProcessSoftButtons(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(kProcessingResult));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -198,7 +189,8 @@ TEST_F(AlertManeuverRequestTest, Run_IsWhiteSpaceExist_UNSUCCESS) {
 
 TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+  (*msg)[am::strings::msg_params][am::strings::soft_buttons][0]
+        [am::strings::text] = "text";
 
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
@@ -208,21 +200,16 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(ReturnRef(policy_interface_));
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              ProcessSoftButtons(_, _, _, _))
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  MockHmiInterfaces hmi_interfaces;
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillRepeatedly(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillRepeatedly(
           Return(am::HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
-              SubscribeApplicationToSoftButton(_, _, _));
+  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
   EXPECT_EQ(hmi_apis::FunctionID::Navigation_AlertManeuver,
@@ -243,34 +230,35 @@ TEST_F(AlertManeuverRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
                     .asInt()));
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case1) {
+TEST_F(AlertManeuverRequestTest, OnEvent_SUCCESS) {
   CheckExpectations(hmi_apis::Common_Result::SUCCESS,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    mobile_apis::Result::SUCCESS,
                     am::HmiInterfaces::STATE_AVAILABLE,
                     true);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case2) {
-  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE) {
+  CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                    am::HmiInterfaces::STATE_NOT_AVAILABLE,
-                    true);
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    false);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case3) {
-  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+TEST_F(AlertManeuverRequestTest, OnEvent_WARNINGS) {
+  CheckExpectations(hmi_apis::Common_Result::WARNINGS,
+                    mobile_apis::Result::WARNINGS,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
                     true);
 }
 
-TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case4) {
+TEST_F(AlertManeuverRequestTest, OnEvent_GENERIC_ERROR) {
   CheckExpectations(hmi_apis::Common_Result::GENERIC_ERROR,
-                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    mobile_apis::Result::GENERIC_ERROR,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
                     false);
 }
 
+}  // namespace alert_maneuver_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

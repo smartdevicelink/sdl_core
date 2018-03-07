@@ -37,24 +37,27 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/test/include/application_manager/commands/commands_test.h"
-#include "application_manager/commands/mobile/on_app_interface_unregistered_notification.h"
-#include "application_manager/commands/mobile/on_audio_pass_thru_notification.h"
-#include "application_manager/commands/mobile/on_driver_distraction_notification.h"
-#include "application_manager/commands/mobile/on_language_change_notification.h"
-#include "application_manager/commands/mobile/on_permissions_change_notification.h"
+#include "application_manager/mock_message_helper.h"
+#include "command_impl.h"
+#include "commands/commands_test.h"
+#include "mobile/on_app_interface_unregistered_notification.h"
+#include "mobile/on_audio_pass_thru_notification.h"
+#include "mobile/on_driver_distraction_notification.h"
+#include "mobile/on_language_change_notification.h"
+#include "mobile/on_permissions_change_notification.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace simple_notification_commands_test {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
 
 using ::testing::_;
 using ::testing::Types;
+using ::testing::Return;
 
 template <class Command>
 class MobileNotificationCommandsTest
@@ -89,6 +92,7 @@ TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
   command->Run();
 }
 
+}  // namespace simple_notification_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

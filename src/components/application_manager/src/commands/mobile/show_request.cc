@@ -45,9 +45,45 @@ namespace commands {
 
 ShowRequest::ShowRequest(const MessageSharedPtr& message,
                          ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {}
+    : CommandRequestImpl(message, application_manager)
+    , core_result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
 ShowRequest::~ShowRequest() {}
+
+void ShowRequest::HandleMetadata(const char* field_id,
+                                 int32_t field_index,
+                                 smart_objects::SmartObject& msg_params) {
+  smart_objects::SmartObject& metadata_tags =
+      (*message_)[strings::msg_params][strings::metadata_tags];
+
+  if (metadata_tags.keyExists(field_id)) {
+    if (field_index != -1) {
+      msg_params[hmi_request::show_strings][field_index]
+                [hmi_request::field_types] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+      const size_t num_tags = metadata_tags[field_id].length();
+      for (size_t i = 0; i < num_tags; ++i) {
+        const int32_t current_tag = metadata_tags[field_id][i].asInt();
+        msg_params[hmi_request::show_strings][field_index]
+                  [hmi_request::field_types][i] = current_tag;
+      }
+    } else {
+      LOG4CXX_INFO(logger_,
+                   "metadata tag provided with no item for "
+                       << field_id << ", ignoring with warning");
+      // tag provided with no item, ignore with warning
+      if (mobile_apis::Result::INVALID_ENUM == core_result_code_) {
+        core_result_code_ = mobile_apis::Result::WARNINGS;
+        core_response_info_ =
+            "Metadata tag was provided for a field with no data.";
+      }
+    }
+  } else {
+    LOG4CXX_INFO(logger_,
+                 "No metadata tagging provided for field: " << field_id);
+  }
+}
 
 void ShowRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -125,36 +161,51 @@ void ShowRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   int32_t index = 0;
+  int32_t main_field_1_index = -1;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField1);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_1];
+    main_field_1_index = index;
     ++index;
   }
 
+  int32_t main_field_2_index = -1;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField2);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_2];
+    main_field_2_index = index;
     ++index;
   }
 
+  int32_t main_field_3_index = -1;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField3);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_3];
+    main_field_3_index = index;
     ++index;
   }
 
+  int32_t main_field_4_index = -1;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField4);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_4];
+    main_field_4_index = index;
     ++index;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::metadata_tags)) {
+    HandleMetadata(strings::main_field_1, main_field_1_index, msg_params);
+    HandleMetadata(strings::main_field_2, main_field_2_index, msg_params);
+    HandleMetadata(strings::main_field_3, main_field_3_index, msg_params);
+    HandleMetadata(strings::main_field_4, main_field_4_index, msg_params);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
@@ -212,6 +263,7 @@ void ShowRequest::Run() {
         (*message_)[strings::msg_params][strings::custom_presets];
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);
 
   MessageSharedPtr persistentData = new smart_objects::SmartObject(msg_params);
@@ -227,6 +279,7 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       std::string response_info;
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
@@ -239,8 +292,15 @@ void ShowRequest::on_event(const event_engine::Event& event) {
         response_info =
             message[strings::params][hmi_response::message].asString();
       }
+      mobile_apis::Result::eType converted_result_code =
+          MessageHelper::HMIToMobileResult(result_code);
+      if (mobile_apis::Result::SUCCESS == converted_result_code &&
+          mobile_apis::Result::INVALID_ENUM != core_result_code_) {
+        converted_result_code = core_result_code_;
+        response_info = core_response_info_;
+      }
       SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
+                   converted_result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;

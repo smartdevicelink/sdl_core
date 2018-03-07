@@ -41,6 +41,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol/service_type.h"
+#include "protocol_handler/protocol_packet.h"
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -75,8 +76,10 @@ struct Service {
   Service()
       : service_type(protocol_handler::kInvalidServiceType)
       , is_protected_(false) {}
+
   explicit Service(protocol_handler::ServiceType service_type)
       : service_type(service_type), is_protected_(false) {}
+
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
   }
@@ -95,6 +98,7 @@ struct Session {
 #endif  // ENABLE_SECURITY
   Session()
       : service_list()
+      , protocol_version(::protocol_handler::PROTOCOL_VERSION_2)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -207,6 +211,17 @@ class Connection {
    */
   void SetProtectionFlag(const uint8_t session_id,
                          const protocol_handler::ServiceType& service_type);
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param session_id id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint8_t session_id,
+      const protocol_handler::ServiceType& service_type) const;
+
 #endif  // ENABLE_SECURITY
         /**
          * @brief Returns map of sessions which have been opened in

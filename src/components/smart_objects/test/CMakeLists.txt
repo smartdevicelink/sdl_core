@@ -28,8 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 if(BUILD_TESTS)
-add_definitions(-DUNIT_TESTS)
+  add_definitions(-DUNIT_TESTS)
+endif()
 
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -45,22 +48,10 @@ set(LIBRARIES
     jsoncpp   
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/smart_objects/test/SmartObjectDraft_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/SmartObjectInvalid_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/SmartObjectStress_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/SmartObjectUnit_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/smart_object_performance_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/map_performance_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/BoolSchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/NumberSchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/StringSchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/ArraySchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/CObjectSchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/AlwaysTrueSchemaItem_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/AlwaysFalseSchemaItem_test.cc
+set(EXCLUDE_PATHS
+  EnumSchemaItem_test.cc
+  SmartObjectConvertionTime_test.cc
 )
 
-create_test("smart_object_test" "${SOURCES}" "${LIBRARIES}")
-
-endif()
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+create_test(smart_object_test "${SOURCES}" "${LIBRARIES}")

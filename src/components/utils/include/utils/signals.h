@@ -46,4 +46,4 @@ bool WaitTerminationSignals(sighandler_t sig_handler);
 
 }  //  namespace utils
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

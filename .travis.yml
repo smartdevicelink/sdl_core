@@ -20,20 +20,24 @@ addons:
     - libbluetooth3
     - libbluetooth-dev
     - libudev-dev
+    - libusb-1.0
     - cmake
     - html2text
     - clang-format-3.6
+    - binutils
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
+  - sudo apt-get -q -y install bluez-tools sqlite3 libsqlite3-dev automake1.11
   - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
   - sudo dpkg -i lcov_1.11-3_all.deb
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
-  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
+  - echo "Number of processing units available ${PROCESSING_UNITS_COUNT}"
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install -j${PROCESSING_UNITS_COUNT}
   - sudo ldconfig
-  - make test
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
+  - bash ../tools/infrastructure/show_disabled.sh 
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
@@ -42,6 +46,7 @@ env:
   - CMAKE_CXX_COMPILER=g++-4.9
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
+  - PROCESSING_UNITS_COUNT=$("nproc")
 after_success:
   - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
 deploy:
@@ -55,10 +60,6 @@ deploy:
 notifications:
   email:
     - AKutsan@luxoft.com
-    - AByzhynar@luxoft.com
     - NSnitsar@luxoft.com
-    - RMalynovskyi@luxoft.com
     - MGhiumiusliu@luxoft.com
-    - AGaliuzov@luxoft.com
-    - ANosach@luxoft.com
 

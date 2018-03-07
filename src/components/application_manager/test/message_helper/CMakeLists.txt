@@ -30,14 +30,9 @@
 
 if(BUILD_TESTS)
 
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
-
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/application_manager/test/message_helper/include
-    ${COMPONENTS_DIR}/application_manager/test/state_controller/include
-    ${COMPONENTS_DIR}/include
-    ${COMPONENTS_DIR}
+    ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
 set(LIBRARIES
@@ -52,8 +47,15 @@ set(LIBRARIES
     Utils
 )
 
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+        FunctionalModule
+        ${LIBRARIES}
+    )
+endif(REMOTE_CONTROL)
+
 set(SOURCES
-    #message_helper_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/message_helper/message_helper_test.cc
 )
 
 create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")

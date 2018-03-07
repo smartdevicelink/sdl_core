@@ -45,12 +45,14 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/mobile/get_dtcs_request.h"
+#include "application_manager/mock_message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace get_dtcs_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -58,12 +60,17 @@ namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::GetDTCsRequest;
 using am::event_engine::Event;
+using am::MockMessageHelper;
+using testing::Mock;
 namespace mobile_result = mobile_apis::Result;
 
 typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  GetDTCsRequestTest() : CommandRequestTest<CommandsTestMocks::kIsNice>() {}
+};
 
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
@@ -109,8 +116,6 @@ TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 }
 
 TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
-
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::msg_params] = 0;
   (*event_msg)[am::strings::params][am::hmi_response::code] =
@@ -123,9 +128,14 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
   command->on_event(event);
 }
 
+}  // namespace get_dtcs_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

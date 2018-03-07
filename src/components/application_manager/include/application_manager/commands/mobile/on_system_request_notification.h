@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include <vector>
@@ -67,14 +67,14 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
   void Run() OVERRIDE;
 
  private:
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
   /**
    * @brief Adds HTTP header to message
    * @param message Message
    */
   void AddHeader(BinaryMessage& message) const;
   size_t ParsePTString(std::string& pt_string) const;
-#endif
+#endif  // PROPRIETARY_MODE
 
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
@@ -83,4 +83,4 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_

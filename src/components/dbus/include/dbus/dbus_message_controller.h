@@ -36,19 +36,18 @@
 #include <string>
 #include <map>
 #include "dbus/dbus_adapter.h"
+#include "smart_objects/smart_object.h"
 
 namespace dbus {
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class DBusMessageController : public DBusAdapter {
  public:
   /**
-   * \brief constructs DBus message controller
-   * \param sdlServiceName name of service SDL
-   * \param sdlObjectPath path of object SDL
-   * \param hmiServiceName name of service HMI
-   * \param hmiObjectPath path of object HMI
+   * @brief constructs DBus message controller
+   * @param sdlServiceName name of service SDL
+   * @param sdlObjectPath path of object SDL
+   * @param hmiServiceName name of service HMI
+   * @param hmiObjectPath path of object HMI
    */
   DBusMessageController(const std::string& sdlServiceName,
                         const std::string& sdlObjectPath,
@@ -56,28 +55,41 @@ class DBusMessageController : public DBusAdapter {
                         const std::string& hmiObjectPath);
 
   /**
-   * \brief destructs DBus message controller
+   * @brief destructs DBus message controller
    */
   virtual ~DBusMessageController();
 
   /**
-   * \brief subscribes to the DBus signal.
-   * \param interface name of interface in HMI
-   * \param signal name of signal
+   * @brief subscribes to the DBus signal.
+   * @param interface name of interface in HMI
+   * @param signal name of signal
    */
   void SubscribeTo(const std::string& interface, const std::string& signal);
 
   /**
-   * \brief Method for receiving thread.
+   * @brief Method for receiving thread.
    */
   void* MethodForReceiverThread(void*);
 
+  /**
+   * @brief Main thread loop.
+   */
+  bool Run();
+
+  /**
+   * @brief Signal shutdown for thread loop.
+   */
+  void Shutdown();
+
  protected:
   /**
-   * \brief sends message to core
-   * \param obj
+   * @brief sends message to core
+   * @param obj
    */
   virtual void SendMessageToCore(const smart_objects::SmartObject& obj) = 0;
+
+ private:
+  bool shutdown_;
 };
 
 }  // namespace dbus

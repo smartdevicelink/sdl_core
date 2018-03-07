@@ -36,8 +36,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "interfaces/MOBILE_API.h"
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
@@ -165,7 +165,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
       "DELETE FROM `applicationCommandsArray`; "
       "DELETE FROM `applicationFilesArray`; "
       "DELETE FROM `applicationSubMenuArray`; "
-      "DELETE FROM `applicationSubscribtionsArray`; "
+      "DELETE FROM `applicationSubscriptionsArray`; "
       "DELETE FROM `_internal_data`; ";
 
  private:
@@ -728,7 +728,7 @@ TEST_F(ResumptionDataDBTest, OnSuspend) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 }
@@ -740,18 +740,18 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(-1, result);
@@ -765,11 +765,11 @@ TEST_F(ResumptionDataDBTest, OnSuspendOnAwake) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   ign_off_count_++;
   CheckSavedDB();
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 }
@@ -782,7 +782,7 @@ TEST_F(ResumptionDataDBTest, Awake_AppNotSuspended) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 }
@@ -795,12 +795,12 @@ TEST_F(ResumptionDataDBTest, TwiceAwake_AppNotSuspended) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
-  res_db()->OnAwake();
+  res_db()->IncrementIgnOffCount();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   CheckSavedDB();
 }
 
@@ -826,14 +826,14 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
   last_ign_off_time = res_db()->GetIgnOffTime();
   EXPECT_EQ(0u, last_ign_off_time);
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   uint32_t after_suspend;
   after_suspend = res_db()->GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
   uint32_t after_awake;
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
 
   after_awake = res_db()->GetIgnOffTime();
   EXPECT_LE(after_suspend, after_awake);
@@ -848,7 +848,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
 
-  am::smart_objects::SmartObject app;
+  smart_objects::SmartObject app;
   EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&
@@ -863,8 +863,8 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
   EXPECT_TRUE(app.keyExists(am::strings::application_global_properties) &&
               app[am::strings::application_global_properties].empty());
 
-  EXPECT_TRUE(app.keyExists(am::strings::application_subscribtions) &&
-              app[am::strings::application_subscribtions].empty());
+  EXPECT_TRUE(app.keyExists(am::strings::application_subscriptions) &&
+              app[am::strings::application_subscriptions].empty());
 
   EXPECT_TRUE(app.keyExists(am::strings::application_files) &&
               app[am::strings::application_files].empty());

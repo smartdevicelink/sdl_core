@@ -2,6 +2,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017 Xevo Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -13,7 +16,7 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
+ Neither the name of the copyright holders nor the names of their contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
 
@@ -56,6 +59,8 @@
 #include "application_manager/commands/mobile/generic_response.h"
 #include "application_manager/commands/mobile/get_dtcs_request.h"
 #include "application_manager/commands/mobile/get_dtcs_response.h"
+#include "application_manager/commands/mobile/get_system_capability_request.h"
+#include "application_manager/commands/mobile/get_system_capability_response.h"
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
 #include "application_manager/commands/mobile/get_way_points_request.h"
@@ -133,6 +138,8 @@
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/send_haptic_data_request.h"
+#include "application_manager/commands/mobile/send_haptic_data_response.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/make_shared.h"
 
@@ -450,6 +457,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::GetSystemCapabilityID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::GetSystemCapabilityResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::GetSystemCapabilityRequest(
+            message, application_manager));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::ReadDIDID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
@@ -601,6 +619,17 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       } else {
         command.reset(
             new commands::DialNumberRequest(message, application_manager));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SendHapticDataID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(
+            new commands::SendHapticDataResponse(message, application_manager));
+      } else {
+        command.reset(
+            new commands::SendHapticDataRequest(message, application_manager));
       }
       break;
     }

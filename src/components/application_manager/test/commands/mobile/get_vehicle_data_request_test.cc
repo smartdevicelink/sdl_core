@@ -52,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace get_vehicle_data_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -77,7 +78,7 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
                                  am::ApplicationManager& application_manager)
       : GetVehicleDataRequest(message, application_manager) {}
 
-  std::vector<std::string>& get_disallowed_params() {
+  policy::RPCParams& get_disallowed_params() {
     return removed_parameters_permissions_.disallowed_params;
   }
 
@@ -137,7 +138,7 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
       CreateCommand<GetVehicleDataRequest>(command_msg));
 
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(kEmptyVehicleData));
 
   MockAppPtr app(CreateMockApp());
@@ -160,12 +161,11 @@ TEST_F(GetVehicleDataRequestTest,
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(), vehicle_data())
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillRepeatedly(ReturnRef(kEmptyVehicleData));
 
-  std::vector<std::string>& disallowed_params =
-      command->get_disallowed_params();
-  disallowed_params.push_back("test_param");
+  policy::RPCParams& disallowed_params = command->get_disallowed_params();
+  disallowed_params.insert("test_param");
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -189,9 +189,9 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
       CreateCommand<GetVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
-  vehicle_data.insert(
-      am::VehicleData::value_type(kMsgParamKey, am::VehicleDataType::SPEED));
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(), vehicle_data())
+  vehicle_data.insert(am::VehicleData::value_type(
+      kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
 
   MockAppPtr app(CreateMockApp());
@@ -220,6 +220,11 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 }
 
 TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
+  const hmi_apis::Common_Result::eType hmi_response_code =
+      hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
+  const mobile_result::eType mobile_response_code =
+      mobile_result::DATA_NOT_AVAILABLE;
+
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
@@ -228,24 +233,21 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
       CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_result::VEHICLE_DATA_NOT_AVAILABLE;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_response_code;
   (*event_msg)[am::strings::params][am::strings::error_msg] = "test_error";
   (*event_msg)[am::strings::msg_params][am::hmi_response::method] = 0;
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
   event.set_smart_object(*event_msg);
-
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::VEHICLE_DATA_NOT_AVAILABLE), _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   command->on_event(event);
 }
 
 #endif  // HMI_DBUS_API
 
+}  // namespace get_vehicle_data_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

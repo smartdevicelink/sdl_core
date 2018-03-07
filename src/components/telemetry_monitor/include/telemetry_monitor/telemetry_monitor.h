@@ -30,12 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
-#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_
 
 #include <string>
 
-#include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -46,6 +45,11 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "protocol_handler_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
+
+namespace utils {
+template <typename T>
+class SharedPtr;
+}
 
 namespace telemetry_monitor {
 
@@ -88,16 +92,16 @@ class TelemetryMonitor {
   virtual void Stop();
   virtual void Start();
   virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
-  void set_streamer(Streamer* streamer);
+  DEPRECATED void set_streamer(Streamer* streamer);
+  void set_streamer(utils::SharedPtr<Streamer> streamer);
   const std::string& ip() const;
   int16_t port() const;
 
  private:
   std::string server_address_;
   int16_t port_;
-  bool is_ready_;
   threads::Thread* thread_;
-  Streamer* streamer_;
+  utils::SharedPtr<Streamer> streamer_;
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;
   ProtocolHandlerObserver ph_observer;
@@ -105,4 +109,4 @@ class TelemetryMonitor {
   DISALLOW_COPY_AND_ASSIGN(TelemetryMonitor);
 };
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TELEMETRY_MONITOR_H_

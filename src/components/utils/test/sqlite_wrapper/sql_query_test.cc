@@ -44,8 +44,8 @@ using ::utils::dbms::SQLQuery;
 
 namespace test {
 namespace components {
-namespace utils {
-namespace dbms {
+namespace utils_test {
+namespace dbms_test {
 
 class SQLQueryTest : public ::testing::Test {
  protected:
@@ -97,7 +97,9 @@ class SQLQueryTest : public ::testing::Test {
 };
 
 sqlite3* SQLQueryTest::conn = 0;
-const std::string SQLQueryTest::kDatabaseName = "test-query";
+
+// mounting /tmp as tmpfs will descrease utils unit tests runing time
+const std::string SQLQueryTest::kDatabaseName = "/tmp/test-query";
 
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
@@ -374,7 +376,7 @@ TEST_F(SQLQueryTest, DoublePrepare_TwicePrepareQuery_ActWithoutErrors) {
   EXPECT_FALSE(IsError(query.LastError()));
 }
 
-}  // namespace dbms
-}  // namespace utils
+}  // namespace dbms_test
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

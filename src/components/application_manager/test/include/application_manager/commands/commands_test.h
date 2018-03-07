@@ -42,22 +42,29 @@
 #include "utils/make_shared.h"
 #include "application_manager/mock_application_manager.h"
 #include "test/application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_application.h"
-
+#include "application_manager/mock_message_helper.h"
 namespace test {
 namespace components {
 namespace commands_test {
 
+namespace am = ::application_manager;
+
 using ::testing::ReturnRef;
+using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Mock;
+using ::testing::_;
 
 using ::utils::SharedPtr;
 using ::smart_objects::SmartObject;
-using ::application_manager::commands::MessageSharedPtr;
+using am::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
+using am::ApplicationSharedPtr;
+using am::MockMessageHelper;
 using ::test::components::application_manager_test::MockApplication;
 
 // Depending on the value type will be selected
@@ -93,10 +100,11 @@ class CommandsTest : public ::testing::Test {
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;
-
   typedef SharedPtr<MockApp> MockAppPtr;
 
-  virtual ~CommandsTest() {}
+  virtual ~CommandsTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   static MessageSharedPtr CreateMessage(
       const smart_objects::SmartType type = smart_objects::SmartType_Null) {
@@ -131,6 +139,8 @@ class CommandsTest : public ::testing::Test {
 
   MockAppManager app_mngr_;
   MockAppManagerSettings app_mngr_settings_;
+  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
+  am::MockMessageHelper& mock_message_helper_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
@@ -140,8 +150,90 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(ReturnRef(timeout));
   }
 
-  CommandsTest() {}
+  CommandsTest()
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
+        .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_SDL));
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    InitHMIToMobileResultConverter();
+  }
+
+  void InitHMIToMobileResultConverter() {
+    namespace MobileResult = mobile_apis::Result;
+    namespace HMIResult = hmi_apis::Common_Result;
+    auto link_hmi_to_mob_result =
+        [this](HMIResult::eType hmi_result, MobileResult::eType mobile_result) {
+          ON_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
+              .WillByDefault(Return(mobile_result));
+        };
+    link_hmi_to_mob_result(HMIResult::INVALID_ENUM, MobileResult::INVALID_ENUM);
+    link_hmi_to_mob_result(HMIResult::SUCCESS, MobileResult::SUCCESS);
+    link_hmi_to_mob_result(HMIResult::UNSUPPORTED_REQUEST,
+                           MobileResult::UNSUPPORTED_REQUEST);
+    link_hmi_to_mob_result(HMIResult::UNSUPPORTED_RESOURCE,
+                           MobileResult::UNSUPPORTED_RESOURCE);
+    link_hmi_to_mob_result(HMIResult::DISALLOWED, MobileResult::DISALLOWED);
+    link_hmi_to_mob_result(HMIResult::REJECTED, MobileResult::REJECTED);
+    link_hmi_to_mob_result(HMIResult::ABORTED, MobileResult::ABORTED);
+    link_hmi_to_mob_result(HMIResult::IGNORED, MobileResult::IGNORED);
+    link_hmi_to_mob_result(HMIResult::RETRY, MobileResult::RETRY);
+    link_hmi_to_mob_result(HMIResult::IN_USE, MobileResult::IN_USE);
+    link_hmi_to_mob_result(HMIResult::TIMED_OUT, MobileResult::TIMED_OUT);
+    link_hmi_to_mob_result(HMIResult::INVALID_DATA, MobileResult::INVALID_DATA);
+    link_hmi_to_mob_result(HMIResult::CHAR_LIMIT_EXCEEDED,
+                           MobileResult::CHAR_LIMIT_EXCEEDED);
+    link_hmi_to_mob_result(HMIResult::INVALID_ID, MobileResult::INVALID_ID);
+    link_hmi_to_mob_result(HMIResult::DUPLICATE_NAME,
+                           MobileResult::DUPLICATE_NAME);
+    link_hmi_to_mob_result(HMIResult::APPLICATION_NOT_REGISTERED,
+                           MobileResult::APPLICATION_NOT_REGISTERED);
+    link_hmi_to_mob_result(HMIResult::WRONG_LANGUAGE,
+                           MobileResult::WRONG_LANGUAGE);
+    link_hmi_to_mob_result(HMIResult::OUT_OF_MEMORY,
+                           MobileResult::OUT_OF_MEMORY);
+    link_hmi_to_mob_result(HMIResult::TOO_MANY_PENDING_REQUESTS,
+                           MobileResult::TOO_MANY_PENDING_REQUESTS);
+    link_hmi_to_mob_result(HMIResult::WARNINGS, MobileResult::WARNINGS);
+    link_hmi_to_mob_result(HMIResult::GENERIC_ERROR,
+                           MobileResult::GENERIC_ERROR);
+    link_hmi_to_mob_result(HMIResult::USER_DISALLOWED,
+                           MobileResult::USER_DISALLOWED);
+    link_hmi_to_mob_result(HMIResult::TRUNCATED_DATA,
+                           MobileResult::TRUNCATED_DATA);
+    link_hmi_to_mob_result(HMIResult::SAVED, MobileResult::SAVED);
+    link_hmi_to_mob_result(HMIResult::DATA_NOT_AVAILABLE,
+                           MobileResult::DATA_NOT_AVAILABLE);
+    link_hmi_to_mob_result(HMIResult::READ_ONLY, MobileResult::READ_ONLY);
+  }
 };
+
+MATCHER_P(MobileResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<mobile_apis::Result::eType>(
+             (*arg)[application_manager::strings::msg_params]
+                   [application_manager::strings::result_code].asInt());
+}
+
+MATCHER_P(HMIResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<hmi_apis::FunctionID::eType>(
+             (*arg)[application_manager::strings::params]
+                   [application_manager::strings::function_id].asInt());
+}
+
+MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {
+  mobile_apis::Result::eType code = static_cast<mobile_apis::Result::eType>(
+      (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+  std::string info =
+      (*arg)[am::strings::msg_params][am::strings::info].asString();
+  bool success = (*arg)[am::strings::msg_params][am::strings::success].asBool();
+  return result_code == code && result_info == info &&
+         result_success == success;
+}
 
 }  // namespace commands_test
 }  // namespace components

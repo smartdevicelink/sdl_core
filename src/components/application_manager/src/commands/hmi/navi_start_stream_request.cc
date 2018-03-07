@@ -109,11 +109,13 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
               logger_,
               "NaviStartStreamRequest aborted. Application can not stream");
         }
+        application_manager_.TerminateRequest(
+            connection_key(), correlation_id(), function_id());
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
-        SendRequest();
+        RetryStartSession();
         break;
       }
     }
@@ -125,14 +127,15 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 }
 
 void NaviStartStreamRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
   RetryStartSession();
-
-  application_manager_.TerminateRequest(
-      connection_key(), correlation_id(), function_id());
 }
 
 void NaviStartStreamRequest::RetryStartSession() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
@@ -156,10 +159,11 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
-  if (curr_retry_number < retry_number_ - 1) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Send NaviStartStream retry. retry_number = " << curr_retry_number);
+  LOG4CXX_DEBUG(
+      logger_, "Retry number " << curr_retry_number << " of " << retry_number_);
+
+  if (curr_retry_number < retry_number_) {
+    LOG4CXX_DEBUG(logger_, "Send NaviStartStream retry");
     MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {

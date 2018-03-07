@@ -46,9 +46,9 @@ namespace application_manager {
  * table
  */
 struct CommandParametersPermissions {
-  std::vector<std::string> allowed_params;
-  std::vector<std::string> disallowed_params;
-  std::vector<std::string> undefined_params;
+  RPCParams allowed_params;
+  RPCParams disallowed_params;
+  RPCParams undefined_params;
 };
 
 namespace commands {
@@ -142,16 +142,30 @@ class CommandImpl : public Command {
 
  protected:
   /**
-   * @brief Parse smartObject and replace mobile app Id by HMI app ID
-   *
-   * @param message Smartobject to be parsed
+   * @brief Parses mobile message and replaces mobile app id with HMI app id
+   * @param message Message to replace its ids
+   * @return True if replacement succeeded, otherwise - false
+   */
+  bool ReplaceMobileWithHMIAppId(smart_objects::SmartObject& message);
+
+  /**
+   * DEPRECATED
+   * @brief Parses mobile message and replaces mobile app id with HMI app id
+   * @param message Message to replace its ids
    */
   void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * @brief Parse smartObject and replace HMI app ID by mobile app Id
-   *
-   * @param message Smartobject to be parsed
+   * @brief Parses message from HMI and replaces HMI app id with mobile app id
+   * @param message Message to replace its ids
+   * @return True if replacement succeeded, otherwise - false
+   */
+  bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
+
+  /**
+   * DEPRECATED
+   * @brief Parses message from HMI and replaces HMI app id with mobile app id
+   * @param message Message to replace its ids
    */
   void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
 

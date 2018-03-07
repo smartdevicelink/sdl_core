@@ -38,8 +38,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
-namespace SharedPtrTest {
+namespace utils_test {
 
 class CMockObject {
  public:
@@ -58,12 +57,6 @@ class CExtendedMockObject : public CMockObject {
   CExtendedMockObject(int id);
 };
 
-}  // namespace CMockObject
-}  // namespace SmartObjects
-}  // namespace components
-}  // namespace test
-
-using namespace test::components::utils::SharedPtrTest;
 using ::testing::NiceMock;
 
 CMockObject::CMockObject(int id) : mId_(id) {}
@@ -514,7 +507,7 @@ TEST(SharedPtrTest, ValidMethodTest_ExpectCorrectValidation) {
   ASSERT_FALSE(p2.valid());
 }
 
-TEST(SharedPtrTest, StressTest) {
+TEST(SharedPtrTest, DISABLED_StressTest) {
   // Arrange
   const size_t kNumIterations = 1024U * 1024U;
 
@@ -543,3 +536,7 @@ TEST(SharedPtrTest, StressTest) {
          objectCreated,
          pointersCopied);
 }
+
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

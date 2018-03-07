@@ -45,8 +45,10 @@ EventDispatcherImpl::EventDispatcherImpl()
 EventDispatcherImpl::~EventDispatcherImpl() {}
 
 void EventDispatcherImpl::raise_event(const Event& event) {
+  AutoLock observer_lock(observer_lock_);
   {
-    AutoLock auto_lock(state_lock_);
+    AutoLock state_lock(state_lock_);
+
     // check if event is notification
     if (hmi_apis::messageType::notification == event.smart_object_type()) {
       const uint32_t notification_correlation_id = 0;
@@ -61,11 +63,10 @@ void EventDispatcherImpl::raise_event(const Event& event) {
   }
 
   // Call observers
-  EventObserver* temp;
   while (!observers_.empty()) {
-    AutoLock auto_lock(observer_lock_);
-    temp = *observers_.begin();
+    EventObserver* temp = *observers_.begin();
     observers_.erase(observers_.begin());
+    AutoUnlock unlock_observer(observer_lock);
     temp->on_event(event);
   }
 }

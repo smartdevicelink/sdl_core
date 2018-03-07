@@ -48,17 +48,18 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
+#include "application_manager/command_holder.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
@@ -91,13 +92,9 @@
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/timer.h"
+#include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+struct BsonObject;
 
 namespace threads {
 class Thread;
@@ -193,7 +190,6 @@ typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-typedef std::vector<std::string> RPCParams;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
@@ -250,10 +246,14 @@ class ApplicationManagerImpl
   std::vector<ApplicationSharedPtr> applications_by_button(
       uint32_t button) OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_with_navi() OVERRIDE;
+  std::vector<ApplicationSharedPtr> applications_with_mobile_projection()
+      OVERRIDE;
 
   ApplicationSharedPtr get_limited_media_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_navi_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_voice_application() const OVERRIDE;
+  ApplicationSharedPtr get_limited_mobile_projection_application()
+      const OVERRIDE;
 
   uint32_t application_id(const int32_t correlation_id) OVERRIDE;
   void set_application_id(const int32_t correlation_id,
@@ -265,6 +265,40 @@ class ApplicationManagerImpl
 
   void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr application(
+      const std::string& device_id,
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief ChangeAppsHMILevel the function that will change application's
+   * hmi level.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param level new hmi level for certain application.
+   */
+  void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
+
+  void Erase(ApplicationSharedPtr app_to_remove) {
+    DCHECK(app_to_remove);
+    app_to_remove->RemoveExtensions();
+    applications_.erase(app_to_remove);
+  }
+
+  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
+    return plugin_manager_;
+  }
+
+  std::vector<std::string> devices(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  virtual void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
+
+  virtual void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   /**
    * @brief Checks if application with the same HMI type
    *        (media, voice communication or navi) exists
@@ -277,6 +311,7 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
+   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
@@ -285,16 +320,38 @@ class ApplicationManagerImpl
   bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
   void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
   void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application pointer
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application pointer
+   */
+  void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application pointer
+   */
+  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) OVERRIDE;
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -315,10 +372,17 @@ class ApplicationManagerImpl
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  std::vector<ApplicationSharedPtr> IviInfoUpdated(VehicleDataType vehicle_info,
-                                                   int value) OVERRIDE;
+  std::vector<ApplicationSharedPtr> IviInfoUpdated(
+      mobile_apis::VehicleDataType::eType vehicle_info, int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief OnApplicationSwitched starts processing of commands collected
+   * during device switching process
+   * @param app Application
+   */
+  void OnApplicationSwitched(ApplicationSharedPtr app) OVERRIDE;
 
   HMICapabilities& hmi_capabilities() OVERRIDE;
   const HMICapabilities& hmi_capabilities() const OVERRIDE;
@@ -389,8 +453,9 @@ class ApplicationManagerImpl
    */
   void UnregisterAllApplications();
 
-  bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
-  bool LoadAppDataToHMI(ApplicationSharedPtr app);
+  DEPRECATED bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+
+  DEPRECATED bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -430,16 +495,19 @@ class ApplicationManagerImpl
    *
    * @return Current state of the distraction state
    */
-  inline bool driver_distraction() const;
+  hmi_apis::Common_DriverDistractionState::eType driver_distraction_state()
+      const;
 
   /*
    * @brief Sets state for driver distraction
    *
    * @param state New state to be set
    */
-  void set_driver_distraction(const bool is_distracting) OVERRIDE;
+  void set_driver_distraction_state(
+      const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
 
   /*
+   * DEPRECATED
    * @brief Retrieves if VR session has started
    *
    * @return Current VR session state (started, stopped)
@@ -447,6 +515,7 @@ class ApplicationManagerImpl
   inline bool vr_session_started() const;
 
   /*
+   * DEPRECATED
    * @brief Sets VR session state
    *
    * @param state Current HMI VR session state
@@ -469,13 +538,28 @@ class ApplicationManagerImpl
 
   /**
    * @brief CreateRegularState create regular HMI state for application
-   * @param app_id
+   * @param app Application
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
    * @return new regular HMI state
    */
   HmiStatePtr CreateRegularState(
+      utils::SharedPtr<Application> app,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
+
+  /**
+   * DEPRECATED
+   * @brief CreateRegularState create regular HMI state for application
+   * @param app_id Application id
+   * @param hmi_level of returned state
+   * @param audio_state of returned state
+   * @param system_context of returned state
+   * @return new regular HMI state
+   */
+  DEPRECATED HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
@@ -513,6 +597,67 @@ class ApplicationManagerImpl
     }
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
   }
+
+  /**
+   * @brief Checks, if given RPC is allowed at current HMI level for specific
+   * application in policy table
+   * @param app Application
+   * @param hmi_level Current HMI level of application
+   * @param function_id FunctionID of RPC
+   * @param params_permissions Permissions for RPC parameters (e.g.
+   * SubscribeVehicleData) defined in policy table
+   * @return SUCCESS, if allowed, otherwise result code of check
+   */
+  mobile_apis::Result::eType CheckPolicyPermissions(
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
+      const RPCParams& rpc_params,
+      CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
+
+  /**
+   * @brief IsApplicationForbidden allows to distinguish if application is
+   * not allowed to register, becuase of spaming.
+   *
+   * @param connection_key the conection key ofthe required application
+   *
+   * @param mobile_app_id application's mobile(policy) identifier.
+   *
+   * @return true in case application is allowed to register, false otherwise.
+   */
+  bool IsApplicationForbidden(uint32_t connection_key,
+                              const std::string& mobile_app_id);
+
+  struct ApplicationsAppIdSorter {
+    bool operator()(const ApplicationSharedPtr lhs,
+                    const ApplicationSharedPtr rhs) {
+      return lhs->app_id() < rhs->app_id();
+    }
+  };
+
+  struct ApplicationsMobileAppIdSorter {
+    bool operator()(const ApplicationSharedPtr lhs,
+                    const ApplicationSharedPtr rhs) {
+      if (lhs->policy_app_id() == rhs->policy_app_id()) {
+        return lhs->device() < rhs->device();
+      }
+      return lhs->policy_app_id() < rhs->policy_app_id();
+    }
+  };
+
+  // typedef for Applications list
+  typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
+
+  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
+      AppsWaitRegistrationSet;
+
+  // typedef for Applications list iterator
+  typedef ApplictionSet::iterator ApplictionSetIt;
+
+  // typedef for Applications list const iterator
+  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
+
+  DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
+  ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
 
   /**
    * @brief SetState Change regular audio state
@@ -640,6 +785,12 @@ class ApplicationManagerImpl
   void OnUpdateHMIAppType(
       std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
 
+  /**
+   * @brief OnPTUFinished is called on policy table update coming
+   * @param ptu_result True if PTU is succeeded, otherwise - false
+   */
+  void OnPTUFinished(const bool ptu_result) FINAL;
+
   /*
    * @brief Starts audio pass thru thread
    *
@@ -703,6 +854,9 @@ class ApplicationManagerImpl
 
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
+  void RemoveHMIFakeParameters(
+      application_manager::MessagePtr& message) OVERRIDE;
+
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandOrigin origin) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;
@@ -734,25 +888,78 @@ class ApplicationManagerImpl
   void OnFindNewApplicationsRequest() OVERRIDE;
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
-  bool OnServiceStartedCallback(
+
+  /**
+   * @brief OnDeviceSwitchingStart is invoked on device transport switching
+   * start (e.g. from Bluetooth to USB) and creates waiting list of applications
+   * expected to be re-registered after switching is complete
+   * @param device_from device params being switched to the new transport
+   * @param device_to device params on the new transport
+   */
+  void OnDeviceSwitchingStart(
+      const connection_handler::Device& device_from,
+      const connection_handler::Device& device_to) FINAL;
+
+  /**
+   * @brief OnDeviceSwitchingFinish is invoked on device trasport switching end
+   * i.e. timeout for switching is expired, unregisters applications from
+   * waiting list which haven't been re-registered and clears the waiting list
+   * @param device_uid UID of device being switched
+   */
+  void OnDeviceSwitchingFinish(const std::string& device_uid) FINAL;
+
+  DEPRECATED bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) OVERRIDE;
+  void OnServiceStartedCallback(
+      const connection_handler::DeviceHandle& device_handle,
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type,
+      const BsonObject* params) OVERRIDE;
   void OnServiceEndedCallback(
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
 
 #ifdef ENABLE_SECURITY
-  // Overriden SecurityManagerListener method
+  /**
+   * @brief Notification about protection result
+   * @param connection_key Unique key of session which triggers handshake
+   * @param result result of connection protection
+   * @return true on success notification handling or false otherwise
+   */
   bool OnHandshakeDone(
       uint32_t connection_key,
-      security_manager::SSLContext::HandshakeResult result) OVERRIDE FINAL;
+      security_manager::SSLContext::HandshakeResult result) OVERRIDE;
 
-  void OnCertificateUpdateRequired() OVERRIDE FINAL;
+  /**
+   * @brief Notification that certificate update is required.
+   */
+  void OnCertificateUpdateRequired() OVERRIDE;
 
+  /**
+   * @brief Get certificate data from policy
+   * @param reference to string where to save certificate data
+   * @return true if listener saved some data to string otherwise false
+   */
+  bool GetPolicyCertificateData(std::string& data) const OVERRIDE;
+
+  /**
+   * @brief Get unique handshake context by application id
+   * @param key id of application
+   * @return generated handshake context or empty context if application with
+   * provided id does not exist
+   */
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
-      uint32_t key) const OVERRIDE FINAL;
+      uint32_t key) const OVERRIDE;
+
+  /**
+   * @brief Check if application with specified app_id has NAVIGATION HMI type
+   * @param app_id id of application to check
+   * @return true if application is navi otherwise returns false
+   */
+  bool CheckAppIsNavi(const uint32_t app_id) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
@@ -828,6 +1035,20 @@ class ApplicationManagerImpl
   void ForbidStreaming(uint32_t app_id) OVERRIDE;
 
   /**
+   * @brief Called when application completes streaming configuration
+   * @param app_id Streaming application id
+   * @param service_type Streaming service type
+   * @param result true if configuration is successful, false otherwise
+   * @param rejected_params list of rejected parameters' name. Valid
+   *                        only when result is false.
+   */
+  void OnStreamingConfigured(
+      uint32_t app_id,
+      protocol_handler::ServiceType service_type,
+      bool result,
+      std::vector<std::string>& rejected_params) OVERRIDE;
+
+  /**
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
@@ -867,15 +1088,15 @@ class ApplicationManagerImpl
   uint32_t GenerateNewHMIAppID() OVERRIDE;
 
   /**
+   * DERPECATED
    * @brief Parse smartObject and replace mobile app Id by HMI app ID
-   *
    * @param message Smartobject to be parsed
    */
   void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
+   * DEPRECATED
    * @brief Parse smartObject and replace HMI app ID by mobile app Id
-   *
    * @param message Smartobject to be parsed
    */
   void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
@@ -932,6 +1153,7 @@ class ApplicationManagerImpl
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief method adds application in FULL and LIMITED state
    * to on_phone_call_app_list_.
    * Also OnHMIStateNotification with BACKGROUND state sent for these apps
@@ -939,6 +1161,7 @@ class ApplicationManagerImpl
   void CreatePhoneCallAppList();
 
   /**
+   * DEPRECATED
    * @brief method removes application from on_phone_call_app_list_.
    *
    * Also OnHMIStateNotification with previous HMI state sent for these apps
@@ -950,24 +1173,14 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-    return policy_handler_;
+    return *policy_handler_;
   }
-  /**
-   * @brief Checks, if given RPC is allowed at current HMI level for specific
-   * application in policy table
-   * @param policy_app_id Application id
-   * @param hmi_level Current HMI level of application
-   * @param function_id FunctionID of RPC
-   * @param params_permissions Permissions for RPC parameters (e.g.
-   * SubscribeVehicleData) defined in policy table
-   * @return SUCCESS, if allowed, otherwise result code of check
-   */
-  mobile_apis::Result::eType CheckPolicyPermissions(
-      const std::string& policy_app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::FunctionID::eType function_id,
-      const RPCParams& rpc_params,
-      CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
+
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler()
+      const OVERRIDE {
+    return *policy_handler_;
+  }
+
   /*
    * @brief Function Should be called when Low Voltage is occured
    */
@@ -993,13 +1206,6 @@ class ApplicationManagerImpl
 
   policy::DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
-
-  struct ApplicationsAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      return lhs->app_id() < rhs->app_id();
-    }
-  };
 
   // typedef for Applications list
   typedef std::set<std::string> ForbiddenApps;
@@ -1045,7 +1251,10 @@ class ApplicationManagerImpl
     bool operator()(const ApplicationSharedPtr app) const {
       return app
                  ? handle_ == app->device() &&
-                       ProtocolVersion::kV4 == app->protocol_version()
+                       Message::is_sufficient_version(
+                           protocol_handler::MajorProtocolVersion::
+                               PROTOCOL_VERSION_4,
+                           app->protocol_version())
                  : false;
     }
   };
@@ -1056,15 +1265,6 @@ class ApplicationManagerImpl
         : handle_(handle) {}
     bool operator()(const ApplicationSharedPtr app) const {
       return handle_ == app->device() ? true : false;
-    }
-  };
-
-  struct SubscribedToIVIPredicate {
-    int32_t vehicle_info_;
-    SubscribedToIVIPredicate(int32_t vehicle_info)
-        : vehicle_info_(vehicle_info) {}
-    bool operator()(const ApplicationSharedPtr app) const {
-      return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
     }
   };
 
@@ -1104,9 +1304,35 @@ class ApplicationManagerImpl
   bool IsAppsQueriedFrom(
       const connection_handler::DeviceHandle handle) const OVERRIDE;
 
+  /**
+   * @brief IsAppInReconnectMode check if application belongs to session
+   * affected by transport switching at the moment by checking internal
+   * waiting list prepared on switching start
+   * @param policy_app_id Application id
+   * @return True if application is in the waiting list, otherwise - false
+   */
+  bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
+
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
   }
+
+  /**
+     * @brief ProcessReconnection handles reconnection flow for application on
+     * transport switch
+     * @param application Pointer to switched application, must be validated
+     * before passing
+     * @param connection_key Connection key from registration request of
+     * switched
+     * application
+     */
+  void ProcessReconnection(ApplicationSharedPtr application,
+                           const uint32_t connection_key) FINAL;
+
+  /**
+   * @brief Clears all applications' persistent data
+   */
+  void ClearAppsPersistentData();
 
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
@@ -1150,6 +1376,10 @@ class ApplicationManagerImpl
                           smart_objects::SmartObject& output);
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
+
+  MessageValidationResult ValidateMessageBySchema(
+      const Message& message) OVERRIDE;
+
   utils::SharedPtr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
 
@@ -1235,6 +1465,32 @@ class ApplicationManagerImpl
    */
   bool IsLowVoltage();
 
+  /**
+   * @brief Allows to process postponed commands for application
+   * when its HMI level has been changed.
+   * @param app_id the application id for processing.
+   * @param from the old HMILevel.
+   * @param to the new HMILevel for the certain app.
+   */
+  void ProcessPostponedMessages(const uint32_t app_id);
+
+  /**
+   * @brief Allows to process applications after HMILevel has been changed.
+   * @param app_id the application id for processing.
+   * @param from the old HMILevel.
+   * @param to the new HMILevel for the certain app.
+   */
+  void ProcessApp(const uint32_t app_id,
+                  const mobile_apis::HMILevel::eType from,
+                  const mobile_apis::HMILevel::eType to);
+
+  /**
+   * @brief Allows to send appropriate message to mobile device.
+   * @param message The smart object which contains all neccesary info to send
+   * notification.
+   */
+  void SendMobileMessage(smart_objects::SmartObjectSPtr message);
+
  private:
   /*
    * NaviServiceStatusMap shows which navi service (audio/video) is opened
@@ -1283,8 +1539,20 @@ class ApplicationManagerImpl
    * @param service_type Type of service to start
    * @return True on success, false on fail
    */
+  DEPRECATED bool StartNaviService(uint32_t app_id,
+                                   protocol_handler::ServiceType service_type);
+
+  /**
+   * @brief Starts specified navi service for application
+   * @param app_id Application to proceed
+   * @param service_type Type of service to start
+   * @param params configuration parameters specified by mobile
+   * @return True if service is immediately started or configuration
+   * parameters are sent to HMI, false on other cases
+   */
   bool StartNaviService(uint32_t app_id,
-                        protocol_handler::ServiceType service_type);
+                        protocol_handler::ServiceType service_type,
+                        const BsonObject* params);
 
   /**
    * @brief Stops specified navi service for application
@@ -1312,7 +1580,15 @@ class ApplicationManagerImpl
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
    */
-  ProtocolVersion SupportedSDLVersion() const;
+  protocol_handler::MajorProtocolVersion SupportedSDLVersion() const;
+
+  /**
+   * @brief Checks if driver distraction state is valid, creates message
+   * and puts it to postponed message.
+   * @param application contains registered application.
+   */
+  void PutDriverDistractionMessageToPostponed(
+      ApplicationSharedPtr application) const;
 
   /**
    * @brief Types of directories used by Application Manager
@@ -1355,6 +1631,46 @@ class ApplicationManagerImpl
 
   void ClearTTSGlobalPropertiesList();
 
+  /**
+   * @brief EraseAppFromReconnectionList drops application from reconnection
+   * list on transport switch success
+   * @param app Pointer to application
+   */
+  void EraseAppFromReconnectionList(const ApplicationSharedPtr& app);
+
+  /**
+   * @brief SwitchApplication updates parameters of switched application and
+   * internal applications list
+   * @param app Pointer to switched application, must be validated before
+   * passing in
+   * @param connection_key Connection key of switched application from its
+   * registration request
+   * @param device_id Device id of switched application
+   * @param mac_address New device mac address
+   */
+  void SwitchApplication(ApplicationSharedPtr app,
+                         const uint32_t connection_key,
+                         const size_t device_id,
+                         const std::string& mac_address);
+
+  /**
+   * @brief Converts BSON object containing video parameters to
+   * smart object's map object
+   * @param output the smart object to add video parameters
+   * @param input BSON object to read parameters from
+   */
+  static void ConvertVideoParamsToSO(smart_objects::SmartObject& output,
+                                     const BsonObject* input);
+
+  /**
+   * @brief Converts rejected parameters' names acquired from HMI to
+   * SDL protocol's parameter names
+   * @param list of rejected parameters' names
+   * @return converted parameters' names
+   */
+  static std::vector<std::string> ConvertRejectedParamList(
+      const std::vector<std::string>& input);
+
  private:
   const ApplicationManagerSettings& settings_;
   /**
@@ -1388,7 +1704,7 @@ class ApplicationManagerImpl
   bool audio_pass_thru_active_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
-  bool is_distracting_driver_;
+  hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
@@ -1398,9 +1714,31 @@ class ApplicationManagerImpl
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  policy::PolicyHandler policy_handler_;
+  std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
+
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager plugin_manager_;
+
+  /**
+   * @brief Map contains apps with HMI state before incoming call
+   * After incoming call ends previous HMI state must restore
+   *
+   */
+  struct AppState {
+    AppState(const mobile_apis::HMILevel::eType& level,
+             const mobile_apis::AudioStreamingState::eType& streaming_state,
+             const mobile_apis::SystemContext::eType& context)
+        : hmi_level(level)
+        , audio_streaming_state(streaming_state)
+        , system_context(context) {}
+
+    mobile_apis::HMILevel::eType hmi_level;
+    mobile_apis::AudioStreamingState::eType audio_streaming_state;
+    mobile_apis::SystemContext::eType system_context;
+  };
+#endif  // SDL_REMOTE_CONTROL
 
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;
@@ -1435,6 +1773,7 @@ class ApplicationManagerImpl
   HmiInterfacesImpl hmi_interfaces_;
 
   NaviServiceStatusMap navi_service_status_;
+  sync_primitives::Lock navi_service_status_lock_;
   std::deque<uint32_t> navi_app_to_stop_;
   std::deque<uint32_t> navi_app_to_end_stream_;
   uint32_t navi_close_app_timeout_;
@@ -1447,6 +1786,15 @@ class ApplicationManagerImpl
   std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
 
+  /**
+   * @brief ReregisterWaitList is list of applications expected to be
+   * re-registered after transport switching is complete
+   */
+  typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
+  ReregisterWaitList reregister_wait_list_;
+
+  mutable sync_primitives::Lock reregister_wait_list_lock_;
+
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
@@ -1457,17 +1805,29 @@ class ApplicationManagerImpl
 
   bool is_low_voltage_;
 
+  uint32_t apps_size_;
+
   volatile bool is_stopping_;
+
+  std::unique_ptr<CommandHolder> commands_holder_;
+
+#ifdef BUILD_TESTS
+ public:
+  /**
+   * @brief register a mock application without going through the formal
+   * registration process. Only for unit testing.
+   * @param mock_app the mock app to be registered
+   */
+  void AddMockApplication(ApplicationSharedPtr mock_app);
+
+ private:
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 
-bool ApplicationManagerImpl::vr_session_started() const {
+DEPRECATED bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;
-}
-
-bool ApplicationManagerImpl::driver_distraction() const {
-  return is_distracting_driver_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {

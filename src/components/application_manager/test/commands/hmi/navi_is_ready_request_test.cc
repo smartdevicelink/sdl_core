@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace navi_is_ready_request {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -68,12 +69,9 @@ class NaviIsReadyRequestTest
   NaviIsReadyRequestTest() : command_(CreateCommand<NaviIsReadyRequest>()) {
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
   }
 
   NaviIsReadyRequestPtr command_;
-  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   MOCK(application_manager_test::MockHMICapabilities) mock_hmi_capabilities_;
 };
 
@@ -133,6 +131,7 @@ TEST_F(NaviIsReadyRequestTest,
   command_->on_event(event);
 }
 
+}  // namespace navi_is_ready_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_touch_event_notification {
 
 namespace am = ::application_manager;
 
@@ -75,10 +76,16 @@ TEST_F(OnTouchEventNotificationTest, Run_AppIsNotFullscreen_UNSUCCESS) {
   std::vector<ApplicationSharedPtr> applications_with_navi;
   applications_with_navi.push_back(mock_app);
 
+  std::vector<ApplicationSharedPtr> applications_with_mobile_projection;
+  applications_with_mobile_projection.push_back(mock_app);
+
   EXPECT_CALL(app_mngr_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
-  EXPECT_CALL(*mock_app, IsFullscreen()).WillOnce(Return(false));
+  EXPECT_CALL(app_mngr_, applications_with_mobile_projection())
+      .WillOnce(Return(applications_with_mobile_projection));
+
+  EXPECT_CALL(*mock_app, IsFullscreen()).WillRepeatedly(Return(false));
 
   EXPECT_CALL(*mock_app, app_id()).Times(0);
 
@@ -117,18 +124,25 @@ TEST_F(OnTouchEventNotificationTest, Run_NotEmptyListOfAppsWithNavi_SUCCESS) {
   std::vector<ApplicationSharedPtr> applications_with_navi;
   applications_with_navi.push_back(mock_app);
 
+  std::vector<ApplicationSharedPtr> applications_with_mobile_projection;
+  applications_with_mobile_projection.push_back(mock_app);
+
   EXPECT_CALL(app_mngr_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
-  EXPECT_CALL(*mock_app, IsFullscreen()).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, applications_with_mobile_projection())
+      .WillOnce(Return(applications_with_mobile_projection));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(*mock_app, IsFullscreen()).WillRepeatedly(Return(true));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _));
+  EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
+
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _)).Times(2);
 
   command_->Run();
 }
 
+}  // namespace on_touch_event_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
