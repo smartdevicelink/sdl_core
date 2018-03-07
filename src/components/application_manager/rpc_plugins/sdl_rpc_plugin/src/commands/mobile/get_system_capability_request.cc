@@ -67,6 +67,7 @@ void GetSystemCapabilityRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
   mobile_apis::SystemCapabilityType::eType response_type =
       static_cast<mobile_apis::SystemCapabilityType::eType>(
@@ -100,6 +101,14 @@ void GetSystemCapabilityRequest::Run() {
       break;
     }
     case mobile_apis::SystemCapabilityType::REMOTE_CONTROL: {
+      if (!app->is_remote_control_supported()) {
+        SendResponse(false, mobile_apis::Result::DISALLOWED);
+        return;
+      }
+      if (!hmi_capabilities.is_rc_cooperating()) {
+        SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+        return;
+      }
       if (hmi_capabilities.rc_capability()) {
         response_params[strings::system_capability][strings::rc_capability] =
             *hmi_capabilities.rc_capability();
@@ -131,5 +140,4 @@ void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager
