@@ -193,11 +193,11 @@ bool RCCommandRequest::AcquireResources() {
 void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const std::string module_type = ModuleType();
-  SetResourceState(module_type, ResourceState::FREE);
-
   if (event.id() == hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent) {
     ProcessAccessResponse(event);
+  } else {
+    const std::string module_type = ModuleType();
+    SetResourceState(module_type, ResourceState::FREE);
   }
 }
 

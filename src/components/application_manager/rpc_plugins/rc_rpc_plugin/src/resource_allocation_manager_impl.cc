@@ -205,14 +205,14 @@ EnumType StringToEnum(const std::string& str) {
 void ConstructOnRCStatusNotificationParams(
     smart_objects::SmartObject& msg_params,
     const std::map<std::string, uint32_t>& allocated_resources,
-    const std::vector<std::string>& supported_resources) {
+    const std::vector<std::string>& supported_resources,
+    const uint32_t app_id) {
   namespace strings = application_manager::strings;
   namespace message_params = rc_rpc_plugin::message_params;
   using smart_objects::SmartObject;
   using smart_objects::SmartType_Map;
   using smart_objects::SmartType_Array;
   LOG4CXX_AUTO_TRACE(logger_);
-
   auto modules_inserter = [](SmartObject& result_modules) {
     return [&result_modules](const std::string& module_name) {
       smart_objects::SmartObject module_data =
@@ -224,8 +224,10 @@ void ConstructOnRCStatusNotificationParams(
     };
   };
   SmartObject allocated_modules = SmartObject(SmartType_Array);
-  for (auto& module : allocated_resources) {
-    modules_inserter(allocated_modules)(module.first);
+  for (const auto& module : allocated_resources) {
+    if (module.second == app_id) {
+      modules_inserter(allocated_modules)(module.first);
+    }
   }
   SmartObject free_modules = SmartObject(SmartType_Array);
   for (auto& module : supported_resources) {
@@ -239,29 +241,29 @@ void ConstructOnRCStatusNotificationParams(
 
 smart_objects::SmartObjectSPtr
 ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
-    const uint32_t app_id) {
+    const application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
-  auto to_mobile_msg = MessageHelper::CreateNotification(
-      mobile_apis::FunctionID::OnRCStatusID, app_id);
-  auto& msg_params = (*to_mobile_msg)[application_manager::strings::msg_params];
+  auto msg_to_mobile = MessageHelper::CreateNotification(
+      mobile_apis::FunctionID::OnRCStatusID, app->app_id());
+  auto& msg_params = (*msg_to_mobile)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules());
-  return to_mobile_msg;
+      msg_params, allocated_resources_, all_supported_modules(), app->app_id());
+  return msg_to_mobile;
 }
 
 smart_objects::SmartObjectSPtr
 ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
-        const uint32_t app_id) {
+    const application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
-  auto to_hmi_msg =
+  auto msg_to_hmi =
       MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
-  auto& msg_params = (*to_hmi_msg)[application_manager::strings::msg_params];
+  auto& msg_params = (*msg_to_hmi)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules());
-  msg_params[application_manager::strings::app_id] = app_id;
-  return to_hmi_msg;
+      msg_params, allocated_resources_, all_supported_modules(), app->app_id());
+  msg_params[application_manager::strings::app_id] = app->hmi_app_id();
+  return msg_to_hmi;
 }
 
 void ResourceAllocationManagerImpl::SetResourceAquired(
@@ -274,11 +276,11 @@ void ResourceAllocationManagerImpl::SetResourceAquired(
 void ResourceAllocationManagerImpl::SendOnRCStatusNotification() {
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_apps = RCRPCPlugin::GetRCApplications(app_mngr_);
-  for (auto& rc_app : rc_apps) {
-    auto to_mobile = CreateOnRCStatusNotificationToMobile(rc_app->app_id());
-    rpc_service_.SendMessageToMobile(to_mobile);
-    auto to_HMI = CreateOnRCStatusNotificationToHmi(rc_app->hmi_app_id());
-    rpc_service_.SendMessageToHMI(to_HMI);
+  for (const auto& rc_app : rc_apps) {
+    auto msg_to_mobile = CreateOnRCStatusNotificationToMobile(rc_app);
+    rpc_service_.SendMessageToMobile(msg_to_mobile);
+    auto msg_to_hmi = CreateOnRCStatusNotificationToHmi(rc_app);
+    rpc_service_.SendMessageToHMI(msg_to_hmi);
   }
 }
 
