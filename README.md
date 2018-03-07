@@ -31,7 +31,7 @@ We're ramping up our efforts to get SmartDeviceLink developed and maintained dir
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
 
   1. Clone this repository
-  2. Create a folder for your build and run `cmake ../sdl_core`
+  2. Create a folder for your build outside of the source folder and run `cmake {path_to_sdl_core_source_folder}` from the build folder you created
   3. If there are any dependency issues, install missing dependencies
   4. Run the following commands to compile and install smartdevicelink
 
