@@ -42,6 +42,7 @@ include_directories(
   ${COMPONENTS_DIR}/include/test/policy/policy_regular/
   ${POLICY_PATH}/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
+  ${SQLITE3_INCLUDE_DIRS}
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -57,6 +58,8 @@ set(LIBRARIES
   Policy
   UsageStatistics
 )
+
+list (APPEND LIBRARIES sqlite3 -L${SQLITE3_LIBRARY_DIR} -Wl,-rpath,/opt/i386/lib)
 
 create_test(policy_test "${SOURCES}" "${LIBRARIES}")
 

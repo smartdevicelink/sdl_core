@@ -45,8 +45,10 @@ class SecurityManagerListener {
    * \param success result of connection protection
    * \return \c true on success notification or \c false otherwise
    */
+#ifdef ENABLE_SECURITY
   virtual bool OnHandshakeDone(uint32_t connection_key,
                                SSLContext::HandshakeResult result) = 0;
+#endif  // ENABLE_SECURITY
   /**
    * @brief Notify listeners that certificate update is required.
    */

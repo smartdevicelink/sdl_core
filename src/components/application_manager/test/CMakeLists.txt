@@ -101,10 +101,15 @@ set(LIBRARIES
   MediaManager
   Resumption
   ProtocolHandler
-  SecurityManager
   bson -L${BSON_LIBS_DIRECTORY}
   emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
+
+if(ENABLE_SECURITY)
+  list(APPEND LIBRARIES SecurityManager)
+endif()
+
+list (APPEND LIBRARIES sqlite3 -L${SQLITE3_LIBRARY_DIR} -Wl,-rpath,/opt/i386/lib)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)

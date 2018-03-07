@@ -1601,6 +1601,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(PolicyHandlerTest, RetrieveCertificate) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
@@ -1609,6 +1610,7 @@ TEST_F(PolicyHandlerTest, RetrieveCertificate) {
       .WillOnce(Return(test_certificate));
   EXPECT_EQ(test_certificate, policy_handler_.RetrieveCertificate());
 }
+#endif  // ENABLE_SECURITY
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
