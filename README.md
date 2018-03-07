@@ -118,6 +118,10 @@ There are several RPCs that are "required" to be implemented in order for SDL to
   * OnSystemRequest
   * Speak
 
+## Frequently Asked Questions
+
+If you have any questions regarding the setup of SDL Core or regarding the integration of SDL into an infotainment system, first visit our [SDL Core FAQ](https://smartdevicelink.com/en/guides/core/faq/). If you still have questions, you can post a question in the `core-help` channel of our Slack group (sign up [here](http://slack.smartdevicelink.com/))
+
 ## Test Coverage
 ### Used technologies
   * GCOV - test coverage program.
