@@ -22,7 +22,7 @@
                     "default": ["http://sdl.shaid.server"]
                 },
                 "lock_screen_icon_url": {
-                    "default": ["http://i.imgur.com/QwZ9uKG.png"]
+                    "default": ["http://i.imgur.com/TgkvOIZ.png"]
                 }
             },
             "notifications_per_minute_by_priority": {
