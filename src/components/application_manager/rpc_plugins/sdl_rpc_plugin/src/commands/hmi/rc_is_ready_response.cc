@@ -58,5 +58,4 @@ void RCIsReadyResponse::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

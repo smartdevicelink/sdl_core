@@ -13,12 +13,15 @@ typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
   ResourceAllocationManagerImpl(
-      application_manager::ApplicationManager& app_mngr);
+      application_manager::ApplicationManager& app_mngr,
+      application_manager::rpc_service::RPCService& rpc_service);
 
   ~ResourceAllocationManagerImpl();
 
   AcquireResult::eType AcquireResource(const std::string& module_type,
                                        const uint32_t app_id) OVERRIDE FINAL;
+  void ForceAcquireResource(const std::string& module_type,
+                            const uint32_t app_id) FINAL;
 
   void SetResourceState(const std::string& module_type,
                         const uint32_t app_id,
@@ -30,9 +33,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
 
   hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
-
-  void ForceAcquireResource(const std::string& module_type,
-                            const uint32_t app_id) FINAL;
 
   void OnDriverDisallowed(const std::string& module_type,
                           const uint32_t app_id) FINAL;
@@ -107,6 +107,23 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void RemoveAppsSubscriptions(const Apps& apps);
 
   /**
+   * @brief SetResourceAquired mark resourse as aquired and process logic of
+   * changing state of aquired resources
+   * @param module_type resource name
+   * @param app applicastion that aquire resource
+   */
+  void SetResourceAquired(const std::string& module_type,
+                          const uint32_t app_id);
+  /**
+   * @brief SetResourceFree mark resourse as free and process logic of
+   * changing state of aquired resources
+   * @param module_type resource name
+   * @param app applicastion that aquire resource
+   */
+  void SetResourceFree(const std::string& module_type, const uint32_t app_id);
+
+  std::vector<std::string> all_supported_modules();
+  /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource
    */
@@ -132,7 +149,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
-
+  application_manager::rpc_service::RPCService& rpc_service_;
 };
 }  // rc_rpc_plugin
 
