@@ -78,8 +78,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
       const uint32_t app_id);
 
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToHmi(
-      const uint32_t app_id);
-
+      const uint32_t hmi_app_id, const uint32_t mobile_app_id);
 
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by

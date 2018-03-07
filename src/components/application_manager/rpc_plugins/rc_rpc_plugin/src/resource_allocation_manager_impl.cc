@@ -205,14 +205,14 @@ EnumType StringToEnum(const std::string& str) {
 void ConstructOnRCStatusNotificationParams(
     smart_objects::SmartObject& msg_params,
     const std::map<std::string, uint32_t>& allocated_resources,
-    const std::vector<std::string>& supported_resources) {
+    const std::vector<std::string>& supported_resources,
+    const uint32_t app_id) {
   namespace strings = application_manager::strings;
   namespace message_params = rc_rpc_plugin::message_params;
   using smart_objects::SmartObject;
   using smart_objects::SmartType_Map;
   using smart_objects::SmartType_Array;
   LOG4CXX_AUTO_TRACE(logger_);
-
   auto modules_inserter = [](SmartObject& result_modules) {
     return [&result_modules](const std::string& module_name) {
       smart_objects::SmartObject module_data =
@@ -225,7 +225,9 @@ void ConstructOnRCStatusNotificationParams(
   };
   SmartObject allocated_modules = SmartObject(SmartType_Array);
   for (auto& module : allocated_resources) {
-    modules_inserter(allocated_modules)(module.first);
+    if (app_id == module.second) {
+      modules_inserter(allocated_modules)(module.first);
+    }
   }
   SmartObject free_modules = SmartObject(SmartType_Array);
   for (auto& module : supported_resources) {
@@ -246,21 +248,21 @@ ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToMobile(
       mobile_apis::FunctionID::OnRCStatusID, app_id);
   auto& msg_params = (*to_mobile_msg)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules());
+      msg_params, allocated_resources_, all_supported_modules(), app_id);
   return to_mobile_msg;
 }
 
 smart_objects::SmartObjectSPtr
 ResourceAllocationManagerImpl::CreateOnRCStatusNotificationToHmi(
-        const uint32_t app_id) {
+    const uint32_t hmi_app_id, const uint32_t mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   using application_manager::MessageHelper;
   auto to_hmi_msg =
       MessageHelper::CreateHMINotification(hmi_apis::FunctionID::RC_OnRCStatus);
   auto& msg_params = (*to_hmi_msg)[application_manager::strings::msg_params];
   ConstructOnRCStatusNotificationParams(
-      msg_params, allocated_resources_, all_supported_modules());
-  msg_params[application_manager::strings::app_id] = app_id;
+      msg_params, allocated_resources_, all_supported_modules(), mobile_app_id);
+  msg_params[application_manager::strings::app_id] = hmi_app_id;
   return to_hmi_msg;
 }
 
@@ -277,7 +279,8 @@ void ResourceAllocationManagerImpl::SendOnRCStatusNotification() {
   for (auto& rc_app : rc_apps) {
     auto to_mobile = CreateOnRCStatusNotificationToMobile(rc_app->app_id());
     rpc_service_.SendMessageToMobile(to_mobile);
-    auto to_HMI = CreateOnRCStatusNotificationToHmi(rc_app->hmi_app_id());
+    auto to_HMI = CreateOnRCStatusNotificationToHmi(rc_app->hmi_app_id(),
+                                                    rc_app->app_id());
     rpc_service_.SendMessageToHMI(to_HMI);
   }
 }
