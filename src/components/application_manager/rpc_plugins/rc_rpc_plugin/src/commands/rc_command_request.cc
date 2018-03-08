@@ -140,7 +140,6 @@ void RCCommandRequest::Run() {
     SendResponse(false, mobile_apis::Result::DISALLOWED, "");
     return;
   }
-
   if (CheckDriverConsent()) {
     if (AcquireResources()) {
       Execute();  // run child's logic
