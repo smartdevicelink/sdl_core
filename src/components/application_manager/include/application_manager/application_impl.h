@@ -353,6 +353,12 @@ class ApplicationImpl : public virtual Application,
   virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
+
+  /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
