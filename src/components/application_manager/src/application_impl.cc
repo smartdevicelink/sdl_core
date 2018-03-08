@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -288,6 +288,13 @@ const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
 
 const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
+}
+
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (!is_remote_control_supported() || !is_media_application()) {
+    return false;
+  }
+  return true;
 }
 
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {

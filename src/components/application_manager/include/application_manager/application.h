@@ -695,6 +695,12 @@ class Application : public virtual InitialApplicationData,
   virtual const HmiStatePtr RegularHmiState() const = 0;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const = 0;
+
+  /**
    * @brief PostponedHmiState returns postponed hmi state of application
    * if it's present
    *
