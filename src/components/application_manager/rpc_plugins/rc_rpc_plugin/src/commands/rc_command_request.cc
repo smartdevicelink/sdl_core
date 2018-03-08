@@ -143,6 +143,14 @@ void RCCommandRequest::Run() {
     SendResponse(false, mobile_apis::Result::DISALLOWED, "");
     return;
   }
+  if (!resource_allocation_manager_.is_rc_enabled()) {
+    LOG4CXX_WARN(logger_, "Remote control is disabled by user");
+    SetResourceState(ModuleType(), ResourceState::FREE);
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
+                 "Remote control is disabled by user");
+    return;
+  }
 
   if (CheckDriverConsent()) {
     if (AcquireResources()) {

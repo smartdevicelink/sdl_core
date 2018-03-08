@@ -114,6 +114,10 @@ class ResourceAllocationManager {
   virtual RCAppExtensionPtr GetApplicationExtention(
       application_manager::ApplicationSharedPtr application) = 0;
 
+  virtual bool is_rc_enabled() const = 0;
+
+  virtual void set_rc_enabled(const bool value) = 0;
+
   virtual ~ResourceAllocationManager() {}
 };
 

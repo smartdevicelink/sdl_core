@@ -33,6 +33,8 @@ class MockResourceAllocationManager
                rc_rpc_plugin::RCAppExtensionPtr(
                    application_manager::ApplicationSharedPtr application));
   MOCK_METHOD0(ResetAllAllocations, void());
+  MOCK_CONST_METHOD0(is_rc_enabled, bool());
+  MOCK_METHOD1(set_is_rc_enabled, void(const bool value));
 };
 
 }  // namespace rc_rpc_plugin_test

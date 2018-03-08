@@ -110,6 +110,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_CONST_METHOD0(CurrentHmiState, const application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(RegularHmiState, const application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD0(IsAllowedToChangeAudioSource, bool());
   MOCK_CONST_METHOD0(PostponedHmiState,
                      const application_manager::HmiStatePtr());
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
