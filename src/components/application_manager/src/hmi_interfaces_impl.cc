@@ -61,8 +61,6 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFileRemoved] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_AllowDeviceToConnect] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnDeviceChosen] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFindApplications] =
