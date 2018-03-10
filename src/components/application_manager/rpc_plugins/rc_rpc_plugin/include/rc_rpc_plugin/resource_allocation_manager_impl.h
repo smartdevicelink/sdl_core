@@ -75,11 +75,10 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @return smart object with mobile OnRCStatusNotification
    */
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToMobile(
-      const uint32_t app_id);
+      const application_manager::ApplicationSharedPtr app);
 
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToHmi(
-      const uint32_t app_id);
-
+      const application_manager::ApplicationSharedPtr app);
 
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
