@@ -96,8 +96,10 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
   mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
   mapping["backTiltAngle"] = "backTiltAngleAvailable";
-  mapping["headSupportHorizontalPosition"] = "headSupportHorizontalPositionAvailable";
-  mapping["headSupportVerticalPosition"] = "headSupportVerticalPositionAvailable";
+  mapping["headSupportHorizontalPosition"] =
+      "headSupportHorizontalPositionAvailable";
+  mapping["headSupportVerticalPosition"] =
+      "headSupportVerticalPositionAvailable";
   mapping["massageEnabled"] = "massageEnabledAvailable";
   mapping["massageMode"] = "massageModeAvailable";
   mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
@@ -348,6 +350,20 @@ void SetInteriorVehicleDataRequest::Execute() {
         application_manager_.application(connection_key());
     (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
         app->app_id();
+
+    const bool app_wants_to_set_audio_src =
+        module_data.keyExists(message_params::kAudioControlData) &&
+        module_data[message_params::kAudioControlData].keyExists(
+            message_params::kSource);
+
+    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
+      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::REJECTED,
+                   "App is not allowed to change audio source");
+      return;
+    }
 
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],

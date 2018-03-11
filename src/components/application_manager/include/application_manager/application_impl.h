@@ -41,7 +41,7 @@
 #include <forward_list>
 #include <stdint.h>
 
-#include "utils/date_time.h"
+#include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/hmi_state.h"
@@ -53,6 +53,7 @@
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
+#include "utils/date_time.h"
 
 namespace usage_statistics {
 
@@ -318,6 +319,12 @@ class ApplicationImpl : public virtual Application,
    * @return Active HmiState of application
    */
   virtual const HmiStatePtr CurrentHmiState() const;
+
+  /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
