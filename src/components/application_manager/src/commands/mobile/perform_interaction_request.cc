@@ -766,7 +766,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-  if (!CheckSyntax(str)) {
+  if (!CheckSyntax(str, true)) {
     LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
     return true;
   }

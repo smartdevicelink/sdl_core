@@ -3435,7 +3435,7 @@
     <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="request">
         <description>Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
         
-        <param name="initialText" type="String" maxlength="500"  mandatory="true">
+        <param name="initialText" type="String" maxlength="500"  mandatory="false">
             <description>
                 Text to be displayed first.
             </description>
