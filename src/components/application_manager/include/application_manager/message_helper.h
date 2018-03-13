@@ -70,15 +70,14 @@ typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
  **/
 class MessageHelper {
  public:
-
-    /**
-   * @brief CreateNotification creates basic mobile notification smart object
-   * @param function_id Notificaiton function ID
-   * @param app_id application to send notification
-   * @return basic mobile notification smart object
-   */
-  static smart_objects::SmartObjectSPtr CreateNotification(mobile_apis::FunctionID::eType function_id,
-                                                           uint32_t app_id);
+  /**
+ * @brief CreateNotification creates basic mobile notification smart object
+ * @param function_id Notificaiton function ID
+ * @param app_id application to send notification
+ * @return basic mobile notification smart object
+ */
+  static smart_objects::SmartObjectSPtr CreateNotification(
+      mobile_apis::FunctionID::eType function_id, uint32_t app_id);
   /**
  * @brief CreateHMINotification creates basic hmi notification smart object
  * @param function_id Notificaiton function ID
