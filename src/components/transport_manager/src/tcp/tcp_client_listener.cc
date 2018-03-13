@@ -59,6 +59,7 @@
 #include "utils/make_shared.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/tcp/network_interface_listener.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
@@ -78,6 +79,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
     , thread_stop_requested_(false) {
   thread_ = threads::CreateThread("TcpClientListener",
                                   new ListeningThreadDelegate(this));
+  interface_listener_ = new NetworkInterfaceListener(this);
 }
 
 TransportAdapter::Error TcpClientListener::Init() {
@@ -113,6 +115,12 @@ TransportAdapter::Error TcpClientListener::Init() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "listen() failed");
     return TransportAdapter::FAIL;
   }
+
+  if (!interface_listener_->Init()) {
+    close(socket_);
+    socket_ = -1;
+    return TransportAdapter::FAIL;
+  }
   return TransportAdapter::OK;
 }
 
@@ -129,6 +137,8 @@ void TcpClientListener::Terminate() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
   }
   socket_ = -1;
+
+  interface_listener_->Deinit();
 }
 
 bool TcpClientListener::IsInitialised() const {
@@ -300,8 +310,13 @@ TransportAdapter::Error TcpClientListener::StartListening() {
     return TransportAdapter::BAD_STATE;
   }
 
+  if (!interface_listener_->Start()) {
+    return TransportAdapter::FAIL;
+  }
+
   if (!thread_->start()) {
     LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed");
+    interface_listener_->Stop();
     return TransportAdapter::FAIL;
   }
   LOG4CXX_INFO(logger_, "Tcp client listener has started successfully");
@@ -326,6 +341,8 @@ TransportAdapter::Error TcpClientListener::StopListening() {
     LOG4CXX_DEBUG(logger_, "TcpClientListener is not running now");
     return TransportAdapter::BAD_STATE;
   }
+
+  interface_listener_->Stop();
 
   thread_->join();
 

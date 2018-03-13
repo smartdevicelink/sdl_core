@@ -48,6 +48,7 @@ namespace transport_manager {
 namespace transport_adapter {
 
 class TransportAdapterController;
+class NetworkInterfaceListener;
 
 /**
  * @brief Listener of device adapter that use TCP transport.
@@ -132,6 +133,7 @@ class TcpClientListener : public ClientConnectionListener {
   threads::Thread* thread_;
   int socket_;
   bool thread_stop_requested_;
+  NetworkInterfaceListener* interface_listener_;
   std::string current_ip_address_;
 
   void Loop();
