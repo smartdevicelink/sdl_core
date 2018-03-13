@@ -2123,11 +2123,11 @@ void ApplicationManagerImpl::set_application_id(const int32_t correlation_id,
 }
 
 uint32_t ApplicationManagerImpl::get_current_audio_source() const {
-    return current_audio_source_;
+  return current_audio_source_;
 }
 
 void ApplicationManagerImpl::set_current_audio_source(const uint32_t source) {
-    current_audio_source_ = source;
+  current_audio_source_ = source;
 }
 
 void ApplicationManagerImpl::AddPolicyObserver(
