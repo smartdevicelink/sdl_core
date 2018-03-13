@@ -494,7 +494,8 @@ void NetworkInterfaceListener::NotifyIPAddresses() {
     notified_ipv4_addr_ = ipv4_addr;
     notified_ipv6_addr_ = ipv6_addr;
 
-    /* TODO: notify the change */
+    tcp_client_listener_->OnIPAddressUpdated(notified_ipv4_addr_,
+                                             notified_ipv6_addr_);
   }
 }
 

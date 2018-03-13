@@ -5,6 +5,9 @@
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +19,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -101,6 +104,13 @@ class TcpClientListener : public ClientConnectionListener {
    */
   virtual TransportAdapter::Error StopListening();
 
+  /**
+   * @brief Called from NetworkInterfaceListener when IP address of the network
+   *        interface is changed.
+   */
+  void OnIPAddressUpdated(const std::string ipv4_addr,
+                          const std::string ipv6_addr);
+
 #ifdef BUILD_TESTS
   uint16_t port() const {
     return port_;
@@ -122,6 +132,7 @@ class TcpClientListener : public ClientConnectionListener {
   threads::Thread* thread_;
   int socket_;
   bool thread_stop_requested_;
+  std::string current_ip_address_;
 
   void Loop();
   void StopLoop();

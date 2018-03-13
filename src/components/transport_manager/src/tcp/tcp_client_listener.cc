@@ -3,6 +3,9 @@
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -14,7 +17,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -328,6 +331,29 @@ TransportAdapter::Error TcpClientListener::StopListening() {
 
   LOG4CXX_INFO(logger_, "Tcp client listener has stopped successfully");
   return TransportAdapter::OK;
+}
+
+void TcpClientListener::OnIPAddressUpdated(const std::string ipv4_addr,
+                                           const std::string ipv6_addr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  // Since we only create a TCP socket with IPv4 option (AF_INET), currently we
+  // do not use IPv6 address.
+  if (ipv4_addr != current_ip_address_) {
+    current_ip_address_ = ipv4_addr;
+
+    std::string enabled = !current_ip_address_.empty() ? "true" : "false";
+    std::ostringstream oss;
+    oss << port_;
+
+    TransportConfig config;
+    config.insert(std::make_pair(std::string("enabled"), enabled));
+    config.insert(
+        std::make_pair(std::string("tcp_ip_address"), current_ip_address_));
+    config.insert(std::make_pair(std::string("tcp_port"), oss.str()));
+
+    controller_->TransportConfigUpdated(config);
+  }
 }
 
 }  // namespace transport_adapter

@@ -2,6 +2,9 @@
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
+ * Copyright (c) 2018 Xevo Inc.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -13,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -1143,6 +1146,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                                       << event.application_id << ") not found");
       }
       LOG4CXX_DEBUG(logger_, "eevent_type = ON_UNEXPECTED_DISCONNECT");
+      break;
+    }
+    case EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED: {
+      LOG4CXX_DEBUG(logger_, "event_type = ON_TRANSPORT_CONFIG_UPDATED");
+      std::map<std::string, std::string> config =
+          event.transport_adapter->GetTransportConfiguration();
+      RaiseEvent(&TransportManagerListener::OnTransportConfigUpdated, config);
       break;
     }
   }  // switch
