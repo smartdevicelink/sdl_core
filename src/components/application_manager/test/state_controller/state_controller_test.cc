@@ -2404,7 +2404,9 @@ TEST_F(StateControllerImplTest, SetRegularStateWithAudioStateAudible) {
   EXPECT_CALL(*simple_app_ptr_,
               SetRegularState(Truly(HmiStatesComparator(check_state))));
 
-  state_ctrl_->SetRegularState(simple_app_, AudioStreamingState::AUDIBLE);
+  state_ctrl_->SetRegularState(simple_app_,
+                               AudioStreamingState::AUDIBLE,
+                               VideoStreamingState::STREAMABLE);
 }
 
 TEST_F(StateControllerImplTest,

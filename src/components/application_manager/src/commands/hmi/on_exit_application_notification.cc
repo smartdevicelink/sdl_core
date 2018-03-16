@@ -105,7 +105,11 @@ void OnExitApplicationNotification::Run() {
   }
 
   application_manager_.state_controller().SetRegularState(
-      app_impl, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
+      app_impl,
+      HMILevel::HMI_NONE,
+      AudioStreamingState::NOT_AUDIBLE,
+      VideoStreamingState::NOT_STREAMABLE,
+      false);
 }
 
 }  // namespace commands
