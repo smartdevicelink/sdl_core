@@ -953,6 +953,7 @@ TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppLimitedAndRevoked) {
               SetRegularState(_,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                              mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                               true));
 
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))

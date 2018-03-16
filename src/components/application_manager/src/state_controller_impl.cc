@@ -41,10 +41,15 @@ namespace application_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "StateControllerImpl")
 
 bool IsStatusChanged(HmiStatePtr old_state, HmiStatePtr new_state) {
-  if (old_state->hmi_level() != new_state->hmi_level() ||
-      old_state->audio_streaming_state() !=
-          new_state->audio_streaming_state() ||
-      old_state->system_context() != new_state->system_context()) {
+  bool level_changed = old_state->hmi_level() != new_state->hmi_level();
+  bool audio_streaming_state_changed =
+      old_state->audio_streaming_state() != new_state->audio_streaming_state();
+  bool video_streaming_state_changed =
+      old_state->video_streaming_state() != new_state->video_streaming_state();
+  bool system_context_changed =
+      old_state->system_context() != new_state->system_context();
+  if (level_changed || audio_streaming_state_changed ||
+      video_streaming_state_changed || system_context_changed) {
     return true;
   }
   return false;
@@ -76,6 +81,8 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
   if (state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM ||
       state->audio_streaming_state() ==
           mobile_apis::AudioStreamingState::INVALID_ENUM ||
+      state->video_streaming_state() ==
+          mobile_apis::VideoStreamingState::INVALID_ENUM ||
       state->system_context() == mobile_apis::SystemContext::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "Get invalid state");
     return;
@@ -113,6 +120,7 @@ void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level,
     const mobile_apis::AudioStreamingState::eType audio_state,
+    const mobile_apis::VideoStreamingState::eType video_state,
     const bool send_activate_app) {
   CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
@@ -127,6 +135,7 @@ void StateControllerImpl::SetRegularState(
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(audio_state);
+  hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(prev_regular->system_context());
   SetRegularState(app, hmi_state, send_activate_app);
 }
@@ -149,6 +158,7 @@ void StateControllerImpl::SetRegularState(
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
+  hmi_state->set_video_streaming_state(CalcVideoState(app, hmi_level));
   hmi_state->set_system_context(SystemContext::SYSCTXT_MAIN);
   SetRegularState(app, hmi_state, send_activate_app);
 }
@@ -157,6 +167,7 @@ void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level,
     const mobile_apis::AudioStreamingState::eType audio_state,
+    const mobile_apis::VideoStreamingState::eType video_state,
     const mobile_apis::SystemContext::eType system_context,
     const bool send_activate_app) {
   CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
@@ -170,6 +181,7 @@ void StateControllerImpl::SetRegularState(
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(audio_state);
+  hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(system_context);
   SetRegularState(app, hmi_state, send_activate_app);
 }
@@ -188,6 +200,7 @@ void StateControllerImpl::SetRegularState(
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(hmi_level);
   hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
+  hmi_state->set_video_streaming_state(CalcVideoState(app, hmi_level));
   hmi_state->set_system_context(prev_state
                                     ? prev_state->system_context()
                                     : mobile_apis::SystemContext::SYSCTXT_MAIN);
@@ -211,13 +224,16 @@ void StateControllerImpl::SetRegularState(
   hmi_state->set_hmi_level(prev_regular->hmi_level());
   hmi_state->set_audio_streaming_state(
       CalcAudioState(app, prev_regular->hmi_level()));
+  hmi_state->set_video_streaming_state(
+      CalcVideoState(app, prev_regular->hmi_level()));
   hmi_state->set_system_context(system_context);
   SetRegularState(app, hmi_state, false);
 }
 
 void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
-    const mobile_apis::AudioStreamingState::eType audio_state) {
+    const mobile_apis::AudioStreamingState::eType audio_state,
+    const mobile_apis::VideoStreamingState::eType video_state) {
   CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
   if (!app) {
@@ -231,6 +247,7 @@ void StateControllerImpl::SetRegularState(
   DCHECK_OR_RETURN_VOID(hmi_state);
   hmi_state->set_hmi_level(prev_state->hmi_level());
   hmi_state->set_audio_streaming_state(audio_state);
+  hmi_state->set_video_streaming_state(video_state);
   hmi_state->set_system_context(prev_state->system_context());
   SetRegularState(app, hmi_state, false);
 }
@@ -301,11 +318,17 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
                   "Application " << to_resolve->app_id()
                                  << " will change HMI level to "
                                  << result_hmi_level);
-    state_ctrl_->SetupRegularHmiState(to_resolve,
-                                      result_hmi_level,
-                                      result_hmi_level == HMILevel::HMI_LIMITED
-                                          ? AudioStreamingState::AUDIBLE
-                                          : AudioStreamingState::NOT_AUDIBLE);
+    VideoStreamingState::eType video_state =
+        result_hmi_level == HMILevel::HMI_LIMITED
+            ? VideoStreamingState::STREAMABLE
+            : VideoStreamingState::NOT_STREAMABLE;
+    AudioStreamingState::eType audio_state =
+        result_hmi_level == HMILevel::HMI_LIMITED
+            ? AudioStreamingState::AUDIBLE
+            : AudioStreamingState::NOT_AUDIBLE;
+
+    state_ctrl_->SetupRegularHmiState(
+        to_resolve, result_hmi_level, audio_state, video_state);
   } else {
     LOG4CXX_DEBUG(logger_,
                   "Application " << to_resolve->app_id()
@@ -321,6 +344,7 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
   LOG4CXX_DEBUG(logger_,
                 "State to resolve: hmi_level "
                     << state->hmi_level() << ", audio_state "
+                    << state->video_streaming_state() << ", video_state "
                     << state->audio_streaming_state() << ", system_context "
                     << state->system_context());
 
@@ -329,6 +353,7 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
   DCHECK_OR_RETURN(available_state, HmiStatePtr());
   available_state->set_hmi_level(state->hmi_level());
   available_state->set_audio_streaming_state(state->audio_streaming_state());
+  available_state->set_video_streaming_state(state->video_streaming_state());
   available_state->set_system_context(state->system_context());
 
   if (app->is_resuming()) {
@@ -337,6 +362,8 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
     available_state->set_hmi_level(available_level);
     available_state->set_audio_streaming_state(
         CalcAudioState(app, available_level));
+    available_state->set_video_streaming_state(
+        CalcVideoState(app, available_level));
   }
   return IsStateAvailable(app, available_state) ? available_state
                                                 : HmiStatePtr();
@@ -506,6 +533,7 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(old_state);
   old_state->set_hmi_level(curr_state->hmi_level());
   old_state->set_audio_streaming_state(curr_state->audio_streaming_state());
+  old_state->set_video_streaming_state(curr_state->video_streaming_state());
   old_state->set_system_context(curr_state->system_context());
   app->SetRegularState(state);
 
@@ -524,7 +552,8 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
 void StateControllerImpl::SetupRegularHmiState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level,
-    const mobile_apis::AudioStreamingState::eType audio_state) {
+    const mobile_apis::AudioStreamingState::eType audio_state,
+    const mobile_apis::VideoStreamingState::eType video_state) {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   using helpers::Compare;
@@ -537,6 +566,7 @@ void StateControllerImpl::SetupRegularHmiState(
   DCHECK_OR_RETURN_VOID(new_state);
   new_state->set_hmi_level(hmi_level);
   new_state->set_audio_streaming_state(audio_state);
+  new_state->set_video_streaming_state(video_state);
   new_state->set_system_context(prev_state->system_context());
   SetupRegularHmiState(app, new_state);
 }
@@ -675,15 +705,17 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(old_state);
   DCHECK_OR_RETURN_VOID(new_state);
   LOG4CXX_DEBUG(logger_,
-                "old: hmi_level " << old_state->hmi_level() << ", audio_state "
-                                  << old_state->audio_streaming_state()
-                                  << ", system_context "
-                                  << old_state->system_context());
+                "old: hmi_level "
+                    << old_state->hmi_level() << ", audio_state "
+                    << old_state->audio_streaming_state() << ", video_state "
+                    << old_state->video_streaming_state() << ", system_context "
+                    << old_state->system_context());
   LOG4CXX_DEBUG(logger_,
-                "new: hmi_level " << new_state->hmi_level() << ", audio_state "
-                                  << new_state->audio_streaming_state()
-                                  << ", system_context "
-                                  << new_state->system_context());
+                "new: hmi_level "
+                    << new_state->hmi_level() << ", audio_state "
+                    << new_state->audio_streaming_state() << ", video_state "
+                    << old_state->video_streaming_state() << ", system_context "
+                    << new_state->system_context());
   if (IsStatusChanged(old_state, new_state)) {
     app_mngr_.SendHMIStatusNotification(app);
     if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
@@ -730,6 +762,7 @@ void StateControllerImpl::OnApplicationRegistered(
   DCHECK_OR_RETURN_VOID(default_state);
   default_state->set_hmi_level(default_level);
   default_state->set_audio_streaming_state(CalcAudioState(app, default_level));
+  default_state->set_video_streaming_state(CalcVideoState(app, default_level));
   default_state->set_system_context(SystemContext::SYSCTXT_MAIN);
 
   HmiStatePtr initial_state = app->RegularHmiState();
@@ -812,9 +845,11 @@ void StateControllerImpl::DeactivateApp(ApplicationSharedPtr app) {
   if (app->IsAudioApplication()) {
     new_regular->set_hmi_level(HMILevel::HMI_LIMITED);
     new_regular->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
+    new_regular->set_video_streaming_state(VideoStreamingState::STREAMABLE);
   } else {
     new_regular->set_hmi_level(HMILevel::HMI_BACKGROUND);
     new_regular->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
+    new_regular->set_video_streaming_state(VideoStreamingState::NOT_STREAMABLE);
   }
 
   SetRegularState(app, new_regular, false);
@@ -966,6 +1001,25 @@ mobile_apis::AudioStreamingState::eType StateControllerImpl::CalcAudioState(
     }
   }
   return audio_state;
+}
+
+mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
+    ApplicationSharedPtr app,
+    const mobile_apis::HMILevel::eType hmi_level) const {
+  namespace HMILevel = mobile_apis::HMILevel;
+  namespace VideoStreamingState = mobile_apis::VideoStreamingState;
+  using helpers::Compare;
+  using helpers::EQ;
+  using helpers::ONE;
+
+  VideoStreamingState::eType video_state = VideoStreamingState::NOT_STREAMABLE;
+  if (Compare<HMILevel::eType, EQ, ONE>(
+          hmi_level, HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+    if (app->IsVideoApplication()) {
+      video_state = VideoStreamingState::STREAMABLE;
+    }
+  }
+  return video_state;
 }
 
 }  // namespace application_manager

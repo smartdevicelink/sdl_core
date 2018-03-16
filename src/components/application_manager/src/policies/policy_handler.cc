@@ -162,10 +162,12 @@ struct DeactivateApplication {
 
   void operator()(const ApplicationSharedPtr& app) {
     if (device_id_ == app->device()) {
-      state_ctrl_.SetRegularState(app,
-                                  mobile_apis::HMILevel::HMI_NONE,
-                                  mobile_apis::AudioStreamingState::NOT_AUDIBLE,
-                                  true);
+      state_ctrl_.SetRegularState(
+          app,
+          mobile_apis::HMILevel::HMI_NONE,
+          mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
+          true);
     }
   }
 
@@ -974,6 +976,7 @@ void PolicyHandler::OnPendingPermissionChange(
         app,
         mobile_apis::HMILevel::HMI_NONE,
         mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+        mobile_apis::VideoStreamingState::NOT_STREAMABLE,
         true);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;

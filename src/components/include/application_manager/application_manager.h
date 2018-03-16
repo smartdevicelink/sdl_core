@@ -654,6 +654,7 @@ class ApplicationManager {
       utils::SharedPtr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::VideoStreamingState::eType video_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**

@@ -525,6 +525,8 @@ class Application : public virtual InitialApplicationData,
   virtual const mobile_api::SystemContext::eType system_context() const = 0;
   virtual const mobile_api::AudioStreamingState::eType audio_streaming_state()
       const = 0;
+  virtual const mobile_api::VideoStreamingState::eType video_streaming_state()
+      const = 0;
   virtual const std::string& app_icon_path() const = 0;
   virtual connection_handler::DeviceHandle device() const = 0;
 
@@ -714,6 +716,13 @@ class Application : public virtual InitialApplicationData,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const = 0;
+
+  /**
+   * @brief Check's if it is projection or navigation application
+   *
+   * @return true if application is projection or navigation
+   */
+  virtual bool IsVideoApplication() const = 0;
 
   /**
    * DEPRECATED

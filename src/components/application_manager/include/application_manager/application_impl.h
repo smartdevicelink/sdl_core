@@ -167,6 +167,8 @@ class ApplicationImpl : public virtual Application,
   const mobile_api::SystemContext::eType system_context() const;
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const;
+  inline const mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
   const std::string& mac_address() const OVERRIDE;
@@ -264,6 +266,8 @@ class ApplicationImpl : public virtual Application,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
+
+  bool IsVideoApplication() const OVERRIDE;
 
   /**
    * @brief SetInitialState sets initial HMI state for application on
@@ -532,6 +536,14 @@ ApplicationImpl::audio_streaming_state() const {
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->audio_streaming_state()
                    : AudioStreamingState::INVALID_ENUM;
+}
+
+const mobile_api::VideoStreamingState::eType
+ApplicationImpl::video_streaming_state() const {
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->video_streaming_state()
+                   : VideoStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

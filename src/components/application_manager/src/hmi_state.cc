@@ -45,6 +45,7 @@ HmiState::HmiState(utils::SharedPtr<Application> app,
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
+    , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {}
 
 HmiState::HmiState(utils::SharedPtr<Application> app,
@@ -54,6 +55,7 @@ HmiState::HmiState(utils::SharedPtr<Application> app,
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
+    , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {}
 
 DEPRECATED HmiState::HmiState(uint32_t app_id,
@@ -155,6 +157,18 @@ NaviStreamingHmiState::audio_streaming_state() const {
     } else {
       expected_state = AudioStreamingState::NOT_AUDIBLE;
     }
+  }
+  return expected_state;
+}
+
+mobile_apis::VideoStreamingState::eType
+NaviStreamingHmiState::video_streaming_state() const {
+  using namespace helpers;
+  using namespace mobile_apis;
+
+  VideoStreamingState::eType expected_state = parent()->video_streaming_state();
+  if (!is_navi_app() && VideoStreamingState::STREAMABLE == expected_state) {
+    expected_state = VideoStreamingState::NOT_STREAMABLE;
   }
   return expected_state;
 }

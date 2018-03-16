@@ -232,6 +232,10 @@ bool ApplicationImpl::IsAudioApplication() const {
          mobile_projection_enabled_;
 }
 
+bool ApplicationImpl::IsVideoApplication() const {
+  return is_navi_ || mobile_projection_enabled_;
+}
+
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   state_.AddState(state);

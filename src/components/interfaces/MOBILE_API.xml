@@ -358,6 +358,12 @@
         <element name="ATTENUATED" />
         <element name="NOT_AUDIBLE" />
     </enum>
+
+    <enum name="VideoStreamingState">
+        <description>Enumeration that describes possible states of video streaming. </description>
+        <element name="STREAMABLE" />
+        <element name="NOT_STREAMABLE" />
+    </enum>
     
     <enum name="SystemAction">
         <description>Enumeration that describes system actions that can be triggered.</description>
@@ -5694,6 +5700,9 @@
         
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
+        </param>
+        <param name="videoStreamingState" type="VideoStreamingState" mandatory="true">
+            <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
         </param>
     </function>
     
