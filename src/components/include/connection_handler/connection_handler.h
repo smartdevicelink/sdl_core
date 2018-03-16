@@ -40,6 +40,7 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
 #include "utils/macro.h"
+#include "utils/data_accessor.h"
 
 /**
  * \namespace connection_handler
@@ -50,6 +51,8 @@ namespace connection_handler {
 enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
 
 class ConnectionHandlerObserver;
+
+typedef std::map<uint8_t, transport_manager::ConnectionUID> SessionConnectionMap;
 
 /**
  * \class ConnectionHandler
@@ -215,6 +218,8 @@ class ConnectionHandler {
   virtual const protocol_handler::SessionObserver& get_session_observer() = 0;
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
+
+  virtual NonConstDataAccessor<SessionConnectionMap> session_connection_map() = 0;
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed

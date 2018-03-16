@@ -59,6 +59,7 @@
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
 /**
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
@@ -522,6 +523,8 @@ class ConnectionHandlerImpl
   const protocol_handler::SessionObserver& get_session_observer();
   DevicesDiscoveryStarter& get_device_discovery_starter();
 
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map();
+
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
    * \param session_key the key of started session passed to
@@ -586,6 +589,12 @@ class ConnectionHandlerImpl
   sync_primitives::Lock start_service_context_map_lock_;
   std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
+
+  /**
+   * @brief session/connection map
+   */
+  SessionConnectionMap session_connection_map_;
+  mutable sync_primitives::Lock session_connection_map_lock_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage

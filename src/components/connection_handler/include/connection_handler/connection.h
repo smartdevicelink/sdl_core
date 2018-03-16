@@ -156,7 +156,7 @@ class Connection {
    * @brief Adds session to connection
    * @return new session id or 0 in case of issues
    */
-  uint32_t AddNewSession();
+  uint32_t AddNewSession(const transport_manager::ConnectionUID connection_handle);
 
   /**
    * @brief Removes session from connection

@@ -72,7 +72,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_handler_observer_lock_()
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
-    , start_service_context_map_() {}
+    , start_service_context_map_()
+    , session_connection_map_lock_(true) {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -361,7 +362,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
-    new_session_id = connection->AddNewSession();
+    new_session_id = connection->AddNewSession(connection_handle);
     if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       return 0;
@@ -439,7 +440,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
       !connection->SessionServiceExists(session_id, service_type);
 
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
-    context.new_session_id_ = connection->AddNewSession();
+    context.new_session_id_ = connection->AddNewSession(connection_handle);
     if (0 == context.new_session_id_) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       protocol_handler_->NotifySessionStarted(context, rejected_params);
@@ -462,7 +463,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     context.hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     const uint32_t session_key =
         KeyFromPair(connection_handle, context.new_session_id_);
 
@@ -739,6 +740,10 @@ ConnectionHandlerImpl::get_session_observer() {
 
 DevicesDiscoveryStarter& ConnectionHandlerImpl::get_device_discovery_starter() {
   return *this;
+}
+
+NonConstDataAccessor<SessionConnectionMap> ConnectionHandlerImpl::session_connection_map() {
+  return NonConstDataAccessor<SessionConnectionMap>(session_connection_map_, session_connection_map_lock_);
 }
 
 struct CompareMAC {

@@ -115,28 +115,53 @@ uint32_t findGap(const std::map<unsigned char, T>& map) {
 }
 }  // namespace
 
-uint32_t Connection::AddNewSession() {
+uint32_t Connection::AddNewSession(
+    const transport_manager::ConnectionUID connection_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(session_map_lock_);
-  const uint32_t session_id = findGap(session_map_);
+
+  // Even though we have our own SessionMap, we use the Connection Handler's SessionConnectionMap to generate a 
+  // session ID. We want to make sure that session IDs are globally unique, and not only unique within a Connection.
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  const uint32_t session_id = findGap(session_connection_map);
   if (session_id > 0) {
+    LOG4CXX_INFO(logger_, "New session ID " << session_id << " and Connection Id " << static_cast<int>(connection_handle) << " added to Session/Connection Map");
+    session_connection_map[session_id] = connection_handle;
+
+    // NESTED LOCK: make sure to never lock the ConnectionHandler's SessionConnectedMap inside of the "session_map_lock_"
+    sync_primitives::AutoLock lock(session_map_lock_);
     Session& new_session = session_map_[session_id];
     new_session.protocol_version = ::protocol_handler::PROTOCOL_VERSION_2;
     new_session.service_list.push_back(Service(protocol_handler::kRpc));
     new_session.service_list.push_back(Service(protocol_handler::kBulk));
+  } else {
+    LOG4CXX_WARN(logger_, "Session/Connection Map could not create a new session ID!!!");
   }
+
   return session_id;
 }
 
 uint32_t Connection::RemoveSession(uint8_t session_id) {
-  sync_primitives::AutoLock lock(session_map_lock_);
-  SessionMap::iterator it = session_map_.find(session_id);
-  if (session_map_.end() == it) {
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  SessionConnectionMap::iterator itr = session_connection_map.find(session_id);
+  if (session_connection_map.end() == itr) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
-    return 0;
+  } else {
+    LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_id) << " from Session/Connection Map");
+    session_connection_map.erase(session_id);
+
+    // Again, a NESTED lock, but it follows the rules.
+    sync_primitives::AutoLock lock(session_map_lock_);
+    SessionMap::iterator it = session_map_.find(session_id);
+    if (session_map_.end() == it) {
+      LOG4CXX_WARN(logger_, "Session not found in this connection!");
+      return 0;
+    }
+    heartbeat_monitor_->RemoveSession(session_id);
+    session_map_.erase(session_id);
   }
-  heartbeat_monitor_->RemoveSession(session_id);
-  session_map_.erase(session_id);
+
   return session_id;
 }
 
