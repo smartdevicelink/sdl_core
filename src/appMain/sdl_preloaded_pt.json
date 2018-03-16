@@ -2344,7 +2344,15 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4", "RemoteControl"],
+                "moduleType": [
+                    "RADIO",
+                    "CLIMATE",
+                    "AUDIO",
+                    "LIGHT",
+                    "HMI_SETTINGS",
+                    "SEAT"
+                ]
             },
             "device": {
                 "keep_context": false,
