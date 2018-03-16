@@ -549,6 +549,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       CreateRegularState(utils::SharedPtr<Application>(application),
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
                          mobile_api::SystemContext::SYSCTXT_MAIN);
 
   application->SetInitialState(initial_state);
@@ -661,9 +662,12 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType audio_state;
+  VideoStreamingState::eType video_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE
                             : audio_state = AudioStreamingState::NOT_AUDIBLE;
-  state_ctrl_.SetRegularState(app, hmi_level, audio_state, false);
+  app->IsVideoApplication() ? video_state = VideoStreamingState::STREAMABLE
+                            : video_state = VideoStreamingState::NOT_STREAMABLE;
+  state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, false);
   return true;
 }
 
@@ -840,10 +844,12 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
     utils::SharedPtr<Application> app,
     mobile_apis::HMILevel::eType hmi_level,
     mobile_apis::AudioStreamingState::eType audio_state,
+    mobile_apis::VideoStreamingState::eType video_state,
     mobile_apis::SystemContext::eType system_context) const {
   HmiStatePtr state(new HmiState(app, *this));
   state->set_hmi_level(hmi_level);
   state->set_audio_streaming_state(audio_state);
+  state->set_video_streaming_state(video_state);
   state->set_system_context(system_context);
   return state;
 }
@@ -3737,6 +3743,9 @@ void ApplicationManagerImpl::SendHMIStatusNotification(
 
   message[strings::msg_params][strings::audio_streaming_state] =
       static_cast<int32_t>(app->audio_streaming_state());
+
+  message[strings::msg_params][strings::video_streaming_state] =
+      static_cast<int32_t>(app->video_streaming_state());
 
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(app->system_context());

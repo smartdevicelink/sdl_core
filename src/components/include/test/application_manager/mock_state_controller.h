@@ -51,27 +51,30 @@ class MockStateController : public am::StateController {
                void(am::ApplicationSharedPtr app,
                     am::HmiStatePtr state,
                     const bool SendActivateApp));
-  MOCK_METHOD4(SetRegularState,
+  MOCK_METHOD5(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state,
                     const bool SendActivateApp));
   MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const bool SendActivateApp));
-  MOCK_METHOD5(SetRegularState,
+  MOCK_METHOD6(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state,
                     const mobile_apis::SystemContext::eType system_context,
                     const bool SendActivateApp));
   MOCK_METHOD2(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType hmi_level));
-  MOCK_METHOD2(SetRegularState,
+  MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
-                    const mobile_apis::AudioStreamingState::eType audio_state));
+                    const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::VideoStreamingState::eType video_state));
   MOCK_METHOD2(SetRegularState,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::SystemContext::eType system_context));

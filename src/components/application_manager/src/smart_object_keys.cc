@@ -128,6 +128,7 @@ const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
 const char* audio_streaming_state = "audioStreamingState";
+const char* video_streaming_state = "videoStreamingState";
 const char* system_context = "systemContext";
 const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";

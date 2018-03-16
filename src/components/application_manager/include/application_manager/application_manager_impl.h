@@ -565,6 +565,7 @@ class ApplicationManagerImpl
       utils::SharedPtr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::VideoStreamingState::eType video_state,
       mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
@@ -588,14 +589,15 @@ class ApplicationManagerImpl
    * @param audio_state aaudio streaming state
    */
   void SetState(uint32_t app_id,
-                mobile_apis::AudioStreamingState::eType audio_state) {
+                mobile_apis::AudioStreamingState::eType audio_state,
+                mobile_apis::VideoStreamingState::eType video_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOG4CXX_ERROR(logger_,
                     "Application with appID=" << app_id << " does not exist");
       return;
     }
-    state_ctrl_.SetRegularState(app, audio_state);
+    state_ctrl_.SetRegularState(app, audio_state, video_state);
   }
 
   /**
@@ -702,14 +704,15 @@ class ApplicationManagerImpl
   template <bool SendActivateApp>
   void SetState(uint32_t app_id,
                 mobile_apis::HMILevel::eType hmi_level,
-                mobile_apis::AudioStreamingState::eType audio_state) {
+                mobile_apis::AudioStreamingState::eType audio_state,
+                mobile_apis::VideoStreamingState::eType video_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOG4CXX_ERROR(logger_,
                     "Application with appID=" << app_id << " does not exist");
       return;
     }
-    state_ctrl_.SetRegularState(app, hmi_level, audio_state, SendActivateApp);
+    state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, SendActivateApp);
   }
 
   /**
@@ -723,6 +726,7 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id,
                 mobile_apis::HMILevel::eType hmi_level,
                 mobile_apis::AudioStreamingState::eType audio_state,
+                mobile_apis::VideoStreamingState::eType video_state,
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
@@ -731,7 +735,7 @@ class ApplicationManagerImpl
       return;
     }
     state_ctrl_.SetRegularState(
-        app, hmi_level, audio_state, system_context, SendActivateApp);
+        app, hmi_level, audio_state, video_state, system_context, SendActivateApp);
   }
 
   /**

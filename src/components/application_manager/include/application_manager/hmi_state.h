@@ -154,6 +154,28 @@ class HmiState {
     }
     return audio_streaming_state_;
   }
+
+  /**
+   * @brief video_streaming_state
+   * @return return video streaming state member
+   */
+  virtual mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const {
+    if (parent_) {
+      return parent_->video_streaming_state();
+    }
+    return video_streaming_state_;
+  }
+
+  /**
+   * @brief set_video_streaming_state set set_video_streaming_state member
+   * @param video_state video_state to setup
+   */
+  virtual void set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType video_state) {
+    video_streaming_state_ = video_state;
+  }
+
   /**
    * @brief set_audio_streaming_state set audio_streaming_state member
    * @param audio_state audio_state to setup
@@ -206,6 +228,7 @@ class HmiState {
   HmiStatePtr parent_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
+  mobile_apis::VideoStreamingState::eType video_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
 
  protected:
@@ -278,6 +301,8 @@ class NaviStreamingHmiState : public HmiState {
                                    const ApplicationManager& app_mngr);
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
       const OVERRIDE;
 };
 
