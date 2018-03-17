@@ -97,7 +97,19 @@ Connection::~Connection() {
   heart_beat_monitor_thread_->join();
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
+
+  // Before clearing out the session_map_, we must remove all sessions
+  // associated with this Connection from the SessionConnectionMap.
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
   sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.begin();
+  while (session_it != session_map_.end()) {
+    LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_it->first) << " from Session/Connection Map in Connection Destructor");
+    session_connection_map.erase(session_it->first);
+    session_it++;
+  }
+
   session_map_.clear();
 }
 
