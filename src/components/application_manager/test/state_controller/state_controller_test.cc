@@ -81,24 +81,29 @@ const uint32_t kHMIAppID = 2718u;
 struct HmiStatesComparator {
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
+  mobile_apis::VideoStreamingState::eType video_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
 
   HmiStatesComparator(
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_streaming_state,
+      mobile_apis::VideoStreamingState::eType video_streaming_state,
       mobile_apis::SystemContext::eType system_context)
       : hmi_level_(hmi_level)
       , audio_streaming_state_(audio_streaming_state)
+      , video_streaming_state_(video_streaming_state)
       , system_context_(system_context) {}
 
   HmiStatesComparator(am::HmiStatePtr state_ptr)
       : hmi_level_(state_ptr->hmi_level())
       , audio_streaming_state_(state_ptr->audio_streaming_state())
+      , video_streaming_state_(state_ptr->video_streaming_state())
       , system_context_(state_ptr->system_context()) {}
 
   bool operator()(am::HmiStatePtr state_ptr) const {
     return state_ptr->hmi_level() == hmi_level_ &&
            state_ptr->audio_streaming_state() == audio_streaming_state_ &&
+           state_ptr->video_streaming_state() == video_streaming_state_ &&
            state_ptr->system_context() == system_context_;
   }
 };
@@ -206,7 +211,8 @@ class StateControllerImplTest : public ::testing::Test {
 
   am::HmiStatePtr createHmiState(
       mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType aidio_ss,
+      mobile_apis::AudioStreamingState::eType audio_ss,
+      mobile_apis::VideoStreamingState::eType video_ss,
       mobile_apis::SystemContext::eType system_context) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
@@ -215,7 +221,8 @@ class StateControllerImplTest : public ::testing::Test {
     am::HmiStatePtr state =
         utils::MakeShared<am::HmiState>(simple_app_, app_manager_mock_);
     state->set_hmi_level(hmi_level);
-    state->set_audio_streaming_state(aidio_ss);
+    state->set_audio_streaming_state(audio_ss);
+    state->set_video_streaming_state(video_ss);
     state->set_system_context(system_context);
     return state;
   }
@@ -228,6 +235,7 @@ class StateControllerImplTest : public ::testing::Test {
   am::HmiStatePtr CreateHmiStateByHmiStateType(
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_ss,
+      const mobile_apis::VideoStreamingState::eType video_ss,
       const mobile_apis::SystemContext::eType system_context,
       const am::ApplicationSharedPtr app) {
     am::HmiStatePtr new_state =
@@ -235,6 +243,7 @@ class StateControllerImplTest : public ::testing::Test {
 
     new_state->set_hmi_level(hmi_level);
     new_state->set_audio_streaming_state(audio_ss);
+    new_state->set_video_streaming_state(video_ss);
     new_state->set_system_context(system_context);
 
     return new_state;
@@ -248,27 +257,38 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_NONE,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_MAIN));
     result_hmi_state.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_NONE,
+                       AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_VRSESSION));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_NONE,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_MENU));
     result_hmi_state.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MENU));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_NONE,
+                       AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_HMI_OBSCURED));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_NONE,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_ALERT));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_BACKGROUND,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_NONE,
+                       AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_ALERT));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_BACKGROUND,
+                       AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
   }
 
   /**
@@ -280,20 +300,29 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     PrepareCommonStateResults(result_hmi_state);
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_LIMITED,
-                                              AudioStreamingState::ATTENUATED,
-                                              SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_LIMITED,
-                                              AudioStreamingState::ATTENUATED,
-                                              SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_FULL,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_MAIN));
-    result_hmi_state.push_back(createHmiState(HMILevel::HMI_FULL,
-                                              AudioStreamingState::ATTENUATED,
-                                              SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_LIMITED,
+                       AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_LIMITED,
+                       AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_FULL,
+                       AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
+    result_hmi_state.push_back(
+        createHmiState(HMILevel::HMI_FULL,
+                       AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
+                       SystemContext::SYSCTXT_MAIN));
   }
 
   /**
@@ -305,6 +334,7 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state, ApplicationType app_t) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
 
     switch (app_t) {
@@ -313,6 +343,7 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -321,18 +352,22 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -341,18 +376,22 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -369,6 +408,7 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state, ApplicationType app_t) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     switch (app_t) {
       case APP_TYPE_NON_MEDIA: {
@@ -376,6 +416,7 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -385,18 +426,22 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -417,6 +462,7 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state, ApplicationType app_t) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     switch (app_t) {
       case APP_TYPE_NON_MEDIA: {
@@ -424,6 +470,7 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -432,18 +479,22 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::ATTENUATED,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -465,6 +516,7 @@ class StateControllerImplTest : public ::testing::Test {
       std::vector<am::HmiStatePtr>& result_hmi_state, ApplicationType app_t) {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     switch (app_t) {
       case APP_TYPE_NON_MEDIA: {
@@ -472,6 +524,7 @@ class StateControllerImplTest : public ::testing::Test {
         result_hmi_state.push_back(
             createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
+                           VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         break;
       }
@@ -630,146 +683,180 @@ class StateControllerImplTest : public ::testing::Test {
   void FillStatesLists() {
     namespace HMILevel = mobile_apis::HMILevel;
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+    namespace VideoStreamingState = mobile_apis::VideoStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     // Valid states for not audio app
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_VRSESSION));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MENU));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_HMI_OBSCURED));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_ALERT));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_BACKGROUND,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_FULL,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
 
     // Valid states audio app
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_VRSESSION));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MENU));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_HMI_OBSCURED));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_ALERT));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_BACKGROUND,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_LIMITED,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_LIMITED,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_FULL,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     valid_states_for_audio_app_.push_back(
         createHmiState(HMILevel::HMI_FULL,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
 
     // Common Invalid States
     common_invalid_states_.push_back(
         createHmiState(HMILevel::INVALID_ENUM,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     common_invalid_states_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::INVALID_ENUM,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     common_invalid_states_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::INVALID_ENUM));
     common_invalid_states_.push_back(
         createHmiState(HMILevel::INVALID_ENUM,
                        AudioStreamingState::INVALID_ENUM,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     common_invalid_states_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::INVALID_ENUM,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::INVALID_ENUM));
     common_invalid_states_.push_back(
         createHmiState(HMILevel::INVALID_ENUM,
                        AudioStreamingState::INVALID_ENUM,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::INVALID_ENUM));
 
     // Invalid States for audio apps
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_LIMITED,
                        AudioStreamingState::NOT_AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_BACKGROUND,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_BACKGROUND,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_audio_app.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     // Invalid States for not audio apps
     invalid_states_for_not_audio_app.push_back(
         createHmiState(HMILevel::HMI_LIMITED,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_not_audio_app.push_back(
         createHmiState(HMILevel::HMI_LIMITED,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_not_audio_app.push_back(
         createHmiState(HMILevel::HMI_FULL,
                        AudioStreamingState::ATTENUATED,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
     invalid_states_for_not_audio_app.push_back(
         createHmiState(HMILevel::HMI_FULL,
                        AudioStreamingState::AUDIBLE,
+                       VideoStreamingState::NOT_STREAMABLE,
                        SystemContext::SYSCTXT_MAIN));
 
     // Valid state ids
@@ -954,30 +1041,35 @@ class StateControllerImplTest : public ::testing::Test {
   am::HmiStatePtr NoneNotAudibleState() {
     return createHmiState(mobile_apis::HMILevel::HMI_NONE,
                           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
   }
 
   am::HmiStatePtr FullAudibleState() {
     return createHmiState(mobile_apis::HMILevel::HMI_FULL,
                           mobile_apis::AudioStreamingState::AUDIBLE,
+                          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
   }
 
   am::HmiStatePtr FullNotAudibleState() {
     return createHmiState(mobile_apis::HMILevel::HMI_FULL,
                           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
   }
 
   am::HmiStatePtr LimitedState() {
     return createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
                           mobile_apis::AudioStreamingState::AUDIBLE,
+                          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
   }
 
   am::HmiStatePtr BackgroundState() {
     return createHmiState(mobile_apis::HMILevel::HMI_BACKGROUND,
                           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
   }
 
@@ -1199,10 +1291,13 @@ TEST_F(StateControllerImplTest, OnStateChangedToNone) {
 
   HmiStatePtr none_state = createHmiState(HMILevel::HMI_NONE,
                                           AudioStreamingState::NOT_AUDIBLE,
+                                          VideoStreamingState::NOT_STREAMABLE,
                                           SystemContext::SYSCTXT_MAIN);
-  HmiStatePtr not_none_state = createHmiState(HMILevel::HMI_FULL,
-                                              AudioStreamingState::NOT_AUDIBLE,
-                                              SystemContext::SYSCTXT_MAIN);
+  HmiStatePtr not_none_state =
+      createHmiState(HMILevel::HMI_FULL,
+                     AudioStreamingState::NOT_AUDIBLE,
+                     VideoStreamingState::NOT_STREAMABLE,
+                     SystemContext::SYSCTXT_MAIN);
 
   EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
   state_ctrl_->OnStateChanged(simple_app_, none_state, not_none_state);
@@ -1214,9 +1309,11 @@ TEST_F(StateControllerImplTest, OnStateChangedToNone) {
 TEST_F(StateControllerImplTest, MoveSimpleAppToValidStates) {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+  namespace VideoStreamingState = mobile_apis::VideoStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
   HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
                                              AudioStreamingState::INVALID_ENUM,
+                                             VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);
 
   for (std::vector<HmiStatePtr>::iterator it =
@@ -1243,6 +1340,7 @@ TEST_F(StateControllerImplTest, MoveSimpleAppToValidStates) {
 TEST_F(StateControllerImplTest, MoveAudioNotResumeAppToValidStates) {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+  namespace VideoStreamingState = mobile_apis::VideoStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
 
   am::ApplicationSharedPtr audio_app = media_navi_vc_app_;
@@ -1251,6 +1349,7 @@ TEST_F(StateControllerImplTest, MoveAudioNotResumeAppToValidStates) {
 
   HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
                                              AudioStreamingState::INVALID_ENUM,
+                                             VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);
 
   for (std::vector<HmiStatePtr>::iterator it =
@@ -1277,6 +1376,7 @@ TEST_F(StateControllerImplTest, MoveAudioNotResumeAppToValidStates) {
 TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
+  namespace VideoStreamingState = mobile_apis::VideoStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
 
   am::ApplicationSharedPtr audio_app = media_navi_vc_app_;
@@ -1285,6 +1385,7 @@ TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
 
   HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
                                              AudioStreamingState::INVALID_ENUM,
+                                             VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);
 
   // Set all valid states for audio app
@@ -1360,7 +1461,6 @@ TEST_F(StateControllerImplTest, MoveAppFromValidStateToInvalid) {
 TEST_F(StateControllerImplTest,
        SetFullToSimpleAppWhileAnotherSimpleAppIsInFull) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
   am::ApplicationSharedPtr app_in_full;
   NiceMock<application_manager_test::MockApplication>* app_in_full_mock;
@@ -1389,7 +1489,6 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetFullToSimpleAppWhileAudioAppAppIsInFull) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
   am::ApplicationSharedPtr app_in_full = media_navi_vc_app_;
   NiceMock<application_manager_test::MockApplication>* app_in_full_mock =
@@ -1415,7 +1514,6 @@ TEST_F(StateControllerImplTest, SetFullToSimpleAppWhileAudioAppAppIsInFull) {
 TEST_F(StateControllerImplTest,
        SetFullToAudioAppAppWhileAnotherTypeAudioAppAppIsInFull) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
 
   am::ApplicationSharedPtr app_in_full = media_app_;
@@ -1442,7 +1540,6 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetFullToAudioAppAppWhileSameTypeAudioAppAppIsInFull) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
   NiceMock<application_manager_test::MockApplication>* app_in_full_mock;
   am::ApplicationSharedPtr app_in_full =
@@ -1468,7 +1565,6 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetFullToAudioAppAppWhileSameTypeAudioAppAppIsInLimited) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
 
   NiceMock<application_manager_test::MockApplication>* app_in_limited_mock;
@@ -1495,7 +1591,6 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetLimitedToAudioAppAppWhileSameTypeAudioAppAppIsInLimited) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
   NiceMock<application_manager_test::MockApplication>* app_in_limited_mock;
   am::ApplicationSharedPtr app_in_limited =
@@ -1523,7 +1618,6 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetLimitedToAudioAppAppWhileOtherTypeAudioAppAppIsInLimited) {
   namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
 
   am::ApplicationSharedPtr app_in_limited = navi_app_;
@@ -1817,6 +1911,7 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
   hmi_states.push_back(
       StateLevelPair(createHmiState(HMILevel::HMI_NONE,
                                     AudioStreamingState::NOT_AUDIBLE,
+                                    VideoStreamingState::NOT_STREAMABLE,
                                     SystemContext::SYSCTXT_MAIN),
                      Common_HMILevel::NONE));
   std::vector<StateLevelPair> initial_hmi_states = hmi_states;
@@ -2394,6 +2489,7 @@ TEST_F(StateControllerImplTest, SetRegularStateWithAudioStateAudible) {
 
   HmiStatePtr check_state = createHmiState(HMILevel::HMI_BACKGROUND,
                                            AudioStreamingState::AUDIBLE,
+                                           VideoStreamingState::NOT_STREAMABLE,
                                            SystemContext::SYSCTXT_MAIN);
   EXPECT_CALL(*simple_app_ptr_, RegularHmiState())
       .WillRepeatedly(Return(BackgroundState()));
@@ -2755,6 +2851,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
   const HmiStatePtr state =
       createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
                      mobile_apis::AudioStreamingState::AUDIBLE,
+                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                      mobile_apis::SystemContext::SYSCTXT_MAIN);
   // OnAppDeactivated
   EXPECT_CALL(app_manager_mock_, application(app_id))
@@ -2783,6 +2880,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
   const HmiStatePtr state =
       createHmiState(mobile_apis::HMILevel::HMI_BACKGROUND,
                      mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                      mobile_apis::SystemContext::SYSCTXT_MAIN);
   // OnAppDeactivated
   EXPECT_CALL(app_manager_mock_, application(app_id))
@@ -2846,9 +2944,11 @@ TEST_F(StateControllerImplTest, OnEventOnAppActivated) {
 }
 
 TEST_F(StateControllerImplTest, IsStateActive) {
-  HmiStatePtr state = createHmiState(mobile_apis::HMILevel::HMI_FULL,
-                                     mobile_apis::AudioStreamingState::AUDIBLE,
-                                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  HmiStatePtr state =
+      createHmiState(mobile_apis::HMILevel::HMI_FULL,
+                     mobile_apis::AudioStreamingState::AUDIBLE,
+                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
+                     mobile_apis::SystemContext::SYSCTXT_MAIN);
   state->set_state_id(HmiState::STATE_ID_CURRENT);
   EXPECT_TRUE(state_ctrl_->IsStateActive(state->state_id()));
   state->set_state_id(HmiState::STATE_ID_REGULAR);
@@ -2908,6 +3008,7 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredDifferentStates) {
   const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
       mobile_apis::HMILevel::HMI_FULL,
       mobile_apis::AudioStreamingState::AUDIBLE,
+      mobile_apis::VideoStreamingState::NOT_STREAMABLE,
       mobile_apis::SystemContext::SYSCTXT_MAIN,
       simple_app_);
 
@@ -2920,6 +3021,7 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredDifferentStates) {
       CreateHmiStateByHmiStateType<am::HmiState>(
           mobile_apis::HMILevel::HMI_BACKGROUND,
           mobile_apis::AudioStreamingState::AUDIBLE,
+          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           simple_app_);
 
@@ -2957,6 +3059,7 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredEqualStates) {
   const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
       mobile_apis::HMILevel::HMI_FULL,
       mobile_apis::AudioStreamingState::AUDIBLE,
+      mobile_apis::VideoStreamingState::NOT_STREAMABLE,
       mobile_apis::SystemContext::SYSCTXT_MAIN,
       simple_app_);
 
@@ -2969,6 +3072,7 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredEqualStates) {
       CreateHmiStateByHmiStateType<am::HmiState>(
           mobile_apis::HMILevel::HMI_BACKGROUND,
           mobile_apis::AudioStreamingState::AUDIBLE,
+          mobile_apis::VideoStreamingState::NOT_STREAMABLE,
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           simple_app_);
   EXPECT_CALL(*simple_app_ptr_, RegularHmiState())
