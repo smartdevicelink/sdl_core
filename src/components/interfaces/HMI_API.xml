@@ -1294,9 +1294,6 @@
   <element name="DEACTIVATE_HMI">
     <description> GAL/DIO is active </description>
   </element>
-  <element name="PROJECTION">
-    <description>Projection app is shown in HMI</description>
-  </element>
 </enum>
 
 <enum name="DeliveryMode">
