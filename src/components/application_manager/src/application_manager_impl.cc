@@ -834,12 +834,6 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   return state;
 }
 
-bool ApplicationManagerImpl::IsStateActive(HmiState::StateID state_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Checking for active state id " << state_id);
-  return state_ctrl_.IsStateActive(state_id);
-}
-
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t correlation_id,
                                                       int32_t max_duration,
