@@ -245,8 +245,7 @@ class TransportManagerImpl
   int Visibility(const bool& on_off) const OVERRIDE;
 
   /**
-   * DEPRECATED
-   * Must be moved under 'private' section
+   * @deprecated Must be moved under 'private' section
    * @brief Updates total device list with info from specific transport adapter.
    * @param ta Transport adapter
    */

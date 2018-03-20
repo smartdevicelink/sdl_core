@@ -87,7 +87,7 @@ class TransportAdapterEvent {
       , event_error(error) {}
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Constructor.
    *
    * @param type Event type.
@@ -97,12 +97,12 @@ class TransportAdapterEvent {
    * @param data Smart pointer to the raw message.
    * @param error Error class that contains details of this error situation.
    */
-  TransportAdapterEvent(int type,
-                        transport_adapter::TransportAdapter* adapter,
-                        const DeviceUID& device_handle,
-                        const ApplicationHandle& application_id,
-                        ::protocol_handler::RawMessagePtr data,
-                        BaseErrorPtr error)
+  DEPRECATED TransportAdapterEvent(int type,
+                                   transport_adapter::TransportAdapter* adapter,
+                                   const DeviceUID& device_handle,
+                                   const ApplicationHandle& application_id,
+                                   ::protocol_handler::RawMessagePtr data,
+                                   BaseErrorPtr error)
       : event_type(static_cast<EventTypeEnum>(type))
       , application_id(application_id)
       , device_uid(device_handle)

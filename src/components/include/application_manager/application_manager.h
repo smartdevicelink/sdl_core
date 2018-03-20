@@ -254,27 +254,29 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
+  DEPRECATED virtual bool IsAppSubscribedForWayPoints(
+      const uint32_t app_id) const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
-  virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
+  DEPRECATED virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
-  virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
+  DEPRECATED virtual void UnsubscribeAppFromWayPoints(
+      const uint32_t app_id) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -658,7 +660,7 @@ class ApplicationManager {
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief CreateRegularState create regular HMI state for application
    * @param app_id Application id
    * @param hmi_level of returned state
@@ -666,7 +668,7 @@ class ApplicationManager {
    * @param system_context of returned state
    * @return new regular HMI state
    */
-  virtual HmiStatePtr CreateRegularState(
+  DEPRECATED virtual HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,

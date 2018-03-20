@@ -504,7 +504,7 @@ class ConnectionHandlerImpl
       connection_handler::DeviceHandle* device_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
+   * \deprecated
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID

@@ -183,7 +183,7 @@ class ConnectionHandler {
       connection_handler::DeviceHandle* device_id) const = 0;
 
   /**
-   * DEPRECATED
+   * \deprecated
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID

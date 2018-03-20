@@ -641,13 +641,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
-DEPRECATED bool ApplicationManagerImpl::RemoveAppDataFromHMI(
-    ApplicationSharedPtr app) {
+bool ApplicationManagerImpl::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
   return true;
 }
 
-DEPRECATED bool ApplicationManagerImpl::LoadAppDataToHMI(
-    ApplicationSharedPtr app) {
+bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
   return true;
 }
 
@@ -804,8 +802,7 @@ void ApplicationManagerImpl::set_driver_distraction_state(
   driver_distraction_state_ = state;
 }
 
-DEPRECATED void ApplicationManagerImpl::set_vr_session_started(
-    const bool state) {
+void ApplicationManagerImpl::set_vr_session_started(const bool state) {
   is_vr_session_strated_ = state;
 }
 
@@ -830,7 +827,7 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
     mobile_apis::HMILevel::eType hmi_level,
     mobile_apis::AudioStreamingState::eType audio_state,
     mobile_apis::SystemContext::eType system_context) const {
-  HmiStatePtr state(new HmiState(app_id, *this));
+  HmiStatePtr state(new HmiState(application(app_id), *this));
   state->set_hmi_level(hmi_level);
   state->set_audio_streaming_state(audio_state);
   state->set_system_context(system_context);

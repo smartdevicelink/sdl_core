@@ -721,12 +721,12 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsAudioApplication() const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief GetDeviceId allows to obtain device id which posseses
    * by this application.
    * @return device the device id.
    */
-  std::string GetDeviceId() const {
+  DEPRECATED std::string GetDeviceId() const {
     return device_id_;
   }
 

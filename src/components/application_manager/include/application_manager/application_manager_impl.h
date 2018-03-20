@@ -311,7 +311,7 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
@@ -320,14 +320,14 @@ class ApplicationManagerImpl
   bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
   void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
@@ -507,7 +507,7 @@ class ApplicationManagerImpl
       const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
 
   /*
-   * DEPRECATED
+   * @deprecated
    * @brief Retrieves if VR session has started
    *
    * @return Current VR session state (started, stopped)
@@ -515,12 +515,13 @@ class ApplicationManagerImpl
   inline bool vr_session_started() const;
 
   /*
-   * DEPRECATED
+   * @deprecated
+   *
    * @brief Sets VR session state
    *
    * @param state Current HMI VR session state
    */
-  void set_vr_session_started(const bool state);
+  DEPRECATED void set_vr_session_started(const bool state);
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -551,7 +552,7 @@ class ApplicationManagerImpl
       mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief CreateRegularState create regular HMI state for application
    * @param app_id Application id
    * @param hmi_level of returned state
@@ -559,7 +560,7 @@ class ApplicationManagerImpl
    * @param system_context of returned state
    * @return new regular HMI state
    */
-  DEPRECATED HmiStatePtr CreateRegularState(
+  HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
@@ -1088,14 +1089,14 @@ class ApplicationManagerImpl
   uint32_t GenerateNewHMIAppID() OVERRIDE;
 
   /**
-   * DERPECATED
+   * @deprecated
    * @brief Parse smartObject and replace mobile app Id by HMI app ID
    * @param message Smartobject to be parsed
    */
   void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief Parse smartObject and replace HMI app ID by mobile app Id
    * @param message Smartobject to be parsed
    */
@@ -1153,7 +1154,7 @@ class ApplicationManagerImpl
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief method adds application in FULL and LIMITED state
    * to on_phone_call_app_list_.
    * Also OnHMIStateNotification with BACKGROUND state sent for these apps
@@ -1161,7 +1162,7 @@ class ApplicationManagerImpl
   void CreatePhoneCallAppList();
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief method removes application from on_phone_call_app_list_.
    *
    * Also OnHMIStateNotification with previous HMI state sent for these apps
@@ -1534,6 +1535,7 @@ class ApplicationManagerImpl
   void EndNaviStreaming();
 
   /**
+   * @deprecated
    * @brief Starts specified navi service for application
    * @param app_id Application to proceed
    * @param service_type Type of service to start
@@ -1809,7 +1811,7 @@ class ApplicationManagerImpl
 
   volatile bool is_stopping_;
 
-  std::unique_ptr<CommandHolder> commands_holder_;
+  std::auto_ptr<CommandHolder> commands_holder_;
 
 #ifdef BUILD_TESTS
  public:

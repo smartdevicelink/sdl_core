@@ -91,23 +91,23 @@ class HmiState {
            StateID state_id);
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief HmiState constructor
    * @param app_id Application id
    * @param app_mngr Application manager
    */
-  HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 
   /**
-   * DEPRECATED
+   * @deprecated
    * @brief HmiState constructor
    * @param app_id Application id
    * @param app_mngr Application manager
    * @param state_id HMI state to assign
    */
-  HmiState(uint32_t app_id,
-           const ApplicationManager& app_mngr,
-           StateID state_id);
+  DEPRECATED HmiState(uint32_t app_id,
+                      const ApplicationManager& app_mngr,
+                      StateID state_id);
 
   virtual ~HmiState() {}
 
