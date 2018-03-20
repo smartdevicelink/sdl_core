@@ -481,7 +481,8 @@ class ApplicationManagerImpl
    *
    * @return true on success, false if passthru is already in process
    */
-  DEPRECATED bool BeginAudioPassThrough() OVERRIDE;
+  // DEPRECATED
+  bool BeginAudioPassThrough() OVERRIDE;
 
   /**
    * @brief Starts AudioPassThru process by given application
@@ -495,7 +496,8 @@ class ApplicationManagerImpl
    *
    * @return true on success, false if passthru is not active
    */
-  DEPRECATED bool EndAudioPassThrough() OVERRIDE;
+  // DEPRECATED
+  bool EndAudioPassThrough() OVERRIDE;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application

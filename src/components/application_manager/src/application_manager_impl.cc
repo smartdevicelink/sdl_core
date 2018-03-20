@@ -775,7 +775,7 @@ uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   return corelation_id_;
 }
 
-DEPRECATED bool ApplicationManagerImpl::BeginAudioPassThrough() {
+bool ApplicationManagerImpl::BeginAudioPassThrough() {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
     return false;
@@ -796,7 +796,7 @@ bool ApplicationManagerImpl::BeginAudioPassThru(int32_t session_key) {
   }
 }
 
-DEPRECATED bool ApplicationManagerImpl::EndAudioPassThrough() {
+bool ApplicationManagerImpl::EndAudioPassThrough() {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
     audio_pass_thru_active_ = false;
