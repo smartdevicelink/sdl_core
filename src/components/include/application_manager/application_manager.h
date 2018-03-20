@@ -393,8 +393,7 @@ class ApplicationManager {
    *
    * @return true on success, false if passthru is already in process
    */
-  // DEPRECATED
-  virtual bool BeginAudioPassThrough() = 0;
+  DEPRECATED virtual bool BeginAudioPassThrough() = 0;
 
   /**
    * @brief Starts AudioPassThru process by given application
@@ -408,8 +407,7 @@ class ApplicationManager {
    *
    * @return true on success, false if passthru is not active
    */
-  // DEPRECATED
-  virtual bool EndAudioPassThrough() = 0;
+  DEPRECATED virtual bool EndAudioPassThrough() = 0;
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
