@@ -426,6 +426,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 #endif  // ENABLE_SECURITY
+
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -878,6 +879,12 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   connection.SetProtectionFlag(session_id, service_type);
 }
 
+security_manager::SSLContext::HandshakeContext
+ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
+  return connection_handler_observer_->GetHandshakeContext(key);
+}
+
+#endif  // ENABLE_SECURITY
 bool ConnectionHandlerImpl::SessionServiceExists(
     const uint32_t connection_key,
     const protocol_handler::ServiceType& service_type) const {
@@ -895,13 +902,6 @@ bool ConnectionHandlerImpl::SessionServiceExists(
   const Connection& connection = *it->second;
   return connection.SessionServiceExists(session_id, service_type);
 }
-
-security_manager::SSLContext::HandshakeContext
-ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
-  return connection_handler_observer_->GetHandshakeContext(key);
-}
-
-#endif  // ENABLE_SECURITY
 
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
   LOG4CXX_AUTO_TRACE(logger_);

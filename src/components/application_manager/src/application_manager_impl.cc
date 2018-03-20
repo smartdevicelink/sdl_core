@@ -1682,6 +1682,7 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   return SSLContext::HandshakeContext();
 }
 
+#endif  // ENABLE_SECURITY
 bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application(app_id);
@@ -1690,8 +1691,6 @@ bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   }
   return false;
 }
-#endif  // ENABLE_SECURITY
-
 void ApplicationManagerImpl::set_hmi_message_handler(
     hmi_message_handler::HMIMessageHandler* handler) {
   hmi_handler_ = handler;

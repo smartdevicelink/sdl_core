@@ -75,11 +75,11 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)
+    , is_ptu_triggered_(false)
     ,
 #endif  // ENABLE_SECURITY
-    is_ptu_triggered_(false)
-    , raw_ford_messages_from_mobile_(
-          "PH FromMobile", this, threads::ThreadOptions(kStackSize))
+    raw_ford_messages_from_mobile_(
+        "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
     , start_session_frame_map_lock_()
@@ -1408,7 +1408,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet->protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
-  const uint8_t protocol_version = packet->protocol_version();
+  // const uint8_t protocol_version = packet->protocol_version();
   BsonObject bson_obj;
   if (packet->data() != NULL) {
     bson_obj = bson_object_from_bytes(packet->data());
