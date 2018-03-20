@@ -406,7 +406,6 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   // Checks
 
   EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_, ForcePTExchange()).WillOnce(Return(""));
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID()).Times(0);
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _))
       .Times(0);
