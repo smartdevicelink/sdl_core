@@ -356,14 +356,13 @@ class ConnectionHandlerImpl
    * @param service_type type of service to check
    * @return true if session contains service with specified service type
    */
-  bool SessionServiceExists(
-      const uint32_t connection_key,
-      const protocol_handler::ServiceType& service_type) const OVERRIDE;
 
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
-
+  bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const OVERRIDE;
   /**
    * \brief Get device handle by mac address
    * \param mac_address uniq address

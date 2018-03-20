@@ -32,7 +32,7 @@
 
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_START_SESSION_HANDLER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_START_SESSION_HANDLER_H_
-
+#ifdef ENABLE_SECURITY
 #include <memory>
 
 #include "protocol_handler/protocol_handler_impl.h"
@@ -124,5 +124,5 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
 };
 
 }  // namespace protocol_handler
-
+#endif  //#ifdef ENABLE_SECURITY
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_START_SESSION_HANDLER_H_

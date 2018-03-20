@@ -327,19 +327,18 @@ class SessionObserver {
       const uint32_t& key,
       const protocol_handler::ServiceType& service_type) = 0;
 
-  /**
-   * @brief Check if session contains service with specified service type
-   * @param connection_key unique id of session to check
-   * @param service_type type of service to check
-   * @return true if session contains service with specified service type
-   */
-  virtual bool SessionServiceExists(
-      const uint32_t connection_key,
-      const protocol_handler::ServiceType& service_type) const = 0;
-
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
 #endif  // ENABLE_SECURITY
+        /**
+         * @brief Check if session contains service with specified service type
+         * @param connection_key unique id of session to check
+         * @param service_type type of service to check
+         * @return true if session contains service with specified service type
+         */
+  virtual bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const = 0;
 
  protected:
   /**

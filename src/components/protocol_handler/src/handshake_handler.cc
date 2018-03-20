@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#ifdef ENABLE_SECURITY
 #include "protocol_handler/handshake_handler.h"
 
 #include <bson_object.h>
@@ -42,7 +42,6 @@
 namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
-
 HandshakeHandler::HandshakeHandler(
     ProtocolHandlerImpl& protocol_handler,
     SessionObserver& session_observer,
@@ -199,3 +198,4 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params) {
 }
 
 }  // namespace protocol_handler
+#endif  //#ifdef ENABLE_SECURITY
