@@ -72,6 +72,7 @@ using ::smart_objects::SmartObject;
 using rc_rpc_plugin::commands::ButtonPressRequest;
 using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentResponse;
 using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentRequest;
+using rc_rpc_plugin::RCRPCPlugin;
 using test::components::commands_test::CommandsTestMocks;
 using test::components::commands_test::CommandRequestTest;
 using am::plugin_manager::MockRPCPluginManager;
@@ -90,8 +91,8 @@ using namespace rc_rpc_plugin;
 namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kAppId = 5u;
-const int kModuleId = 153u;
 const std::string kResource = "CLIMATE";
+const uint32_t kPluginID = RCRPCPlugin::kRCPluginID;
 }  // namespace
 
 class RCGetInteriorVehicleDataConsentTest
@@ -106,9 +107,11 @@ class RCGetInteriorVehicleDataConsentTest
                     &mock_protocol_handler,
                     &mock_hmi_handler,
                     command_holder)
-      , rc_app_extention_(utils::MakeShared<RCAppExtension>(kModuleId))
+      , rc_app_extention_(utils::MakeShared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
-            utils::MakeShared<NiceMock<MockRPCPluginManager> >()) {
+            utils::MakeShared<NiceMock<MockRPCPluginManager> >())
+      , rpc_plugin(mock_rpc_plugin)
+      , optional_mock_rpc_plugin(mock_rpc_plugin) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
@@ -131,6 +134,14 @@ class RCGetInteriorVehicleDataConsentTest
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_policy_handler_, CheckModule(_, _))
+        .WillByDefault(Return(true));
+    ON_CALL(app_mngr_, GetPluginManager())
+        .WillByDefault(ReturnRef(*mock_rpc_plugin_manager));
+    ON_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
+        .WillByDefault(Return(rpc_plugin));
+    ON_CALL(mock_allocation_manager_, IsResourceFree(kResource))
         .WillByDefault(Return(true));
   }
 
@@ -174,63 +185,55 @@ class RCGetInteriorVehicleDataConsentTest
   utils::SharedPtr<RCAppExtension> rc_app_extention_;
   utils::SharedPtr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;
+  utils::Optional<RPCPlugin> rpc_plugin;
+  utils::Optional<MockRPCPlugin> optional_mock_rpc_plugin;
 };
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendASKDRIVERModeToMobile) {
-  MessageSharedPtr mobile_message = CreateBasicMessage();
-  ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(app_mngr_, GetPluginManager())
-      .WillRepeatedly(ReturnRef(*mock_rpc_plugin_manager));
-  utils::Optional<RPCPlugin> rpc_plugin(mock_rpc_plugin);
-  utils::Optional<MockRPCPlugin> mrpc_plugin(mock_rpc_plugin);
-  EXPECT_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
-      .WillOnce(Return(rpc_plugin));
-  utils::SharedPtr<RCGetInteriorVehicleDataConsentRequest> rc_consent_request =
-      CreateRCCommand<commands::RCGetInteriorVehicleDataConsentRequest>(
-          mobile_message);
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(kResource))
-      .WillOnce(Return(true));
+  // Arrange
+  auto mobile_message = CreateBasicMessage();
+
+  // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ASK_DRIVER));
-  EXPECT_CALL(*mrpc_plugin, GetCommandFactory())
+  EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
+  auto rc_consent_request =
+      CreateRCCommand<commands::RCGetInteriorVehicleDataConsentRequest>(
+          mobile_message);
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(rc_consent_request));
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceFromFunction(
                   hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent))
       .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_RC));
-  application_manager::SharedPtr<commands::ButtonPressRequest> command =
-      CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
+
+  // Act
+  auto command = CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
 }
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendINUSEModeToMobile) {
-  MessageSharedPtr mobile_message = CreateBasicMessage();
-  ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(app_mngr_, GetPluginManager())
-      .WillRepeatedly(ReturnRef(*mock_rpc_plugin_manager));
-  utils::Optional<RPCPlugin> rpc_plugin(mock_rpc_plugin);
-  utils::Optional<MockRPCPlugin> mrpc_plugin(mock_rpc_plugin);
-  EXPECT_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
-      .WillOnce(Return(rpc_plugin));
-  utils::SharedPtr<RCGetInteriorVehicleDataConsentResponse>
-      rc_consent_response =
-          CreateRCCommand<commands::RCGetInteriorVehicleDataConsentResponse>(
-              mobile_message);
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(kResource))
-      .WillOnce(Return(true));
+  // Arrange
+  auto mobile_message = CreateBasicMessage();
+
+  // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::IN_USE));
-  EXPECT_CALL(*mrpc_plugin, GetCommandFactory())
+
+  EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
+  auto rc_consent_response =
+      CreateRCCommand<commands::RCGetInteriorVehicleDataConsentResponse>(
+          mobile_message);
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(rc_consent_response));
-  application_manager::SharedPtr<commands::ButtonPressRequest> command =
-      CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
+  auto command = CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
+
+  // Act
   ASSERT_TRUE(command->Init());
   command->Run();
 }
