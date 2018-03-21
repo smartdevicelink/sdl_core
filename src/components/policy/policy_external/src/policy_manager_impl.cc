@@ -1681,6 +1681,12 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
   SendNotificationOnPermissionsUpdated(application_id);
 }
 
+void PolicyManagerImpl::OnDeviceSwitching(const std::string& device_id_from,
+                                          const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
 const MetaInfo PolicyManagerImpl::GetMetaInfo() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return cache_->GetMetaInfo();

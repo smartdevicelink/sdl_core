@@ -71,11 +71,9 @@ class OnVehicleDataNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnVehicleDataNotificationTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , command_msg_(CreateMessage(smart_objects::SmartType_Map))
+      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
       , command_(CreateCommand<OnVehicleDataNotification>(command_msg_)) {}
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr command_msg_;
   NotificationPtr command_;
 };
@@ -113,7 +111,8 @@ TEST_F(OnVehicleDataNotificationTest,
        Run_NotEmptyListOfAppsSubscribedForEvent_SUCCESS) {
   am::VehicleData test_vehicle_data;
   test_vehicle_data.insert(am::VehicleData::value_type(
-      am::strings::fuel_level, am::VehicleDataType::FUELLEVEL));
+      am::strings::fuel_level,
+      mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL));
 
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(test_vehicle_data));
@@ -126,9 +125,10 @@ TEST_F(OnVehicleDataNotificationTest,
   std::vector<ApplicationSharedPtr> applications;
   applications.push_back(mock_app);
 
-  EXPECT_CALL(app_mngr_,
-              IviInfoUpdated(am::VehicleDataType::FUELLEVEL, kFuelLevel))
-      .WillOnce(Return(applications));
+  EXPECT_CALL(
+      app_mngr_,
+      IviInfoUpdated(mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL,
+                     kFuelLevel)).WillOnce(Return(applications));
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
   ::utils::custom_string::CustomString dummy_name("test_app");

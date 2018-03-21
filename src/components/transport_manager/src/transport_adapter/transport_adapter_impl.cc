@@ -45,13 +45,16 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
+// @deprecated DeviceTypes: PASA_AOA, PASA_BLUETOOTH, MME
 DeviceTypes devicesType = {
-    std::make_pair(AOA, std::string("USB_AOA")),
-    std::make_pair(PASA_AOA, std::string("USB_AOA")),
-    std::make_pair(MME, std::string("USB_IOS")),
-    std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(TCP, std::string("WIFI"))};
+    std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
+    std::make_pair(DeviceType::PASA_AOA, std::string("USB_AOA")),
+    std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::PASA_BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::MME, std::string("USB_IOS")),
+    std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
+    std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
+    std::make_pair(DeviceType::TCP, std::string("WIFI"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -502,15 +505,13 @@ void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
 }
 
 bool TransportAdapterImpl::IsSearchDevicesSupported() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   return device_scanner_ != 0;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   return server_connection_factory_ != 0;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
@@ -694,6 +695,23 @@ void TransportAdapterImpl::DataSendFailed(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
+void TransportAdapterImpl::DoTransportSwitch() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::for_each(
+      listeners_.begin(),
+      listeners_.end(),
+      std::bind2nd(
+          std::mem_fun(&TransportAdapterListener::OnTransportSwitchRequested),
+          this));
+}
+
+void TransportAdapterImpl::DeviceSwitched(const DeviceUID& device_handle) {
+  LOG4CXX_DEBUG(logger_,
+                "Switching is not implemented for that adapter type "
+                    << GetConnectionType().c_str());
+  UNUSED(device_handle);
+}
+
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr ret;
@@ -864,8 +882,38 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   }
 }
 
+void TransportAdapterImpl::StopDevice(const DeviceUID& device_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DeviceSptr device = FindDevice(device_id);
+  if (device) {
+    device->Stop();
+  }
+}
+
 std::string TransportAdapterImpl::GetConnectionType() const {
   return devicesType[GetDeviceType()];
+}
+
+SwitchableDevices TransportAdapterImpl::GetSwitchableDevices() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SwitchableDevices devices;
+  sync_primitives::AutoLock locker(devices_mutex_);
+  for (DeviceMap::const_iterator it = devices_.begin(); it != devices_.end();
+       ++it) {
+    const auto device_uid = it->first;
+    const auto device = it->second;
+    const auto transport_switch_id = device->transport_switch_id();
+    if (transport_switch_id.empty()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Device is not suitable for switching: " << device_uid);
+      continue;
+    }
+    LOG4CXX_DEBUG(logger_, "Device is suitable for switching: " << device_uid);
+    devices.insert(std::make_pair(device_uid, transport_switch_id));
+  }
+  LOG4CXX_INFO(logger_,
+               "Found number of switchable devices: " << devices.size());
+  return devices;
 }
 
 #ifdef TELEMETRY_MONITOR

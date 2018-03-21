@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/helpers.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
@@ -148,6 +149,10 @@ bool Connection::AddNewService(uint8_t session_id,
     LOG4CXX_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
     return false;
   }
+
+  LOG4CXX_DEBUG(logger_,
+                "Add service " << service_type << " for session "
+                               << static_cast<uint32_t>(session_id));
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
@@ -156,6 +161,20 @@ bool Connection::AddNewService(uint8_t session_id,
     return false;
   }
   Session& session = session_it->second;
+
+  if (session.protocol_version <= protocol_handler::PROTOCOL_VERSION_2 &&
+      helpers::Compare<protocol_handler::ServiceType,
+                       helpers::EQ,
+                       helpers::ONE>(
+          service_type,
+          protocol_handler::ServiceType::kAudio,
+          protocol_handler::ServiceType::kMobileNav)) {
+    LOG4CXX_WARN(logger_,
+                 "Audio and video services are disallowed for protocol version "
+                 "2 or lower");
+    return false;
+  }
+
   Service* service = session.FindService(service_type);
   // if service already exists
   if (service) {
@@ -294,6 +313,23 @@ void Connection::SetProtectionFlag(
     service_rpc->is_protected_ = true;
   }
 }
+
+bool Connection::SessionServiceExists(
+    const uint8_t session_id,
+    const protocol_handler::ServiceType& service_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(session_map_lock_);
+
+  SessionMap::const_iterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    return false;
+  }
+
+  const Session& session = session_it->second;
+  return session.FindService(service_type);
+}
+
 #endif  // ENABLE_SECURITY
 
 ConnectionHandle Connection::connection_handle() const {

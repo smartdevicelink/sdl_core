@@ -268,6 +268,29 @@ class MockMessageHelper {
   MOCK_METHOD2(GetDeviceMacAddressForHandle,
                std::string(const uint32_t device_handle,
                            const ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteCommandRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteSubmenuRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteChoiceSetRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendResetPropertiesRequest,
+               void(ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendUnsubscribeButtonNotification,
+               void(mobile_apis::ButtonName::eType button,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendUnsubscribeIVIRequest,
+               void(int32_t ivi_id,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };

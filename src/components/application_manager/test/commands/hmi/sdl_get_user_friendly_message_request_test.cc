@@ -73,10 +73,6 @@ namespace strings = ::application_manager::strings;
 
 class SDLGetUserFriendlyMessageRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  SDLGetUserFriendlyMessageRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
  protected:
   void SetUp() OVERRIDE {
     mock_app_ = CreateMockApp();
@@ -90,7 +86,6 @@ class SDLGetUserFriendlyMessageRequestTest
   }
   MockAppPtr mock_app_;
   MockPolicyHandlerInterface mock_policy_handler_;
-  MockMessageHelper& mock_message_helper_;
 };
 
 TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {

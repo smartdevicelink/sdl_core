@@ -90,12 +90,6 @@ class GetSystemInfoResponseTest
     return command_msg;
   }
 
-  void SetUp() OVERRIDE {
-    message_helper_mock_ =
-        application_manager::MockMessageHelper::message_helper_mock();
-  }
-
-  am::MockMessageHelper* message_helper_mock_;
   MockHMICapabilities mock_hmi_capabilities_;
   SmartObject capabilities_;
 };
@@ -114,7 +108,7 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   std::string language;
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(mock_message_helper_,
               CommonLanguageToString(
                   static_cast<hmi_apis::Common_Language::eType>(lang_code)))
       .WillOnce(Return(language));
@@ -140,7 +134,7 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, hmi_capabilities()).Times(0);
 
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(mock_message_helper_,
               CommonLanguageToString(
                   static_cast<hmi_apis::Common_Language::eType>(lang_code)))
       .Times(0);
