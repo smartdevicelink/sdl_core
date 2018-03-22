@@ -973,10 +973,6 @@ void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
     }
   }
 }
-void ApplicationManagerImpl::OnErrorSending(
-    hmi_message_handler::MessageSharedPointer message) {
-  return;
-}
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
     const connection_handler::DeviceMap& device_list) {
@@ -2831,8 +2827,8 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
         const mobile_apis::Result::eType check_result =
             CheckPolicyPermissions(app, function_id, params);
         if (mobile_api::Result::SUCCESS == check_result) {
-          ManageMobileCommand(message,
-                              commands::Command::CommandOrigin::ORIGIN_SDL);
+          rpc_service_->ManageMobileCommand(message,
+                              commands::Command::SOURCE_SDL);
         } else {
           app->PushMobileMessage(message);
         }
