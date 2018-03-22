@@ -128,6 +128,7 @@ class CryptoManagerTest : public testing::Test {
   std::vector<int> forced_protected_services_;
   std::vector<int> forced_unprotected_services_;
 };
+
 std::string CryptoManagerTest::certificate_data_base64_;
 
 TEST_F(CryptoManagerTest, UsingBeforeInit) {
@@ -189,9 +190,17 @@ TEST_F(CryptoManagerTest, CorrectInit) {
       security_manager::CLIENT, security_manager::TLSv1_1, kFordCipher);
   EXPECT_TRUE(crypto_manager_->Init());
 
+  SetInitialValues(
+      security_manager::CLIENT, security_manager::DTLSv1, kFordCipher);
+  EXPECT_TRUE(crypto_manager_->Init());
+
   // Cipher value
   SetInitialValues(
       security_manager::SERVER, security_manager::TLSv1_2, kAllCiphers);
+  EXPECT_TRUE(crypto_manager_->Init());
+
+  SetInitialValues(
+      security_manager::SERVER, security_manager::DTLSv1, kAllCiphers);
   EXPECT_TRUE(crypto_manager_->Init());
 }
 // #endif  // __QNX__
