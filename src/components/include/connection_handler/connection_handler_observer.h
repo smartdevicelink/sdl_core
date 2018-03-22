@@ -140,6 +140,13 @@ class ConnectionHandlerObserver {
    */
   virtual void OnDeviceSwitchingFinish(const std::string& device_uid) = 0;
 
+  /**
+   * @brief Check if application with specified app_id has NAVIGATION HMI type
+   * @param app_id id of application to check
+   * @return true if application is navi otherwise returns false
+   */
+  virtual bool CheckAppIsNavi(const uint32_t app_id) const = 0;
+
 #ifdef ENABLE_SECURITY
   /**
    * @brief Get unique handshake context by application id
@@ -149,13 +156,6 @@ class ConnectionHandlerObserver {
    */
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
-
-  /**
-   * @brief Check if application with specified app_id has NAVIGATION HMI type
-   * @param app_id id of application to check
-   * @return true if application is navi otherwise returns false
-   */
-  virtual bool CheckAppIsNavi(const uint32_t app_id) const = 0;
 #endif  // ENABLE_SECURITY
  protected:
   /**

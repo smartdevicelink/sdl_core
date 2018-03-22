@@ -212,6 +212,13 @@ class Connection {
   void SetProtectionFlag(const uint8_t session_id,
                          const protocol_handler::ServiceType& service_type);
 
+#endif  // ENABLE_SECURITY
+        /**
+         * @brief Returns map of sessions which have been opened in
+         *  current connection.
+         */
+  const SessionMap session_map() const;
+
   /**
    * @brief Check if session contains service with specified service type
    * @param session_id id of session to check
@@ -221,13 +228,6 @@ class Connection {
   bool SessionServiceExists(
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type) const;
-
-#endif  // ENABLE_SECURITY
-        /**
-         * @brief Returns map of sessions which have been opened in
-         *  current connection.
-         */
-  const SessionMap session_map() const;
 
   /**
    * @brief Close session

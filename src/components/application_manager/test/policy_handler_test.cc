@@ -40,8 +40,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_crypto_manager.h"
+#endif  // ENABLE_SECURITY
 #include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
@@ -1601,6 +1603,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(PolicyHandlerTest, RetrieveCertificate) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
@@ -1609,6 +1612,7 @@ TEST_F(PolicyHandlerTest, RetrieveCertificate) {
       .WillOnce(Return(test_certificate));
   EXPECT_EQ(test_certificate, policy_handler_.RetrieveCertificate());
 }
+#endif  // ENABLE_SECURITY
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
@@ -1826,6 +1830,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
 }
+#ifdef ENABLE_SECURITY
 #ifdef EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   const std::string app_storage = "storage";
@@ -1851,7 +1856,8 @@ TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   EXPECT_CALL(policy_handler_observer, OnCertificateUpdated(cert_data));
   policy_handler_.OnCertificateUpdated(cert_data);
 }
-#endif
+#endif  // EXTERNAL_PROPRIETARY_MODE
+#endif  // ENABLE_SECURITY
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_WithoutApps) {
   // Arrange
