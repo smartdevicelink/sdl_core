@@ -35,17 +35,16 @@
 
 #include "application_manager/commands/command_impl.h"
 
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace application_manager {
 
 namespace commands {
 
-class NotificationToHMI : public app_mngr::commands::CommandImpl {
+class NotificationToHMI : public CommandImpl {
  public:
-  NotificationToHMI(const app_mngr::commands::MessageSharedPtr& message,
-                    app_mngr::ApplicationManager& application_manager,
-                    app_mngr::rpc_service::RPCService& rpc_service,
-                    app_mngr::HMICapabilities& hmi_capabilities,
+  NotificationToHMI(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager,
+                    rpc_service::RPCService& rpc_service,
+                    HMICapabilities& hmi_capabilities,
                     policy::PolicyHandlerInterface& policy_handle);
   virtual ~NotificationToHMI();
   virtual bool Init();
