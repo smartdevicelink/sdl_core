@@ -56,7 +56,7 @@ using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::GetUrlsResponse;
-using sdl_rpc_plugin::commands::ResponseToHMI;
+using am::commands::ResponseToHMI;
 using am::commands::CommandImpl;
 
 typedef SharedPtr<ResponseToHMI> ResponseToHMIPtr;

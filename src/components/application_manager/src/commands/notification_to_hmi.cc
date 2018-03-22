@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 NotificationToHMI::NotificationToHMI(
-    const application_manager::commands::MessageSharedPtr& message,
+    const MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
