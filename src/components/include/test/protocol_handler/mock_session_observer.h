@@ -37,6 +37,7 @@
 #include <string>
 #include <list>
 #include "protocol_handler/session_observer.h"
+#include "transport_manager/common.h"
 
 namespace test {
 namespace components {
@@ -100,13 +101,6 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                              std::list<uint32_t>* applications_list,
                              std::string* mac_address,
                              std::string* connection_type));
-
-  DEPRECATED MOCK_CONST_METHOD5(GetDataOnDeviceID,
-                                int32_t(uint32_t device_handle,
-                                        std::string* device_name,
-                                        std::list<uint32_t>* applications_list,
-                                        std::string* mac_address,
-                                        std::string* connection_type));
 
   MOCK_CONST_METHOD2(IsHeartBeatSupported,
                      bool(transport_manager::ConnectionUID connection_handle,
