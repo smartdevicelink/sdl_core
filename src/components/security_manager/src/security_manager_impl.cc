@@ -164,7 +164,8 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
     }
   }
 
-  security_manager::SSLContext* ssl_context = crypto_manager_->CreateSSLContext();
+  security_manager::SSLContext* ssl_context =
+      crypto_manager_->CreateSSLContext();
   if (!ssl_context) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);
