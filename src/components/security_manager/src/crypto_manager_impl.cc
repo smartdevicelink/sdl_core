@@ -159,7 +159,7 @@ bool CryptoManagerImpl::Init() {
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
 #else
-  const SSL_METHOD* method;
+  const SSL_METHOD* method = NULL;
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
