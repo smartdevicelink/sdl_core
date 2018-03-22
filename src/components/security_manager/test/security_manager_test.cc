@@ -76,11 +76,11 @@ using ::testing::_;
 
 namespace {
 // Sample data for handshake data emulation
-const int32_t key = 0x1;
-const int32_t seq_number = 0x2;
-const ServiceType secureServiceType = kControl;
-const uint32_t protocolVersion = PROTOCOL_VERSION_2;
-const bool is_final = false;
+const int32_t kKey = 0x1;
+const int32_t kSeqNumber = 0x2;
+const ServiceType kSecureServiceType = kControl;
+const uint32_t kProtocolVersion = PROTOCOL_VERSION_2;
+const bool kIsFinal = false;
 
 const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
 const size_t handshake_data_size =
@@ -116,7 +116,7 @@ class SecurityManagerTest : public ::testing::Test {
                               uint32_t dataSize,
                               const ServiceType serviceType) {
     const RawMessagePtr rawMessagePtr(utils::MakeShared<RawMessage>(
-        key, protocolVersion, data, dataSize, serviceType));
+        kKey, kProtocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
   /*
@@ -147,7 +147,7 @@ class SecurityManagerTest : public ::testing::Test {
                                      const int repeat_count = 1) {
     const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
                                             SecurityQuery::SEND_HANDSHAKE_DATA,
-                                            seq_number);
+                                            kSeqNumber);
     for (int c = 0; c < repeat_count; ++c) {
       EmulateMobileMessage(header, data, data_size);
     }
@@ -209,9 +209,9 @@ TEST_F(SecurityManagerTest, Listeners_NoListeners) {
   security_manager_->RemoveListener(&mock_listener2);
 
   security_manager_->NotifyListenersOnHandshakeDone(
-      key, SSLContext::Handshake_Result_Success);
+      kKey, SSLContext::Handshake_Result_Success);
   security_manager_->NotifyListenersOnHandshakeDone(
-      key, SSLContext::Handshake_Result_Fail);
+      kKey, SSLContext::Handshake_Result_Fail);
 }
 /*
  * Notifying two listeners
@@ -228,11 +228,11 @@ TEST_F(SecurityManagerTest, Listeners_Notifying) {
   const SSLContext::HandshakeResult first_call_value =
       SSLContext::Handshake_Result_Success;
   // Expect call both listeners on 1st call
-  EXPECT_CALL(*mock_listener1, OnHandshakeDone(key, first_call_value))
+  EXPECT_CALL(*mock_listener1, OnHandshakeDone(kKey, first_call_value))
       .
       // Emulate false (reject) result
       WillOnce(Return(false));
-  EXPECT_CALL(*mock_listener2, OnHandshakeDone(key, first_call_value))
+  EXPECT_CALL(*mock_listener2, OnHandshakeDone(kKey, first_call_value))
       .
       // Emulate true (accept) result
       WillOnce(Return(true));
@@ -244,7 +244,7 @@ TEST_F(SecurityManagerTest, Listeners_Notifying) {
   const SSLContext::HandshakeResult second_call_value =
       SSLContext::Handshake_Result_Fail;
   // Expect call last listener on 2d call
-  EXPECT_CALL(*mock_listener1, OnHandshakeDone(key, second_call_value))
+  EXPECT_CALL(*mock_listener1, OnHandshakeDone(kKey, second_call_value))
       .
       // Emulate false (reject) result
       WillOnce(Return(true));
@@ -254,14 +254,14 @@ TEST_F(SecurityManagerTest, Listeners_Notifying) {
   security_manager_->AddListener(mock_listener1);
   security_manager_->AddListener(mock_listener2);
   // 1st call
-  security_manager_->NotifyListenersOnHandshakeDone(key, first_call_value);
+  security_manager_->NotifyListenersOnHandshakeDone(kKey, first_call_value);
   security_manager_->NotifyOnCertificateUpdateRequired();
   // 2nd call
-  security_manager_->NotifyListenersOnHandshakeDone(key, second_call_value);
+  security_manager_->NotifyListenersOnHandshakeDone(kKey, second_call_value);
   security_manager_->NotifyOnCertificateUpdateRequired();
   // 3nd call
   security_manager_->NotifyListenersOnHandshakeDone(
-      key, SSLContext::Handshake_Result_Fail);
+      kKey, SSLContext::Handshake_Result_Fail);
   security_manager_->NotifyOnCertificateUpdateRequired();
 }
 
@@ -275,7 +275,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   uint8_t session_id = 0;
 
   TestAsyncWaiter waiter;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -283,7 +283,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   EXPECT_CALL(mock_protocol_handler,
               SendMessageToMobileApp(
                   InternalErrorWithErrId(SecurityManager::ERROR_NOT_SUPPORTED),
-                  is_final)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+                  kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           // It could be any query id
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -298,7 +298,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
   const uint8_t* data_param = NULL;
   const RawMessagePtr rawMessagePtr(
-      utils::MakeShared<RawMessage>(key, protocolVersion, data_param, 0));
+      utils::MakeShared<RawMessage>(kKey, kProtocolVersion, data_param, 0));
   security_manager_->OnMobileMessageSent(rawMessagePtr);
 }
 /*
@@ -319,7 +319,7 @@ TEST_F(SecurityManagerTest, GetEmptyQuery) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -328,9 +328,9 @@ TEST_F(SecurityManagerTest, GetEmptyQuery) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
-          is_final));
+          kIsFinal));
   // Call with NULL data
-  call_OnMessageReceived(NULL, 0, secureServiceType);
+  call_OnMessageReceived(NULL, 0, kSecureServiceType);
 }
 /*
  * Shall send InternallError on null data recieved
@@ -340,7 +340,7 @@ TEST_F(SecurityManagerTest, GetWrongJSONSize) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -349,7 +349,7 @@ TEST_F(SecurityManagerTest, GetWrongJSONSize) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
-          is_final));
+          kIsFinal));
   SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                     SecurityQuery::INVALID_QUERY_ID);
   header.json_size = 0x0FFFFFFF;
@@ -365,7 +365,7 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_session_observer,
@@ -378,7 +378,7 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_ID),
-          is_final)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
                                           SecurityQuery::INVALID_QUERY_ID);
@@ -395,10 +395,10 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
   SetMockCryptoManager();
 
   // Return mock SSLContext
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(Return(&mock_ssl_context_new));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
@@ -410,21 +410,21 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_protocol_handler,
       SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), is_final));
+          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
 
   // Emulate SessionObserver and CryptoManager result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(ReturnNull());
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext()).WillOnce(ReturnNull());
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -437,7 +437,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -446,18 +446,18 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR),
-          is_final));
+          kIsFinal));
 
   // Emulate SessionObserver and CryptoManager result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(ReturnNull());
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext())
       .WillOnce(Return(&mock_ssl_context_new));
   EXPECT_CALL(mock_crypto_manager, ReleaseSSLContext(&mock_ssl_context_new));
-  EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
+  EXPECT_CALL(mock_session_observer, SetSSLContext(kKey, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -469,17 +469,17 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
   // Expect no notifying listeners - it will be done after handshake
 
   // Emulate SessionObserver and CryptoManager result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(ReturnNull())
       .
       // additional check for debug code
       WillOnce(Return(&mock_ssl_context_exists));
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext())
       .WillOnce(Return(&mock_ssl_context_new));
-  EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
+  EXPECT_CALL(mock_session_observer, SetSSLContext(kKey, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_SUCCESS));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
@@ -490,7 +490,7 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -498,17 +498,17 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
   EXPECT_CALL(
       mock_protocol_handler,
       SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), is_final));
+          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Fail))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
       .WillOnce(Return(true));
 
   // Emulate SessionObserver result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(ReturnNull());
 
-  security_manager_->StartHandshake(key);
+  security_manager_->StartHandshake(kKey);
 
   // Listener was destroyed after OnHandshakeDone call
   mock_sm_listener.release();
@@ -522,8 +522,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
-  EXPECT_CALL(mock_session_observer, GetHandshakeContext(key))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
+  EXPECT_CALL(mock_session_observer, GetHandshakeContext(kKey))
       .WillOnce(Return(SSLContext::HandshakeContext()));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
@@ -533,14 +533,14 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
   EXPECT_CALL(
       mock_protocol_handler,
       SendMessageToMobileApp(
-          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), is_final));
+          InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Fail))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
       .WillOnce(Return(true));
 
   // Emulate SessionObserver result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(Return(&mock_ssl_context_exists));
   EXPECT_CALL(mock_ssl_context_exists, IsInitCompleted())
       .WillOnce(Return(false));
@@ -550,7 +550,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
                       SetArgPointee<1>(handshake_data_out_size),
                       Return(SSLContext::Handshake_Result_Fail)));
 
-  security_manager_->StartHandshake(key);
+  security_manager_->StartHandshake(kKey);
 
   // Listener was destroyed after OnHandshakeDone call
   mock_sm_listener.release();
@@ -563,8 +563,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
-  EXPECT_CALL(mock_session_observer, GetHandshakeContext(key))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
+  EXPECT_CALL(mock_session_observer, GetHandshakeContext(kKey))
       .Times(3)
       .WillRepeatedly(Return(SSLContext::HandshakeContext()));
   EXPECT_CALL(mock_session_observer,
@@ -572,10 +572,10 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
       .WillOnce(Return(true));
 
   // Expect send one message (with correct pointer and size data)
-  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, is_final));
+  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, kIsFinal));
 
   // Return mock SSLContext
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .Times(3)
       .WillRepeatedly(Return(&mock_ssl_context_exists));
   // Expect initialization check on each call StartHandshake
@@ -597,9 +597,9 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
                       SetArgPointee<1>(handshake_data_out_size),
                       Return(SSLContext::Handshake_Result_Success)));
 
-  security_manager_->StartHandshake(key);
-  security_manager_->StartHandshake(key);
-  security_manager_->StartHandshake(key);
+  security_manager_->StartHandshake(kKey);
+  security_manager_->StartHandshake(kKey);
+  security_manager_->StartHandshake(kKey);
 }
 /*
  * Shall notify listeners on call StartHandshake after SSLContext initialization
@@ -610,16 +610,16 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsComplete) {
   // Expect no message send
   // Expect notifying listeners (success)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Success))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Success))
       .WillOnce(Return(true));
 
   // Emulate SessionObserver result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(Return(&mock_ssl_context_exists));
   EXPECT_CALL(mock_ssl_context_exists, IsInitCompleted())
       .WillOnce(Return(true));
 
-  security_manager_->StartHandshake(key);
+  security_manager_->StartHandshake(kKey);
 
   // Listener was destroyed after OnHandshakeDone call
   mock_sm_listener.release();
@@ -634,7 +634,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
   uint8_t session_id = 0;
 
   TestAsyncWaiter waiter;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -644,7 +644,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INVALID_QUERY_SIZE),
-          is_final)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   EmulateMobileMessageHandshake(NULL, 0);
 
@@ -664,7 +664,7 @@ TEST_F(SecurityManagerTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_session_observer,
@@ -675,17 +675,17 @@ TEST_F(SecurityManagerTest,
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SERVICE_NOT_PROTECTED),
-          is_final)).WillOnce(NotifyTestAsyncWaiter(&waiter));
+          kIsFinal)).WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Fail))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
 
   // Emulate SessionObserver result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
   times++;
 
@@ -713,7 +713,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
@@ -728,18 +728,18 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_SSL_INVALID_DATA),
-          is_final))
+          kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Fail))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
 
   // Emulate SessionObserver and CryptoManager result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .Times(handshake_emulates)
       .WillRepeatedly(Return(&mock_ssl_context_exists));
 
@@ -794,7 +794,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _))
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
@@ -808,14 +808,14 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
   const size_t raw_message_size = 15;
   EXPECT_CALL(
       mock_protocol_handler,
-      SendMessageToMobileApp(RawMessageEqSize(raw_message_size), is_final))
+      SendMessageToMobileApp(RawMessageEqSize(raw_message_size), kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
 
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Fail))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
 
@@ -824,7 +824,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
       .Times(handshake_emulates)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
   times += handshake_emulates;
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .Times(handshake_emulates)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter),
                             Return(&mock_ssl_context_exists)));
@@ -870,12 +870,12 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
   // Expect no errors
   // Expect notifying listeners (success)
   EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(key, SSLContext::Handshake_Result_Success))
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Success))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
 
   // Emulate SessionObserver and CryptoManager result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .Times(handshake_emulates)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter),
                             Return(&mock_ssl_context_exists)));
@@ -928,14 +928,14 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
   // uint8_t protocol_version = 0;
-  EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _)).Times(2);
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _)).Times(2);
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .Times(2)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times += 2;  // matches to the number above
 
-  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, is_final))
+  EXPECT_CALL(mock_protocol_handler, SendMessageToMobileApp(_, kIsFinal))
       .Times(2)
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += 2;  // matches to the number above
