@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 NotificationFromHMI::NotificationFromHMI(
-    const application_manager::commands::MessageSharedPtr& message,
+    const MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
@@ -67,7 +67,7 @@ bool NotificationFromHMI::CleanUp() {
 void NotificationFromHMI::Run() {}
 
 void NotificationFromHMI::SendNotificationToMobile(
-    const application_manager::commands::MessageSharedPtr& message) {
+    const MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
