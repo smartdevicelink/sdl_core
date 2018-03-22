@@ -261,12 +261,13 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     client_ctx_ = client_manager_->CreateSSLContext();
 
     using custom_str::CustomString;
-    security_manager::SSLContext::HandshakeContext ctx(CustomString("SPT"),
-                                                       CustomString("client"));
-    server_ctx_->SetHandshakeContext(ctx);
 
-    ctx.expected_cn = "server";
-    client_ctx_->SetHandshakeContext(ctx);
+    server_ctx_->SetHandshakeContext(
+        security_manager::SSLContext::HandshakeContext(CustomString("SPT"),
+                                                       CustomString("client")));
+    client_ctx_->SetHandshakeContext(
+        security_manager::SSLContext::HandshakeContext(CustomString("SPT"),
+                                                       CustomString("server")));
 
     kServerBuf = NULL;
     kClientBuf = NULL;
@@ -342,7 +343,7 @@ class SSLTestForTLS1_2 : public SSLTestParam {};
 INSTANTIATE_TEST_CASE_P(
     CorrectProtocolAndCiphers,
     SSLTestParam,
-    ::testing::Values(ProtocolAndCipher(security_manager::TLSv1,
+    ::testing::Values(ProtocolAndCipher(security_manager::TLSv1_1,
                                         security_manager::TLSv1,
                                         kFordCipher,
                                         kFordCipher),
@@ -392,6 +393,22 @@ INSTANTIATE_TEST_CASE_P(
                                         security_manager::SSLv3,
                                         kFordCipher,
                                         kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1,
+                                        security_manager::DTLSv1,
+                                        kFordCipher,
+                                        kFordCipher),
+                      ProtocolAndCipher(security_manager::DTLSv1,
+                                        security_manager::TLSv1_1,
+                                        kFordCipher,
+                                        kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::DTLSv1,
+                                        kFordCipher,
+                                        kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::DTLSv1,
+                                        kFordCipher,
+                                        kFordCipher),
                       ProtocolAndCipher(security_manager::TLSv1_2,
                                         security_manager::SSLv3,
                                         kFordCipher,
@@ -412,6 +429,7 @@ INSTANTIATE_TEST_CASE_P(
 TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx_->StartHandshake(&kClientBuf, &client_buf_len));
+
   ASSERT_FALSE(NULL == kClientBuf);
   ASSERT_LT(0u, client_buf_len);
   // Broke 3 bytes for get abnormal fail of handshake
@@ -577,9 +595,12 @@ TEST_P(SSLTestForTLS1_2, HandshakeFailed) {
             client_ctx_->StartHandshake(&kClientBuf, &client_buf_len));
   EXPECT_FALSE(NULL == kClientBuf);
   ASSERT_LT(0u, client_buf_len);
+
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
             server_ctx_->DoHandshakeStep(
-                kClientBuf, client_buf_len, &kServerBuf, &server_buf_len));
+                kClientBuf, client_buf_len, &kServerBuf, &server_buf_len))
+      << ERR_reason_error_string(ERR_get_error());
+
   EXPECT_TRUE(NULL == kServerBuf);
   EXPECT_EQ(0u, server_buf_len);
 
