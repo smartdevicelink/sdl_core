@@ -588,13 +588,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     policy_table::FunctionalGroupings functional_groupings;
     cache_->GetFunctionalGroupings(functional_groupings);
 
-#ifdef SDL_REMOTE_CONTROL
-    ApplicationOnDevice who = {device_id, app_id};
-    const policy_table::Strings app_groups = access_remote_->GetGroups(who);
-#else   // SDL_REMOTE_CONTROL
-    const policy_table::Strings app_groups =
+    policy_table::Strings app_groups =
         GetGroupsNames(app_group_permissions);
-#endif  // SDL_REMOTE_CONTROL
 
     // Undefined groups (without user consent) disallowed by default, since
     // OnPermissionsChange notification has no "undefined" section
@@ -1160,14 +1155,8 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
   FunctionalIdType group_types;
 
-#ifdef SDL_REMOTE_CONTROL
-  allowed_by_default = false;
-  const bool ret = access_remote_->GetPermissionsForApp(
-      device_id, app_id_to_check, group_types);
-#else
   const bool ret =
       cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types);
-#endif  // REMOTE_CONTROL
 
   if (!ret) {
     LOG4CXX_WARN(logger_,
