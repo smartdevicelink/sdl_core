@@ -984,10 +984,6 @@ void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (permissions.group_permissions.empty()) {
-    LOG4CXX_DEBUG(logger_, "Permissions list is empty, skipping update.");
-    return;
-  }
 
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
