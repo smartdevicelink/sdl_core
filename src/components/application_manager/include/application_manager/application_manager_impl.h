@@ -478,10 +478,10 @@ class ApplicationManagerImpl
   uint32_t GetNextHMICorrelationID() OVERRIDE;
 
   /* @brief Starts audio passthru process
+   * @deprecated Use BeginAudioPassThru(int32_t session_key) instead
    *
    * @return true on success, false if passthru is already in process
    */
-  // DEPRECATED
   bool BeginAudioPassThrough() OVERRIDE;
 
   /**
@@ -493,10 +493,10 @@ class ApplicationManagerImpl
 
   /*
    * @brief Finishes already started audio passthru process
+   * @deprecated Use EndAudioPassThru(int32_t application_key) instead
    *
    * @return true on success, false if passthru is not active
    */
-  // DEPRECATED
   bool EndAudioPassThrough() OVERRIDE;
 
   /**

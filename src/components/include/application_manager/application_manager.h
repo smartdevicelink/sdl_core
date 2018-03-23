@@ -390,6 +390,7 @@ class ApplicationManager {
   virtual void EndNaviServices(uint32_t app_id) = 0;
 
   /* @brief Starts audio passthru process
+   * @deprecated Use BeginAudioPassThru(int32_t session_key) instead
    *
    * @return true on success, false if passthru is already in process
    */
@@ -404,6 +405,7 @@ class ApplicationManager {
 
   /*
    * @brief Finishes already started audio passthru process
+   * @deprecated Use EndAudioPassThru(int32_t application_key) instead
    *
    * @return true on success, false if passthru is not active
    */
