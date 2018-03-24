@@ -169,8 +169,8 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   utils::SharedPtr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>(message);
 
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(true));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
 
   EXPECT_CALL(
@@ -239,8 +239,8 @@ TEST_F(PerformAudioPassThruRequestTest,
   event_ui.set_smart_object(*response_ui);
 
   MessageSharedPtr response_to_mobile;
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(false));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillRepeatedly(Return(true));
   EXPECT_CALL(
       app_mngr_,
@@ -370,8 +370,8 @@ TEST_F(PerformAudioPassThruRequestTest,
       hmi_apis::Common_Result::GENERIC_ERROR;
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(false));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(false));
 
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
@@ -545,7 +545,8 @@ TEST_F(
   }
 
   // Start microphone recording cals
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(kConnectionKey));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id));
   EXPECT_CALL(app_mngr_, StartAudioPassThruThread(_, _, _, _, _, _));
 
   CallRun caller(*command_sptr_);
@@ -590,7 +591,8 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   // Start microphone recording cals
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(kConnectionKey));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id));
   EXPECT_CALL(app_mngr_, StartAudioPassThruThread(_, _, _, _, _, _));
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
@@ -626,8 +628,8 @@ TEST_F(PerformAudioPassThruRequestTest,
   caller_speak();
 
   // Second call for test correct behavior of UI_PerformAudioPassThru event
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(false));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_)).Times(0);
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
@@ -651,8 +653,8 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(kConnectionKey))
-      .WillOnce(Return(true));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
 
   EXPECT_CALL(
       app_mngr_,
@@ -675,9 +677,9 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::connection_key] = kConnectionKey;
   msg_params_[am::strings::function_id] = kFunctionId;
 
+  uint32_t app_id = kConnectionKey;
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(kConnectionKey))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
 
   EXPECT_CALL(
       app_mngr_,
@@ -695,8 +697,9 @@ TEST_F(PerformAudioPassThruRequestTest,
 TEST_F(PerformAudioPassThruRequestTest, OnEvent_DefaultCase) {
   am::event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
+  uint32_t app_id = kConnectionKey;
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey)).Times(0);
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);
   caller();
@@ -715,8 +718,8 @@ TEST_F(PerformAudioPassThruRequestTest, Init_CorrectTimeout) {
 
 TEST_F(PerformAudioPassThruRequestTest,
        onTimeOut_ttsSpeakNotActive_DontSendHMIReqeust) {
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(true));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
 
   // For setting current_state_ -> kCompleted
@@ -730,8 +733,8 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        DISABLED_onTimeOut_ttsSpeakActive_SendHMIReqeust) {
-  EXPECT_CALL(app_mngr_, EndAudioPassThru(kConnectionKey))
-      .WillOnce(Return(true));
+  uint32_t app_id = kConnectionKey;
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
 
   EXPECT_CALL(*application_sptr_, hmi_level())

@@ -478,7 +478,7 @@ class ApplicationManagerImpl
   uint32_t GetNextHMICorrelationID() OVERRIDE;
 
   /* @brief Starts audio passthru process
-   * @deprecated Use BeginAudioPassThru(int32_t session_key) instead
+   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is already in process
    */
@@ -486,14 +486,14 @@ class ApplicationManagerImpl
 
   /**
    * @brief Starts AudioPassThru process by given application
-   * @param session_key Session key of connection for Mobile side
+   * @param app_id ID of the application which starts the process
    * @return true if AudioPassThru can be started, false otherwise
    */
-  bool BeginAudioPassThru(int32_t session_key) OVERRIDE;
+  bool BeginAudioPassThru(uint32_t app_id) OVERRIDE;
 
   /*
    * @brief Finishes already started audio passthru process
-   * @deprecated Use EndAudioPassThru(int32_t application_key) instead
+   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is not active
    */
@@ -501,11 +501,11 @@ class ApplicationManagerImpl
 
   /**
    * @brief Finishes already started AudioPassThru process by given application
-   * @param application_key ID of the application which started the process
+   * @param app_id ID of the application which started the process
    * @return true if AudioPassThru process has been started with given
    * application and thus it can be stopped, false otherwise
    */
-  bool EndAudioPassThru(int32_t application_key) OVERRIDE;
+  bool EndAudioPassThru(uint32_t app_id) OVERRIDE;
 
   /*
    * @brief Retrieves driver distraction state
@@ -1719,7 +1719,7 @@ class ApplicationManagerImpl
   std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
 
   bool audio_pass_thru_active_;
-  int32_t audio_pass_thru_app_key_;
+  uint32_t audio_pass_thru_app_id_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;

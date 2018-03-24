@@ -143,7 +143,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     : settings_(am_settings)
     , applications_list_lock_(true)
     , audio_pass_thru_active_(false)
-    , audio_pass_thru_app_key_(0)
+    , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
           hmi_apis::Common_DriverDistractionState::INVALID_ENUM)
     , is_vr_session_strated_(false)
@@ -785,13 +785,13 @@ bool ApplicationManagerImpl::BeginAudioPassThrough() {
   }
 }
 
-bool ApplicationManagerImpl::BeginAudioPassThru(int32_t session_key) {
+bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
     return false;
   } else {
     audio_pass_thru_active_ = true;
-    audio_pass_thru_app_key_ = session_key;
+    audio_pass_thru_app_id_ = app_id;
     return true;
   }
 }
@@ -806,11 +806,11 @@ bool ApplicationManagerImpl::EndAudioPassThrough() {
   }
 }
 
-bool ApplicationManagerImpl::EndAudioPassThru(int32_t application_key) {
+bool ApplicationManagerImpl::EndAudioPassThru(uint32_t app_id) {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-  if (audio_pass_thru_active_ && audio_pass_thru_app_key_ == application_key) {
+  if (audio_pass_thru_active_ && audio_pass_thru_app_id_ == app_id) {
     audio_pass_thru_active_ = false;
-    audio_pass_thru_app_key_ = 0;
+    audio_pass_thru_app_id_ = 0;
     return true;
   } else {
     return false;

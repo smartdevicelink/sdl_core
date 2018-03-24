@@ -834,7 +834,7 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
       mock_media_manager;
   app_manager_impl_->SetMockMediaManager(&mock_media_manager);
 
-  const int32_t session_key = 65537;
+  const uint32_t app_id = 65537;
   const int32_t max_duration = 1000;
   // below are not used
   const int32_t correlation_id = 0;
@@ -843,15 +843,15 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
   const int32_t audio_type = 0;
 
   EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(session_key, _, max_duration))
+              StartMicrophoneRecording(app_id, _, max_duration))
       .WillOnce(Return());
-  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(session_key))
+  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id))
       .WillOnce(Return());
 
-  bool result = app_manager_impl_->BeginAudioPassThru(session_key);
+  bool result = app_manager_impl_->BeginAudioPassThru(app_id);
   EXPECT_TRUE(result);
   if (result) {
-    app_manager_impl_->StartAudioPassThruThread(session_key,
+    app_manager_impl_->StartAudioPassThruThread(app_id,
                                                 correlation_id,
                                                 max_duration,
                                                 sampling_rate,
@@ -859,10 +859,10 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
                                                 audio_type);
   }
 
-  result = app_manager_impl_->EndAudioPassThru(session_key);
+  result = app_manager_impl_->EndAudioPassThru(app_id);
   EXPECT_TRUE(result);
   if (result) {
-    app_manager_impl_->StopAudioPassThru(session_key);
+    app_manager_impl_->StopAudioPassThru(app_id);
   }
 }
 
@@ -871,14 +871,13 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   ON_CALL(mock_application_manager_settings_, recording_file_name())
       .WillByDefault(ReturnRef(dummy_file_name));
 
-  const int32_t session_key_of_app_1 = 65537;
-  const int32_t session_key_of_app_2 = 65538;
+  const uint32_t app_id_1 = 65537;
+  const uint32_t app_id_2 = 65538;
 
   std::string dummy_mac_address;
   utils::SharedPtr<MockApplication> mock_app_1 =
       utils::SharedPtr<MockApplication>(new MockApplication());
-  EXPECT_CALL(*mock_app_1, app_id())
-      .WillRepeatedly(Return(session_key_of_app_1));
+  EXPECT_CALL(*mock_app_1, app_id()).WillRepeatedly(Return(app_id_1));
   EXPECT_CALL(*mock_app_1, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_1, mac_address())
       .WillRepeatedly(ReturnRef(dummy_mac_address));
@@ -889,8 +888,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
 
   utils::SharedPtr<MockApplication> mock_app_2 =
       utils::SharedPtr<MockApplication>(new MockApplication());
-  EXPECT_CALL(*mock_app_2, app_id())
-      .WillRepeatedly(Return(session_key_of_app_2));
+  EXPECT_CALL(*mock_app_2, app_id()).WillRepeatedly(Return(app_id_2));
   EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_2, mac_address())
       .WillRepeatedly(ReturnRef(dummy_mac_address));
@@ -914,16 +912,16 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   const int32_t audio_type = 0;
 
   EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(session_key_of_app_2, _, max_duration))
+              StartMicrophoneRecording(app_id_2, _, max_duration))
       .WillOnce(Return());
-  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(session_key_of_app_2))
+  EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id_2))
       .WillOnce(Return());
 
   // app 2 starts Audio Pass Thru
-  bool result = app_manager_impl_->BeginAudioPassThru(session_key_of_app_2);
+  bool result = app_manager_impl_->BeginAudioPassThru(app_id_2);
   EXPECT_TRUE(result);
   if (result) {
-    app_manager_impl_->StartAudioPassThruThread(session_key_of_app_2,
+    app_manager_impl_->StartAudioPassThruThread(app_id_2,
                                                 correlation_id,
                                                 max_duration,
                                                 sampling_rate,
@@ -933,13 +931,13 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
 
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(
-      session_key_of_app_1, mobile_apis::Result::SUCCESS, false, true);
+      app_id_1, mobile_apis::Result::SUCCESS, false, true);
 
   // confirm that APT is still running
-  result = app_manager_impl_->EndAudioPassThru(session_key_of_app_2);
+  result = app_manager_impl_->EndAudioPassThru(app_id_2);
   EXPECT_TRUE(result);
   if (result) {
-    app_manager_impl_->StopAudioPassThru(session_key_of_app_2);
+    app_manager_impl_->StopAudioPassThru(app_id_2);
   }
 }
 
