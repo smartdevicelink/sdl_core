@@ -210,7 +210,10 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated) {
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
+  time_t system_time = 0;
+  time_t certificates_time = 1;
   size_t updates_before = 0;
+
   SetInitialValues(
       security_manager::CLIENT, security_manager::TLSv1_2, kAllCiphers);
   ASSERT_TRUE(crypto_manager_->Init());
@@ -218,7 +221,8 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
   EXPECT_CALL(*mock_security_manager_settings_, update_before_hours())
       .WillOnce(Return(updates_before));
 
-  EXPECT_FALSE(crypto_manager_->IsCertificateUpdateRequired());
+  EXPECT_FALSE(crypto_manager_->IsCertificateUpdateRequired(system_time,
+                                                            certificates_time));
 
   size_t max_updates_ = std::numeric_limits<size_t>::max();
   SetInitialValues(
@@ -227,7 +231,8 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
       .WillOnce(Return(max_updates_));
   ASSERT_TRUE(crypto_manager_->Init());
 
-  EXPECT_TRUE(crypto_manager_->IsCertificateUpdateRequired());
+  EXPECT_TRUE(crypto_manager_->IsCertificateUpdateRequired(system_time,
+                                                           certificates_time));
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_NotInitialized) {

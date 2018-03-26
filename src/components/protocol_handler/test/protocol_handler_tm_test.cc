@@ -985,7 +985,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
 
   SetProtocolVersion2();
   // Expect start protection for unprotected session
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return fail protection
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
@@ -1040,7 +1043,10 @@ TEST_F(ProtocolHandlerImplTest,
 
   SetProtocolVersion2();
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(
@@ -1117,7 +1123,10 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(Return(&ssl_context_mock));
@@ -1196,7 +1205,10 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(
@@ -1294,7 +1306,10 @@ TEST_F(
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(
@@ -1390,7 +1405,10 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(
