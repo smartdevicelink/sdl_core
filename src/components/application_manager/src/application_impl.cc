@@ -46,6 +46,7 @@
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "transport_manager/common.h"
 
 namespace {
 
@@ -81,6 +82,7 @@ void SwitchApplicationParameters(ApplicationSharedPtr app,
                                  const uint32_t app_id,
                                  const size_t device_id,
                                  const std::string& mac_address) {
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::SharedPtr<ApplicationImpl> application =
       ApplicationSharedPtr::dynamic_pointer_cast<ApplicationImpl>(app);
   DCHECK_OR_RETURN_VOID(application);

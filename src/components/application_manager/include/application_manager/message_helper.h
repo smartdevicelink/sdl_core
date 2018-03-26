@@ -46,6 +46,7 @@
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/common.h"
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -137,7 +138,8 @@ class MessageHelper {
       mobile_apis::Result::eType mobile_result);
 
   static std::string GetDeviceMacAddressForHandle(
-      const uint32_t device_handle, const ApplicationManager& app_mngr);
+      const transport_manager::DeviceHandle device_handle,
+      const ApplicationManager& app_mngr);
   /**
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value

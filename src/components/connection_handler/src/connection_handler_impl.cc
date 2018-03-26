@@ -753,12 +753,11 @@ struct CompareMAC {
 
 bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
                                         DeviceHandle* device_handle) {
+  DCHECK_OR_RETURN(device_handle, false);
   DeviceMap::const_iterator it = std::find_if(
       device_list_.begin(), device_list_.end(), CompareMAC(mac_address));
   if (it != device_list_.end()) {
-    if (device_handle) {
-      *device_handle = it->first;
-    }
+    *device_handle = it->first;
     return true;
   }
   return false;
@@ -775,7 +774,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   int32_t result = -1;
   DeviceMap::const_iterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Device not found!");
+    LOG4CXX_ERROR(logger_, "Device not found for handle " << device_handle);
     return result;
   }
 

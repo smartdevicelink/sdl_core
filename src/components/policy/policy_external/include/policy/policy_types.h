@@ -41,6 +41,8 @@
 #include <utility>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
+#include "transport_manager/common.h"
+
 namespace policy {
 
 // TODO(PV): specify errors
@@ -190,7 +192,7 @@ struct DeviceParams {
   std::string device_name;
   std::string device_mac_address;
   std::string device_connection_type;
-  uint32_t device_handle;
+  transport_manager::DeviceHandle device_handle;
 };
 
 /**
