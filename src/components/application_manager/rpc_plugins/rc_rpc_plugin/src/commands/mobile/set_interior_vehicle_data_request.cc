@@ -486,13 +486,34 @@ bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
   return true;
 }
 
+bool CheckReadOnlyParamsForAudio(
+    const smart_objects::SmartObject& module_type_params) {
+  if (module_type_params.keyExists(message_params::kEqualizerSettings)) {
+    const auto& equalizer_settings =
+        module_type_params[message_params::kEqualizerSettings];
+    auto it = equalizer_settings.asArray()->begin();
+    for (; it != equalizer_settings.asArray()->end(); ++it) {
+      if (it->keyExists(message_params::kChannelName)) {
+        LOG4CXX_DEBUG(logger_,
+                      " READ ONLY parameter: " << message_params::kChannelName);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
+  const std::string module_type = ModuleType();
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  if (enums_value::kAudio == module_type) {
+    return CheckReadOnlyParamsForAudio(module_type_params);
+  }
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
       return true;
@@ -517,6 +538,20 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
       } else if (enums_value::kRadio == module_type) {
         module_data[message_params::kRadioControlData].erase(it);
         LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
+      }
+    }
+  }
+
+  if (enums_value::kAudio == module_type) {
+    auto& equalizer_settings = module_data[message_params::kAudioControlData]
+                                          [message_params::kEqualizerSettings];
+    auto it = equalizer_settings.asArray()->begin();
+    for (; it != equalizer_settings.asArray()->end(); ++it) {
+      if (it->keyExists(message_params::kChannelName)) {
+        it->erase(message_params::kChannelName);
+        LOG4CXX_DEBUG(logger_,
+                      "Cutting-off READ ONLY parameter: "
+                          << message_params::kChannelName);
       }
     }
   }

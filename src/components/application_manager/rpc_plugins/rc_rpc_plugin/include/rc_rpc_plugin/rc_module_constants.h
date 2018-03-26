@@ -182,6 +182,8 @@ const char kColor[] = "color";
 // AudioControlData
 const char kSource[] = "source";
 const char kKeepContext[] = "keepContext";
+const char kEqualizerSettings[] = "equalizerSettings";
+const char kChannelName[] = "channelName";
 
 // ModuleData struct
 const char kRadioControlData[] = "radioControlData";
