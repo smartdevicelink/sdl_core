@@ -113,7 +113,13 @@ typedef std::vector<std::string> PermissionsList;
  */
 typedef std::vector<std::string> StringArray;
 
-enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
+enum PermitResult {
+  kRpcAllowed = 0,
+  kRpcDisallowed,
+  kRpcUserDisallowed,
+  kRpcAllParamsDisallowed,
+  kRpcAllParamsUserDisallowed
+};
 
 /**
   * @struct Stores result of check:

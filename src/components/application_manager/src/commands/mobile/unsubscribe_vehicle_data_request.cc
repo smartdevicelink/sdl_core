@@ -35,6 +35,7 @@
 #include "application_manager/commands/command_impl.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/commands/command_helper.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -134,7 +135,7 @@ void UnsubscribeVehicleDataRequest::Run() {
       if (is_key_enabled) {
         ++items_to_unsubscribe;
 
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (!app->IsSubscribedToIVI(key_type)) {
           ++unsubscribed_items;
           vi_already_unsubscribed_by_this_app_.insert(key_type);
@@ -183,7 +184,7 @@ void UnsubscribeVehicleDataRequest::Run() {
           vi_already_unsubscribed_by_this_app_.size();
 
   if (0 == items_to_unsubscribe) {
-    if (HasDisallowedParams()) {
+    if (command_helper::HasDisallowedParams(removed_parameters_permissions_)) {
       SendResponse(false, mobile_apis::Result::DISALLOWED);
     } else {
       SendResponse(
@@ -234,6 +235,7 @@ void UnsubscribeVehicleDataRequest::Run() {
        ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
                  &msg_params,
                  true);
@@ -250,6 +252,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_ERROR(logger_, "Received unknown event.");
     return;
   }
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
@@ -390,6 +393,23 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
        ++it_another_app) {
     response[*it_another_app][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
+  }
+}
+
+void UnsubscribeVehicleDataRequest::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          static_cast<mobile_apis::Result::eType>(
+              response[strings::msg_params][strings::result_code].asInt()),
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::DISALLOWED,
+          mobile_apis::Result::USER_DISALLOWED)) {
+    response[strings::msg_params][strings::info] = std::string();
+    command_helper::AddDisallowedParameters(removed_parameters_permissions_,
+                                            response);
+    command_helper::AddDisallowedParametersToInfo(
+        removed_parameters_permissions_, response);
   }
 }
 

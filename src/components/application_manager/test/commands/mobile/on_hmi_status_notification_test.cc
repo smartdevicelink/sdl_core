@@ -59,9 +59,6 @@ using testing::_;
 class OnHMIStatusNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnHMIStatusNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
-
   MessageSharedPtr CreateMsgParams(
       const mobile_apis::HMILevel::eType kHMIState) {
     MessageSharedPtr msg = CreateMessage();
@@ -70,14 +67,13 @@ class OnHMIStatusNotificationTest
     return msg;
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
   void SetSendNotificationExpectations(MessageSharedPtr& msg) {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-    EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-    EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+    EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+        .WillOnce(Return(false));
+    EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
+        .WillOnce(SaveArg<0>(&msg));
   }
 
   void VerifySendNotificationData(MessageSharedPtr& msg) {
@@ -88,8 +84,6 @@ class OnHMIStatusNotificationTest
     ASSERT_EQ(CommandImpl::protocol_version_,
               (*msg)[strings::params][strings::protocol_version].asInt());
   }
-
-  MockMessageHelper& message_helper_;
 };
 
 TEST_F(OnHMIStatusNotificationTest, Run_InvalidApp_NoNotification) {
@@ -119,7 +113,8 @@ TEST_F(OnHMIStatusNotificationTest, Run_InvalidEnum_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
 
   SetSendNotificationExpectations(msg);
 
@@ -137,11 +132,12 @@ TEST_F(OnHMIStatusNotificationTest, Run_BackgroundAndFalseProperties_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
 
   EXPECT_CALL(*mock_app, tts_properties_in_none()).WillOnce(Return(false));
   EXPECT_CALL(*mock_app, set_tts_properties_in_none(true));
-  EXPECT_CALL(message_helper_, SendTTSGlobalProperties(_, false, _));
+  EXPECT_CALL(mock_message_helper_, SendTTSGlobalProperties(_, false, _));
 
   command->Run();
 
@@ -156,7 +152,8 @@ TEST_F(OnHMIStatusNotificationTest, Run_BackgroundAndTrueProperties_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
 
   EXPECT_CALL(*mock_app, tts_properties_in_none()).WillOnce(Return(true));
 
@@ -175,7 +172,8 @@ TEST_F(OnHMIStatusNotificationTest, Run_FullAndFalseProperties_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
 
   EXPECT_CALL(*mock_app, tts_properties_in_full()).WillOnce(Return(false));
   EXPECT_CALL(*mock_app, set_tts_properties_in_full(true));
@@ -197,7 +195,8 @@ TEST_F(OnHMIStatusNotificationTest, Run_FullAndTrueProperties_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
 
   EXPECT_CALL(*mock_app, tts_properties_in_full()).WillOnce(Return(true));
 

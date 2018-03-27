@@ -55,7 +55,6 @@ using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -75,18 +74,12 @@ const uint32_t kSeconds = 1u;
 class SetMediaClockRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetMediaClockRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  SetMediaClockRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -114,7 +107,6 @@ class SetMediaClockRequestTest
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
   }
 
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 
@@ -139,10 +131,6 @@ TEST_F(SetMediaClockRequestTest,
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -328,20 +316,20 @@ TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
 TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
+      hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
 
-  SharedPtr<SetMediaClockRequest> command(
-      CreateCommand<SetMediaClockRequest>(msg));
-
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*msg);
-
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
   command->on_event(event);
 }
 

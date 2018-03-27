@@ -129,9 +129,23 @@ class ResumeCtrlImpl : public ResumeCtrl,
   void OnSuspend() OVERRIDE;
 
   /**
+   * @brief Processes resumption data after receiving signal "Ignition Off"
+   */
+  void OnIgnitionOff() OVERRIDE;
+
+  /**
    * @brief Processes resumption data after receiving signal "Awake"
    */
   void OnAwake() OVERRIDE;
+
+  /**
+   * @brief Checks if SDL has already received OnExitAllApplication notification
+   * with "SUSPEND" reason
+   *
+   * @return Returns TRUE if SDL has received OnExitAllApplication notification
+   * with reason "SUSPEND" otherwise returns FALSE
+   */
+  bool is_suspended() const OVERRIDE;
 
   /**
    * @brief Method stops timer "RsmCtrlPercist" when SDL
@@ -299,6 +313,12 @@ class ResumeCtrlImpl : public ResumeCtrl,
    *  N gets from property
    */
   void SaveDataOnTimer();
+
+  /**
+   * @brief FinalPersistData persists ResumptionData last time and stops
+   * persistent data timer to avoid further persisting
+   */
+  void FinalPersistData();
 
   /**
    * @brief AddFiles allows to add files for the application
@@ -491,6 +511,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
   WaitingForTimerList waiting_for_timer_;
   bool is_resumption_active_;
   bool is_data_saved_;
+  bool is_suspended_;
   time_t launch_time_;
   utils::SharedPtr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;

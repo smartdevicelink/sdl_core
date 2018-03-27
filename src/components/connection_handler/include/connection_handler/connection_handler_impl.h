@@ -137,6 +137,24 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  /**
+   * @brief OnDeviceSwitchingStart notifies listeners on device transport
+   * switching start
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  void OnDeviceSwitchingStart(const std::string& device_uid_from,
+                              const std::string& device_uid_to) FINAL;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listeners on device transport
+   * switching completion
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  void OnDeviceSwitchingFinish(
+      const transport_manager::DeviceUID& device_uid) FINAL;
+
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
@@ -182,9 +200,9 @@ class ConnectionHandlerImpl
    * \param is_protected would be service protected
    * \param hash_id pointer for session hash identifier
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \deprecated
    */
-  // DEPRECATED
-  virtual uint32_t OnSessionStartedCallback(
+  DEPRECATED virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
@@ -209,9 +227,18 @@ class ConnectionHandlerImpl
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
       const BsonObject* params);
-
-  // DEPRECATED
-  uint32_t OnSessionEndedCallback(
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connection_handle Connection identifier within which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink
+   * protocol.
+   * If not equal to hash assigned to session on start then operation fails.
+   * \return uint32_t 0 if operation fails, session key otherwise
+   * \deprecated
+   */
+  DEPRECATED uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const uint32_t& hashCode,
@@ -452,10 +479,33 @@ class ConnectionHandlerImpl
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
 
-  int32_t GetDataOnSessionKey(uint32_t key,
-                              uint32_t* app_id,
-                              std::list<int32_t>* sessions_list,
-                              uint32_t* device_id) const OVERRIDE;
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const OVERRIDE;
+
+  /**
+   * DEPRECATED
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  DEPRECATED int32_t GetDataOnSessionKey(uint32_t key,
+                                         uint32_t* app_id,
+                                         std::list<int32_t>* sessions_list,
+                                         uint32_t* device_id) const OVERRIDE;
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 

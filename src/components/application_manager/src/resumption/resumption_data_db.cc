@@ -212,7 +212,9 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataDB::OnSuspend() {
+DEPRECATED void ResumptionDataDB::OnSuspend() {}
+
+void ResumptionDataDB::IncrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query_update_suspend_data(db());
@@ -291,7 +293,9 @@ bool ResumptionDataDB::GetHashId(const std::string& policy_app_id,
   return SelectHashId(policy_app_id, device_id, hash_id);
 }
 
-void ResumptionDataDB::OnAwake() {
+DEPRECATED void ResumptionDataDB::OnAwake() {}
+
+void ResumptionDataDB::DecrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   UpdateDataOnAwake();
@@ -2578,7 +2582,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(connection_key);
+      application_manager_.IsAppSubscribedForWayPoints(application.app_ptr);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,
@@ -2804,6 +2808,7 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_hmi_app_id = application->hmi_app_id();
     m_hmi_level = application->hmi_level();
     m_is_media_application = application->IsAudioApplication();
+    app_ptr = application;
   }
 }
 

@@ -90,7 +90,7 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
       mobile_apis::AppInterfaceUnregisteredReason::INVALID_ENUM;
 
   MessageSharedPtr dummy_msg(CreateMessage());
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(),
+  EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kConnectionKey, kUnregisterReason))
       .WillOnce(Return(dummy_msg));

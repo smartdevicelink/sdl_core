@@ -43,27 +43,18 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
-  ResponseInfo()
-      : result_code(hmi_apis::Common_Result::INVALID_ENUM)
-      , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
-  ResponseInfo(hmi_apis::Common_Result::eType result,
-               HmiInterfaces::InterfaceID interface)
-      : result_code(result)
-      , interface(interface)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+  DEPRECATED ResponseInfo(hmi_apis::Common_Result::eType result,
+                          HmiInterfaces::InterfaceID interface);
+  ResponseInfo();
+  ResponseInfo(const hmi_apis::Common_Result::eType result,
+               const HmiInterfaces::InterfaceID hmi_interface,
+               ApplicationManager& application_manager);
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
   bool is_ok;
   bool is_unsupported_resource;
-  bool is_invalid_enum;
+  bool is_not_used;
 };
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
@@ -224,23 +215,10 @@ class CommandRequestImpl : public CommandImpl,
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
 
   /**
-   * @brief Remove from current message parameters disallowed by policy table
+   * @brief Adds specific message to response info for current RPC
+   * @param response Response message, which info should be updated
    */
-  void RemoveDisallowedParameters();
-
-  /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
-   */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
-
-  /**
-   * @brief Checks if any request param was marked as disallowed by policy
-   * @return true if any param was marked as disallowed
-   */
-  bool HasDisallowedParams() const;
+  virtual void AddSpecificInfoToResponse(smart_objects::SmartObject& response);
 
   /**
    * @brief Checks result code from HMI for single RPC
@@ -290,12 +268,54 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
 
+  /**
+   * @brief Resolves if the return code must be
+   * UNSUPPORTED_RESOURCE
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return True, if the communication return code must be
+   * UNSUPPORTED_RESOURCE, otherwise false.
+   */
+  bool IsResultCodeUnsupported(const ResponseInfo& first,
+                               const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference
    */
   const CommandParametersPermissions& parameters_permissions() const;
+
+  /**
+   * @brief Adds interface to be awaited for by sdl request command
+     @param interface_id interface which SDL expects to response in given time
+  */
+  void StartAwaitForInterface(const HmiInterfaces::InterfaceID interface_id);
+
+  /**
+   * @brief Gets interface await state.
+   * @param interface_id interface which SDL awaits for response in given time
+   * @return true if SDL awaits for response from given interface in
+   * interface_id
+  */
+  bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
+
+  /**
+   * @brief Sets given HMI interface await status to false
+   * @param interface_id interface which SDL no longer awaits for response in
+   * given time
+   */
+  void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
+
+  /**
+  * @brief This set stores all the interfaces which are awaited by SDL to
+   * return a response on some request
+   */
+  std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
+
+  mutable sync_primitives::Lock awaiting_response_interfaces_lock_;
 
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
@@ -311,30 +331,15 @@ class CommandRequestImpl : public CommandImpl,
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 
-  /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
-
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-   * @brief UpdateHash updates hash field for application and sends
-   * OnHashChanged notification to mobile side in case of approriate hash mode
-   * is set
-   */
+    * @brief UpdateHash updates hash field for application and sends
+    * OnHashChanged notification to mobile side in case of approriate hash mode
+    * is set
+    */
   void UpdateHash();
 
   /**
@@ -342,6 +347,13 @@ class CommandRequestImpl : public CommandImpl,
    * it is value of 'success' field of appropriate response sent to mobile
    */
   bool is_success_result_;
+
+  /**
+   * @brief Add information for the component of response in case of timeout
+   * @param response Response message, which info should be extended
+   */
+  void AddTimeOutComponentInfoToMessage(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

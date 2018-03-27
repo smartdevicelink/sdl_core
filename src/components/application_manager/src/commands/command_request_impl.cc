@@ -33,7 +33,9 @@
 #include <algorithm>
 #include <string>
 #include "utils/macro.h"
+#include "utils/make_shared.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_helper.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
@@ -104,47 +106,86 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
+std::string CreateInfoForPolicyPermitResult(const PermitResult value) {
+  switch (value) {
+    case PermitResult::kRpcDisallowed: {
+      return "RPC is disallowed by Policies";
+    }
+    case PermitResult::kRpcUserDisallowed: {
+      return "RPC is disallowed by the User";
+    }
+    case PermitResult::kRpcAllParamsDisallowed: {
+      return "Requested parameters are disallowed by Policies";
+    }
+    case PermitResult::kRpcAllParamsUserDisallowed: {
+      return "Requested parameters are disallowed by User";
+    }
+    default:
+      return std::string();
+  }
+}
+
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
-  if (first.is_ok && second.is_unsupported_resource &&
-      second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
+  if (first.is_ok && second.is_unsupported_resource) {
+    return true;
+  }
+  if (first.is_ok && second.is_not_used) {
+    return true;
+  }
+  if (first.is_ok && second.is_ok) {
     return true;
   }
   return false;
 }
 
-bool IsResultCodeUnsupported(const ResponseInfo& first,
-                             const ResponseInfo& second) {
-  return ((first.is_ok || first.is_invalid_enum) &&
-          second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
-          first.is_unsupported_resource) ||
-         (first.is_unsupported_resource && second.is_unsupported_resource);
+bool IsResultCodeWarning(const ResponseInfo& first,
+                         const ResponseInfo& second) {
+  const bool first_is_ok_second_is_warn =
+      (first.is_ok || first.is_not_used) &&
+      hmi_apis::Common_Result::WARNINGS == second.result_code;
+
+  const bool both_warnings =
+      hmi_apis::Common_Result::WARNINGS == first.result_code &&
+      hmi_apis::Common_Result::WARNINGS == second.result_code;
+
+  return first_is_ok_second_is_warn || both_warnings;
 }
 
-struct DisallowedParamsInserter {
-  DisallowedParamsInserter(smart_objects::SmartObject& response,
-                           mobile_apis::VehicleDataResultCode::eType code)
-      : response_(response), code_(code) {}
+ResponseInfo::ResponseInfo()
+    : result_code(hmi_apis::Common_Result::INVALID_ENUM)
+    , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
+    , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+    , is_ok(false)
+    , is_unsupported_resource(false)
+    , is_not_used(false) {}
 
-  bool operator()(const std::string& param) {
-    const VehicleData& vehicle_data =
-        application_manager::MessageHelper::vehicle_data();
-    VehicleData::const_iterator it = vehicle_data.find(param);
-    if (vehicle_data.end() != it) {
-      smart_objects::SmartObjectSPtr disallowed_param =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
-      (*disallowed_param)[strings::data_type] = (*it).second;
-      (*disallowed_param)[strings::result_code] = code_;
-      response_[strings::msg_params][param.c_str()] = *disallowed_param;
-      return true;
-    }
-    return false;
-  }
+ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
+                           const HmiInterfaces::InterfaceID hmi_interface,
+                           ApplicationManager& application_manager)
+    : result_code(result)
+    , interface(hmi_interface)
+    , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+    , is_ok(false)
+    , is_unsupported_resource(false)
+    , is_not_used(false) {
+  using namespace helpers;
 
- private:
-  smart_objects::SmartObject& response_;
-  mobile_apis::VehicleDataResultCode::eType code_;
-};
+  interface_state =
+      application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
+
+  is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
+
+  is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
+
+  is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
+}
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager)
@@ -193,7 +234,7 @@ void CommandRequestImpl::onTimeOut() {
                                             function_id(),
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
-
+  AddTimeOutComponentInfoToMessage(*response);
   application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
 }
 
@@ -204,6 +245,7 @@ void CommandRequestImpl::SendResponse(
     const mobile_apis::Result::eType& result_code,
     const char* info,
     const smart_objects::SmartObject* response_params) {
+  LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kTimedOut == current_state_) {
@@ -214,11 +256,9 @@ void CommandRequestImpl::SendResponse(
     current_state_ = kCompleted;
   }
 
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
+  smart_objects::SmartObjectSPtr result =
+      utils::MakeShared<smart_objects::SmartObject>();
+
   smart_objects::SmartObject& response = *result;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
@@ -234,30 +274,16 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
+
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
-  // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
-  }
-
-  response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  AddSpecificInfoToResponse(response);
 
   is_success_result_ = success;
-
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
@@ -559,7 +585,10 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
+    if (helpers::Compare<smart_objects::SmartType, helpers::NEQ, helpers::ALL>(
+            iter->second.getType(),
+            smart_objects::SmartType_Null,
+            smart_objects::SmartType_Invalid)) {
       LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
       params.insert(iter->first);
     }
@@ -573,6 +602,10 @@ bool CommandRequestImpl::CheckAllowedParameters() {
           params,
           &parameters_permissions_);
 
+  command_helper::RemoveDisallowedParameters(parameters_permissions_,
+                                             removed_parameters_permissions_,
+                                             (*message_)[strings::msg_params]);
+
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {
     smart_objects::SmartObjectSPtr response =
@@ -581,6 +614,12 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             check_result,
             correlation_id(),
             app->app_id());
+    std::string info =
+        CreateInfoForPolicyPermitResult(parameters_permissions_.permit_result);
+    if (!info.empty()) {
+      (*response)[strings::msg_params][strings::info] = info;
+    }
+    AddSpecificInfoToResponse(*response);
 
     application_manager_.SendMessageToMobile(response);
     return false;
@@ -593,8 +632,6 @@ bool CommandRequestImpl::CheckAllowedParameters() {
       parameters_permissions_.undefined_params.empty()) {
     return true;
   }
-
-  RemoveDisallowedParameters();
 
   return true;
 }
@@ -637,124 +674,13 @@ bool CommandRequestImpl::CheckHMICapabilities(
   return false;
 }
 
-void CommandRequestImpl::RemoveDisallowedParameters() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObject& params = (*message_)[strings::msg_params];
-
-  // Remove from request all disallowed parameters
-  RPCParams::const_iterator it_disallowed =
-      parameters_permissions_.disallowed_params.begin();
-  RPCParams::const_iterator it_disallowed_end =
-      parameters_permissions_.disallowed_params.end();
-  for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
-    if (params.keyExists(*it_disallowed)) {
-      const std::string key = *it_disallowed;
-      params.erase(key);
-      removed_parameters_permissions_.disallowed_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by user: " << key);
-    }
-  }
-
-  // Remove from request all undefined yet parameters
-  RPCParams::const_iterator it_undefined =
-      parameters_permissions_.undefined_params.begin();
-  RPCParams::const_iterator it_undefined_end =
-      parameters_permissions_.undefined_params.end();
-  for (; it_undefined != it_undefined_end; ++it_undefined) {
-    if (params.keyExists(*it_undefined)) {
-      const std::string key = *it_undefined;
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by policy: " << key);
-    }
-  }
-
-  // Remove from request all parameters missed in allowed
-  const VehicleData& vehicle_data =
-      application_manager::MessageHelper::vehicle_data();
-
-  VehicleData::const_iterator it_vehicle_data = vehicle_data.begin();
-  VehicleData::const_iterator it_vehicle_data_end = vehicle_data.end();
-  for (; it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
-    const std::string key = it_vehicle_data->first;
-    if (params.keyExists(key) &&
-        parameters_permissions_.allowed_params.end() ==
-            std::find(parameters_permissions_.allowed_params.begin(),
-                      parameters_permissions_.allowed_params.end(),
-                      key)) {
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is not found among allowed parameters '"
-                       << key << "' and will be treated as disallowed.");
-    }
-  }
-}
-
-void CommandRequestImpl::AddDissalowedParameterToInfoString(
-    std::string& info, const std::string& param) const {
-  // prepare disallowed params enumeration for response info string
-  if (info.empty()) {
-    info = "\'" + param + "\'";
-  } else {
-    info = info + "," + " " + "\'" + param + "\'";
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParametersToInfo(
-    smart_objects::SmartObject& response) const {
-  std::string info;
-
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  if (!info.empty()) {
-    info += " disallowed by policies.";
-
-    if (!response[strings::msg_params][strings::info].asString().empty()) {
-      // If we already have info add info about disallowed params to it
-      response[strings::msg_params][strings::info] =
-          response[strings::msg_params][strings::info].asString() + " " + info;
-    } else {
-      response[strings::msg_params][strings::info] = info;
-    }
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParameters(
-    smart_objects::SmartObject& response) {
-  DisallowedParamsInserter disallowed_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
-                removed_parameters_permissions_.disallowed_params.end(),
-                disallowed_inserter);
-
-  DisallowedParamsInserter undefined_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
-                removed_parameters_permissions_.undefined_params.end(),
-                undefined_inserter);
-}
-
-bool CommandRequestImpl::HasDisallowedParams() const {
-  return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
-          (!removed_parameters_permissions_.undefined_params.empty()));
-}
+void CommandRequestImpl::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {}
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           result_code,
@@ -777,48 +703,9 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
-  using namespace helpers;
-
-  out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_first.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
-
-  out_second.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_second.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
-
-  out_first.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_first.result_code;
-
-  out_second.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_second.result_code;
-
-  out_first.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_first.result_code;
-
-  out_second.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_second.result_code;
-
-  out_first.interface_state =
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          out_first.interface);
-  out_second.interface_state =
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          out_second.interface);
-
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool result = CheckResultCode(out_first, out_second) ||
+                CheckResultCode(out_second, out_first);
   return result;
 }
 
@@ -835,31 +722,130 @@ void CommandRequestImpl::GetInfo(
 
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
     const ResponseInfo& first, const ResponseInfo& second) {
+  LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  if (IsResultCodeUnsupported(first, second)) {
-    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  } else {
-    // If response contains erroneous result code SDL need return erroneus
-    // result code.
-    hmi_apis::Common_Result::eType first_result =
-        hmi_apis::Common_Result::INVALID_ENUM;
-    hmi_apis::Common_Result::eType second_result =
-        hmi_apis::Common_Result::INVALID_ENUM;
-    if (!first.is_unsupported_resource) {
-      first_result = first.result_code;
-    }
-    if (!second.is_unsupported_resource) {
-      second_result = second.result_code;
-    }
-    result_code =
-        MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
+  if (IsResultCodeUnsupported(first, second) ||
+      IsResultCodeUnsupported(second, first)) {
+    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
   }
+  if (IsResultCodeWarning(first, second) ||
+      IsResultCodeWarning(second, first)) {
+    return mobile_apis::Result::WARNINGS;
+  }
+  // If response contains erroneous result code SDL need return erroneus
+  // result code.
+  hmi_apis::Common_Result::eType first_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  hmi_apis::Common_Result::eType second_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  if (!first.is_unsupported_resource) {
+    first_result = first.result_code;
+  }
+  if (!second.is_unsupported_resource) {
+    second_result = second.result_code;
+  }
+  result_code =
+      MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
   return result_code;
 }
 
 const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
     const {
   return parameters_permissions_;
+}
+
+void CommandRequestImpl::StartAwaitForInterface(
+    const HmiInterfaces::InterfaceID interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  awaiting_response_interfaces_.insert(interface_id);
+}
+
+bool CommandRequestImpl::IsInterfaceAwaited(
+    const HmiInterfaces::InterfaceID& interface_id) const {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  return (it != awaiting_response_interfaces_.end());
+}
+
+void CommandRequestImpl::EndAwaitForInterface(
+    const HmiInterfaces::InterfaceID& interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
+      awaiting_response_interfaces_.find(interface_id);
+  if (it != awaiting_response_interfaces_.end()) {
+    awaiting_response_interfaces_.erase(it);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "EndAwaitForInterface called on interface \
+                    which was not put into await state: "
+                     << interface_id);
+  }
+}
+
+bool CommandRequestImpl::IsResultCodeUnsupported(
+    const ResponseInfo& first, const ResponseInfo& second) const {
+  const bool first_ok_second_unsupported =
+      (first.is_ok || first.is_not_used) && second.is_unsupported_resource;
+  const bool both_unsupported =
+      first.is_unsupported_resource && second.is_unsupported_resource;
+  return first_ok_second_unsupported || both_unsupported;
+}
+
+std::string GetComponentNameFromInterface(
+    const HmiInterfaces::InterfaceID& interface) {
+  switch (interface) {
+    case HmiInterfaces::HMI_INTERFACE_Buttons:
+      return "Buttons";
+    case HmiInterfaces::HMI_INTERFACE_BasicCommunication:
+      return "BasicCommunication";
+    case HmiInterfaces::HMI_INTERFACE_VR:
+      return "VR";
+    case HmiInterfaces::HMI_INTERFACE_TTS:
+      return "TTS";
+    case HmiInterfaces::HMI_INTERFACE_UI:
+      return "UI";
+    case HmiInterfaces::HMI_INTERFACE_Navigation:
+      return "Navigation";
+    case HmiInterfaces::HMI_INTERFACE_VehicleInfo:
+      return "VehicleInfo";
+    case HmiInterfaces::HMI_INTERFACE_SDL:
+      return "SDL";
+    default:
+      return "Unknown type";
+  }
+}
+
+const std::string InfoInterfaceSeparator(
+    const std::string& sum, const HmiInterfaces::InterfaceID container_value) {
+  return sum.empty()
+             ? GetComponentNameFromInterface(container_value)
+             : sum + ", " + GetComponentNameFromInterface(container_value);
+}
+
+void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
+    smart_objects::SmartObject& response) const {
+  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  if (awaiting_response_interfaces_.empty()) {
+    LOG4CXX_ERROR(logger_, "No interfaces awaiting, info param is empty");
+    return;
+  }
+
+  const std::string not_responding_interfaces_string =
+      std::accumulate(awaiting_response_interfaces_.begin(),
+                      awaiting_response_interfaces_.end(),
+                      std::string(""),
+                      InfoInterfaceSeparator);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Not responding interfaces string: " << not_responding_interfaces_string);
+  if (!not_responding_interfaces_string.empty()) {
+    const std::string component_info =
+        not_responding_interfaces_string + " component does not respond";
+    response[strings::msg_params][strings::info] = component_info;
+  }
 }
 
 }  // namespace commands

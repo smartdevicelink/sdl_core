@@ -35,6 +35,7 @@
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/commands/command_helper.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -217,6 +218,21 @@ GetVehicleDataRequest::GetVehicleDataRequest(
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
+void GetVehicleDataRequest::AddSpecificInfoToResponse(
+    smart_objects::SmartObject& response) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          static_cast<mobile_apis::Result::eType>(
+              response[strings::msg_params][strings::result_code].asInt()),
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::DISALLOWED,
+          mobile_apis::Result::USER_DISALLOWED)) {
+    response[strings::msg_params][strings::info] = std::string();
+    command_helper::AddDisallowedParametersToInfo(
+        removed_parameters_permissions_, response);
+  }
+}
+
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -250,10 +266,12 @@ void GetVehicleDataRequest::Run() {
     }
   }
   if (msg_params.length() > min_length_msg_params) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
     SendHMIRequest(
         hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &msg_params, true);
     return;
-  } else if (HasDisallowedParams()) {
+  } else if (command_helper::HasDisallowedParams(
+                 removed_parameters_permissions_)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -266,6 +284,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

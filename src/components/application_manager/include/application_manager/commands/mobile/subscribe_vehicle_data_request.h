@@ -77,6 +77,12 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Adds specific message to response info for current RPC
+   * @param response Response message, which info should be updated
+   */
+  void AddSpecificInfoToResponse(smart_objects::SmartObject& response) FINAL;
+
 #ifdef HMI_DBUS_API
  private:
   struct HmiRequest {
@@ -130,7 +136,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * HMI
    * @param result contains result that SDL sends to mobile app.
    */
-  void CheckVISubscribtions(ApplicationSharedPtr app,
+  void CheckVISubscriptions(ApplicationSharedPtr app,
                             std::string& out_info,
                             mobile_apis::Result::eType& out_result_code,
                             smart_objects::SmartObject& out_response_params,
@@ -147,6 +153,11 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * @brief VI parameters which had been subscribed already by particular app
    */
   VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
+
+  /**
+   * @brief VI parameters which wait for subscribe after HMI respond
+   */
+  VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

@@ -701,6 +701,15 @@ class CacheManager : public CacheManagerInterface {
     return pt_;
   }
 
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -721,6 +730,13 @@ class CacheManager : public CacheManagerInterface {
   void CheckSnapshotInitialization();
 
   void PersistData();
+
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
 
   void ResetCalculatedPermissions();
 

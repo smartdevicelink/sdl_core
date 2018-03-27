@@ -56,19 +56,7 @@ using testing::ReturnRef;
 using testing::_;
 
 class OnHashChangeNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  OnHashChangeNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-  MockMessageHelper& message_helper_;
-};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   const uint32_t kConnectionKey = 1u;
@@ -81,10 +69,15 @@ TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   std::string return_string = "1234";
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .Times(2)
+      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(*mock_app, curHash()).WillOnce(ReturnRef(return_string));
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).WillOnce(SaveArg<0>(&msg));
 
   command->Run();
 
@@ -112,7 +105,7 @@ TEST_F(OnHashChangeNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app, curHash()).Times(0);
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();

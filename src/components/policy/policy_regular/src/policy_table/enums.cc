@@ -161,6 +161,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_ECALLINFO:
       return true;
+    case P_ENGINEOILLIFE:
+      return true;
     default:
       return false;
   }
@@ -217,6 +219,8 @@ const char* EnumToJsonString(Parameter val) {
       return "emergencyEvent";
     case P_ECALLINFO:
       return "eCallInfo";
+    case P_ENGINEOILLIFE:
+      return "engineOilLife";
     default:
       return "";
   }
@@ -296,6 +300,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("eCallInfo" == literal) {
     *result = P_ECALLINFO;
+    return true;
+  } else if ("engineOilLife" == literal) {
+    *result = P_ENGINEOILLIFE;
     return true;
   } else {
     return false;

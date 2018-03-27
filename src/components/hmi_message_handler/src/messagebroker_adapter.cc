@@ -108,6 +108,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnAwakeSDL");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnExitAllApplications");

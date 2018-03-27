@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,28 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_VEHICLE_INFO_DATA_H_
-#define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_VEHICLE_INFO_DATA_H_
+#include <gmock/gmock.h>
+#include "application_manager/hmi_command_factory.h"
+#include "application_manager/mock_hmi_command_factory.h"
+
+namespace test {
+namespace components {
+namespace application_manager_test {
+
+MockHMICommandFactory* MockHMICommandFactory::mock_hmi_command_factory() {
+  static MockHMICommandFactory mock_hmi_command_factory;
+  return &mock_hmi_command_factory;
+}
+
+}  // application_manager_test
+}  // components
+}  // test
 
 namespace application_manager {
-/*
-*@brief Typedef for the vehicle data types that can
-*be published and subscribed to
-*/
-enum VehicleDataType {
-  GPS = 0,
-  SPEED,
-  RPM,
-  FUELLEVEL,
-  FUELLEVEL_STATE,
-  FUELCONSUMPTION,
-  EXTERNTEMP,
-  VIN,
-  PRNDL,
-  TIREPRESSURE,
-  ODOMETER,
-  BELTSTATUS,
-  BODYINFO,
-  DEVICESTATUS,
-  ECALLINFO,
-  AIRBAGSTATUS,
-  EMERGENCYEVENT,
-  CLUSTERMODESTATUS,
-  MYKEY,
-  BRAKING,
-  WIPERSTATUS,
-  HEADLAMPSTATUS,
-  BATTVOLTAGE,
-  ENGINETORQUE,
-  ACCPEDAL,
-  STEERINGWHEEL
-};
-}  //  namespace application_manager
-
-#endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_VEHICLE_INFO_DATA_H_
+CommandSharedPtr HMICommandFactory::CreateCommand(
+    const commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager) {
+  return test::components::application_manager_test::MockHMICommandFactory::
+      mock_hmi_command_factory()->CreateCommand(message, application_manager);
+}
+}  // application_manager

@@ -123,6 +123,11 @@ TEST_F(OnTBTClientStateNotificationTest,
   EXPECT_CALL(app_mngr_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
+  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(*mock_app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
 
