@@ -73,7 +73,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
     , start_service_context_map_()
-    , session_connection_map_lock_(true) {}
+    , session_connection_map_lock_(true)
+    , ending_connection_(NULL) {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -414,7 +415,26 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::vector<std::string> rejected_params;
-  protocol_handler::SessionContext context(connection_handle,
+
+  // In case this is a Session running on a Secondary Transport, we need to 
+  // find the Sessions's primary transport. In this case, "connection_handle"
+  // reflects the secondary transport, which we need for the various callbacks,
+  // so they can send appropriate Ack or NAK messages on the correct transport.
+  transport_manager::ConnectionUID primary_connection_handle = connection_handle;
+  if (session_id != 0) {
+    SessionTransports st = GetSessionTransports(session_id);
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "OnSessionStartedCallback could not find Session in the Session/Connection Map!");
+    } else {
+      LOG4CXX_INFO(logger_, "OnSessionStartedCallback found session " << static_cast<int>(session_id) << 
+                            " with primary connection " << static_cast<int>(st.primary_transport) <<
+                            " and secondary connection " << static_cast<int>(st.secondary_transport));
+      primary_connection_handle = st.primary_transport;
+    }
+  }
+
+  protocol_handler::SessionContext context(primary_connection_handle,
+                                           connection_handle,
                                            session_id,
                                            0,
                                            service_type,
@@ -428,7 +448,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 #endif  // ENABLE_SECURITY
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(primary_connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     protocol_handler_->NotifySessionStarted(context, rejected_params);
@@ -440,13 +460,13 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
       !connection->SessionServiceExists(session_id, service_type);
 
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
-    context.new_session_id_ = connection->AddNewSession(connection_handle);
+    context.new_session_id_ = connection->AddNewSession(primary_connection_handle);
     if (0 == context.new_session_id_) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       protocol_handler_->NotifySessionStarted(context, rejected_params);
       return;
     }
-    context.hash_id_ = KeyFromPair(connection_handle, context.new_session_id_);
+    context.hash_id_ = KeyFromPair(primary_connection_handle, context.new_session_id_);
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_,
@@ -465,7 +485,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_valid_ && connection_handler_observer_) {
     const uint32_t session_key =
-        KeyFromPair(connection_handle, context.new_session_id_);
+        KeyFromPair(primary_connection_handle, context.new_session_id_);
 
     uint32_t app_id = 0;
     GetDataOnSessionKey(
@@ -510,10 +530,11 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
     start_service_context_map_.erase(it);
   }
 
+  // We need the context's primary connection so we can manage its services list
   Connection* connection = NULL;
   {
     sync_primitives::AutoReadLock lock(connection_list_lock_);
-    ConnectionList::iterator it = connection_list_.find(context.connection_id_);
+    ConnectionList::iterator it = connection_list_.find(context.primary_connection_handle_);
     if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "connection not found");
       return;
@@ -546,6 +567,21 @@ void ConnectionHandlerImpl::OnApplicationFloodCallBack(
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
 
+  // In case this is a Session running on a Secondary Transport, "connection_handle"
+  // will reflect the active (secondary) transport. To close the conneciton and its
+  // sessions properly, we need to find the Sessions's primary transport/connection.
+  if (session_id != 0) {
+    SessionTransports st = GetSessionTransports(session_id);
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "OnApplicationFloodCallBack could not find Session in the Session/Connection Map!");
+    } else {
+      LOG4CXX_INFO(logger_, "OnApplicationFloodCallBack found session " << static_cast<int>(session_id) << 
+                            " with primary connection " << static_cast<int>(st.primary_transport) <<
+                            " and secondary connection " << static_cast<int>(st.secondary_transport));
+      connection_handle = st.primary_transport;
+    }
+  }
+
   LOG4CXX_INFO(logger_, "Disconnect flooding application");
   if (session_id != 0) {
     CloseSession(connection_handle, session_id, kFlood);
@@ -562,6 +598,21 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
+
+  // In case this is a Session running on a Secondary Transport, "connection_handle"
+  // will reflect the active (secondary) transport. To close the conneciton and its
+  // sessions properly, we need to find the Sessions's primary transport/connection.
+  if (session_id != 0) {
+    SessionTransports st = GetSessionTransports(session_id);
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "OnMalformedMessageCallback could not find Session in the Session/Connection Map!");
+    } else {
+      LOG4CXX_INFO(logger_, "OnMalformedMessageCallback found session " << static_cast<int>(session_id) << 
+                            " with primary connection " << static_cast<int>(st.primary_transport) <<
+                            " and secondary connection " << static_cast<int>(st.secondary_transport));
+      connection_handle = st.primary_transport;
+    }
+  }
 
   LOG4CXX_INFO(logger_, "Disconnect malformed messaging application");
   CloseConnectionSessions(connection_handle, kMalformed);
@@ -585,8 +636,25 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const protocol_handler::ServiceType& service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // In case this is a Session running on a Secondary Transport, we need to 
+  // find the Sessions's primary transport. In this case, "connection_handle"
+  // reflects the secondary transport, which we need for the various callbacks,
+  // so they can send appropriate Ack or NAK messages on the correct transport.
+  transport_manager::ConnectionUID primary_connection_handle = connection_handle;
+  if (session_id != 0) {
+    SessionTransports st = GetSessionTransports(session_id);
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "OnSessionEndedCallback could not find Session in the Session/Connection Map!");
+    } else {
+      LOG4CXX_INFO(logger_, "OnSessionEndedCallback found session " << static_cast<int>(session_id) << 
+                            " with primary connection " << static_cast<int>(st.primary_transport) <<
+                            " and secondary connection " << static_cast<int>(st.secondary_transport));
+      primary_connection_handle = st.primary_transport;
+    }
+  }
+
   connection_list_lock_.AcquireForReading();
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(primary_connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_WARN(logger_, "Unknown connection!");
     connection_list_lock_.Release();
@@ -596,7 +664,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   connection_list_lock_.Release();
 
   Connection* connection = connection_item.second;
-  const uint32_t session_key = KeyFromPair(connection_handle, session_id);
+  const uint32_t session_key = KeyFromPair(primary_connection_handle, session_id);
 
   if (protocol_handler::kRpc == service_type) {
     LOG4CXX_INFO(logger_,
@@ -647,7 +715,7 @@ uint32_t ConnectionHandlerImpl::KeyFromPair(
                 "Key for ConnectionHandle:"
                     << static_cast<uint32_t>(connection_handle)
                     << " Session:" << static_cast<uint32_t>(session_id)
-                    << " is: " << static_cast<uint32_t>(key));
+                    << " is: 0x" << std::hex << static_cast<uint32_t>(key));
   if (protocol_handler::HASH_ID_WRONG == key) {
     LOG4CXX_ERROR(logger_,
                   "Connection key is WRONG_HASH_ID "
@@ -744,6 +812,45 @@ DevicesDiscoveryStarter& ConnectionHandlerImpl::get_device_discovery_starter() {
 
 NonConstDataAccessor<SessionConnectionMap> ConnectionHandlerImpl::session_connection_map() {
   return NonConstDataAccessor<SessionConnectionMap>(session_connection_map_, session_connection_map_lock_);
+}
+
+bool ConnectionHandlerImpl::SetSecondaryTransportID(
+    uint8_t session_id, 
+    transport_manager::ConnectionUID secondary_connection_id, 
+    bool force,
+    SessionTransports &st) {
+  bool bret = false;
+
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = session_connection_map();
+  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  SessionConnectionMap::iterator it = session_connection_map.find(session_id);
+  if (session_connection_map.end() == it) {
+    st.primary_transport = 0;
+    st.secondary_transport = 0;
+  } else {
+    st = it->second;
+    if (st.secondary_transport == 0 || force) {
+      st.secondary_transport = secondary_connection_id;
+      session_connection_map[session_id] = st;
+      bret = true;
+    }
+  }
+  return bret;
+}
+
+SessionTransports ConnectionHandlerImpl::GetSessionTransports(uint8_t session_id) {
+  SessionTransports st;
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = session_connection_map();
+  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  SessionConnectionMap::iterator it = session_connection_map.find(session_id);
+  if (session_connection_map.end() == it) {
+    st.primary_transport = 0;
+    st.secondary_transport = 0;
+  } else {
+    st = it->second;
+  }
+
+  return st;
 }
 
 struct CompareMAC {
@@ -1123,8 +1230,18 @@ void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
     uint32_t connection_handle = 0;
     uint8_t session_id = 0;
     PairFromKey(key, &connection_handle, &session_id);
-    protocol_handler_->SendEndService(
-        connection_handle, session_id, service_type);
+    
+    // If the service is running on a secondary transport, we need to retrieve that transport from the SessionConnection Map
+    SessionTransports st = GetSessionTransports(session_id);
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "SendEndService could not find Session in the Session/Connection Map!");
+    } else {
+      LOG4CXX_INFO(logger_, "SendEndService found session " << static_cast<int>(session_id) << 
+                            " with primary connection " << static_cast<int>(st.primary_transport) <<
+                            " and secondary connection " << static_cast<int>(st.secondary_transport));
+
+      protocol_handler_->SendEndService(st.primary_transport, st.secondary_transport, session_id, service_type);
+    }
   }
 }
 
@@ -1190,7 +1307,11 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_lock_.Release();
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_ && connection.get() != NULL) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_ && connection.get() != NULL) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_ && connection.get() != NULL) {
+    // We have to remember the Connection object we just removed from connection_list_, because
+    // we will need to retrieve the protocol version from it inside of OnServiceEndedCallback
+    ending_connection_ = connection.get();
     const SessionMap session_map = connection->session_map();
 
     for (SessionMap::const_iterator session_it = session_map.begin();
@@ -1207,6 +1328,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
             session_key, service_it->service_type, CloseSessionReason::kCommon);
       }
     }
+    ending_connection_ = NULL;
   }
 }
 
@@ -1247,6 +1369,8 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
   ConnectionList::const_iterator it = connection_list_.find(connection_id);
   if (connection_list_.end() != it) {
     return it->second->ProtocolVersion(session_id, protocol_version);
+  } else if (ending_connection_ && static_cast<uint32_t>(ending_connection_->connection_handle()) == connection_id) {
+    return ending_connection_->ProtocolVersion(session_id, protocol_version);
   }
   LOG4CXX_WARN(logger_, "Connection not found !");
   return false;

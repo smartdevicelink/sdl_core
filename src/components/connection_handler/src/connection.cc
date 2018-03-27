@@ -138,7 +138,10 @@ uint32_t Connection::AddNewSession(
   const uint32_t session_id = findGap(session_connection_map);
   if (session_id > 0) {
     LOG4CXX_INFO(logger_, "New session ID " << session_id << " and Connection Id " << static_cast<int>(connection_handle) << " added to Session/Connection Map");
-    session_connection_map[session_id] = connection_handle;
+    SessionTransports st;
+    st.primary_transport = connection_handle;
+    st.secondary_transport = 0;
+    session_connection_map[session_id] = st;
 
     // NESTED LOCK: make sure to never lock the ConnectionHandler's SessionConnectedMap inside of the "session_map_lock_"
     sync_primitives::AutoLock lock(session_map_lock_);
@@ -158,7 +161,7 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
   SessionConnectionMap::iterator itr = session_connection_map.find(session_id);
   if (session_connection_map.end() == itr) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in Session/Connection Map!");
   } else {
     LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_id) << " from Session/Connection Map");
     session_connection_map.erase(session_id);

@@ -1150,7 +1150,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     }
     case EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED: {
       LOG4CXX_DEBUG(logger_, "event_type = ON_TRANSPORT_CONFIG_UPDATED");
-      std::map<std::string, std::string> config =
+      transport_adapter::TransportConfig config =
           event.transport_adapter->GetTransportConfiguration();
       RaiseEvent(&TransportManagerListener::OnTransportConfigUpdated, config);
       break;

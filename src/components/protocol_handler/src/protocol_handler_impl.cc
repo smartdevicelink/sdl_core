@@ -59,7 +59,8 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 const size_t kStackSize = 65536;
 
-ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 0, 0);
+ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 1, 0);
+ProtocolPacket::ProtocolVersion minSimultaneousMultipleTransportsVersion(5, 1, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -242,6 +243,8 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     BsonObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  bool send_transport_update_event = false;
+
   uint8_t ack_protocol_version = SupportedSDLProtocolVersion();
 
   const bool proxy_supports_v5_protocol =
@@ -299,6 +302,36 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
+      LOG4CXX_INFO(logger_, "Protocol Version String " << protocolVersionString);
+
+      if (*minVersion >= minSimultaneousMultipleTransportsVersion) {
+        LOG4CXX_INFO(logger_, "We are a GO for multiple transports!!!");
+
+        // BUGBUG: for now, we hard-code the StartService ACK secondary transport information.
+        // Eventually, we want this configurable through smartDeviceLink.ini information.
+        BsonArray secondaryTransportsArr;
+        bson_array_initialize(&secondaryTransportsArr, 1);
+        bson_array_add_string(&secondaryTransportsArr, const_cast<char *>("TCP_WIFI"));
+        bson_object_put_array(&params, strings::secondary_transports, &secondaryTransportsArr);
+
+        BsonArray audioServiceTransportsArr;
+        bson_array_initialize(&audioServiceTransportsArr, 1);
+        bson_array_add_int32(&audioServiceTransportsArr, 2);
+        bson_object_put_array(&params, strings::audio_service_transports, &audioServiceTransportsArr);
+
+        BsonArray videoServiceTransportsArr;
+        bson_array_initialize(&videoServiceTransportsArr, 1);
+        bson_array_add_int32(&videoServiceTransportsArr, 2);
+        bson_object_put_array(&params, strings::video_service_transports, &videoServiceTransportsArr);
+
+        send_transport_update_event = true;
+      } else {
+        LOG4CXX_INFO(logger_, "Older protocol version. No multiple transports");
+
+        // In this case, we must remember that this session will never have a secondary transport.
+        connection_handler::SessionTransports st;
+        connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF, true /* force */, st );
+      }
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&params);
     ptr->set_data(payloadBytes, bson_object_size(&params));
@@ -316,6 +349,16 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                     << static_cast<int32_t>(service_type) << " session_id "
                     << static_cast<int32_t>(session_id) << " protection "
                     << (protection ? "ON" : "OFF"));
+
+  if (send_transport_update_event) {
+    // Wait until the StartService ACK has been processed for sending.
+    // The TransportUpdateEvent has a higher priority, being that it's
+    // a SERVICE_TYPE_CONTROL message. (The ACK is SERVICE_TYPE_RPC.)
+    LOG4CXX_DEBUG(logger_, "Waiting for the MessageToMobile queue to be empty");
+    raw_ford_messages_to_mobile_.WaitDumpQueue();
+    LOG4CXX_DEBUG(logger_, "Sending the TransportUpdate event");
+    SendTransportUpdateEvent(connection_id, session_id);
+  }
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
@@ -473,14 +516,16 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
                     << static_cast<int32_t>(session_id));
 }
 
-void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
+void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
+                                                int32_t connection_id,
                                                 uint8_t session_id,
                                                 uint8_t service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
-          connection_id, session_id, protocol_version)) {
+          primary_connection_id, session_id, protocol_version)) {
+    LOG4CXX_TRACE(logger_, "SendEndServicePrivate using protocol version " << static_cast<int32_t>(protocol_version));
     ProtocolFramePtr ptr(
         new protocol_handler::ProtocolPacket(connection_id,
                                              protocol_version,
@@ -495,25 +540,28 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
     raw_ford_messages_to_mobile_.PostMessage(
         impl::RawFordMessageToMobile(ptr, false));
     LOG4CXX_DEBUG(logger_,
-                  "SendEndSession() for connection "
-                      << connection_id << " for service_type " << service_type
+                  "SendEndServicePrivate() for connection "
+                      << primary_connection_id << " for service_type " << static_cast<int>(service_type)
+                      << " service connection " << connection_id
                       << " session_id " << static_cast<int32_t>(session_id));
   } else {
     LOG4CXX_WARN(
         logger_,
-        "SendEndSession is failed connection or session does not exist");
+        "SendEndServicePrivate is failed connection or session does not exist");
   }
 }
 
 void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
                                          uint8_t session_id) {
-  SendEndServicePrivate(connection_id, session_id, SERVICE_TYPE_RPC);
+  // A session is always associated with a primary connection ID
+  SendEndServicePrivate(connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
 }
 
-void ProtocolHandlerImpl::SendEndService(int32_t connection_id,
+void ProtocolHandlerImpl::SendEndService(int32_t primary_connection_id,
+                                         int32_t connection_id,
                                          uint8_t session_id,
                                          uint8_t service_type) {
-  SendEndServicePrivate(connection_id, session_id, service_type);
+  SendEndServicePrivate(primary_connection_id, connection_id, session_id, service_type);
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
@@ -543,6 +591,138 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
       logger_,
       "SendHeartBeatAck is failed connection or session does not exist");
   return RESULT_FAIL;
+}
+
+void ProtocolHandlerImpl::SendTransportUpdateEvent(ConnectionID connection_id,
+                                                   uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint8_t protocol_version;
+  if (session_observer_.ProtocolVersionUsed(
+          connection_id, session_id, protocol_version)) {
+    ProtocolFramePtr ptr(
+        new protocol_handler::ProtocolPacket(connection_id,
+                                             protocol_version,
+                                             PROTECTION_OFF,
+                                             FRAME_TYPE_CONTROL,
+                                             SERVICE_TYPE_CONTROL,
+                                             FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                             session_id,
+                                             0,
+                                             message_counters_[session_id]++));
+
+    BsonObject transportUpdatePayloadObj;
+    bson_object_initialize_default(&transportUpdatePayloadObj);
+
+    int32_t tcp_port = atoi(tcp_port_.c_str());
+    char tcp_ip_address[20];
+    if (tcp_enabled_ && (tcp_port != 0)) {
+      strncpy(tcp_ip_address, tcp_ip_address_.c_str(), 19);
+      bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
+      bson_object_put_int32(&transportUpdatePayloadObj, strings::tcp_port, tcp_port);
+    } else {
+      tcp_ip_address[0] = 0;
+      bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
+      bson_object_put_int32(&transportUpdatePayloadObj, strings::tcp_port, 0);
+    }
+    LOG4CXX_INFO(logger_,
+                  "SendTransportUpdateEvent IP address: " << tcp_ip_address << " Port: " << tcp_port);
+
+    uint8_t* payloadBytes = bson_object_to_bytes(&transportUpdatePayloadObj);
+    ptr->set_data(payloadBytes, bson_object_size(&transportUpdatePayloadObj));
+    free(payloadBytes);
+    bson_object_deinitialize(&transportUpdatePayloadObj);
+
+    raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+    LOG4CXX_DEBUG(logger_,
+                  "SendTransportUpdateEvent() for connection "
+                      << connection_id << " for session " << static_cast<int32_t>(session_id));
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "SendTransportUpdateEvent is failed connection or session does not exist");
+  }
+}
+
+RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportAck(ConnectionID connection_id,
+                                                                   ConnectionID primary_transport_connection_id,
+                                                                   uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  // acquire the protocol version from primary transport
+  uint8_t protocol_version;
+  if (session_observer_.ProtocolVersionUsed(
+          primary_transport_connection_id, session_id, protocol_version)) {
+    ProtocolFramePtr ptr(
+        new protocol_handler::ProtocolPacket(connection_id,
+                                             protocol_version,
+                                             PROTECTION_OFF,
+                                             FRAME_TYPE_CONTROL,
+                                             SERVICE_TYPE_CONTROL,
+                                             FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK,
+                                             session_id,
+                                             0u,
+                                             2));
+
+    raw_ford_messages_to_mobile_.PostMessage(
+        impl::RawFordMessageToMobile(ptr, false));
+    return RESULT_OK;
+  }
+  LOG4CXX_WARN(
+      logger_,
+      "RegisterSecondaryTransportAck is failed connection or session does not exist");
+  return RESULT_FAIL;
+}
+
+RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
+                                                                    ConnectionID primary_transport_connection_id,
+                                                                    uint8_t session_id,
+                                                                    char *reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  /* TODO - needs a minor update on protocol sepc */
+  // If mobile sends an invalid session ID and we cannot find out the Connection
+  // ID of primary transport, then we use version 5. (The multiple-transports
+  // feature is added in 5.1.0.)
+  uint8_t protocol_version = PROTOCOL_VERSION_5;
+  if (primary_transport_connection_id > 0) {
+    // acquire the protocol version from primary transport
+    if (!session_observer_.ProtocolVersionUsed(
+        primary_transport_connection_id, session_id, protocol_version)) {
+      LOG4CXX_WARN(
+          logger_,
+          "Failed to acquire protocol version for RegisterSecondaryTransportNAck");
+      return RESULT_FAIL;
+    }
+  }
+
+  ProtocolFramePtr ptr(
+      new protocol_handler::ProtocolPacket(connection_id,
+                                           protocol_version,
+                                           PROTECTION_OFF,
+                                           FRAME_TYPE_CONTROL,
+                                           SERVICE_TYPE_CONTROL,
+                                           FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK,
+                                           session_id,
+                                           0u,
+                                           2));
+
+  if (reason) {
+    BsonObject registerSecondaryTransportNackObj;
+    bson_object_initialize_default(&registerSecondaryTransportNackObj);
+    bson_object_put_string(&registerSecondaryTransportNackObj, strings::reason, reason);
+
+    uint8_t* payloadBytes = bson_object_to_bytes(&registerSecondaryTransportNackObj);
+    ptr->set_data(payloadBytes, bson_object_size(&registerSecondaryTransportNackObj));
+    free(payloadBytes);
+    bson_object_deinitialize(&registerSecondaryTransportNackObj);
+  }
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+  return RESULT_OK;
 }
 
 void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
@@ -892,6 +1072,59 @@ void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
 #endif  // ENABLE_SECURITY
 }
 
+void ProtocolHandlerImpl::OnTransportConfigUpdated(
+    const transport_manager::transport_adapter::TransportConfig& configs) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  transport_manager::transport_adapter::TransportConfig::const_iterator it = configs.find("enabled");
+  if (configs.end() == it) {
+    LOG4CXX_WARN(logger_, "No enabled field in OnTransportConfigUpdated");
+    return;
+  }
+
+  bool tcp_enabled = (0 == strcmp("true", it->second.c_str()));
+  std::string tcp_port;
+
+  if  (tcp_enabled) {
+    it = configs.find("tcp_port");
+    if (configs.end() == it) {
+      LOG4CXX_WARN(logger_, "No port field in OnTransportConfigUpdated");
+      return;
+    }
+    tcp_port = it->second;
+
+    it = configs.find("tcp_ip_address");
+    if (configs.end() == it) {
+      LOG4CXX_WARN(logger_, "No IP address field in OnTransportConfigUpdated");
+      return;
+    }
+    tcp_enabled_ = true;
+    tcp_port_ = tcp_port;
+    tcp_ip_address_ = it->second;
+  } else {
+    tcp_enabled_ = false;
+    tcp_port_.clear();
+    tcp_ip_address_.clear();
+  }
+
+  LOG4CXX_INFO(logger_, "OnTransportConfigUpdated: new config enabled is " << tcp_enabled_ <<
+                        ". Port is " << tcp_port_ <<
+                        ". IP Address is " << tcp_ip_address_);
+
+  // Walk the SessionConnection map and find any sessions whose secondary transport is not -1. Those sessions need a Transport Update Event.
+  NonConstDataAccessor<connection_handler::SessionConnectionMap> session_connection_map_accessor = connection_handler_.session_connection_map();
+  connection_handler::SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  connection_handler::SessionConnectionMap::iterator itr = session_connection_map.begin();
+  while (itr != session_connection_map.end()) {
+    const connection_handler::SessionTransports st = itr->second;
+    LOG4CXX_INFO(logger_, "OnTransportConfigUpdated found session " << itr->first << " with primary connection  " << st.primary_transport << " and secondary connection " << st.secondary_transport);
+    if (st.secondary_transport != 0xFFFFFFFF) {
+      SendTransportUpdateEvent(st.primary_transport, itr->first);
+    }
+    itr++;
+  }
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1076,6 +1309,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
           << packet->data_size() << "; message "
           << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
+  // Replace a potential secondary transport ID in the packet with the primary transport ID
+  const connection_handler::SessionTransports st = connection_handler_.GetSessionTransports(packet->session_id());
+  if (st.primary_transport != 0) {
+    packet->set_connection_id(st.primary_transport);
+  }
   const uint32_t connection_key = session_observer_.KeyFromPair(
       packet->connection_id(), packet->session_id());
 
@@ -1107,6 +1345,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // Replace a potential secondary transport ID in the packet with the primary transport ID
+  const connection_handler::SessionTransports st = connection_handler_.GetSessionTransports(packet->session_id());
+  if (st.primary_transport != 0) {
+    packet->set_connection_id(st.primary_transport);
+  }
 
   if (multiframe_builder_.AddFrame(packet) != RESULT_OK) {
     LOG4CXX_WARN(logger_, "Frame assembling issue");
@@ -1144,6 +1388,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
                     " connection: "
                         << packet->connection_id());
       return RESULT_OK;
+    }
+    case FRAME_DATA_REGISTER_SECONDARY_TRANSPORT: {
+      LOG4CXX_TRACE(logger_, "FrameData: RegisterSecondaryTransport");
+      return HandleControlMessageRegisterSecondaryTransport(packet);
     }
     default:
       LOG4CXX_WARN(logger_,
@@ -1408,7 +1656,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet->protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
-  const uint8_t protocol_version = packet->protocol_version();
   BsonObject bson_obj;
   if (packet->data() != NULL) {
     bson_obj = bson_object_from_bytes(packet->data());
@@ -1428,6 +1675,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
 
+  LOG4CXX_INFO(logger_, "StartSession ID " << static_cast<int>(session_id) << " and Connection ID " << static_cast<int>(connection_id));
+
   {
     sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
     start_session_frame_map_[std::make_pair(connection_id, session_id)] =
@@ -1441,6 +1690,39 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   return RESULT_OK;
 }
 
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
+    const ProtocolFramePtr packet) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const uint8_t session_id = packet->session_id();
+  const ConnectionID connection_id = packet->connection_id();
+
+  LOG4CXX_INFO(logger_, "RegisterSecondaryTransport ID " << static_cast<int>(session_id) << " and Connection ID " << static_cast<int>(connection_id));
+
+  if (0 == session_id) {
+    LOG4CXX_WARN(logger_, "RegisterSecondaryTransport MUST include a non-zero session ID");
+    SendRegisterSecondaryTransportNAck(connection_id, 0, session_id, "RegisterSecondaryTransport MUST include a non-zero session ID");
+    return RESULT_OK;
+  }
+
+  // Add the secondary transport connection ID to the SessionConnectionMap
+  connection_handler::SessionTransports st;
+  if (!connection_handler_.SetSecondaryTransportID(session_id, connection_id, false /* force */, st)) {
+    if (st.primary_transport == 0) {
+      LOG4CXX_WARN(logger_, "RegisterSecondaryTransport: session ID " << static_cast<int>(session_id) << " not found in Session/Connection map");
+      SendRegisterSecondaryTransportNAck(connection_id, 0, session_id, "RegisterSecondaryTransport session ID not found");
+      return RESULT_OK;
+    } else {
+      LOG4CXX_WARN(logger_, "RegisterSecondaryTransport: session ID " << static_cast<int>(session_id) << " already has a secondary connection in the Session/Connection map");
+      SendRegisterSecondaryTransportNAck(connection_id, st.primary_transport, session_id, "RegisterSecondaryTransport session ID has already been registered");
+      return RESULT_OK;
+    }
+  }
+
+  SendRegisterSecondaryTransportAck(connection_id, st.primary_transport, session_id);
+
+  return RESULT_OK;
+}
+
 void ProtocolHandlerImpl::NotifySessionStartedResult(
     int32_t connection_id,
     uint8_t session_id,
@@ -1450,6 +1732,7 @@ void ProtocolHandlerImpl::NotifySessionStartedResult(
     std::vector<std::string>& rejected_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_handler::SessionContext context(connection_id,
+                                           connection_id,
                                            session_id,
                                            generated_session_id,
                                            ServiceType::kInvalidServiceType,

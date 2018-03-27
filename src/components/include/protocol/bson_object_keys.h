@@ -42,6 +42,13 @@ extern const char* height;
 extern const char* width;
 extern const char* video_protocol;
 extern const char* video_codec;
+extern const char* secondary_transports;
+extern const char* audio_service_transports;
+extern const char* video_service_transports;
+extern const char* tcp_ip_address;
+extern const char* tcp_port;
+extern const char* reason;
+
 
 }  // namespace strings
 

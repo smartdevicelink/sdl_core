@@ -526,6 +526,23 @@ class ConnectionHandlerImpl
   NonConstDataAccessor<SessionConnectionMap> session_connection_map();
 
   /**
+   * \brief Associate a secondary transport ID with a session
+   * \param session_id the session ID
+   * \param connection_id the new secondary connection ID to associate with the session
+   * \param force true if an existing secondary connection ID should be replaced, false otherwise
+   * \param st the resultant SessionTransports associated with the session
+   * \return TRUE if the secondary connection ID was successfully replaced
+   **/
+  bool SetSecondaryTransportID(uint8_t session_id, transport_manager::ConnectionUID secondary_connection_id, bool force, SessionTransports &st);
+
+  /**
+   * \brief Retrieve the session transports associated with a session
+   * \param session_id the session ID
+   * \return the SessionTransports associated with the session
+   **/
+  SessionTransports GetSessionTransports(uint8_t session_id);
+
+  /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
    * \param session_key the key of started session passed to
    * OnServiceStartedCallback().
@@ -595,6 +612,11 @@ class ConnectionHandlerImpl
    */
   SessionConnectionMap session_connection_map_;
   mutable sync_primitives::Lock session_connection_map_lock_;
+
+  /**
+   * @brief connection object as it's being closed
+   */
+  Connection *ending_connection_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage

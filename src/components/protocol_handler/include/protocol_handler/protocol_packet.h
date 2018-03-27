@@ -326,6 +326,11 @@ class ProtocolPacket {
   ConnectionID connection_id() const;
 
   /**
+   * \brief Setter of Connection Identifier
+   */
+  void set_connection_id(ConnectionID connection_id);
+
+  /**
     * \brief Getter for data payload size
     */
   uint32_t payload_size() const;

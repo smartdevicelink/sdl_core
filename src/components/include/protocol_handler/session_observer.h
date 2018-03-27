@@ -59,6 +59,7 @@ enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
  * @brief Struct with data containing attributes of starting session
  **/
 struct SessionContext {
+  transport_manager::ConnectionUID primary_connection_id_;
   transport_manager::ConnectionUID connection_id_;
   uint8_t initial_session_id_;
   uint8_t new_session_id_;
@@ -72,7 +73,8 @@ struct SessionContext {
    * @brief Constructor
    */
   SessionContext()
-      : connection_id_(0)
+      : primary_connection_id_(0)
+      , connection_id_(0)
       , initial_session_id_(0)
       , new_session_id_(0)
       , service_type_(protocol_handler::kInvalidServiceType)
@@ -83,6 +85,8 @@ struct SessionContext {
 
   /**
    * @brief Constructor
+   * @param primary_connection_id Connection identifier of the primary
+   * connection in which the session is started
    * @param connection_id_ Connection identifier within which session is
    * started.
    * @param session_id Session ID specified to OnSessionStartedCallback()
@@ -93,13 +97,15 @@ struct SessionContext {
    * @param is_protected Whether service will be protected
    * @param is_new_service Whether service was already established
    **/
-  SessionContext(transport_manager::ConnectionUID connection_id,
+  SessionContext(transport_manager::ConnectionUID primary_connection_id,
+                 transport_manager::ConnectionUID connection_id,
                  uint8_t session_id,
                  uint8_t new_session_id,
                  protocol_handler::ServiceType service_type,
                  uint32_t hash_id,
                  const bool is_protected)
-      : connection_id_(connection_id)
+      : primary_connection_id_(primary_connection_id)
+      , connection_id_(connection_id)
       , initial_session_id_(session_id)
       , new_session_id_(new_session_id)
       , service_type_(service_type)

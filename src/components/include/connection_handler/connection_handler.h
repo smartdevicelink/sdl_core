@@ -52,7 +52,12 @@ enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
 
 class ConnectionHandlerObserver;
 
-typedef std::map<uint8_t, transport_manager::ConnectionUID> SessionConnectionMap;
+// The SessionConnectionMap keeps track of the primary and secondary transports associated with a session ID
+typedef struct {
+  transport_manager::ConnectionUID  primary_transport;
+  transport_manager::ConnectionUID  secondary_transport;
+} SessionTransports;
+typedef std::map<uint8_t, SessionTransports > SessionConnectionMap;
 
 /**
  * \class ConnectionHandler
@@ -220,6 +225,23 @@ class ConnectionHandler {
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
 
   virtual NonConstDataAccessor<SessionConnectionMap> session_connection_map() = 0;
+
+  /**
+   * \brief Associate a secondary transport ID with a session
+   * \param session_id the session ID
+   * \param connection_id the new secondary connection ID to associate with the session
+   * \param force true if an existing secondary connection ID should be replaced, false otherwise
+   * \param st the resultant SessionTransports associated with the session
+   * \return TRUE if the secondary connection ID was successfully replaced
+   **/
+  virtual bool SetSecondaryTransportID(uint8_t session_id, transport_manager::ConnectionUID secondary_connection_id, bool force, SessionTransports &st) = 0;
+
+  /**
+   * \brief Retrieve the session transports associated with a session
+   * \param session_id the session ID
+   * \return the SessionTransports associated with the session
+   **/
+  virtual SessionTransports GetSessionTransports(uint8_t session_id) = 0;
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed

@@ -55,6 +55,7 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
 
@@ -226,14 +227,17 @@ class ProtocolHandlerImpl
   /**
     * \brief Sends ending session to mobile application
     * \param connection_id Identifier of connection within which
-    * session exists
+    * session exists (only needed for SendEndService)
+    * \param connection_id Identifier of the actual transport connection ID
+    * for the sevice
     * \param session_id ID of session to be ended
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
-  void SendEndService(int32_t connection_id,
-                      uint8_t session_id,
-                      uint8_t service_type);
+  void SendEndService(int32_t primary_connection_id, 
+                              int32_t connection_id,
+                              uint8_t session_id,
+                              uint8_t service_type);
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -423,7 +427,8 @@ class ProtocolHandlerImpl
 #endif
 
  private:
-  void SendEndServicePrivate(int32_t connection_id,
+  void SendEndServicePrivate(int32_t primary_connection_id,
+                             int32_t connection_id,
                              uint8_t session_id,
                              uint8_t service_type);
 
@@ -433,6 +438,27 @@ class ProtocolHandlerImpl
   RESULT_CODE SendHeartBeatAck(ConnectionID connection_id,
                                uint8_t session_id,
                                uint32_t message_id);
+
+  /*
+   * Prepare and send TransportUpdateEvent message
+   */
+  void SendTransportUpdateEvent(ConnectionID connection_id,
+                                uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportAck(ConnectionID connection_id,
+                                                ConnectionID primary_transport_connection_id,
+                                                uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportNAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
+                                                 ConnectionID primary_transport_connection_id,
+                                                 uint8_t session_id,
+                                                 char *reason = NULL);
 
   /**
    * @brief Notifies about receiving message from TM.
@@ -479,6 +505,14 @@ class ProtocolHandlerImpl
    * otherwise false.
    */
   void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  void OnTransportConfigUpdated(
+      const transport_manager::transport_adapter::TransportConfig& configs) OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message
@@ -580,6 +614,8 @@ class ProtocolHandlerImpl
   HandleControlMessageStartSession(const ProtocolPacket& packet);
 
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
+
+  RESULT_CODE HandleControlMessageRegisterSecondaryTransport(const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
@@ -698,6 +734,10 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  bool tcp_enabled_;
+  std::string tcp_port_;
+  std::string tcp_ip_address_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;
