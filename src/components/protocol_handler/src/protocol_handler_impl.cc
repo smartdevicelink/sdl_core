@@ -76,10 +76,10 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)
+    , is_ptu_triggered_(false)
     ,
 #endif  // ENABLE_SECURITY
-    is_ptu_triggered_(false)
-    , raw_ford_messages_from_mobile_(
+    raw_ford_messages_from_mobile_(
           "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))

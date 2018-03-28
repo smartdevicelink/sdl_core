@@ -456,8 +456,11 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 
   Connection* connection = it->second;
+
+#ifdef ENABLE_SECURITY
   context.is_new_service_ =
       !connection->SessionServiceExists(session_id, service_type);
+#endif  // ENABLE_SECURITY
 
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     context.new_session_id_ = connection->AddNewSession(primary_connection_handle);
@@ -483,17 +486,19 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     context.hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_valid_ && connection_handler_observer_) {
+  if (connection_handler_observer_) {
     const uint32_t session_key =
         KeyFromPair(primary_connection_handle, context.new_session_id_);
 
     uint32_t app_id = 0;
     GetDataOnSessionKey(
         session_key, &app_id, NULL, static_cast<DeviceHandle*>(NULL));
+#ifdef ENABLE_SECURITY
     if (app_id > 0) {
       context.is_ptu_required_ =
           !connection_handler_observer_->CheckAppIsNavi(app_id);
     }
+#endif  // ENABLE_SECURITY
 
     {
       sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
@@ -534,7 +539,7 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
   Connection* connection = NULL;
   {
     sync_primitives::AutoReadLock lock(connection_list_lock_);
-    ConnectionList::iterator it = connection_list_.find(context.primary_connection_handle_);
+    ConnectionList::iterator it = connection_list_.find(context.primary_connection_id_);
     if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "connection not found");
       return;
@@ -785,6 +790,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   return 0;
 }
 
+#if __SIZEOF_SIZE_T__ != 4
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key,
     uint32_t* app_id,
@@ -796,6 +802,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   *device_id = static_cast<uint32_t>(handle);
   return result;
 }
+#endif
 
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {
   return settings_;
@@ -1307,8 +1314,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_lock_.Release();
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_valid_ && connection_handler_observer_ && connection.get() != NULL) {
-  if (connection_handler_observer_valid_ && connection_handler_observer_ && connection.get() != NULL) {
+  if (connection_handler_observer_ && connection.get() != NULL) {
     // We have to remember the Connection object we just removed from connection_list_, because
     // we will need to retrieve the protocol version from it inside of OnServiceEndedCallback
     ending_connection_ = connection.get();

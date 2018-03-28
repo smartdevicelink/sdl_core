@@ -190,6 +190,7 @@ class ConnectionHandler {
       std::list<int32_t>* sessions_list,
       connection_handler::DeviceHandle* device_id) const = 0;
 
+#if __SIZEOF_SIZE_T__ != 4
   /**
    * DEPRECATED
    * \brief information about given Connection Key.
@@ -204,6 +205,7 @@ class ConnectionHandler {
       uint32_t* app_id,
       std::list<int32_t>* sessions_list,
       uint32_t* device_id) const = 0;
+#endif
 
   /**
    * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
