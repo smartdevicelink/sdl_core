@@ -474,7 +474,15 @@ void RequestController::Worker::threadMain() {
     RequestInfoPtr request_info_ptr =
         utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
-    request_controller_->waiting_for_response_.Add(request_info_ptr);
+    if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
+      commands::CommandRequestImpl* cmd_request =
+          dynamic_cast<commands::CommandRequestImpl*>(request_ptr.get());
+      if (cmd_request != NULL) {
+        cmd_request->SendResponse(
+            false, mobile_apis::Result::INVALID_ID, "Duplicate correlation_id");
+      }
+      continue;
+    }
     LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
 
     if (0 != timeout_in_mseconds) {
