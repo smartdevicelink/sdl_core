@@ -754,7 +754,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
     const std::string& policy_app_id) const {
-  LOG4CXX_INFO(logger_, "GetDeviceInfo");
+  LOG4CXX_AUTO_TRACE(logger_);
   last_device_id_ = listener()->OnCurrentDeviceIdUpdateRequired(policy_app_id);
   return last_device_id_;
 }

@@ -2409,6 +2409,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
     ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
   content[strings::params][strings::function_id] =
