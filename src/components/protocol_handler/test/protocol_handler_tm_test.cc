@@ -95,6 +95,9 @@ using protocol_handler::kInvalidServiceType;
 using transport_manager::TransportManagerListener;
 using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+// For security
+using ContextCreationStrategy =
+    security_manager::SecurityManager::ContextCreationStrategy;
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
@@ -985,7 +988,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
 
   SetProtocolVersion2();
   // Expect start protection for unprotected session
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return fail protection
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
@@ -1390,7 +1396,10 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(

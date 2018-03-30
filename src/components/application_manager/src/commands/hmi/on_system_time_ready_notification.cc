@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,43 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
-#include <string>
+#include "application_manager/commands/hmi/on_system_time_ready_notification.h"
 
-namespace security_manager {
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
-class SecurityManagerListener {
- public:
-  /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session
-   * identifier
-   * \param success result of connection protection
-   * \return \c true on success notification or \c false otherwise
-   */
-  virtual bool OnHandshakeDone(uint32_t connection_key,
-                               SSLContext::HandshakeResult result) = 0;
+namespace application_manager {
 
-  /**
-   * @brief Notification about handshake failure
-   */
-  virtual void OnHandshakeFailed() = 0;
+namespace commands {
 
-  /**
-   * @brief Notify listeners that certificate update is required.
-   */
-  virtual void OnCertificateUpdateRequired() = 0;
+OnSystemTimeReadyNotification::OnSystemTimeReadyNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
+OnSystemTimeReadyNotification::~OnSystemTimeReadyNotification() {}
 
-  virtual ~SecurityManagerListener() {}
-};
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+void OnSystemTimeReadyNotification::Run() {
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
+
+}  // namespace commands
+}  // namespace application_manager

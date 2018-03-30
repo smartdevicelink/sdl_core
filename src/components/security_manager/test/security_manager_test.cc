@@ -44,6 +44,7 @@
 #include "security_manager/mock_ssl_context.h"
 #include "security_manager/mock_crypto_manager.h"
 #include "security_manager/mock_security_manager_listener.h"
+#include "utils/mock_system_time_handler.h"
 #include "utils/make_shared.h"
 #include "utils/test_async_waiter.h"
 
@@ -96,7 +97,8 @@ const uint32_t kAsyncExpectationsTimeout = 10000u;
 class SecurityManagerTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    security_manager_.reset(new SecurityManagerImpl());
+    security_manager_.reset(
+        new SecurityManagerImpl(mock_system_time_handler.get()));
     security_manager_->set_session_observer(&mock_session_observer);
     security_manager_->set_protocol_handler(&mock_protocol_handler);
     mock_sm_listener.reset(new testing::StrictMock<
@@ -105,7 +107,7 @@ class SecurityManagerTest : public ::testing::Test {
   }
 
   void SetMockCryptoManager() {
-    EXPECT_CALL(mock_crypto_manager, IsCertificateUpdateRequired())
+    EXPECT_CALL(mock_crypto_manager, IsCertificateUpdateRequired(_, _))
         .WillRepeatedly(Return(false));
     security_manager_->set_crypto_manager(&mock_crypto_manager);
   }
@@ -166,6 +168,8 @@ class SecurityManagerTest : public ::testing::Test {
       mock_ssl_context_exists;
   std::unique_ptr<testing::StrictMock<
       security_manager_test::MockSecurityManagerListener> > mock_sm_listener;
+  std::unique_ptr<testing::StrictMock<
+      security_manager_test::MockSystemTimeHandler> > mock_system_time_handler;
 };
 // Test Bodies
 
@@ -174,7 +178,7 @@ class SecurityManagerTest : public ::testing::Test {
  * and shall not call any methodes
  */
 TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
-  security_manager_.reset(new SecurityManagerImpl());
+  security_manager_.reset(new SecurityManagerImpl(NULL));
   security_manager_->set_session_observer(NULL);
   security_manager_->set_protocol_handler(NULL);
   security_manager_->set_crypto_manager(NULL);
@@ -398,7 +402,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
   EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
       .WillOnce(Return(&mock_ssl_context_new));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(
+      key,
+      security_manager::SecurityManager::ContextCreationStrategy::kUseExisting);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
@@ -424,7 +430,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
       .WillOnce(ReturnNull());
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext()).WillOnce(ReturnNull());
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(
+      key,
+      security_manager::SecurityManager::ContextCreationStrategy::kUseExisting);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -457,7 +465,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(
+      key,
+      security_manager::SecurityManager::ContextCreationStrategy::kUseExisting);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -479,7 +489,10 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_SUCCESS));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  const SSLContext* result = security_manager_->CreateSSLContext(
+      key,
+      security_manager::SecurityManager::ContextCreationStrategy::
+          kForceRecreation);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*

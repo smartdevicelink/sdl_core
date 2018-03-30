@@ -44,11 +44,21 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 static const char* kErrId = "id";
 static const char* kErrText = "text";
 
-SecurityManagerImpl::SecurityManagerImpl()
+SecurityManagerImpl::SecurityManagerImpl(
+    utils::SystemTimeHandler* system_time_handler)
     : security_messages_("SecurityManager", this)
     , session_observer_(NULL)
     , crypto_manager_(NULL)
-    , protocol_handler_(NULL) {}
+    , protocol_handler_(NULL)
+    , system_time_handler_(system_time_handler)
+    , waiting_for_certificate_(false)
+    , waiting_for_time_(false) {
+  system_time_handler_->SubscribeOnSystemTime(this);
+}
+
+SecurityManagerImpl::~SecurityManagerImpl() {
+  system_time_handler_->UnSubscribeFromSystemTime(this);
+}
 
 void SecurityManagerImpl::OnMessageReceived(
     const ::protocol_handler::RawMessagePtr message) {
@@ -136,16 +146,20 @@ void SecurityManagerImpl::Handle(const SecurityMessage message) {
 }
 
 security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
-    const uint32_t& connection_key) {
+    const uint32_t& connection_key, ContextCreationStrategy cc_strategy) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
 
-  security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
-      connection_key, protocol_handler::kControl);
-  // return exists SSLCOntext for current connection/session
-  if (ssl_context) {
-    return ssl_context;
+  security_manager::SSLContext* ssl_context = NULL;
+  if (kUseExisting == cc_strategy) {
+    security_manager::SSLContext* ssl_context =
+        session_observer_->GetSSLContext(connection_key,
+                                         protocol_handler::kControl);
+    // If SSLContext for current connection/session exists - return it
+    if (ssl_context) {
+      return ssl_context;
+    }
   }
 
   ssl_context = crypto_manager_->CreateSSLContext();
@@ -172,6 +186,40 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
   return ssl_context;
 }
 
+void SecurityManagerImpl::PostponeHandshake(const uint32_t connection_key) {
+  LOG4CXX_DEBUG(logger_, "Handshake postponed");
+  sync_primitives::AutoLock lock(connections_lock_);
+  if (waiting_for_certificate_) {
+    awaiting_certificate_connections_.insert(connection_key);
+  }
+  if (waiting_for_time_) {
+    awaiting_time_connections_.insert(connection_key);
+  }
+}
+
+void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
+  LOG4CXX_DEBUG(logger_, "Handshake resumed");
+
+  security_manager::SSLContext* ssl_context =
+      CreateSSLContext(connection_key, kForceRecreation);
+
+  if (!ssl_context) {
+    LOG4CXX_WARN(logger_,
+                 "Unable to resume handshake. No SSL context for key "
+                     << connection_key);
+    return;
+  }
+
+  ssl_context->ResetConnection();
+  if (!ssl_context->HasCertificate()) {
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
+    return;
+  }
+
+  ProceedHandshake(ssl_context, connection_key);
+}
+
 void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
@@ -187,6 +235,35 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
                                    SSLContext::Handshake_Result_Fail);
     return;
   }
+  if (!ssl_context->HasCertificate()) {
+    LOG4CXX_ERROR(logger_, "Security certificate is absent");
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_certificate_ = true;
+    NotifyOnCertififcateUpdateRequired();
+  }
+
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = true;
+  }
+
+  PostponeHandshake(connection_key);
+  system_time_handler_->QuerySystemTime();
+}
+
+bool SecurityManagerImpl::IsSystemTimeReady() const {
+  return system_time_handler_->is_system_time_ready();
+}
+
+void SecurityManagerImpl::ProceedHandshake(
+    security_manager::SSLContext* ssl_context, uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!ssl_context) {
+    LOG4CXX_WARN(logger_,
+                 "Unable to process handshake. No SSL context for key "
+                     << connection_key);
+    return;
+  }
 
   if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key,
@@ -194,8 +271,33 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
 
-  ssl_context->SetHandshakeContext(
-      session_observer_->GetHandshakeContext(connection_key));
+  time_t cert_due_date;
+  if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
+    LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
+    return;
+  }
+
+  if (crypto_manager_->IsCertificateUpdateRequired(
+          system_time_handler_->GetUTCTime(), cert_due_date)) {
+    LOG4CXX_DEBUG(logger_, "Host certificate update required");
+    if (1 == awaiting_certificate_connections_.size()) {
+      NotifyListenersOnHandshakeDone(connection_key,
+                                     SSLContext::Handshake_Result_CertExpired);
+      return;
+    }
+    {
+      sync_primitives::AutoLock lock(waiters_lock_);
+      waiting_for_certificate_ = true;
+    }
+    PostponeHandshake(connection_key);
+    NotifyOnCertififcateUpdateRequired();
+    return;
+  }
+
+  SSLContext::HandshakeContext handshake_context =
+      session_observer_->GetHandshakeContext(connection_key);
+  handshake_context.system_time = system_time_handler_->GetUTCTime();
+  ssl_context->SetHandshakeContext(handshake_context);
 
   size_t data_size = 0;
   const uint8_t* data = NULL;
@@ -216,9 +318,21 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   }
 }
 
-bool SecurityManagerImpl::IsCertificateUpdateRequired() {
+bool SecurityManagerImpl::IsCertificateUpdateRequired(
+    const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return crypto_manager_->IsCertificateUpdateRequired();
+  security_manager::SSLContext* ssl_context =
+      CreateSSLContext(connection_key, kUseExisting);
+  DCHECK(ssl_context);
+  LOG4CXX_DEBUG(logger_,
+                "Set SSL context to connection_key " << connection_key);
+  time_t cert_due_date;
+  if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
+    LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
+    return true;
+  }
+  return crypto_manager_->IsCertificateUpdateRequired(
+      system_time_handler_->GetUTCTime(), cert_due_date);
 }
 
 void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
@@ -227,7 +341,6 @@ void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
                   "Invalid (NULL) pointer to SecurityManagerListener.");
     return;
   }
-  LOG4CXX_DEBUG(logger_, "Adding listener " << listener);
   listeners_.push_back(listener);
 }
 
@@ -239,6 +352,38 @@ void SecurityManagerImpl::RemoveListener(
     return;
   }
   listeners_.remove(listener);
+}
+
+bool SecurityManagerImpl::OnCertificateUpdated(const std::string& data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Certificate updated");
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_certificate_ = false;
+  }
+  crypto_manager_->OnCertificateUpdated(data);
+  std::for_each(
+      awaiting_certificate_connections_.begin(),
+      awaiting_certificate_connections_.end(),
+      std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
+
+  std::set<uint32_t>().swap(awaiting_certificate_connections_);
+  return true;
+}
+
+void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = false;
+  }
+
+  std::for_each(
+      awaiting_time_connections_.begin(),
+      awaiting_time_connections_.end(),
+      std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
+
+  std::set<uint32_t>().swap(awaiting_time_connections_);
 }
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(

@@ -1682,6 +1682,8 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   return false;
 }
 
+void ApplicationManagerImpl::OnHandshakeFailed() {}
+
 void ApplicationManagerImpl::OnCertificateUpdateRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
   GetPolicyHandler().OnPTExchangeNeeded();

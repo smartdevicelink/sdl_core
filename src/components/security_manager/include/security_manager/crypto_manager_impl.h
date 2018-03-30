@@ -71,6 +71,8 @@ class CryptoManagerImpl : public CryptoManager {
                  size_t* out_data_size) OVERRIDE;
     bool IsInitCompleted() const OVERRIDE;
     bool IsHandshakePending() const OVERRIDE;
+    bool GetCertificateDueDate(time_t& due_date) const OVERRIDE;
+    bool HasCertificate() const OVERRIDE;
     size_t get_max_block_size(size_t mtu) const OVERRIDE;
     std::string LastError() const OVERRIDE;
     void ResetConnection() OVERRIDE;
@@ -101,6 +103,9 @@ class CryptoManagerImpl : public CryptoManager {
 
     std::string GetTextBy(X509_NAME* name, int object) const;
 
+    int pull_number_from_buf(char* buf, int* idx) const;
+    time_t asn1_time_to_tm(ASN1_TIME* time) const;
+
     SSL* connection_;
     BIO* bioIn_;
     BIO* bioOut_;
@@ -128,14 +133,13 @@ class CryptoManagerImpl : public CryptoManager {
   SSLContext* CreateSSLContext() OVERRIDE;
   void ReleaseSSLContext(SSLContext* context) OVERRIDE;
   std::string LastError() const OVERRIDE;
-  virtual bool IsCertificateUpdateRequired() const OVERRIDE;
+  virtual bool IsCertificateUpdateRequired(
+      const time_t system_time, const time_t certificates_time) const OVERRIDE;
   virtual const CryptoManagerSettings& get_settings() const OVERRIDE;
 
  private:
+  bool AreForceProtectionSettingsCorrect() const;
   bool set_certificate(const std::string& cert_data);
-
-  int pull_number_from_buf(char* buf, int* idx);
-  void asn1_time_to_tm(ASN1_TIME* time);
 
   /**
    * @brief Sets initial certificate datetime

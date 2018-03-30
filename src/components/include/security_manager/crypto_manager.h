@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
+#include <time.h>
 #include "application_manager/policies/policy_handler_observer.h"
 #include "security_manager/security_manager_settings.h"
 
@@ -66,7 +67,8 @@ class CryptoManager : public policy::PolicyHandlerObserver {
   virtual void ReleaseSSLContext(SSLContext* context) = 0;
   virtual std::string LastError() const = 0;
 
-  virtual bool IsCertificateUpdateRequired() const = 0;
+  virtual bool IsCertificateUpdateRequired(
+      const time_t system_time, const time_t certificates_time) const = 0;
   /**
   * \brief Crypto manager settings getter
   * \return pointer to crypto manager settings class
