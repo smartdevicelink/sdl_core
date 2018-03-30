@@ -129,6 +129,11 @@ void OnButtonPressNotification::Run() {
     }
     // if "appID" is present, send it to named app only if its FULL or
     // LIMITED
+    if (is_app_id_exists) {
+      app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+    }
+
     if (app.valid()) {
       if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
