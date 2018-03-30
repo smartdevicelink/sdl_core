@@ -41,6 +41,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <ctime>
+#include <algorithm>
 #include "security_manager/security_manager.h"
 
 #include "utils/logger.h"
@@ -113,10 +114,35 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   }
 }
 
+bool CryptoManagerImpl::AreForceProtectionSettingsCorrect() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::vector<int>& forced_unprotected_services =
+      get_settings().force_unprotected_service();
+  const std::vector<int>& forced_protected_services =
+      get_settings().force_protected_service();
+
+  for (auto& item : forced_protected_services) {
+    if (0 == item) {
+      continue;
+    }
+
+    if (std::find(forced_unprotected_services.begin(),
+                  forced_unprotected_services.end(),
+                  item) != forced_unprotected_services.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CryptoManagerImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const Mode mode = get_settings().security_manager_mode();
+  if (!AreForceProtectionSettingsCorrect()) {
+    LOG4CXX_DEBUG(logger_, "Force protection settings of ini file are wrong!");
+    return false;
+  }
   const bool is_server = (mode == SERVER);
   if (is_server) {
     LOG4CXX_DEBUG(logger_, "Server mode");
@@ -137,12 +163,15 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
+      LOG4CXX_DEBUG(logger_, "SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
       break;
     case TLSv1:
+      LOG4CXX_DEBUG(logger_, "TLSv1 is used");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
       break;
     case TLSv1_1:
+      LOG4CXX_DEBUG(logger_, "TLSv1_1 is used");
 #if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(
           logger_,
@@ -153,6 +182,7 @@ bool CryptoManagerImpl::Init() {
 #endif
       break;
     case TLSv1_2:
+      LOG4CXX_DEBUG(logger_, "TLSv1_2 is used");
 #if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(
           logger_,
@@ -161,6 +191,10 @@ bool CryptoManagerImpl::Init() {
 #else
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
 #endif
+      break;
+    case DTLSv1:
+      LOG4CXX_DEBUG(logger_, "DTLSv1 is used");
+      method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
       break;
     default:
       LOG4CXX_ERROR(logger_,
@@ -234,13 +268,14 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if (context_ == NULL) {
+  if (NULL == context_) {
     return NULL;
   }
 
   SSL* conn = SSL_new(context_);
-  if (conn == NULL)
+  if (NULL == conn) {
     return NULL;
+  }
 
   if (get_settings().security_manager_mode() == SERVER) {
     SSL_set_accept_state(conn);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+#include "utils/system_time_handler.h"
+#include <algorithm>
 
-#include "gmock/gmock.h"
-#include "security_manager/security_manager_settings.h"
+namespace utils {
 
-namespace test {
-namespace components {
-namespace security_manager_test {
+SystemTimeHandler::SystemTimeHandler() {}
 
-class MockCryptoManagerSettings
-    : public ::security_manager::CryptoManagerSettings {
- public:
-  MOCK_CONST_METHOD0(security_manager_mode, ::security_manager::Mode());
-  MOCK_CONST_METHOD0(security_manager_protocol_name,
-                     ::security_manager::Protocol());
-  MOCK_CONST_METHOD0(verify_peer, bool());
-  MOCK_CONST_METHOD0(certificate_data, const std::string&());
-  MOCK_CONST_METHOD0(ciphers_list, const std::string&());
-  MOCK_CONST_METHOD0(ca_cert_path, const std::string&());
-  MOCK_CONST_METHOD0(update_before_hours, size_t());
-  MOCK_CONST_METHOD0(maximum_payload_size, size_t());
-  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
-  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
-};
+SystemTimeHandler::~SystemTimeHandler() {}
 
-}  // namespace security_manager_test
-}  // namespace components
-}  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+void SystemTimeHandler::QuerySystemTime() {
+  DoSystemTimeQuery();
+}
+
+void SystemTimeHandler::SubscribeOnSystemTime(SystemTimeListener* listener) {
+  DoSubscribe(listener);
+}
+
+void SystemTimeHandler::UnSubscribeFromSystemTime(
+    SystemTimeListener* listener) {
+  DoUnsubscribe(listener);
+}
+
+time_t SystemTimeHandler::GetUTCTime() {
+  return FetchSystemTime();
+}
+
+}  // namespace utils

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+#include "application_manager/commands/hmi/basic_communication_get_system_time_response.h"
+#include "utils/logger.h"
 
-#include "gmock/gmock.h"
-#include "security_manager/security_manager_settings.h"
+CREATE_LOGGERPTR_GLOBAL(logger_, "Commands")
 
-namespace test {
-namespace components {
-namespace security_manager_test {
+namespace application_manager {
+namespace commands {
 
-class MockCryptoManagerSettings
-    : public ::security_manager::CryptoManagerSettings {
- public:
-  MOCK_CONST_METHOD0(security_manager_mode, ::security_manager::Mode());
-  MOCK_CONST_METHOD0(security_manager_protocol_name,
-                     ::security_manager::Protocol());
-  MOCK_CONST_METHOD0(verify_peer, bool());
-  MOCK_CONST_METHOD0(certificate_data, const std::string&());
-  MOCK_CONST_METHOD0(ciphers_list, const std::string&());
-  MOCK_CONST_METHOD0(ca_cert_path, const std::string&());
-  MOCK_CONST_METHOD0(update_before_hours, size_t());
-  MOCK_CONST_METHOD0(maximum_payload_size, size_t());
-  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
-  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
-};
+BasicCommunicationGetSystemTimeResponse::
+    BasicCommunicationGetSystemTimeResponse(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-}  // namespace security_manager_test
-}  // namespace components
-}  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+void BasicCommunicationGetSystemTimeResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
+
+}  // namespace commands
+}  // namespace application_manager

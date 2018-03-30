@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,35 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
 
-#include <stddef.h>
-#include <string>
-#include <vector>
+#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
-namespace security_manager {
-enum Mode { CLIENT, SERVER };
-enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2, DTLSv1 };
+namespace application_manager {
+
+namespace commands {
+
 /**
- * \class CryptoManagerSettings
- * \brief Interface for crypto manager component settings.
+ * @brief OnSystemTimeReadyNotification command class.
+ * Notifies SDL whenever system time module is ready.
+ * It could be GPS or any other module which is allows
+ * to obtain system time. Once SDL receive this notification
+ * it is allowed to use GetSystemTimeRequest to rerieve system time.
  */
-class CryptoManagerSettings {
+class OnSystemTimeReadyNotification : public NotificationFromHMI {
  public:
-  virtual ~CryptoManagerSettings() {}
+  /**
+   * @brief OnSystemTimeReadyNotification create the command.
+   * @param message content of the command. Passed directy to base class.
+   */
+  OnSystemTimeReadyNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
-  virtual Mode security_manager_mode() const = 0;
-  virtual Protocol security_manager_protocol_name() const = 0;
-  virtual bool verify_peer() const = 0;
-  virtual const std::string& certificate_data() const = 0;
-  virtual const std::string& ciphers_list() const = 0;
-  virtual const std::string& ca_cert_path() const = 0;
-  virtual size_t update_before_hours() const = 0;
-  virtual size_t maximum_payload_size() const = 0;
-  virtual const std::vector<int>& force_protected_service() const = 0;
-  virtual const std::vector<int>& force_unprotected_service() const = 0;
+  /**
+   * @brief ~OnSystemTimeReadyNotification destroys the command object.
+   */
+  ~OnSystemTimeReadyNotification();
+
+ private:
+  /**
+   * @brief Run creates SystemTimeReady event
+   * and notifies all the subscribers.
+   */
+  void Run() FINAL;
 };
 
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_SETTINGS_H_
+}  // namespace commands
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_

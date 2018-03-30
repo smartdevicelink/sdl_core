@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_
 
-#include "gmock/gmock.h"
-#include "security_manager/security_manager_settings.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-namespace test {
-namespace components {
-namespace security_manager_test {
+#include "utils/macro.h"
+#include "application_manager/application_manager_impl.h"
 
-class MockCryptoManagerSettings
-    : public ::security_manager::CryptoManagerSettings {
+namespace application_manager {
+
+namespace commands {
+
+/**
+ * @brief The BasicCommunicationGetSystemTimeResponse class represents the
+ * HMI response which is contains data obtained from HMI.
+ */
+class BasicCommunicationGetSystemTimeResponse : public ResponseFromHMI {
  public:
-  MOCK_CONST_METHOD0(security_manager_mode, ::security_manager::Mode());
-  MOCK_CONST_METHOD0(security_manager_protocol_name,
-                     ::security_manager::Protocol());
-  MOCK_CONST_METHOD0(verify_peer, bool());
-  MOCK_CONST_METHOD0(certificate_data, const std::string&());
-  MOCK_CONST_METHOD0(ciphers_list, const std::string&());
-  MOCK_CONST_METHOD0(ca_cert_path, const std::string&());
-  MOCK_CONST_METHOD0(update_before_hours, size_t());
-  MOCK_CONST_METHOD0(maximum_payload_size, size_t());
-  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
-  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
+  /**
+   * @brief BasicCommunicationGetSystemTimeResponse does nothing except of
+   * initializing base class with the passed parameters.
+   * @param message the message to send to HMI
+   * @param application_manager Location service which which is provides
+   * neccessary api to send the request.
+   */
+  BasicCommunicationGetSystemTimeResponse(
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
+
+ private:
+  /**
+   * @brief Run takes the message obtained from the HMI and
+   * sends this data to the subscribed on certain event class
+   */
+  void Run() FINAL;
 };
 
-}  // namespace security_manager_test
-}  // namespace components
-}  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+}  // namespace commands
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_

@@ -132,6 +132,7 @@ class CryptoManagerImpl : public CryptoManager {
   virtual const CryptoManagerSettings& get_settings() const OVERRIDE;
 
  private:
+  bool AreForceProtectionSettingsCorrect() const;
   bool set_certificate(const std::string& cert_data);
 
   int pull_number_from_buf(char* buf, int* idx);
