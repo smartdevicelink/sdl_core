@@ -128,7 +128,15 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
    */
   void OnSystemTimeReady();
 
-  sync_primitives::Lock state_lock_;
+  /**
+   * @brief Checks if UTC time is ready
+   * and can be requested by GetSystemTime request
+   * @return True if HMI is ready to provide UTC time
+   * otherwise False
+   */
+  bool is_utc_time_ready() const FINAL;
+
+  mutable sync_primitives::Lock state_lock_;
   volatile bool is_utc_ready_;
   volatile bool schedule_request_;
   time_t last_time_;

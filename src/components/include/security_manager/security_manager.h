@@ -148,6 +148,13 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   virtual bool IsCertificateUpdateRequired(const uint32_t connection_key) = 0;
 
   /**
+   * @brief Checks whether system time ready notification
+   * was received from hmi
+   * @return true if received otherwise false
+   */
+  virtual bool IsSystemTimeReady() const = 0;
+
+  /**
    * @brief Notify all listeners that certificate update required
    * Allows to notify that certificate should be updated
    */

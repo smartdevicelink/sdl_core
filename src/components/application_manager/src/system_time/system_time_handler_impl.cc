@@ -60,13 +60,6 @@ SystemTimeHandlerImpl::~SystemTimeHandlerImpl() {
 
 void SystemTimeHandlerImpl::DoSystemTimeQuery() {
   LOG4CXX_AUTO_TRACE(logger_);
-  //  // Remove until next comment line
-  //  last_time_ = time(NULL);
-  //  if (system_time_listener_) {
-  //    system_time_listener_->OnSystemTimeArrived(last_time_);
-  //  }
-  //  return;
-  //  // =========================================================
   using namespace application_manager;
 
   sync_primitives::AutoLock lock(state_lock_);
@@ -93,6 +86,12 @@ void SystemTimeHandlerImpl::DoUnsubscribe(utils::SystemTimeListener* listener) {
 time_t SystemTimeHandlerImpl::FetchSystemTime() {
   LOG4CXX_AUTO_TRACE(logger_);
   return last_time_;
+}
+
+bool SystemTimeHandlerImpl::is_utc_time_ready() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(state_lock_);
+  return is_utc_ready_;
 }
 
 void SystemTimeHandlerImpl::SendTimeRequest() {

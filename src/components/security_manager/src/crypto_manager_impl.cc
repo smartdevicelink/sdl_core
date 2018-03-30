@@ -64,7 +64,12 @@ namespace {
 int debug_callback(int preverify_ok, X509_STORE_CTX* ctx) {
   if (!preverify_ok) {
     const int error = X509_STORE_CTX_get_error(ctx);
-    UNUSED(error);
+    if (error == X509_V_ERR_CERT_NOT_YET_VALID ||
+        error == X509_V_ERR_CERT_HAS_EXPIRED) {
+      // return success result code instead of error because start
+      // and expiration cert dates will be checked by SDL
+      return 1;
+    }
     LOG4CXX_WARN(logger_,
                  "Certificate verification failed with error "
                      << error << " \"" << X509_verify_cert_error_string(error)

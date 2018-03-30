@@ -77,6 +77,7 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::StartHandshake(
     const uint8_t** const out_data, size_t* out_data_size) {
+  LOG4CXX_AUTO_TRACE(logger_);
   is_handshake_pending_ = true;
   return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
@@ -362,6 +363,7 @@ SSLContext::HandshakeResult
 CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
   LOG4CXX_AUTO_TRACE(logger_);
   const int handshake_result = SSL_do_handshake(connection_);
+  LOG4CXX_TRACE(logger_, "Handshake result: " << handshake_result);
   if (handshake_result == 1) {
     const HandshakeResult result = CheckCertContext();
     if (result != Handshake_Result_Success) {
@@ -380,6 +382,7 @@ CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
     is_handshake_pending_ = false;
 
   } else if (handshake_result == 0) {
+    LOG4CXX_DEBUG(logger_, "SSL handshake failed");
     SSL_clear(connection_);
     is_handshake_pending_ = false;
     return Handshake_Result_Fail;

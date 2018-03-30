@@ -95,6 +95,9 @@ using protocol_handler::kInvalidServiceType;
 using transport_manager::TransportManagerListener;
 using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+// For security
+using ContextCreationStrategy =
+    security_manager::SecurityManager::ContextCreationStrategy;
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
@@ -1043,10 +1046,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   SetProtocolVersion2();
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock,
-              CreateSSLContext(connection_key,
-                               security_manager::SecurityManager::
-                                   ContextCreationStrategy::kUseExisting))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
       WillOnce(
@@ -1123,10 +1123,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock,
-              CreateSSLContext(connection_key,
-                               security_manager::SecurityManager::
-                                   ContextCreationStrategy::kUseExisting))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
       WillOnce(Return(&ssl_context_mock));
@@ -1205,10 +1202,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock,
-              CreateSSLContext(connection_key,
-                               security_manager::SecurityManager::
-                                   ContextCreationStrategy::kUseExisting))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
       WillOnce(
@@ -1306,10 +1300,7 @@ TEST_F(
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock,
-              CreateSSLContext(connection_key,
-                               security_manager::SecurityManager::
-                                   ContextCreationStrategy::kUseExisting))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
       WillOnce(

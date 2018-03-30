@@ -50,12 +50,6 @@ class SystemTimeListener {
    * @param utc_time current system time.
    */
   virtual void OnSystemTimeArrived(const time_t utc_time) = 0;
-
-  /**
-   * @brief OnSystemTimeFails notifies when system
-   * fails to respond with proper time.
-   */
-  virtual void OnSystemTimeFails() = 0;
 };
 
 /**
@@ -103,6 +97,14 @@ class SystemTimeHandler {
   time_t GetUTCTime();
 
   /**
+   * @brief Checks if system time is ready
+   * and can be requested by GetSystemTime request
+   * @return True if HMI is ready to provide UTC time
+   * otherwise False
+   */
+  bool is_system_time_ready() const;
+
+  /**
    * @brief ~SystemTimeHandler destroys the object
    */
   virtual ~SystemTimeHandler();
@@ -134,6 +136,14 @@ class SystemTimeHandler {
    * @return utc time.
    */
   virtual time_t FetchSystemTime() = 0;
+
+  /**
+   * @brief Checks if UTC time is ready
+   * and can be requested by GetSystemTime request
+   * @return True if HMI is ready to provide UTC time
+   * otherwise False
+   */
+  virtual bool is_utc_time_ready() const = 0;
 };
 
 }  // namespace utils

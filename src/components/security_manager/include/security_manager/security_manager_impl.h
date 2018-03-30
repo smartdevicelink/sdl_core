@@ -167,6 +167,13 @@ class SecurityManagerImpl : public SecurityManager,
   bool IsCertificateUpdateRequired(const uint32_t connection_key) OVERRIDE;
 
   /**
+   * @brief Checks whether system time ready notification
+   * was received from hmi
+   * @return true if received otherwise false
+   */
+  bool IsSystemTimeReady() const OVERRIDE;
+
+  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   void AddListener(SecurityManagerListener* const listener) OVERRIDE;
@@ -264,28 +271,12 @@ class SecurityManagerImpl : public SecurityManager,
    */
   void ProceedHandshake(SSLContext* ssl_context, uint32_t connection_key);
 
-  // void CheckCertificateDates();
-
   /**
    * @brief OnSystemTimeArrived method which notifies
    * crypto manager with updated time in order to check certificate validity
    * @param utc_time the current system time.
    */
   void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
-
-  /**
-   * @brief OnSystemTimeFails currently does nothing.
-   * The method has to somehow process timeout case for the
-   * GetSystemTimeRequest.
-   */
-  void OnSystemTimeFails() OVERRIDE;
-
-  /**
-   * @brief ResumePendingHandshake allowsto process the connection
-   * lists after apropriate event has occured.
-   * These events are: SystemTime arrived or certificate updated.
-   */
-  void ResumePendingHandshake();
 
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
@@ -311,8 +302,9 @@ class SecurityManagerImpl : public SecurityManager,
   std::unique_ptr<utils::SystemTimeHandler> system_time_handler_;
   sync_primitives::Lock connections_lock_;
   std::set<uint32_t> awaiting_certificate_connections_;
+  std::set<uint32_t> awaiting_time_connections_;
 
-  sync_primitives::Lock waiters_lock_;
+  mutable sync_primitives::Lock waiters_lock_;
   volatile bool waiting_for_certificate_;
   volatile bool waiting_for_time_;
   DISALLOW_COPY_AND_ASSIGN(SecurityManagerImpl);

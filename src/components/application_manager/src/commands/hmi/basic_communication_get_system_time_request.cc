@@ -40,7 +40,10 @@ BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager) {}
 
-void BasicCommunicationGetSystemTimeRequest::onTimeOut() {}
+void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager_.protocol_handler().NotifyOnFailedHandshake();
+}
 
 }  // namespace commands
 }  // namespace application_manager

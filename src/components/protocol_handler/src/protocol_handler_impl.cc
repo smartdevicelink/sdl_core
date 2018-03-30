@@ -149,6 +149,7 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
                  "Not all observers have unsubscribed"
                  " from ProtocolHandlerImpl");
   }
+  handshake_handlers_.clear();
 }
 
 void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
@@ -837,6 +838,18 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   message_meter_.ClearIdentifiers();
   malformed_message_meter_.ClearIdentifiers();
   multiframe_builder_.RemoveConnection(connection_id);
+}
+
+void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(handshake_handlers_lock_);
+  std::list<std::shared_ptr<HandshakeHandler> >::iterator it =
+      handshake_handlers_.begin();
+  while (it != handshake_handlers_.end()) {
+    (*it)->OnHandshakeFailed();
+    LOG4CXX_DEBUG(logger_, "Destroying handler: " << *it);
+    it = handshake_handlers_.erase(it);
+  }
 }
 
 void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
@@ -1566,13 +1579,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            context,
                                            packet->protocol_version(),
                                            bson_object_bytes);
+    handshake_handlers_.push_back(handler);
 
     const bool is_certificate_empty =
         security_manager_->IsPolicyCertificateDataEmpty();
-
-    //    const bool is_certificate_expired =
-    //        is_certificate_empty ||
-    //        security_manager_->IsCertificateUpdateRequired(connection_key);
 
     if (context.is_ptu_required_ && is_certificate_empty) {
       LOG4CXX_DEBUG(logger_,
@@ -1636,10 +1646,18 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                           *fullVersion,
                           *start_session_ack_params);
     } else {
+      LOG4CXX_DEBUG(logger_, "Adding Handshake handler to listenets:");
       security_manager_->AddListener(new HandshakeHandler(*handler));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
+        if (!security_manager_->IsSystemTimeReady()) {
+          SendStartSessionNAck(context.connection_id_,
+                               packet->session_id(),
+                               protocol_version,
+                               packet->service_type(),
+                               rejected_params);
+        }
       }
     }
     LOG4CXX_DEBUG(logger_,

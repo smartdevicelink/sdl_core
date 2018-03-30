@@ -110,8 +110,6 @@ void SecurityManagerImpl::set_crypto_manager(CryptoManager* crypto_manager) {
     return;
   }
   crypto_manager_ = crypto_manager;
-  // TO CLARIFY if this action needed
-  // system_time_handler_->QuerySystemTime();
 }
 
 void SecurityManagerImpl::Handle(const SecurityMessage message) {
@@ -158,7 +156,7 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
     security_manager::SSLContext* ssl_context =
         session_observer_->GetSSLContext(connection_key,
                                          protocol_handler::kControl);
-    // return existed SSLContext for current connection/session
+    // If SSLContext for current connection/session exists - return it
     if (ssl_context) {
       return ssl_context;
     }
@@ -191,7 +189,12 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
 void SecurityManagerImpl::PostponeHandshake(const uint32_t connection_key) {
   LOG4CXX_DEBUG(logger_, "Handshake postponed");
   sync_primitives::AutoLock lock(connections_lock_);
-  awaiting_certificate_connections_.insert(connection_key);
+  if (waiting_for_certificate_) {
+    awaiting_certificate_connections_.insert(connection_key);
+  }
+  if (waiting_for_time_) {
+    awaiting_time_connections_.insert(connection_key);
+  }
 }
 
 void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
@@ -233,46 +236,23 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
   if (!ssl_context->HasCertificate()) {
+    LOG4CXX_ERROR(logger_, "Security certificate is absent");
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_certificate_ = true;
     NotifyOnCertififcateUpdateRequired();
   }
 
-  PostponeHandshake(connection_key);
-
   {
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_time_ = true;
   }
+
+  PostponeHandshake(connection_key);
   system_time_handler_->QuerySystemTime();
+}
 
-  //  if (ssl_context->IsInitCompleted()) {
-  //    NotifyListenersOnHandshakeDone(connection_key,
-  //                                   SSLContext::Handshake_Result_Success);
-  //    return;
-  //  }
-
-  //  ssl_context->SetHandshakeContext(
-  //      session_observer_->GetHandshakeContext(connection_key));
-
-  //  size_t data_size = 0;
-  //  const uint8_t* data = NULL;
-
-  //  const security_manager::SSLContext::HandshakeResult result =
-  //      ssl_context->StartHandshake(&data, &data_size);
-  //  if (security_manager::SSLContext::Handshake_Result_Success != result) {
-  //    const std::string error_text("StartHandshake failed, handshake step
-  //    fail");
-  //    LOG4CXX_ERROR(logger_, error_text);
-  //    SendInternalError(connection_key, ERROR_INTERNAL, error_text);
-  //    NotifyListenersOnHandshakeDone(connection_key,
-  //                                   SSLContext::Handshake_Result_Fail);
-  //    return;
-  //  }
-  //  // for client mode will be generated output data
-  //  if (data != NULL && data_size != 0) {
-  //    SendHandshakeBinData(connection_key, data, data_size);
-  //  }
+bool SecurityManagerImpl::IsSystemTimeReady() const {
+  return system_time_handler_->is_system_time_ready();
 }
 
 void SecurityManagerImpl::ProceedHandshake(
@@ -299,7 +279,19 @@ void SecurityManagerImpl::ProceedHandshake(
 
   if (crypto_manager_->IsCertificateUpdateRequired(
           system_time_handler_->GetUTCTime(), cert_due_date)) {
+    LOG4CXX_DEBUG(logger_, "Host certificate update required");
+    if (1 == awaiting_certificate_connections_.size()) {
+      NotifyListenersOnHandshakeDone(connection_key,
+                                     SSLContext::Handshake_Result_CertExpired);
+      return;
+    }
+    {
+      sync_primitives::AutoLock lock(waiters_lock_);
+      waiting_for_certificate_ = true;
+    }
+    PostponeHandshake(connection_key);
     NotifyOnCertififcateUpdateRequired();
+    return;
   }
 
   SSLContext::HandshakeContext handshake_context =
@@ -329,9 +321,6 @@ void SecurityManagerImpl::ProceedHandshake(
 bool SecurityManagerImpl::IsCertificateUpdateRequired(
     const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  //  security_manager::SSLContext* ssl_context =
-  //  session_observer_->GetSSLContext(
-  //      connection_key, protocol_handler::kControl);
   security_manager::SSLContext* ssl_context =
       CreateSSLContext(connection_key, kUseExisting);
   DCHECK(ssl_context);
@@ -352,7 +341,6 @@ void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
                   "Invalid (NULL) pointer to SecurityManagerListener.");
     return;
   }
-  LOG4CXX_DEBUG(logger_, "Adding listener " << listener);
   listeners_.push_back(listener);
 }
 
@@ -366,47 +354,37 @@ void SecurityManagerImpl::RemoveListener(
   listeners_.remove(listener);
 }
 
-void SecurityManagerImpl::ResumePendingHandshake() {
-  {
-    sync_primitives::AutoLock lock(waiters_lock_);
-
-    if (waiting_for_time_ || waiting_for_certificate_) {
-      return;
-    }
-  }
-  sync_primitives::AutoLock lock(connections_lock_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Awaiting list size: " << awaiting_certificate_connections_.size());
-  std::for_each(
-      awaiting_certificate_connections_.begin(),
-      awaiting_certificate_connections_.end(),
-      std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
-
-  std::set<uint32_t>().swap(awaiting_certificate_connections_);
-}
-
 bool SecurityManagerImpl::OnCertificateUpdated(const std::string& data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Certificate updated");
   {
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_certificate_ = false;
   }
   crypto_manager_->OnCertificateUpdated(data);
-  ResumePendingHandshake();
+  std::for_each(
+      awaiting_certificate_connections_.begin(),
+      awaiting_certificate_connections_.end(),
+      std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
 
+  std::set<uint32_t>().swap(awaiting_certificate_connections_);
   return true;
 }
 
 void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
+  LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_time_ = false;
   }
-  ResumePendingHandshake();
-}
 
-void SecurityManagerImpl::OnSystemTimeFails() {}
+  std::for_each(
+      awaiting_time_connections_.begin(),
+      awaiting_time_connections_.end(),
+      std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
+
+  std::set<uint32_t>().swap(awaiting_time_connections_);
+}
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {

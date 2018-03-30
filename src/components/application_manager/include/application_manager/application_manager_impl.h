@@ -933,6 +933,7 @@ class ApplicationManagerImpl
       uint32_t connection_key,
       security_manager::SSLContext::HandshakeResult result) OVERRIDE;
 
+  void OnHandshakeFailed() OVERRIDE;
   /**
    * @brief Notification that certificate update is required.
    */

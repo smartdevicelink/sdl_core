@@ -141,9 +141,6 @@ class CryptoManagerImpl : public CryptoManager {
   bool AreForceProtectionSettingsCorrect() const;
   bool set_certificate(const std::string& cert_data);
 
-  //  int pull_number_from_buf(char* buf, int* idx);
-  //  void asn1_time_to_tm(ASN1_TIME* time);
-
   /**
    * @brief Sets initial certificate datetime
    */
