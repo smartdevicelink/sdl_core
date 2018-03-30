@@ -227,6 +227,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   navi_app_to_stop_.clear();
   navi_app_to_end_stream_.clear();
+
+  secondary_transport_devices_cache_.clear();
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
@@ -638,6 +640,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   apps_size_ = applications_.size();
   applications_list_lock_.Release();
+
+  // It is possible that secondary transport of this app has been already
+  // established. Make sure that the information is reflected to application
+  // instance.
+  // Also, make sure that this is done *after* we updated applications_ list to
+  // avoid timing issues.
+  SecondaryTransportDeviceMap::iterator itr =
+      secondary_transport_devices_cache_.find(connection_key);
+  if (secondary_transport_devices_cache_.end() != itr) {
+    connection_handler::DeviceHandle secondary_device_handle = itr->second;
+    application->set_secondary_device(secondary_device_handle);
+  }
 
   return application;
 }
@@ -1664,12 +1678,6 @@ void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
     const int32_t session_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application(session_key);
-  if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "Application with id: " << session_key << " is not found");
-    return;
-  }
   if (device_handle == 0) {
     LOG4CXX_WARN(logger_,
                  "Invalid device handle passed for secondary transport of app "
@@ -1677,7 +1685,21 @@ void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
     return;
   }
 
-  app->set_secondary_device(device_handle);
+  secondary_transport_devices_cache_[session_key] = device_handle;
+
+  {
+    sync_primitives::AutoLock auto_lock(applications_list_lock_);
+    ApplicationSharedPtr app = application(session_key);
+    if (!app) {
+      // It is possible that secondary transport is established prior to
+      // RegisterAppInterface request being processed. In this case, we will
+      // update the app's information during RegisterApplication().
+      LOG4CXX_DEBUG(logger_,
+                    "Application with id: " << session_key << " is not found");
+      return;
+    }
+    app->set_secondary_device(device_handle);
+  }
 
   // notify the event to HMI through BC.UpdateAppList request
   SendUpdateAppList();
@@ -1687,22 +1709,36 @@ void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
     const int32_t session_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application(session_key);
-  if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "Application with id: " << session_key << " is not found");
-    return;
+  SecondaryTransportDeviceMap::iterator it =
+      secondary_transport_devices_cache_.find(session_key);
+  if (it == secondary_transport_devices_cache_.end()) {
+    LOG4CXX_WARN(
+        logger_,
+        "Unknown session_key specified while removing secondary transport: "
+            << session_key);
+  } else {
+    secondary_transport_devices_cache_.erase(it);
   }
 
-  connection_handler::DeviceHandle device_handle = app->secondary_device();
-  if (device_handle == 0) {
-    LOG4CXX_WARN(logger_,
-                 "Secondary transport of app " << session_key
-                                               << " is not found");
-    return;
-  }
+  {
+    sync_primitives::AutoLock auto_lock(applications_list_lock_);
+    ApplicationSharedPtr app = application(session_key);
+    if (!app) {
+      LOG4CXX_DEBUG(logger_,
+                    "Application with id: " << session_key << " is not found");
+      return;
+    }
 
-  app->set_secondary_device(0);
+    connection_handler::DeviceHandle device_handle = app->secondary_device();
+    if (device_handle == 0) {
+      LOG4CXX_WARN(logger_,
+                   "Secondary transport of app " << session_key
+                                                 << " is not found");
+      return;
+    }
+
+    app->set_secondary_device(0);
+  }
 
   // notify the event to HMI through BC.UpdateAppList request
   SendUpdateAppList();
