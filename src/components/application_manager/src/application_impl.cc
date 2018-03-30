@@ -123,6 +123,7 @@ ApplicationImpl::ApplicationImpl(
     , list_files_in_none_count_(0)
     , mac_address_(mac_address)
     , device_id_(device_id)
+    , secondary_device_id_(0)
     , usage_report_(mobile_app_id, statistics_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
@@ -358,6 +359,10 @@ const std::string& ApplicationImpl::bundle_id() const {
 
 connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_id_;
+}
+
+connection_handler::DeviceHandle ApplicationImpl::secondary_device() const {
+  return secondary_device_id_;
 }
 
 const std::string& ApplicationImpl::mac_address() const {
@@ -618,6 +623,11 @@ void ApplicationImpl::set_app_allowed(const bool allowed) {
 
 void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_id_ = device;
+}
+
+void ApplicationImpl::set_secondary_device(
+    connection_handler::DeviceHandle secondary_device) {
+  secondary_device_id_ = secondary_device;
 }
 
 uint32_t ApplicationImpl::get_grammar_id() const {

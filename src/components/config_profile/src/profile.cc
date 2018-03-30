@@ -146,6 +146,7 @@ const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
 const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
+const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
 const char* kServerPortKey = "ServerPort";
 const char* kVideoStreamingPortKey = "VideoStreamingPort";
 const char* kAudioStreamingPortKey = "AudioStreamingPort";
@@ -237,6 +238,7 @@ const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
+const char* kDefaultTransportManagerTCPAdapterNetworkInterface = "";
 
 #ifdef ENABLE_SECURITY
 const char* kDefaultSecurityProtocol = "TLSv1.2";
@@ -680,6 +682,11 @@ const std::vector<uint32_t>& Profile::supported_diag_modes() const {
 
 uint16_t Profile::transport_manager_tcp_adapter_port() const {
   return transport_manager_tcp_adapter_port_;
+}
+
+const std::string& Profile::transport_manager_tcp_adapter_network_interface()
+    const {
+  return transport_manager_tcp_adapter_network_interface_;
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -1608,6 +1615,16 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_,
                     kTCPAdapterPortKey,
+                    kTransportManagerSection);
+
+  // Transport manager TCP network interface
+  ReadStringValue(&transport_manager_tcp_adapter_network_interface_,
+                  kDefaultTransportManagerTCPAdapterNetworkInterface,
+                  kTransportManagerSection,
+                  kTCPAdapterNetworkInterfaceKey);
+
+  LOG_UPDATED_VALUE(transport_manager_tcp_adapter_network_interface_,
+                    kTCPAdapterNetworkInterfaceKey,
                     kTransportManagerSection);
 
   // Event MQ

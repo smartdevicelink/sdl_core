@@ -385,6 +385,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   uint16_t transport_manager_tcp_adapter_port() const OVERRIDE;
 
+  /**
+   * @brief Returns the network interface name for TCP transport adapter
+   */
+  const std::string& transport_manager_tcp_adapter_network_interface()
+      const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -859,6 +865,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<uint32_t> supported_diag_modes_;
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
+  std::string transport_manager_tcp_adapter_network_interface_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;

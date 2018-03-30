@@ -938,6 +938,10 @@ class ApplicationManagerImpl
       const int32_t& session_key,
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
+  void OnSecondaryTransportStartedCallback(
+      const connection_handler::DeviceHandle device_handle,
+      const int32_t session_key) OVERRIDE;
+  void OnSecondaryTransportEndedCallback(const int32_t session_key) OVERRIDE;
 
   /**
    * @brief Check if application with specified app_id has NAVIGATION HMI type

@@ -712,6 +712,71 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   return session_key;
 }
 
+bool ConnectionHandlerImpl::OnSecondaryTransportStarted(
+    transport_manager::ConnectionUID &primary_connection_handle,
+    const transport_manager::ConnectionUID secondary_connection_handle,
+    const uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (session_id == 0) {
+    LOG4CXX_WARN(logger_, "Session id for secondary transport is invalid");
+    return false;
+  }
+
+  DeviceHandle device_handle;
+  {
+    sync_primitives::AutoReadLock lock(connection_list_lock_);
+    ConnectionList::iterator it =
+        connection_list_.find(secondary_connection_handle);
+    if (connection_list_.end() == it) {
+      LOG4CXX_WARN(logger_,
+                   "Unknown connection " << secondary_connection_handle);
+      return false;
+    }
+
+    Connection* connection = it->second;
+    device_handle = connection->connection_device_handle();
+  }
+
+  // Add the secondary transport connection ID to the SessionConnectionMap
+  SessionTransports st = SetSecondaryTransportID(session_id, secondary_connection_handle);
+  primary_connection_handle = st.primary_transport;
+  if (st.secondary_transport != secondary_connection_handle) {
+    return false;
+  }
+
+  const uint32_t session_key =
+      KeyFromPair(primary_connection_handle, session_id);
+
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
+    connection_handler_observer_->OnSecondaryTransportStartedCallback(
+        device_handle, session_key);
+  }
+
+  return true;
+}
+
+void ConnectionHandlerImpl::OnSecondaryTransportEnded(
+    const transport_manager::ConnectionUID primary_connection_handle,
+    const uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (session_id == 0) {
+    LOG4CXX_WARN(logger_, "Session id for secondary transport is invalid");
+    return;
+  }
+
+  const uint32_t session_key =
+      KeyFromPair(primary_connection_handle, session_id);
+
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
+    connection_handler_observer_->OnSecondaryTransportEndedCallback(
+        session_key);
+  }
+}
+
 uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) const {
@@ -821,28 +886,34 @@ NonConstDataAccessor<SessionConnectionMap> ConnectionHandlerImpl::session_connec
   return NonConstDataAccessor<SessionConnectionMap>(session_connection_map_, session_connection_map_lock_);
 }
 
-bool ConnectionHandlerImpl::SetSecondaryTransportID(
+SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
     uint8_t session_id, 
-    transport_manager::ConnectionUID secondary_connection_id, 
-    bool force,
-    SessionTransports &st) {
-  bool bret = false;
+    transport_manager::ConnectionUID secondary_transport_id) {
+  SessionTransports st;
 
   NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = session_connection_map();
   SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
   SessionConnectionMap::iterator it = session_connection_map.find(session_id);
   if (session_connection_map.end() == it) {
+    LOG4CXX_WARN(logger_, "SetSecondaryTransportID: session ID " << static_cast<int>(session_id) << " not found in Session/Connection map");
     st.primary_transport = 0;
     st.secondary_transport = 0;
   } else {
     st = it->second;
-    if (st.secondary_transport == 0 || force) {
-      st.secondary_transport = secondary_connection_id;
+
+    // The only time we overwrite an existing entry in the map is if the new secondary transport ID
+    // is 0xFFFFFFFF, which effectively DISABLES the secondary transport feature for the session
+    if (st.secondary_transport != 0 && secondary_transport_id != 0xFFFFFFFF) {
+      LOG4CXX_WARN(logger_, "SetSecondaryTransportID: session ID " << static_cast<int>(session_id) << 
+                            " already has a secondary connection " << static_cast<int>(st.secondary_transport) << 
+                            " in the Session/Connection map");
+    } else {
+      st.secondary_transport = secondary_transport_id;
       session_connection_map[session_id] = st;
-      bret = true;
     }
   }
-  return bret;
+
+  return st;
 }
 
 SessionTransports ConnectionHandlerImpl::GetSessionTransports(uint8_t session_id) {

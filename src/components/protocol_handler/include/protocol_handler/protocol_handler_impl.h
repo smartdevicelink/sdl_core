@@ -458,7 +458,7 @@ class ProtocolHandlerImpl
   RESULT_CODE SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
                                                  ConnectionID primary_transport_connection_id,
                                                  uint8_t session_id,
-                                                 char *reason = NULL);
+                                                 BsonObject *reason = NULL);
 
   /**
    * @brief Notifies about receiving message from TM.

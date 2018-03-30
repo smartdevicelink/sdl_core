@@ -1659,6 +1659,40 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
   return vr_command;
 }
 
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  DCHECK_OR_RETURN(output, false);
+
+  std::string device_name;
+  std::string mac_address;
+  std::string transport_type;
+  if (-1 ==
+      session_observer.GetDataOnDeviceID(
+          device_handle, &device_name, NULL, &mac_address, &transport_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to extract information for device " << device_handle);
+  }
+
+  smart_objects::SmartObject& device_info_map = *output;
+  device_info_map = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  device_info_map[strings::name] = device_name;
+  device_info_map[strings::id] = mac_address;
+  device_info_map[strings::transport_type] =
+      app_mngr.GetDeviceTransportType(transport_type);
+
+  const policy::DeviceConsent device_consent =
+      policy_handler.GetUserConsentForDevice(mac_address);
+  device_info_map[strings::isSDLAllowed] =
+      policy::DeviceConsent::kDeviceAllowed == device_consent;
+
+  return true;
+}
+
 bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
@@ -1677,15 +1711,6 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* app_types = app->app_types();
   const smart_objects::SmartObject* ngn_media_screen_name =
       app->ngn_media_screen_name();
-  std::string device_name;
-  std::string mac_address;
-  std::string transport_type;
-  if (-1 ==
-      session_observer.GetDataOnDeviceID(
-          app->device(), &device_name, NULL, &mac_address, &transport_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to extract information for device " << app->device());
-  }
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
   message[strings::app_name] = app->name();
@@ -1716,15 +1741,22 @@ bool MessageHelper::CreateHMIApplicationStruct(
 
   message[strings::device_info] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  message[strings::device_info][strings::name] = device_name;
-  message[strings::device_info][strings::id] = mac_address;
-  const policy::DeviceConsent device_consent =
-      policy_handler.GetUserConsentForDevice(mac_address);
-  message[strings::device_info][strings::isSDLAllowed] =
-      policy::DeviceConsent::kDeviceAllowed == device_consent;
+  smart_objects::SmartObject& device_info = message[strings::device_info];
+  CreateDeviceInfo(
+      app->device(), session_observer, policy_handler, app_mngr, &device_info);
 
-  message[strings::device_info][strings::transport_type] =
-      app_mngr.GetDeviceTransportType(transport_type);
+  if (app->secondary_device() != 0) {
+    message[strings::secondary_device_info] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& secondary_device_info =
+        message[strings::secondary_device_info];
+    CreateDeviceInfo(app->secondary_device(),
+                     session_observer,
+                     policy_handler,
+                     app_mngr,
+                     &secondary_device_info);
+  }
+
   return true;
 }
 

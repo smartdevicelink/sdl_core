@@ -532,6 +532,12 @@ class Application : public virtual InitialApplicationData,
       const = 0;
   virtual const std::string& app_icon_path() const = 0;
   virtual connection_handler::DeviceHandle device() const = 0;
+  /**
+   * @brief Returns handle of the device on which secondary transport of this
+   * app is running
+   * @return handle of the device on which secondary transport is running
+   */
+  virtual connection_handler::DeviceHandle secondary_device() const = 0;
 
   /**
    * @brief sets true if application has sent TTS GlobalProperties
@@ -569,6 +575,13 @@ class Application : public virtual InitialApplicationData,
   virtual void set_app_allowed(const bool allowed) = 0;
   DEPRECATED virtual void set_device(
       connection_handler::DeviceHandle device) = 0;
+  /**
+   * @brief Sets the handle of the device on which secondary transport of this
+   * app is running
+   * @param handle of the device on which secondary transport is running
+   */
+  virtual void set_secondary_device(
+      connection_handler::DeviceHandle secondary_device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
 

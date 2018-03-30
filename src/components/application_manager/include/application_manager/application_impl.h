@@ -169,6 +169,7 @@ class ApplicationImpl : public virtual Application,
       const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
+  connection_handler::DeviceHandle secondary_device() const;
   const std::string& mac_address() const OVERRIDE;
   const std::string& bundle_id() const OVERRIDE;
   void set_bundle_id(const std::string& bundle_id) OVERRIDE;
@@ -185,6 +186,7 @@ class ApplicationImpl : public virtual Application,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
+  void set_secondary_device(connection_handler::DeviceHandle secondary_device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -470,6 +472,7 @@ class ApplicationImpl : public virtual Application,
   std::string app_icon_path_;
   std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
+  connection_handler::DeviceHandle secondary_device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;

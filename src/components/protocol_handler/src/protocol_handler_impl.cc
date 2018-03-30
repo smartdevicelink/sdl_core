@@ -329,8 +329,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         LOG4CXX_INFO(logger_, "Older protocol version. No multiple transports");
 
         // In this case, we must remember that this session will never have a secondary transport.
-        connection_handler::SessionTransports st;
-        connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF, true /* force */, st );
+        connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
       }
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&params);
@@ -679,7 +678,7 @@ RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportAck(ConnectionID 
 RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
                                                                     ConnectionID primary_transport_connection_id,
                                                                     uint8_t session_id,
-                                                                    char *reason) {
+                                                                    BsonObject *reason) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   /* TODO - needs a minor update on protocol sepc */
@@ -710,14 +709,9 @@ RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(ConnectionID
                                            2));
 
   if (reason) {
-    BsonObject registerSecondaryTransportNackObj;
-    bson_object_initialize_default(&registerSecondaryTransportNackObj);
-    bson_object_put_string(&registerSecondaryTransportNackObj, strings::reason, reason);
-
-    uint8_t* payloadBytes = bson_object_to_bytes(&registerSecondaryTransportNackObj);
-    ptr->set_data(payloadBytes, bson_object_size(&registerSecondaryTransportNackObj));
+    uint8_t* payloadBytes = bson_object_to_bytes(reason);
+    ptr->set_data(payloadBytes, bson_object_size(reason));
     free(payloadBytes);
-    bson_object_deinitialize(&registerSecondaryTransportNackObj);
   }
 
   raw_ford_messages_to_mobile_.PostMessage(
@@ -1696,30 +1690,27 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
   LOG4CXX_AUTO_TRACE(logger_);
   const uint8_t session_id = packet->session_id();
   const ConnectionID connection_id = packet->connection_id();
+  ConnectionID primary_connection_id = 0;
 
   LOG4CXX_INFO(logger_, "RegisterSecondaryTransport ID " << static_cast<int>(session_id) << " and Connection ID " << static_cast<int>(connection_id));
 
-  if (0 == session_id) {
-    LOG4CXX_WARN(logger_, "RegisterSecondaryTransport MUST include a non-zero session ID");
-    SendRegisterSecondaryTransportNAck(connection_id, 0, session_id, "RegisterSecondaryTransport MUST include a non-zero session ID");
-    return RESULT_OK;
-  }
-
-  // Add the secondary transport connection ID to the SessionConnectionMap
-  connection_handler::SessionTransports st;
-  if (!connection_handler_.SetSecondaryTransportID(session_id, connection_id, false /* force */, st)) {
-    if (st.primary_transport == 0) {
-      LOG4CXX_WARN(logger_, "RegisterSecondaryTransport: session ID " << static_cast<int>(session_id) << " not found in Session/Connection map");
-      SendRegisterSecondaryTransportNAck(connection_id, 0, session_id, "RegisterSecondaryTransport session ID not found");
-      return RESULT_OK;
+  if (connection_handler_.OnSecondaryTransportStarted(primary_connection_id, connection_id, session_id)) {
+    SendRegisterSecondaryTransportAck(connection_id, primary_connection_id, session_id); 
+  } else {
+    char reason[256];
+    BsonObject registerSecondaryTransportNackObj;
+    bson_object_initialize_default(&registerSecondaryTransportNackObj);
+    if (0 == session_id) {
+      strncpy(reason, "RegisterSecondaryTransport MUST include a non-zero session ID", 255);
+    } else if (primary_connection_id == 0) {
+      strncpy(reason, "RegisterSecondaryTransport session ID not found", 255);
     } else {
-      LOG4CXX_WARN(logger_, "RegisterSecondaryTransport: session ID " << static_cast<int>(session_id) << " already has a secondary connection in the Session/Connection map");
-      SendRegisterSecondaryTransportNAck(connection_id, st.primary_transport, session_id, "RegisterSecondaryTransport session ID has already been registered");
-      return RESULT_OK;
+      strncpy(reason, "RegisterSecondaryTransport session ID has already been registered", 255);
     }
+    bson_object_put_string(&registerSecondaryTransportNackObj, strings::reason, reason);
+    SendRegisterSecondaryTransportNAck(connection_id, primary_connection_id, session_id, &registerSecondaryTransportNackObj);
+    bson_object_deinitialize(&registerSecondaryTransportNackObj);
   }
-
-  SendRegisterSecondaryTransportAck(connection_id, st.primary_transport, session_id);
 
   return RESULT_OK;
 }

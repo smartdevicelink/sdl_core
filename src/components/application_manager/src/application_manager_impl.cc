@@ -1659,6 +1659,55 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   }
 }
 
+void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
+    const connection_handler::DeviceHandle device_handle,
+    const int32_t session_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(session_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Application with id: " << session_key << " is not found");
+    return;
+  }
+  if (device_handle == 0) {
+    LOG4CXX_WARN(logger_,
+                 "Invalid device handle passed for secondary transport of app "
+                     << session_key);
+    return;
+  }
+
+  app->set_secondary_device(device_handle);
+
+  // notify the event to HMI through BC.UpdateAppList request
+  SendUpdateAppList();
+}
+
+void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
+    const int32_t session_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(session_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Application with id: " << session_key << " is not found");
+    return;
+  }
+
+  connection_handler::DeviceHandle device_handle = app->secondary_device();
+  if (device_handle == 0) {
+    LOG4CXX_WARN(logger_,
+                 "Secondary transport of app " << session_key
+                                               << " is not found");
+    return;
+  }
+
+  app->set_secondary_device(0);
+
+  // notify the event to HMI through BC.UpdateAppList request
+  SendUpdateAppList();
+}
+
 bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application(app_id);

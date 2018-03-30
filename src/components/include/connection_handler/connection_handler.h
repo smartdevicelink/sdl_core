@@ -232,11 +232,11 @@ class ConnectionHandler {
    * \brief Associate a secondary transport ID with a session
    * \param session_id the session ID
    * \param connection_id the new secondary connection ID to associate with the session
-   * \param force true if an existing secondary connection ID should be replaced, false otherwise
-   * \param st the resultant SessionTransports associated with the session
-   * \return TRUE if the secondary connection ID was successfully replaced
+   * \return the SessionTransports (newly) associated with the session
    **/
-  virtual bool SetSecondaryTransportID(uint8_t session_id, transport_manager::ConnectionUID secondary_connection_id, bool force, SessionTransports &st) = 0;
+  virtual SessionTransports SetSecondaryTransportID(
+      uint8_t session_id, 
+      transport_manager::ConnectionUID secondary_transport_id) = 0;
 
   /**
    * \brief Retrieve the session transports associated with a session
@@ -260,6 +260,26 @@ class ConnectionHandler {
       uint32_t session_key,
       bool result,
       std::vector<std::string>& rejected_params) = 0;
+
+  /**
+   * \brief Called when secondary transport with given session ID is established
+   * \param primary_connection_handle Set to identifier of primary connection
+   * \param secondary_connection_handle Identifier of secondary connection
+   * \param sessionid session ID taken from Register Secondary Transport frame
+   **/
+  virtual bool OnSecondaryTransportStarted(
+      transport_manager::ConnectionUID &primary_connection_handle,
+      const transport_manager::ConnectionUID secondary_connection_handle,
+      const uint8_t session_id) = 0;
+
+  /**
+   * \brief Called when secondary transport with given session ID is removed
+   * \param primary_connection_handle Identifier of primary connection
+   * \param sessionid session ID taken from Register Secondary Transport frame
+   **/
+  virtual void OnSecondaryTransportEnded(
+      const transport_manager::ConnectionUID primary_connection_handle,
+      const uint8_t session_id) = 0;
 
  protected:
   /**

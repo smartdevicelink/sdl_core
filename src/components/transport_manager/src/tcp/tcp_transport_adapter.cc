@@ -58,11 +58,16 @@ TcpTransportAdapter::TcpTransportAdapter(
     const uint16_t port,
     resumption::LastState& last_state,
     const TransportManagerSettings& settings)
-    : TransportAdapterImpl(NULL,
-                           new TcpConnectionFactory(this),
-                           new TcpClientListener(this, port, true),
-                           last_state,
-                           settings) {}
+    : TransportAdapterImpl(
+          NULL,
+          new TcpConnectionFactory(this),
+          new TcpClientListener(
+              this,
+              port,
+              true,
+              settings.transport_manager_tcp_adapter_network_interface()),
+          last_state,
+          settings) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {}
 
