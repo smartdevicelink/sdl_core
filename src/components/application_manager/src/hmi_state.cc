@@ -252,6 +252,9 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   if (mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
     return mobile_apis::HMILevel::HMI_NONE;
   }
+  if (mobile_apis::HMILevel::HMI_FULL == parent()->hmi_level()) {
+    return mobile_apis::HMILevel::HMI_FULL;
+  }
 
   return mobile_apis::HMILevel::HMI_BACKGROUND;
 }
