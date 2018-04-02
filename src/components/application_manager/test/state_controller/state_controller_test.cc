@@ -64,6 +64,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
+using ::testing::SaveArg;
 using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::InSequence;
@@ -2827,6 +2828,78 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(*navi_app_ptr_, SetPostponedState(_)).Times(0);
 
   state_ctrl_->SetRegularState(navi_app_, hmi_state, true);
+}
+
+TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppRemainInFull) {
+  const uint32_t app_id = simple_app_->app_id();
+  InsertApplication(simple_app_);
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  msg[am::strings::msg_params][am::hmi_notification::is_active] = true;
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::AUDIO_SOURCE;
+
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+
+  const HmiStatePtr state =
+      createHmiState(mobile_apis::HMILevel::HMI_FULL,
+                     mobile_apis::AudioStreamingState::AUDIBLE,
+                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
+                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
+  EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillOnce(Return(FullAudibleState()));
+
+  HmiStatePtr new_state;
+  EXPECT_CALL(*simple_app_ptr_, AddHMIState(_))
+      .WillOnce(SaveArg<0>(&new_state));
+
+  state_ctrl_->on_event(event);
+
+  EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_EQ(new_state->audio_streaming_state(),
+            mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+}
+
+TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppToBackground) {
+  const uint32_t app_id = simple_app_->app_id();
+  InsertApplication(simple_app_);
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  msg[am::strings::msg_params][am::hmi_notification::is_active] = true;
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::AUDIO_SOURCE;
+
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+
+  const HmiStatePtr state =
+      createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
+                     mobile_apis::AudioStreamingState::AUDIBLE,
+                     mobile_apis::VideoStreamingState::NOT_STREAMABLE,
+                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
+  EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillOnce(Return(LimitedState()));
+
+  HmiStatePtr new_state;
+  EXPECT_CALL(*simple_app_ptr_, AddHMIState(_))
+      .WillOnce(SaveArg<0>(&new_state));
+
+  state_ctrl_->on_event(event);
+
+  EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_BACKGROUND);
+  EXPECT_EQ(new_state->audio_streaming_state(),
+            mobile_apis::AudioStreamingState::NOT_AUDIBLE);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectHmiLevel) {
