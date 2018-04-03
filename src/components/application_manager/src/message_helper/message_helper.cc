@@ -54,6 +54,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "transport_manager/common.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/file_system.h"
@@ -295,7 +296,8 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
 }
 
 std::string MessageHelper::GetDeviceMacAddressForHandle(
-    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+    const transport_manager::DeviceHandle device_handle,
+    const ApplicationManager& app_mngr) {
   std::string device_mac_address = "";
   app_mngr.connection_handler().get_session_observer().GetDataOnDeviceID(
       device_handle, NULL, NULL, &device_mac_address);
@@ -2415,6 +2417,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
     ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
   content[strings::params][strings::function_id] =

@@ -41,8 +41,10 @@
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
+#ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
+#endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/make_shared.h"
 #include "utils/test_async_waiter.h"

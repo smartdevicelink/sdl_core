@@ -75,11 +75,11 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)
+    , is_ptu_triggered_(false)
     ,
 #endif  // ENABLE_SECURITY
-    is_ptu_triggered_(false)
-    , raw_ford_messages_from_mobile_(
-          "PH FromMobile", this, threads::ThreadOptions(kStackSize))
+    raw_ford_messages_from_mobile_(
+        "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
     , start_session_frame_map_lock_()
@@ -1252,13 +1252,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
-  const uint8_t protocol_version = packet.protocol_version();
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
-      (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
-                                              : false;
+      // Protocol version 1 is not support protection
+      (packet.protocol_version() > PROTOCOL_VERSION_1)
+          ? packet.protection_flag()
+          : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
@@ -1274,7 +1274,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                      << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id,
                          packet.session_id(),
-                         protocol_version,
+                         packet.protocol_version(),
                          packet.service_type());
     return RESULT_OK;
   }
@@ -1323,7 +1323,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     if (!rejectedParams.empty()) {
       SendStartSessionNAck(connection_id,
                            packet.session_id(),
-                           protocol_version,
+                           packet.protocol_version(),
                            packet.service_type(),
                            rejectedParams);
     } else if (ssl_context->IsInitCompleted()) {
@@ -1383,7 +1383,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                               std::string("protocolVersion"));
       SendStartSessionNAck(connection_id,
                            packet.session_id(),
-                           protocol_version,
+                           packet.protocol_version(),
                            packet.service_type(),
                            rejectedParams);
     }
@@ -1408,7 +1408,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet->protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
-  const uint8_t protocol_version = packet->protocol_version();
   BsonObject bson_obj;
   if (packet->data() != NULL) {
     bson_obj = bson_object_from_bytes(packet->data());
@@ -1418,9 +1417,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
-      (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
-                                              : false;
+      // Protocol version 1 is not support protection
+      (packet->protocol_version() > PROTOCOL_VERSION_1)
+          ? packet->protection_flag()
+          : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY

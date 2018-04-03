@@ -37,8 +37,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/common.h"
 // TODO(EZamakhov): move security test
+#ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
+#endif  // ENABLE_SECURITY
 #include "protocol_handler/mock_protocol_handler.h"
 #include "connection_handler/mock_connection_handler_observer.h"
 #include "connection_handler/mock_connection_handler_settings.h"
@@ -175,7 +177,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    const Connection& connection = *connection_list.begin()->second;
+    const Connection& connection = *conn_it->second;
 
     const SessionMap& session_map = connection.session_map();
     SessionMap::const_iterator sess_it = session_map.find(session_id);
@@ -206,7 +208,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    const Connection& connection = *connection_list.begin()->second;
+    const Connection& connection = *conn_it->second;
 
     const SessionMap& session_map = connection.session_map();
     ASSERT_FALSE(session_map.empty());
@@ -223,7 +225,9 @@ class ConnectionHandlerTest : public ::testing::Test {
       ASSERT_EQ(serv_it, service_list.end());
     }
   }
-  // Check Service Wrapper
+
+// Check Service Wrapper
+#ifdef ENABLE_SECURITY
   void CheckService(const int connectionId,
                     const int session_id,
                     const ::protocol_handler::ServiceType serviceId,
@@ -235,16 +239,14 @@ class ConnectionHandlerTest : public ::testing::Test {
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    const Connection& connection = *connection_list.begin()->second;
+    const Connection& connection = *conn_it->second;
 
     const SessionMap& session_map = connection.session_map();
     ASSERT_FALSE(session_map.empty());
     SessionMap::const_iterator sess_it = session_map.find(session_id);
     ASSERT_NE(sess_it, session_map.end());
     const Session& session = sess_it->second;
-#ifdef ENABLE_SECURITY
     ASSERT_EQ(session.ssl_context, ssl_context);
-#endif  // ENABLE_SECURITY
     const ServiceList& service_list = session.service_list;
     ASSERT_FALSE(service_list.empty());
     ServiceList::const_iterator serv_it =
@@ -253,14 +255,39 @@ class ConnectionHandlerTest : public ::testing::Test {
 
     const Service& service = *serv_it;
     EXPECT_EQ(PROTECTION_OFF, service.is_protected_);
-#ifdef ENABLE_SECURITY
     if (is_protected) {
       // Emulate success protection - check enable service flag
       const uint32_t connection_key_ =
           connection_handler_->KeyFromPair(connectionId, session_id);
       connection_handler_->SetProtectionFlag(connection_key_, serviceId);
     }
+  }
 #endif  // ENABLE_SECURITY
+
+  void CheckService(const int connectionId,
+                    const int session_id,
+                    const ::protocol_handler::ServiceType serviceId) {
+    // Check all tree to find Service and check own protected value
+    const ConnectionList& connection_list =
+        connection_handler_->getConnectionList();
+    ASSERT_FALSE(connection_list.empty());
+    ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
+    ASSERT_NE(conn_it, connection_list.end());
+    const Connection& connection = *conn_it->second;
+
+    const SessionMap& session_map = connection.session_map();
+    ASSERT_FALSE(session_map.empty());
+    SessionMap::const_iterator sess_it = session_map.find(session_id);
+    ASSERT_NE(sess_it, session_map.end());
+    const Session& session = sess_it->second;
+    const ServiceList& service_list = session.service_list;
+    ASSERT_FALSE(service_list.empty());
+    ServiceList::const_iterator serv_it =
+        std::find(service_list.begin(), service_list.end(), serviceId);
+    ASSERT_NE(serv_it, service_list.end());
+
+    const Service& service = *serv_it;
+    EXPECT_EQ(PROTECTION_OFF, service.is_protected_);
   }
 
   void ChangeProtocol(const int connectionId,
@@ -1482,8 +1509,7 @@ TEST_F(ConnectionHandlerTest,
   connection_handler_->OnSessionStartedCallback(
       uid_, 0, kRpc, PROTECTION_OFF, static_cast<BsonObject*>(NULL));
   EXPECT_NE(0u, positive_context.new_session_id_);
-  CheckService(
-      uid_, positive_context.new_session_id_, kRpc, NULL, PROTECTION_OFF);
+  CheckService(uid_, positive_context.new_session_id_, kRpc);
   EXPECT_EQ(SessionHash(uid_, positive_context.new_session_id_),
             positive_context.hash_id_);
 }
@@ -1525,10 +1551,10 @@ TEST_F(ConnectionHandlerTest,
   EXPECT_NE(0u, positive_context.new_session_id_);
   EXPECT_EQ(SessionHash(uid_, positive_context.new_session_id_),
             positive_context.hash_id_);
-
+#ifdef ENABLE_SECURITY
   // Protection steal FALSE because of APPlink Protocol implementation
-  CheckService(
-      uid_, positive_context.new_session_id_, kRpc, NULL, PROTECTION_OFF);
+  CheckService(uid_, positive_context.new_session_id_, kRpc);
+#endif  // ENABLE_SECURITY
 }
 
 TEST_F(ConnectionHandlerTest,
@@ -1634,8 +1660,6 @@ TEST_F(ConnectionHandlerTest,
 #else
   EXPECT_EQ(0u, positive_context.new_session_id_);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, positive_context.hash_id_);
-  CheckService(
-      uid_, positive_context.new_session_id_, kAudio, NULL, PROTECTION_OFF);
 #endif  // ENABLE_SECURITY
 }
 
@@ -1667,7 +1691,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   EXPECT_EQ(0u, context_new.new_session_id_);
   // Post protection nedd no hash
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, context_new.hash_id_);
-  CheckService(uid_, context_new.new_session_id_, kRpc, NULL, PROTECTION_OFF);
 #endif  // ENABLE_SECURITY
 
   // Start Audio session without protection
@@ -1678,8 +1701,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
                                                 static_cast<BsonObject*>(NULL));
   EXPECT_EQ(out_context_.new_session_id_, context_second.new_session_id_);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, context_second.hash_id_);
-  CheckService(
-      uid_, context_second.new_session_id_, kAudio, NULL, PROTECTION_OFF);
+  CheckService(uid_, context_second.new_session_id_, kAudio);
 
   // Start Audio protection
   connection_handler_->OnSessionStartedCallback(uid_,
@@ -1695,8 +1717,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 #else
   EXPECT_EQ(0u, context_third.new_session_id_);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, context_third.hash_id_);
-  CheckService(
-      uid_, context_third.new_session_id_, kAudio, NULL, PROTECTION_OFF);
 #endif  // ENABLE_SECURITY
 }
 
@@ -1718,7 +1738,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   CheckService(uid_, new_context.new_session_id_, kRpc, NULL, PROTECTION_ON);
 #else
   EXPECT_EQ(0u, new_context.new_session_id_);
-  CheckService(uid_, new_context.new_session_id_, kRpc, NULL, PROTECTION_OFF);
 #endif  // ENABLE_SECURITY
 }
 
