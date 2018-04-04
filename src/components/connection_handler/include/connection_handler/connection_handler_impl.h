@@ -572,13 +572,13 @@ class ConnectionHandlerImpl
       const uint8_t session_id);
 
   /**
-   * \brief Called when secondary transport with given session ID is removed
+   * \brief Called when secondary transport shuts down
    * \param primary_connection_handle Identifier of primary connection
-   * \param sessionid session ID taken from Register Secondary Transport frame
+   * \param secondary_connection_handle Identifier of secondary connection transport
    **/
   void OnSecondaryTransportEnded(
       const transport_manager::ConnectionUID primary_connection_handle,
-      const uint8_t session_id);
+      const transport_manager::ConnectionUID secondary_connection_handle);
 
  private:
   /**
@@ -590,6 +590,9 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
+
+  uint8_t GetSessionIdFromSecondaryTransport(
+    transport_manager::ConnectionUID secondary_transport_id);
 
   const ConnectionHandlerSettings& settings_;
   /**

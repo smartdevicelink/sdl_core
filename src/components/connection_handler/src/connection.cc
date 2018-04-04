@@ -82,6 +82,7 @@ Connection::Connection(ConnectionHandle connection_handle,
     , connection_handle_(connection_handle)
     , connection_device_handle_(connection_device_handle)
     , session_map_lock_(true)
+    , primary_connection_handle_(0)
     , heartbeat_timeout_(heartbeat_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(connection_handler_);
@@ -147,8 +148,8 @@ uint32_t Connection::AddNewSession(
     sync_primitives::AutoLock lock(session_map_lock_);
     Session& new_session = session_map_[session_id];
     new_session.protocol_version = ::protocol_handler::PROTOCOL_VERSION_2;
-    new_session.service_list.push_back(Service(protocol_handler::kRpc));
-    new_session.service_list.push_back(Service(protocol_handler::kBulk));
+    new_session.service_list.push_back(Service(protocol_handler::kRpc, connection_handle));
+    new_session.service_list.push_back(Service(protocol_handler::kBulk, connection_handle));
   } else {
     LOG4CXX_WARN(logger_, "Session/Connection Map could not create a new session ID!!!");
   }
@@ -182,7 +183,8 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 
 bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
-                               const bool request_protection) {
+                               const bool request_protection,
+                               transport_manager::ConnectionUID connection_id) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
@@ -192,7 +194,9 @@ bool Connection::AddNewService(uint8_t session_id,
 
   LOG4CXX_DEBUG(logger_,
                 "Add service " << service_type << " for session "
-                               << static_cast<uint32_t>(session_id));
+                               << static_cast<uint32_t>(session_id)
+                               << " using connection ID "
+                               << static_cast<uint32_t>(connection_id));
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
@@ -241,7 +245,7 @@ bool Connection::AddNewService(uint8_t session_id,
 #endif  // ENABLE_SECURITY
   }
   // id service is not exists
-  session.service_list.push_back(Service(service_type));
+  session.service_list.push_back(Service(service_type, connection_id));
   return true;
 }
 
@@ -284,6 +288,54 @@ bool Connection::RemoveService(uint8_t session_id,
   }
   service_list.erase(service_it);
   return true;
+}
+
+uint8_t Connection::RemoveSecondaryServices(transport_manager::ConnectionUID secondary_connection_handle,
+                                            std::list<protocol_handler::ServiceType>& removed_services_list) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint8_t found_session_id = 0;
+  sync_primitives::AutoLock lock(session_map_lock_);
+
+  LOG4CXX_INFO(logger_, "RemoveSecondaryServices looking for services on Connection ID " << static_cast<int>(secondary_connection_handle));
+
+  // Walk the SessionMap in the primary connection, and for each
+  // Session, we walk its ServiceList, looking for all the services
+  // that were running on the now-closed Secondary Connection.
+  for (SessionMap::iterator session_it = session_map_.begin();
+       session_map_.end() != session_it;
+       ++session_it) {
+
+    LOG4CXX_INFO(logger_, "RemoveSecondaryServices found session ID " << static_cast<int>(session_it->first));
+
+    // Now, for each session, walk the its ServiceList, looking for services
+    // that were using secondary)_connection_handle. If we find such a service,
+    // set session_found and break out of the outer loop.
+    ServiceList& service_list = session_it->second.service_list;
+    ServiceList::iterator service_it = service_list.begin();
+    for ( ; service_it != service_list.end() ; ) {
+      LOG4CXX_INFO(logger_, "RemoveSecondaryServices found service ID " << static_cast<int>(service_it->service_type));
+      if (service_it->connection_id == secondary_connection_handle) {
+        found_session_id = session_it->first;
+
+        LOG4CXX_INFO(logger_, "RemoveSecondaryServices removing Service " << 
+                              static_cast<int>(service_it->service_type) << 
+                              " in session " << static_cast<int>(found_session_id));
+
+        removed_services_list.push_back(service_it->service_type);
+        service_it = service_list.erase(service_it);
+      } else {
+        service_it++;
+      }
+    }
+
+    // If we found a session that had services running on the secondary connection, we're done.
+    if (found_session_id != 0) {
+      break;
+    }
+  }
+
+  return found_session_id;
 }
 
 #ifdef ENABLE_SECURITY
@@ -443,6 +495,15 @@ bool Connection::ProtocolVersion(uint8_t session_id,
   }
   protocol_version = (session_it->second).protocol_version;
   return true;
+}
+
+ConnectionHandle Connection::primary_connection_handle() const {
+  return primary_connection_handle_;
+}
+
+void Connection::SetPrimaryConnectionHandle(
+    ConnectionHandle primary_connection_handle) {
+  primary_connection_handle_ = primary_connection_handle;
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {
