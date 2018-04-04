@@ -198,6 +198,24 @@ class ApplicationImpl : public virtual Application,
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
 
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) OVERRIDE;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level() const OVERRIDE;
+
   bool AddFile(const AppFile& file);
   bool UpdateFile(const AppFile& file);
   bool DeleteFile(const std::string& file_name);
@@ -481,6 +499,7 @@ class ApplicationImpl : public virtual Application,
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
 
   uint32_t video_stream_retry_number_;

@@ -158,6 +158,13 @@ class ResumeCtrl {
       app_mngr::ApplicationSharedPtr application) = 0;
 
   /**
+   * @brief Retry resumption of an app if it has been disabled or limited
+   *        due to absence of high-bandwidth transport.
+   * @param app_id ID of the app to resume
+   */
+  virtual void RetryResumption(const uint32_t app_id) = 0;
+
+  /**
    * @brief Check if there are all files need for resumption
    * @param application that is need to be restored
    * @return true if it all files exist, otherwise return false

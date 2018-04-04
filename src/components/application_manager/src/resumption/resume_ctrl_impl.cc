@@ -53,6 +53,12 @@
 namespace resumption {
 using namespace application_manager;
 
+static mobile_api::HMILevel::eType PickHigherHmiLevel(
+    mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2);
+static mobile_api::HMILevel::eType PickLowerHmiLevel(
+    mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2);
+static mobile_api::HMILevel::eType ConvertHmiLevelString(const std::string str);
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
@@ -157,10 +163,38 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   if (result) {
     DCHECK_OR_RETURN(application, false);
     if (saved_app.keyExists(strings::hmi_level)) {
-      const HMILevel::eType saved_hmi_level =
-          static_cast<mobile_apis::HMILevel::eType>(
-              saved_app[strings::hmi_level].asInt());
-      LOG4CXX_DEBUG(logger_, "Saved HMI Level is : " << saved_hmi_level);
+      HMILevel::eType saved_hmi_level;
+      if (HMILevel::eType::INVALID_ENUM !=
+          application->deferred_resumption_hmi_level()) {
+        saved_hmi_level = application->deferred_resumption_hmi_level();
+        LOG4CXX_INFO(logger_,
+                     "Retry resuming into HMI level : " << saved_hmi_level);
+        application->set_deferred_resumption_hmi_level(
+            HMILevel::eType::INVALID_ENUM);
+      } else {
+        saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
+            saved_app[strings::hmi_level].asInt());
+        LOG4CXX_DEBUG(logger_, "Saved HMI Level is : " << saved_hmi_level);
+      }
+
+      // Check one of the high-bandwidth transports (configured through
+      // smartDeviceLink.ini file) is available. If not, then HMI level to
+      // resume will be updated.
+      if (!application_manager_.CheckResumptionRequiredTransportAvailable(
+              application)) {
+        mobile_apis::HMILevel::eType low_bandwidth_level =
+            GetHmiLevelOnLowBandwidthTransport(application);
+
+        application->set_deferred_resumption_hmi_level(saved_hmi_level);
+
+        saved_hmi_level =
+            PickLowerHmiLevel(saved_hmi_level, low_bandwidth_level);
+        LOG4CXX_DEBUG(
+            logger_,
+            "High-bandwidth transport not available, app will resume into : "
+                << saved_hmi_level);
+      }
+
       return SetAppHMIState(application, saved_hmi_level, true);
     } else {
       result = false;
@@ -175,9 +209,23 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
-  mobile_apis::HMILevel::eType default_hmi =
+  mobile_apis::HMILevel::eType hmi_level =
       application_manager_.GetDefaultHmiLevel(application);
-  return SetAppHMIState(application, default_hmi, false);
+
+  // Check one of the high-bandwidth transports (configured through
+  // smartDeviceLink.ini file) is available. If not, then HMI level to resume
+  // will be updated.
+  if (!application_manager_.CheckResumptionRequiredTransportAvailable(
+          application)) {
+    mobile_apis::HMILevel::eType low_bandwidth_level =
+        GetHmiLevelOnLowBandwidthTransport(application);
+    hmi_level = PickLowerHmiLevel(hmi_level, low_bandwidth_level);
+    LOG4CXX_DEBUG(
+        logger_,
+        "High-bandwidth transport not available, default HMI level is set to : "
+            << hmi_level);
+  }
+  return SetAppHMIState(application, hmi_level, false);
 }
 
 void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
@@ -352,6 +400,28 @@ bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
   return result;
 }
 
+void ResumeCtrlImpl::RetryResumption(const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application_manager_.application(app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Invalid app_id = " << app_id);
+    return;
+  }
+
+  {
+    sync_primitives::AutoLock auto_lock(queue_lock_);
+    // check and update resumption deferred flag in queue_lock_
+    if (mobile_api::HMILevel::eType::INVALID_ENUM ==
+        app->deferred_resumption_hmi_level()) {
+      LOG4CXX_DEBUG(logger_, "No need to retry resumption for app: " << app_id);
+      return;
+    }
+  }
+
+  AddToResumptionTimerQueue(app_id);
+}
+
 void ResumeCtrlImpl::StartAppHmiStateResumption(
     ApplicationSharedPtr application) {
   using namespace date_time;
@@ -374,6 +444,11 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
     LOG4CXX_INFO(logger_,
                  "Resume application " << application->policy_app_id());
     RestoreAppHMIState(application);
+    if (mobile_apis::HMILevel::eType::INVALID_ENUM !=
+        application->deferred_resumption_hmi_level()) {
+      // the application has not been fully resumed
+      return;
+    }
     RemoveApplicationFromSaved(application);
   } else {
     LOG4CXX_INFO(logger_,
@@ -685,8 +760,14 @@ bool ResumeCtrlImpl::CheckAppRestrictions(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(saved_app.keyExists(strings::hmi_level), false);
 
-  const HMILevel::eType hmi_level =
-      static_cast<HMILevel::eType>(saved_app[strings::hmi_level].asInt());
+  HMILevel::eType hmi_level;
+  if (mobile_api::HMILevel::eType::INVALID_ENUM !=
+      application->deferred_resumption_hmi_level()) {
+    hmi_level = application->deferred_resumption_hmi_level();
+  } else {
+    hmi_level =
+        static_cast<HMILevel::eType>(saved_app[strings::hmi_level].asInt());
+  }
   const bool result = Compare<HMILevel::eType, EQ, ONE>(
                           hmi_level, HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)
                           ? true
@@ -762,14 +843,19 @@ void ResumeCtrlImpl::ProcessHMIRequests(
 
 void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  bool run_resumption = false;
   queue_lock_.Acquire();
   waiting_for_timer_.push_back(app_id);
+
+  if (!is_resumption_active_) {
+    is_resumption_active_ = true;
+    run_resumption = true;
+  }
   queue_lock_.Release();
   LOG4CXX_DEBUG(logger_,
                 "Application ID " << app_id << " have been added"
                                                " to resumption queue.");
-  if (!is_resumption_active_) {
-    is_resumption_active_ = true;
+  if (run_resumption) {
     restore_hmi_level_timer_.Start(
         application_manager_.get_settings().app_resuming_timeout(),
         timer::kSingleShot);
@@ -832,6 +918,99 @@ bool ResumeCtrlImpl::IsAppDataResumptionExpired(
     const smart_objects::SmartObject& application) const {
   const int32_t max_ign_off_count = 3;
   return max_ign_off_count <= application[strings::ign_off_count].asInt();
+}
+
+mobile_apis::HMILevel::eType ResumeCtrlImpl::GetHmiLevelOnLowBandwidthTransport(
+    ApplicationConstSharedPtr application) const {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const ApplicationManagerSettings& settings =
+      application_manager_.get_settings();
+  const std::string level_for_navi_app =
+      settings.navigation_lowbandwidth_resumption_level();
+  const std::string level_for_projection_app =
+      settings.projection_lowbandwidth_resumption_level();
+  const std::string level_for_media_app =
+      settings.mediaapp_lowbandwidth_resumption_level();
+
+  HMILevel::eType result_level = HMILevel::HMI_NONE;
+  HMILevel::eType level;
+
+  // NAVIGATION, PROJECTION and media apps have special exceptions. Their HMI
+  // level can be configured through .ini file. when the app has multiple
+  // AppHMIType, then the highest level will be applied.
+  if (application->is_navi()) {
+    level = ConvertHmiLevelString(level_for_navi_app);
+    LOG4CXX_DEBUG(logger_,
+                  "NAVIGATION apps may have level "
+                      << level
+                      << " while high-bandwidth transport is not available.");
+    result_level = PickHigherHmiLevel(level, result_level);
+  }
+  if (application->mobile_projection_enabled()) {
+    level = ConvertHmiLevelString(level_for_projection_app);
+    LOG4CXX_DEBUG(logger_,
+                  "PROJECTION apps may have level "
+                      << level
+                      << " while high-bandwidth transport is not available.");
+    result_level = PickHigherHmiLevel(level, result_level);
+  }
+  if (application->is_media_application()) {
+    level = ConvertHmiLevelString(level_for_media_app);
+    LOG4CXX_DEBUG(logger_,
+                  "media apps may have level "
+                      << level
+                      << " while high-bandwidth transport is not available.");
+    result_level = PickHigherHmiLevel(level, result_level);
+  }
+
+  return result_level;
+}
+
+static mobile_api::HMILevel::eType PickHigherHmiLevel(
+    mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2) {
+  using namespace mobile_apis;
+
+  if (val1 == HMILevel::INVALID_ENUM) {
+    return val2;
+  } else if (val2 == HMILevel::INVALID_ENUM) {
+    return val1;
+  }
+
+  // smaller enum value has higher level
+  return val1 < val2 ? val1 : val2;
+}
+
+static mobile_api::HMILevel::eType PickLowerHmiLevel(
+    mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2) {
+  using namespace mobile_apis;
+
+  if (val1 == HMILevel::INVALID_ENUM) {
+    return val2;
+  } else if (val2 == HMILevel::INVALID_ENUM) {
+    return val1;
+  }
+
+  // bigger enum value has lower level
+  return val1 > val2 ? val1 : val2;
+}
+
+static mobile_api::HMILevel::eType ConvertHmiLevelString(
+    const std::string str) {
+  using namespace mobile_apis;
+
+  if ("BACKGROUND" == str) {
+    return HMILevel::HMI_BACKGROUND;
+  } else if ("FULL" == str) {
+    return HMILevel::HMI_FULL;
+  } else if ("LIMITED" == str) {
+    return HMILevel::HMI_LIMITED;
+  } else if ("NONE" == str) {
+    return HMILevel::HMI_NONE;
+  } else {
+    return HMILevel::HMI_NONE;
+  }
 }
 
 }  // namespce resumption

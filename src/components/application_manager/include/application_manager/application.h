@@ -592,6 +592,24 @@ class Application : public virtual InitialApplicationData,
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;
 
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  virtual void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) = 0;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  virtual mobile_api::HMILevel::eType deferred_resumption_hmi_level() const = 0;
+
   virtual bool AddFile(const AppFile& file) = 0;
   virtual const AppFilesMap& getAppFiles() const = 0;
 

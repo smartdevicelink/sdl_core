@@ -138,6 +138,10 @@ class MockApplication : public ::application_manager::Application {
                      ::protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
+  MOCK_METHOD1(set_deferred_resumption_hmi_level,
+               void(mobile_api::HMILevel::eType level));
+  MOCK_CONST_METHOD0(deferred_resumption_hmi_level,
+                     mobile_api::HMILevel::eType());
   MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
   MOCK_CONST_METHOD0(getAppFiles, const ::application_manager::AppFilesMap&());
   MOCK_METHOD1(UpdateFile, bool(const ::application_manager::AppFile& file));

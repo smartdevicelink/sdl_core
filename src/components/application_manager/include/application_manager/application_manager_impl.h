@@ -1083,6 +1083,18 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr application) const;
 
   /**
+   * @brief Checks if required transport for resumption is available
+   *
+   * The required transport can be configured through smartDeviceLink.ini file.
+   *
+   * @param application an instance of the app to check
+   * @return true if the app is connected through one of the required
+   *         transports, false otherwise
+   */
+  bool CheckResumptionRequiredTransportAvailable(
+      ApplicationConstSharedPtr application) const;
+
+  /**
   * Getter for resume_controller
   * @return Resume Controller
   */
@@ -1380,6 +1392,14 @@ class ApplicationManagerImpl
    * @return enum AppHMIType
    */
   mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
+
+  /**
+   * @brief Returns a string representation of AppHMIType
+   * @param type an enum value of AppHMIType
+   * @return string representation of the enum value
+   */
+  const std::string AppHMITypeToString(
+      mobile_apis::AppHMIType::eType type) const;
 
   /**
    * @brief Method compares arrays of app HMI type
@@ -1691,6 +1711,15 @@ class ApplicationManagerImpl
    */
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string GetTransportTypeProfileString(
+      connection_handler::DeviceHandle device_handle) const;
 
  private:
   const ApplicationManagerSettings& settings_;

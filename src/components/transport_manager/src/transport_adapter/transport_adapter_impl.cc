@@ -57,7 +57,13 @@ DeviceTypes devicesType = {
     std::make_pair(DeviceType::MME, std::string("USB_IOS")),
     std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
     std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
-    std::make_pair(DeviceType::TCP, std::string("WIFI"))};
+    std::make_pair(DeviceType::TCP, std::string("WIFI")),
+    std::make_pair(DeviceType::IOS_USB_HOST_MODE,
+                   std::string("USB_IOS_HOST_MODE")),
+    std::make_pair(DeviceType::IOS_USB_DEVICE_MODE,
+                   std::string("USB_IOS_DEVICE_MODE")),
+    std::make_pair(DeviceType::IOS_CARPLAY_WIRELESS,
+                   std::string("CARPLAY_WIRELESS_IOS"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(

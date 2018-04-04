@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 #include "utils/macro.h"
 #include "protocol_handler/protocol_handler_settings.h"
 #include "connection_handler/connection_handler_settings.h"
@@ -546,13 +547,17 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @param pKey          The key whose value needs to be read out
    * @param out_result    Pointer to bool value for result reading Section
    * (could be NULL)
+   * @param allow_empty   If true, then out_result will be true when the value
+   *                      contains an empty string.
+   *                      If false, then out_result will be false in such case.
    *
    * @return container of values or empty continer
    * if could not read the value out of the profile
    */
   std::vector<std::string> ReadStringContainer(const char* const pSection,
                                                const char* const pKey,
-                                               bool* out_result) const;
+                                               bool* out_result,
+                                               bool allow_empty = false) const;
   /**
    * @brief Reads an container of hex int values from the profile,
    * which handle as "0x01, 0xA0, 0XFF"
@@ -642,6 +647,33 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns timeout between attempts
    */
   uint16_t open_attempt_timeout_ms_resumption_db() const;
+
+  /**
+   * @brief Returns "transport required for resumption" map
+   *
+   * Keys of the map are AppHMIType strings, i.e. "DEFAULT", "COMMUNICATION",
+   * "MEDIA", and so on. The map may contain a special key "EMPTY_APP" for apps
+   * that does not specify any AppHMIType.
+   */
+  const std::map<std::string, std::vector<std::string> >&
+  transport_required_for_resumption_map() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a NAVIGATION app
+   */
+  const std::string& navigation_lowbandwidth_resumption_level() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a PROJECTION app
+   */
+  const std::string& projection_lowbandwidth_resumption_level() const OVERRIDE;
+
+  /**
+   * @brief Returns HMI level for resumption of a media app
+   *
+   * Note: this is not for AppHMIType = MEDIA.
+   */
+  const std::string& mediaapp_lowbandwidth_resumption_level() const OVERRIDE;
 
   /**
    * @brief Returns wait time after device connection
@@ -740,11 +772,27 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @param pKey       The key whose value needs to be read out
    *
    * @return FALSE if could not read the value out of the profile
-   * (then the value is not changed)
+   * (then the value is not changed) or the value was empty
    */
   bool ReadValue(std::string* value,
                  const char* const pSection,
                  const char* const pKey) const;
+
+  /**
+   * @brief Reads a string value from the profile
+   *
+   * This is same as ReadValue(), except that this method will accept an empty
+   * string.
+   *
+   * @param value      The value to return
+   * @param pSection   The section to read the value in
+   * @param pKey       The key whose value needs to be read out
+   *
+   * @return TRUE if the value is read, FALSE if the value is not found
+   */
+  bool ReadValueEmpty(std::string* value,
+                      const char* const pSection,
+                      const char* const pKey) const;
 
   /**
    * @brief Reads a boolean value from the profile
@@ -946,6 +994,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool use_db_for_resumption_;
   uint16_t attempts_to_open_resumption_db_;
   uint16_t open_attempt_timeout_ms_resumption_db_;
+  std::map<std::string, std::vector<std::string> >
+      transport_required_for_resumption_map_;
+  std::string navigation_lowbandwidth_resumption_level_;
+  std::string projection_lowbandwidth_resumption_level_;
+  std::string mediaapps_lowbandwidth_resumption_level_;
   uint16_t app_launch_wait_time_;
   uint16_t app_launch_max_retry_attempt_;
   uint16_t app_launch_retry_wait_time_;

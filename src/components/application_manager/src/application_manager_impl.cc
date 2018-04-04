@@ -1249,6 +1249,79 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   return default_hmi;
 }
 
+bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
+    ApplicationConstSharedPtr application) const {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::map<std::string, std::vector<std::string> >& transport_map =
+      get_settings().transport_required_for_resumption_map();
+
+  // retrieve transport type string used in .ini file
+  const std::string transport_type =
+      GetTransportTypeProfileString(application->device());
+  const std::string secondary_transport_type =
+      GetTransportTypeProfileString(application->secondary_device());
+
+  const smart_objects::SmartObject* app_types_array = application->app_types();
+  if (app_types_array->length() == 0) {
+    // This app does not have any AppHMIType. In this case, check "EMPTY_APP"
+    // entry
+    std::map<std::string, std::vector<std::string> >::const_iterator it =
+        transport_map.find(std::string("EMPTY_APP"));
+    if (it == transport_map.end()) {
+      // if "EMPTY_APP" is not specified, resumption is always enabled
+      return true;
+    }
+    const std::vector<std::string>& required_transport_list = it->second;
+
+    for (std::vector<std::string>::const_iterator itr =
+             required_transport_list.begin();
+         itr != required_transport_list.end();
+         ++itr) {
+      if (transport_type == *itr || secondary_transport_type == *itr) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    // check all AppHMITypes that the app has
+    for (size_t i = 0; i < app_types_array->length(); i++) {
+      const std::string app_type_string =
+          AppHMITypeToString(static_cast<mobile_apis::AppHMIType::eType>(
+              app_types_array->getElement(i).asUInt()));
+      bool transport_is_found = false;
+
+      std::map<std::string, std::vector<std::string> >::const_iterator it =
+          transport_map.find(app_type_string);
+      if (it == transport_map.end()) {
+        // this AppHMIType is not listed in .ini file, so resumption is always
+        // enabled
+        continue;
+      }
+
+      const std::vector<std::string>& required_transport_list = it->second;
+      for (std::vector<std::string>::const_iterator itr =
+               required_transport_list.begin();
+           itr != required_transport_list.end();
+           ++itr) {
+        if (transport_type == *itr || secondary_transport_type == *itr) {
+          transport_is_found = true;
+          break;
+        }
+      }
+
+      // if neither primary or secondary transport type is included in the list,
+      // then resumption will be disabled
+      if (!transport_is_found) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
 uint32_t ApplicationManagerImpl::GenerateGrammarID() {
   return rand();
 }
@@ -1703,6 +1776,9 @@ void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
 
   // notify the event to HMI through BC.UpdateAppList request
   SendUpdateAppList();
+
+  // if resumption has not been enabled, run it now
+  resume_controller().RetryResumption(session_key);
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
@@ -4160,6 +4236,39 @@ mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
   }
 }
 
+const std::string ApplicationManagerImpl::AppHMITypeToString(
+    mobile_apis::AppHMIType::eType type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (type) {
+    case mobile_apis::AppHMIType::DEFAULT:
+      return "DEFAULT";
+    case mobile_apis::AppHMIType::COMMUNICATION:
+      return "COMMUNICATION";
+    case mobile_apis::AppHMIType::MEDIA:
+      return "MEDIA";
+    case mobile_apis::AppHMIType::MESSAGING:
+      return "MESSAGING";
+    case mobile_apis::AppHMIType::NAVIGATION:
+      return "NAVIGATION";
+    case mobile_apis::AppHMIType::INFORMATION:
+      return "INFORMATION";
+    case mobile_apis::AppHMIType::SOCIAL:
+      return "SOCIAL";
+    case mobile_apis::AppHMIType::BACKGROUND_PROCESS:
+      return "BACKGROUND_PROCESS";
+    case mobile_apis::AppHMIType::TESTING:
+      return "TESTING";
+    case mobile_apis::AppHMIType::SYSTEM:
+      return "SYSTEM";
+    case mobile_apis::AppHMIType::PROJECTION:
+      return "PROJECTION";
+    case mobile_apis::AppHMIType::REMOTE_CONTROL:
+      return "REMOTE_CONTROL";
+    default:
+      return "INVALID_ENUM";
+  }
+}
+
 bool ApplicationManagerImpl::CompareAppHMIType(
     const smart_objects::SmartObject& from_policy,
     const smart_objects::SmartObject& from_application) {
@@ -4539,6 +4648,39 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     // ignore unknown parameters
   }
   return output;
+}
+
+// retrieve transport type string used in .ini file, e.g. "TCP_WIFI"
+const std::string ApplicationManagerImpl::GetTransportTypeProfileString(
+    connection_handler::DeviceHandle device_handle) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string connection_type;
+  connection_handler().get_session_observer().GetDataOnDeviceID(
+      device_handle, NULL, NULL, NULL, &connection_type);
+
+  // Caution: this should be in sync with devicesType map in
+  // transport_adapter_impl.cc
+  if (connection_type == "USB_AOA") {
+    return std::string("AOA_USB");
+  } else if (connection_type == "BLUETOOTH") {
+    return std::string("SPP_BLUETOOTH");
+  } else if (connection_type == "USB_IOS") {
+    return std::string("IAP_USB");
+  } else if (connection_type == "BLUETOOTH_IOS") {
+    return std::string("IAP_BLUETOOTH");
+  } else if (connection_type == "WIFI") {
+    return std::string("TCP_WIFI");
+  } else if (connection_type == "USB_IOS_HOST_MODE") {
+    return std::string("IAP_USB_HOST_MODE");
+  } else if (connection_type == "USB_IOS_DEVICE_MODE") {
+    return std::string("IAP_USB_DEVICE_MODE");
+  } else if (connection_type == "CARPLAY_WIRELESS_IOS") {
+    return std::string("IAP_CARPLAY");
+  } else {
+    LOG4CXX_WARN(logger_, "Unknown transport type string: " << connection_type);
+    return std::string();
+  }
 }
 
 #ifdef BUILD_TESTS

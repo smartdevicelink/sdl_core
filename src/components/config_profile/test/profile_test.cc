@@ -694,6 +694,30 @@ TEST_F(ProfileTest, CheckStringContainer) {
   EXPECT_EQ(diag_mode, element_mode);
 }
 
+TEST_F(ProfileTest, CheckStringContainerEmpty) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+
+  bool isread = false;
+  std::vector<std::string> output_list =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list.empty());
+
+  isread = false;
+  std::vector<std::string> output_list2 =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread, true);
+  EXPECT_TRUE(isread);
+  EXPECT_TRUE(output_list2.empty());
+
+  isread = false;
+  std::vector<std::string> output_list3 =
+      profile_.ReadStringContainer("MAIN", "DoesNotExistKey", &isread, true);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list2.empty());
+}
+
 #ifdef ENABLE_SECURITY
 TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   // Set new config file
@@ -723,6 +747,27 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   EXPECT_EQ(res_protect, force_protected_list.begin());
 }
 #endif
+
+TEST_F(ProfileTest, CheckEmptyValue) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+
+  bool isread = false;
+  std::string output;
+
+  // specify a key with empty value
+  bool ret = profile_.ReadValue(&output, "MAIN", "AppConfigFolder");
+  EXPECT_FALSE(ret);
+
+  std::string output2 = "abc";
+  ret = profile_.ReadValueEmpty(&output2, "MAIN", "AppConfigFolder");
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(output2, "");
+
+  ret = profile_.ReadValueEmpty(&output2, "MAIN", "DoesNotExistKey");
+  EXPECT_FALSE(ret);
+}
 
 }  // namespace profile_test
 }  // namespace components

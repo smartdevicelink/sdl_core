@@ -90,6 +90,10 @@ const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
 const char* kMultipleTransportsSection = "MultipleTransports";
 const char* kServicesMapSection = "ServicesMap";
+const char* kTransportRequiredForResumptionSection =
+    "TransportRequiredForResumption";
+const char* kLowBandwidthTransportResumptionLevelSection =
+    "LowBandwidthTransportResumptionLevel";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -223,6 +227,53 @@ const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
 const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
+
+const char* kDefaultTransportRequiredForResumptionKey =
+    "DefaultTransportRequiredForResumption";
+const char* kAppHMITypeDefault = "DEFAULT";
+const char* kCommunicationTransportRequiredForResumptionKey =
+    "CommunicationTransportRequiredForResumption";
+const char* kAppHMITypeCommunication = "COMMUNICATION";
+const char* kMediaTransportRequiredForResumptionKey =
+    "MediaTransportRequiredForResumption";
+const char* kAppHMITypeMedia = "MEDIA";
+const char* kMessagingTransportRequiredForResumptionKey =
+    "MessagingTransportRequiredForResumption";
+const char* kAppHMITypeMessaging = "MESSAGING";
+const char* kNavigationTransportRequiredForResumptionKey =
+    "NavigationTransportRequiredForResumption";
+const char* kAppHMITypeNavigation = "NAVIGATION";
+const char* kInformationTransportRequiredForResumptionKey =
+    "InformationTransportRequiredForResumption";
+const char* kAppHMITypeInformation = "INFORMATION";
+const char* kSocialTransportRequiredForResumptionKey =
+    "SocialTransportRequiredForResumption";
+const char* kAppHMITypeSocial = "SOCIAL";
+const char* kBackgroundProcessTransportRequiredForResumptionKey =
+    "BackgroundProcessTransportRequiredForResumption";
+const char* kAppHMITypeBackgroundProcess = "BACKGROUND_PROCESS";
+const char* kTestingTransportRequiredForResumptionKey =
+    "TestingTransportRequiredForResumption";
+const char* kAppHMITypeTesting = "TESTING";
+const char* kSystemTransportRequiredForResumptionKey =
+    "SystemTransportRequiredForResumption";
+const char* kAppHMITypeSystem = "SYSTEM";
+const char* kProjectionTransportRequiredForResumptionKey =
+    "ProjectionTransportRequiredForResumption";
+const char* kAppHMITypeProjection = "PROJECTION";
+const char* kRemoteControlTransportRequiredForResumptionKey =
+    "RemoteControlTransportRequiredForResumption";
+const char* kAppHMITypeRemoteControl = "REMOTE_CONTROL";
+const char* kEmptyAppTransportRequiredForResumptionKey =
+    "EmptyAppTransportRequiredForResumption";
+const char* kAppHMITypeEmptyApp = "EMPTY_APP";
+const char* kNavigationLowBandwidthResumptionLevelKey =
+    "NavigationLowBandwidthResumptionLevel";
+const char* kProjectionLowBandwidthResumptionLevelKey =
+    "ProjectionLowBandwidthResumptionLevel";
+const char* kMediaLowBandwidthResumptionLevelKey =
+    "MediaLowBandwidthResumptionLevel";
+
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -322,6 +373,7 @@ const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 const bool kDefaultMultipleTransportsEnabled = true;
+const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 }  // namespace
 
 namespace profile {
@@ -414,6 +466,12 @@ Profile::Profile()
     , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
     , open_attempt_timeout_ms_resumption_db_(
           kDefaultOpenAttemptTimeoutMsResumptionDB)
+    , navigation_lowbandwidth_resumption_level_(
+          kDefaultLowBandwidthResumptionLevel)
+    , projection_lowbandwidth_resumption_level_(
+          kDefaultLowBandwidthResumptionLevel)
+    , mediaapps_lowbandwidth_resumption_level_(
+          kDefaultLowBandwidthResumptionLevel)
     , app_launch_wait_time_(kDefaultAppLaunchWaitTime)
     , app_launch_max_retry_attempt_(kDefaultAppLaunchMaxRetryAttempt)
     , app_launch_retry_wait_time_(kDefaultAppLaunchRetryWaitTime)
@@ -913,6 +971,23 @@ uint16_t Profile::attempts_to_open_resumption_db() const {
 
 uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
   return open_attempt_timeout_ms_resumption_db_;
+}
+
+const std::map<std::string, std::vector<std::string> >&
+Profile::transport_required_for_resumption_map() const {
+  return transport_required_for_resumption_map_;
+}
+
+const std::string& Profile::navigation_lowbandwidth_resumption_level() const {
+  return navigation_lowbandwidth_resumption_level_;
+}
+
+const std::string& Profile::projection_lowbandwidth_resumption_level() const {
+  return projection_lowbandwidth_resumption_level_;
+}
+
+const std::string& Profile::mediaapp_lowbandwidth_resumption_level() const {
+  return mediaapps_lowbandwidth_resumption_level_;
 }
 
 const uint16_t Profile::app_launch_max_retry_attempt() const {
@@ -1891,6 +1966,86 @@ void Profile::UpdateValues() {
                     kOpenAttemptTimeoutMsResumptionDBKey,
                     kResumptionSection);
 
+  {  // read parameters from TransportRequiredForResumption section
+    struct KeyPair {
+      const char* ini_key_name;
+      const char* map_key_name;
+    } keys[] = {
+        {kDefaultTransportRequiredForResumptionKey, kAppHMITypeDefault},
+        {kCommunicationTransportRequiredForResumptionKey,
+         kAppHMITypeCommunication},
+        {kMediaTransportRequiredForResumptionKey, kAppHMITypeMedia},
+        {kMessagingTransportRequiredForResumptionKey, kAppHMITypeMessaging},
+        {kNavigationTransportRequiredForResumptionKey, kAppHMITypeNavigation},
+        {kInformationTransportRequiredForResumptionKey, kAppHMITypeInformation},
+        {kSocialTransportRequiredForResumptionKey, kAppHMITypeSocial},
+        {kBackgroundProcessTransportRequiredForResumptionKey,
+         kAppHMITypeBackgroundProcess},
+        {kTestingTransportRequiredForResumptionKey, kAppHMITypeTesting},
+        {kSystemTransportRequiredForResumptionKey, kAppHMITypeSystem},
+        {kProjectionTransportRequiredForResumptionKey, kAppHMITypeProjection},
+        {kRemoteControlTransportRequiredForResumptionKey,
+         kAppHMITypeRemoteControl},
+        {kEmptyAppTransportRequiredForResumptionKey, kAppHMITypeEmptyApp},
+        {NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_key_name != NULL) {
+      bool exist = false;
+      std::vector<std::string> transport_list =
+          ReadStringContainer(kTransportRequiredForResumptionSection,
+                              entry->ini_key_name,
+                              &exist,
+                              true);
+      if (exist) {
+        transport_required_for_resumption_map_[entry->map_key_name] =
+            transport_list;
+
+        std::stringstream ss;
+        for (std::vector<std::string>::iterator it = transport_list.begin();
+             it != transport_list.end();
+             ++it) {
+          if (it != transport_list.begin()) {
+            ss << ", ";
+          }
+          ss << *it;
+        }
+        LOG_UPDATED_VALUE(ss.str(),
+                          entry->ini_key_name,
+                          kTransportRequiredForResumptionSection);
+      }
+      entry++;
+    }
+  }
+
+  // Read parameters from LowBandwidthTransportResumptionLevel section
+  ReadStringValue(&navigation_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kNavigationLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(navigation_lowbandwidth_resumption_level_,
+                    kNavigationLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
+  ReadStringValue(&projection_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kProjectionLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(projection_lowbandwidth_resumption_level_,
+                    kProjectionLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
+  ReadStringValue(&mediaapps_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kMediaLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(mediaapps_lowbandwidth_resumption_level_,
+                    kMediaLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
   // Read parameters from App Launch section
   ReadUIntValue(&app_launch_wait_time_,
                 kDefaultAppLaunchWaitTime,
@@ -1976,14 +2131,46 @@ void Profile::UpdateValues() {
   LOG_UPDATED_BOOL_VALUE(
       multiple_transports_enabled_, kMultipleTransportsEnabledKey, kMultipleTransportsSection);
 
-  // Secondary Transports
-  secondary_transports_for_bluetooth_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForBluetoothKey, NULL);
-  secondary_transports_for_usb_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForUSBKey, NULL);
-  secondary_transports_for_wifi_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForWiFiKey, NULL);
+  {  // Secondary Transports and ServicesMap
+    struct KeyPair {
+      std::vector<std::string> *ini_vector;
+      const char* ini_section_name;
+      const char* ini_key_name;
+    } keys[] = {
+        {&secondary_transports_for_bluetooth_, kMultipleTransportsSection, kSecondaryTransportForBluetoothKey},
+        {&secondary_transports_for_usb_, kMultipleTransportsSection, kSecondaryTransportForUSBKey},
+        {&secondary_transports_for_wifi_, kMultipleTransportsSection, kSecondaryTransportForWiFiKey},
+        {&audio_service_transports_, kServicesMapSection, kAudioServiceTransportsKey},
+        {&video_service_transports_, kServicesMapSection, kVideoServiceTransportsKey},
+        {NULL, NULL, NULL}};
+    struct KeyPair* entry = keys;
 
-  // Services Map
-  audio_service_transports_ = ReadStringContainer(kServicesMapSection, kAudioServiceTransportsKey, NULL);
-  video_service_transports_ = ReadStringContainer(kServicesMapSection, kVideoServiceTransportsKey, NULL);
+    while (entry->ini_vector != NULL) {
+      bool exist = false;
+      std::vector<std::string> profile_entry =
+          ReadStringContainer(entry->ini_section_name,
+                              entry->ini_key_name,
+                              &exist,
+                              true);
+      if (exist) {
+        *entry->ini_vector = profile_entry;
+
+        std::stringstream ss;
+        for (std::vector<std::string>::iterator it = profile_entry.begin();
+             it != profile_entry.end();
+             ++it) {
+          if (it != profile_entry.begin()) {
+            ss << ", ";
+          }
+          ss << *it;
+        }
+        LOG_UPDATED_VALUE(ss.str(),
+                          entry->ini_key_name,
+                          entry->ini_section_name);
+      }
+      entry++;
+    }
+  }
 }
 
 bool Profile::ReadValue(bool* value,
@@ -2020,6 +2207,22 @@ bool Profile::ReadValue(std::string* value,
     *value = buf;
     ret = true;
   }
+  return ret;
+}
+
+bool Profile::ReadValueEmpty(std::string* value,
+                             const char* const pSection,
+                             const char* const pKey) const {
+  DCHECK(value);
+  bool ret = false;
+
+  char buf[INI_LINE_LEN + 1];
+  *buf = '\0';
+  if (0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) {
+    *value = buf;
+    ret = true;
+  }
+
   return ret;
 }
 
@@ -2081,6 +2284,18 @@ namespace {
 int32_t hex_to_int(const std::string& value) {
   return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
 }
+
+std::string trim_string(const std::string& str) {
+  const char* delims = " \t";
+
+  size_t start = str.find_first_not_of(delims);
+  if (std::string::npos == start) {
+    return std::string();
+  }
+  size_t end = str.find_last_not_of(delims);
+
+  return str.substr(start, end - start + 1);
+}
 }
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
@@ -2098,9 +2313,15 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
 std::vector<std::string> Profile::ReadStringContainer(
     const char* const pSection,
     const char* const pKey,
-    bool* out_result) const {
+    bool* out_result,
+    bool allow_empty) const {
   std::string string;
-  const bool result = ReadValue(&string, pSection, pKey);
+  bool result;
+  if (allow_empty) {
+    result = ReadValueEmpty(&string, pSection, pKey);
+  } else {
+    result = ReadValue(&string, pSection, pKey);
+  }
   if (out_result)
     *out_result = result;
   std::vector<std::string> value_container;
@@ -2110,8 +2331,7 @@ std::vector<std::string> Profile::ReadStringContainer(
     while (iss) {
       if (!getline(iss, temp_str, ','))
         break;
-      value_container.push_back(temp_str);
-      LOG_UPDATED_VALUE(temp_str, pKey, pSection);
+      value_container.push_back(trim_string(temp_str));
     }
   }
   return value_container;

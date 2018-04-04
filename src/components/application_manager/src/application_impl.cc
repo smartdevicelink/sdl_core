@@ -129,6 +129,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
@@ -673,6 +674,16 @@ void ApplicationImpl::set_is_resuming(bool is_resuming) {
 
 bool ApplicationImpl::is_resuming() const {
   return is_resuming_;
+}
+
+void ApplicationImpl::set_deferred_resumption_hmi_level(
+    mobile_api::HMILevel::eType level) {
+  deferred_resumption_hmi_level_ = level;
+}
+
+mobile_api::HMILevel::eType ApplicationImpl::deferred_resumption_hmi_level()
+    const {
+  return deferred_resumption_hmi_level_;
 }
 
 bool ApplicationImpl::AddFile(const AppFile& file) {
