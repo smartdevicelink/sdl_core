@@ -55,7 +55,6 @@ class BasicCommunicationGetSystemTimeRequest : public RequestToHMI {
   BasicCommunicationGetSystemTimeRequest(
       const MessageSharedPtr& message, ApplicationManager& application_manager);
 
- private:
   /**
    * @brief onTimeOut allows to handle case when
    * system does not respond for certain request in
