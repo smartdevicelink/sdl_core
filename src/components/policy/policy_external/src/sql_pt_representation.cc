@@ -559,10 +559,10 @@ void SQLPTRepresentation::GatherModuleConfig(
     LOG4CXX_WARN(logger_, "Incorrect select statement for endpoints");
   } else {
     while (endpoints.Next()) {
-      std::stringstream stream;
-      stream << "0x0" << endpoints.GetInteger(1);
-      config->endpoints[stream.str()][endpoints.GetString(2)].push_back(
-          endpoints.GetString(0));
+      const std::string& url = endpoints.GetString(0);
+      const std::string& service = endpoints.GetString(1);
+      const std::string& app_id = endpoints.GetString(2);
+      config->endpoints[service][app_id].push_back(url);
     }
   }
 
