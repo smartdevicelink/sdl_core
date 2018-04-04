@@ -61,7 +61,6 @@ class OnSystemTimeReadyNotification : public NotificationFromHMI {
    */
   ~OnSystemTimeReadyNotification();
 
- private:
   /**
    * @brief Run creates SystemTimeReady event
    * and notifies all the subscribers.
