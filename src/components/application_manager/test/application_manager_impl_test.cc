@@ -890,6 +890,13 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   std::string dummy_mac_address;
   utils::SharedPtr<MockApplication> mock_app_1 =
       utils::SharedPtr<MockApplication>(new MockApplication());
+
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
+
   EXPECT_CALL(*mock_app_1, app_id()).WillRepeatedly(Return(app_id_1));
   EXPECT_CALL(*mock_app_1, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_1, mac_address())
