@@ -58,7 +58,6 @@ class BasicCommunicationGetSystemTimeResponse : public ResponseFromHMI {
   BasicCommunicationGetSystemTimeResponse(
       const MessageSharedPtr& message, ApplicationManager& application_manager);
 
- private:
   /**
    * @brief Run takes the message obtained from the HMI and
    * sends this data to the subscribed on certain event class
