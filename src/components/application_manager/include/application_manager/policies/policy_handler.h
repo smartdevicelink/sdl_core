@@ -67,7 +67,7 @@ class ApplicationManager;
 namespace policy {
 
 typedef std::vector<uint32_t> AppIds;
-typedef std::vector<uint32_t> DeviceHandles;
+typedef std::vector<transport_manager::DeviceHandle> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
 class PolicyHandler : public PolicyHandlerInterface,

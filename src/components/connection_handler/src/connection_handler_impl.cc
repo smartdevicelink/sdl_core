@@ -872,12 +872,11 @@ struct CompareMAC {
 
 bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
                                         DeviceHandle* device_handle) {
+  DCHECK_OR_RETURN(device_handle, false);
   DeviceMap::const_iterator it = std::find_if(
       device_list_.begin(), device_list_.end(), CompareMAC(mac_address));
   if (it != device_list_.end()) {
-    if (device_handle) {
-      *device_handle = it->first;
-    }
+    *device_handle = it->first;
     return true;
   }
   return false;
@@ -894,7 +893,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   int32_t result = -1;
   DeviceMap::const_iterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Device not found!");
+    LOG4CXX_ERROR(logger_, "Device not found for handle " << device_handle);
     return result;
   }
 
@@ -997,6 +996,13 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   connection.SetProtectionFlag(session_id, service_type);
 }
 
+security_manager::SSLContext::HandshakeContext
+ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
+  return connection_handler_observer_->GetHandshakeContext(key);
+}
+
+#endif  // ENABLE_SECURITY
+
 bool ConnectionHandlerImpl::SessionServiceExists(
     const uint32_t connection_key,
     const protocol_handler::ServiceType& service_type) const {
@@ -1014,13 +1020,6 @@ bool ConnectionHandlerImpl::SessionServiceExists(
   const Connection& connection = *it->second;
   return connection.SessionServiceExists(session_id, service_type);
 }
-
-security_manager::SSLContext::HandshakeContext
-ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
-  return connection_handler_observer_->GetHandshakeContext(key);
-}
-
-#endif  // ENABLE_SECURITY
 
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
   LOG4CXX_AUTO_TRACE(logger_);

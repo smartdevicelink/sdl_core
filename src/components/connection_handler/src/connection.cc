@@ -354,6 +354,8 @@ void Connection::SetProtectionFlag(
   }
 }
 
+#endif  // ENABLE_SECURITY
+
 bool Connection::SessionServiceExists(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) const {
@@ -369,8 +371,6 @@ bool Connection::SessionServiceExists(
   const Session& session = session_it->second;
   return session.FindService(service_type);
 }
-
-#endif  // ENABLE_SECURITY
 
 ConnectionHandle Connection::connection_handle() const {
   return connection_handle_;

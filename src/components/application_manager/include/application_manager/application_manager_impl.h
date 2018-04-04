@@ -939,6 +939,13 @@ class ApplicationManagerImpl
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
 
+  /**
+   * @brief Check if application with specified app_id has NAVIGATION HMI type
+   * @param app_id id of application to check
+   * @return true if application is navi otherwise returns false
+   */
+  bool CheckAppIsNavi(const uint32_t app_id) const OVERRIDE;
+
 #ifdef ENABLE_SECURITY
   /**
    * @brief Notification about protection result
@@ -970,13 +977,6 @@ class ApplicationManagerImpl
    */
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
-
-  /**
-   * @brief Check if application with specified app_id has NAVIGATION HMI type
-   * @param app_id id of application to check
-   * @return true if application is navi otherwise returns false
-   */
-  bool CheckAppIsNavi(const uint32_t app_id) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**

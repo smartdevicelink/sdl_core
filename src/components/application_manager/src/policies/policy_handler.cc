@@ -103,7 +103,7 @@ const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
 const policy::DeviceParams GetDeviceParams(
     connection_handler::DeviceHandle device_handle,
     const protocol_handler::SessionObserver& session_observer) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "PolicyHandler")
+  CREATE_LOGGERPTR_LOCAL(logger_, "PolicyHandler");
   policy::DeviceParams device_params;
   if (-1 ==
       session_observer.GetDataOnDeviceID(
@@ -1223,6 +1223,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                            device_handle);
     // If consent done from HMI menu
     if (it == pending_device_handles_.end()) {
+      LOG4CXX_WARN(logger_, "No pendining application activation");
       return;
     }
 

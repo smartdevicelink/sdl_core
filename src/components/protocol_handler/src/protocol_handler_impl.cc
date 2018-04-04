@@ -1500,13 +1500,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       logger_,
       "Protocol version:" << static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
-  const uint8_t protocol_version = packet.protocol_version();
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
-      (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
-                                              : false;
+      // Protocol version 1 is not support protection
+      (packet.protocol_version() > PROTOCOL_VERSION_1)
+          ? packet.protection_flag()
+          : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
@@ -1522,7 +1522,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                      << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id,
                          packet.session_id(),
-                         protocol_version,
+                         packet.protocol_version(),
                          packet.service_type());
     return RESULT_OK;
   }
@@ -1571,7 +1571,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     if (!rejectedParams.empty()) {
       SendStartSessionNAck(connection_id,
                            packet.session_id(),
-                           protocol_version,
+                           packet.protocol_version(),
                            packet.service_type(),
                            rejectedParams);
     } else if (ssl_context->IsInitCompleted()) {
@@ -1631,7 +1631,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                               std::string("protocolVersion"));
       SendStartSessionNAck(connection_id,
                            packet.session_id(),
-                           protocol_version,
+                           packet.protocol_version(),
                            packet.service_type(),
                            rejectedParams);
     }
@@ -1665,9 +1665,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
-      (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
-                                              : false;
+      // Protocol version 1 is not support protection
+      (packet->protocol_version() > PROTOCOL_VERSION_1)
+          ? packet->protection_flag()
+          : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
