@@ -2297,10 +2297,6 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
 }
 
 impl::TransportTypes transportTypes = {
-    std::make_pair(transport_manager::transport_adapter::UIE_BLUETOOTH,
-                   impl::TransportDescription("Bluetooth", false, true)),
-    std::make_pair(transport_manager::transport_adapter::UIE_IAP,
-                   impl::TransportDescription("Bluetooth", true, false)),
     std::make_pair(transport_manager::transport_adapter::AOA,
                    impl::TransportDescription("USB", false, true)),
     std::make_pair(transport_manager::transport_adapter::BLUETOOTH,

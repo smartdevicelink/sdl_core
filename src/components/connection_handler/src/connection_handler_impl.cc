@@ -754,7 +754,7 @@ bool ConnectionHandlerImpl::OnSecondaryTransportStarted(
       KeyFromPair(primary_connection_handle, session_id);
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_valid_ && connection_handler_observer_) {
+  if (connection_handler_observer_) {
     LOG4CXX_TRACE(logger_, "Calling Connection Handler Observer's OnSecondaryTransportStartedCallback");
     connection_handler_observer_->OnSecondaryTransportStartedCallback(
         device_handle, session_key);
@@ -795,7 +795,7 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
 
       {
         sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-        if (connection_handler_observer_valid_ && connection_handler_observer_) {
+        if (connection_handler_observer_) {
           const uint32_t session_key =
               KeyFromPair(primary_connection_handle, session_id);
 
