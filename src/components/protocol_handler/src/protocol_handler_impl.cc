@@ -1132,45 +1132,6 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   }
 }
 
-void trace_bytes(unsigned char *bytes_orig, int size_orig)
-{
-  unsigned char buf[512];
-  const unsigned char hex_table[] = "0123456789ABCDEF";
-  unsigned char c;
-  int i, j;
-  LOG4CXX_TRACE(logger_, "size=" << size_orig);
-
-  int size = (size_orig > 1000 ? 1000 : size_orig);
-  unsigned char *bytes = bytes_orig;
-
-redo:
-  while(size > 0) {
-    memset((char*)buf, 0x20, sizeof(buf)); /* fill the output buffer w/ space */
-    /* generate 1 line output (every 32 bytes) */
-    j = (size > 32)? 32: size;
-    for(i = 0; i < j; i++) {
-      c = *(bytes + i);
-      buf[i * 3] = hex_table[(c >> 4) & 0x0f];
-      buf[i * 3 + 1] = hex_table[c & 0x0f];
-      buf[96 + i] = ((c > 0x20) && (c < 0x7f))? c: '.'; /* 96 = 3 * 32 */
-    }
-    buf[96 + i] = '\0';
-    /* output the log */
-    LOG4CXX_TRACE(logger_, (char*)buf);
-    /* next */
-    size -= j;
-    bytes += j;
-  }
-  if (size_orig > 1000) {
-    size = 500;
-    bytes = bytes_orig + size_orig - 500;
-    size_orig = 0;
-    LOG4CXX_TRACE(logger_, "........");
-    goto redo;
-  }
-}
-
-
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1199,7 +1160,6 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_DEBUG(logger_,
                 "Message to send with connection id "
                     << static_cast<int>(packet->connection_id()));
-  trace_bytes(message_to_send->data(), message_to_send->data_size());
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_.SendMessageToDevice(message_to_send)) {
