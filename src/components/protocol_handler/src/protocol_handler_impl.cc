@@ -304,24 +304,37 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           &params, strings::protocol_version, protocolVersionString);
       LOG4CXX_INFO(logger_, "Protocol Version String " << protocolVersionString);
 
-      if (*minVersion >= minSimultaneousMultipleTransportsVersion) {
-        LOG4CXX_INFO(logger_, "We are a GO for multiple transports!!!");
-
-        // BUGBUG: for now, we hard-code the StartService ACK secondary transport information.
-        // Eventually, we want this configurable through smartDeviceLink.ini information.
+      std::vector<std::string> secondaryTransports;
+      std::vector<int32_t> audioServiceTransports;
+      std::vector<int32_t> videoServiceTransports;
+      if (settings_.multiple_transports_enabled() && 
+          *minVersion >= minSimultaneousMultipleTransportsVersion &&
+          parseSecondaryTransportConfiguration(connection_id, secondaryTransports, audioServiceTransports, videoServiceTransports)) {
+        LOG4CXX_TRACE(logger_, "We are a GO for multiple transports!!!");
         BsonArray secondaryTransportsArr;
-        bson_array_initialize(&secondaryTransportsArr, 1);
-        bson_array_add_string(&secondaryTransportsArr, const_cast<char *>("TCP_WIFI"));
+        bson_array_initialize(&secondaryTransportsArr, secondaryTransports.size());
+        for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
+          char secondaryTransport[255];
+          strncpy(secondaryTransport, secondaryTransports[i].c_str(), 255);
+          LOG4CXX_TRACE(logger_, "Adding " << secondaryTransport << " to secondaryTransports parameter of StartSessionAck");
+          bson_array_add_string(&secondaryTransportsArr, secondaryTransport);
+        }
         bson_object_put_array(&params, strings::secondary_transports, &secondaryTransportsArr);
 
         BsonArray audioServiceTransportsArr;
-        bson_array_initialize(&audioServiceTransportsArr, 1);
-        bson_array_add_int32(&audioServiceTransportsArr, 2);
+        bson_array_initialize(&audioServiceTransportsArr, audioServiceTransports.size());
+        for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
+          LOG4CXX_TRACE(logger_, "Adding " << audioServiceTransports[i] << " to audioServiceTransports parameter of StartSessionAck");
+          bson_array_add_int32(&audioServiceTransportsArr, audioServiceTransports[i]);
+        }
         bson_object_put_array(&params, strings::audio_service_transports, &audioServiceTransportsArr);
 
         BsonArray videoServiceTransportsArr;
-        bson_array_initialize(&videoServiceTransportsArr, 1);
-        bson_array_add_int32(&videoServiceTransportsArr, 2);
+        bson_array_initialize(&videoServiceTransportsArr, videoServiceTransports.size());
+        for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
+          LOG4CXX_TRACE(logger_, "Adding " << videoServiceTransports[i] << " to videoServiceTransports parameter of StartSessionAck");
+          bson_array_add_int32(&videoServiceTransportsArr, videoServiceTransports[i]);
+        }
         bson_object_put_array(&params, strings::video_service_transports, &videoServiceTransportsArr);
 
         send_transport_update_event = true;
@@ -1119,6 +1132,45 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   }
 }
 
+void trace_bytes(unsigned char *bytes_orig, int size_orig)
+{
+  unsigned char buf[512];
+  const unsigned char hex_table[] = "0123456789ABCDEF";
+  unsigned char c;
+  int i, j;
+  LOG4CXX_TRACE(logger_, "size=" << size_orig);
+
+  int size = (size_orig > 1000 ? 1000 : size_orig);
+  unsigned char *bytes = bytes_orig;
+
+redo:
+  while(size > 0) {
+    memset((char*)buf, 0x20, sizeof(buf)); /* fill the output buffer w/ space */
+    /* generate 1 line output (every 32 bytes) */
+    j = (size > 32)? 32: size;
+    for(i = 0; i < j; i++) {
+      c = *(bytes + i);
+      buf[i * 3] = hex_table[(c >> 4) & 0x0f];
+      buf[i * 3 + 1] = hex_table[c & 0x0f];
+      buf[96 + i] = ((c > 0x20) && (c < 0x7f))? c: '.'; /* 96 = 3 * 32 */
+    }
+    buf[96 + i] = '\0';
+    /* output the log */
+    LOG4CXX_TRACE(logger_, (char*)buf);
+    /* next */
+    size -= j;
+    bytes += j;
+  }
+  if (size_orig > 1000) {
+    size = 500;
+    bytes = bytes_orig + size_orig - 500;
+    size_orig = 0;
+    LOG4CXX_TRACE(logger_, "........");
+    goto redo;
+  }
+}
+
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1147,6 +1199,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_DEBUG(logger_,
                 "Message to send with connection id "
                     << static_cast<int>(packet->connection_id()));
+  trace_bytes(message_to_send->data(), message_to_send->data_size());
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_.SendMessageToDevice(message_to_send)) {
@@ -2282,4 +2335,191 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return get_settings().max_supported_protocol_version();
 }
+
+impl::TransportTypes transportTypes = {
+    std::make_pair(transport_manager::transport_adapter::UIE_BLUETOOTH,
+                   impl::TransportDescription("Bluetooth", false, true)),
+    std::make_pair(transport_manager::transport_adapter::UIE_IAP,
+                   impl::TransportDescription("Bluetooth", true, false)),
+    std::make_pair(transport_manager::transport_adapter::AOA,
+                   impl::TransportDescription("USB", false, true)),
+    std::make_pair(transport_manager::transport_adapter::BLUETOOTH,
+                   impl::TransportDescription("Bluetooth", false, true)),
+    std::make_pair(transport_manager::transport_adapter::IOS_BT,
+                   impl::TransportDescription("Bluetooth", true, false)),
+    std::make_pair(transport_manager::transport_adapter::IOS_USB,
+                   impl::TransportDescription("USB", true, false)),
+    std::make_pair(transport_manager::transport_adapter::TCP,
+                   impl::TransportDescription("WiFi", true, true)),
+    std::make_pair(transport_manager::transport_adapter::IOS_USB_HOST_MODE,
+                   impl::TransportDescription("USB", true, false)),
+    std::make_pair(transport_manager::transport_adapter::IOS_USB_DEVICE_MODE,
+                   impl::TransportDescription("USB", true, false)),
+    std::make_pair(transport_manager::transport_adapter::IOS_CARPLAY_WIRELESS,
+                   impl::TransportDescription("WiFi", true, false))
+};
+
+impl::TransportDescription
+ProtocolHandlerImpl::GetTransportTypeFromDeviceType(
+    transport_manager::transport_adapter::DeviceType device_type) {
+  impl::TransportDescription result = impl::TransportDescription("", false, false);
+  impl::TransportTypes::const_iterator it = transportTypes.find(device_type);
+  if (it != transportTypes.end()) {
+    result = it->second;
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown device type " << device_type);
+  }
+
+  return result;
+}
+
+bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
+                                                               std::vector<std::string>& secondaryTransports, 
+                                                               std::vector<int32_t>& audioServiceTransports,
+                                                               std::vector<int32_t>& videoServiceTransports) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string primary_transport_type;
+  std::vector<std::string> secondary_transport_types;
+  bool device_is_ios = false;
+  bool device_is_android = false;
+
+  // First discover what the connection type of the primary transport is
+  // and look up the allowed secondary transports for that primary transport
+  transport_manager::transport_adapter::DeviceType device_type = session_observer_.device_type(connection_id);
+  impl::TransportDescription td = GetTransportTypeFromDeviceType(device_type);
+  if (td.transport_type_ == "USB") {
+      secondary_transport_types = settings_.secondary_transports_for_usb();
+  } else if (td.transport_type_ == "Bluetooth") {
+      secondary_transport_types = settings_.secondary_transports_for_bluetooth();
+  } else if (td.transport_type_ == "WiFi") {
+      secondary_transport_types = settings_.secondary_transports_for_wifi();
+  } else {
+    LOG4CXX_ERROR(logger_, "Bad or unknown device type in parseSecondaryTransportConfiguration");
+    return false;
+  }
+
+  // Then, generate the "secondaryTransports" array for the StartSession ACK
+  generateSecondaryTransportsForStartSessionAck(secondary_transport_types, 
+                                                td.ios_transport_, td.android_transport_, 
+                                                secondaryTransports);
+
+  // Next, figure out which connections audio or video services are allowed on
+  generateServiceTransportsForStartSessionAck(settings_.audio_service_transports(),
+                                              td.transport_type_, 
+                                              secondary_transport_types, 
+                                              audioServiceTransports);
+
+  generateServiceTransportsForStartSessionAck(settings_.video_service_transports(),
+                                              td.transport_type_, 
+                                              secondary_transport_types, 
+                                              videoServiceTransports);
+
+  return true;
+}
+
+void ProtocolHandlerImpl::generateSecondaryTransportsForStartSessionAck(
+    const std::vector<std::string>& secondary_transport_types, 
+    bool device_is_ios, 
+    bool device_is_android, 
+    std::vector<std::string>& secondaryTransports) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  
+  // Parse the "secondary_transport_types" vector (which comes from smartDeviceLink.ini)
+  // For each entry in the vector, add an appropriate string to the secondaryTransports
+  std::vector<std::string>::const_iterator it = secondary_transport_types.begin();
+  while (it != secondary_transport_types.end()) {
+    std::string transport_type = *it;
+    if (transport_type == "USB") {
+      if (device_is_ios) {
+        LOG4CXX_TRACE(logger_, "Adding IAP_USB to secondaryTransports for StartSessionAck");
+        secondaryTransports.push_back("IAP_USB");
+      }
+      if (device_is_android) {
+        LOG4CXX_TRACE(logger_, "Adding AOA_USB to secondaryTransports for StartSessionAck");
+        secondaryTransports.push_back("AOA_USB");
+      }
+    } else if (transport_type == "Bluetooth") {
+      if (device_is_ios) {
+        LOG4CXX_TRACE(logger_, "Adding IAP_BLUETOOTH to secondaryTransports for StartSessionAck");
+        secondaryTransports.push_back("IAP_BLUETOOTH");
+      }
+      if (device_is_android) {
+        LOG4CXX_TRACE(logger_, "Adding SPP_BLUETOOTH to secondaryTransports for StartSessionAck");
+        secondaryTransports.push_back("SPP_BLUETOOTH");
+      }
+    }
+    if (transport_type == "WiFi") {
+      LOG4CXX_TRACE(logger_, "Adding TCP_WIFI to secondaryTransports for StartSessionAck");
+      secondaryTransports.push_back("TCP_WIFI");
+    }
+
+    it++;
+  }
+}
+
+void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
+    const std::vector<std::string>& service_transports,
+    const std::string& primary_transport_type, 
+    const std::vector<std::string>& secondary_transport_types, 
+    std::vector<int32_t>& serviceTransports) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (service_transports.size() == 0) {
+    LOG4CXX_TRACE(logger_, "Empty Service Transports. Allowing service to run on both connections");
+    serviceTransports.push_back(1);
+    serviceTransports.push_back(2);
+  } else {
+    bool fPrimaryAdded = false;
+    bool fSecondaryAdded = false;
+    std::vector<std::string>::const_iterator it = service_transports.begin();
+    for ( ; it != service_transports.end(); it++ ) {
+      std::string transport = *it;
+      LOG4CXX_TRACE(logger_, "Service Allowed to run on " << transport.c_str() << " transport");
+
+      if (!fPrimaryAdded) {
+        std::string transport_type = transportTypeFromTransport(transport);
+        
+        if (transportTypeFromTransport(transport) == primary_transport_type) {
+          LOG4CXX_TRACE(logger_, "Service allowed on primary transport");
+          serviceTransports.push_back(1);
+          fPrimaryAdded = true;
+        }
+      }
+
+      if (!fSecondaryAdded) {
+        std::string transport_type = transportTypeFromTransport(transport);
+        if (std::find(secondary_transport_types.begin(), secondary_transport_types.end(), transport_type) != secondary_transport_types.end()) {
+          LOG4CXX_TRACE(logger_, "Service allowed on secondary transport");
+          serviceTransports.push_back(2);
+          fSecondaryAdded = true;
+        }
+      }
+
+      if (fPrimaryAdded && fSecondaryAdded) {
+        break;
+      }
+    }
+  }
+}
+
+std::string ProtocolHandlerImpl::transportTypeFromTransport(std::string transport) {
+  std::string transport_type;
+
+  if (transport == "IAP_BLUETOOTH" || 
+      transport == "SPP_BLUETOOTH") {
+    transport_type = "Bluetooth";
+  }
+  else if (transport == "IAP_USB" || 
+           transport == "AOA_USB" ||
+           transport == "IAP_USB_HOST_MODE" || 
+           transport == "IAP_USB_DEVICE_MODE") {
+    transport_type = "USB";
+  } else if (transport == "TCP_WIFI" ||
+             transport == "IAP_CARPLAY") {
+    transport_type = "WiFi";
+  }
+
+  return transport_type;
+}
+
 }  // namespace protocol_handler

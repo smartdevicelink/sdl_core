@@ -88,6 +88,8 @@ const char* kSDL4Section = "SDL4";
 const char* kSDL5Section = "SDL5";
 const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
+const char* kMultipleTransportsSection = "MultipleTransports";
+const char* kServicesMapSection = "ServicesMap";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -215,6 +217,12 @@ const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
 const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
 const char* kAppTransportChangeTimerAdditionKey =
     "AppTransportChangeTimerAddition";
+const char* kMultipleTransportsEnabledKey = "MultipleTransportsEnabled";
+const char* kSecondaryTransportForBluetoothKey = "SecondaryTransportForBluetooth";
+const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
+const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
+const char* kAudioServiceTransportsKey = "AudioServiceTransports";
+const char* kVideoServiceTransportsKey = "VideoServiceTransports";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -313,6 +321,7 @@ const uint32_t kDefaultAppTransportChangeTimer = 500u;
 const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
+const bool kDefaultMultipleTransportsEnabled = true;
 }  // namespace
 
 namespace profile {
@@ -940,6 +949,30 @@ const uint16_t Profile::remove_bundle_id_attempts() const {
 
 const uint16_t Profile::wait_time_between_apps() const {
   return wait_time_between_apps_;
+}
+
+const bool Profile::multiple_transports_enabled() const {
+  return multiple_transports_enabled_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_bluetooth() const {
+  return secondary_transports_for_bluetooth_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_usb() const {
+  return secondary_transports_for_usb_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_wifi() const {
+  return secondary_transports_for_wifi_;
+}
+
+const std::vector<std::string>& Profile::audio_service_transports() const {
+  return audio_service_transports_;
+}
+
+const std::vector<std::string>& Profile::video_service_transports() const {
+  return video_service_transports_;
 }
 
 const bool Profile::ErrorOccured() const {
@@ -1934,6 +1967,23 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(app_tranport_change_timer_addition_,
                     kAppTransportChangeTimerAdditionKey,
                     kMainSection);
+
+  ReadBoolValue(&multiple_transports_enabled_,
+                kDefaultMultipleTransportsEnabled,
+                kMultipleTransportsSection,
+                kMultipleTransportsEnabledKey);
+
+  LOG_UPDATED_BOOL_VALUE(
+      multiple_transports_enabled_, kMultipleTransportsEnabledKey, kMultipleTransportsSection);
+
+  // Secondary Transports
+  secondary_transports_for_bluetooth_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForBluetoothKey, NULL);
+  secondary_transports_for_usb_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForUSBKey, NULL);
+  secondary_transports_for_wifi_ = ReadStringContainer(kMultipleTransportsSection, kSecondaryTransportForWiFiKey, NULL);
+
+  // Services Map
+  audio_service_transports_ = ReadStringContainer(kServicesMapSection, kAudioServiceTransportsKey, NULL);
+  video_service_transports_ = ReadStringContainer(kServicesMapSection, kVideoServiceTransportsKey, NULL);
 }
 
 bool Profile::ReadValue(bool* value,
@@ -2061,6 +2111,7 @@ std::vector<std::string> Profile::ReadStringContainer(
       if (!getline(iss, temp_str, ','))
         break;
       value_container.push_back(temp_str);
+      LOG_UPDATED_VALUE(temp_str, pKey, pSection);
     }
   }
   return value_container;

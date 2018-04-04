@@ -472,17 +472,37 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   size_t update_before_hours() const;
 
 #endif  // ENABLE_SECURITY
-        /**
-         * @brief Reads a string value from the profile
-         *
-         * @param value         Result value
-         * @param default_value Value to use key wasn't found
-         * @param pSection      The section to read the value in
-         * @param pKey          The key whose value needs to be read out
-         *
-         * @return FALSE if could not read the value out of the profile
-         * (then the value is equal \c default_value)
-         */
+
+  /**
+   * @brief Returns true multiple transports is enabled
+   */
+  const bool multiple_transports_enabled() const;
+
+  /**
+   * @brief Returns list of secondary transports available
+   * for the named primary transport
+   */
+  const std::vector<std::string>& secondary_transports_for_bluetooth() const;
+  const std::vector<std::string>& secondary_transports_for_usb() const;
+  const std::vector<std::string>& secondary_transports_for_wifi() const;
+
+  /**
+   * @brief Returns list of allowed transports for the named service
+   */
+  const std::vector<std::string>& audio_service_transports() const;
+  const std::vector<std::string>& video_service_transports() const;
+
+  /**
+   * @brief Reads a string value from the profile
+   *
+   * @param value         Result value
+   * @param default_value Value to use key wasn't found
+   * @param pSection      The section to read the value in
+   * @param pKey          The key whose value needs to be read out
+   *
+   * @return FALSE if could not read the value out of the profile
+   * (then the value is equal \c default_value)
+   */
   bool ReadStringValue(std::string* value,
                        const char* default_value,
                        const char* const pSection,
@@ -935,6 +955,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool enable_app_launch_ios_;
   uint32_t app_tranport_change_timer_;
   uint32_t app_tranport_change_timer_addition_;
+  bool multiple_transports_enabled_;
+  std::vector<std::string> secondary_transports_for_bluetooth_;
+  std::vector<std::string> secondary_transports_for_usb_;
+  std::vector<std::string> secondary_transports_for_wifi_;
+  std::vector<std::string> audio_service_transports_;
+  std::vector<std::string> video_service_transports_;
   bool error_occured_;
   std::string error_description_;
 

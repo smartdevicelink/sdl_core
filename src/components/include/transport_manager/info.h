@@ -38,6 +38,7 @@
 
 #include <string>
 #include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 /**
  * @brief transport_manager name space
@@ -100,6 +101,11 @@ class DeviceInfo : public Info {
    */
   ConnectionType connection_type_;
 
+  /**
+   * @brief The type of the device.
+   */
+  transport_manager::transport_adapter::DeviceType device_type_;
+
  public:
   /**
    * @brief Constructor.
@@ -111,11 +117,13 @@ class DeviceInfo : public Info {
   DeviceInfo(DeviceHandle device_handle,
              std::string mac_address,
              std::string name,
-             const ConnectionType& connection_type)
+             const ConnectionType& connection_type,
+             transport_manager::transport_adapter::DeviceType device_type)
       : Info(name)
       , mac_address_(mac_address)
       , device_handle_(device_handle)
-      , connection_type_(connection_type) {}
+      , connection_type_(connection_type)
+      , device_type_(device_type) {}
 
   /**
    * @brief Return mac_address.
@@ -137,6 +145,14 @@ class DeviceInfo : public Info {
    */
   ConnectionType connection_type() const {
     return connection_type_;
+  }
+
+  /**
+   * @brief Return device_type_.
+   * @return
+   */
+  transport_manager::transport_adapter::DeviceType device_type() const {
+    return device_type_;
   }
 
   /**

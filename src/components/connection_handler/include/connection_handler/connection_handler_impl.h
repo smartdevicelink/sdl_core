@@ -275,6 +275,14 @@ class ConnectionHandlerImpl
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
 
   /**
+   * \brief Returns the device type associated with the connection handle
+   * \param connection_handle Handle of the connection being queried
+   * \return Device Type
+   */
+  transport_manager::transport_adapter::DeviceType device_type(
+      transport_manager::ConnectionUID connection_handle) const;
+
+  /**
    * \brief Creates unique identifier of session (can be used as hash)
    * from given connection identifier
    * within which session exists and session number.

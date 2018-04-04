@@ -48,11 +48,13 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 Device::Device(DeviceHandle device_handle,
                const std::string& user_friendly_name,
                const std::string& mac_address,
-               const std::string& connection_type)
+               const std::string& connection_type,
+               transport_manager::transport_adapter::DeviceType device_type)
     : device_handle_(device_handle)
     , user_friendly_name_(user_friendly_name)
     , mac_address_(mac_address)
-    , connection_type_(connection_type) {
+    , connection_type_(connection_type)
+    , device_type_(device_type) {
   mac_address_ = encryption::MakeHash(mac_address);
   LOG4CXX_DEBUG(logger_,
                 "Device: MAC address - " << mac_address << ", hash - "
@@ -73,6 +75,10 @@ std::string Device::mac_address() const {
 
 std::string Device::connection_type() const {
   return connection_type_;
+}
+
+transport_manager::transport_adapter::DeviceType Device::device_type() const {
+  return device_type_;
 }
 
 }  // namespace connection_handler

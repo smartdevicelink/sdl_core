@@ -132,6 +132,23 @@ typedef threads::MessageLoopThread<
     utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
     utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
+
+// Type to allow easy mapping between a device type and transport characteristics
+struct TransportDescription {
+  TransportDescription(const std::string& transport_type,
+                       const bool ios_transport,
+                       const bool android_transport)
+      : transport_type_(transport_type)
+      , ios_transport_(ios_transport)
+      , android_transport_(android_transport) {}
+
+  std::string transport_type_;
+  bool ios_transport_;
+  bool android_transport_;
+};
+
+typedef std::map<transport_manager::transport_adapter::DeviceType, TransportDescription>
+    TransportTypes;
 }  // namespace impl
 
 /**
@@ -644,6 +661,25 @@ class ProtocolHandlerImpl
    * @brief Function returns supported SDL Protocol Version,
    */
   uint8_t SupportedSDLProtocolVersion() const;
+
+  impl::TransportDescription GetTransportTypeFromDeviceType(transport_manager::transport_adapter::DeviceType device_type);
+
+  bool parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
+                                            std::vector<std::string>& secondaryTransports, 
+                                            std::vector<int32_t>& audioServiceTransports,
+                                            std::vector<int32_t>& videoServiceTransports);
+
+  void generateSecondaryTransportsForStartSessionAck(const std::vector<std::string>& secondary_transport_types, 
+                                                     bool device_is_ios, 
+                                                     bool device_is_android, 
+                                                     std::vector<std::string>& secondaryTransports);
+
+  void generateServiceTransportsForStartSessionAck(const std::vector<std::string>& service_transports,
+                                                   const std::string& primary_transport_type, 
+                                                   const std::vector<std::string>& secondary_transport_types, 
+                                                   std::vector<int32_t>& serviceTransports);
+
+  std::string transportTypeFromTransport(std::string transport);
 
   const ProtocolHandlerSettings& settings_;
 
