@@ -102,7 +102,7 @@ class RAManagerTest : public ::testing::Test {
 
   void OnRCStatusNotoficationExpectations();
 
-protected:
+ protected:
   NiceMock<MockApplicationManager> mock_app_mngr_;
   NiceMock<MockRPCService> mock_rpc_service_;
   test::components::policy_test::MockPolicyHandlerInterface
@@ -138,12 +138,12 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
 }
 
 void RAManagerTest::OnRCStatusNotoficationExpectations() {
-    ON_CALL(mock_app_mngr_, application(kAppId1))
-        .WillByDefault(Return(mock_app_1_));
-    ON_CALL(*mock_app_1_, QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
-        .WillByDefault(Return(app_ext_ptr_));
-    apps_.insert(mock_app_1_);
-    ON_CALL(mock_app_mngr_, applications()).WillByDefault(Return(apps_da_));
+  ON_CALL(mock_app_mngr_, application(kAppId1))
+      .WillByDefault(Return(mock_app_1_));
+  ON_CALL(*mock_app_1_, QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+      .WillByDefault(Return(app_ext_ptr_));
+  apps_.insert(mock_app_1_);
+  ON_CALL(mock_app_mngr_, applications()).WillByDefault(Return(apps_da_));
 }
 
 TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {

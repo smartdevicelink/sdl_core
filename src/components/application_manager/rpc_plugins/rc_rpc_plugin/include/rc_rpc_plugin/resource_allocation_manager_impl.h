@@ -120,6 +120,10 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void SendOnRCStatusNotification() FINAL;
 
+  bool is_rc_enabled() const FINAL;
+
+  void set_rc_enabled(const bool value) FINAL;
+
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
@@ -130,11 +134,10 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @return smart object with mobile OnRCStatusNotification
    */
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToMobile(
-      const uint32_t app_id);
+      const application_manager::ApplicationSharedPtr app);
 
   smart_objects::SmartObjectSPtr CreateOnRCStatusNotificationToHmi(
-      const uint32_t app_id);
-
+      const application_manager::ApplicationSharedPtr app);
 
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
@@ -194,6 +197,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
   std::vector<std::string> all_supported_modules();
+
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource
@@ -221,6 +225,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
   application_manager::rpc_service::RPCService& rpc_service_;
+  bool is_rc_enabled_;
 };
 }  // rc_rpc_plugin
 

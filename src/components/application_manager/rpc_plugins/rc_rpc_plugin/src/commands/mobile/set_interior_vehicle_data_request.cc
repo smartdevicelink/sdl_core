@@ -32,6 +32,7 @@
 
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 #include "json/json.h"
