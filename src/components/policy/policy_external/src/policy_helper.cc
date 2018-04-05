@@ -797,7 +797,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_INFO(logger_, "FillFunctionalGroupPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -817,7 +817,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
-  LOG4CXX_INFO(logger_, "Exclude same groups");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -839,7 +839,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Merge groups");
+  LOG4CXX_AUTO_TRACE(logger_);
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 

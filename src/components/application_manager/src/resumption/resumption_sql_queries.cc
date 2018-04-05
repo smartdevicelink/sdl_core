@@ -212,7 +212,7 @@ const std::string kCreateSchema =
     "`vrHelpItemArray`(`idglobalProperties`); "
     "CREATE TABLE IF NOT EXISTS `application`( "
     "  `idApplication` INTEGER PRIMARY KEY NOT NULL, "
-    "  `appID` TEXT, "
+    "  `appID` TEXT COLLATE NOCASE, "
     "  `connection_key` INTEGER, "
     "  `grammarID` INTEGER, "
     "  `hashID` TEXT, "

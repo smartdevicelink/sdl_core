@@ -14,7 +14,7 @@ Pull Requests Welcome!
 
 ## Documentation
 
-  * [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+  * [Software Architecture Document](https://smartdevicelink.com/en/docs/sdl-core/master/software-architecture-document/table-of-contents/)
   * [Transport Manager Programming Guide](https://smartdevicelink.com/en/guides/core/transport-manager-programming/)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
   * [Integration Guidelines](https://smartdevicelink.com/en/docs/hmi/master/overview/)
@@ -65,9 +65,10 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 | Flag | Description | Dependencies |
 |------|-------------|--------------|
 |Web HMI|Use HTML5 HMI|chromium-browser|
-|HMI2|Build with QT HMI|QT5, dbus-*dev|
+|DBus|Use DBus HMI Adapter|dbus-1-dev|
 |EXTENDED_MEDIA_MODE|Support Video and Audio Streaming|Opengl es2, gstreamer1.0*|
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
+|USB|Enable USB transport adapter|libusb-dev|
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
 

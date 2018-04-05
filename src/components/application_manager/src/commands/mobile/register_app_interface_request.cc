@@ -46,6 +46,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/helpers/application_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
@@ -217,6 +218,10 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  if (IsApplicationSwitched()) {
+    return;
+  }
+
   const std::string mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
 
@@ -231,7 +236,13 @@ void RegisterAppInterfaceRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string policy_app_id = msg_params[strings::app_id].asString();
+  std::string new_policy_app_id = policy_app_id;
+  std::transform(policy_app_id.begin(),
+                 policy_app_id.end(),
+                 new_policy_app_id.begin(),
+                 ::tolower);
+  (*message_)[strings::msg_params][strings::app_id] = new_policy_app_id;
 
   if (application_manager_.IsApplicationForbidden(connection_key(),
                                                   policy_app_id)) {
@@ -359,7 +370,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
-  SendRegisterAppInterfaceResponseToMobile();
+  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   application_manager_.ManageMobileCommand(so, commands::Command::ORIGIN_SDL);
@@ -498,7 +509,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.rc_supported();
 }
 
-void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
+void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
+    ApplicationType app_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
 
@@ -569,18 +581,27 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     FillUIRelatedFields(response_params, hmi_capabilities);
   }
 
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
+    FillVIRelatedFields(response_params, hmi_capabilities);
+  }
+
   if (hmi_capabilities.button_capabilities()) {
     response_params[hmi_response::button_capabilities] =
         *hmi_capabilities.button_capabilities();
   }
+
   if (hmi_capabilities.soft_button_capabilities()) {
     response_params[hmi_response::soft_button_capabilities] =
         *hmi_capabilities.soft_button_capabilities();
   }
+
   if (hmi_capabilities.preset_bank_capabilities()) {
     response_params[hmi_response::preset_bank_capabilities] =
         *hmi_capabilities.preset_bank_capabilities();
   }
+
   if (hmi_capabilities.hmi_zone_capabilities()) {
     if (smart_objects::SmartType_Array ==
         hmi_capabilities.hmi_zone_capabilities()->getType()) {
@@ -593,21 +614,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     }
   }
 
-  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_TTS)) {
-    FillTTSRelatedFields(response_params, hmi_capabilities);
-  }
-
   if (hmi_capabilities.pcm_stream_capabilities()) {
     response_params[strings::pcm_stream_capabilities] =
         *hmi_capabilities.pcm_stream_capabilities();
-  }
-
-  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
-    FillVIRelatedFields(response_params, hmi_capabilities);
   }
 
   const std::vector<uint32_t>& diag_modes =
@@ -620,12 +629,34 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       ++index;
     }
   }
+
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
   const std::string ccpu_version =
       application_manager_.hmi_capabilities().ccpu_version();
   if (!ccpu_version.empty()) {
     response_params[strings::system_software_version] = ccpu_version;
+  }
+
+  if (ApplicationType::kSwitchedApplicationWrongHashId == app_type) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application has been switched from another transport, "
+                  "but doesn't have correct hashID.");
+
+    application_manager::DeleteApplicationData(application,
+                                               application_manager_);
+
+    SendResponse(
+        true, mobile_apis::Result::RESUME_FAILED, NULL, &response_params);
+    return;
+  }
+
+  if (ApplicationType::kSwitchedApplicationHashOk == app_type) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application has been switched from another transport "
+                  "and has correct hashID.");
+    SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+    return;
   }
 
   bool resumption =
@@ -708,6 +739,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
+}
+
+DEPRECATED void
+RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
+  SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(
@@ -1189,6 +1225,56 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
   CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+}
+
+bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+
+  LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
+
+  auto app = application_manager_.application_by_policy_id(policy_app_id);
+
+  if (!app) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application with policy id " << policy_app_id
+                                                << " is not found.");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Application with policy id " << policy_app_id << " is found.");
+  if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Policy id " << policy_app_id
+                               << " is not found in reconnection list.");
+    SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Application is found in reconnection list.");
+
+  auto app_type = ApplicationType::kSwitchedApplicationWrongHashId;
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+    const auto hash_id =
+        (*message_)[strings::msg_params][strings::hash_id].asString();
+
+    auto& resume_ctrl = application_manager_.resume_controller();
+    if (resume_ctrl.CheckApplicationHash(app, hash_id)) {
+      app_type = ApplicationType::kSwitchedApplicationHashOk;
+    }
+  }
+
+  application_manager_.ProcessReconnection(app, connection_key());
+  SendRegisterAppInterfaceResponseToMobile(app_type);
+
+  application_manager_.SendHMIStatusNotification(app);
+
+  application_manager_.OnApplicationSwitched(app);
+
+  return true;
 }
 
 policy::PolicyHandlerInterface&

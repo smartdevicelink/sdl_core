@@ -42,7 +42,7 @@ NotificationFromHMI::NotificationFromHMI(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {
   // Replace HMI app id with Mobile connection id
-  ReplaceHMIByMobileAppId(*message);
+  ReplaceHMIWithMobileAppId(*message);
 }
 
 NotificationFromHMI::~NotificationFromHMI() {}

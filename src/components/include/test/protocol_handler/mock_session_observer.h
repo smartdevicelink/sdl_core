@@ -37,6 +37,7 @@
 #include <string>
 #include <list>
 #include "protocol_handler/session_observer.h"
+#include "transport_manager/common.h"
 
 namespace test {
 namespace components {
@@ -46,8 +47,7 @@ namespace protocol_handler_test {
  */
 class MockSessionObserver : public ::protocol_handler::SessionObserver {
  public:
-  // DEPRECATED
-  MOCK_METHOD5(
+  DEPRECATED MOCK_METHOD5(
       OnSessionStartedCallback,
       uint32_t(const transport_manager::ConnectionUID connection_handle,
                const uint8_t sessionId,
@@ -88,13 +88,20 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                      int32_t(uint32_t key,
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
-                             uint32_t* device_id));
+                             transport_manager::DeviceHandle* device_id));
+  DEPRECATED MOCK_CONST_METHOD4(GetDataOnSessionKey,
+                                int32_t(uint32_t key,
+                                        uint32_t* app_id,
+                                        std::list<int32_t>* sessions_list,
+                                        uint32_t* device_id));
+
   MOCK_CONST_METHOD5(GetDataOnDeviceID,
-                     int32_t(uint32_t device_handle,
+                     int32_t(transport_manager::DeviceHandle device_handle,
                              std::string* device_name,
                              std::list<uint32_t>* applications_list,
                              std::string* mac_address,
                              std::string* connection_type));
+
   MOCK_CONST_METHOD2(IsHeartBeatSupported,
                      bool(transport_manager::ConnectionUID connection_handle,
                           uint8_t session_id));
@@ -102,6 +109,9 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                      bool(uint32_t connection_id,
                           uint8_t session_id,
                           uint8_t& protocol_version));
+  MOCK_CONST_METHOD2(SessionServiceExists,
+                     bool(const uint32_t connection_key,
+                          const protocol_handler::ServiceType& service_type));
 
 #ifdef ENABLE_SECURITY
   MOCK_METHOD2(SetSSLContext,

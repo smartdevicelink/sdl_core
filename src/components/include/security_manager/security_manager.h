@@ -128,6 +128,24 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
   virtual void StartHandshake(uint32_t connection_key) = 0;
 
   /**
+   * @brief Check whether certificate should be updated
+   * @return true if certificate should be updated otherwise false
+   */
+  virtual bool IsCertificateUpdateRequired() = 0;
+
+  /**
+   * @brief Notify all listeners that certificate update required
+   * Allows to notify that certificate should be updated
+   */
+  virtual void NotifyOnCertificateUpdateRequired() = 0;
+
+  /**
+   * @brief Check if policy certificate data is empty
+   * @return true if policy certificate data is empty otherwise false
+   */
+  virtual bool IsPolicyCertificateDataEmpty() = 0;
+
+  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;

@@ -701,6 +701,15 @@ class CacheManager : public CacheManagerInterface {
 
   const PolicySettings& get_settings() const;
 
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -731,6 +740,13 @@ class CacheManager : public CacheManagerInterface {
    */
   void ResetCalculatedPermissionsForDevice(const std::string& device_id);
 
+  /**
+   * @brief Transform to lower case all non default application names in
+   * applications policies section
+   * @param pt polict rable for update
+   */
+  void MakeLowerCaseAppNames(policy_table::Table& pt) const;
+
   void AddCalculatedPermissions(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const policy::Permissions& permissions);
@@ -748,7 +764,7 @@ class CacheManager : public CacheManagerInterface {
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
 
-  sync_primitives::Lock cache_lock_;
+  mutable sync_primitives::Lock cache_lock_;
   sync_primitives::Lock unpaired_lock_;
 
   typedef std::map<std::string, Permissions> AppCalculatedPermissions;

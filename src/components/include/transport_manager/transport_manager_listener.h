@@ -70,6 +70,23 @@ class TransportManagerListener {
   virtual void OnDeviceRemoved(const DeviceInfo& device_info) = 0;
 
   /**
+   * @brief OnDeviceSwitchingStart allows to notify listener that device is
+   * going to switch its connection.
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  virtual void OnDeviceSwitchingStart(const DeviceUID& device_uid_from,
+                                      const DeviceUID& device_uid_to) = 0;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listener that device reconnection
+   * fails due to some reason.
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  virtual void OnDeviceSwitchingFinish(const DeviceUID& device_uid) = 0;
+
+  /**
    * @brief Reaction to the event, when scanning of devices is finished.
    */
   virtual void OnScanDevicesFinished() = 0;

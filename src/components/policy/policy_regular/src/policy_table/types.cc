@@ -308,19 +308,24 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
 
 // RpcParameters methods
 RpcParameters::RpcParameters() : CompositeType(kUninitialized) {}
+
 RpcParameters::RpcParameters(const HmiLevels& hmi_levels)
     : CompositeType(kUninitialized), hmi_levels(hmi_levels) {}
+
 RpcParameters::~RpcParameters() {}
+
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
     , parameters(impl::ValueMember(value__, "parameters")) {}
+
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
   return result__;
 }
+
 bool RpcParameters::is_valid() const {
   if (!hmi_levels.is_valid()) {
     return false;
@@ -330,9 +335,11 @@ bool RpcParameters::is_valid() const {
   }
   return Validate();
 }
+
 bool RpcParameters::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool RpcParameters::struct_empty() const {
   if (hmi_levels.is_initialized()) {
     return false;
@@ -343,6 +350,7 @@ bool RpcParameters::struct_empty() const {
 
   return true;
 }
+
 void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -363,18 +371,23 @@ void RpcParameters::SetPolicyTableType(PolicyTableType pt_type) {
 
 // Rpcs methods
 Rpcs::Rpcs() : CompositeType(kUninitialized) {}
+
 Rpcs::Rpcs(const Rpc& rpcs) : CompositeType(kUninitialized), rpcs(rpcs) {}
+
 Rpcs::~Rpcs() {}
+
 Rpcs::Rpcs(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , user_consent_prompt(impl::ValueMember(value__, "user_consent_prompt"))
     , rpcs(impl::ValueMember(value__, "rpcs")) {}
+
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("user_consent_prompt", user_consent_prompt, &result__);
   impl::WriteJsonField("rpcs", rpcs, &result__);
   return result__;
 }
+
 bool Rpcs::is_valid() const {
   if (!user_consent_prompt.is_valid()) {
     return false;
@@ -384,9 +397,11 @@ bool Rpcs::is_valid() const {
   }
   return Validate();
 }
+
 bool Rpcs::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool Rpcs::struct_empty() const {
   if (user_consent_prompt.is_initialized()) {
     return false;
@@ -397,6 +412,7 @@ bool Rpcs::struct_empty() const {
 
   return true;
 }
+
 void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -418,6 +434,7 @@ void Rpcs::SetPolicyTableType(PolicyTableType pt_type) {
 
 // ModuleConfig methods
 ModuleConfig::ModuleConfig() : CompositeType(kUninitialized) {}
+
 ModuleConfig::ModuleConfig(
     uint8_t exchange_after_x_ignition_cycles,
     int64_t exchange_after_x_kilometers,
@@ -435,7 +452,9 @@ ModuleConfig::ModuleConfig(
     , endpoints(endpoints)
     , notifications_per_minute_by_priority(
           notifications_per_minute_by_priority) {}
+
 ModuleConfig::~ModuleConfig() {}
+
 ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , device_certificates(impl::ValueMember(value__, "device_certificates"))
@@ -501,6 +520,7 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
   return result__;
 }
+
 bool ModuleConfig::is_valid() const {
   if (!preloaded_pt.is_valid()) {
     return false;
@@ -543,9 +563,11 @@ bool ModuleConfig::is_valid() const {
   }
   return Validate();
 }
+
 bool ModuleConfig::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
     return false;
@@ -587,6 +609,7 @@ bool ModuleConfig::struct_empty() const {
   }
   return true;
 }
+
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -670,7 +693,9 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
+
 MessageString::~MessageString() {}
+
 MessageString::MessageString(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , line1(impl::ValueMember(value__, "line1"))
@@ -678,6 +703,7 @@ MessageString::MessageString(const Json::Value* value__)
     , tts(impl::ValueMember(value__, "tts"))
     , label(impl::ValueMember(value__, "label"))
     , textBody(impl::ValueMember(value__, "textBody")) {}
+
 Json::Value MessageString::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("line1", line1, &result__);
@@ -687,6 +713,7 @@ Json::Value MessageString::ToJsonValue() const {
   impl::WriteJsonField("textBody", textBody, &result__);
   return result__;
 }
+
 bool MessageString::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -708,9 +735,11 @@ bool MessageString::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageString::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageString::struct_empty() const {
   if (line1.is_initialized()) {
     return false;
@@ -731,6 +760,7 @@ bool MessageString::struct_empty() const {
   }
   return true;
 }
+
 void MessageString::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -765,17 +795,22 @@ void MessageString::SetPolicyTableType(PolicyTableType pt_type) {
 const std::string MessageLanguages::default_language_("en-us");
 
 MessageLanguages::MessageLanguages() : CompositeType(kUninitialized) {}
+
 MessageLanguages::MessageLanguages(const Languages& languages)
     : CompositeType(kUninitialized), languages(languages) {}
+
 MessageLanguages::~MessageLanguages() {}
+
 MessageLanguages::MessageLanguages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , languages(impl::ValueMember(value__, "languages")) {}
+
 Json::Value MessageLanguages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("languages", languages, &result__);
   return result__;
 }
+
 bool MessageLanguages::is_valid() const {
   if (!languages.is_valid()) {
     return false;
@@ -786,9 +821,11 @@ bool MessageLanguages::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageLanguages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageLanguages::struct_empty() const {
   if (languages.is_initialized()) {
     return false;
@@ -827,19 +864,24 @@ void MessageLanguages::SetPolicyTableType(PolicyTableType pt_type) {
 // ConsumerFriendlyMessages methods
 ConsumerFriendlyMessages::ConsumerFriendlyMessages()
     : CompositeType(kUninitialized) {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const std::string& version)
     : CompositeType(kUninitialized), version(version) {}
+
 ConsumerFriendlyMessages::~ConsumerFriendlyMessages() {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , version(impl::ValueMember(value__, "version"))
     , messages(impl::ValueMember(value__, "messages")) {}
+
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
   impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
+
 bool ConsumerFriendlyMessages::is_valid() const {
   if (!version.is_valid()) {
     return false;
@@ -849,9 +891,11 @@ bool ConsumerFriendlyMessages::is_valid() const {
   }
   return Validate();
 }
+
 bool ConsumerFriendlyMessages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ConsumerFriendlyMessages::struct_empty() const {
   if (version.is_initialized()) {
     return false;
@@ -862,6 +906,7 @@ bool ConsumerFriendlyMessages::struct_empty() const {
 
   return true;
 }
+
 void ConsumerFriendlyMessages::ReportErrors(
     rpc::ValidationReport* report__) const {
   if (struct_empty()) {
@@ -892,7 +937,9 @@ void ConsumerFriendlyMessages::SetPolicyTableType(PolicyTableType pt_type) {
 
 // ModuleMeta methods
 ModuleMeta::ModuleMeta() : CompositeType(kUninitialized) {}
+
 ModuleMeta::~ModuleMeta() {}
+
 ModuleMeta::ModuleMeta(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , pt_exchanged_at_odometer_x(
@@ -901,6 +948,7 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
           impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
     , ignition_cycles_since_last_exchange(
           impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
+
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField(
@@ -913,6 +961,7 @@ Json::Value ModuleMeta::ToJsonValue() const {
                        &result__);
   return result__;
 }
+
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -928,9 +977,11 @@ bool ModuleMeta::is_valid() const {
   }
   return Validate();
 }
+
 bool ModuleMeta::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ModuleMeta::struct_empty() const {
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
@@ -944,6 +995,7 @@ bool ModuleMeta::struct_empty() const {
   }
   return true;
 }
+
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1006,7 +1058,9 @@ AppLevel::AppLevel(uint16_t minutes_in_hmi_full,
     , count_of_tls_errors(count_of_tls_errors)
     , count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
 }
+
 AppLevel::~AppLevel() {}
+
 AppLevel::AppLevel(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full"))
@@ -1042,6 +1096,7 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
   return result__;
 }
+
 bool AppLevel::is_valid() const {
   if (!minutes_in_hmi_full.is_valid()) {
     return false;
@@ -1090,9 +1145,11 @@ bool AppLevel::is_valid() const {
   }
   return Validate();
 }
+
 bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool AppLevel::struct_empty() const {
   if (minutes_in_hmi_full.is_initialized()) {
     return false;
@@ -1147,6 +1204,7 @@ bool AppLevel::struct_empty() const {
   }
   return true;
 }
+
 void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1171,6 +1229,7 @@ Json::Value UsageAndErrorCounts::ToJsonValue() const {
   impl::WriteJsonField("app_level", app_level, &result__);
   return result__;
 }
+
 bool UsageAndErrorCounts::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -1180,15 +1239,18 @@ bool UsageAndErrorCounts::is_valid() const {
   }
   return Validate();
 }
+
 bool UsageAndErrorCounts::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool UsageAndErrorCounts::struct_empty() const {
   if (app_level.is_initialized()) {
     return false;
   }
   return true;
 }
+
 void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1211,25 +1273,32 @@ void UsageAndErrorCounts::SetPolicyTableType(PolicyTableType pt_type) {
 
 // DeviceParams methods
 DeviceParams::DeviceParams() : CompositeType(kUninitialized) {}
+
 DeviceParams::~DeviceParams() {}
+
 DeviceParams::DeviceParams(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject)) {}
+
 Json::Value DeviceParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   return result__;
 }
+
 bool DeviceParams::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
   }
   return Validate();
 }
+
 bool DeviceParams::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool DeviceParams::struct_empty() const {
   return true;
 }
+
 void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1238,6 +1307,7 @@ void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
 
 // PolicyTable methods
 PolicyTable::PolicyTable() : CompositeType(kUninitialized) {}
+
 PolicyTable::PolicyTable(
     const ApplicationPoliciesSection& app_policies_section,
     const FunctionalGroupings& functional_groupings,
@@ -1248,7 +1318,9 @@ PolicyTable::PolicyTable(
     , functional_groupings(functional_groupings)
     , consumer_friendly_messages(consumer_friendly_messages)
     , module_config(module_config) {}
+
 PolicyTable::~PolicyTable() {}
+
 PolicyTable::PolicyTable(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , app_policies_section(impl::ValueMember(value__, "app_policies"))
@@ -1260,6 +1332,7 @@ PolicyTable::PolicyTable(const Json::Value* value__)
     , usage_and_error_counts(
           impl::ValueMember(value__, "usage_and_error_counts"))
     , device_data(impl::ValueMember(value__, "device_data")) {}
+
 Json::Value PolicyTable::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("app_policies", app_policies_section, &result__);
@@ -1273,6 +1346,7 @@ Json::Value PolicyTable::ToJsonValue() const {
   impl::WriteJsonField("device_data", device_data, &result__);
   return result__;
 }
+
 bool PolicyTable::is_valid() const {
   if (!app_policies_section.is_valid()) {
     return false;
@@ -1297,9 +1371,11 @@ bool PolicyTable::is_valid() const {
   }
   return Validate();
 }
+
 bool PolicyTable::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool PolicyTable::struct_empty() const {
   if (app_policies_section.is_initialized()) {
     return false;
@@ -1327,6 +1403,7 @@ bool PolicyTable::struct_empty() const {
   }
   return true;
 }
+
 void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1381,32 +1458,40 @@ void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
 
 // Table methods
 Table::Table() : CompositeType(kUninitialized) {}
+
 Table::Table(const PolicyTable& policy_table)
     : CompositeType(kUninitialized), policy_table(policy_table) {}
+
 Table::~Table() {}
+
 Table::Table(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , policy_table(impl::ValueMember(value__, "policy_table")) {}
+
 Json::Value Table::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("policy_table", policy_table, &result__);
   return result__;
 }
+
 bool Table::is_valid() const {
   if (!policy_table.is_valid()) {
     return false;
   }
   return Validate();
 }
+
 bool Table::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool Table::struct_empty() const {
   if (policy_table.is_initialized()) {
     return false;
   }
   return true;
 }
+
 void Table::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
