@@ -2336,8 +2336,6 @@ bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(const ConnectionI
   LOG4CXX_AUTO_TRACE(logger_);
   std::string primary_transport_type;
   std::vector<std::string> secondary_transport_types;
-  bool device_is_ios = false;
-  bool device_is_android = false;
 
   // First discover what the connection type of the primary transport is
   // and look up the allowed secondary transports for that primary transport
