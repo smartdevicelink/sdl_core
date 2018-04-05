@@ -313,7 +313,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     utils::SharedPtr<policy_table::Table> policy_table_snapshot =
         cache_->GenerateSnapshot();
     if (!policy_table_snapshot) {
-      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed to create snapshot of policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
@@ -327,7 +330,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
     // Replace current data with updated
     if (!cache_->ApplyUpdate(*pt_update)) {
-      LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
+      LOG4CXX_WARN(
+          logger_,
+          "Unsuccessful save of updated policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
