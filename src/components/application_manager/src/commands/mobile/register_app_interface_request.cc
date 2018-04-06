@@ -50,6 +50,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
+#include "utils/file_system.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -710,6 +711,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
   policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
       application->policy_app_id(), hmi_types);
+
+  response_params[strings::icon_resumed] =
+      file_system::FileExists(application->app_icon_path());
+
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);

@@ -178,6 +178,7 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* icon_resumed;
 
 // PutFile
 extern const char* sync_file_name;
