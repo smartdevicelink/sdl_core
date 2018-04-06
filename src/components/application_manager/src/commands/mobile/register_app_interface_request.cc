@@ -839,7 +839,9 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
   application[hmi_response::policy_app_id] = application_impl.policy_app_id();
-  application[strings::icon] = application_impl.app_icon_path();
+  if (file_system::FileExists(application_impl.app_icon_path())) {
+    application[strings::icon] = application_impl.app_icon_path();
+  }
 
   const smart_objects::SmartObject* ngn_media_screen_name =
       application_impl.ngn_media_screen_name();
