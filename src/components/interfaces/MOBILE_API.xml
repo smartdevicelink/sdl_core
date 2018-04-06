@@ -3090,6 +3090,10 @@
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
         </param>
+        <param name="iconResumed" type="Boolean" mandatory="true">
+            <description>Existence of apps icon at system. If true, apps icon
+            was resumed at system. If false, apps icon is not resumed at system</description>
+        </param>
     </function>
     
     <function name="UnregisterAppInterface" functionID="UnregisterAppInterfaceID" messagetype="request">
