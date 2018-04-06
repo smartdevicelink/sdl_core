@@ -36,7 +36,7 @@
 namespace logger {
 
 LogMessageLoopThread::LogMessageLoopThread()
-: log_message_loop_handler_("Logger", this) {}
+    : log_message_loop_handler_("Logger", this) {}
 
 LogMessageLoopThread::~LogMessageLoopThread() {
   // we'll have to drop messages
