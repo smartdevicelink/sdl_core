@@ -142,6 +142,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* icon_resumed = "iconResumed";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
