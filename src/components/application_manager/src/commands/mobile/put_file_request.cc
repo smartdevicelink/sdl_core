@@ -38,6 +38,22 @@
 #include "application_manager/application_impl.h"
 
 #include "utils/file_system.h"
+#include <boost/crc.hpp>
+
+namespace {
+/**
+* Calculates CRC32 checksum
+* @param binary_data - input data for which CRC32 should be calculated
+* @return calculated CRC32 checksum
+*/
+uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
+  const std::size_t file_size = binary_data.size();
+  boost::crc_32_type result;
+  result.process_bytes(&binary_data[0], file_size);
+  return result.checksum();
+}
+
+}  // namespace
 
 namespace application_manager {
 
@@ -137,7 +153,7 @@ void PutFileRequest::Run() {
   is_persistent_file_ = false;
   bool is_system_file = false;
   length_ = binary_data.size();
-  bool is_download_compleate = true;
+  bool is_download_complete = true;
   bool offset_exist =
       (*message_)[strings::msg_params].keyExists(strings::offset);
 
@@ -187,11 +203,29 @@ void PutFileRequest::Run() {
     return;
   }
   const std::string full_path = file_path + "/" + sync_file_name_;
-  UNUSED(full_path);
+  const size_t bin_data_size = binary_data.size();
+
+  if ((*message_)[strings::msg_params].keyExists(strings::crc32_check_sum)) {
+    LOG4CXX_TRACE(logger_, "Binary Data Size:  " << bin_data_size);
+    const uint32_t crc_received =
+        (*message_)[strings::msg_params][strings::crc32_check_sum].asUInt();
+    LOG4CXX_TRACE(logger_, "CRC32 SUM Received: " << crc_received);
+    const uint32_t crc_calculated = GetCrc32CheckSum(binary_data);
+    LOG4CXX_TRACE(logger_, "CRC32 SUM Calculated: " << crc_calculated);
+    if (crc_calculated != crc_received) {
+      SendResponse(false,
+                   mobile_apis::Result::CORRUPTED_DATA,
+                   "CRC Check on file failed. File upload has been cancelled, "
+                   "please retry.",
+                   &response_params);
+      return;
+    }
+  }
+
   LOG4CXX_DEBUG(logger_,
-                "Wrtiting " << binary_data.size() << "bytes to " << full_path
-                            << " (current size is"
-                            << file_system::FileSize(full_path) << ")");
+                "Writing " << bin_data_size << " bytes to " << full_path
+                           << " (current size is"
+                           << file_system::FileSize(full_path) << ")");
 
   mobile_apis::Result::eType save_result = application_manager_.SaveBinary(
       binary_data, file_path, sync_file_name_, offset_);
@@ -211,7 +245,7 @@ void PutFileRequest::Run() {
       if (!is_system_file) {
         AppFile file(sync_file_name_,
                      is_persistent_file_,
-                     is_download_compleate,
+                     is_download_complete,
                      file_type_);
 
         if (0 == offset_) {
