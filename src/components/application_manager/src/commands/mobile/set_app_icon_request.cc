@@ -31,8 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "application_manager/commands/mobile/set_app_icon_request.h"
+
+#include <algorithm>
 
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
@@ -88,10 +89,6 @@ void SetAppIconRequest::Run() {
     LOG4CXX_ERROR(logger_, "No such file " << full_file_path);
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
-  }
-
-  if (is_icons_saving_enabled_) {
-    CopyToIconStorage(full_file_path);
   }
 
   smart_objects::SmartObject msg_params =
@@ -262,6 +259,11 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         const std::string& path =
             (*message_)[strings::msg_params][strings::sync_file_name]
                        [strings::value].asString();
+
+        if (is_icons_saving_enabled_) {
+          CopyToIconStorage(path);
+        }
+
         app->set_app_icon_path(path);
 
         LOG4CXX_INFO(logger_,
