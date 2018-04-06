@@ -14,7 +14,7 @@ Pull Requests Welcome!
 
 ## Documentation
 
-  * [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+  * [Software Architecture Document](https://smartdevicelink.com/en/docs/sdl-core/master/software-architecture-document/table-of-contents/)
   * [Transport Manager Programming Guide](https://smartdevicelink.com/en/guides/core/transport-manager-programming/)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
   * [Integration Guidelines](https://smartdevicelink.com/en/docs/hmi/master/overview/)
@@ -31,7 +31,7 @@ We're ramping up our efforts to get SmartDeviceLink developed and maintained dir
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
 
   1. Clone this repository
-  2. Create a folder for your build and run `cmake ../sdl_core`
+  2. Create a folder for your build outside of the source folder and run `cmake {path_to_sdl_core_source_folder}` from the build folder you created
   3. If there are any dependency issues, install missing dependencies
   4. Run the following commands to compile and install smartdevicelink
 
@@ -65,9 +65,10 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 | Flag | Description | Dependencies |
 |------|-------------|--------------|
 |Web HMI|Use HTML5 HMI|chromium-browser|
-|HMI2|Build with QT HMI|QT5, dbus-*dev|
+|DBus|Use DBus HMI Adapter|dbus-1-dev|
 |EXTENDED_MEDIA_MODE|Support Video and Audio Streaming|Opengl es2, gstreamer1.0*|
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
+|USB|Enable USB transport adapter|libusb-dev|
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
 
@@ -118,6 +119,10 @@ There are several RPCs that are "required" to be implemented in order for SDL to
   * OnLanguageChange
   * OnSystemRequest
   * Speak
+
+## Frequently Asked Questions
+
+If you have any questions regarding the setup of SDL Core or regarding the integration of SDL into an infotainment system, first visit our [SDL Core FAQ](https://smartdevicelink.com/en/guides/core/faq/). If you still have questions, you can post a question in the `core-help` channel of our Slack group (sign up [here](http://slack.smartdevicelink.com/))
 
 ## Test Coverage
 ### Used technologies

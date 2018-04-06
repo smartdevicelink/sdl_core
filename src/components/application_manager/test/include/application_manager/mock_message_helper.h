@@ -40,6 +40,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/common.h"
 
 namespace application_manager {
 
@@ -266,8 +267,31 @@ class MockMessageHelper {
   MOCK_METHOD1(StringifiedHMILevel,
                std::string(const mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD2(GetDeviceMacAddressForHandle,
-               std::string(const uint32_t device_handle,
+               std::string(const transport_manager::DeviceHandle device_handle,
                            const ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteCommandRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteSubmenuRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendDeleteChoiceSetRequest,
+               void(smart_objects::SmartObject* cmd,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendResetPropertiesRequest,
+               void(ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendUnsubscribeButtonNotification,
+               void(mobile_apis::ButtonName::eType button,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendUnsubscribeIVIRequest,
+               void(int32_t ivi_id,
+                    ApplicationSharedPtr application,
+                    ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };

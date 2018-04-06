@@ -72,7 +72,7 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
 
   CheckGlobalProporties(
       resume_app_list[am::strings::application_global_properties]);
-  CheckSubscriptions(resume_app_list[am::strings::application_subscribtions]);
+  CheckSubscriptions(resume_app_list[am::strings::application_subscriptions]);
 }
 
 void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {

@@ -39,6 +39,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
+#include "utils/macro.h"
 
 /**
  * \namespace connection_handler
@@ -175,10 +176,27 @@ class ConnectionHandler {
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) const = 0;
+  virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const = 0;
+
+  /**
+   * DEPRECATED
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  DEPRECATED virtual int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      uint32_t* device_id) const = 0;
+
   /**
    * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
    * currently connected devices.

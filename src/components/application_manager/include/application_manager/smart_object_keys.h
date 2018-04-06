@@ -282,7 +282,7 @@ extern const char* application_choice_sets;
 extern const char* application_global_properties;
 extern const char* application_vehicle_info;
 extern const char* application_buttons;
-extern const char* application_subscribtions;
+extern const char* application_subscriptions;
 extern const char* application_files;
 extern const char* application_show;
 extern const char* resumption;

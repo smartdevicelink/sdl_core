@@ -189,9 +189,10 @@ TEST_F(TransportAdapterTest, AddDevice) {
   MockTransportAdapterListener mock_listener;
   transport_adapter.AddListener(&mock_listener);
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
 
-  EXPECT_CALL(mock_listener, OnDeviceListUpdated(_));
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   transport_adapter.AddDevice(mockdev);
 }
 
@@ -276,7 +277,8 @@ TEST_F(TransportAdapterTest, ConnectDevice_ServerNotAdded_DeviceAdded) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -286,6 +288,7 @@ TEST_F(TransportAdapterTest, ConnectDevice_ServerNotAdded_DeviceAdded) {
   int app_handle = 1;
   std::vector<int> intList = {app_handle};
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
 
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::FAIL, res);
@@ -303,6 +306,8 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceNotAdded) {
 
   EXPECT_CALL(*serverMock, IsInitialised()).Times(0);
   EXPECT_CALL(*serverMock, CreateConnection(_, _)).Times(0);
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id))
+      .WillOnce(Return(utils::SharedPtr<MockDevice>()));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::BAD_PARAM, res);
 
@@ -318,7 +323,8 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -332,6 +338,7 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAdded) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
 
@@ -347,7 +354,8 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -361,6 +369,7 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
 
@@ -370,6 +379,7 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceAddedTwice) {
 
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle)).Times(0);
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   TransportAdapter::Error newres = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, newres);
 
@@ -415,7 +425,8 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -428,6 +439,7 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
 
@@ -455,8 +467,9 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
   MockTransportAdapterListener mock_listener;
   transport_adapter.AddListener(&mock_listener);
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
-  EXPECT_CALL(mock_listener, OnDeviceListUpdated(_));
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -465,23 +478,25 @@ TEST_F(TransportAdapterTest, DeviceDisconnected) {
 
   std::vector<int> intList = {app_handle};
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
-
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(uniq_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
   TransportAdapter::Error res = transport_adapter.ConnectDevice(uniq_id);
   EXPECT_EQ(TransportAdapter::OK, res);
 
-  MockConnection* mock_connection = new MockConnection();
+  utils::SharedPtr<MockConnection> mock_connection =
+      utils::MakeShared<MockConnection>();
   transport_adapter.ConnectionCreated(mock_connection, uniq_id, app_handle);
 
+  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
   EXPECT_CALL(
       mock_listener,
       OnUnexpectedDisconnect(&transport_adapter, uniq_id, app_handle, _));
   EXPECT_CALL(mock_listener,
               OnDisconnectDeviceDone(&transport_adapter, uniq_id));
-  EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   DisconnectDeviceError error;
   transport_adapter.DeviceDisconnected(uniq_id, error);
 
@@ -697,7 +712,8 @@ TEST_F(TransportAdapterTest, GetDeviceAndApplicationLists) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  MockDevice* mockdev = new MockDevice(dev_id, uniq_id);
+  utils::SharedPtr<MockDevice> mockdev =
+      utils::MakeShared<MockDevice>(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
   std::vector<std::string> devList = transport_adapter.GetDeviceList();
@@ -707,6 +723,7 @@ TEST_F(TransportAdapterTest, GetDeviceAndApplicationLists) {
   int app_handle = 1;
   std::vector<int> intList = {app_handle};
   EXPECT_CALL(*mockdev, GetApplicationList()).WillOnce(Return(intList));
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   std::vector<int> res = transport_adapter.GetApplicationList(uniq_id);
   ASSERT_EQ(1u, res.size());
   EXPECT_EQ(intList[0], res[0]);
@@ -752,6 +769,8 @@ TEST_F(TransportAdapterTest, RunAppOnDevice_NoDeviseWithAskedId_UNSUCCESS) {
   transport_adapter.AddDevice(mock_device);
 
   EXPECT_CALL(*mock_device, LaunchApp(bundle_id)).Times(0);
+  EXPECT_CALL(transport_adapter, FindDevice("test_device_uid1"))
+      .WillOnce(Return(utils::SharedPtr<MockDevice>()));
 
   transport_adapter.RunAppOnDevice("test_device_uid1", bundle_id);
 }
@@ -769,8 +788,25 @@ TEST_F(TransportAdapterTest, RunAppOnDevice_DeviseWithAskedIdWasFound_SUCCESS) {
   transport_adapter.AddDevice(mock_device);
 
   EXPECT_CALL(*mock_device, LaunchApp(bundle_id));
+  EXPECT_CALL(transport_adapter, FindDevice(device_uid))
+      .WillOnce(Return(mock_device));
 
   transport_adapter.RunAppOnDevice(device_uid, bundle_id);
+}
+
+TEST_F(TransportAdapterTest, StopDevice) {
+  MockTransportAdapterImpl transport_adapter(
+      NULL, NULL, NULL, last_state_, transport_manager_settings);
+  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
+  transport_adapter.Init();
+
+  auto mockdev = utils::MakeShared<MockDevice>(dev_id, uniq_id);
+  transport_adapter.AddDevice(mockdev);
+
+  EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
+  EXPECT_CALL(*mockdev, Stop());
+
+  transport_adapter.StopDevice(uniq_id);
 }
 
 }  // namespace transport_manager_test
