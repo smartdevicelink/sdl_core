@@ -65,8 +65,9 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
-  RequestType::eType request_type = static_cast<RequestType::eType>(
-      (*message_)[strings::msg_params][strings::request_type].asInt());
+  const mobile_apis::RequestType::eType request_type =
+      static_cast<mobile_apis::RequestType::eType>(
+          (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
@@ -77,7 +78,7 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
-  if (RequestType::PROPRIETARY == request_type) {
+  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
@@ -97,7 +98,7 @@ void OnSystemRequestNotification::Run() {
 #endif  // PROPRIETARY_MODE
 
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
-  } else if (RequestType::HTTP == request_type) {
+  } else if (mobile_apis::RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =

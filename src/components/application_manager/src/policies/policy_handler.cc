@@ -90,7 +90,8 @@ RequestTypeMap TypeToString = {
     {mobile_apis::RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
     {mobile_apis::RequestType::EMERGENCY, "EMERGENCY"},
     {mobile_apis::RequestType::MEDIA, "MEDIA"},
-    {mobile_apis::RequestType::FOTA, "FOTA"}};
+    {mobile_apis::RequestType::FOTA, "FOTA"},
+    {mobile_apis::RequestType::OEM_SPECIFIC, "OEM_SPECIFIC"}};
 
 const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);

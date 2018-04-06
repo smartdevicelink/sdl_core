@@ -2144,6 +2144,7 @@
         <element name="EMERGENCY" />
         <element name="MEDIA" />
         <element name="FOTA" />
+        <element name="OEM_SPECIFIC" />
     </enum>         
     <enum name="AppHMIType">
         <description>Enumeration listing possible app types.</description>
@@ -5295,6 +5296,11 @@
                 Note that Proprietary requests should forward the binary data to the known proprietary module on the system.
             </description>
         </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
+        </param>
         <param name="fileName" type="String" maxlength="255" mandatory="false">
             <description>
                 Filename of HTTP data to store in predefined system staging area.
@@ -5887,6 +5893,11 @@
         </description>
         <param name="requestType" type="RequestType" mandatory="true">
             <description>The type of system request.</description>
+        </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
         </param>
         <param name="url" type="String" maxlength="1000" mandatory="false">
             <description>
