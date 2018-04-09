@@ -161,8 +161,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
-  MOCK_METHOD0(BeginAudioPassThrough, bool());
-  MOCK_METHOD0(EndAudioPassThrough, bool());
+  DEPRECATED MOCK_METHOD0(BeginAudioPassThrough, bool());
+  MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
+  DEPRECATED MOCK_METHOD0(EndAudioPassThrough, bool());
+  MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
   MOCK_METHOD0(OnHMIStartedCooperation, void());
   MOCK_CONST_METHOD0(IsHMICooperating, bool());

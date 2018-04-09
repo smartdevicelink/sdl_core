@@ -143,6 +143,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     : settings_(am_settings)
     , applications_list_lock_(true)
     , audio_pass_thru_active_(false)
+    , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
           hmi_apis::Common_DriverDistractionState::INVALID_ENUM)
     , is_vr_session_strated_(false)
@@ -784,10 +785,32 @@ bool ApplicationManagerImpl::BeginAudioPassThrough() {
   }
 }
 
+bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
+  if (audio_pass_thru_active_) {
+    return false;
+  } else {
+    audio_pass_thru_active_ = true;
+    audio_pass_thru_app_id_ = app_id;
+    return true;
+  }
+}
+
 bool ApplicationManagerImpl::EndAudioPassThrough() {
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
     audio_pass_thru_active_ = false;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool ApplicationManagerImpl::EndAudioPassThru(uint32_t app_id) {
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
+  if (audio_pass_thru_active_ && audio_pass_thru_app_id_ == app_id) {
+    audio_pass_thru_active_ = false;
+    audio_pass_thru_app_id_ = 0;
     return true;
   } else {
     return false;
@@ -3222,9 +3245,8 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   commands_holder_->Clear(app_to_remove);
 
-  if (audio_pass_thru_active_) {
+  if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
-    EndAudioPassThrough();
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru(*this);
   }
@@ -4440,6 +4462,11 @@ void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_.insert(mock_app);
   apps_size_ = applications_.size();
   applications_list_lock_.Release();
+}
+
+void ApplicationManagerImpl::SetMockMediaManager(
+    media_manager::MediaManager* mock_media_manager) {
+  media_manager_ = mock_media_manager;
 }
 #endif  // BUILD_TESTS
 #ifdef SDL_REMOTE_CONTROL
