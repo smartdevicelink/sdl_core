@@ -372,7 +372,7 @@ const uint32_t kDefaultAppTransportChangeTimer = 500u;
 const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
-const bool kDefaultMultipleTransportsEnabled = true;
+const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 }  // namespace
 
@@ -478,6 +478,7 @@ Profile::Profile()
     , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
+    , multiple_transports_enabled_(kDefaultMultipleTransportsEnabled)
     , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
     , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
     , app_tranport_change_timer_addition_(

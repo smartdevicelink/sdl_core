@@ -44,6 +44,7 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/shared_ptr.h"
 #include "utils/messagemeter.h"
+#include "utils/custom_string.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -244,17 +245,27 @@ class ProtocolHandlerImpl
   /**
     * \brief Sends ending session to mobile application
     * \param connection_id Identifier of connection within which
-    * session exists (only needed for SendEndService)
-    * \param connection_id Identifier of the actual transport connection ID
-    * for the sevice
+    * session exists
     * \param session_id ID of session to be ended
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
+  DEPRECATED void SendEndService(int32_t connection_id,
+                      uint8_t session_id,
+                      uint8_t service_type);
+
+  /**
+    * \brief Sends ending session to mobile application
+    * \param connection_id Identifier of connection within which
+    * service exists
+    * \param connection_id Identifier of the actual transport connection ID
+    * for the sevice
+    * \param session_id ID of session to be ended
+    */
   void SendEndService(int32_t primary_connection_id, 
-                              int32_t connection_id,
-                              uint8_t session_id,
-                              uint8_t service_type);
+                      int32_t connection_id,
+                      uint8_t session_id,
+                      uint8_t service_type);
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -662,24 +673,24 @@ class ProtocolHandlerImpl
    */
   uint8_t SupportedSDLProtocolVersion() const;
 
-  impl::TransportDescription GetTransportTypeFromDeviceType(transport_manager::transport_adapter::DeviceType device_type);
+  const impl::TransportDescription GetTransportTypeFromDeviceType(transport_manager::transport_adapter::DeviceType device_type) const;
 
-  bool parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
-                                            std::vector<std::string>& secondaryTransports, 
-                                            std::vector<int32_t>& audioServiceTransports,
-                                            std::vector<int32_t>& videoServiceTransports);
+  const bool parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
+                                                  std::vector<std::string>& secondaryTransports, 
+                                                  std::vector<int32_t>& audioServiceTransports,
+                                                  std::vector<int32_t>& videoServiceTransports) const;
 
   void generateSecondaryTransportsForStartSessionAck(const std::vector<std::string>& secondary_transport_types, 
                                                      bool device_is_ios, 
                                                      bool device_is_android, 
-                                                     std::vector<std::string>& secondaryTransports);
+                                                     std::vector<std::string>& secondaryTransports) const;
 
   void generateServiceTransportsForStartSessionAck(const std::vector<std::string>& service_transports,
                                                    const std::string& primary_transport_type, 
                                                    const std::vector<std::string>& secondary_transport_types, 
-                                                   std::vector<int32_t>& serviceTransports);
+                                                   std::vector<int32_t>& serviceTransports) const;
 
-  std::string transportTypeFromTransport(std::string transport);
+  const std::string transportTypeFromTransport(const utils::custom_string::CustomString& transport) const;
 
   const ProtocolHandlerSettings& settings_;
 

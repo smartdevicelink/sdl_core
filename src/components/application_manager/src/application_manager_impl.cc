@@ -4572,6 +4572,39 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   return subscribed_way_points_apps_list_;
 }
 
+// retrieve transport type string used in .ini file, e.g. "TCP_WIFI"
+const std::string ApplicationManagerImpl::GetTransportTypeProfileString(
+    connection_handler::DeviceHandle device_handle) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string connection_type;
+  connection_handler().get_session_observer().GetDataOnDeviceID(
+      device_handle, NULL, NULL, NULL, &connection_type);
+
+  // Caution: this should be in sync with devicesType map in
+  // transport_adapter_impl.cc
+  if (connection_type == "USB_AOA") {
+    return std::string("AOA_USB");
+  } else if (connection_type == "BLUETOOTH") {
+    return std::string("SPP_BLUETOOTH");
+  } else if (connection_type == "USB_IOS") {
+    return std::string("IAP_USB");
+  } else if (connection_type == "BLUETOOTH_IOS") {
+    return std::string("IAP_BLUETOOTH");
+  } else if (connection_type == "WIFI") {
+    return std::string("TCP_WIFI");
+  } else if (connection_type == "USB_IOS_HOST_MODE") {
+    return std::string("IAP_USB_HOST_MODE");
+  } else if (connection_type == "USB_IOS_DEVICE_MODE") {
+    return std::string("IAP_USB_DEVICE_MODE");
+  } else if (connection_type == "CARPLAY_WIRELESS_IOS") {
+    return std::string("IAP_CARPLAY");
+  } else {
+    LOG4CXX_WARN(logger_, "Unknown transport type string: " << connection_type);
+    return std::string();
+  }
+}
+
 static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(
     const char* str) {
   if (strcmp(str, "RAW") == 0) {
@@ -4654,39 +4687,6 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     // ignore unknown parameters
   }
   return output;
-}
-
-// retrieve transport type string used in .ini file, e.g. "TCP_WIFI"
-const std::string ApplicationManagerImpl::GetTransportTypeProfileString(
-    connection_handler::DeviceHandle device_handle) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  std::string connection_type;
-  connection_handler().get_session_observer().GetDataOnDeviceID(
-      device_handle, NULL, NULL, NULL, &connection_type);
-
-  // Caution: this should be in sync with devicesType map in
-  // transport_adapter_impl.cc
-  if (connection_type == "USB_AOA") {
-    return std::string("AOA_USB");
-  } else if (connection_type == "BLUETOOTH") {
-    return std::string("SPP_BLUETOOTH");
-  } else if (connection_type == "USB_IOS") {
-    return std::string("IAP_USB");
-  } else if (connection_type == "BLUETOOTH_IOS") {
-    return std::string("IAP_BLUETOOTH");
-  } else if (connection_type == "WIFI") {
-    return std::string("TCP_WIFI");
-  } else if (connection_type == "USB_IOS_HOST_MODE") {
-    return std::string("IAP_USB_HOST_MODE");
-  } else if (connection_type == "USB_IOS_DEVICE_MODE") {
-    return std::string("IAP_USB_DEVICE_MODE");
-  } else if (connection_type == "CARPLAY_WIRELESS_IOS") {
-    return std::string("IAP_CARPLAY");
-  } else {
-    LOG4CXX_WARN(logger_, "Unknown transport type string: " << connection_type);
-    return std::string();
-  }
 }
 
 #ifdef BUILD_TESTS

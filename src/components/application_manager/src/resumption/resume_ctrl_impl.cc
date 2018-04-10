@@ -178,8 +178,8 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
       }
 
       // Check one of the high-bandwidth transports (configured through
-      // smartDeviceLink.ini file) is available. If not, then HMI level to
-      // resume will be updated.
+      // smartDeviceLink.ini file) is available. If not, then the HMI level to
+      // resume into will be modified.
       if (!application_manager_.CheckResumptionRequiredTransportAvailable(
               application)) {
         mobile_apis::HMILevel::eType low_bandwidth_level =
@@ -213,8 +213,8 @@ bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
       application_manager_.GetDefaultHmiLevel(application);
 
   // Check one of the high-bandwidth transports (configured through
-  // smartDeviceLink.ini file) is available. If not, then HMI level to resume
-  // will be updated.
+  // smartDeviceLink.ini file) is available. If not, then the HMI level to
+  // resume into will be modified.
   if (!application_manager_.CheckResumptionRequiredTransportAvailable(
           application)) {
     mobile_apis::HMILevel::eType low_bandwidth_level =
@@ -927,11 +927,11 @@ mobile_apis::HMILevel::eType ResumeCtrlImpl::GetHmiLevelOnLowBandwidthTransport(
 
   const ApplicationManagerSettings& settings =
       application_manager_.get_settings();
-  const std::string level_for_navi_app =
+  const std::string& level_for_navi_app =
       settings.navigation_lowbandwidth_resumption_level();
-  const std::string level_for_projection_app =
+  const std::string& level_for_projection_app =
       settings.projection_lowbandwidth_resumption_level();
-  const std::string level_for_media_app =
+  const std::string& level_for_media_app =
       settings.mediaapp_lowbandwidth_resumption_level();
 
   HMILevel::eType result_level = HMILevel::HMI_NONE;

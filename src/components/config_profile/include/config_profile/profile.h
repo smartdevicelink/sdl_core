@@ -477,21 +477,21 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns true multiple transports is enabled
    */
-  const bool multiple_transports_enabled() const;
+  const bool multiple_transports_enabled() const OVERRIDE;
 
   /**
    * @brief Returns list of secondary transports available
    * for the named primary transport
    */
-  const std::vector<std::string>& secondary_transports_for_bluetooth() const;
-  const std::vector<std::string>& secondary_transports_for_usb() const;
-  const std::vector<std::string>& secondary_transports_for_wifi() const;
+  const std::vector<std::string>& secondary_transports_for_bluetooth() const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_usb() const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_wifi() const OVERRIDE;
 
   /**
    * @brief Returns list of allowed transports for the named service
    */
-  const std::vector<std::string>& audio_service_transports() const;
-  const std::vector<std::string>& video_service_transports() const;
+  const std::vector<std::string>& audio_service_transports() const OVERRIDE;
+  const std::vector<std::string>& video_service_transports() const OVERRIDE;
 
   /**
    * @brief Reads a string value from the profile

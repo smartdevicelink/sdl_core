@@ -173,8 +173,6 @@ class ConnectionHandlerObserver {
    * \param session_key session ID representing the app
    */
   virtual void OnSecondaryTransportEndedCallback(
-      // TODO: possibly a list of apps, so that when underlying transport is
-      // disconnected, we can remove secondary transports of all apps at once
       const int32_t session_key) = 0;
 
  protected:

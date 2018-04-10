@@ -982,12 +982,11 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
   return st;
 }
 
-SessionTransports ConnectionHandlerImpl::GetSessionTransports(uint8_t session_id) {
+const SessionTransports ConnectionHandlerImpl::GetSessionTransports(uint8_t session_id) const {
   SessionTransports st;
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = session_connection_map();
-  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
-  SessionConnectionMap::iterator it = session_connection_map.find(session_id);
-  if (session_connection_map.end() == it) {
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  SessionConnectionMap::const_iterator it = session_connection_map_.find(session_id);
+  if (session_connection_map_.end() == it) {
     st.primary_transport = 0;
     st.secondary_transport = 0;
   } else {
@@ -997,12 +996,11 @@ SessionTransports ConnectionHandlerImpl::GetSessionTransports(uint8_t session_id
   return st;
 }
 
-uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
-    transport_manager::ConnectionUID secondary_transport_id) {
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = session_connection_map();
-  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
-  SessionConnectionMap::iterator it = session_connection_map.begin();
-  for ( ; session_connection_map.end() != it ; it++) {
+const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
+    transport_manager::ConnectionUID secondary_transport_id) const {
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  SessionConnectionMap::const_iterator it = session_connection_map_.begin();
+  for ( ; session_connection_map_.end() != it ; it++) {
     SessionTransports st = it->second;
     if (st.secondary_transport == secondary_transport_id) {
       return it->first;

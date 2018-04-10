@@ -479,6 +479,9 @@ void ApplicationImpl::StopStreamingForce(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // see the comment in StopStreaming()
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
+
   SuspendStreaming(service_type);
 
   if (service_type == ServiceType::kMobileNav) {
@@ -492,6 +495,12 @@ void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // since WakeUpStreaming() is called from another thread, it is possible that
+  // the stream will be restarted after we call SuspendStreaming() and before
+  // we call StopXxxStreaming(). To avoid such timing issue, make sure that
+  // we run SuspendStreaming() and StopXxxStreaming() atomically.
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   SuspendStreaming(service_type);
 
@@ -542,6 +551,10 @@ void ApplicationImpl::WakeUpStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // See the comment in StopStreaming(). Also, please make sure that we acquire
+  // streaming_stop_lock_ then xxx_streaming_suspended_lock_ in this order!
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);

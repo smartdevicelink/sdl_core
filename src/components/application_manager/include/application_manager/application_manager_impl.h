@@ -1695,6 +1695,15 @@ class ApplicationManagerImpl
                          const std::string& mac_address);
 
   /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string GetTransportTypeProfileString(
+      connection_handler::DeviceHandle device_handle) const;
+
+  /**
    * @brief Converts BSON object containing video parameters to
    * smart object's map object
    * @param output the smart object to add video parameters
@@ -1711,15 +1720,6 @@ class ApplicationManagerImpl
    */
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
-
-  /**
-   * @brief Converts device handle to transport type string used in
-   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
-   * @param device_handle A device handle
-   * @return string representation of the transport of the device
-   */
-  const std::string GetTransportTypeProfileString(
-      connection_handler::DeviceHandle device_handle) const;
 
  private:
   const ApplicationManagerSettings& settings_;

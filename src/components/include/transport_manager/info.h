@@ -112,7 +112,27 @@ class DeviceInfo : public Info {
    *
    * @param device_handle Handle of device.
    * @param mac_address MAC address of device.
+   * @param connection_type Connection Type string
    * @param name Name of device.
+   */
+  DEPRECATED DeviceInfo(DeviceHandle device_handle,
+             std::string mac_address,
+             std::string name,
+             const ConnectionType& connection_type)
+      : Info(name)
+      , mac_address_(mac_address)
+      , device_handle_(device_handle)
+      , connection_type_(connection_type)
+      , device_type_(transport_manager::transport_adapter::DeviceType::UNKNOWN) {}
+
+  /**
+   * @brief Constructor.
+   *
+   * @param device_handle Handle of device.
+   * @param mac_address MAC address of device.
+   * @param name Name of device.
+   * @param connection_type Connection Type string
+   * @param device_type Device Type of the Device
    */
   DeviceInfo(DeviceHandle device_handle,
              std::string mac_address,

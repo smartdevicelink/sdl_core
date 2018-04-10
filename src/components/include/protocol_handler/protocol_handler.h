@@ -95,17 +95,27 @@ class ProtocolHandler {
   /**
     * \brief Sends ending session to mobile application
     * \param connection_id Identifier of connection within which
-    * session exists (only needed for SendEndService)
-    * \param connection_id Identifier of the actual transport connection ID
-    * for the sevice
+    * session exists
     * \param session_id ID of session to be ended
     */
   virtual void SendEndSession(int32_t connection_id, uint8_t session_id) = 0;
 
+  DEPRECATED virtual void SendEndService(int32_t connection_id,
+                              uint8_t session_id,
+                              uint8_t service_type) = 0;
+  /**
+    * \brief Sends ending session to mobile application
+    * \param connection_id Identifier of connection within which
+    * service exists
+    * \param connection_id Identifier of the actual transport connection ID
+    * for the sevice
+    * \param session_id ID of session to be ended
+    */
   virtual void SendEndService(int32_t primary_connection_id, 
                               int32_t connection_id,
                               uint8_t session_id,
                               uint8_t service_type) = 0;
+
   /**
    * \brief Protocol handler settings getter
    * \return pointer to protocol handler settings class

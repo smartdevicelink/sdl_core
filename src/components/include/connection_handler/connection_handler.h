@@ -243,7 +243,7 @@ class ConnectionHandler {
    * \param session_id the session ID
    * \return the SessionTransports associated with the session
    **/
-  virtual SessionTransports GetSessionTransports(uint8_t session_id) = 0;
+  virtual const SessionTransports GetSessionTransports(uint8_t session_id) const = 0;
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
