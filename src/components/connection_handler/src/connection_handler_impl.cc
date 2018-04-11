@@ -146,17 +146,6 @@ void ConnectionHandlerImpl::OnDeviceFound(
 void ConnectionHandlerImpl::OnDeviceAdded(
     const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-<<<<<<< HEAD
-  device_list_.insert(
-      DeviceMap::value_type(device_info.device_handle(),
-                            Device(device_info.device_handle(),
-                                   device_info.name(),
-                                   device_info.mac_address(),
-                                   device_info.connection_type())));
-  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_valid_ && connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
-=======
   auto handle = device_info.device_handle();
 
   Device device(handle,
@@ -172,7 +161,6 @@ void ConnectionHandlerImpl::OnDeviceAdded(
                                         << " is known already. "
                                            "Information won't be updated.");
     return;
->>>>>>> 4bc4914adc8b23b57b377a47e771c2b10217739a
   }
 }
 
@@ -213,7 +201,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
 void ConnectionHandlerImpl::OnDeviceSwitchingFinish(
     const transport_manager::DeviceUID& device_uid) {
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnDeviceSwitchingFinish(
         encryption::MakeHash(device_uid));
   }
@@ -247,7 +235,7 @@ void ConnectionHandlerImpl::OnDeviceSwitchingStart(
   DCHECK_OR_RETURN_VOID(device_list_.end() != device_from);
   DCHECK_OR_RETURN_VOID(device_list_.end() != device_to);
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     connection_handler_observer_->OnDeviceSwitchingStart(device_from->second,
                                                          device_to->second);
   }
@@ -483,7 +471,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     context.hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
+  if (connection_handler_observer_valid_ && connection_handler_observer_) {
     const uint32_t session_key =
         KeyFromPair(connection_handle, context.new_session_id_);
 
