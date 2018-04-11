@@ -1192,7 +1192,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_lock_.Release();
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_valid_ && connection_handler_observer_ && 
+  if (connection_handler_observer_valid_ && connection_handler_observer_ &&
       connection.get() != NULL) {
     const SessionMap session_map = connection->session_map();
 
