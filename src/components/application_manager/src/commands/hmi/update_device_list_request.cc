@@ -60,10 +60,11 @@ void UpdateDeviceListRequest::Run() {
       LOG4CXX_INFO(logger_, "Wait for HMI Cooperation");
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       const sync_primitives::ConditionalVariable::WaitStatus wait_status =
-        termination_condition_.WaitFor(auto_lock, 1000);
+          termination_condition_.WaitFor(auto_lock, 1000);
       if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
         LOG4CXX_DEBUG(logger_, "HMI Cooperation Wait timed out");
-        unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+        unsubscribe_from_event(
+            hmi_apis::FunctionID::BasicCommunication_OnReady);
       } else {
         LOG4CXX_DEBUG(logger_, "HMI Cooperation OK");
       }
