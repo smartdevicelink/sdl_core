@@ -148,7 +148,7 @@ struct TransportDescription {
   bool android_transport_;
 };
 
-typedef std::map<transport_manager::transport_adapter::DeviceType, TransportDescription>
+typedef std::map<std::string, TransportDescription>
     TransportTypes;
 }  // namespace impl
 
@@ -673,7 +673,7 @@ class ProtocolHandlerImpl
    */
   uint8_t SupportedSDLProtocolVersion() const;
 
-  const impl::TransportDescription GetTransportTypeFromDeviceType(transport_manager::transport_adapter::DeviceType device_type) const;
+  const impl::TransportDescription GetTransportTypeFromConnectionType(std::string& device_type) const;
 
   const bool parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
                                                   std::vector<std::string>& secondaryTransports, 

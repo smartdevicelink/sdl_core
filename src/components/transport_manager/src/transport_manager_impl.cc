@@ -590,7 +590,7 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
       DeviceHandle device_handle =
           converter_.UidToHandle(*it, ta->GetConnectionType());
       DeviceInfo info(
-          device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType(), ta->GetDeviceType());
+          device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
       device_list_.push_back(std::make_pair(ta, info));
       new_devices.insert(info);
     }
@@ -895,8 +895,7 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     DeviceInfo info(device_handle,
                     device_uid,
                     ta->DeviceName(device_uid),
-                    ta->GetConnectionType(),
-                    ta->GetDeviceType());
+                    ta->GetConnectionType());
     RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
 
@@ -970,8 +969,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
           DeviceInfo(device_handle,
                      event.device_uid,
                      event.transport_adapter->DeviceName(event.device_uid),
-                     event.transport_adapter->GetConnectionType(),
-                     event.transport_adapter->GetDeviceType()),
+                     event.transport_adapter->GetConnectionType()),
           connection_id_counter_);
       LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_DONE");
       break;
@@ -984,8 +982,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                          event.transport_adapter->GetConnectionType()),
                      event.device_uid,
                      event.transport_adapter->DeviceName(event.device_uid),
-                     event.transport_adapter->GetConnectionType(),
-                     event.transport_adapter->GetDeviceType()),
+                     event.transport_adapter->GetConnectionType()),
           ConnectError());
       LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_FAIL");
       break;

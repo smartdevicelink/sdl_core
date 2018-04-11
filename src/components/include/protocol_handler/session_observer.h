@@ -253,11 +253,11 @@ class SessionObserver {
   virtual void OnMalformedMessageCallback(const uint32_t& connection_key) = 0;
 
   /**
-   * \brief Returns the device type associated with the connection handle
+   * \brief Returns the connection type associated with the connection handle
    * \param connection_handle Handle of the connection being queried
-   * \return Device Type
+   * \return Connection Type
    */
-  virtual transport_manager::transport_adapter::DeviceType device_type(
+  virtual std::string connection_type(
       transport_manager::ConnectionUID connection_handle) const = 0;
 
   /**

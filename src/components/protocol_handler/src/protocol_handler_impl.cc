@@ -2306,33 +2306,33 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
 }
 
 impl::TransportTypes transportTypes = {
-    std::make_pair(transport_manager::transport_adapter::AOA,
+    std::make_pair(std::string("USB_AOA"),
                    impl::TransportDescription("USB", false, true)),
-    std::make_pair(transport_manager::transport_adapter::BLUETOOTH,
+    std::make_pair(std::string("BLUETOOTH"),
                    impl::TransportDescription("Bluetooth", false, true)),
-    std::make_pair(transport_manager::transport_adapter::IOS_BT,
+    std::make_pair(std::string("BLUETOOTH_IOS"),
                    impl::TransportDescription("Bluetooth", true, false)),
-    std::make_pair(transport_manager::transport_adapter::IOS_USB,
+    std::make_pair(std::string("USB_IOS"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(transport_manager::transport_adapter::TCP,
+    std::make_pair(std::string("WIFI"),
                    impl::TransportDescription("WiFi", true, true)),
-    std::make_pair(transport_manager::transport_adapter::IOS_USB_HOST_MODE,
+    std::make_pair(std::string("USB_IOS_HOST_MODE"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(transport_manager::transport_adapter::IOS_USB_DEVICE_MODE,
+    std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(transport_manager::transport_adapter::IOS_CARPLAY_WIRELESS,
+    std::make_pair(std::string("IOS_CARPLAY_WIRELESS"),
                    impl::TransportDescription("WiFi", true, false))
 };
 
 const impl::TransportDescription
-ProtocolHandlerImpl::GetTransportTypeFromDeviceType(
-    transport_manager::transport_adapter::DeviceType device_type) const {
+ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
+    std::string& connection_type) const {
   impl::TransportDescription result = impl::TransportDescription("", false, false);
-  impl::TransportTypes::const_iterator it = transportTypes.find(device_type);
+  impl::TransportTypes::const_iterator it = transportTypes.find(connection_type);
   if (it != transportTypes.end()) {
     result = it->second;
   } else {
-    LOG4CXX_ERROR(logger_, "Unknown device type " << device_type);
+    LOG4CXX_ERROR(logger_, "Unknown device type " << connection_type);
   }
 
   return result;
@@ -2349,8 +2349,8 @@ const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
 
   // First discover what the connection type of the primary transport is
   // and look up the allowed secondary transports for that primary transport
-  transport_manager::transport_adapter::DeviceType device_type = session_observer_.device_type(connection_id);
-  const impl::TransportDescription td = GetTransportTypeFromDeviceType(device_type);
+  std::string connection_type = session_observer_.connection_type(connection_id);
+  const impl::TransportDescription td = GetTransportTypeFromConnectionType(connection_type);
   if (td.transport_type_ == "USB") {
       secondary_transport_types = settings_.secondary_transports_for_usb();
   } else if (td.transport_type_ == "Bluetooth") {

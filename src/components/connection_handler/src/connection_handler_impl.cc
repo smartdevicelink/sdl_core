@@ -144,8 +144,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
   Device device(handle,
                 device_info.name(),
                 device_info.mac_address(),
-                device_info.connection_type(),
-                device_info.device_type());
+                device_info.connection_type());
 
   auto result = device_list_.insert(std::make_pair(handle, device));
 
@@ -817,11 +816,11 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
   }
 }
 
-transport_manager::transport_adapter::DeviceType ConnectionHandlerImpl::device_type(
+std::string ConnectionHandlerImpl::connection_type(
     transport_manager::ConnectionUID connection_handle) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  
-  transport_manager::transport_adapter::DeviceType device_type = transport_manager::transport_adapter::DeviceType::UNKNOWN;
+
+  std::string connection_type;
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::const_iterator it =
@@ -835,11 +834,11 @@ transport_manager::transport_adapter::DeviceType ConnectionHandlerImpl::device_t
     if (device_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Device not found!");
     } else {
-      device_type = it->second.device_type();
+      connection_type = it->second.connection_type();
     }
   }
 
-  return device_type;
+  return connection_type;
 }
 
 uint32_t ConnectionHandlerImpl::KeyFromPair(

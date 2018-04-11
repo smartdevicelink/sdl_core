@@ -37,7 +37,6 @@
 #include <map>
 #include <vector>
 #include "transport_manager/common.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 
 /**
  * \namespace connection_handler
@@ -63,8 +62,7 @@ class Device {
   Device(DeviceHandle device_handle,
          const std::string& user_friendly_name,
          const std::string& mac_address = "",
-         const std::string& connection_type = "",
-         transport_manager::transport_adapter::DeviceType device_type = transport_manager::transport_adapter::DeviceType::UNKNOWN);
+         const std::string& connection_type = "");
 
   /**
    * \brief Returns device handle
@@ -90,12 +88,6 @@ class Device {
    */
   std::string connection_type() const;
 
-  /**
-   * @brief The type of device.
-   * @return device type
-   */
-  transport_manager::transport_adapter::DeviceType device_type() const;
-
  private:
   /**
    * \brief Uniq device handle.
@@ -116,11 +108,6 @@ class Device {
    * \brief The type of connection used by device.
    */
   std::string connection_type_;
-
-  /**
-   * \brief The DeviceType associated with the device
-   */
-  transport_manager::transport_adapter::DeviceType device_type_;
 };
 
 /**
