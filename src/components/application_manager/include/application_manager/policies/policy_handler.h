@@ -67,7 +67,7 @@ class ApplicationManager;
 namespace policy {
 
 typedef std::vector<uint32_t> AppIds;
-typedef std::vector<uint32_t> DeviceHandles;
+typedef std::vector<transport_manager::DeviceHandle> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
 class PolicyHandler : public PolicyHandlerInterface,
@@ -532,6 +532,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   const PolicySettings& get_settings() const OVERRIDE;
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  /**
+   * @brief OnDeviceSwitching Notifies policy manager on device switch event so
+   * policy permissions should be processed accordingly
+   * @param device_id_from Id of device being switched
+   * @param device_id_to Id of device on the new transport
+   */
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) FINAL;
 
  protected:
   /**

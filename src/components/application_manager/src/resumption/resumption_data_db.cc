@@ -212,7 +212,9 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataDB::OnSuspend() {
+DEPRECATED void ResumptionDataDB::OnSuspend() {}
+
+void ResumptionDataDB::IncrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query_update_suspend_data(db());
@@ -291,7 +293,9 @@ bool ResumptionDataDB::GetHashId(const std::string& policy_app_id,
   return SelectHashId(policy_app_id, device_id, hash_id);
 }
 
-void ResumptionDataDB::OnAwake() {
+DEPRECATED void ResumptionDataDB::OnAwake() {}
+
+void ResumptionDataDB::DecrementIgnOffCount() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   UpdateDataOnAwake();
@@ -949,7 +953,7 @@ bool ResumptionDataDB::SelectSubscriptionsData(
     return false;
   }
 
-  saved_app[strings::application_subscribtions] = SmartObject(SmartType_Map);
+  saved_app[strings::application_subscriptions] = SmartObject(SmartType_Map);
 
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain subscriptions data");
@@ -968,8 +972,8 @@ bool ResumptionDataDB::SelectSubscriptionsData(
   size_t buttons_idx = 0;
   size_t vi_idx = 0;
   /* Position of data in "select_subscriptions" :
-     field "vehicleValue" from table "applicationSubscribtionsArray" = 0
-     field "ButtonNameValue" from table "applicationSubscribtionsArray" = 1*/
+     field "vehicleValue" from table "applicationSubscriptionsArray" = 0
+     field "ButtonNameValue" from table "applicationSubscriptionsArray" = 1*/
   while (select_subscriptions.Next()) {
     if (!select_subscriptions.IsNull(0)) {
       application_vehicle_info[vi_idx++] = select_subscriptions.GetInteger(0);
@@ -979,12 +983,12 @@ bool ResumptionDataDB::SelectSubscriptionsData(
     }
   }
   if (!application_buttons.empty()) {
-    saved_app[strings::application_subscribtions]
+    saved_app[strings::application_subscriptions]
              [strings::application_buttons] = application_buttons;
   }
 
   if (!application_vehicle_info.empty()) {
-    saved_app[strings::application_subscribtions]
+    saved_app[strings::application_subscriptions]
              [strings::application_vehicle_info] = application_vehicle_info;
   }
   LOG4CXX_INFO(logger_, "Subscriptions were restored from DB successfully");
@@ -1500,9 +1504,9 @@ bool ResumptionDataDB::DeleteSavedSubscriptions(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecQueryToDeleteData(
-          policy_app_id, device_id, kDeleteApplicationSubscribtionsArray)) {
+          policy_app_id, device_id, kDeleteApplicationSubscriptionsArray)) {
     LOG4CXX_WARN(logger_,
-                 "Incorrect delete from applicationSubscribtionsArray.");
+                 "Incorrect delete from applicationSubscriptionsArray.");
     return false;
   }
   return true;
@@ -1895,7 +1899,7 @@ bool ResumptionDataDB::SaveApplicationToDB(
   }
   if (!InsertSubscriptionsData(GetApplicationSubscriptions(application),
                                application_primary_key)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert subscribtions data to DB.");
+    LOG4CXX_WARN(logger_, "Incorrect insert subscriptions data to DB.");
     db_->RollbackTransaction();
     return false;
   }
@@ -1952,9 +1956,9 @@ bool ResumptionDataDB::SaveApplicationToDB(
     db_->RollbackTransaction();
     return false;
   }
-  if (!InsertSubscriptionsData(application["subscribtions"],
+  if (!InsertSubscriptionsData(application["subscriptions"],
                                application_primary_key)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert subscribtions data to DB.");
+    LOG4CXX_WARN(logger_, "Incorrect insert subscriptions data to DB.");
     db_->RollbackTransaction();
     return false;
   }
@@ -2160,9 +2164,9 @@ bool ResumptionDataDB::InsertSubscriptionsData(
     return false;
   }
   /* Positions of binding data for "insert_subscriptions":
-       field "idApplication" from table "applicationSubscribtionsArray" = 0
-       field "vehicleValue" from table "applicationSubscribtionsArray" = 1
-       field "ButtonNameValue" from table "applicationSubscribtionsArray" = 2*/
+       field "idApplication" from table "applicationSubscriptionsArray" = 0
+       field "vehicleValue" from table "applicationSubscriptionsArray" = 1
+       field "ButtonNameValue" from table "applicationSubscriptionsArray" = 2*/
   for (size_t i = 0; i < max_length; ++i) {
     insert_subscriptions.Bind(0, application_primary_key);
     if (i < vi_sub_length) {
@@ -2578,7 +2582,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(connection_key);
+      application_manager_.IsAppSubscribedForWayPoints(application.app_ptr);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,
@@ -2804,6 +2808,7 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_hmi_app_id = application->hmi_app_id();
     m_hmi_level = application->hmi_level();
     m_is_media_application = application->IsAudioApplication();
+    app_ptr = application;
   }
 }
 

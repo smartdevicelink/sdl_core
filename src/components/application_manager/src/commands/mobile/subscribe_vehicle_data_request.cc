@@ -3,6 +3,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -116,7 +119,7 @@ void SubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   bool result = false;
-  CheckVISubscribtions(
+  CheckVISubscriptions(
       app, info, result_code, response_params, msg_params, result);
 
   if (mobile_apis::Result::INVALID_ENUM != result_code) {
@@ -359,6 +362,21 @@ bool SubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
 }
 
 void SubscribeVehicleDataRequest::CheckVISubscribtions(
+    ApplicationSharedPtr app,
+    std::string& out_info,
+    mobile_apis::Result::eType& out_result_code,
+    smart_objects::SmartObject& out_response_params,
+    smart_objects::SmartObject& out_request_params,
+    bool& out_result) {
+  CheckVISubscriptions(app,
+                       out_info,
+                       out_result_code,
+                       out_response_params,
+                       out_request_params,
+                       out_result);
+}
+
+void SubscribeVehicleDataRequest::CheckVISubscriptions(
     ApplicationSharedPtr app,
     std::string& out_info,
     mobile_apis::Result::eType& out_result_code,

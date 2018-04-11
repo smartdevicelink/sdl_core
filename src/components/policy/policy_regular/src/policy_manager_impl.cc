@@ -366,6 +366,12 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
   SendNotificationOnPermissionsUpdated(application_id);
 }
 
+void PolicyManagerImpl::OnDeviceSwitching(const std::string& device_id_from,
+                                          const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->OnDeviceSwitching(device_id_from, device_id_to);
+}
+
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
     const std::string policy_app_id) const {
   std::vector<std::string> request_types;
@@ -748,7 +754,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
     const std::string& policy_app_id) const {
-  LOG4CXX_INFO(logger_, "GetDeviceInfo");
+  LOG4CXX_AUTO_TRACE(logger_);
   last_device_id_ = listener()->OnCurrentDeviceIdUpdateRequired(policy_app_id);
   return last_device_id_;
 }

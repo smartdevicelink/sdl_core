@@ -257,7 +257,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspend) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 }
@@ -268,13 +268,13 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 
-  res_json.OnSuspend();
-  res_json.OnSuspend();
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
+  res_json.IncrementIgnOffCount();
+  res_json.IncrementIgnOffCount();
 
   EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, kMacAddress_));
 }
@@ -285,11 +285,11 @@ TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 }
@@ -300,7 +300,7 @@ TEST_F(ResumptionDataJsonTest, Awake_AppNotSuspended) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 }
@@ -311,12 +311,12 @@ TEST_F(ResumptionDataJsonTest, TwiceAwake_AppNotSuspended) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  res_json.OnSuspend();
-  res_json.OnAwake();
+  res_json.IncrementIgnOffCount();
+  res_json.DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedJson();
 
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
   CheckSavedJson();
 }
 
@@ -339,14 +339,14 @@ TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
   last_ign_off_time = res_json.GetIgnOffTime();
   EXPECT_EQ(0u, last_ign_off_time);
 
-  res_json.OnSuspend();
+  res_json.IncrementIgnOffCount();
 
   uint32_t after_suspend;
   after_suspend = res_json.GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
   uint32_t after_awake;
-  res_json.OnAwake();
+  res_json.DecrementIgnOffCount();
 
   after_awake = res_json.GetIgnOffTime();
   EXPECT_LE(after_suspend, after_awake);
@@ -375,8 +375,8 @@ TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   EXPECT_TRUE(app.keyExists(am::strings::application_global_properties) &&
               app[am::strings::application_global_properties].empty());
 
-  EXPECT_TRUE(app.keyExists(am::strings::application_subscribtions) &&
-              app[am::strings::application_subscribtions].empty());
+  EXPECT_TRUE(app.keyExists(am::strings::application_subscriptions) &&
+              app[am::strings::application_subscriptions].empty());
 
   EXPECT_TRUE(app.keyExists(am::strings::application_files) &&
               app[am::strings::application_files].empty());

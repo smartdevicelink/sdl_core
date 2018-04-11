@@ -280,7 +280,7 @@ bool CryptoManagerImpl::SSLContextImpl::WriteHandshakeData(
     if (ret <= 0) {
       is_handshake_pending_ = false;
       ResetConnection();
-      return Handshake_Result_AbnormalFail;
+      return false;
     }
   }
   return true;

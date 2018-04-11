@@ -54,11 +54,8 @@ test/components/utils/test_Utils
 test/test_suit
 
 # libraries
-src/components/qt_hmi/qml_plugins/dbus/libhmi_dbus.so
-src/components/qt_hmi/qml_plugins/hmi_framework/libHmiFramework.so
 
 # install folders
-src/components/qt_hmi/qml_model/com/ford/sdl
 
 # ctags-generated
 tags
@@ -70,9 +67,6 @@ moc_*.cpp
 *_automoc.cpp
 
 # generated files
-src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.cc
-src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.h
-src/components/qt_hmi/qml_model/hmi_api/*Proxy.qml
 
 # Mac OS Specific
 .DS_Store
