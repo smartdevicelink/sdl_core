@@ -80,7 +80,8 @@ class ResumeCtrlTest : public ::testing::Test {
       , kTestGrammarId_(10)
       , kHash_("saved_hash")
       , kAppResumingTimeout_(30000u)  // miliseconds
-      , kTestTimeStamp_(1452074434u) {}
+      , kTestTimeStamp_(1452074434u)
+      , kDefaultDeferredTestLevel_(eType::INVALID_ENUM) {}
 
   virtual void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&app_mngr_);
@@ -99,11 +100,16 @@ class ResumeCtrlTest : public ::testing::Test {
         .WillByDefault(ReturnRef(state_controller_));
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(mock_application_manager_settings_));
+    ON_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+        .WillByDefault(Return(true));
 
     ON_CALL(mock_application_manager_settings_, use_db_for_resumption())
         .WillByDefault(Return(false));
     ON_CALL(mock_application_manager_settings_, app_resuming_timeout())
         .WillByDefault(ReturnRef(kAppResumingTimeout_));
+
+    ON_CALL(*app_mock_, deferred_resumption_hmi_level())
+        .WillByDefault(Return(kDefaultDeferredTestLevel_));
   }
   void TearDown() OVERRIDE {
     Mock::VerifyAndClearExpectations(&app_mngr_);
@@ -137,6 +143,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const uint32_t kAppResumingTimeout_;
   const uint32_t kTestTimeStamp_;
   sync_primitives::Lock app_set_lock_;
+  const mobile_apis::HMILevel::eType kDefaultDeferredTestLevel_;
 };
 
 /**

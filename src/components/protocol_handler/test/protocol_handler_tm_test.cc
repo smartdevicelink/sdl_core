@@ -209,6 +209,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       const uint32_t hash_id,
       const bool protection_flag) {
     return protocol_handler::SessionContext(connection_id,
+                                            connection_id,
                                             initial_session_id,
                                             new_session_id,
                                             service_type,
@@ -1955,7 +1956,8 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // Act
-  protocol_handler_impl->SendEndService(connection_id, session_id, kControl);
+  protocol_handler_impl->SendEndService(
+      connection_id, connection_id, session_id, kControl);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }

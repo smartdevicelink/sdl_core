@@ -64,6 +64,7 @@ class HeartBeatMonitorTest : public testing::Test {
   uint32_t kTimeout;
   static const connection_handler::ConnectionHandle kConnectionHandle =
       0xABCDEF;
+  static const transport_manager::ConnectionUID kDefaultConnectionHandle = 1;
 
   virtual void SetUp() {
     conn = new connection_handler::Connection(
@@ -85,7 +86,7 @@ TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
 
-  conn->AddNewSession();
+  conn->AddNewSession(kDefaultConnectionHandle);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
@@ -93,12 +94,12 @@ TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
 
-  const uint32_t session = conn->AddNewSession();
+  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
   conn->StartHeartBeat(session);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerElapsed) {
-  const uint32_t session = conn->AddNewSession();
+  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -125,7 +126,7 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
 
-  const uint32_t session = conn->AddNewSession();
+  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
   conn->StartHeartBeat(session);
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
@@ -137,7 +138,7 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
-  const uint32_t session = conn->AddNewSession();
+  const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -167,8 +168,8 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
-  const uint32_t kSession1 = conn->AddNewSession();
-  const uint32_t kSession2 = conn->AddNewSession();
+  const uint32_t kSession1 = conn->AddNewSession(kDefaultConnectionHandle);
+  const uint32_t kSession2 = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
@@ -199,7 +200,7 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
-  const uint32_t kSession = conn->AddNewSession();
+  const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
 
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
@@ -211,7 +212,7 @@ TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
 }
 
 TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
-  const uint32_t kSession = conn->AddNewSession();
+  const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;

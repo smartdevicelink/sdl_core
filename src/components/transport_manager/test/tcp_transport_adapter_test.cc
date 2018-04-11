@@ -48,6 +48,7 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::_;
 
 using namespace ::protocol_handler;
@@ -61,6 +62,13 @@ class TcpAdapterTest : public ::testing::Test {
   resumption::LastStateImpl last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
+  std::string network_interface = "";
+
+  void SetUp() OVERRIDE {
+    EXPECT_CALL(transport_manager_settings,
+                transport_manager_tcp_adapter_network_interface())
+        .WillRepeatedly(ReturnRef(network_interface));
+  }
 };
 
 TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {

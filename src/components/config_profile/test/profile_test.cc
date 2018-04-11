@@ -690,7 +690,7 @@ TEST_F(ProfileTest, CheckStringContainer) {
   std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
   element_mode++;
   element_mode++;
-  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x03");
   EXPECT_EQ(diag_mode, element_mode);
 }
 
@@ -747,27 +747,6 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   EXPECT_EQ(res_protect, force_protected_list.begin());
 }
 #endif
-
-TEST_F(ProfileTest, CheckEmptyValue) {
-  // Set new config file
-  profile_.set_config_file_name("smartDeviceLink_test.ini");
-  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
-
-  bool isread = false;
-  std::string output;
-
-  // specify a key with empty value
-  bool ret = profile_.ReadValue(&output, "MAIN", "AppConfigFolder");
-  EXPECT_FALSE(ret);
-
-  std::string output2 = "abc";
-  ret = profile_.ReadValueEmpty(&output2, "MAIN", "AppConfigFolder");
-  EXPECT_TRUE(ret);
-  EXPECT_EQ(output2, "");
-
-  ret = profile_.ReadValueEmpty(&output2, "MAIN", "DoesNotExistKey");
-  EXPECT_FALSE(ret);
-}
 
 }  // namespace profile_test
 }  // namespace components

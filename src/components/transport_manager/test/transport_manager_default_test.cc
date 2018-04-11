@@ -74,6 +74,10 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
       .WillRepeatedly(Return(false));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(12345u));
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
 
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
@@ -106,6 +110,10 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(12345u));
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -137,6 +145,10 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
+  std::string network_interface = "";
+  EXPECT_CALL(transport_manager_settings,
+              transport_manager_tcp_adapter_network_interface())
+      .WillRepeatedly(ReturnRef(network_interface));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }

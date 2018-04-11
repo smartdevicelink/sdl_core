@@ -95,6 +95,9 @@ class MockTransportAdapterController : public TransportAdapterController {
   MOCK_METHOD2(DeviceDisconnected,
                void(const DeviceUID& device_handle,
                     const DisconnectDeviceError& error));
+  MOCK_METHOD1(TransportConfigUpdated,
+               void(const transport_manager::transport_adapter::TransportConfig&
+                        new_config));
 };
 
 class TcpClientListenerTest : public ::testing::Test {
@@ -119,7 +122,8 @@ TEST_F(TcpClientListenerTest, Ctor_test) {
 }
 
 TEST_F(TcpClientListenerTest, IsInitialised) {
-  EXPECT_TRUE(tcp_client_listener_.IsInitialised());
+  // should return false until Init() is called
+  EXPECT_FALSE(tcp_client_listener_.IsInitialised());
 }
 
 TEST_F(TcpClientListenerTest, Init) {

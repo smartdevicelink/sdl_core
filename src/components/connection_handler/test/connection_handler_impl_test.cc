@@ -518,7 +518,7 @@ MATCHER_P(SameDevice, device, "") {
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc)).Times(0);
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -526,7 +526,7 @@ TEST_F(ConnectionHandlerTest, SendEndService) {
   AddTestDeviceConnection();
   AddTestSession();
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc));
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc));
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 

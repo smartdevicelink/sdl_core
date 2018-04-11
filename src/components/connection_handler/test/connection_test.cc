@@ -78,7 +78,7 @@ class ConnectionTest : public ::testing::Test {
         session_id, protocol_handler::PROTOCOL_VERSION_3);
   }
   void StartDefaultSession() {
-    session_id = connection_->AddNewSession();
+    session_id = connection_->AddNewSession(kDefaultConnectionHandle);
     EXPECT_NE(session_id, 0u);
     const SessionMap sessionMap = connection_->session_map();
     EXPECT_FALSE(sessionMap.empty());
@@ -93,8 +93,8 @@ class ConnectionTest : public ::testing::Test {
                      const bool protection,
                      const bool expect_add_new_service_call_result,
                      const bool expect_exist_service) {
-    const bool result =
-        connection_->AddNewService(session_id, service_type, protection);
+    const bool result = connection_->AddNewService(
+        session_id, service_type, protection, kDefaultConnectionHandle);
     EXPECT_EQ(result, expect_add_new_service_call_result);
 
 #ifdef ENABLE_SECURITY
@@ -141,6 +141,7 @@ class ConnectionTest : public ::testing::Test {
       transport_manager_mock;
   ConnectionHandlerImpl* connection_handler_;
   uint32_t session_id;
+  static const transport_manager::ConnectionUID kDefaultConnectionHandle = 1;
 };
 
 TEST_F(ConnectionTest, Session_TryGetProtocolVersionWithoutSession) {
@@ -236,13 +237,17 @@ TEST_F(ConnectionTest, HeartBeat_Protocol5_ZeroHeartBeat_NotSupported) {
 
 // Try to add service without session
 TEST_F(ConnectionTest, Session_AddNewServiceWithoutSession) {
-  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, true),
+  EXPECT_EQ(connection_->AddNewService(
+                session_id, kAudio, true, kDefaultConnectionHandle),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, false),
+  EXPECT_EQ(connection_->AddNewService(
+                session_id, kAudio, false, kDefaultConnectionHandle),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, true),
+  EXPECT_EQ(connection_->AddNewService(
+                session_id, kMobileNav, true, kDefaultConnectionHandle),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, false),
+  EXPECT_EQ(connection_->AddNewService(
+                session_id, kMobileNav, false, kDefaultConnectionHandle),
             EXPECT_RETURN_FALSE);
 }
 
