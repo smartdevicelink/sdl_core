@@ -1425,17 +1425,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   }
 
 #ifdef ENABLE_SECURITY
+  const uint8_t protocol_version = packet->protocol_version();
   const bool protection =
-<<<<<<< HEAD
-      // Protocol version 1 is not support protection
-      (packet->protocol_version() > PROTOCOL_VERSION_1)
-          ? packet->protection_flag()
-          : false;
-=======
       // Protocol version 1 does not support protection
       (protocol_version > PROTOCOL_VERSION_1) ? packet->protection_flag()
                                               : false;
->>>>>>> Add handling of wrong force protection settings in ini file
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
@@ -1583,11 +1577,16 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     const bool is_certificate_empty =
         security_manager_->IsPolicyCertificateDataEmpty();
 
-    if (context.is_ptu_required_ && is_certificate_empty) {
-      LOG4CXX_DEBUG(logger_,
-                    "PTU for StartSessionHandler "
-                        << handler.get()
-                        << " is required and certificate data is empty");
+    const bool is_certificate_expired =
+        security_manager_->IsCertificateUpdateRequired();
+
+    if (context.is_ptu_required_ &&
+        (is_certificate_empty || is_certificate_expired)) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "PTU for StartSessionHandler "
+              << handler.get()
+              << " is required and certificate data is empty or expired");
 
       sync_primitives::AutoLock lock(ptu_handlers_lock_);
       if (!is_ptu_triggered_) {
