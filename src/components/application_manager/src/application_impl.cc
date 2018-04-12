@@ -538,13 +538,24 @@ void ApplicationImpl::SuspendStreaming(
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
+
+    if (video_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+    } else {
+      LOG4CXX_INFO(logger_, "Do not suspend video streaming because already not approved");
+    }
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
+
+    if (audio_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+    }  else {
+      LOG4CXX_INFO(logger_, "Do not suspend audio streaming because already not approved");
+    }
   }
-  MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
 }
 
 void ApplicationImpl::WakeUpStreaming(
@@ -557,6 +568,10 @@ void ApplicationImpl::WakeUpStreaming(
   sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   if (ServiceType::kMobileNav == service_type) {
+    if (!video_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Video streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
@@ -567,6 +582,10 @@ void ApplicationImpl::WakeUpStreaming(
     video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
                                       timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
+    if (!audio_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Audio streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
