@@ -271,6 +271,8 @@ class ResumeCtrl {
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
       utils::SharedPtr<ResumptionData> mock_storage) = 0;
+
+  virtual bool get_resumption_active() const = 0;
 #endif  // BUILD_TESTS
 };
 

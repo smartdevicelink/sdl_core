@@ -81,6 +81,11 @@ void ResumeCtrlImpl::set_resumption_storage(
     utils::SharedPtr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
+
+bool ResumeCtrlImpl::get_resumption_active() const {
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  return is_resumption_active_;
+}
 #endif  // BUILD_TESTS
 
 bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {

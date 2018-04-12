@@ -305,6 +305,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
 #ifdef BUILD_TESTS
   void set_resumption_storage(
       utils::SharedPtr<ResumptionData> mock_storage) OVERRIDE;
+
+  bool get_resumption_active() const OVERRIDE;
 #endif  // BUILD_TESTS
  private:
   /**
