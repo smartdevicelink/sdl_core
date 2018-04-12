@@ -62,7 +62,7 @@
 #include "utils/make_shared.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/tcp/network_interface_listener.h"
+#include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
@@ -90,7 +90,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
   thread_ = threads::CreateThread("TcpClientListener",
                                   new ListeningThreadDelegate(this));
   interface_listener_ =
-      new NetworkInterfaceListener(this, designated_interface);
+      new NetworkInterfaceListenerImpl(this, designated_interface);
 }
 
 TransportAdapter::Error TcpClientListener::Init() {
@@ -130,11 +130,11 @@ TransportAdapter::Error TcpClientListener::Init() {
 void TcpClientListener::Terminate() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (!initialized_) {
+    return;
+  }
+
   if (!IsListeningOnSpecificInterface()) {
-    if (socket_ == -1) {
-      LOG4CXX_WARN(logger_, "Socket has been closed");
-      return;
-    }
     DestroyServerSocket(socket_);
     socket_ = -1;
   } else {
@@ -157,6 +157,7 @@ TcpClientListener::~TcpClientListener() {
   delete thread_->delegate();
   threads::DeleteThread(thread_);
   Terminate();
+  delete interface_listener_;
 }
 
 void SetKeepaliveOptions(const int fd) {
@@ -541,7 +542,7 @@ int TcpClientListener::CreateIPv4ServerSocket(
   struct in_addr ipv4_address;
   memset(&ipv4_address, 0, sizeof(ipv4_address));
   if (interface_name.empty()) {
-    ipv4_address.s_addr = INADDR_ANY;
+    ipv4_address.s_addr = htonl(INADDR_ANY);
   } else if (!GetIPv4Address(interface_name, &ipv4_address)) {
     return -1;
   }
@@ -596,6 +597,17 @@ void TcpClientListener::DestroyServerSocket(int sock) {
 bool TcpClientListener::GetIPv4Address(const std::string interface_name,
                                        struct in_addr* ip_address) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+#ifdef BUILD_TESTS
+  // return a dummy address of INADDR_LOOPBACK
+  struct in_addr dummy_addr;
+  dummy_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+  if (ip_address != NULL) {
+    *ip_address = dummy_addr;
+  }
+  return true;
+#endif
 
   struct ifaddrs* if_list;
   if (getifaddrs(&if_list) != 0) {

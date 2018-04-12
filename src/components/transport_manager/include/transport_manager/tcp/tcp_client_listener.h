@@ -115,10 +115,14 @@ class TcpClientListener : public ClientConnectionListener {
    * @brief Called from NetworkInterfaceListener when IP address of the network
    *        interface is changed.
    */
-  void OnIPAddressUpdated(const std::string ipv4_addr,
-                          const std::string ipv6_addr);
+  virtual void OnIPAddressUpdated(const std::string ipv4_addr,
+                                  const std::string ipv6_addr);
 
 #ifdef BUILD_TESTS
+  void set_network_interface_listener(NetworkInterfaceListener* listener) {
+    interface_listener_ = listener;
+  }
+
   uint16_t port() const {
     return port_;
   }

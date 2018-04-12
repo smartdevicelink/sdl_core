@@ -347,6 +347,37 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   }
 }
 
+TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
+  MockTransportAdapterListener mock_adapter_listener;
+
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
+  transport_adapter.AddListener(&mock_adapter_listener);
+
+  TransportConfig config;
+  config["enabled"] = std::string("enabled");
+  config["tcp_ip_address"] = std::string("192.168.1.1");
+  config["tcp_port"] = std::string("12345");
+
+  EXPECT_CALL(mock_adapter_listener, OnTransportConfigUpdated(_)).Times(1);
+
+  transport_adapter.TransportConfigUpdated(config);
+}
+
+TEST_F(TcpAdapterTest, GetTransportConfiguration) {
+  MockTCPTransportAdapter transport_adapter(
+      port, last_state_, transport_manager_settings);
+
+  TransportConfig config;
+  config["enabled"] = std::string("enabled");
+  config["tcp_ip_address"] = std::string("192.168.1.1");
+  config["tcp_port"] = std::string("12345");
+
+  transport_adapter.TransportConfigUpdated(config);
+
+  EXPECT_EQ(config, transport_adapter.GetTransportConfiguration());
+}
+
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

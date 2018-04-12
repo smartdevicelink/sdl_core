@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the names of the copyright holders nor the names of its contributors
+ * Neither the name of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -30,44 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_CLIENT_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_CLIENT_LISTENER_H_
 
-namespace transport_manager {
-namespace transport_adapter {
+#include "gmock/gmock.h"
+#include "transport_manager/tcp/tcp_client_listener.h"
 
-/**
- * @brief Listener to detect various events on network interfaces
- */
-class NetworkInterfaceListener {
+namespace test {
+namespace components {
+namespace transport_manager_test {
+
+using namespace ::transport_manager::transport_adapter;
+
+class MockTcpClientListener : public TcpClientListener {
  public:
-  /**
-   * @brief Destructor
-   */
-  virtual ~NetworkInterfaceListener() {}
-
-  /**
-   * @brief Initialize this listener
-   */
-  virtual bool Init() = 0;
-
-  /**
-   * @brief Deinitialize this listener
-   */
-  virtual void Deinit() = 0;
-
-  /**
-   * @brief Start this listener
-   */
-  virtual bool Start() = 0;
-
-  /**
-   * @brief Stop this listener
-   */
-  virtual bool Stop() = 0;
+  MockTcpClientListener(TransportAdapterController* controller,
+                        uint16_t port,
+                        bool enable_keepalive,
+                        const std::string designated_interface = "")
+      : TcpClientListener(
+            controller, port, enable_keepalive, designated_interface) {}
+  MOCK_METHOD0(Init, TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD0(StartListening, TransportAdapter::Error());
+  MOCK_METHOD0(StopListening, TransportAdapter::Error());
+  MOCK_METHOD2(OnIPAddressUpdated,
+               void(const std::string ipv4_addr, const std::string ipv6_addr));
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_CLIENT_LISTENER_H_

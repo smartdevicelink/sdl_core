@@ -230,6 +230,15 @@ TEST_F(TransportAdapterListenerTest, OnUnexpectedDisconnect) {
       &adapter_mock, dev_id, app_handle, err);
 }
 
+TEST_F(TransportAdapterListenerTest, OnTransportConfigUpdated) {
+  EXPECT_CALL(
+      tr_mock,
+      ReceiveEventFromDevice(IsEvent(
+          EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED, &adapter_mock, "", 0)))
+      .WillOnce(Return(E_SUCCESS));
+  transport_listener.OnTransportConfigUpdated(&adapter_mock);
+}
+
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
