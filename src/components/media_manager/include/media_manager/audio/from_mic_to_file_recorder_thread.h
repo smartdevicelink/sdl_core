@@ -74,6 +74,7 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   } GstTimeout;
 
   void initArgs();
+  void deinitArgs();
 
   void psleep(void* timeout);
 

@@ -385,53 +385,45 @@ CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(
 void PolicyManagerImpl::ProcessAppPolicyCheckResults(
     const CheckAppPolicyResults& results,
     const policy_table::ApplicationPolicies& app_policies) {
-  CheckAppPolicyResults::const_iterator it_results = results.begin();
+  ApplicationsPoliciesActions actions_for_apps_policies;
+  FillActionsForAppPolicies filler(actions_for_apps_policies, app_policies);
 
-  for (; results.end() != it_results; ++it_results) {
-    const policy_table::ApplicationPolicies::const_iterator app_policy =
-        app_policies.find(it_results->first);
+  std::for_each(results.begin(), results.end(), filler);
 
+  ProcessActionsForAppPolicies(actions_for_apps_policies, app_policies);
+}
+
+void PolicyManagerImpl::ProcessActionsForAppPolicies(
+    const ApplicationsPoliciesActions& actions,
+    const policy_table::ApplicationPolicies& app_policies) {
+  ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
+  for (; it_actions != actions.end(); ++it_actions) {
+    policy_table::ApplicationPolicies::const_iterator app_policy =
+        app_policies.find(it_actions->first);
     if (app_policies.end() == app_policy) {
       continue;
     }
 
-    if (IsPredefinedApp(*app_policy)) {
-      continue;
-    }
+    if (it_actions->second.is_consent_needed) {
+      // Post-check after ExternalConsent consent changes
+      const std::string& policy_app_id = app_policy->first;
+      if (!IsConsentNeeded(policy_app_id)) {
+        sync_primitives::AutoLock lock(app_permissions_diff_lock_);
 
-    switch (it_results->second) {
-      case RESULT_NO_CHANGES:
-        continue;
-      case RESULT_APP_REVOKED:
-        NotifySystem(*app_policy);
-        continue;
-      case RESULT_NICKNAME_MISMATCH:
-        NotifySystem(*app_policy);
-        continue;
-      case RESULT_CONSENT_NEEDED:
-      case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED: {
-        // Post-check after ExternalConsent consent changes
-        const std::string policy_app_id = app_policy->first;
-        if (!IsConsentNeeded(policy_app_id)) {
-          sync_primitives::AutoLock lock(app_permissions_diff_lock_);
+        PendingPermissions::iterator app_id_diff =
+            app_permissions_diff_.find(policy_app_id);
 
-          PendingPermissions::iterator app_id_diff =
-              app_permissions_diff_.find(policy_app_id);
-
-          if (app_permissions_diff_.end() != app_id_diff) {
-            app_id_diff->second.appPermissionsConsentNeeded = false;
-          }
+        if (app_permissions_diff_.end() != app_id_diff) {
+          app_id_diff->second.appPermissionsConsentNeeded = false;
         }
-      } break;
-      case RESULT_CONSENT_NOT_REQIURED:
-      case RESULT_PERMISSIONS_REVOKED:
-      case RESULT_REQUEST_TYPE_CHANGED:
-        break;
-      default:
-        continue;
+      }
     }
-    NotifySystem(*app_policy);
-    SendPermissionsToApp(*app_policy);
+    if (it_actions->second.is_notify_system) {
+      NotifySystem(*app_policy);
+    }
+    if (it_actions->second.is_send_permissions_to_app) {
+      SendPermissionsToApp(*app_policy);
+    }
   }
 }
 
@@ -596,13 +588,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     policy_table::FunctionalGroupings functional_groupings;
     cache_->GetFunctionalGroupings(functional_groupings);
 
-#ifdef SDL_REMOTE_CONTROL
-    ApplicationOnDevice who = {device_id, app_id};
-    const policy_table::Strings app_groups = access_remote_->GetGroups(who);
-#else   // SDL_REMOTE_CONTROL
-    const policy_table::Strings app_groups =
-        GetGroupsNames(app_group_permissions);
-#endif  // SDL_REMOTE_CONTROL
+    policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
 
     // Undefined groups (without user consent) disallowed by default, since
     // OnPermissionsChange notification has no "undefined" section
@@ -622,8 +608,19 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                       << " returns true");
   }
 
+  if (cache_->IsApplicationRevoked(app_id)) {
+    // SDL must be able to notify mobile side with its status after app has
+    // been revoked by backend
+    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
+      result.hmi_level_permitted = kRpcAllowed;
+    } else {
+      result.hmi_level_permitted = kRpcDisallowed;
+    }
+    return;
+  }
+
   const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
-  LOG4CXX_INFO(logger_, "Is known rpc " << known_rpc);
+  LOG4CXX_DEBUG(logger_, "Is known rpc " << (known_rpc ? "true" : "false"));
   if (!known_rpc) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
@@ -645,6 +642,9 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
              rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].find(
                  hmi_level)) {
     // RPC found in allowed == allowed by backend, but disallowed by user
+    LOG4CXX_DEBUG(
+        logger_,
+        "RPC found in allowed == allowed by backend, but disallowed by user");
     result.hmi_level_permitted = kRpcUserDisallowed;
   } else {
     LOG4CXX_DEBUG(logger_,
@@ -722,17 +722,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   } else if (!result.IsAnyAllowed(rpc_params)) {
     LOG4CXX_DEBUG(logger_, "There are no parameters allowed.");
     result.hmi_level_permitted = kRpcDisallowed;
-  }
-
-  if (cache_->IsApplicationRevoked(app_id)) {
-    // SDL must be able to notify mobile side with its status after app has
-    // been revoked by backend
-    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
-      result.hmi_level_permitted = kRpcAllowed;
-    } else {
-      result.hmi_level_permitted = kRpcDisallowed;
-    }
-    return;
   }
 }
 
@@ -975,6 +964,7 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
 void PolicyManagerImpl::NotifyPermissionsChanges(
     const std::string& policy_app_id,
     const std::vector<FunctionalGroupPermission>& app_group_permissions) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // Get current functional groups from DB with RPC permissions
   policy_table::FunctionalGroupings functional_groups;
   cache_->GetFunctionalGroupings(functional_groups);
@@ -993,11 +983,6 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (permissions.group_permissions.empty()) {
-    LOG4CXX_DEBUG(logger_, "Permissions list is empty, skipping update.");
-    return;
-  }
 
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
@@ -1165,14 +1150,8 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
   FunctionalIdType group_types;
 
-#ifdef SDL_REMOTE_CONTROL
-  allowed_by_default = false;
-  const bool ret = access_remote_->GetPermissionsForApp(
-      device_id, app_id_to_check, group_types);
-#else
   const bool ret =
       cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types);
-#endif  // REMOTE_CONTROL
 
   if (!ret) {
     LOG4CXX_WARN(logger_,
@@ -1687,6 +1666,12 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& application_id) {
   StartPTExchange();
   SendNotificationOnPermissionsUpdated(application_id);
+}
+
+void PolicyManagerImpl::OnDeviceSwitching(const std::string& device_id_from,
+                                          const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->OnDeviceSwitching(device_id_from, device_id_to);
 }
 
 const MetaInfo PolicyManagerImpl::GetMetaInfo() const {

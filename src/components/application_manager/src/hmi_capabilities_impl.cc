@@ -391,6 +391,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , is_video_streaming_supported_(false)
+    , is_rc_supported_(false)
     , navigation_capability_(NULL)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
@@ -650,6 +651,10 @@ void HMICapabilitiesImpl::set_video_streaming_supported(const bool supported) {
   is_video_streaming_supported_ = supported;
 }
 
+void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
+  is_rc_supported_ = supported;
+}
+
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
   if (navigation_capability_) {
@@ -801,6 +806,10 @@ bool HMICapabilitiesImpl::phone_call_supported() const {
 
 bool HMICapabilitiesImpl::video_streaming_supported() const {
   return is_video_streaming_supported_;
+}
+
+bool HMICapabilitiesImpl::rc_supported() const {
+  return is_rc_supported_;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
@@ -1076,6 +1085,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
+          if (!navigation_capability_so.empty()) {
+            set_navigation_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "phoneCapability")) {
@@ -1085,6 +1097,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
           set_phone_capability(phone_capability_so);
+          if (!phone_capability_so.empty()) {
+            set_phone_call_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "videoStreamingCapability")) {
@@ -1132,6 +1147,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
             vs_capability_so["supportedFormats"] = converted_array;
           }
           set_video_streaming_capability(vs_capability_so);
+          if (!vs_capability_so.empty()) {
+            set_video_streaming_supported(true);
+          }
         }
         if (check_existing_json_member(system_capabilities,
                                        "remoteControlCapability")) {
@@ -1141,6 +1159,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           Formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
           set_rc_capability(rc_capability_so);
+          if (!rc_capability_so.empty()) {
+            set_rc_supported(true);
+          }
         }
       }
     }  // UI end

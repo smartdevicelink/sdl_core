@@ -66,7 +66,7 @@ const std::string GeneratedCodeTest::kEndpointsCreation =
     "CREATE TABLE Endpoints ("
     "endpoint_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
     "service_id VARCHAR(45) NOT NULL,"
-    "application_id VARCHAR(45),"
+    "application_id VARCHAR(45) COLLATE NOCASE,"
     "url VARCHAR(45) NOT NULL,"
     "is_default INTEGER NOT NULL CHECK(is_default>=0))";
 
@@ -77,14 +77,14 @@ const std::string GeneratedCodeTest::kEndpointsContent =
 const std::string GeneratedCodeTest::kAppPoliciesCreation =
     "CREATE TABLE AppPolicies ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-    "application_id VARCHAR(45),"
+    "application_id VARCHAR(45) COLLATE NOCASE,"
     "priority VARCHAR(45),"
     "is_default INTEGER NOT NULL CHECK(is_default>=0))";
 
 const std::string GeneratedCodeTest::kGroupsCreation =
     "CREATE TABLE Groups ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-    "application_id VARCHAR(45) NOT NULL,"
+    "application_id VARCHAR(45) NOT NULL COLLATE NOCASE,"
     "group_name VARCHAR(45) NOT NULL )";
 
 TEST_F(GeneratedCodeTest,

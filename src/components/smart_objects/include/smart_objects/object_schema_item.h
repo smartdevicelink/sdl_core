@@ -84,11 +84,20 @@ class CObjectSchemaItem : public ISchemaItem {
    **/
   static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__) OVERRIDE;
   /**
    * @brief Apply schema.
    * @param Object Object to apply schema.

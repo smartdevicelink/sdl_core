@@ -212,7 +212,7 @@ const std::string kCreateSchema =
     "`vrHelpItemArray`(`idglobalProperties`); "
     "CREATE TABLE IF NOT EXISTS `application`( "
     "  `idApplication` INTEGER PRIMARY KEY NOT NULL, "
-    "  `appID` TEXT, "
+    "  `appID` TEXT COLLATE NOCASE, "
     "  `connection_key` INTEGER, "
     "  `grammarID` INTEGER, "
     "  `hashID` TEXT, "
@@ -298,8 +298,8 @@ const std::string kCreateSchema =
     "CREATE INDEX IF NOT EXISTS "
     "`applicationSubMenuArray.fk_Application_idx` "
     "  ON `applicationSubMenuArray`(`idApplication`); "
-    "CREATE TABLE IF NOT EXISTS `applicationSubscribtionsArray`( "
-    "  `idapplicationSubscribtionsArray` INTEGER PRIMARY KEY NOT NULL, "
+    "CREATE TABLE IF NOT EXISTS `applicationSubscriptionsArray`( "
+    "  `idapplicationSubscriptionsArray` INTEGER PRIMARY KEY NOT NULL, "
     "  `vehicleValue` INTEGER, "
     "  `ButtonNameValue` INTEGER, "
     "  `idApplication` INTEGER, "
@@ -308,8 +308,8 @@ const std::string kCreateSchema =
     "    REFERENCES `application`(`idApplication`) "
     "  ); "
     "CREATE INDEX IF NOT EXISTS "
-    "`applicationSubscribtionsArray.fk_Application_idx` "
-    "  ON `applicationSubscribtionsArray`(`idApplication`); "
+    "`applicationSubscriptionsArray.fk_Application_idx` "
+    "  ON `applicationSubscriptionsArray`(`idApplication`); "
     "CREATE TABLE IF NOT EXISTS `_internal_data`( "
     "   `db_version_hash` INTEGER "
     "  ); "
@@ -365,8 +365,8 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `applicationSubMenuArray`; "
     "DROP INDEX IF EXISTS `applicationSubMenuArray.fk_subMenu_idx`; "
     "DROP INDEX IF EXISTS `applicationSubMenuArray.fk_Application_idx`; "
-    "DROP TABLE IF EXISTS `applicationSubscribtionsArray`; "
-    "DROP INDEX IF EXISTS `applicationSubscribtionsArray.fk_Application_idx`; "
+    "DROP TABLE IF EXISTS `applicationSubscriptionsArray`; "
+    "DROP INDEX IF EXISTS `applicationSubscriptionsArray.fk_Application_idx`; "
     "DROP TABLE IF EXISTS `_internal_data`; "
     "COMMIT; "
     "VACUUM;";
@@ -477,8 +477,8 @@ const std::string kDeleteApplicationSubMenuArray =
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?)";
 
-const std::string kDeleteApplicationSubscribtionsArray =
-    "DELETE FROM `applicationSubscribtionsArray` "
+const std::string kDeleteApplicationSubscriptionsArray =
+    "DELETE FROM `applicationSubscriptionsArray` "
     "WHERE `idApplication` = (SELECT `idApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?)";
@@ -713,7 +713,7 @@ const std::string kInsertVrCommand =
     "(?, ?, ?);";
 
 const std::string kInsertSubscriptions =
-    "INSERT INTO `applicationSubscribtionsArray` "
+    "INSERT INTO `applicationSubscriptionsArray` "
     "(`idApplication`, `vehicleValue`, `ButtonNameValue`) "
     "VALUES "
     "(?, ?, ?);";
@@ -851,14 +851,14 @@ const std::string kSelectCommands =
 
 const std::string kSelectCountSubscriptions =
     "SELECT COUNT (`idApplication`) "
-    "FROM `applicationSubscribtionsArray` "
+    "FROM `applicationSubscriptionsArray` "
     "WHERE `idApplication` = (SELECT `idApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?);";
 
 const std::string kSelectSubscriptions =
     "SELECT `vehicleValue`, `ButtonNameValue` "
-    "FROM `applicationSubscribtionsArray` "
+    "FROM `applicationSubscriptionsArray` "
     "WHERE `idApplication` = (SELECT `idApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?);";

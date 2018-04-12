@@ -34,11 +34,9 @@ set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}) 
 
 set (install-3rd_party_logger_var "")
-set (install-3rd_party_dbus_var "")
 
 if(NO_REBUILD_3RD_PARTY)
   set(NO_REBUILD_3RD_PARTY_LOGGER ON)
-  set(NO_REBUILD_3RD_PARTY_DBUS ON)
 endif()
 
 if(FORCE_3RD_PARTY)
@@ -173,116 +171,6 @@ if(ENABLE_LOG)
   add_subdirectory(apache-log4cxx-cmake)
 endif()
 
-# --- D-Bus
-if(HMI_DBUS_API)
-  if(NO_REBUILD_3RD_PARTY_DBUS)
-    message(STATUS "Not rebuilding D-Bus.")
-  else()
-    if(FORCE_3RD_PARTY_DBUS)
-      message(STATUS "Force to rebuild D-Bus.")
-
-      #build d-bus
-      add_custom_target(3rd_party_dbus
-        make
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-
-      #install d-bus
-      #install either to default place with sudo or non-default plase without sudo.
-      #to install with sudo to non-default place use manual installation
-      add_custom_target(install-3rd_party_dbus
-        COMMAND /bin/bash -c \"USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                               if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                 sudo -k \;
-                                 sudo make install\;
-                               else
-                                 make install\;
-                               fi\"
-        DEPENDS 3rd_party_dbus
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-    else()
-      #build d-bus
-      add_custom_target(3rd_party_dbus
-        COMMAND /bin/bash -c \"grep .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/libdbus-1.so 1>/dev/null 2>&1\;
-                               if [ \\$$? == 0 ]\; then
-                                 VAR1=\\$$\(readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/libdbus-1.so 2>/dev/null\)\;
-                                 VAR1=\\$$\(echo \\$$VAR1 | awk '{print \\$$NF}'\)\;
-                                 VAR2=-1\;
-                                 cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-                                 git log . 1>/dev/null 2>&1\;
-                                 if [ \\$$? == 0 ]; then
-                                     VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/dbus-1.7.8\)\;
-                                 fi\;
-                                 if [ \\$$VAR1 != \\$$VAR2 ]\; then
-                                   echo " Need to rebuild D-Bus. " \;
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make\;
-                                 else
-                                   echo " D-Bus is actual. " \;
-                                 fi\;
-                               else
-                                 echo " Need to build D-Bus. " \;
-                                 cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                 make\;
-                               fi\"
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-
-      #install d-bus
-      #install either to default place with sudo or non-default plase without sudo.
-      #to install with sudo to non-default place use manual installation
-      add_custom_target(install-3rd_party_dbus
-        COMMAND /bin/bash -c \"grep .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/libdbus-1.so 1>/dev/null 2>&1\;
-                               if [ \\$$? == 0 ]\; then
-                                 VAR1=\\$$\(readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/libdbus-1.so 2>/dev/null\)\;
-                                 VAR1=\\$$\(echo \\$$VAR1 | awk '{print \\$$NF}'\)\;
-                                 VAR2=-1\;
-                                 cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-                                 git log . 1>/dev/null 2>&1\;
-                                 if [ \\$$? == 0 ]; then
-                                     VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/dbus-1.7.8\)\;
-                                 fi\;
-                                 if [ \\$$VAR1 != \\$$VAR2 ]\; then
-                                   USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                                   if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     sudo -k \;
-                                     sudo make install\;
-                                   else
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     make install\;
-                                   fi\;
-                                 fi\;
-                               else
-                                 USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
-                                 if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   sudo -k \;
-                                   sudo make install\;
-                                 else
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make install\;
-                                 fi\;
-                               fi\"
-        DEPENDS 3rd_party_dbus
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
-      )
-  
-    set(install-3rd_party_dbus_var "install-3rd_party_dbus")
-    endif()
-  endif()
-
-  # --- D-Bus
-  set(DBUS_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include)
-  set(DBUS_INCLUDE_DIR_ARCH ${3RD_PARTY_INSTALL_PREFIX_ARCH}/include)
-  set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_DIR_ARCH})
-  set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIRS} PARENT_SCOPE)
-  set(DBUS_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-
-  add_subdirectory(dbus-cmake)
-endif()
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
 find_package (BSON)
@@ -319,10 +207,40 @@ else()
   set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
 endif()
 
+if (HMIADAPTER STREQUAL "messagebroker")
+  find_package(Boost 1.66.0 COMPONENTS system) 
+  set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
+  set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+  set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
+  if (NOT ${Boost_FOUND})
+    message(STATUS "Did not find boost. Downloading and installing boost 1.66")
+    set(BOOST_INSTALL_COMMAND ./b2 install)
+    if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
+      set(BOOST_INSTALL_COMMAND sudo ./b2 install)
+    endif()
+    include(ExternalProject)
+    ExternalProject_Add(
+      Boost
+      URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+      DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
+      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_COMMAND ./b2
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
+      BUILD_IN_SOURCE true
+    )
+
+    set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
+    set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
+  endif()
+endif()
+
 add_custom_target(install-3rd_party
   DEPENDS ${install-3rd_party_logger_var}
-  DEPENDS ${install-3rd_party_dbus_var}
   DEPENDS libbson
+  DEPENDS Boost
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
 

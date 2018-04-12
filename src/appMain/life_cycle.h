@@ -32,6 +32,7 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
+#include <thread>
 #include "utils/macro.h"
 #include "unistd.h"
 
@@ -57,14 +58,6 @@
 #include "telemetry_monitor/telemetry_monitor.h"
 #endif
 
-//#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#ifdef MESSAGEBROKER_HMIADAPTER
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-#endif                   // MESSAGEBROKER_HMIADAPTER
-#include "system.h"      // cpplint: Include the directory when naming .h files
-
 #ifdef ENABLE_SECURITY
 namespace security_manager {
 class CryptoManager;
@@ -84,8 +77,8 @@ class LifeCycle {
   */
   bool InitMessageSystem();
   /**
-   * \brief Main loop
-   */
+ * \brief Main loop
+ */
   void Run();
   void StopComponents();
 
@@ -107,16 +100,12 @@ class LifeCycle {
 #endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
   hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  System::Thread* dbus_adapter_thread_;
+  std::thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-  NsMessageBroker::CMessageBroker* message_broker_;
-  NsMessageBroker::TcpServer* message_broker_server_;
-  System::Thread* mb_thread_;
-  System::Thread* mb_server_thread_;
-  System::Thread* mb_adapter_thread_;
+  std::thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   const profile::Profile& profile_;

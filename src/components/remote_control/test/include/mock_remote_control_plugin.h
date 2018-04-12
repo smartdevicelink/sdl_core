@@ -43,7 +43,7 @@ class MockRemotePluginInterface : public remote_control::RemotePluginInterface {
                remote_control::ResourceAllocationManager&());
   MOCK_METHOD2(OnApplicationEvent,
                void(functional_modules::ApplicationEvent event,
-                    const uint32_t application_id));
+                    application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(OnPolicyEvent, void(functional_modules::PolicyEvent event));
 };
 

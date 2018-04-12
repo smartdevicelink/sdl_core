@@ -87,6 +87,78 @@ class RCGetCapabilitiesResponseTest
 TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*command_msg)[strings::msg_params][strings::system_capabilities]
+                [strings::rc_capability] =
+                    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& remote_control_capability =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::rc_capability];
+
+  remote_control_capability["climateControlCapabilities"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability["climateControlCapabilities"][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& climate_control_capability =
+      remote_control_capability["climateControlCapabilities"][0];
+
+  climate_control_capability["moduleName"] = "Climate";
+  climate_control_capability["fanSpeedAvailable"] = true;
+  climate_control_capability["desiredTemperatureAvailable"] = true;
+  climate_control_capability["acEnableAvailable"] = true;
+  climate_control_capability["acMaxEnableAvailable"] = true;
+  climate_control_capability["circulateAirEnableAvailable"] = true;
+  climate_control_capability["autoModeEnableAvailable"] = true;
+  climate_control_capability["dualModeEnableAvailable"] = true;
+
+  climate_control_capability["defrostZoneAvailable"] = true;
+  climate_control_capability["defrostZone"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  climate_control_capability["defrostZone"][0] = "ALL";
+
+  climate_control_capability["ventilationModeAvailable"] = true;
+  climate_control_capability["ventilationMode"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  climate_control_capability["ventilationMode"][0] = "BOTH";
+
+  remote_control_capability["radioControlCapabilities"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability["radioControlCapabilities"][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& radio_control_capability =
+      remote_control_capability["radioControlCapabilities"][0];
+
+  radio_control_capability["moduleName"] = "Radio";
+  radio_control_capability["radioEnableAvailable"] = true;
+  radio_control_capability["radioBandAvailable"] = true;
+  radio_control_capability["radioFrequencyAvailable"] = true;
+  radio_control_capability["hdChannelAvailable"] = true;
+  radio_control_capability["rdsDataAvailable"] = true;
+  radio_control_capability["availableHDsAvailable"] = true;
+  radio_control_capability["stateAvailable"] = true;
+  radio_control_capability["signalStrengthAvailable"] = true;
+  radio_control_capability["signalChangeThresholdAvailable"] = true;
+
+  remote_control_capability[hmi_response::button_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  remote_control_capability[hmi_response::button_capabilities][0] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& button_capability =
+      remote_control_capability[hmi_response::button_capabilities][0];
+
+  button_capability[strings::button_name] = "OK";
+  button_capability["shortPressAvailable"] = true;
+  button_capability["longPressAvailable"] = true;
+  button_capability["upDownAvailable"] = true;
+
   RCGetCapabilitiesResponsePtr command(
       CreateCommand<RCGetCapabilitiesResponse>(command_msg));
 
@@ -97,6 +169,7 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
       (*command_msg)[strings::msg_params][strings::rc_capability];
 
   EXPECT_CALL(mock_hmi_capabilities_, set_rc_capability(rc_capability_so));
+  EXPECT_CALL(mock_hmi_capabilities_, set_rc_supported(true));
 
   command->Run();
 }

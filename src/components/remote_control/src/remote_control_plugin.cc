@@ -284,7 +284,6 @@ bool RemoteControlPlugin::IsAppForPlugin(
   if (service()->IsRemoteControlApplication(app)) {
     RCAppExtensionPtr rc_app_extension = new RCAppExtension(GetModuleID());
     app->AddExtension(rc_app_extension);
-    service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
     return true;
   }
   return false;
@@ -321,9 +320,17 @@ ResourceAllocationManager& RemoteControlPlugin::resource_allocation_manager() {
 }
 
 void RemoteControlPlugin::OnApplicationEvent(
-    functional_modules::ApplicationEvent event, const uint32_t application_id) {
+    functional_modules::ApplicationEvent event,
+    application_manager::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  resource_allocation_manager_.OnApplicationEvent(event, application_id);
+  if (false == service()->IsRemoteControlApplication(application)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application " << application->app_id()
+                                 << " has no remote control functionality."
+                                 << " Event will be ignored for RC plugin");
+    return;
+  }
+  resource_allocation_manager_.OnApplicationEvent(event, application);
 }
 
 void RemoteControlPlugin::OnPolicyEvent(functional_modules::PolicyEvent event) {

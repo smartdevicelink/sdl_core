@@ -116,13 +116,14 @@ class RemoteControlPlugin : public RemotePluginInterface {
    */
   void set_service(application_manager::ServicePtr service) OVERRIDE;
 
-  /*
+  /**
    * @brief OnApplicationEvent Processes application related events
    * @param event Event
-   * @param application_id Application id
+   * @param application Pointer to application struct
    */
-  void OnApplicationEvent(functional_modules::ApplicationEvent event,
-                          const uint32_t application_id) OVERRIDE;
+  void OnApplicationEvent(
+      functional_modules::ApplicationEvent event,
+      application_manager::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief OnPolicyEvent Processes policy related events
