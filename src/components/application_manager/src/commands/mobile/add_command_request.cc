@@ -163,6 +163,12 @@ void AddCommandRequest::Run() {
         msg_params[strings::cmd_icon].keyExists(strings::value) &&
         (0 < msg_params[strings::cmd_icon][strings::value].length())) {
       ui_msg_params[strings::cmd_icon] = msg_params[strings::cmd_icon];
+
+      const smart_objects::SmartObject& cmd_icon_params = msg_params[strings::cmd_icon];
+      if (cmd_icon_params.keyExists(strings::is_template) &&
+          cmd_icon_params[strings::is_template].asBool()) {
+        ui_msg_params[strings::cmd_icon][strings::cmd_icon] = cmd_icon_params[strings::is_template];
+      }
     }
 
     send_ui_ = true;
