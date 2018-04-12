@@ -2035,10 +2035,10 @@
     </struct>         
     <struct name="Turn">
         <param name="navigationText" type="String" maxlength="500" mandatory="false">
-            <description>Individual turn text.  Must provide at least text or icon for a given turn.</description>
+            <description>Individual turn text. Must provide at least text or icon for a given turn.</description>
         </param>
         <param name="turnIcon" type="Image" mandatory="false">
-            <description>Individual turn icon.  Must provide at least text or icon for a given turn.</description>
+            <description>Individual turn icon. Must provide at least text or icon for a given turn.</description>
         </param>
     </struct>         
     <struct name="VehicleType">

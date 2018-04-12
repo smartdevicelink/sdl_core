@@ -153,6 +153,7 @@ const char* persistent_file = "persistentFile";
 const char* file_data = "fileData";
 const char* space_available = "spaceAvailable";
 const char* image_type = "imageType";
+const char* is_template = "isTemplate";
 const char* image = "image";
 const char* type = "type";
 const char* system_file = "systemFile";

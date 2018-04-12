@@ -2839,7 +2839,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   using namespace smart_objects;
 
   if (!message_params.keyExists(strings::soft_buttons)) {
-    return mobile_apis::Result::SUCCESS;
+    return Result::SUCCESS;
   }
 
   SmartObject& request_soft_buttons = message_params[strings::soft_buttons];
@@ -2852,7 +2852,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   SmartObject soft_buttons(SmartType_Array);
 
   uint32_t j = 0;
-  size_t size = request_soft_buttons.length();
+  const std::size_t size = request_soft_buttons.length();
   for (uint32_t i = 0; i < size; ++i) {
     const int system_action =
         request_soft_buttons[i][strings::system_action].asInt();
