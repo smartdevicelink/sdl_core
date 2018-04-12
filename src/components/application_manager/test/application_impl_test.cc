@@ -64,6 +64,7 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -106,6 +107,11 @@ class ApplicationImplTest : public ::testing::Test {
     HmiStatePtr initial_state = CreateTestHmiState();
     app_impl->SetInitialState(initial_state);
   }
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
+  }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
