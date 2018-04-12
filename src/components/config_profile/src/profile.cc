@@ -478,11 +478,11 @@ Profile::Profile()
     , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
-    , multiple_transports_enabled_(kDefaultMultipleTransportsEnabled)
     , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
     , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
     , app_tranport_change_timer_addition_(
           kDefaultAppTransportChangeTimerAddition)
+    , multiple_transports_enabled_(kDefaultMultipleTransportsEnabled)
     , error_occured_(false)
     , error_description_() {
   // SDL version
