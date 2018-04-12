@@ -33,14 +33,14 @@
 #include <unistd.h>
 
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
 #include "utils/scope_guard.h"
-#include "application_manager/application_manager_settings.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -843,7 +843,7 @@ bool ResumptionDataDB::SelectSubmenuData(
     SmartObject array_item(SmartType_Map);
     array_item[strings::menu_id] = select_sub_menu.GetInteger(0);
     array_item[strings::menu_name] = select_sub_menu.GetString(1);
-    if (!(select_sub_menu.IsNull(2))) {
+    if (!select_sub_menu.IsNull(2)) {
       array_item[strings::position] = select_sub_menu.GetInteger(2);
     }
     saved_app[strings::application_submenus][i++] = array_item;
@@ -1328,9 +1328,13 @@ bool ResumptionDataDB::SelectImageData(
   }
   /* Position of data in "select_image" :
      field "imageType" from table "image" = 0
-     field "value" from table "image" = 1*/
+     field "value" from table "image" = 1
+     optional field "isTemplate" from table "image" = 2 */
   image[strings::image_type] = select_image.GetInteger(0);
   image[strings::value] = select_image.GetString(1);
+  if (!select_image.IsNull(2)) {
+    image[strings::is_template] = select_image.GetBoolean(2);
+  }
   return true;
 }
 
@@ -1717,6 +1721,9 @@ bool ResumptionDataDB::ExecInsertImage(
     if (result) {
       query.Bind(0, image[strings::image_type].asInt());
       query.Bind(1, image[strings::value].asString());
+      if (image.keyExists(strings::is_template)) {
+        query.Bind(2, image[strings::is_template].asBool());
+      }
       result = query.Exec();
       if (result) {
         image_primary_key = query.LastInsertId();
@@ -1748,7 +1755,7 @@ bool ResumptionDataDB::ExecInsertChoice(
      field "secondaryText" from table "choice" = 2
      field "tertiaryText" from table "choice" = 3
      field "idimage" from table "choice" = 4
-     field "idsecondaryImage" from table "choice" = 5*/
+     field "idsecondaryImage" from table "choice" = 5 */
   int64_t image_primary_key = 0;
   int64_t choice_primary_key = 0;
   size_t length_choice_array = choice_array.length();
