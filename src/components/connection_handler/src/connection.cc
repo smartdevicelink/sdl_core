@@ -107,7 +107,10 @@ Connection::~Connection() {
   SessionMap::iterator session_it = session_map_.begin();
   while (session_it != session_map_.end()) {
     LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_it->first) << " from Session/Connection Map in Connection Destructor");
-    session_connection_map.erase(session_it->first);
+    SessionConnectionMap::iterator itr = session_connection_map.find(session_it->first);
+    if (session_connection_map.end() != itr) {
+      session_connection_map.erase(session_it->first);
+    }
     session_it++;
   }
 
@@ -167,6 +170,7 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   SessionConnectionMap::iterator itr = session_connection_map.find(session_id);
   if (session_connection_map.end() == itr) {
     LOG4CXX_WARN(logger_, "Session not found in Session/Connection Map!");
+    return 0;
   } else {
     LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_id) << " from Session/Connection Map");
     session_connection_map.erase(session_id);

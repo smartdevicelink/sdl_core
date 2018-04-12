@@ -621,6 +621,12 @@ class ConnectionHandlerImpl
   DeviceMap device_list_;
 
   /**
+   * @brief session/connection map
+   */
+  SessionConnectionMap session_connection_map_;
+  mutable sync_primitives::Lock session_connection_map_lock_;
+
+  /**
    * \brief List of connections
    */
   ConnectionList connection_list_;
@@ -639,12 +645,6 @@ class ConnectionHandlerImpl
   sync_primitives::Lock start_service_context_map_lock_;
   std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
-
-  /**
-   * @brief session/connection map
-   */
-  SessionConnectionMap session_connection_map_;
-  mutable sync_primitives::Lock session_connection_map_lock_;
 
   /**
    * @brief connection object as it's being closed

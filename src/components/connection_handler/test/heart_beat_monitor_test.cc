@@ -51,6 +51,7 @@ namespace connection_handler_test {
 
 using ::testing::DoAll;
 using ::testing::_;
+using ::testing::Return;
 
 class HeartBeatMonitorTest : public testing::Test {
  public:
@@ -65,6 +66,9 @@ class HeartBeatMonitorTest : public testing::Test {
   static const connection_handler::ConnectionHandle kConnectionHandle =
       0xABCDEF;
   static const transport_manager::ConnectionUID kDefaultConnectionHandle = 1;
+  connection_handler::SessionConnectionMap session_connection_map_;
+  ::sync_primitives::Lock session_connection_map_lock_;
+
 
   virtual void SetUp() {
     conn = new connection_handler::Connection(
@@ -81,6 +85,10 @@ ACTION_P2(RemoveSession, conn, session_id) {
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   // Whithout StartHeartBeat nothing to be call
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
@@ -90,6 +98,10 @@ TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
@@ -99,6 +111,10 @@ TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, TimerElapsed) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
@@ -122,6 +138,10 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, KeptAlive) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
@@ -138,6 +158,10 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   const uint32_t session = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;
@@ -168,6 +192,10 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 }
 
 TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   const uint32_t kSession1 = conn->AddNewSession(kDefaultConnectionHandle);
   const uint32_t kSession2 = conn->AddNewSession(kDefaultConnectionHandle);
 
@@ -200,6 +228,10 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
 }
 
 TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
 
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
@@ -212,6 +244,10 @@ TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
 }
 
 TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
+  ON_CALL(connection_handler_mock, session_connection_map())
+      .WillByDefault(Return(NonConstDataAccessor<connection_handler::SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
   const uint32_t kSession = conn->AddNewSession(kDefaultConnectionHandle);
 
   TestAsyncWaiter waiter;

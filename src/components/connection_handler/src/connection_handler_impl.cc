@@ -68,12 +68,12 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_handler_observer_(NULL)
     , transport_manager_(tm)
     , protocol_handler_(NULL)
+    , session_connection_map_lock_(true)
     , connection_list_lock_()
     , connection_handler_observer_lock_()
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
     , start_service_context_map_()
-    , session_connection_map_lock_(true)
     , ending_connection_(NULL) {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
