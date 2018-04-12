@@ -77,6 +77,7 @@ const std::string kFileName = "sync_file_name.txt";
 const int64_t kOffset = 10u;
 const int64_t kZeroOffset = 0u;
 const std::string kStorageFolder = "./storage";
+const std::string kFolder = "folder";
 const std::string kAppFolder = "app_folder";
 }
 
@@ -342,6 +343,64 @@ TEST_F(PutFileRequestTest, Run_InvalidPutFile_UNSUCCESS) {
 
   PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
   command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_CrcSumEqual_SendSuccessResponse) {
+  binary_data_ = {1u};
+  (*msg_)[am::strings::params][am::strings::binary_data] = binary_data_;
+  const uint32_t correct_crc_sum =
+      2768625435u;  // calculated using the GetCrc32CheckSum method
+  (*msg_)[am::strings::msg_params][am::strings::crc32_check_sum] =
+      correct_crc_sum;
+
+  ExpectReceiveMessageFromSDK();
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
+  ON_CALL(app_mngr_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kStorageFolder));
+  ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kFolder));
+  const size_t available_space = binary_data_.size() + 1;
+  ON_CALL(*mock_app_, GetAvailableDiskSpace())
+      .WillByDefault(Return(available_space));
+  ON_CALL(*mock_app_, AddFile(_)).WillByDefault(Return(true));
+
+  const std::string file_path = kStorageFolder + "/" + kFolder;
+  EXPECT_CALL(app_mngr_, SaveBinary(binary_data_, file_path, kFileName, 0u))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(*mock_app_, increment_put_file_in_none_count());
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // The folder was created in the "Run" method
+  EXPECT_TRUE(file_system::RemoveDirectory(kStorageFolder, true));
+}
+
+TEST_F(PutFileRequestTest, Run_CrcSumUnequal_SendCorruptedDataResponse) {
+  binary_data_ = {1u};
+  (*msg_)[am::strings::params][am::strings::binary_data] = binary_data_;
+  const uint32_t incorrect_crc_sum = 0u;
+  (*msg_)[am::strings::msg_params][am::strings::crc32_check_sum] =
+      incorrect_crc_sum;
+
+  ExpectReceiveMessageFromSDK();
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
+  ON_CALL(app_mngr_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kStorageFolder));
+  ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kFolder));
+  const size_t available_space = binary_data_.size() + 1;
+  ON_CALL(*mock_app_, GetAvailableDiskSpace())
+      .WillByDefault(Return(available_space));
+  ON_CALL(*mock_app_, AddFile(_)).WillByDefault(Return(true));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::CORRUPTED_DATA);
+  EXPECT_CALL(app_mngr_, SaveBinary(_, _, _, _)).Times(0);
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+  // The folder was created in the "Run" method
+  EXPECT_TRUE(file_system::RemoveDirectory(kStorageFolder, true));
 }
 
 }  // namespace put_file
