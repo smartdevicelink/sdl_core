@@ -1270,7 +1270,7 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
       GetTransportTypeProfileString(application->secondary_device());
 
   const smart_objects::SmartObject* app_types_array = application->app_types();
-  if (app_types_array->length() == 0) {
+  if (app_types_array == NULL || app_types_array->length() == 0) {
     // This app does not have any AppHMIType. In this case, check "EMPTY_APP"
     // entry
     std::map<std::string, std::vector<std::string> >::const_iterator it =

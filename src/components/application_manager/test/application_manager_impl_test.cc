@@ -1214,6 +1214,28 @@ TEST_F(ApplicationManagerImplTest,
 }
 
 TEST_F(ApplicationManagerImplTest,
+       CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes2) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  const connection_handler::DeviceHandle primary_device_handle = 1;
+  const connection_handler::DeviceHandle secondary_device_handle = 0;
+
+  std::string primary_transport_device_string("BLUETOOTH");
+  std::string secondary_transport_device_string("");
+
+  // - The app doesn't specify AppHMIType.
+  // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
+  //   -> The app does not have required transport.
+  bool result = CheckResumptionRequiredTransportAvailableTest(
+      NULL,
+      primary_device_handle,
+      primary_transport_device_string,
+      secondary_device_handle,
+      secondary_transport_device_string);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_TwoTransports_Success) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
 
