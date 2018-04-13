@@ -574,8 +574,7 @@ TEST_F(PolicyManagerImplTest2, GetUpdateUrl) {
   CreateLocalPT(preloaded_pt_filename_);
   GetPTU(kValidSdlPtUpdateJson);
   // Check expectations
-  const std::string update_url(
-      "http://policies.telematics.ford.com/api/policies");
+  const std::string update_url("http://policies.telematics.ford.com/api/policies");
   EXPECT_EQ(update_url, policy_manager_->GetUpdateUrl(7));
   EXPECT_EQ("", policy_manager_->GetUpdateUrl(4));
 }
