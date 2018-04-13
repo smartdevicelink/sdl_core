@@ -94,7 +94,9 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
       CreateCommand<VRGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_vr_supported_languages((supported_languages)));

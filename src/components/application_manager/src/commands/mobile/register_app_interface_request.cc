@@ -529,7 +529,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     return;
   }
 
-  const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+  const DataAccessor<HMICapabilities> hmi_capabilities_accessor =
+      application_manager_.const_hmi_capabilities();
   const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
   response_params[strings::sync_msg_version][strings::major_version] =
@@ -632,8 +633,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
-  const std::string ccpu_version =
-      hmi_capabilities.ccpu_version();
+  const std::string ccpu_version = hmi_capabilities.ccpu_version();
   if (!ccpu_version.empty()) {
     response_params[strings::system_software_version] = ccpu_version;
   }

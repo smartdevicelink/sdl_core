@@ -60,7 +60,8 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_IsReady);
       const bool is_available = ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_TTS);
-      application_manager_.hmi_capabilities().GetData().set_is_tts_cooperating(is_available);
+      application_manager_.hmi_capabilities().GetData().set_is_tts_cooperating(
+          is_available);
       if (!CheckAvailabilityHMIInterfaces(application_manager_,
                                           HmiInterfaces::HMI_INTERFACE_TTS)) {
         LOG4CXX_INFO(logger_,
@@ -86,7 +87,8 @@ void TTSIsReadyRequest::SendMessageToHMI() {
   utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage,
                                         application_manager_));
-  application_manager_.hmi_capabilities().GetData().set_handle_response_for(*get_language);
+  application_manager_.hmi_capabilities().GetData().set_handle_response_for(
+      *get_language);
   application_manager_.ManageHMICommand(get_language);
   utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(

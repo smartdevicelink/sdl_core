@@ -132,7 +132,9 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
   MockHMICapabilities mock_hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities, hmi_lock)));
   EXPECT_CALL(mock_hmi_capabilities, active_ui_language())
       .WillOnce(Return(kLanguage));
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))

@@ -2696,12 +2696,16 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
   return *mobile_so_factory_;
 }
 
-NonConstDataAccessor<HMICapabilities> ApplicationManagerImpl::hmi_capabilities() {
-  return NonConstDataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
+NonConstDataAccessor<HMICapabilities>
+ApplicationManagerImpl::hmi_capabilities() {
+  return NonConstDataAccessor<HMICapabilities>(*hmi_capabilities_,
+                                               hmi_capabilities_lock_);
 }
 
-const DataAccessor<HMICapabilities> ApplicationManagerImpl::const_hmi_capabilities() const {
-  return DataAccessor<HMICapabilities>(*hmi_capabilities_, hmi_capabilities_lock_);
+const DataAccessor<HMICapabilities>
+ApplicationManagerImpl::const_hmi_capabilities() const {
+  return DataAccessor<HMICapabilities>(*hmi_capabilities_,
+                                       hmi_capabilities_lock_);
 }
 
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
@@ -2713,8 +2717,8 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
     return;
   }
 
-  std::string cur_vr_lang(
-      MessageHelper::CommonLanguageToString(const_hmi_capabilities().GetData().active_vr_language()));
+  std::string cur_vr_lang(MessageHelper::CommonLanguageToString(
+      const_hmi_capabilities().GetData().active_vr_language()));
   const SmartObject& languages = app_data[json::languages];
 
   std::transform(

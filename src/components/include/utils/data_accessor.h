@@ -41,20 +41,22 @@
 template <class T>
 struct DataAccessorImpl {
   DataAccessorImpl(T& data, sync_primitives::Lock& lock)
-    : lockptr_(std::make_shared<sync_primitives::AutoLock>(lock))
-    , data_(data) {
-  }
+      : lockptr_(std::make_shared<sync_primitives::AutoLock>(lock))
+      , data_(data) {}
   T& GetData() const {
     return data_;
   }
- DataAccessorImpl(const DataAccessorImpl&) = default;
- DataAccessorImpl(DataAccessorImpl&&) = default;
+  DataAccessorImpl(const DataAccessorImpl&) = default;
+  DataAccessorImpl(DataAccessorImpl&&) = default;
+
  private:
   std::shared_ptr<sync_primitives::AutoLock> lockptr_;
   T& data_;
 };
 
-template<class T> using DataAccessor = DataAccessorImpl<const T>;
-template<class T> using NonConstDataAccessor = DataAccessorImpl<T>;
+template <class T>
+using DataAccessor = DataAccessorImpl<const T>;
+template <class T>
+using NonConstDataAccessor = DataAccessorImpl<T>;
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_

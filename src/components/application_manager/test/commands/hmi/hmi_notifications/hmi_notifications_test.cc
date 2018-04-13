@@ -1370,7 +1370,9 @@ TEST_F(HMICommandsNotificationsTest, OnVRLanguageChangeNotificationEmptyData) {
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
@@ -1392,7 +1394,9 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
@@ -1438,7 +1442,9 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
@@ -1701,7 +1707,9 @@ TEST_F(HMICommandsNotificationsTest, OnTTSLanguageChangeNotificationEmptyData) {
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
@@ -1724,7 +1732,9 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
@@ -1771,7 +1781,9 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
@@ -1811,7 +1823,9 @@ TEST_F(HMICommandsNotificationsTest, OnUILanguageChangeNotificationEmptyData) {
   EXPECT_CALL(mock_hmi_capabilities_, active_vr_language())
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_ptr_, app_id()).Times(0);
@@ -1833,7 +1847,9 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
@@ -1879,7 +1895,9 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(Return(hmi_apis::Common_Language::EN_AU));
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));

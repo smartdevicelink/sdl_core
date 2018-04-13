@@ -234,7 +234,9 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
       "templates_available";
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              hmi_capabilities, hmi_lock)));
 
   EXPECT_CALL(hmi_capabilities, display_capabilities())
       .WillOnce(Return(dispaly_capabilities_msg.get()));

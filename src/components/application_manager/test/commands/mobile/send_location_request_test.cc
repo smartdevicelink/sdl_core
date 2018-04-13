@@ -112,7 +112,8 @@ class SendLocationRequestTest
 
   void HMICapabilitiesSetupHelper() {
     EXPECT_CALL(app_mngr_, const_hmi_capabilities())
-        .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+            mock_hmi_capabilities_, hmi_lock_)));
     EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
         .WillOnce(Return(true));
   }
@@ -335,7 +336,8 @@ TEST_F(SendLocationRequestTest, Run_HMIUINotCoop_Cancelled) {
   (*disp_cap_)[hmi_response::text_fields][0][strings::name] =
       Common_TextFieldName::phoneNumber;
   EXPECT_CALL(app_mngr_, const_hmi_capabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
       .WillOnce(Return(false));
   FinishSetupCancelled(mobile_apis::Result::UNSUPPORTED_RESOURCE);

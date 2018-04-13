@@ -50,8 +50,10 @@ OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {}
 void OnVRLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
-    NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.hmi_capabilities();
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities
+     // lock.
+    NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor =
+        application_manager_.hmi_capabilities();
     HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
     hmi_capabilities.set_active_vr_language(

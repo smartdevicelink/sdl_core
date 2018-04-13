@@ -68,7 +68,9 @@ class NaviIsReadyRequestTest
  public:
   NaviIsReadyRequestTest() : command_(CreateCommand<NaviIsReadyRequest>()) {
     ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillByDefault(
+            Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                mock_hmi_capabilities_, hmi_lock_)));
   }
 
   NaviIsReadyRequestPtr command_;

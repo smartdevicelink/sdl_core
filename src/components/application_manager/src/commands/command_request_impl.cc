@@ -652,7 +652,8 @@ bool CommandRequestImpl::CheckHMICapabilities(
   using namespace smart_objects;
   using namespace mobile_apis;
 
-  const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+  const DataAccessor<HMICapabilities> hmi_capabilities_accessor =
+      application_manager_.const_hmi_capabilities();
   const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported by HMI");

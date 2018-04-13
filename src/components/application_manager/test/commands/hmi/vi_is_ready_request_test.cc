@@ -71,7 +71,9 @@ class VIIsReadyRequestTest
                          bool is_message_contain_param,
                          am::HmiInterfaces::InterfaceState state) {
     EXPECT_CALL(app_mngr_, hmi_capabilities())
-        .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillOnce(
+            Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                mock_hmi_capabilities_, hmi_lock_)));
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_ivi_cooperating(is_vi_cooperating_available));
 

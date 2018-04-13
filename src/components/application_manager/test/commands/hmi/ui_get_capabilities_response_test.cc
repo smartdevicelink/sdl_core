@@ -101,7 +101,9 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject display_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::display_capabilities];
@@ -123,7 +125,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
       [strings::msg_params][hmi_response::soft_button_capabilities];
@@ -145,7 +149,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject hmi_zone_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities];
@@ -165,7 +171,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
       [strings::msg_params][strings::audio_pass_thru_capabilities];
@@ -187,7 +195,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
@@ -209,7 +219,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
@@ -231,7 +243,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreaming_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
@@ -257,7 +271,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject navigation_capability_so =
       (*command_msg)[strings::msg_params][strings::system_capabilities]
@@ -281,7 +297,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhonenCapability_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject phone_capability_so =
       (*command_msg)[strings::msg_params][strings::system_capabilities]
@@ -332,7 +350,9 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_capability(video_streaming_capability));

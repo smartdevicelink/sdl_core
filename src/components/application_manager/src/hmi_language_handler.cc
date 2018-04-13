@@ -231,9 +231,12 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
       static_cast<int32_t>(kNotification);
   message[strings::params][strings::connection_key] = connection_key;
 
-  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
-    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
-    const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities
+     // lock.
+    const DataAccessor<HMICapabilities> hmi_capabilities_accessor =
+        application_manager_.const_hmi_capabilities();
+    const HMICapabilities& hmi_capabilities =
+        hmi_capabilities_accessor.GetData();
     message[strings::msg_params][strings::hmi_display_language] =
         hmi_capabilities.active_ui_language();
     message[strings::msg_params][strings::language] =
@@ -252,9 +255,12 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
-    const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
-    const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
+  {  // A local scope to limit accessor's lifetime and release hmi_capabilities
+     // lock.
+    const DataAccessor<HMICapabilities> hmi_capabilities_accessor =
+        application_manager_.const_hmi_capabilities();
+    const HMICapabilities& hmi_capabilities =
+        hmi_capabilities_accessor.GetData();
 
     // Updated values compared with persisted
     if (hmi_capabilities.active_ui_language() == persisted_ui_language_ &&

@@ -94,7 +94,9 @@ TEST_F(UIGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
       CreateCommand<UIGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_ui_supported_languages((supported_languages)));

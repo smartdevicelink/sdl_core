@@ -183,8 +183,10 @@ void SetInteriorVehicleDataRequest::Execute() {
 
   if (module_type_and_data_match) {
     {  // A local scope to limit accessor's lifetime and release app list lock.
-      const DataAccessor<application_manager::HMICapabilities> hmi_capabilities_accessor = service()->GetHMICapabilities();
-      const smart_objects::SmartObject* capabilities = hmi_capabilities_accessor.GetData().rc_capability();
+      const DataAccessor<application_manager::HMICapabilities>
+          hmi_capabilities_accessor = service()->GetHMICapabilities();
+      const smart_objects::SmartObject* capabilities =
+          hmi_capabilities_accessor.GetData().rc_capability();
 
       if (capabilities &&
           !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {

@@ -59,8 +59,10 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
       const bool is_available = ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_RC);
 
-      {  // A local scope to limit accessor's lifetime and release hmi_capabilities lock.
-        NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.hmi_capabilities();
+      {  // A local scope to limit accessor's lifetime and release
+         // hmi_capabilities lock.
+        NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor =
+            application_manager_.hmi_capabilities();
         HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
         hmi_capabilities.set_is_rc_cooperating(is_available);
         if (!is_available) {

@@ -53,7 +53,9 @@ class MockService : public Service {
   MOCK_METHOD2(NotifyHMIAboutHMILevel,
                void(ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType level));
-  MOCK_CONST_METHOD0(GetHMICapabilities, const DataAccessor<application_manager::HMICapabilities>());
+  MOCK_CONST_METHOD0(
+      GetHMICapabilities,
+      const DataAccessor<application_manager::HMICapabilities>());
   MOCK_METHOD2(CheckModule,
                bool(const ApplicationId& app_id, const std::string& module));
   MOCK_METHOD1(RemoveHMIFakeParameters,

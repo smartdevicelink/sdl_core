@@ -71,11 +71,15 @@ class VRIsReadyRequestTest
     const bool is_send_message_by_timeout = false;
     if (is_send_message_to_hmi) {
       EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillRepeatedly(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+          .WillRepeatedly(
+              Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                  mock_hmi_capabilities_, hmi_lock_)));
       ExpectSendMessagesToHMI(is_send_message_by_timeout);
     } else {
       EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+          .WillOnce(
+              Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                  mock_hmi_capabilities_, hmi_lock_)));
     }
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_vr_cooperating(is_vr_cooperating_available));
@@ -99,7 +103,9 @@ class VRIsReadyRequestTest
   void ExpectSendMessagesToHMI(bool is_send_message_by_timeout) {
     if (is_send_message_by_timeout) {
       EXPECT_CALL(app_mngr_, hmi_capabilities())
-          .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+          .WillOnce(
+              Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                  mock_hmi_capabilities_, hmi_lock_)));
     }
 
     smart_objects::SmartObjectSPtr language(

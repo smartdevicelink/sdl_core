@@ -65,7 +65,8 @@ TEST_F(UnsubscribeButtonRequestTest,
   UnsubscribeButtonRequestTest::MockHMICapabilities hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, const_hmi_capabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities, hmi_lock)));
   EXPECT_CALL(hmi_capabilities, is_ui_cooperating()).WillOnce(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
@@ -100,7 +101,8 @@ TEST_F(UnsubscribeButtonRequestTest,
   UnsubscribeButtonRequestTest::MockHMICapabilities hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, const_hmi_capabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities, hmi_lock)));
   EXPECT_CALL(hmi_capabilities, is_ui_cooperating()).WillOnce(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
@@ -125,7 +127,8 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   UnsubscribeButtonRequestTest::MockHMICapabilities hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, const_hmi_capabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities, hmi_lock)));
   EXPECT_CALL(hmi_capabilities, is_ui_cooperating()).WillOnce(Return(true));
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));

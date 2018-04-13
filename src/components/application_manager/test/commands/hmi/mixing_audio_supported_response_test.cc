@@ -89,7 +89,9 @@ TEST_F(MixingAudioSupportedResponseTest, RUN_SUCCESS) {
   ::sync_primitives::Lock hmi_lock;
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities, hmi_lock)));
 
   const bool hmiResponse =
       (*command_msg)[strings::msg_params][hmi_response::attenuated_supported]

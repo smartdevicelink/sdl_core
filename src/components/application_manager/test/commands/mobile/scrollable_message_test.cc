@@ -140,7 +140,9 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MockHMICapabilities hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillByDefault(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              hmi_capabilities, hmi_lock)));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);

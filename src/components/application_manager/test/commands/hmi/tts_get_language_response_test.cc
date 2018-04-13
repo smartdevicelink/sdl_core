@@ -72,7 +72,9 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MockHMICapabilities mock_hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities, hmi_lock)));
   EXPECT_CALL(mock_hmi_capabilities, set_active_tts_language(kLanguage));
 
   MockEventDispatcher mock_event_dispatcher;
@@ -92,7 +94,9 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MockHMICapabilities mock_hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities, hmi_lock)));
 
   EXPECT_CALL(mock_hmi_capabilities,
               set_active_tts_language(Common_Language::INVALID_ENUM));

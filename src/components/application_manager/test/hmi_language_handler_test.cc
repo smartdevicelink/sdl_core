@@ -150,7 +150,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // After last flag gets up, `VerifyWithPersistedLanguages`
   // method been called to and then will call `hmi_capabilities`
   ON_CALL(app_manager_, const_hmi_capabilities())
-      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities_, hmi_lock_)));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be the same
@@ -178,7 +179,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   hmi_language_handler_->on_event(vr_event);
 
   ON_CALL(app_manager_, const_hmi_capabilities())
-      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities_, hmi_lock_)));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be different
@@ -216,7 +218,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
   hmi_language_handler_->on_event(vr_event);
 
   ON_CALL(app_manager_, const_hmi_capabilities())
-      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities_, hmi_lock_)));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be different
@@ -296,7 +299,8 @@ TEST_F(HmiLanguageHandlerTest,
   hmi_language_handler_->on_event(event);
 
   ON_CALL(app_manager_, const_hmi_capabilities())
-      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(hmi_capabilities_, hmi_lock_)));
+      .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(
+          hmi_capabilities_, hmi_lock_)));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be different

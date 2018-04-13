@@ -239,7 +239,8 @@ bool SendLocationRequest::CheckHMICapabilities(
     return true;
   }
 
-  const DataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.const_hmi_capabilities();
+  const DataAccessor<HMICapabilities> hmi_capabilities_accessor =
+      application_manager_.const_hmi_capabilities();
   const HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
   if (!hmi_capabilities.is_ui_cooperating()) {

@@ -156,7 +156,8 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>
       mock_allocation_manager_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
-  NiceMock<application_manager_test::MockHMICapabilities> mock_hmi_capabilities_;
+  NiceMock<application_manager_test::MockHMICapabilities>
+      mock_hmi_capabilities_;
   ::sync_primitives::Lock hmi_lock_;
 };
 
@@ -168,7 +169,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   // Expectations
   EXPECT_CALL(*mock_service_, GetHMICapabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
@@ -236,7 +238,8 @@ TEST_F(
 
   // Expectations
   EXPECT_CALL(*mock_service_, GetHMICapabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))
@@ -304,7 +307,8 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 
   // Expectations
   EXPECT_CALL(*mock_service_, GetHMICapabilities())
-      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(Return(DataAccessor<application_manager::HMICapabilities>(
+          mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(*mock_service_, ValidateMessageBySchema(*mobile_message))
       .WillOnce(Return(application_manager::MessageValidationResult::SUCCESS));
   EXPECT_CALL(*mock_service_, CheckPolicyPermissions(mobile_message))

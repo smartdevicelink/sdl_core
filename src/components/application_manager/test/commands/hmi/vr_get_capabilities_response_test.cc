@@ -96,7 +96,9 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
       CreateCommand<VRGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   smart_objects::SmartObject vr_capabilities_so =
       (*command_msg)[strings::msg_params][strings::vr_capabilities];

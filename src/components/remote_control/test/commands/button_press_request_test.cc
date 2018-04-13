@@ -147,7 +147,9 @@ class ButtonPressRequestTest : public ::testing::Test {
     rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
 
     ON_CALL(*mock_service_, GetHMICapabilities())
-        .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillByDefault(
+            Return(DataAccessor<application_manager::HMICapabilities>(
+                mock_hmi_capabilities_, hmi_lock_)));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
         .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(*mock_service_, IsInterfaceAvailable(_))
@@ -173,7 +175,8 @@ class ButtonPressRequestTest : public ::testing::Test {
 
  protected:
   smart_objects::SmartObject rc_capabilities_;
-  NiceMock<application_manager_test::MockHMICapabilities> mock_hmi_capabilities_;
+  NiceMock<application_manager_test::MockHMICapabilities>
+      mock_hmi_capabilities_;
   ::sync_primitives::Lock hmi_lock_;
   utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
   utils::SharedPtr<NiceMock<MockApplication> > mock_app_;

@@ -86,7 +86,9 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeSuccess_SUCCESS) {
   ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_preset_bank_capabilities(preset_bank_capabilities_));

@@ -106,7 +106,9 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
   policy_test::MockPolicyHandlerInterface policy_handler;
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              mock_hmi_capabilities_, hmi_lock_)));
 
   std::string language;
   EXPECT_CALL(mock_message_helper_,

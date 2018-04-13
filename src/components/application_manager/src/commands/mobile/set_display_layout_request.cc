@@ -88,8 +88,10 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
                         [hmi_response::templates_available].length()) {
             msg_params[hmi_response::display_capabilities]
                       [hmi_response::templates_available] =
-                          application_manager_.hmi_capabilities().GetData().display_capabilities()->getElement(
-                              hmi_response::templates_available);
+                          application_manager_.hmi_capabilities()
+                              .GetData()
+                              .display_capabilities()
+                              ->getElement(hmi_response::templates_available);
           }
         }
       }

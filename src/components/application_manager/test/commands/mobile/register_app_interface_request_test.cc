@@ -152,7 +152,9 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
     ON_CALL(app_mngr_, const_hmi_capabilities())
-        .WillByDefault(Return(DataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillByDefault(
+            Return(DataAccessor<application_manager::HMICapabilities>(
+                mock_hmi_capabilities_, hmi_lock_)));
     ON_CALL(app_mngr_settings_, sdl_version())
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(mock_hmi_capabilities_, ccpu_version())

@@ -296,7 +296,9 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
   application_manager_test::MockHMICapabilities hmi_capabilities;
   ::sync_primitives::Lock hmi_lock;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(Return(NonConstDataAccessor<application_manager::HMICapabilities>(hmi_capabilities, hmi_lock)));
+      .WillOnce(
+          Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+              hmi_capabilities, hmi_lock)));
 
   EXPECT_CALL(hmi_capabilities,
               set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));

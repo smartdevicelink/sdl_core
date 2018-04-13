@@ -54,7 +54,8 @@ void ButtonGetCapabilitiesResponse::Run() {
     return;
   }
 
-  NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.hmi_capabilities();
+  NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor =
+      application_manager_.hmi_capabilities();
   HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
 
   hmi_capabilities.set_button_capabilities(

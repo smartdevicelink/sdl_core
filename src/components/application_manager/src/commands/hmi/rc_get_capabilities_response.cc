@@ -44,7 +44,8 @@ RCGetCapabilitiesResponse::~RCGetCapabilitiesResponse() {}
 void RCGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor = application_manager_.hmi_capabilities();
+  NonConstDataAccessor<HMICapabilities> hmi_capabilities_accessor =
+      application_manager_.hmi_capabilities();
   HMICapabilities& hmi_capabilities = hmi_capabilities_accessor.GetData();
   bool capability_exists =
       (*message_)[strings::msg_params].keyExists(strings::rc_capability);
