@@ -1273,8 +1273,10 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
           true,
           ByRef(empty)));
 
+#ifdef ENABLE_SECURITY
   EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
       .WillOnce(Return(true));
+#endif
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
   EXPECT_CALL(mock_protocol_handler_, NotifySessionStarted(_, _))
@@ -1312,8 +1314,11 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
           session_key,
           true,
           ByRef(empty)));
+
+#ifdef ENABLE_SECURITY
   EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
       .WillOnce(Return(true));
+#endif
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1354,8 +1359,11 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
           session_key,
           false,
           ByRef(empty)));
+
+#ifdef ENABLE_SECURITY
   EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
       .WillOnce(Return(true));
+#endif
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1446,9 +1454,12 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
                           session_key1,
                           true,
                           ByRef(empty))));
+
+#ifdef ENABLE_SECURITY
   EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
       .Times(2)
       .WillRepeatedly(Return(true));
+#endif
 
   // verify that connection handler will not mix up the two results
   SessionContext new_context_first, new_context_second;
