@@ -69,7 +69,9 @@ class UIIsReadyRequestTest
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(Return(NonConstDataAccessor<application_manager::HMICapabilities>(mock_hmi_capabilities_, hmi_lock_)));
+        .WillByDefault(
+            Return(NonConstDataAccessor<application_manager::HMICapabilities>(
+                mock_hmi_capabilities_, hmi_lock_)));
   }
   void SetUpExpectations(bool is_ui_cooperating_available,
                          bool is_send_message_to_hmi,
