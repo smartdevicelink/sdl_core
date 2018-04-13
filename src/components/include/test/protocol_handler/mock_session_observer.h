@@ -93,11 +93,13 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
                              transport_manager::DeviceHandle* device_id));
+#if __SIZEOF_SIZE_T__ != 4
   DEPRECATED MOCK_CONST_METHOD4(GetDataOnSessionKey,
                                 int32_t(uint32_t key,
                                         uint32_t* app_id,
                                         std::list<int32_t>* sessions_list,
                                         uint32_t* device_id));
+#endif
 
   MOCK_CONST_METHOD5(GetDataOnDeviceID,
                      int32_t(transport_manager::DeviceHandle device_handle,

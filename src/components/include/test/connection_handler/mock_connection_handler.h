@@ -86,12 +86,15 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD2(BindProtocolVersionWithSession,
                void(uint32_t connection_key, uint8_t protocol_version));
 
+#if __SIZEOF_SIZE_T__ != 4
   // DEPRECATED
   MOCK_CONST_METHOD4(GetDataOnSessionKey,
                      int32_t(uint32_t key,
                              uint32_t* app_id,
                              std::list<int32_t>* sessions_list,
                              uint32_t* device_id));
+#endif
+
   MOCK_CONST_METHOD4(GetDataOnSessionKey,
                      int32_t(uint32_t key,
                              uint32_t* app_id,
