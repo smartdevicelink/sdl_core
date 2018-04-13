@@ -184,6 +184,7 @@ extern const char* sync_file_name;
 extern const char* file_name;
 extern const char* file_type;
 extern const char* file_size;
+extern const char* crc32_check_sum;
 extern const char* request_type;
 extern const char* persistent_file;
 extern const char* file_data;
