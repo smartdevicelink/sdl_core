@@ -258,10 +258,18 @@ const std::string kCreateSchema =
     "    REFERENCES `application`(`id`) "
     "); "
     "CREATE TABLE IF NOT EXISTS `request_type`( "
-    "  `request_type` VARCHAR(50) NOT NULL, "
+    "  `request_type` VARCHAR(50), "
     "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  PRIMARY KEY(`request_type`,`application_id`), "
     "  CONSTRAINT `fk_app_type_application1` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`) "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `request_subtype`( "
+    "  `request_subtype` VARCHAR(50), "
+    "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
+    "  PRIMARY KEY(`request_subtype`,`application_id`), "
+    "  CONSTRAINT `fk_app_type_application2` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "
@@ -582,8 +590,21 @@ const std::string kInsertAppType =
     "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
 
 const std::string kInsertRequestType =
-    "INSERT OR IGNORE INTO `request_type` (`application_id`, `request_type`) "
+    "INSERT INTO `request_type` (`application_id`, `request_type`) "
     "VALUES (?, ?)";
+
+const std::string kInsertOmittedRequestType =
+    "INSERT INTO `request_type` (`application_id`) "
+    "VALUES (?)";
+
+const std::string kInsertRequestSubType =
+    "INSERT INTO `request_subtype` (`application_id`, "
+    "`request_subtype`) "
+    "VALUES (?, ?)";
+
+const std::string kInsertOmittedRequestSubType =
+    "INSERT INTO `request_subtype` (`application_id`) "
+    "VALUES (?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
@@ -695,6 +716,11 @@ const std::string kSelectRequestTypes =
     "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` "
     "= ?";
 
+const std::string kSelectRequestSubTypes =
+    "SELECT DISTINCT `request_subtype` FROM `request_subtype` WHERE "
+    "`application_id` "
+    "= ?";
+
 const std::string kSelectSecondsBetweenRetries =
     "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
 
@@ -739,6 +765,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
 const std::string kDeleteApplication = "DELETE FROM `application`";
 
 const std::string kDeleteRequestType = "DELETE FROM `request_type`";
+
+const std::string kDeleteRequestSubType = "DELETE FROM `request_subtype`";
 
 const std::string kSelectApplicationRevoked =
     "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

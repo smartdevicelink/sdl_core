@@ -1893,23 +1893,71 @@ bool PolicyHandler::IsRequestTypeAllowed(
     return false;
   }
 
-  std::vector<std::string> request_types =
-      policy_manager_->GetAppRequestTypes(policy_app_id);
-
-  // If no request types are assigned to app - any is allowed
-  if (request_types.empty()) {
+  const RequestType::State request_type_state =
+      policy_manager_->GetAppRequestTypesState(policy_app_id);
+  // If empty array of request types is assigned to app - any is allowed
+  if (RequestType::State::EMPTY == request_type_state) {
+    LOG4CXX_TRACE(logger_, "Any Request Type is allowed by policies.");
     return true;
+  } else if (RequestType::State::OMITTED == request_type_state) {
+    // If RequestType parameter omitted for app- any is disallowed
+    LOG4CXX_TRACE(logger_, "Any Request Type is disallowed by policies.");
+    return false;
+  }
+  // If any of request types is available for current application - get them
+  if (RequestType::State::AVAILABLE == request_type_state) {
+    const std::vector<std::string> request_types =
+        policy_manager_->GetAppRequestTypes(policy_app_id);
+    std::vector<std::string>::const_iterator it =
+        std::find(request_types.begin(), request_types.end(), stringified_type);
+    return request_types.end() != it;
+  }
+  return false;
+}
+
+bool PolicyHandler::IsRequestSubTypeAllowed(
+    const std::string& policy_app_id,
+    const std::string& request_subtype) const {
+  POLICY_LIB_CHECK(false);
+  using namespace mobile_apis;
+
+  if (request_subtype.empty()) {
+    LOG4CXX_ERROR(logger_, "Unknown request subtype.");
+    return false;
   }
 
-  std::vector<std::string>::const_iterator it =
-      std::find(request_types.begin(), request_types.end(), stringified_type);
-  return request_types.end() != it;
+  const RequestSubType::State request_subtype_state =
+      policy_manager_->GetAppRequestSubTypesState(policy_app_id);
+  // If empty array of request subtypes is assigned to app - any is allowed
+  if (RequestSubType::State::EMPTY == request_subtype_state) {
+    LOG4CXX_TRACE(logger_, "Any Request SubType is allowed by policies.");
+    return true;
+  } else if (RequestSubType::State::OMITTED == request_subtype_state) {
+    // If RequestSubType parameter omitted for app- any is disallowed
+    LOG4CXX_TRACE(logger_, "Any Request SubType is disallowed by policies.");
+    return false;
+  }
+  // If any of request subtypes is available for current application - get them
+  if (RequestSubType::State::AVAILABLE == request_subtype_state) {
+    const std::vector<std::string> request_subtypes =
+        policy_manager_->GetAppRequestSubTypes(policy_app_id);
+    std::vector<std::string>::const_iterator it = std::find(
+        request_subtypes.begin(), request_subtypes.end(), request_subtype);
+    return request_subtypes.end() != it;
+  }
+  return false;
 }
 
 const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
     const std::string& policy_app_id) const {
   POLICY_LIB_CHECK(std::vector<std::string>());
   return policy_manager_->GetAppRequestTypes(policy_app_id);
+}
+
+const std::vector<std::string> PolicyHandler::GetAppRequestSubTypes(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(std::vector<std::string>());
+  return policy_manager_->GetAppRequestSubTypes(policy_app_id);
 }
 
 const VehicleInfo policy::PolicyHandler::GetVehicleInfo() const {

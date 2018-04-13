@@ -39,6 +39,10 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
+
+#include "json/json.h"
+#include "formatters/CFormatterJsonBase.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -604,11 +608,14 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
+  Json::Value tmp;
+  namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  Formatters::CFormatterJsonBase::objToJsonValue(s_map, tmp);
+  LOG4CXX_DEBUG(logger_, "Mobile request: " << tmp.toStyledString());
+
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
-      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-      params.insert(iter->first);
-    }
+    LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+    params.insert(iter->first);
   }
 
   mobile_apis::Result::eType check_result =

@@ -46,6 +46,16 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
+namespace RequestType {
+// Describes available RequestType states in policy table
+enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+}  // namespace RequestType
+
+namespace RequestSubType {
+// Describes available RequestSubType states in policy table
+enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+}  // namespace RequestType
+
 class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
@@ -65,6 +75,22 @@ class CacheManagerInterface {
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
+
+  /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  virtual RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  virtual RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Returns true if Policy Table was not updated yet
@@ -625,6 +651,15 @@ class CacheManagerInterface {
   virtual void GetAppRequestTypes(
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @param request_subtypes Request subtypes of application to be filled
+   */
+  virtual void GetAppRequestSubTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_subtypes) const = 0;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to

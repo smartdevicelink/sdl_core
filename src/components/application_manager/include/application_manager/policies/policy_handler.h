@@ -487,11 +487,29 @@ class PolicyHandler : public PolicyHandlerInterface,
       mobile_apis::RequestType::eType type) const OVERRIDE;
 
   /**
+   * @brief Checks if certain request subtype is allowed for application
+   * @param policy_app_id Unique applicaion id
+   * @param type Request subtype
+   * @return true, if allowed, otherwise - false
+   */
+  bool IsRequestSubTypeAllowed(
+      const std::string& policy_app_id,
+      const std::string& request_subtype) const OVERRIDE;
+
+  /**
    * @brief Gets application request types
    * @param policy_app_id Unique application id
    * @return request types
    */
   const std::vector<std::string> GetAppRequestTypes(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Gets application request subtypes
+   * @param policy_app_id Unique application id
+   * @return app request subtypes
+   */
+  const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**

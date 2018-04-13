@@ -78,6 +78,20 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
+  const bool request_subtype_present =
+      (*message_)[strings::msg_params].keyExists(strings::request_subtype);
+  if (request_subtype_present) {
+    const std::string request_subtype =
+        (*message_)[strings::msg_params][strings::request_subtype].asString();
+    if (!policy_handler.IsRequestSubTypeAllowed(app->policy_app_id(),
+                                                request_subtype)) {
+      LOG4CXX_ERROR(logger_,
+                    "Request subtype: " << request_subtype << " is DISALLOWED");
+
+      return;
+    }
+  }
+
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
@@ -184,7 +198,8 @@ size_t OnSystemRequestNotification::ParsePTString(
     if (pt_string[i] == '\"' || pt_string[i] == '\\') {
       result += '\\';
     } else if (pt_string[i] == '\n') {
-      result_length--;  // contentLength is adjusted when this character is not
+      result_length--;  // contentLength is adjusted when this character is
+                        // not
                         // copied to result.
       continue;
     }

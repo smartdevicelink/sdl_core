@@ -379,6 +379,25 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   return request_types;
 }
 
+RequestType::State PolicyManagerImpl::GetAppRequestTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetAppRequestTypesState(policy_app_id);
+}
+
+RequestSubType::State PolicyManagerImpl::GetAppRequestSubTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetAppRequestSubTypesState(policy_app_id);
+}
+
+const std::vector<std::string> PolicyManagerImpl::GetAppRequestSubTypes(
+    const std::string& policy_app_id) const {
+  std::vector<std::string> request_subtypes;
+  cache_->GetAppRequestSubTypes(policy_app_id, request_subtypes);
+  return request_subtypes;
+}
+
 const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }

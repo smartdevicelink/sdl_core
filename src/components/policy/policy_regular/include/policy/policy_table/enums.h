@@ -133,7 +133,8 @@ enum RequestType {
   RT_EMERGENCY,
   RT_MEDIA,
   RT_FOTA,
-  RT_OEM_SPECIFIC
+  RT_OEM_SPECIFIC,
+  RT_EMPTY  // Added to allow empty Request Types handling
 };
 
 bool IsValidEnum(RequestType val);

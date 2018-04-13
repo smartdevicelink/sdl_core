@@ -139,6 +139,7 @@ struct ApplicationParams : PolicyBase {
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
+  Optional<Strings> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;
