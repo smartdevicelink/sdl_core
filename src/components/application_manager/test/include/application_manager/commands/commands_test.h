@@ -144,14 +144,16 @@ class CommandsTest : public ::testing::Test {
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
+    timeout_ = timeout;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
-        .WillByDefault(ReturnRef(timeout));
+        .WillByDefault(ReturnRef(timeout_));
   }
 
   CommandsTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
+      , timeout_(0) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -209,6 +211,9 @@ class CommandsTest : public ::testing::Test {
                            MobileResult::DATA_NOT_AVAILABLE);
     link_hmi_to_mob_result(HMIResult::READ_ONLY, MobileResult::READ_ONLY);
   }
+
+ private:
+  uint32_t timeout_;
 };
 
 MATCHER_P(MobileResultCodeIs, result_code, "") {
