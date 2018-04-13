@@ -1826,6 +1826,7 @@ void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
   SendUpdateAppList();
 }
 
+#ifdef ENABLE_SECURITY
 bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application(app_id);
@@ -1835,7 +1836,6 @@ bool ApplicationManagerImpl::CheckAppIsNavi(const uint32_t app_id) const {
   return false;
 }
 
-#ifdef ENABLE_SECURITY
 bool ApplicationManagerImpl::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {
