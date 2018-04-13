@@ -40,8 +40,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_crypto_manager.h"
+#endif  // ENABLE_SECURITY
 #include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
@@ -803,8 +805,14 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   EXPECT_CALL(*application1, is_audio()).WillRepeatedly(Return(false));
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
-  EXPECT_CALL(mock_session_observer,
-              GetDataOnDeviceID(device_handle, _, _, _, _));
+  EXPECT_CALL(
+      mock_session_observer,
+      GetDataOnDeviceID(
+          testing::Matcher<transport_manager::DeviceHandle>(device_handle),
+          _,
+          _,
+          _,
+          _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
@@ -1163,7 +1171,15 @@ TEST_F(PolicyHandlerTest, OnCurrentDeviceIdUpdateRequired) {
   EXPECT_CALL(conn_handler, get_session_observer())
       .WillOnce(ReturnRef(session_observer));
 
-  EXPECT_CALL(session_observer, GetDataOnDeviceID(0u, _, _, _, _));
+  const transport_manager::DeviceHandle handle = 0u;
+
+  EXPECT_CALL(session_observer,
+              GetDataOnDeviceID(
+                  testing::Matcher<transport_manager::DeviceHandle>(handle),
+                  _,
+                  _,
+                  _,
+                  _));
 
   // Act
   policy_handler_.OnCurrentDeviceIdUpdateRequired(kPolicyAppId_);
@@ -1464,7 +1480,9 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
   EXPECT_CALL(app_manager_, application(app_id))
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _));
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
@@ -1490,7 +1508,9 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
@@ -1564,7 +1584,9 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
@@ -1582,6 +1604,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(PolicyHandlerTest, RetrieveCertificate) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
@@ -1590,6 +1613,7 @@ TEST_F(PolicyHandlerTest, RetrieveCertificate) {
       .WillOnce(Return(test_certificate));
   EXPECT_EQ(test_certificate, policy_handler_.RetrieveCertificate());
 }
+#endif  // ENABLE_SECURITY
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
@@ -1807,6 +1831,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
 }
+#ifdef ENABLE_SECURITY
 #ifdef EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   const std::string app_storage = "storage";
@@ -1832,7 +1857,8 @@ TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   EXPECT_CALL(policy_handler_observer, OnCertificateUpdated(cert_data));
   policy_handler_.OnCertificateUpdated(cert_data);
 }
-#endif
+#endif  // EXTERNAL_PROPRIETARY_MODE
+#endif  // ENABLE_SECURITY
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_WithoutApps) {
   // Arrange
@@ -1879,7 +1905,9 @@ void PolicyHandlerTest::GetAppIDForSending() {
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
 
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
@@ -1945,7 +1973,9 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
 
   // Check expectations
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
 
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
@@ -1985,7 +2015,9 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
 
   // Check expectations
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
 
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
@@ -2078,7 +2110,9 @@ TEST_F(PolicyHandlerTest, CanUpdate_TwoApplicationForSending_SUCCESS) {
   test_app.insert(mock_app_);
   test_app.insert(second_mock_app);
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
 
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
@@ -2112,8 +2146,13 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
       .WillOnce(ReturnRef(mock_session_observer));
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(device, _, NULL, _, _))
-      .WillOnce(Return(1u));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::Matcher<transport_manager::DeviceHandle>(device),
+                  _,
+                  NULL,
+                  _,
+                  _)).WillOnce(Return(1u));
 
   EXPECT_CALL(app_manager_, application(kConnectionKey_))
       .WillOnce(Return(mock_app_));
@@ -2266,7 +2305,10 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
+  EXPECT_CALL(
+      mock_session_observer,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), _, NULL, _, _))
       .WillRepeatedly(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
 
   EXPECT_CALL(app_manager_, connection_handler())
@@ -2327,7 +2369,10 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
+  EXPECT_CALL(
+      mock_session_observer,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), _, NULL, _, _))
       .WillRepeatedly(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
 
   EXPECT_CALL(app_manager_, connection_handler())

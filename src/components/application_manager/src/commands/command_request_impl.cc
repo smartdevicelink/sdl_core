@@ -31,6 +31,7 @@
  */
 
 #include <algorithm>
+#include <numeric>
 #include <string>
 #include "utils/macro.h"
 #include "utils/make_shared.h"

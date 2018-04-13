@@ -130,6 +130,8 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "application_manager/mock_resume_ctrl.h"
+
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
 #endif  // SDL_REMOTE_CONTROL
@@ -180,6 +182,11 @@ ACTION_P(GetEventId, event_id) {
 ACTION_P(GetArg, arg) {
   *arg = arg0;
 }
+
+ACTION_P(GetArg3, result) {
+  arg3 = *result;
+}
+
 ACTION_P2(GetConnectIdPermissionConsent, connect_id, consent) {
   *connect_id = arg0;
   std::vector<policy::FunctionalGroupPermission>::const_iterator it =
@@ -1030,10 +1037,16 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, OnSuspend());
+
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId_));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(GetMessage(temp_message));
+
   command->Run();
   EXPECT_EQ(
       static_cast<uint32_t>(
@@ -1588,7 +1601,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
@@ -1638,7 +1654,10 @@ TEST_F(HMICommandsNotificationsTest,
   ON_CALL(mock_connection_handler_, get_session_observer())
       .WillByDefault(ReturnRef(mock_session_observer_));
   const int32_t device_id = 1;
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+  ON_CALL(
+      mock_session_observer_,
+      GetDataOnDeviceID(
+          testing::An<transport_manager::DeviceHandle>(), NULL, NULL, _, NULL))
       .WillByDefault(Return(device_id));
 
   EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
@@ -1897,7 +1916,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
-  EXPECT_CALL(app_mngr_, set_driver_distraction(state));
+  EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
@@ -1932,12 +1951,18 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);
-
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+  policy::CheckPermissionResult result;
+  result.hmi_level_permitted = policy::kRpcAllowed;
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_interface_));
+  EXPECT_CALL(policy_interface_, CheckPermissions(_, _, _, _))
+      .WillOnce(GetArg3(&result));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(GetMessage(message));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
+
   command->Run();
   EXPECT_EQ(
       static_cast<int32_t>(am::mobile_api::FunctionID::OnDriverDistractionID),

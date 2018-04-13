@@ -107,10 +107,10 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * application
    * @param result_code contains result code for sending to mobile application
    * @return result for sending to mobile application.
+   * @deprecated
    */
-  // DEPRECATED
-  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
-                                 std::string& info);
+  DEPRECATED bool PrepareResponseParameters(
+      mobile_apis::Result::eType& result_code, std::string& info);
   /**
    * @brief Prepare result code, 'success' result and info for sending
    * to mobile  application
@@ -159,10 +159,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
-  /* flag display state of speak and ui perform audio
-  during perform audio pass thru*/
-  bool awaiting_tts_speak_response_;
-  bool awaiting_ui_response_;
   /**
    * @brief Pair of result_code and success for mobile app
    */

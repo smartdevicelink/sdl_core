@@ -40,8 +40,14 @@ CSmartSchema::CSmartSchema() : mSchemaItem(CAlwaysTrueSchemaItem::create()) {}
 CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
     : mSchemaItem(SchemaItem) {}
 
-Errors::eType CSmartSchema::validate(const SmartObject& object) const {
-  return mSchemaItem->validate(object);
+Errors::eType CSmartSchema::validate(const SmartObject& Object) const {
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
+}
+
+Errors::eType CSmartSchema::validate(const SmartObject& object,
+                                     rpc::ValidationReport* report__) const {
+  return mSchemaItem->validate(object, report__);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {

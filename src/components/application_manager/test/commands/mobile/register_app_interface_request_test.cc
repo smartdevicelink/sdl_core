@@ -43,17 +43,19 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "utils/data_accessor.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "utils/data_accessor.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -90,9 +92,20 @@ class RegisterAppInterfaceRequestTest
   RegisterAppInterfaceRequestTest()
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
-      , app_name_("test_app_name_") {
+      , app_name_("test_app_name_")
+      , mock_application_helper_(
+            application_manager_test::MockApplicationHelper::
+                application_helper_mock()) {
     InitGetters();
     InitLanguage();
+  }
+
+  void SetUp() OVERRIDE {
+    testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
+  }
+
+  void TearDown() OVERRIDE {
+    testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
   }
 
   void InitBasicMessage() {
@@ -112,6 +125,7 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, app_icon_path()).WillByDefault(ReturnRef(kDummyString));
     ON_CALL(*mock_app, language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
+    ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId));
     return mock_app;
   }
 
@@ -151,6 +165,9 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
+    ON_CALL(app_mngr_, IsAppInReconnectMode(_)).WillByDefault(Return(false));
+    ON_CALL(app_mngr_, application_by_policy_id(_))
+        .WillByDefault(Return(ApplicationSharedPtr()));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
     ON_CALL(
@@ -165,6 +182,43 @@ class RegisterAppInterfaceRequestTest
         mock_hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  }
+
+  void SetCommonExpectionsOnSwitchedApplication(
+      MockAppPtr mock_app, mobile_apis::Result::eType response_result_code) {
+    EXPECT_CALL(mock_policy_handler_, AddApplication(_, _)).Times(0);
+
+    EXPECT_CALL(
+        app_mngr_,
+        ManageMobileCommand(MobileResultCodeIs(response_result_code), _));
+
+    EXPECT_CALL(app_mngr_,
+                ManageHMICommand(HMIResultCodeIs(
+                    hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
+        .Times(0);
+
+    EXPECT_CALL(app_mngr_,
+                ManageHMICommand(HMIResultCodeIs(
+                    hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
+        .Times(0);
+
+    EXPECT_CALL(app_mngr_,
+                ManageHMICommand(HMIResultCodeIs(
+                    hmi_apis::FunctionID::UI_ChangeRegistration))).Times(0);
+
+    EXPECT_CALL(app_mngr_,
+                ManageHMICommand(HMIResultCodeIs(
+                    hmi_apis::FunctionID::TTS_ChangeRegistration))).Times(0);
+
+    EXPECT_CALL(app_mngr_,
+                ManageHMICommand(HMIResultCodeIs(
+                    hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
+
+    EXPECT_CALL(
+        app_mngr_,
+        OnApplicationSwitched(
+            MockAppPtr::static_pointer_cast<application_manager::Application>(
+                mock_app)));
   }
 
   MessageSharedPtr msg_;
@@ -194,6 +248,7 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   MockHMICapabilities mock_hmi_capabilities_;
+  application_manager_test::MockApplicationHelper& mock_application_helper_;
   ::sync_primitives::Lock hmi_lock_;
 };
 
@@ -350,6 +405,113 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .Times(2);
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       SwitchApplication_CorrectHash_ExpectNoCleanupSuccess) {
+  InitBasicMessage();
+
+  const std::string request_hash_id = "abc123";
+  (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
+
+  EXPECT_CALL(
+      mock_resume_crt_,
+      CheckApplicationHash(
+          MockAppPtr::static_pointer_cast<application_manager::Application>(
+              mock_app),
+          request_hash_id)).WillOnce(Return(true));
+
+  EXPECT_CALL(mock_resume_crt_, RemoveApplicationFromSaved(_)).Times(0);
+
+  EXPECT_CALL(mock_application_helper_, RecallApplicationData(_, _)).Times(0);
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::SUCCESS);
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       SwitchApplication_WrongHash_ExpectCleanupResumeFailed) {
+  InitBasicMessage();
+
+  const std::string request_hash_id = "abc123";
+  (*msg_)[am::strings::msg_params][am::strings::hash_id] = request_hash_id;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
+
+  EXPECT_CALL(
+      mock_resume_crt_,
+      CheckApplicationHash(
+          MockAppPtr::static_pointer_cast<application_manager::Application>(
+              mock_app),
+          request_hash_id)).WillOnce(Return(false));
+
+  EXPECT_CALL(
+      mock_application_helper_,
+      RecallApplicationData(
+          MockAppPtr::static_pointer_cast<application_manager::Application>(
+              mock_app),
+          _));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::RESUME_FAILED);
+
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       SwitchApplication_NoHash_ExpectCleanupResumeFailed) {
+  InitBasicMessage();
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(kAppId)).WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
+
+  EXPECT_CALL(
+      mock_application_helper_,
+      RecallApplicationData(
+          MockAppPtr::static_pointer_cast<application_manager::Application>(
+              mock_app),
+          _));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  SetCommonExpectionsOnSwitchedApplication(mock_app,
+                                           mobile_apis::Result::RESUME_FAILED);
 
   command_->Run();
 }

@@ -72,16 +72,6 @@ class AlertRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
-  /*
-   * @brief Will caled by request controller, when default will be expired.
-   * If Alert request has soft buttons, timeout response should not be sent to
-   * mobile
-   */
-  // DEPRECATED
-  virtual void onTimeOut() {
-    CommandRequestImpl::onTimeOut();
-  }
-
   /**
    * @brief Interface method that is called whenever new event received
    *

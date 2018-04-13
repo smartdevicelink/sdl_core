@@ -3,6 +3,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -117,6 +120,13 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
       ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params) const;
 
+  DEPRECATED void CheckVISubscribtions(
+      ApplicationSharedPtr app,
+      std::string& out_info,
+      mobile_apis::Result::eType& out_result_code,
+      smart_objects::SmartObject& out_response_params,
+      smart_objects::SmartObject& out_request_params,
+      bool& out_result);
   /**
    * @brief Checks if current application and other applications
    * were subscribed to VI, prepare data that need to send to mobile app
@@ -130,7 +140,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    * HMI
    * @param result contains result that SDL sends to mobile app.
    */
-  void CheckVISubscribtions(ApplicationSharedPtr app,
+  void CheckVISubscriptions(ApplicationSharedPtr app,
                             std::string& out_info,
                             mobile_apis::Result::eType& out_result_code,
                             smart_objects::SmartObject& out_response_params,

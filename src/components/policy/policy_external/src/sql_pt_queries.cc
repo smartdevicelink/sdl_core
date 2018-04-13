@@ -325,7 +325,7 @@ const std::string kCreateSchema =
     "`consent_group.fk_consent_group_functional_group1_idx` "
     "  ON `consent_group`(`functional_group_id`); "
     "CREATE TABLE IF NOT EXISTS `endpoint`( "
-    "  `service` INTEGER NOT NULL, "
+    "  `service` VARCHAR(100) NOT NULL, "
     "  `url` VARCHAR(100) NOT NULL, "
     "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  CONSTRAINT `fk_endpoint_application1` "

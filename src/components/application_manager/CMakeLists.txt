@@ -324,6 +324,7 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_error_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_on_awake_sdl.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_received_policy_update.cc
@@ -344,9 +345,6 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/rc_get_capabilities_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/ui_send_haptic_data_response.cc
-)
-
-set (HMI_COMMANDS_SOURCES_JSON
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_subscribe_vehicle_data_request.cc
@@ -354,6 +352,9 @@ set (HMI_COMMANDS_SOURCES_JSON
   ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vehicle_data_notification.cc
+)
+
+set (HMI_COMMANDS_SOURCES_JSON
 )
 
 set (HMI_COMMANDS_SOURCES_DBUS

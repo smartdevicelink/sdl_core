@@ -25,13 +25,13 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (application_manager_.IsAppSubscribedForWayPoints(app->app_id())) {
+  if (application_manager_.IsAppSubscribedForWayPoints(app)) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
-    application_manager_.SubscribeAppForWayPoints(app->app_id());
+    application_manager_.SubscribeAppForWayPoints(app);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
@@ -57,7 +57,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
-        application_manager_.SubscribeAppForWayPoints(app->app_id());
+        application_manager_.SubscribeAppForWayPoints(app);
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),

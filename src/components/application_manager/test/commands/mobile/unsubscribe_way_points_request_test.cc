@@ -100,9 +100,9 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
@@ -117,9 +117,9 @@ TEST_F(UnSubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+  EXPECT_CALL(app_mngr_,
+              IsAppSubscribedForWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
       .WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_,
@@ -154,9 +154,9 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
-
-  EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId));
+  EXPECT_CALL(app_mngr_,
+              UnsubscribeAppFromWayPoints(
+                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)));
 
   EXPECT_CALL(
       app_mngr_,
