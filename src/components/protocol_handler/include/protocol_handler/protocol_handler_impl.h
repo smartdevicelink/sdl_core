@@ -452,6 +452,14 @@ class ProtocolHandlerImpl
   const impl::ToMobileQueue& get_to_mobile_queue() const {
     return raw_ford_messages_to_mobile_;
   }
+
+  void set_tcp_config(bool tcp_enabled,
+                      std::string tcp_address,
+                      std::string tcp_port) {
+    tcp_enabled_ = tcp_enabled;
+    tcp_ip_address_ = tcp_address;
+    tcp_port_ = tcp_port;
+  }
 #endif
 
  private:

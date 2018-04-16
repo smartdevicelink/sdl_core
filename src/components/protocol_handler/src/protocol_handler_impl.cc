@@ -31,6 +31,7 @@
  */
 
 #include "protocol_handler/protocol_handler_impl.h"
+#include <arpa/inet.h> // for INET6_ADDRSTRLEN
 #include <memory.h>
 #include <algorithm>  // std::find
 #include <bson_object.h>
@@ -307,44 +308,51 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (settings_.multiple_transports_enabled() && 
-          *minVersion >= minSimultaneousMultipleTransportsVersion &&
-          parseSecondaryTransportConfiguration(connection_id, secondaryTransports, audioServiceTransports, videoServiceTransports)) {
-        LOG4CXX_TRACE(logger_, "We are a GO for multiple transports!!!");
-        BsonArray secondaryTransportsArr;
-        bson_array_initialize(&secondaryTransportsArr, secondaryTransports.size());
-        for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
-          char secondaryTransport[255];
-          strncpy(secondaryTransport,
-                  secondaryTransports[i].c_str(), 
-                  sizeof(secondaryTransport));
-          secondaryTransport[sizeof(secondaryTransport) - 1] = '\0';
-          LOG4CXX_TRACE(logger_, "Adding " << secondaryTransport << " to secondaryTransports parameter of StartSessionAck");
-          bson_array_add_string(&secondaryTransportsArr, secondaryTransport);
-        }
-        bson_object_put_array(&params, strings::secondary_transports, &secondaryTransportsArr);
+      if (*minVersion >= minSimultaneousMultipleTransportsVersion) {
+        if (parseSecondaryTransportConfiguration(connection_id, secondaryTransports, audioServiceTransports, videoServiceTransports)) {
+          LOG4CXX_TRACE(logger_, "We are a GO for multiple transports!!!");
+          BsonArray secondaryTransportsArr;
+          bson_array_initialize(&secondaryTransportsArr, secondaryTransports.size());
+          for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
+            char secondaryTransport[255];
+            strncpy(secondaryTransport,
+                    secondaryTransports[i].c_str(),
+                    sizeof(secondaryTransport));
+            secondaryTransport[sizeof(secondaryTransport) - 1] = '\0';
+            LOG4CXX_TRACE(logger_, "Adding " << secondaryTransport << " to secondaryTransports parameter of StartSessionAck");
+            bson_array_add_string(&secondaryTransportsArr, secondaryTransport);
+          }
+          bson_object_put_array(&params, strings::secondary_transports, &secondaryTransportsArr);
 
-        BsonArray audioServiceTransportsArr;
-        bson_array_initialize(&audioServiceTransportsArr, audioServiceTransports.size());
-        for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
-          LOG4CXX_TRACE(logger_, "Adding " << audioServiceTransports[i] << " to audioServiceTransports parameter of StartSessionAck");
-          bson_array_add_int32(&audioServiceTransportsArr, audioServiceTransports[i]);
-        }
-        bson_object_put_array(&params, strings::audio_service_transports, &audioServiceTransportsArr);
+          BsonArray audioServiceTransportsArr;
+          bson_array_initialize(&audioServiceTransportsArr, audioServiceTransports.size());
+          for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
+            LOG4CXX_TRACE(logger_, "Adding " << audioServiceTransports[i] << " to audioServiceTransports parameter of StartSessionAck");
+            bson_array_add_int32(&audioServiceTransportsArr, audioServiceTransports[i]);
+          }
+          bson_object_put_array(&params, strings::audio_service_transports, &audioServiceTransportsArr);
 
-        BsonArray videoServiceTransportsArr;
-        bson_array_initialize(&videoServiceTransportsArr, videoServiceTransports.size());
-        for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
-          LOG4CXX_TRACE(logger_, "Adding " << videoServiceTransports[i] << " to videoServiceTransports parameter of StartSessionAck");
-          bson_array_add_int32(&videoServiceTransportsArr, videoServiceTransports[i]);
-        }
-        bson_object_put_array(&params, strings::video_service_transports, &videoServiceTransportsArr);
+          BsonArray videoServiceTransportsArr;
+          bson_array_initialize(&videoServiceTransportsArr, videoServiceTransports.size());
+          for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
+            LOG4CXX_TRACE(logger_, "Adding " << videoServiceTransports[i] << " to videoServiceTransports parameter of StartSessionAck");
+            bson_array_add_int32(&videoServiceTransportsArr, videoServiceTransports[i]);
+          }
+          bson_object_put_array(&params, strings::video_service_transports, &videoServiceTransportsArr);
 
-        send_transport_update_event = true;
+          if (settings_.multiple_transports_enabled()) {
+            send_transport_update_event = true;
+          } else {
+            LOG4CXX_TRACE(logger_, "Multiple transports feature is disabled by configuration");
+            // In this case, we must remember that this session will never have a secondary transport.
+            connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
+          }
+        } else {
+          LOG4CXX_WARN(logger_, "Failed to set up secondary transport and service type params");
+          connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
+        }
       } else {
         LOG4CXX_INFO(logger_, "Older protocol version. No multiple transports");
-
-        // In this case, we must remember that this session will never have a secondary transport.
         connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
       }
     }
@@ -636,15 +644,16 @@ void ProtocolHandlerImpl::SendTransportUpdateEvent(ConnectionID connection_id,
     bson_object_initialize_default(&transportUpdatePayloadObj);
 
     int32_t tcp_port = atoi(tcp_port_.c_str());
-    char tcp_ip_address[20];
+    char tcp_ip_address[INET6_ADDRSTRLEN + 1];
     if (tcp_enabled_ && (tcp_port != 0)) {
-      strncpy(tcp_ip_address, tcp_ip_address_.c_str(), 19);
+      strncpy(tcp_ip_address, tcp_ip_address_.c_str(), INET6_ADDRSTRLEN);
+      tcp_ip_address[INET6_ADDRSTRLEN] = '\0';
       bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
       bson_object_put_int32(&transportUpdatePayloadObj, strings::tcp_port, tcp_port);
     } else {
-      tcp_ip_address[0] = 0;
+      tcp_ip_address[0] = '\0';
       bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
-      bson_object_put_int32(&transportUpdatePayloadObj, strings::tcp_port, 0);
+      // omit TCP port number
     }
     LOG4CXX_INFO(logger_,
                   "SendTransportUpdateEvent IP address: " << tcp_ip_address << " Port: " << tcp_port);
@@ -2351,15 +2360,17 @@ const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
   // and look up the allowed secondary transports for that primary transport
   std::string connection_type = session_observer_.connection_type(connection_id);
   const impl::TransportDescription td = GetTransportTypeFromConnectionType(connection_type);
-  if (td.transport_type_ == "USB") {
-      secondary_transport_types = settings_.secondary_transports_for_usb();
-  } else if (td.transport_type_ == "Bluetooth") {
-      secondary_transport_types = settings_.secondary_transports_for_bluetooth();
-  } else if (td.transport_type_ == "WiFi") {
-      secondary_transport_types = settings_.secondary_transports_for_wifi();
-  } else {
-    LOG4CXX_ERROR(logger_, "Bad or unknown device type in parseSecondaryTransportConfiguration");
-    return false;
+  if (settings_.multiple_transports_enabled()) {
+    if (td.transport_type_ == "USB") {
+        secondary_transport_types = settings_.secondary_transports_for_usb();
+    } else if (td.transport_type_ == "Bluetooth") {
+        secondary_transport_types = settings_.secondary_transports_for_bluetooth();
+    } else if (td.transport_type_ == "WiFi") {
+        secondary_transport_types = settings_.secondary_transports_for_wifi();
+    } else {
+      LOG4CXX_ERROR(logger_, "Bad or unknown device type in parseSecondaryTransportConfiguration");
+      return false;
+    }
   }
 
   // Then, generate the "secondaryTransports" array for the StartSession ACK

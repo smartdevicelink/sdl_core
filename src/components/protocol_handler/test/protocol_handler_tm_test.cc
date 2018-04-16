@@ -87,6 +87,10 @@ using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
 using protocol_handler::FRAME_DATA_SINGLE;
 using protocol_handler::FRAME_DATA_FIRST;
 using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK;
+using protocol_handler::FRAME_DATA_TRANSPORT_EVENT_UPDATE;
 using protocol_handler::kRpc;
 using protocol_handler::kControl;
 using protocol_handler::kAudio;
@@ -101,10 +105,12 @@ using transport_manager::DeviceInfo;
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnNull;
 using ::testing::An;
 using ::testing::AnyOf;
+using ::testing::AtLeast;
 using ::testing::ByRef;
 using ::testing::DoAll;
 using ::testing::SaveArg;
@@ -314,10 +320,11 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                           uint8_t service_type,
                           uint8_t sessionId,
                           uint32_t frame_data,
+                          uint8_t protocol_version = PROTOCOL_VERSION_3,
                           uint32_t dataSize = 0u,
                           const uint8_t* data = NULL) {
     SendTMMessage(connection_id,
-                  PROTOCOL_VERSION_3,
+                  protocol_version,
                   protection,
                   FRAME_TYPE_CONTROL,
                   service_type,
@@ -327,6 +334,18 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                   message_id,
                   data);
   }
+
+  void VerifySecondaryTransportParamsInStartSessionAck(
+      bool config_multiple_transports_enabled,
+      const std::vector<std::string>& config_secondary_transports_for_usb,
+      const std::vector<std::string>& config_secondary_transports_for_bluetooth,
+      const std::vector<std::string>& config_secondary_transports_for_wifi,
+      const std::vector<std::string>& config_audio_service_transports,
+      const std::vector<std::string>& config_video_service_transports,
+      const std::string& connection_type_string,
+      const std::vector<std::string>& expected_transport_strings,
+      const std::vector<int32_t>& expected_audio_service_transports,
+      const std::vector<int32_t>& expected_video_service_transports);
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
   ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
@@ -354,6 +373,10 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   std::vector<int> force_unprotected_services;
 #endif  // ENABLE_SECURITY
   std::vector<std::string> empty_rejected_param_;
+  // Used by OnTransportConfigUpdated() tests. The lifetime of these objects
+  // should be longer than that of a test case.
+  connection_handler::SessionConnectionMap session_connection_map_;
+  sync_primitives::Lock session_connection_map_lock_;
 };
 
 #ifdef ENABLE_SECURITY
@@ -1450,6 +1473,989 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 #endif  // ENABLE_SECURITY
+
+void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
+    bool config_multiple_transports_enabled,
+    const std::vector<std::string>& config_secondary_transports_for_usb,
+    const std::vector<std::string>& config_secondary_transports_for_bluetooth,
+    const std::vector<std::string>& config_secondary_transports_for_wifi,
+    const std::vector<std::string>& config_audio_service_transports,
+    const std::vector<std::string>& config_video_service_transports,
+    const std::string& connection_type_string,
+    const std::vector<std::string>& expected_transport_strings,
+    const std::vector<int32_t>& expected_audio_service_transports,
+    const std::vector<int32_t>& expected_video_service_transports) {
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  char full_version_string[] = "5.1.0";
+
+  // configuration setup
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(config_multiple_transports_enabled));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_usb())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_usb));
+  EXPECT_CALL(protocol_handler_settings_mock,
+              secondary_transports_for_bluetooth())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_bluetooth));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_wifi())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(config_audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(config_video_service_transports));
+
+  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+      .WillRepeatedly(Return(connection_type_string));
+
+  // Prepare expected BSON parameters. When we add another param in Start
+  // Service ACK frame in future, it should be also added here.
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+  // secondaryTransports
+  BsonArray secondary_transports;
+  bson_array_initialize(&secondary_transports,
+                        expected_transport_strings.size());
+  for (std::vector<std::string>::const_iterator it =
+           expected_transport_strings.begin();
+       it != expected_transport_strings.end();
+       ++it) {
+    // note: if there is no transport allowed, we can either make the array
+    // empty, or completely omit the array. (The spec allows both cases.) In
+    // this test case we make the array empty.
+    bson_array_add_string(&secondary_transports,
+                          const_cast<char*>(it->c_str()));
+  }
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::secondary_transports,
+                        &secondary_transports);
+  // audioServiceTransports
+  BsonArray audio_service_transports;
+  if (expected_audio_service_transports.size() > 0) {
+    bson_array_initialize(&audio_service_transports,
+                          expected_audio_service_transports.size());
+    for (std::vector<int32_t>::const_iterator it =
+             expected_audio_service_transports.begin();
+         it != expected_audio_service_transports.end();
+         ++it) {
+      bson_array_add_int32(&audio_service_transports, *it);
+    }
+    bson_object_put_array(&expected_obj,
+                          protocol_handler::strings::audio_service_transports,
+                          &audio_service_transports);
+  }
+  // videoServiceTransports
+  BsonArray video_service_transports;
+  if (expected_video_service_transports.size() > 0) {
+    bson_array_initialize(&video_service_transports,
+                          expected_video_service_transports.size());
+    for (std::vector<int32_t>::const_iterator it =
+             expected_video_service_transports.begin();
+         it != expected_video_service_transports.end();
+         ++it) {
+      bson_array_add_int32(&video_service_transports, *it);
+    }
+    bson_object_put_array(&expected_obj,
+                          protocol_handler::strings::video_service_transports,
+                          &video_service_transports);
+  }
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id,
+                                                 Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_SecondaryTransportParams_Enabled) {
+  // config allows secondary transport only when connected through Bluetooth,
+  // and the secondary is Wi-Fi
+  std::vector<std::string> secondary_transports_for_usb;  // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;
+  secondary_transports_for_bluetooth.push_back("WiFi");
+  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  // config allows video and audio services to run on all transports except
+  // Bluetooth
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_USB");
+  audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_USB");
+  video_service_transports.push_back("IAP_USB_HOST_MODE");
+  video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("AOA_USB");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is Android and is connected through Bluetooth SPP
+  std::string connection_type_string("BLUETOOTH");
+
+  // Core should specify WiFi for secondary transport, and should allow video
+  // and audio services only on secondary transport
+  std::vector<std::string> expected_transport_strings;
+  expected_transport_strings.push_back("TCP_WIFI");
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(2);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(2);
+
+  // A TransportUpdateEvent is also issued after Start Service ACK. We don't
+  // check it in this test case.
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_SecondaryTransportParams_NoSecondaryTransport) {
+  // config allows secondary transport only when connected through Bluetooth,
+  // and the secondary is Wi-Fi
+  std::vector<std::string> secondary_transports_for_usb;  // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;
+  secondary_transports_for_bluetooth.push_back("WiFi");
+  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  // config allows video and audio services to run on all transports except
+  // Bluetooth
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_USB");
+  audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_USB");
+  video_service_transports.push_back("IAP_USB_HOST_MODE");
+  video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("AOA_USB");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is iOS and is connected through iAP over USB
+  std::string connection_type_string("USB_IOS");
+
+  // Core should not offer any secondary transport. It will allow both video
+  // and audio services on primary transport.
+  std::vector<std::string> expected_transport_strings;  // empty
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(1);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(1);
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_SecondaryTransportParams_MultipleSecondaryTransports) {
+  // config allows secondary transport only when connected through Bluetooth,
+  // and the secondary is Wi-Fi and USB
+  std::vector<std::string> secondary_transports_for_usb;  // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;
+  secondary_transports_for_bluetooth.push_back("WiFi");
+  secondary_transports_for_bluetooth.push_back("USB");
+  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  // config allows video and audio services to run on all transports except
+  // Bluetooth
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_USB");
+  audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_USB");
+  video_service_transports.push_back("IAP_USB_HOST_MODE");
+  video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("AOA_USB");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is iOS and is connected through iAP over Bluetooth
+  std::string connection_type_string("BLUETOOTH_IOS");
+
+  // Core should offer both Wi-Fi and USB for secondary transport. Since the
+  // device is iOS, Core should specify "IAP_USB".
+  std::vector<std::string> expected_transport_strings;
+  expected_transport_strings.push_back("TCP_WIFI");
+  expected_transport_strings.push_back("IAP_USB");
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(2);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(2);
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+TEST_F(
+    ProtocolHandlerImplTest,
+    StartSessionAck_SecondaryTransportParams_ServiceAllowedOnBothTransports) {
+  std::vector<std::string> secondary_transports_for_usb;
+  secondary_transports_for_usb.push_back("WiFi");
+  std::vector<std::string> secondary_transports_for_bluetooth;
+  secondary_transports_for_bluetooth.push_back("USB");
+  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  // config allows video service to run on Wi-Fi transports only, and audio
+  // service to run on all transports
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_BLUETOOTH");
+  audio_service_transports.push_back("IAP_USB");
+  audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("SPP_BLUETOOTH");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is Android and is connected through AOA
+  std::string connection_type_string("USB_AOA");
+
+  // Core should offer Wi-Fi for secondary transport. It should allow audio
+  // service to run on both primary and secondary, while video service to run
+  // on secondary only. Since the list specifies AOA_USB then TCP_WIFI, the
+  // priority is primary > secondary.
+  std::vector<std::string> expected_transport_strings;
+  expected_transport_strings.push_back("TCP_WIFI");
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(1);  // primary preferred
+  expected_audio_service_transports.push_back(2);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(2);
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_SecondaryTransportParams_SecondaryDisabled) {
+  std::vector<std::string> secondary_transports_for_usb;        // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;  // empty
+  std::vector<std::string> secondary_transports_for_wifi;       // empty
+  // config allows video and audio services to run on all transports
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_BLUETOOTH");
+  audio_service_transports.push_back("IAP_USB");
+  audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("SPP_BLUETOOTH");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_BLUETOOTH");
+  video_service_transports.push_back("IAP_USB");
+  video_service_transports.push_back("IAP_USB_HOST_MODE");
+  video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("SPP_BLUETOOTH");
+  video_service_transports.push_back("AOA_USB");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is iOS and is connected through iAP over Bluetooth
+  std::string connection_type_string("BLUETOOTH_IOS");
+
+  // Core should not offer any secondary transport. It should still send
+  // the video/audio service transport lists.
+  std::vector<std::string> expected_transport_strings;  // empty
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(1);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(1);
+
+  connection_handler::SessionTransports dummy_st;
+  EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
+      .WillOnce(Return(dummy_st));
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      false, /* disabled */
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_SecondaryTransportParams_ServicesMapEmpty) {
+  std::vector<std::string> secondary_transports_for_usb;  // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;
+  secondary_transports_for_bluetooth.push_back("USB");
+  std::vector<std::string> secondary_transports_for_wifi;
+  secondary_transports_for_wifi.push_back("USB");
+  // config does not specify video and audio services
+  std::vector<std::string> audio_service_transports;  // empty
+  std::vector<std::string> video_service_transports;  // empty
+
+  // assume the device is connected through Wi-Fi (so not sure if it's iOS or
+  // Android)
+  std::string connection_type_string("WIFI");
+
+  // Core should offer USB transport for secondary transport. (Since the OS type
+  // is unknown, it will offer both IAP_USB and AOA_USB.) Also, it should allow
+  // video/audio services on all transports.
+  std::vector<std::string> expected_transport_strings;
+  expected_transport_strings.push_back("IAP_USB");
+  expected_transport_strings.push_back("AOA_USB");
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(1);
+  expected_audio_service_transports.push_back(2);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(1);
+  expected_video_service_transports.push_back(2);
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
+// Secondary transport param should not be included for apps with v5.0.0
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_Unprotected_NoSecondaryTransportParamsForV5) {
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  ProtocolPacket::ProtocolVersion full_version(5, 0, 0);
+  char full_version_string[] = "5.0.0";
+
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  // configuration
+  std::vector<std::string> config_secondary_transports_for_usb;  // empty
+  std::vector<std::string> config_secondary_transports_for_bluetooth;
+  config_secondary_transports_for_bluetooth.push_back("USB");
+  std::vector<std::string> config_secondary_transports_for_wifi;
+  config_secondary_transports_for_wifi.push_back("USB");
+
+  // assume the device is iOS and is connected through iAP over Bluetooth
+  std::string connection_type_string("BLUETOOTH_IOS");
+
+  // configuration setup
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_usb())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_usb));
+  EXPECT_CALL(protocol_handler_settings_mock,
+              secondary_transports_for_bluetooth())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_bluetooth));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_wifi())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
+
+  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+      .WillRepeatedly(Return(connection_type_string));
+
+  // BSON params should not include any of "secondaryTransports",
+  // "audioServiceTransports" and "videoServiceTransports" since v5.0.0 app
+  // does not understand them
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id,
+                                                 Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  connection_handler::SessionTransports dummy_st;
+  EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
+      .WillOnce(Return(dummy_st));
+
+  // Since the protocol version is less than 5.1.0, Core should not issue
+  // TransportEventUpdate frame. Enable ProtocolVersionUsed() call and verify
+  // that transport_manager_mock will NOT receive another SendMessageToDevice()
+  // call.
+  ON_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillByDefault(Return(true));
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       TransportEventUpdate_afterVersionNegotiation_TCPEnabled) {
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  // TCP configuration setup
+  bool tcp_enabled = true;
+  char tcp_address[] = "192.168.1.1";
+  int32_t tcp_port = 12345;
+  std::string tcp_port_str = "12345";
+  protocol_handler_impl->set_tcp_config(
+      tcp_enabled, std::string(tcp_address), tcp_port_str);
+
+  // configuration setup
+  std::vector<std::string> config_secondary_transports_for_usb;  // empty
+  std::vector<std::string> config_secondary_transports_for_bluetooth;
+  config_secondary_transports_for_bluetooth.push_back("WiFi");
+  std::vector<std::string> config_secondary_transports_for_wifi;  // empty
+  std::vector<std::string> config_audio_service_transports;
+  config_audio_service_transports.push_back("IAP_USB");
+  config_audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  config_audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  config_audio_service_transports.push_back("IAP_CARPLAY");
+  config_audio_service_transports.push_back("AOA_USB");
+  config_audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> config_video_service_transports;
+  config_video_service_transports.push_back("IAP_USB");
+  config_video_service_transports.push_back("IAP_USB_HOST_MODE");
+  config_video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  config_video_service_transports.push_back("IAP_CARPLAY");
+  config_video_service_transports.push_back("AOA_USB");
+  config_video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_usb())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_usb));
+  EXPECT_CALL(protocol_handler_settings_mock,
+              secondary_transports_for_bluetooth())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_bluetooth));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_wifi())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(config_audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(config_video_service_transports));
+
+  // assume the device is iOS and is connected through iAP over Bluetooth
+  std::string connection_type_string("BLUETOOTH_IOS");
+
+  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+      .WillRepeatedly(Return(connection_type_string));
+
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(
+          FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // IP address
+  bson_object_put_string(
+      &expected_obj, protocol_handler::strings::tcp_ip_address, tcp_address);
+  // TCP port number
+  bson_object_put_int32(
+      &expected_obj, protocol_handler::strings::tcp_port, tcp_port);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                         PROTECTION_OFF,
+                                         connection_id,
+                                         Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       TransportEventUpdate_afterVersionNegotiation_TCPDisabled) {
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  // TCP configuration setup
+  bool tcp_enabled = false;
+  char tcp_address[] = "192.168.2.3";
+  std::string tcp_port_str = "12345";
+  protocol_handler_impl->set_tcp_config(
+      tcp_enabled, std::string(tcp_address), tcp_port_str);
+
+  std::vector<std::string> config_secondary_transports_for_usb;  // empty
+  std::vector<std::string> config_secondary_transports_for_bluetooth;
+  config_secondary_transports_for_bluetooth.push_back("WiFi");
+  std::vector<std::string> config_secondary_transports_for_wifi;  // empty
+  std::vector<std::string> config_audio_service_transports;
+  config_audio_service_transports.push_back("IAP_USB");
+  config_audio_service_transports.push_back("IAP_USB_HOST_MODE");
+  config_audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  config_audio_service_transports.push_back("IAP_CARPLAY");
+  config_audio_service_transports.push_back("AOA_USB");
+  config_audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> config_video_service_transports;
+  config_video_service_transports.push_back("IAP_USB");
+  config_video_service_transports.push_back("IAP_USB_HOST_MODE");
+  config_video_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  config_video_service_transports.push_back("IAP_CARPLAY");
+  config_video_service_transports.push_back("AOA_USB");
+  config_video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_usb())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_usb));
+  EXPECT_CALL(protocol_handler_settings_mock,
+              secondary_transports_for_bluetooth())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_bluetooth));
+  EXPECT_CALL(protocol_handler_settings_mock, secondary_transports_for_wifi())
+      .Times(AtLeast(0))
+      .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(config_audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(config_video_service_transports));
+
+  // assume the device is iOS and is connected through iAP over Bluetooth
+  std::string connection_type_string("BLUETOOTH_IOS");
+
+  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+      .WillRepeatedly(Return(connection_type_string));
+
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(
+          FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // IP address
+  char empty_ip_address[] = "";
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::tcp_ip_address,
+                         empty_ip_address);
+  // TCP port number should be omitted
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                         PROTECTION_OFF,
+                                         connection_id,
+                                         Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       OnTransportConfigUpdated_TransportEventUpdate_TCPEnabled) {
+  using connection_handler::SessionConnectionMap;
+  using connection_handler::SessionTransports;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  char tcp_address[] = "172.16.2.3";
+  int32_t tcp_port = 23456;
+  std::string tcp_port_str = "23456";
+
+  transport_manager::transport_adapter::TransportConfig configs;
+  configs[std::string("enabled")] = std::string("true");
+  configs[std::string("tcp_port")] = tcp_port_str;
+  configs[std::string("tcp_ip_address")] = std::string(tcp_address);
+
+  transport_manager::ConnectionUID device1_primary_connection_id = 100;
+  transport_manager::ConnectionUID device2_primary_connection_id = 101;
+  transport_manager::ConnectionUID device2_secondary_connection_id = 150;
+
+  SessionTransports st1 = {device1_primary_connection_id, 0xFFFFFFFF};
+  SessionTransports st2 = {device2_primary_connection_id,
+                           device2_secondary_connection_id};
+  session_connection_map_[0x11] = st1;
+  session_connection_map_[0x22] = st2;
+
+  EXPECT_CALL(connection_handler_mock, session_connection_map())
+      .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // IP address
+  bson_object_put_string(
+      &expected_obj, protocol_handler::strings::tcp_ip_address, tcp_address);
+  // TCP port number
+  bson_object_put_int32(
+      &expected_obj, protocol_handler::strings::tcp_port, tcp_port);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  // since device 1 doesn't support secondary transport feature,
+  // TransportEvetUpdate should be delivered only to device 2
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                         PROTECTION_OFF,
+                                         device2_primary_connection_id,
+                                         Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  tm_listener->OnTransportConfigUpdated(configs);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       OnTransportConfigUpdated_TransportEventUpdate_TCPDisabled) {
+  using connection_handler::SessionConnectionMap;
+  using connection_handler::SessionTransports;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  char tcp_address[] = "172.16.2.3";
+  std::string tcp_port_str = "23456";
+
+  transport_manager::transport_adapter::TransportConfig configs;
+  configs[std::string("enabled")] = std::string("false");
+  configs[std::string("tcp_port")] = tcp_port_str;
+  configs[std::string("tcp_ip_address")] = std::string(tcp_address);
+
+  transport_manager::ConnectionUID device1_primary_connection_id = 100;
+  transport_manager::ConnectionUID device1_secondary_connection_id = 150;
+  transport_manager::ConnectionUID device2_primary_connection_id = 101;
+  transport_manager::ConnectionUID device3_primary_connection_id = 102;
+  transport_manager::ConnectionUID device3_secondary_connection_id = 151;
+
+  SessionTransports st1 = {device1_primary_connection_id,
+                           device1_secondary_connection_id};
+  SessionTransports st2 = {device2_primary_connection_id, 0xFFFFFFFF};
+  SessionTransports st3 = {device3_primary_connection_id,
+                           device3_secondary_connection_id};
+  session_connection_map_[0x11] = st1;
+  session_connection_map_[0x22] = st2;
+  session_connection_map_[0x33] = st3;
+
+  EXPECT_CALL(connection_handler_mock, session_connection_map())
+      .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
+          session_connection_map_, session_connection_map_lock_)));
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // IP address
+  char empty_ip_address[] = "";
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::tcp_ip_address,
+                         empty_ip_address);
+  // TCP port number should be omitted
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  // both device 1 and device 3 should receive TransportEventUpdate frames
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                         PROTECTION_OFF,
+                                         device1_primary_connection_id,
+                                         Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(FRAME_DATA_TRANSPORT_EVENT_UPDATE,
+                                         PROTECTION_OFF,
+                                         device3_primary_connection_id,
+                                         Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  tm_listener->OnTransportConfigUpdated(configs);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
+  AddConnection();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  transport_manager::ConnectionUID primary_connection_id = 123;
+
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(primary_connection_id, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  EXPECT_CALL(connection_handler_mock,
+              OnSecondaryTransportStarted(_, connection_id, session_id))
+      .WillOnce(DoAll(SetArgReferee<0>(primary_connection_id), Return(true)));
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(
+                  ControlMessage(FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK,
+                                 PROTECTION_OFF,
+                                 connection_id,
+                                 _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(PROTECTION_OFF,
+                     kControl,
+                     session_id,
+                     FRAME_DATA_REGISTER_SECONDARY_TRANSPORT,
+                     PROTOCOL_VERSION_5);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
+  AddConnection();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  transport_manager::ConnectionUID primary_connection_id = 123;
+
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(primary_connection_id, _, _))
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
+
+  // check the behavior when OnSecondaryTransportStarted() returns false
+  EXPECT_CALL(connection_handler_mock,
+              OnSecondaryTransportStarted(_, connection_id, session_id))
+      .WillOnce(DoAll(SetArgReferee<0>(primary_connection_id), Return(false)));
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(
+                  ControlMessage(FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK,
+                                 PROTECTION_OFF,
+                                 connection_id,
+                                 _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(PROTECTION_OFF,
+                     kControl,
+                     session_id,
+                     FRAME_DATA_REGISTER_SECONDARY_TRANSPORT,
+                     PROTOCOL_VERSION_5);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
 
 TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   const size_t period_msec = 10000;
