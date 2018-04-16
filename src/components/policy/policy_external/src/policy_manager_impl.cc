@@ -1574,8 +1574,7 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  send_on_update_sent_out_ =
-      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
+  send_on_update_sent_out_ = !update_status_manager_.IsUpdatePending();
 
   if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);
