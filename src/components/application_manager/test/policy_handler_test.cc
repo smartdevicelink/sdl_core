@@ -1378,8 +1378,12 @@ TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
 
   mobile_apis::RequestType::eType type =
       mobile_apis::RequestType::eType::EMERGENCY;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypesState(kPolicyAppId_))
+      .WillOnce(Return(policy::RequestType::State::AVAILABLE));
+
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(kPolicyAppId_))
-      .WillOnce(Return(std::vector<std::string>()));
+      .WillOnce(Return(std::vector<std::string>({"HTTP"})));
   // Act
   policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type);
 }
