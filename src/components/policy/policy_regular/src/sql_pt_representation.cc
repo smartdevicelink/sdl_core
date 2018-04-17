@@ -1160,7 +1160,8 @@ bool SQLPTRepresentation::SaveRequestType(
 }
 
 bool SQLPTRepresentation::SaveRequestSubType(
-    const std::string& app_id, const policy_table::Strings& request_subtypes) {
+    const std::string& app_id,
+    const policy_table::RequestSubTypes& request_subtypes) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertRequestSubType)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
@@ -1620,7 +1621,8 @@ bool SQLPTRepresentation::GatherRequestType(
 }
 
 bool SQLPTRepresentation::GatherRequestSubType(
-    const std::string& app_id, policy_table::Strings* request_subtypes) const {
+    const std::string& app_id,
+    policy_table::RequestSubTypes* request_subtypes) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectRequestSubTypes)) {
     LOG4CXX_WARN(logger_, "Incorrect select from request subtypes.");

@@ -2595,6 +2595,17 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
     }
     message[strings::msg_params][strings::request_type] = request_types_array;
   }
+  if (permissions.requestSubTypeChanged) {
+    smart_objects::SmartObject request_subtypes_array(
+        smart_objects::SmartType_Array);
+    ;
+    for (uint16_t index = 0; index < permissions.requestSubType.size();
+         ++index) {
+      request_subtypes_array[index] = permissions.requestSubType[index];
+    }
+    message[strings::msg_params][strings::request_subtype] =
+        request_subtypes_array;
+  }
 
   app_mngr.ManageHMICommand(
       utils::MakeShared<smart_objects::SmartObject>(message));

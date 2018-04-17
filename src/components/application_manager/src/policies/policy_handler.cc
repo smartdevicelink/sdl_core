@@ -1025,7 +1025,7 @@ void PolicyHandler::OnPendingPermissionChange(
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
-  if (permissions.requestTypeChanged) {
+  if (permissions.requestTypeChanged || permissions.requestSubTypeChanged) {
     MessageHelper::SendOnAppPermissionsChangedNotification(
         app->app_id(), permissions, application_manager_);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
