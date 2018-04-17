@@ -54,7 +54,7 @@ enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
 namespace RequestSubType {
 // Describes available RequestSubType states in policy table
 enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
-}  // namespace RequestType
+}  // namespace RequestSubType
 
 class CacheManagerInterface {
  public:

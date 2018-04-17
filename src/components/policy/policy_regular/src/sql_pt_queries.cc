@@ -269,7 +269,7 @@ const std::string kCreateSchema =
     "  `request_subtype` VARCHAR(50), "
     "  `application_id` VARCHAR(45) NOT NULL COLLATE NOCASE, "
     "  PRIMARY KEY(`request_subtype`,`application_id`), "
-    "  CONSTRAINT `fk_app_type_application2` "
+    "  CONSTRAINT `fk_request_subtype_app_id` "
     "    FOREIGN KEY(`application_id`) "
     "    REFERENCES `application`(`id`) "
     "); "

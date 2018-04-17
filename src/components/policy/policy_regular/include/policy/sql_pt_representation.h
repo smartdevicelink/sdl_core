@@ -132,8 +132,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                      policy_table::AppHMITypes* app_types) const;
   bool GatherRequestType(const std::string& app_id,
                          policy_table::RequestTypes* request_types) const;
-  bool GatherRequestSubType(const std::string& app_id,
-                            policy_table::Strings* request_subtypes) const;
+  bool GatherRequestSubType(
+      const std::string& app_id,
+      policy_table::RequestSubTypes* request_subtypes) const;
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
@@ -169,8 +170,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                    const policy_table::AppHMITypes& types);
   bool SaveRequestType(const std::string& app_id,
                        const policy_table::RequestTypes& types);
-  bool SaveRequestSubType(const std::string& app_id,
-                          const policy_table::Strings& request_subtypes);
+  bool SaveRequestSubType(
+      const std::string& app_id,
+      const policy_table::RequestSubTypes& request_subtypes);
 
  public:
   bool UpdateRequired() const;

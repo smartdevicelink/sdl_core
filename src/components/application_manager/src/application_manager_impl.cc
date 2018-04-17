@@ -73,9 +73,6 @@
 #include "utils/custom_string.h"
 #include <time.h>
 
-#include "json/json.h"
-#include "formatters/CFormatterJsonBase.h"
-
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/usage_statistics/counter.h"
 #include "functional_module/plugin_manager.h"
@@ -2341,10 +2338,6 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         output[strings::params][strings::binary_data] =
             *(message.binary_data());
       }
-      Json::Value tmp;
-      namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
-      Formatters::CFormatterJsonBase::objToJsonValue(output, tmp);
-      LOG4CXX_DEBUG(logger_, "Mobile request: " << tmp.toStyledString());
       break;
     }
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_HMI: {

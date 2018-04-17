@@ -49,6 +49,7 @@
 #include "smart_objects/smart_object.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
+#include "policy/cache_manager_interface.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
@@ -393,12 +394,28 @@ class PolicyHandlerInterface {
   /**
    * @brief Checks if certain request subtype is allowed for application
    * @param policy_app_id Unique applicaion id
-   * @param type Request subtype
+   * @param request_subtype Request subtype
    * @return true, if allowed, otherwise - false
    */
   virtual bool IsRequestSubTypeAllowed(
       const std::string& policy_app_id,
       const std::string& request_subtype) const = 0;
+
+  /**
+   * @brief Gets application request types state
+   * @param policy_app_id Unique application id
+   * @return request types state
+   */
+  virtual RequestType::State GetAppRequestTypeState(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Gets application request subtypes state
+   * @param policy_app_id Unique application id
+   * @return request subtypes state
+   */
+  virtual RequestSubType::State GetAppRequestSubTypeState(
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Gets application request types

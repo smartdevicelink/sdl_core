@@ -1025,7 +1025,7 @@ void PolicyHandler::OnPendingPermissionChange(
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
-  if (permissions.requestTypeChanged) {
+  if (permissions.requestTypeChanged || permissions.requestSubTypeChanged) {
     MessageHelper::SendOnAppPermissionsChangedNotification(
         app->app_id(), permissions, application_manager_);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
@@ -1881,6 +1881,18 @@ void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
   policy_manager_->OnAppRegisteredOnMobile(application_id);
 }
 
+RequestType::State PolicyHandler::GetAppRequestTypeState(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(RequestType::State::UNAVAILABLE);
+  return policy_manager_->GetAppRequestTypesState(policy_app_id);
+}
+
+RequestSubType::State PolicyHandler::GetAppRequestSubTypeState(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(RequestSubType::State::UNAVAILABLE);
+  return policy_manager_->GetAppRequestSubTypesState(policy_app_id);
+}
+
 bool PolicyHandler::IsRequestTypeAllowed(
     const std::string& policy_app_id,
     mobile_apis::RequestType::eType type) const {
@@ -1900,15 +1912,15 @@ bool PolicyHandler::IsRequestTypeAllowed(
     LOG4CXX_TRACE(logger_, "Any Request Type is allowed by policies.");
     return true;
   } else if (RequestType::State::OMITTED == request_type_state) {
-    // If RequestType parameter omitted for app- any is disallowed
-    LOG4CXX_TRACE(logger_, "Any Request Type is disallowed by policies.");
+    // If RequestType parameter omitted for app - any is disallowed
+    LOG4CXX_TRACE(logger_, "All Request Types are disallowed by policies.");
     return false;
   }
   // If any of request types is available for current application - get them
   if (RequestType::State::AVAILABLE == request_type_state) {
-    const std::vector<std::string> request_types =
+    const auto request_types =
         policy_manager_->GetAppRequestTypes(policy_app_id);
-    std::vector<std::string>::const_iterator it =
+    const auto it =
         std::find(request_types.begin(), request_types.end(), stringified_type);
     return request_types.end() != it;
   }
@@ -1933,15 +1945,15 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
     LOG4CXX_TRACE(logger_, "Any Request SubType is allowed by policies.");
     return true;
   } else if (RequestSubType::State::OMITTED == request_subtype_state) {
-    // If RequestSubType parameter omitted for app- any is disallowed
-    LOG4CXX_TRACE(logger_, "Any Request SubType is disallowed by policies.");
+    // If RequestSubType parameter omitted for app - any is disallowed
+    LOG4CXX_TRACE(logger_, "All Request SubTypes are disallowed by policies.");
     return false;
   }
   // If any of request subtypes is available for current application - get them
   if (RequestSubType::State::AVAILABLE == request_subtype_state) {
-    const std::vector<std::string> request_subtypes =
+    const auto request_subtypes =
         policy_manager_->GetAppRequestSubTypes(policy_app_id);
-    std::vector<std::string>::const_iterator it = std::find(
+    const auto it = std::find(
         request_subtypes.begin(), request_subtypes.end(), request_subtype);
     return request_subtypes.end() != it;
   }

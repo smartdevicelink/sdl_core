@@ -464,7 +464,7 @@ void SystemRequest::Run() {
                                            request_type)) {
     LOG4CXX_ERROR(logger_,
                   "RequestType " << stringified_request_type
-                                 << " is DISALLOWED");
+                                 << " is DISALLOWED by policies");
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -479,7 +479,8 @@ void SystemRequest::Run() {
     if (!policy_handler.IsRequestSubTypeAllowed(application->policy_app_id(),
                                                 request_subtype)) {
       LOG4CXX_ERROR(logger_,
-                    "Request subtype: " << request_subtype << " is DISALLOWED");
+                    "Request subtype: " << request_subtype
+                                        << " is DISALLOWED by policies");
       SendResponse(false, mobile_apis::Result::DISALLOWED);
       return;
     }

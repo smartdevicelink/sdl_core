@@ -70,10 +70,16 @@ void OnSystemRequestNotification::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
+
+  const std::string stringified_request_type =
+      rpc::policy_table_interface_base::EnumToJsonString(
+          static_cast<rpc::policy_table_interface_base::RequestType>(
+              request_type));
+
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
     LOG4CXX_WARN(logger_,
-                 "Request type " << request_type
+                 "Request type " << stringified_request_type
                                  << " is not allowed by policies");
     return;
   }
@@ -86,8 +92,8 @@ void OnSystemRequestNotification::Run() {
     if (!policy_handler.IsRequestSubTypeAllowed(app->policy_app_id(),
                                                 request_subtype)) {
       LOG4CXX_ERROR(logger_,
-                    "Request subtype: " << request_subtype << " is DISALLOWED");
-
+                    "Request subtype: " << request_subtype
+                                        << " is DISALLOWED by policies");
       return;
     }
   }
@@ -199,8 +205,7 @@ size_t OnSystemRequestNotification::ParsePTString(
       result += '\\';
     } else if (pt_string[i] == '\n') {
       result_length--;  // contentLength is adjusted when this character is
-                        // not
-                        // copied to result.
+                        // not copied to result.
       continue;
     }
     result += pt_string[i];

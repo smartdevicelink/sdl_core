@@ -39,6 +39,7 @@
 #include <sstream>
 
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 #include "json/reader.h"
 #include "json/features.h"
 #include "json/writer.h"
@@ -1590,11 +1591,9 @@ void CacheManager::GetAppRequestTypes(
                   "Can't find request types for app_id " << policy_app_id);
     return;
   }
-  policy_table::RequestTypes::iterator it_request_type =
-      policy_iter->second.RequestType->begin();
-  for (; it_request_type != policy_iter->second.RequestType->end();
-       ++it_request_type) {
-    request_types.push_back(EnumToJsonString(*it_request_type));
+
+  for (auto it_request_types : *policy_iter->second.RequestType) {
+    request_types.push_back(EnumToJsonString(it_request_types));
   }
   return;
 }
@@ -1610,7 +1609,7 @@ RequestSubType::State CacheManager::GetAppRequestSubTypesState(
                   "Can't find request subtypes for app_id " << policy_app_id);
     return RequestSubType::State::UNAVAILABLE;
   }
-  const policy_table::Strings& request_types =
+  const policy_table::RequestSubTypes& request_types =
       *app_policies_iter->second.RequestSubType;
   if (!request_types.is_initialized()) {
     return RequestSubType::State::OMITTED;
@@ -1639,11 +1638,9 @@ void CacheManager::GetAppRequestSubTypes(
                   "Can't find request subtypes for app_id " << policy_app_id);
     return;
   }
-  policy_table::Strings::iterator it_request_subtype =
-      policy_iter->second.RequestSubType->begin();
-  for (; it_request_subtype != policy_iter->second.RequestSubType->end();
-       ++it_request_subtype) {
-    request_types.push_back(*it_request_subtype);
+
+  for (auto it_request_subtypes : *policy_iter->second.RequestSubType) {
+    request_types.push_back(it_request_subtypes);
   }
   return;
 }
