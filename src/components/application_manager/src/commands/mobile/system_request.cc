@@ -41,6 +41,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "policy/policy_table/enums.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"

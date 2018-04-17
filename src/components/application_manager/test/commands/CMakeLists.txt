@@ -65,6 +65,7 @@ set(LIBRARIES
   AMMobileCommandsLibrary
   connectionHandler
   jsoncpp
+  Policy
 )
 
 create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
