@@ -362,7 +362,7 @@
     <enum name="SystemAction">
         <description>Enumeration that describes system actions that can be triggered.</description>
         <element name="DEFAULT_ACTION">
-            <description>Default action occurs.  Standard behavior (e.g. SoftButton clears overlay).</description>
+            <description>Default action occurs. Standard behavior (e.g. SoftButton clears overlay).</description>
         </element>
         <element name="STEAL_FOCUS">
             <description>App is brought into HMI_FULL.</description>
@@ -898,6 +898,9 @@
         </param>
         <param name="imageType" type="ImageType" mandatory="true">
             <description>Describes, whether it is a static or dynamic image.</description>
+        </param>
+        <param name="isTemplate" type="Boolean" mandatory="false">
+            <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
         </param>
     </struct>
     
@@ -2032,10 +2035,10 @@
     </struct>         
     <struct name="Turn">
         <param name="navigationText" type="String" maxlength="500" mandatory="false">
-            <description>Individual turn text.  Must provide at least text or icon for a given turn.</description>
+            <description>Individual turn text. Must provide at least text or icon for a given turn.</description>
         </param>
         <param name="turnIcon" type="Image" mandatory="false">
-            <description>Individual turn icon.  Must provide at least text or icon for a given turn.</description>
+            <description>Individual turn icon. Must provide at least text or icon for a given turn.</description>
         </param>
     </struct>         
     <struct name="VehicleType">

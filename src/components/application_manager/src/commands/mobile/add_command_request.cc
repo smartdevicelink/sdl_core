@@ -32,13 +32,14 @@
  */
 
 #include <string>
+
 #include "application_manager/commands/mobile/add_command_request.h"
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
-#include "utils/custom_string.h"
 
 namespace application_manager {
 
@@ -95,14 +96,15 @@ void AddCommandRequest::Run() {
     }
   }
 
-  if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  if (!msg_params.keyExists(strings::cmd_id)) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  if (app->FindCommand(
-          (*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
+  if (app->FindCommand(msg_params[strings::cmd_id].asUInt())) {
     LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -110,16 +112,14 @@ void AddCommandRequest::Run() {
 
   bool data_exist = false;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+  if (msg_params.keyExists(strings::menu_params)) {
     if (!CheckCommandName(app)) {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
     }
-    if (((*message_)[strings::msg_params][strings::menu_params].keyExists(
-            hmi_request::parent_id)) &&
+    if (msg_params[strings::menu_params].keyExists(hmi_request::parent_id) &&
         (0 !=
-         (*message_)[strings::msg_params][strings::menu_params]
-                    [hmi_request::parent_id].asUInt())) {
+         msg_params[strings::menu_params][hmi_request::parent_id].asUInt())) {
       if (!CheckCommandParentId(app)) {
         SendResponse(
             false, mobile_apis::Result::INVALID_ID, "Parent ID doesn't exist");
@@ -129,8 +129,8 @@ void AddCommandRequest::Run() {
     data_exist = true;
   }
 
-  if (((*message_)[strings::msg_params].keyExists(strings::vr_commands)) &&
-      ((*message_)[strings::msg_params][strings::vr_commands].length() > 0)) {
+  if (msg_params.keyExists(strings::vr_commands) &&
+      (msg_params[strings::vr_commands].length() > 0)) {
     if (!CheckCommandVRSynonym(app)) {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
@@ -151,26 +151,20 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  app->AddCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt(),
-                  (*message_)[strings::msg_params]);
+  app->AddCommand(msg_params[strings::cmd_id].asUInt(), msg_params);
 
   smart_objects::SmartObject ui_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    ui_msg_params[strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
-    ui_msg_params[strings::menu_params] =
-        (*message_)[strings::msg_params][strings::menu_params];
+  if (msg_params.keyExists(strings::menu_params)) {
+    ui_msg_params[strings::cmd_id] = msg_params[strings::cmd_id];
+    ui_msg_params[strings::menu_params] = msg_params[strings::menu_params];
 
     ui_msg_params[strings::app_id] = app->app_id();
 
-    if (((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) &&
-        ((*message_)[strings::msg_params][strings::cmd_icon].keyExists(
-            strings::value)) &&
-        (0 < (*message_)[strings::msg_params][strings::cmd_icon][strings::value]
-                 .length())) {
-      ui_msg_params[strings::cmd_icon] =
-          (*message_)[strings::msg_params][strings::cmd_icon];
+    if (msg_params.keyExists(strings::cmd_icon) &&
+        msg_params[strings::cmd_icon].keyExists(strings::value) &&
+        (0 < msg_params[strings::cmd_icon][strings::value].length())) {
+      ui_msg_params[strings::cmd_icon] = msg_params[strings::cmd_icon];
     }
 
     send_ui_ = true;
@@ -178,11 +172,9 @@ void AddCommandRequest::Run() {
 
   smart_objects::SmartObject vr_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-    vr_msg_params[strings::cmd_id] =
-        (*message_)[strings::msg_params][strings::cmd_id];
-    vr_msg_params[strings::vr_commands] =
-        (*message_)[strings::msg_params][strings::vr_commands];
+  if (msg_params.keyExists(strings::vr_commands)) {
+    vr_msg_params[strings::cmd_id] = msg_params[strings::cmd_id];
+    vr_msg_params[strings::vr_commands] = msg_params[strings::vr_commands];
     vr_msg_params[strings::app_id] = app->app_id();
 
     vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
