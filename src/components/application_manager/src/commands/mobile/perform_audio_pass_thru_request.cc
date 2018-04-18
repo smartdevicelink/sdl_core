@@ -311,7 +311,8 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager_.BeginAudioPassThrough();
+  uint32_t app_id = connection_key();
+  application_manager_.BeginAudioPassThru(app_id);
 
   application_manager_.StartAudioPassThruThread(
       connection_key(),
@@ -370,9 +371,10 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
 void PerformAudioPassThruRequest::FinishTTSSpeak() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (application_manager_.EndAudioPassThrough()) {
+  uint32_t app_id = connection_key();
+  if (application_manager_.EndAudioPassThru(app_id)) {
     LOG4CXX_DEBUG(logger_, "Stop AudioPassThru.");
-    application_manager_.StopAudioPassThru(connection_key());
+    application_manager_.StopAudioPassThru(app_id);
   }
   if (!IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS)) {
     LOG4CXX_WARN(logger_, "TTS Speak is inactive.");

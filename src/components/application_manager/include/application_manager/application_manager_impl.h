@@ -478,17 +478,34 @@ class ApplicationManagerImpl
   uint32_t GetNextHMICorrelationID() OVERRIDE;
 
   /* @brief Starts audio passthru process
+   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is already in process
    */
   bool BeginAudioPassThrough() OVERRIDE;
 
+  /**
+   * @brief Starts AudioPassThru process by given application
+   * @param app_id ID of the application which starts the process
+   * @return true if AudioPassThru can be started, false otherwise
+   */
+  bool BeginAudioPassThru(uint32_t app_id) OVERRIDE;
+
   /*
    * @brief Finishes already started audio passthru process
+   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is not active
    */
   bool EndAudioPassThrough() OVERRIDE;
+
+  /**
+   * @brief Finishes already started AudioPassThru process by given application
+   * @param app_id ID of the application which started the process
+   * @return true if AudioPassThru process has been started with given
+   * application and thus it can be stopped, false otherwise
+   */
+  bool EndAudioPassThru(uint32_t app_id) OVERRIDE;
 
   /*
    * @brief Retrieves driver distraction state
@@ -1702,6 +1719,7 @@ class ApplicationManagerImpl
   std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
 
   bool audio_pass_thru_active_;
+  uint32_t audio_pass_thru_app_id_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
@@ -1819,6 +1837,13 @@ class ApplicationManagerImpl
    * @param mock_app the mock app to be registered
    */
   void AddMockApplication(ApplicationSharedPtr mock_app);
+
+  /**
+   * @brief set a mock media manager without running Init(). Only for unit
+   * testing.
+   * @param mock_app the mock app to be registered
+   */
+  void SetMockMediaManager(media_manager::MediaManager* mock_media_manager);
 
  private:
 #endif

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Livio, Inc. 
+Copyright (c) 2018 Livio, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

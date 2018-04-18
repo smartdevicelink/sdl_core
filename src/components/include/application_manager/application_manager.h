@@ -390,17 +390,34 @@ class ApplicationManager {
   virtual void EndNaviServices(uint32_t app_id) = 0;
 
   /* @brief Starts audio passthru process
+   * @deprecated Use BeginAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is already in process
    */
-  virtual bool BeginAudioPassThrough() = 0;
+  DEPRECATED virtual bool BeginAudioPassThrough() = 0;
+
+  /**
+   * @brief Starts AudioPassThru process by given application
+   * @param app_id ID of the application which starts the process
+   * @return true if AudioPassThru can be started, false otherwise
+   */
+  virtual bool BeginAudioPassThru(uint32_t app_id) = 0;
 
   /*
    * @brief Finishes already started audio passthru process
+   * @deprecated Use EndAudioPassThru(uint32_t app_id) instead
    *
    * @return true on success, false if passthru is not active
    */
-  virtual bool EndAudioPassThrough() = 0;
+  DEPRECATED virtual bool EndAudioPassThrough() = 0;
+
+  /**
+   * @brief Finishes already started AudioPassThru process by given application
+   * @param app_id ID of the application which started the process
+   * @return true if AudioPassThru process has been started with given
+   * application and thus it can be stopped, false otherwise
+   */
+  virtual bool EndAudioPassThru(uint32_t app_id) = 0;
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
