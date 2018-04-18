@@ -30,21 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 #include "gtest/gtest.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/make_shared.h"
-#include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
-
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/make_shared.h"
+#include "utils/file_system.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 
 namespace test {
 namespace components {
@@ -55,15 +54,10 @@ using ::testing::ReturnRef;
 using application_manager_test::MockApplication;
 
 namespace am = application_manager;
-using namespace file_system;
 
 using namespace resumption;
 using namespace mobile_apis;
 
-namespace {
-const std::string kPath =
-    file_system::CurrentWorkingDirectory() + "/" + "test_storage";
-}
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
@@ -86,11 +80,10 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   static void SetUpTestCase() {
     kDatabaseName = "resumption";
     if (is_in_file) {
-      path_ = "test_storage";
-      CreateDirectory(file_system::CurrentWorkingDirectory() + "/" + path_);
-      CreateDirectory(kPath);
+      path_ = file_system::CurrentWorkingDirectory() + "/" + "test_storage";
+      file_system::CreateDirectory(path_);
       test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
-      test_db_->set_path(kPath + "/");
+      test_db_->set_path(path_);
       res_db_ = new TestResumptionDataDB(In_File_Storage);
     } else {
       res_db_ = new TestResumptionDataDB(In_Memory_Storage);
@@ -108,7 +101,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   static void TearDownTestCase() {
     test_db_->Close();
     if (is_in_file) {
-      RemoveDirectory("./" + path_, true);
+      file_system::RemoveDirectory(path_, true);
     }
     delete res_db_;
   }
@@ -135,6 +128,14 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   // Check that db includes tables with given elements
   void CheckSavedDB();
+
+  // TODO(EKuliiev@luxoft.com): if 'is_in_file' flag set to 'true'
+  // TestResumptionDataDB fails while instantiation at
+  // 'sdl_core/src/components/application_manager/src/resumption/resumption_data_db.cc
+  // std::string path =
+  // application_manager_.get_settings().app_storage_folder(); ..'
+  // where application_manager_ instance is a mock object.
+
   static const bool is_in_file = false;
   const std::string tables_exist =
       "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table';";
@@ -271,6 +272,10 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
                 select_image.GetInteger(0));
       EXPECT_EQ((*menu_icon_)[am::strings::value].asString(),
                 select_image.GetString(1));
+      if ((*menu_icon_).keyExists(am::strings::is_template)) {
+        EXPECT_EQ((*menu_icon_)[am::strings::is_template].asBool(),
+                  select_image.GetBoolean(2));
+      }
     }
     if (!select_globalproperties.IsNull(8)) {
       utils::dbms::SQLQuery select_tts_chunk(test_db());

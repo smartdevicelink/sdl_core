@@ -130,7 +130,7 @@ class CommandRequestImpl : public CommandImpl,
   bool CleanUp() OVERRIDE;
 
   /**
-   * @brief Execute corresponding command by calling the action on reciever
+   * @brief Execute corresponding command by calling the action on receiver
    **/
   void Run() OVERRIDE;
 
@@ -365,13 +365,13 @@ class CommandRequestImpl : public CommandImpl,
 
   /**
     * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
+    * OnHashChanged notification to mobile side in case of appropriate hash mode
     * is set
     */
   void UpdateHash();
 
   /**
-   * @brief is_success_result_ Defines whether request succeded, at the moment
+   * @brief is_success_result_ Defines whether request succeed, at the moment
    * it is value of 'success' field of appropriate response sent to mobile
    */
   bool is_success_result_;

@@ -56,7 +56,8 @@ ResumptionDataDB::ResumptionDataDB(
   if (db_storage == In_File_Storage) {
     db_ = new utils::dbms::SQLDatabase(kDatabaseName);
 #ifndef __QNX__
-    std::string path = application_manager_.get_settings().app_storage_folder();
+    const std::string path =
+        application_manager_.get_settings().app_storage_folder();
     if (!path.empty()) {
       db_->set_path(path + "/");
     }
