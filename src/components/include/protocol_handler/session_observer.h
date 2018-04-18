@@ -86,7 +86,8 @@ struct SessionContext {
       , is_new_service_(false)
       , is_ptu_required_(false)
 #endif  // ENABLE_SECURITY
-  {}
+  {
+  }
 
   /**
    * @brief Constructor
@@ -101,11 +102,11 @@ struct SessionContext {
    * @param is_new_service Whether service was already established
    **/
   DEPRECATED SessionContext(transport_manager::ConnectionUID connection_id,
-                 uint8_t session_id,
-                 uint8_t new_session_id,
-                 protocol_handler::ServiceType service_type,
-                 uint32_t hash_id,
-                 const bool is_protected)
+                            uint8_t session_id,
+                            uint8_t new_session_id,
+                            protocol_handler::ServiceType service_type,
+                            uint32_t hash_id,
+                            const bool is_protected)
       : primary_connection_id_(connection_id)
       , connection_id_(connection_id)
       , initial_session_id_(session_id)
@@ -117,7 +118,8 @@ struct SessionContext {
       , is_new_service_(false)
       , is_ptu_required_(false)
 #endif  // ENABLE_SECURITY
-  {}
+  {
+  }
 
   /**
    * @brief Constructor
@@ -151,7 +153,8 @@ struct SessionContext {
       , is_new_service_(false)
       , is_ptu_required_(false)
 #endif  // ENABLE_SECURITY
-  {}
+  {
+  }
 };
 
 /**

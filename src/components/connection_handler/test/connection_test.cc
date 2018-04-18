@@ -509,20 +509,19 @@ TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
 TEST_F(ConnectionTest, SecondarySessionTest) {
   StartSession();
   AddNewService(
-    kRpc, PROTECTION_OFF, EXPECT_RETURN_FALSE, EXPECT_SERVICE_EXISTS);
+      kRpc, PROTECTION_OFF, EXPECT_RETURN_FALSE, EXPECT_SERVICE_EXISTS);
 
   const ConnectionHandle connectionHandle = 0;
   const DeviceHandle device_handle = 0u;
   const uint32_t heart_beat = 0u;
   Connection* secondary_connection = new Connection(
-        connectionHandle, device_handle, connection_handler_, heart_beat);
+      connectionHandle, device_handle, connection_handler_, heart_beat);
 
   secondary_connection->SetPrimaryConnectionHandle(kDefaultConnectionHandle);
   connection_handler::ConnectionHandle expected_primary_connection_handle =
       kDefaultConnectionHandle;
-  EXPECT_EQ(
-      secondary_connection->primary_connection_handle(),
-      expected_primary_connection_handle);
+  EXPECT_EQ(secondary_connection->primary_connection_handle(),
+            expected_primary_connection_handle);
 
   AddNewSecondaryService(kAudio);
   AddNewSecondaryService(kMobileNav);

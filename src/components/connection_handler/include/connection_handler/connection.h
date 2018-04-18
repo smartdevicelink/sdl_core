@@ -171,7 +171,8 @@ class Connection {
    * @param connection_handle Connection Handle for the session
    * @return new session id or 0 in case of issues
    */
-  uint32_t AddNewSession(const transport_manager::ConnectionUID connection_handle);
+  uint32_t AddNewSession(
+      const transport_manager::ConnectionUID connection_handle);
 
   /**
    * @brief Removes session from connection
@@ -189,8 +190,8 @@ class Connection {
    * @return TRUE on success, otherwise FALSE
    */
   DEPRECATED bool AddNewService(uint8_t session_id,
-                     protocol_handler::ServiceType service_type,
-                     const bool is_protected);
+                                protocol_handler::ServiceType service_type,
+                                const bool is_protected);
 
   /**
    * @brief Adds uprotected service to session or
@@ -216,12 +217,14 @@ class Connection {
 
   /**
    * @brief Removes secondary service from session
-   * @param secondary_connection_handle connection identifying services to be removed
+   * @param secondary_connection_handle connection identifying services to be
+   * removed
    * \param removed_services_list Returned: List of service types removed
    * @return the session ID associated with the services removed
    */
-  uint8_t RemoveSecondaryServices(transport_manager::ConnectionUID secondary_connection_handle,
-                                  std::list<protocol_handler::ServiceType>& removed_services_list);
+  uint8_t RemoveSecondaryServices(
+      transport_manager::ConnectionUID secondary_connection_handle,
+      std::list<protocol_handler::ServiceType>& removed_services_list);
 
 #ifdef ENABLE_SECURITY
   /**
@@ -252,9 +255,10 @@ class Connection {
                          const protocol_handler::ServiceType& service_type);
 
 #endif  // ENABLE_SECURITY
+
   /**
    * @brief Returns map of sessions which have been opened in
-   *  current connection.
+   * current connection.
    */
   const SessionMap session_map() const;
 
@@ -323,18 +327,18 @@ class Connection {
   bool ProtocolVersion(uint8_t session_id, uint8_t& protocol_version);
 
   /**
-   * @brief Returns the primary connection handle associated with this connection
+   * @brief Returns the primary connection handle associated with this
+   * connection
    * @return ConnectionHandle
    */
   ConnectionHandle primary_connection_handle() const;
 
   /**
    * \brief Sets the primary connection handle
-   * \param primary_connection_handle the primary connection handle to 
+   * \param primary_connection_handle the primary connection handle to
    * associate with this connection
    */
-  void SetPrimaryConnectionHandle(
-      ConnectionHandle primary_connection_handle);
+  void SetPrimaryConnectionHandle(ConnectionHandle primary_connection_handle);
 
  private:
   /**

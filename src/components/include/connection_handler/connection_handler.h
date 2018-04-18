@@ -52,12 +52,13 @@ enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
 
 class ConnectionHandlerObserver;
 
-// The SessionConnectionMap keeps track of the primary and secondary transports associated with a session ID
+// The SessionConnectionMap keeps track of the primary and secondary transports
+// associated with a session ID
 typedef struct {
-  transport_manager::ConnectionUID  primary_transport;
-  transport_manager::ConnectionUID  secondary_transport;
+  transport_manager::ConnectionUID primary_transport;
+  transport_manager::ConnectionUID secondary_transport;
 } SessionTransports;
-typedef std::map<uint8_t, SessionTransports > SessionConnectionMap;
+typedef std::map<uint8_t, SessionTransports> SessionConnectionMap;
 
 /**
  * \class ConnectionHandler
@@ -226,16 +227,18 @@ class ConnectionHandler {
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
 
-  virtual NonConstDataAccessor<SessionConnectionMap> session_connection_map() = 0;
+  virtual NonConstDataAccessor<SessionConnectionMap>
+  session_connection_map() = 0;
 
   /**
    * \brief Associate a secondary transport ID with a session
    * \param session_id the session ID
-   * \param connection_id the new secondary connection ID to associate with the session
+   * \param connection_id the new secondary connection ID to associate with the
+   * session
    * \return the SessionTransports (newly) associated with the session
    **/
   virtual SessionTransports SetSecondaryTransportID(
-      uint8_t session_id, 
+      uint8_t session_id,
       transport_manager::ConnectionUID secondary_transport_id) = 0;
 
   /**
@@ -243,7 +246,8 @@ class ConnectionHandler {
    * \param session_id the session ID
    * \return the SessionTransports associated with the session
    **/
-  virtual const SessionTransports GetSessionTransports(uint8_t session_id) const = 0;
+  virtual const SessionTransports GetSessionTransports(
+      uint8_t session_id) const = 0;
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
@@ -268,14 +272,15 @@ class ConnectionHandler {
    * \param sessionid session ID taken from Register Secondary Transport frame
    **/
   virtual bool OnSecondaryTransportStarted(
-      transport_manager::ConnectionUID &primary_connection_handle,
+      transport_manager::ConnectionUID& primary_connection_handle,
       const transport_manager::ConnectionUID secondary_connection_handle,
       const uint8_t session_id) = 0;
 
   /**
    * \brief Called when secondary transport shuts down
    * \param primary_connection_handle Identifier of primary connection
-   * \param secondary_connection_handle Identifier of secondary connection transport
+   * \param secondary_connection_handle Identifier of secondary connection
+   * transport
    **/
   virtual void OnSecondaryTransportEnded(
       const transport_manager::ConnectionUID primary_connection_handle,

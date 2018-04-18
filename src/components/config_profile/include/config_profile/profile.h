@@ -483,9 +483,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns list of secondary transports available
    * for the named primary transport
    */
-  const std::vector<std::string>& secondary_transports_for_bluetooth() const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_bluetooth()
+      const OVERRIDE;
   const std::vector<std::string>& secondary_transports_for_usb() const OVERRIDE;
-  const std::vector<std::string>& secondary_transports_for_wifi() const OVERRIDE;
+  const std::vector<std::string>& secondary_transports_for_wifi()
+      const OVERRIDE;
 
   /**
    * @brief Returns list of allowed transports for the named service

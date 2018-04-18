@@ -172,8 +172,7 @@ class ConnectionHandlerObserver {
    * \brief Called when secondary transport for a particular app is terminated.
    * \param session_key session ID representing the app
    */
-  virtual void OnSecondaryTransportEndedCallback(
-      const int32_t session_key) = 0;
+  virtual void OnSecondaryTransportEndedCallback(const int32_t session_key) = 0;
 
  protected:
   /**

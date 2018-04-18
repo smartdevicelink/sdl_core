@@ -813,8 +813,8 @@ TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingNotApproved) {
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(mock_application_manager_,
-              OnAppStreaming(app_id, type, true)).Times(0);
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _)).Times(0);
   app_impl->WakeUpStreaming(type);
@@ -829,8 +829,8 @@ TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming_StreamingNotApproved) {
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(mock_application_manager_,
-              OnAppStreaming(app_id, type, true)).Times(0);
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _)).Times(0);
   app_impl->WakeUpStreaming(type);

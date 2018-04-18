@@ -189,8 +189,10 @@ bool CMessageBrokerController::Connect() {
 void CMessageBrokerController::exitReceivingThread() {
   shutdown_ = true;
   mConnectionListLock.Acquire();
-  std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >::iterator it;
-  for (it = mConnectionList.begin(); it != mConnectionList.end(); it = mConnectionList.erase(it)) {
+  std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >::iterator
+      it;
+  for (it = mConnectionList.begin(); it != mConnectionList.end();
+       it = mConnectionList.erase(it)) {
     if (*it) {
       (*it)->Shutdown();
     }

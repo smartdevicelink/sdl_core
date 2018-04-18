@@ -101,13 +101,20 @@ Connection::~Connection() {
 
   // Before clearing out the session_map_, we must remove all sessions
   // associated with this Connection from the SessionConnectionMap.
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
-  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor =
+      connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map =
+      session_connection_map_accessor.GetData();
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.begin();
   while (session_it != session_map_.end()) {
-    LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_it->first) << " from Session/Connection Map in Connection Destructor");
-    SessionConnectionMap::iterator itr = session_connection_map.find(session_it->first);
+    LOG4CXX_INFO(
+        logger_,
+        "Removed Session ID "
+            << static_cast<int>(session_it->first)
+            << " from Session/Connection Map in Connection Destructor");
+    SessionConnectionMap::iterator itr =
+        session_connection_map.find(session_it->first);
     if (session_connection_map.end() != itr) {
       session_connection_map.erase(session_it->first);
     }
@@ -131,7 +138,7 @@ uint32_t findGap(const std::map<unsigned char, T>& map) {
 }
 }  // namespace
 
-DEPRECATED uint32_t Connection::AddNewSession(){
+DEPRECATED uint32_t Connection::AddNewSession() {
   return AddNewSession(0);
 }
 
@@ -139,40 +146,54 @@ uint32_t Connection::AddNewSession(
     const transport_manager::ConnectionUID connection_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // Even though we have our own SessionMap, we use the Connection Handler's SessionConnectionMap to generate a 
-  // session ID. We want to make sure that session IDs are globally unique, and not only unique within a Connection.
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
-  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  // Even though we have our own SessionMap, we use the Connection Handler's
+  // SessionConnectionMap to generate a session ID. We want to make sure that
+  // session IDs are globally unique, and not only unique within a Connection.
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor =
+      connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map =
+      session_connection_map_accessor.GetData();
   const uint32_t session_id = findGap(session_connection_map);
   if (session_id > 0) {
-    LOG4CXX_INFO(logger_, "New session ID " << session_id << " and Connection Id " << static_cast<int>(connection_handle) << " added to Session/Connection Map");
+    LOG4CXX_INFO(logger_,
+                 "New session ID " << session_id << " and Connection Id "
+                                   << static_cast<int>(connection_handle)
+                                   << " added to Session/Connection Map");
     SessionTransports st;
     st.primary_transport = connection_handle;
     st.secondary_transport = 0;
     session_connection_map[session_id] = st;
 
-    // NESTED LOCK: make sure to never lock the ConnectionHandler's SessionConnectedMap inside of the "session_map_lock_"
+    // NESTED LOCK: make sure to never lock the ConnectionHandler's
+    // SessionConnectedMap inside of the "session_map_lock_"
     sync_primitives::AutoLock lock(session_map_lock_);
     Session& new_session = session_map_[session_id];
     new_session.protocol_version = ::protocol_handler::PROTOCOL_VERSION_2;
-    new_session.service_list.push_back(Service(protocol_handler::kRpc, connection_handle));
-    new_session.service_list.push_back(Service(protocol_handler::kBulk, connection_handle));
+    new_session.service_list.push_back(
+        Service(protocol_handler::kRpc, connection_handle));
+    new_session.service_list.push_back(
+        Service(protocol_handler::kBulk, connection_handle));
   } else {
-    LOG4CXX_WARN(logger_, "Session/Connection Map could not create a new session ID!!!");
+    LOG4CXX_WARN(logger_,
+                 "Session/Connection Map could not create a new session ID!!!");
   }
 
   return session_id;
 }
 
 uint32_t Connection::RemoveSession(uint8_t session_id) {
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor = connection_handler_->session_connection_map();
-  SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
+  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor =
+      connection_handler_->session_connection_map();
+  SessionConnectionMap& session_connection_map =
+      session_connection_map_accessor.GetData();
   SessionConnectionMap::iterator itr = session_connection_map.find(session_id);
   if (session_connection_map.end() == itr) {
     LOG4CXX_WARN(logger_, "Session not found in Session/Connection Map!");
     return 0;
   } else {
-    LOG4CXX_INFO(logger_, "Removed Session ID " << static_cast<int>(session_id) << " from Session/Connection Map");
+    LOG4CXX_INFO(logger_,
+                 "Removed Session ID " << static_cast<int>(session_id)
+                                       << " from Session/Connection Map");
     session_connection_map.erase(session_id);
 
     // Again, a NESTED lock, but it follows the rules.
@@ -189,9 +210,10 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   return session_id;
 }
 
-DEPRECATED bool Connection::AddNewService(uint8_t session_id,
-                               protocol_handler::ServiceType service_type,
-                               const bool request_protection) {
+DEPRECATED bool Connection::AddNewService(
+    uint8_t session_id,
+    protocol_handler::ServiceType service_type,
+    const bool request_protection) {
   return AddNewService(session_id, service_type, request_protection, 0);
 }
 
@@ -304,14 +326,17 @@ bool Connection::RemoveService(uint8_t session_id,
   return true;
 }
 
-uint8_t Connection::RemoveSecondaryServices(transport_manager::ConnectionUID secondary_connection_handle,
-                                            std::list<protocol_handler::ServiceType>& removed_services_list) {
+uint8_t Connection::RemoveSecondaryServices(
+    transport_manager::ConnectionUID secondary_connection_handle,
+    std::list<protocol_handler::ServiceType>& removed_services_list) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint8_t found_session_id = 0;
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  LOG4CXX_INFO(logger_, "RemoveSecondaryServices looking for services on Connection ID " << static_cast<int>(secondary_connection_handle));
+  LOG4CXX_INFO(logger_,
+               "RemoveSecondaryServices looking for services on Connection ID "
+                   << static_cast<int>(secondary_connection_handle));
 
   // Walk the SessionMap in the primary connection, and for each
   // Session, we walk its ServiceList, looking for all the services
@@ -319,22 +344,27 @@ uint8_t Connection::RemoveSecondaryServices(transport_manager::ConnectionUID sec
   for (SessionMap::iterator session_it = session_map_.begin();
        session_map_.end() != session_it;
        ++session_it) {
-
-    LOG4CXX_INFO(logger_, "RemoveSecondaryServices found session ID " << static_cast<int>(session_it->first));
+    LOG4CXX_INFO(logger_,
+                 "RemoveSecondaryServices found session ID "
+                     << static_cast<int>(session_it->first));
 
     // Now, for each session, walk the its ServiceList, looking for services
     // that were using secondary)_connection_handle. If we find such a service,
     // set session_found and break out of the outer loop.
     ServiceList& service_list = session_it->second.service_list;
     ServiceList::iterator service_it = service_list.begin();
-    for ( ; service_it != service_list.end() ; ) {
-      LOG4CXX_INFO(logger_, "RemoveSecondaryServices found service ID " << static_cast<int>(service_it->service_type));
+    for (; service_it != service_list.end();) {
+      LOG4CXX_INFO(logger_,
+                   "RemoveSecondaryServices found service ID "
+                       << static_cast<int>(service_it->service_type));
       if (service_it->connection_id == secondary_connection_handle) {
         found_session_id = session_it->first;
 
-        LOG4CXX_INFO(logger_, "RemoveSecondaryServices removing Service " << 
-                              static_cast<int>(service_it->service_type) << 
-                              " in session " << static_cast<int>(found_session_id));
+        LOG4CXX_INFO(logger_,
+                     "RemoveSecondaryServices removing Service "
+                         << static_cast<int>(service_it->service_type)
+                         << " in session "
+                         << static_cast<int>(found_session_id));
 
         removed_services_list.push_back(service_it->service_type);
         service_it = service_list.erase(service_it);
@@ -343,7 +373,8 @@ uint8_t Connection::RemoveSecondaryServices(transport_manager::ConnectionUID sec
       }
     }
 
-    // If we found a session that had services running on the secondary connection, we're done.
+    // If we found a session that had services running on the secondary
+    // connection, we're done.
     if (found_session_id != 0) {
       break;
     }

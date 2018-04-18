@@ -134,7 +134,8 @@ typedef threads::MessageLoopThread<
 typedef threads::MessageLoopThread<
     utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
 
-// Type to allow easy mapping between a device type and transport characteristics
+// Type to allow easy mapping between a device type and transport
+// characteristics
 struct TransportDescription {
   TransportDescription(const std::string& transport_type,
                        const bool ios_transport,
@@ -148,8 +149,7 @@ struct TransportDescription {
   bool android_transport_;
 };
 
-typedef std::map<std::string, TransportDescription>
-    TransportTypes;
+typedef std::map<std::string, TransportDescription> TransportTypes;
 }  // namespace impl
 
 /**
@@ -251,8 +251,8 @@ class ProtocolHandlerImpl
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
   DEPRECATED void SendEndService(int32_t connection_id,
-                      uint8_t session_id,
-                      uint8_t service_type);
+                                 uint8_t session_id,
+                                 uint8_t service_type);
 
   /**
     * \brief Sends ending session to mobile application
@@ -262,7 +262,7 @@ class ProtocolHandlerImpl
     * for the sevice
     * \param session_id ID of session to be ended
     */
-  void SendEndService(int32_t primary_connection_id, 
+  void SendEndService(int32_t primary_connection_id,
                       int32_t connection_id,
                       uint8_t session_id,
                       uint8_t service_type);
@@ -478,23 +478,24 @@ class ProtocolHandlerImpl
   /*
    * Prepare and send TransportUpdateEvent message
    */
-  void SendTransportUpdateEvent(ConnectionID connection_id,
-                                uint8_t session_id);
+  void SendTransportUpdateEvent(ConnectionID connection_id, uint8_t session_id);
 
   /*
    * Prepare and send RegisterSecondaryTransportAck message
    */
-  RESULT_CODE SendRegisterSecondaryTransportAck(ConnectionID connection_id,
-                                                ConnectionID primary_transport_connection_id,
-                                                uint8_t session_id);
+  RESULT_CODE SendRegisterSecondaryTransportAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id);
 
   /*
    * Prepare and send RegisterSecondaryTransportNAck message
    */
-  RESULT_CODE SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
-                                                 ConnectionID primary_transport_connection_id,
-                                                 uint8_t session_id,
-                                                 BsonObject *reason = NULL);
+  RESULT_CODE SendRegisterSecondaryTransportNAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id,
+      BsonObject* reason = NULL);
 
   /**
    * @brief Notifies about receiving message from TM.
@@ -548,7 +549,8 @@ class ProtocolHandlerImpl
    * @param configs pairs of key and value that represent configuration.
    */
   void OnTransportConfigUpdated(
-      const transport_manager::transport_adapter::TransportConfig& configs) OVERRIDE;
+      const transport_manager::transport_adapter::TransportConfig& configs)
+      OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message
@@ -651,7 +653,8 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
 
-  RESULT_CODE HandleControlMessageRegisterSecondaryTransport(const ProtocolFramePtr packet);
+  RESULT_CODE HandleControlMessageRegisterSecondaryTransport(
+      const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
@@ -681,24 +684,29 @@ class ProtocolHandlerImpl
    */
   uint8_t SupportedSDLProtocolVersion() const;
 
-  const impl::TransportDescription GetTransportTypeFromConnectionType(std::string& device_type) const;
+  const impl::TransportDescription GetTransportTypeFromConnectionType(
+      std::string& device_type) const;
 
-  const bool parseSecondaryTransportConfiguration(const ConnectionID connection_id, 
-                                                  std::vector<std::string>& secondaryTransports, 
-                                                  std::vector<int32_t>& audioServiceTransports,
-                                                  std::vector<int32_t>& videoServiceTransports) const;
+  const bool parseSecondaryTransportConfiguration(
+      const ConnectionID connection_id,
+      std::vector<std::string>& secondaryTransports,
+      std::vector<int32_t>& audioServiceTransports,
+      std::vector<int32_t>& videoServiceTransports) const;
 
-  void generateSecondaryTransportsForStartSessionAck(const std::vector<std::string>& secondary_transport_types, 
-                                                     bool device_is_ios, 
-                                                     bool device_is_android, 
-                                                     std::vector<std::string>& secondaryTransports) const;
+  void generateSecondaryTransportsForStartSessionAck(
+      const std::vector<std::string>& secondary_transport_types,
+      bool device_is_ios,
+      bool device_is_android,
+      std::vector<std::string>& secondaryTransports) const;
 
-  void generateServiceTransportsForStartSessionAck(const std::vector<std::string>& service_transports,
-                                                   const std::string& primary_transport_type, 
-                                                   const std::vector<std::string>& secondary_transport_types, 
-                                                   std::vector<int32_t>& serviceTransports) const;
+  void generateServiceTransportsForStartSessionAck(
+      const std::vector<std::string>& service_transports,
+      const std::string& primary_transport_type,
+      const std::vector<std::string>& secondary_transport_types,
+      std::vector<int32_t>& serviceTransports) const;
 
-  const std::string transportTypeFromTransport(const utils::custom_string::CustomString& transport) const;
+  const std::string transportTypeFromTransport(
+      const utils::custom_string::CustomString& transport) const;
 
   const ProtocolHandlerSettings& settings_;
 

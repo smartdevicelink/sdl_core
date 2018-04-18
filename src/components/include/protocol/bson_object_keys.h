@@ -49,7 +49,6 @@ extern const char* tcp_ip_address;
 extern const char* tcp_port;
 extern const char* reason;
 
-
 }  // namespace strings
 
 }  // namespace protocol_handler

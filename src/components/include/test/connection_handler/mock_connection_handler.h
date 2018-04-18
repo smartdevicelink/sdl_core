@@ -114,7 +114,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                SessionTransports(
                    uint8_t session_id,
                    transport_manager::ConnectionUID secondary_transport_id));
-  MOCK_CONST_METHOD1(GetSessionTransports, 
+  MOCK_CONST_METHOD1(GetSessionTransports,
                      const SessionTransports(uint8_t session_id));
   MOCK_METHOD3(NotifyServiceStartedResult,
                void(uint32_t session_key,

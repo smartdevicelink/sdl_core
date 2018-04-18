@@ -222,7 +222,8 @@ const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
 const char* kAppTransportChangeTimerAdditionKey =
     "AppTransportChangeTimerAddition";
 const char* kMultipleTransportsEnabledKey = "MultipleTransportsEnabled";
-const char* kSecondaryTransportForBluetoothKey = "SecondaryTransportForBluetooth";
+const char* kSecondaryTransportForBluetoothKey =
+    "SecondaryTransportForBluetooth";
 const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
 const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
@@ -1031,7 +1032,8 @@ const bool Profile::multiple_transports_enabled() const {
   return multiple_transports_enabled_;
 }
 
-const std::vector<std::string>& Profile::secondary_transports_for_bluetooth() const {
+const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
+    const {
   return secondary_transports_for_bluetooth_;
 }
 
@@ -2129,30 +2131,37 @@ void Profile::UpdateValues() {
                 kMultipleTransportsSection,
                 kMultipleTransportsEnabledKey);
 
-  LOG_UPDATED_BOOL_VALUE(
-      multiple_transports_enabled_, kMultipleTransportsEnabledKey, kMultipleTransportsSection);
+  LOG_UPDATED_BOOL_VALUE(multiple_transports_enabled_,
+                         kMultipleTransportsEnabledKey,
+                         kMultipleTransportsSection);
 
   {  // Secondary Transports and ServicesMap
     struct KeyPair {
-      std::vector<std::string> *ini_vector;
+      std::vector<std::string>* ini_vector;
       const char* ini_section_name;
       const char* ini_key_name;
-    } keys[] = {
-        {&secondary_transports_for_bluetooth_, kMultipleTransportsSection, kSecondaryTransportForBluetoothKey},
-        {&secondary_transports_for_usb_, kMultipleTransportsSection, kSecondaryTransportForUSBKey},
-        {&secondary_transports_for_wifi_, kMultipleTransportsSection, kSecondaryTransportForWiFiKey},
-        {&audio_service_transports_, kServicesMapSection, kAudioServiceTransportsKey},
-        {&video_service_transports_, kServicesMapSection, kVideoServiceTransportsKey},
-        {NULL, NULL, NULL}};
+    } keys[] = {{&secondary_transports_for_bluetooth_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForBluetoothKey},
+                {&secondary_transports_for_usb_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForUSBKey},
+                {&secondary_transports_for_wifi_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForWiFiKey},
+                {&audio_service_transports_,
+                 kServicesMapSection,
+                 kAudioServiceTransportsKey},
+                {&video_service_transports_,
+                 kServicesMapSection,
+                 kVideoServiceTransportsKey},
+                {NULL, NULL, NULL}};
     struct KeyPair* entry = keys;
 
     while (entry->ini_vector != NULL) {
       bool exist = false;
-      std::vector<std::string> profile_entry =
-          ReadStringContainer(entry->ini_section_name,
-                              entry->ini_key_name,
-                              &exist,
-                              true);
+      std::vector<std::string> profile_entry = ReadStringContainer(
+          entry->ini_section_name, entry->ini_key_name, &exist, true);
       if (exist) {
         *entry->ini_vector = profile_entry;
 
@@ -2165,9 +2174,8 @@ void Profile::UpdateValues() {
           }
           ss << *it;
         }
-        LOG_UPDATED_VALUE(ss.str(),
-                          entry->ini_key_name,
-                          entry->ini_section_name);
+        LOG_UPDATED_VALUE(
+            ss.str(), entry->ini_key_name, entry->ini_section_name);
       }
       entry++;
     }

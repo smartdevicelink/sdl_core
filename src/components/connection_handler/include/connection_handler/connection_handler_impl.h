@@ -538,11 +538,12 @@ class ConnectionHandlerImpl
   /**
    * \brief Associate a secondary transport ID with a session
    * \param session_id the session ID
-   * \param connection_id the new secondary connection ID to associate with the session
+   * \param connection_id the new secondary connection ID to associate with the
+   * session
    * \return the SessionTransports (newly) associated with the session
    **/
   SessionTransports SetSecondaryTransportID(
-      uint8_t session_id, 
+      uint8_t session_id,
       transport_manager::ConnectionUID secondary_transport_id) OVERRIDE;
 
   /**
@@ -550,7 +551,8 @@ class ConnectionHandlerImpl
    * \param session_id the session ID
    * \return the SessionTransports associated with the session
    **/
-  const SessionTransports GetSessionTransports(uint8_t session_id) const OVERRIDE;
+  const SessionTransports GetSessionTransports(
+      uint8_t session_id) const OVERRIDE;
 
   /**
    * \brief Invoked when observer's OnServiceStartedCallback is completed
@@ -575,18 +577,20 @@ class ConnectionHandlerImpl
    * \param sessionid session ID taken from Register Secondary Transport frame
    **/
   bool OnSecondaryTransportStarted(
-      transport_manager::ConnectionUID &primary_connection_handle,
+      transport_manager::ConnectionUID& primary_connection_handle,
       const transport_manager::ConnectionUID secondary_connection_handle,
       const uint8_t session_id) OVERRIDE;
 
   /**
    * \brief Called when secondary transport shuts down
    * \param primary_connection_handle Identifier of primary connection
-   * \param secondary_connection_handle Identifier of secondary connection transport
+   * \param secondary_connection_handle Identifier of secondary connection
+   * transport
    **/
   void OnSecondaryTransportEnded(
       const transport_manager::ConnectionUID primary_connection_handle,
-      const transport_manager::ConnectionUID secondary_connection_handle) OVERRIDE;
+      const transport_manager::ConnectionUID secondary_connection_handle)
+      OVERRIDE;
 
  private:
   /**
@@ -600,7 +604,7 @@ class ConnectionHandlerImpl
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
   const uint8_t GetSessionIdFromSecondaryTransport(
-    transport_manager::ConnectionUID secondary_transport_id) const;
+      transport_manager::ConnectionUID secondary_transport_id) const;
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -649,7 +653,7 @@ class ConnectionHandlerImpl
   /**
    * @brief connection object as it's being closed
    */
-  Connection *ending_connection_;
+  Connection* ending_connection_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage

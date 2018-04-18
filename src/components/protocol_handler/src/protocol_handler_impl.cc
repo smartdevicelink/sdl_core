@@ -31,7 +31,7 @@
  */
 
 #include "protocol_handler/protocol_handler_impl.h"
-#include <arpa/inet.h> // for INET6_ADDRSTRLEN
+#include <arpa/inet.h>  // for INET6_ADDRSTRLEN
 #include <memory.h>
 #include <algorithm>  // std::find
 #include <bson_object.h>
@@ -61,7 +61,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 const size_t kStackSize = 65536;
 
 ProtocolPacket::ProtocolVersion defaultProtocolVersion(5, 1, 0);
-ProtocolPacket::ProtocolVersion minSimultaneousMultipleTransportsVersion(5, 1, 0);
+ProtocolPacket::ProtocolVersion minMultipleTransportsVersion(5, 1, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -81,7 +81,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #endif  // ENABLE_SECURITY
     raw_ford_messages_from_mobile_(
-          "PH FromMobile", this, threads::ThreadOptions(kStackSize))
+        "PH FromMobile", this, threads::ThreadOptions(kStackSize))
     , raw_ford_messages_to_mobile_(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
     , start_session_frame_map_lock_()
@@ -303,52 +303,81 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
       bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
-      LOG4CXX_INFO(logger_, "Protocol Version String " << protocolVersionString);
+      LOG4CXX_INFO(logger_,
+                   "Protocol Version String " << protocolVersionString);
 
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (*minVersion >= minSimultaneousMultipleTransportsVersion) {
-        if (parseSecondaryTransportConfiguration(connection_id, secondaryTransports, audioServiceTransports, videoServiceTransports)) {
+      if (*minVersion >= minMultipleTransportsVersion) {
+        if (parseSecondaryTransportConfiguration(connection_id,
+                                                 secondaryTransports,
+                                                 audioServiceTransports,
+                                                 videoServiceTransports)) {
           LOG4CXX_TRACE(logger_, "We are a GO for multiple transports!!!");
           BsonArray secondaryTransportsArr;
-          bson_array_initialize(&secondaryTransportsArr, secondaryTransports.size());
+          bson_array_initialize(&secondaryTransportsArr,
+                                secondaryTransports.size());
           for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
             char secondaryTransport[255];
             strncpy(secondaryTransport,
                     secondaryTransports[i].c_str(),
                     sizeof(secondaryTransport));
             secondaryTransport[sizeof(secondaryTransport) - 1] = '\0';
-            LOG4CXX_TRACE(logger_, "Adding " << secondaryTransport << " to secondaryTransports parameter of StartSessionAck");
+            LOG4CXX_TRACE(
+                logger_,
+                "Adding "
+                    << secondaryTransport
+                    << " to secondaryTransports parameter of StartSessionAck");
             bson_array_add_string(&secondaryTransportsArr, secondaryTransport);
           }
-          bson_object_put_array(&params, strings::secondary_transports, &secondaryTransportsArr);
+          bson_object_put_array(
+              &params, strings::secondary_transports, &secondaryTransportsArr);
 
           BsonArray audioServiceTransportsArr;
-          bson_array_initialize(&audioServiceTransportsArr, audioServiceTransports.size());
+          bson_array_initialize(&audioServiceTransportsArr,
+                                audioServiceTransports.size());
           for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
-            LOG4CXX_TRACE(logger_, "Adding " << audioServiceTransports[i] << " to audioServiceTransports parameter of StartSessionAck");
-            bson_array_add_int32(&audioServiceTransportsArr, audioServiceTransports[i]);
+            LOG4CXX_TRACE(logger_,
+                          "Adding " << audioServiceTransports[i]
+                                    << " to audioServiceTransports parameter "
+                                       "of StartSessionAck");
+            bson_array_add_int32(&audioServiceTransportsArr,
+                                 audioServiceTransports[i]);
           }
-          bson_object_put_array(&params, strings::audio_service_transports, &audioServiceTransportsArr);
+          bson_object_put_array(&params,
+                                strings::audio_service_transports,
+                                &audioServiceTransportsArr);
 
           BsonArray videoServiceTransportsArr;
-          bson_array_initialize(&videoServiceTransportsArr, videoServiceTransports.size());
+          bson_array_initialize(&videoServiceTransportsArr,
+                                videoServiceTransports.size());
           for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
-            LOG4CXX_TRACE(logger_, "Adding " << videoServiceTransports[i] << " to videoServiceTransports parameter of StartSessionAck");
-            bson_array_add_int32(&videoServiceTransportsArr, videoServiceTransports[i]);
+            LOG4CXX_TRACE(logger_,
+                          "Adding " << videoServiceTransports[i]
+                                    << " to videoServiceTransports parameter "
+                                       "of StartSessionAck");
+            bson_array_add_int32(&videoServiceTransportsArr,
+                                 videoServiceTransports[i]);
           }
-          bson_object_put_array(&params, strings::video_service_transports, &videoServiceTransportsArr);
+          bson_object_put_array(&params,
+                                strings::video_service_transports,
+                                &videoServiceTransportsArr);
 
           if (settings_.multiple_transports_enabled()) {
             send_transport_update_event = true;
           } else {
-            LOG4CXX_TRACE(logger_, "Multiple transports feature is disabled by configuration");
-            // In this case, we must remember that this session will never have a secondary transport.
+            LOG4CXX_TRACE(
+                logger_,
+                "Multiple transports feature is disabled by configuration");
+            // In this case, we must remember that this session will never have
+            // a secondary transport.
             connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
           }
         } else {
-          LOG4CXX_WARN(logger_, "Failed to set up secondary transport and service type params");
+          LOG4CXX_WARN(
+              logger_,
+              "Failed to set up secondary transport and service type params");
           connection_handler_.SetSecondaryTransportID(session_id, 0xFFFFFFFF);
         }
       } else {
@@ -548,7 +577,9 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           primary_connection_id, session_id, protocol_version)) {
-    LOG4CXX_TRACE(logger_, "SendEndServicePrivate using protocol version " << static_cast<int32_t>(protocol_version));
+    LOG4CXX_TRACE(logger_,
+                  "SendEndServicePrivate using protocol version "
+                      << static_cast<int32_t>(protocol_version));
     ProtocolFramePtr ptr(
         new protocol_handler::ProtocolPacket(connection_id,
                                              protocol_version,
@@ -564,7 +595,8 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
         impl::RawFordMessageToMobile(ptr, false));
     LOG4CXX_DEBUG(logger_,
                   "SendEndServicePrivate() for connection "
-                      << primary_connection_id << " for service_type " << static_cast<int>(service_type)
+                      << primary_connection_id << " for service_type "
+                      << static_cast<int>(service_type)
                       << " service connection " << connection_id
                       << " session_id " << static_cast<int32_t>(session_id));
   } else {
@@ -577,12 +609,13 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
 void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
                                          uint8_t session_id) {
   // A session is always associated with a primary connection ID
-  SendEndServicePrivate(connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
+  SendEndServicePrivate(
+      connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
 }
 
 DEPRECATED void ProtocolHandlerImpl::SendEndService(int32_t connection_id,
-                                         uint8_t session_id,
-                                         uint8_t service_type) {
+                                                    uint8_t session_id,
+                                                    uint8_t service_type) {
   SendEndServicePrivate(connection_id, connection_id, session_id, service_type);
 }
 
@@ -590,7 +623,8 @@ void ProtocolHandlerImpl::SendEndService(int32_t primary_connection_id,
                                          int32_t connection_id,
                                          uint8_t session_id,
                                          uint8_t service_type) {
-  SendEndServicePrivate(primary_connection_id, connection_id, session_id, service_type);
+  SendEndServicePrivate(
+      primary_connection_id, connection_id, session_id, service_type);
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
@@ -648,15 +682,19 @@ void ProtocolHandlerImpl::SendTransportUpdateEvent(ConnectionID connection_id,
     if (tcp_enabled_ && (tcp_port != 0)) {
       strncpy(tcp_ip_address, tcp_ip_address_.c_str(), INET6_ADDRSTRLEN);
       tcp_ip_address[INET6_ADDRSTRLEN] = '\0';
-      bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
-      bson_object_put_int32(&transportUpdatePayloadObj, strings::tcp_port, tcp_port);
+      bson_object_put_string(
+          &transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
+      bson_object_put_int32(
+          &transportUpdatePayloadObj, strings::tcp_port, tcp_port);
     } else {
       tcp_ip_address[0] = '\0';
-      bson_object_put_string(&transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
+      bson_object_put_string(
+          &transportUpdatePayloadObj, strings::tcp_ip_address, tcp_ip_address);
       // omit TCP port number
     }
     LOG4CXX_INFO(logger_,
-                  "SendTransportUpdateEvent IP address: " << tcp_ip_address << " Port: " << tcp_port);
+                 "SendTransportUpdateEvent IP address: "
+                     << tcp_ip_address << " Port: " << tcp_port);
 
     uint8_t* payloadBytes = bson_object_to_bytes(&transportUpdatePayloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&transportUpdatePayloadObj));
@@ -664,52 +702,55 @@ void ProtocolHandlerImpl::SendTransportUpdateEvent(ConnectionID connection_id,
     bson_object_deinitialize(&transportUpdatePayloadObj);
 
     raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+        impl::RawFordMessageToMobile(ptr, false));
 
     LOG4CXX_DEBUG(logger_,
                   "SendTransportUpdateEvent() for connection "
-                      << connection_id << " for session " << static_cast<int32_t>(session_id));
+                      << connection_id << " for session "
+                      << static_cast<int32_t>(session_id));
   } else {
-    LOG4CXX_WARN(
-        logger_,
-        "SendTransportUpdateEvent is failed connection or session does not exist");
+    LOG4CXX_WARN(logger_,
+                 "SendTransportUpdateEvent is failed connection or session "
+                 "does not exist");
   }
 }
 
-RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportAck(ConnectionID connection_id,
-                                                                   ConnectionID primary_transport_connection_id,
-                                                                   uint8_t session_id) {
+RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportAck(
+    ConnectionID connection_id,
+    ConnectionID primary_transport_connection_id,
+    uint8_t session_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // acquire the protocol version from primary transport
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           primary_transport_connection_id, session_id, protocol_version)) {
-    ProtocolFramePtr ptr(
-        new protocol_handler::ProtocolPacket(connection_id,
-                                             protocol_version,
-                                             PROTECTION_OFF,
-                                             FRAME_TYPE_CONTROL,
-                                             SERVICE_TYPE_CONTROL,
-                                             FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK,
-                                             session_id,
-                                             0u,
-                                             2));
+    ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+        connection_id,
+        protocol_version,
+        PROTECTION_OFF,
+        FRAME_TYPE_CONTROL,
+        SERVICE_TYPE_CONTROL,
+        FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK,
+        session_id,
+        0u,
+        2));
 
     raw_ford_messages_to_mobile_.PostMessage(
         impl::RawFordMessageToMobile(ptr, false));
     return RESULT_OK;
   }
-  LOG4CXX_WARN(
-      logger_,
-      "RegisterSecondaryTransportAck is failed connection or session does not exist");
+  LOG4CXX_WARN(logger_,
+               "RegisterSecondaryTransportAck is failed connection or session "
+               "does not exist");
   return RESULT_FAIL;
 }
 
-RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(ConnectionID connection_id,
-                                                                    ConnectionID primary_transport_connection_id,
-                                                                    uint8_t session_id,
-                                                                    BsonObject *reason) {
+RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(
+    ConnectionID connection_id,
+    ConnectionID primary_transport_connection_id,
+    uint8_t session_id,
+    BsonObject* reason) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // If mobile sends an invalid session ID and we cannot find out the Connection
@@ -719,24 +760,24 @@ RESULT_CODE ProtocolHandlerImpl::SendRegisterSecondaryTransportNAck(ConnectionID
   if (primary_transport_connection_id > 0) {
     // acquire the protocol version from primary transport
     if (!session_observer_.ProtocolVersionUsed(
-        primary_transport_connection_id, session_id, protocol_version)) {
-      LOG4CXX_WARN(
-          logger_,
-          "Failed to acquire protocol version for RegisterSecondaryTransportNAck");
+            primary_transport_connection_id, session_id, protocol_version)) {
+      LOG4CXX_WARN(logger_,
+                   "Failed to acquire protocol version for "
+                   "RegisterSecondaryTransportNAck");
       return RESULT_FAIL;
     }
   }
 
-  ProtocolFramePtr ptr(
-      new protocol_handler::ProtocolPacket(connection_id,
-                                           protocol_version,
-                                           PROTECTION_OFF,
-                                           FRAME_TYPE_CONTROL,
-                                           SERVICE_TYPE_CONTROL,
-                                           FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK,
-                                           session_id,
-                                           0u,
-                                           2));
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+      connection_id,
+      protocol_version,
+      PROTECTION_OFF,
+      FRAME_TYPE_CONTROL,
+      SERVICE_TYPE_CONTROL,
+      FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK,
+      session_id,
+      0u,
+      2));
 
   if (reason) {
     uint8_t* payloadBytes = bson_object_to_bytes(reason);
@@ -1100,7 +1141,8 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  transport_manager::transport_adapter::TransportConfig::const_iterator it = configs.find("enabled");
+  transport_manager::transport_adapter::TransportConfig::const_iterator it =
+      configs.find("enabled");
   if (configs.end() == it) {
     LOG4CXX_WARN(logger_, "No enabled field in OnTransportConfigUpdated");
     return;
@@ -1109,7 +1151,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   bool tcp_enabled = (0 == strcmp("true", it->second.c_str()));
   std::string tcp_port;
 
-  if  (tcp_enabled) {
+  if (tcp_enabled) {
     it = configs.find("tcp_port");
     if (configs.end() == it) {
       LOG4CXX_WARN(logger_, "No port field in OnTransportConfigUpdated");
@@ -1131,18 +1173,29 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
     tcp_ip_address_.clear();
   }
 
-  LOG4CXX_INFO(logger_, "OnTransportConfigUpdated: new config enabled is " << tcp_enabled_ <<
-                        ". Port is " << tcp_port_ <<
-                        ". IP Address is " << tcp_ip_address_);
+  LOG4CXX_INFO(logger_,
+               "OnTransportConfigUpdated: new config enabled is "
+                   << tcp_enabled_ << ". Port is " << tcp_port_
+                   << ". IP Address is " << tcp_ip_address_);
 
-  // Walk the SessionConnection map and find all sessions that need a TransportUpdate Event.
-  // Sessions flagged with 0xFFFFFFFF in their secondary transport are ineligible for secondary transport, and therefore don't get this event.
-  NonConstDataAccessor<connection_handler::SessionConnectionMap> session_connection_map_accessor = connection_handler_.session_connection_map();
-  connection_handler::SessionConnectionMap& session_connection_map = session_connection_map_accessor.GetData();
-  connection_handler::SessionConnectionMap::iterator itr = session_connection_map.begin();
+  // Walk the SessionConnection map and find all sessions that need a
+  // TransportUpdate Event. Sessions flagged with 0xFFFFFFFF in their
+  // secondary transport are ineligible for secondary transport, and
+  // therefore don't get this event.
+  NonConstDataAccessor<connection_handler::SessionConnectionMap>
+      session_connection_map_accessor =
+          connection_handler_.session_connection_map();
+  connection_handler::SessionConnectionMap& session_connection_map =
+      session_connection_map_accessor.GetData();
+  connection_handler::SessionConnectionMap::iterator itr =
+      session_connection_map.begin();
   while (itr != session_connection_map.end()) {
     const connection_handler::SessionTransports st = itr->second;
-    LOG4CXX_INFO(logger_, "OnTransportConfigUpdated found session " << itr->first << " with primary connection  " << st.primary_transport << " and secondary connection " << st.secondary_transport);
+    LOG4CXX_INFO(logger_,
+                 "OnTransportConfigUpdated found session "
+                     << itr->first << " with primary connection  "
+                     << st.primary_transport << " and secondary connection "
+                     << st.secondary_transport);
     if (st.secondary_transport != 0xFFFFFFFF) {
       SendTransportUpdateEvent(st.primary_transport, itr->first);
     }
@@ -1334,8 +1387,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
           << packet->data_size() << "; message "
           << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
-  // Replace a potential secondary transport ID in the packet with the primary transport ID
-  const connection_handler::SessionTransports st = connection_handler_.GetSessionTransports(packet->session_id());
+  // Replace a potential secondary transport ID in the packet with the primary
+  // transport ID
+  const connection_handler::SessionTransports st =
+      connection_handler_.GetSessionTransports(packet->session_id());
   if (st.primary_transport != 0) {
     packet->set_connection_id(st.primary_transport);
   }
@@ -1371,8 +1426,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // Replace a potential secondary transport ID in the packet with the primary transport ID
-  const connection_handler::SessionTransports st = connection_handler_.GetSessionTransports(packet->session_id());
+  // Replace a potential secondary transport ID in the packet with the primary
+  // transport ID
+  const connection_handler::SessionTransports st =
+      connection_handler_.GetSessionTransports(packet->session_id());
   if (st.primary_transport != 0) {
     packet->set_connection_id(st.primary_transport);
   }
@@ -1701,7 +1758,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
 
-  LOG4CXX_INFO(logger_, "StartSession ID " << static_cast<int>(session_id) << " and Connection ID " << static_cast<int>(connection_id));
+  LOG4CXX_INFO(logger_,
+               "StartSession ID " << static_cast<int>(session_id)
+                                  << " and Connection ID "
+                                  << static_cast<int>(connection_id));
 
   {
     sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
@@ -1723,23 +1783,37 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
   const ConnectionID connection_id = packet->connection_id();
   ConnectionID primary_connection_id = 0;
 
-  LOG4CXX_INFO(logger_, "RegisterSecondaryTransport ID " << static_cast<int>(session_id) << " and Connection ID " << static_cast<int>(connection_id));
+  LOG4CXX_INFO(logger_,
+               "RegisterSecondaryTransport ID "
+                   << static_cast<int>(session_id) << " and Connection ID "
+                   << static_cast<int>(connection_id));
 
-  if (connection_handler_.OnSecondaryTransportStarted(primary_connection_id, connection_id, session_id)) {
-    SendRegisterSecondaryTransportAck(connection_id, primary_connection_id, session_id); 
+  if (connection_handler_.OnSecondaryTransportStarted(
+          primary_connection_id, connection_id, session_id)) {
+    SendRegisterSecondaryTransportAck(
+        connection_id, primary_connection_id, session_id);
   } else {
     char reason[256];
     BsonObject registerSecondaryTransportNackObj;
     bson_object_initialize_default(&registerSecondaryTransportNackObj);
     if (0 == session_id) {
-      strncpy(reason, "RegisterSecondaryTransport MUST include a non-zero session ID", 255);
+      strncpy(reason,
+              "RegisterSecondaryTransport MUST include a non-zero session ID",
+              255);
     } else if (primary_connection_id == 0) {
       strncpy(reason, "RegisterSecondaryTransport session ID not found", 255);
     } else {
-      strncpy(reason, "RegisterSecondaryTransport session ID has already been registered", 255);
+      strncpy(
+          reason,
+          "RegisterSecondaryTransport session ID has already been registered",
+          255);
     }
-    bson_object_put_string(&registerSecondaryTransportNackObj, strings::reason, reason);
-    SendRegisterSecondaryTransportNAck(connection_id, primary_connection_id, session_id, &registerSecondaryTransportNackObj);
+    bson_object_put_string(
+        &registerSecondaryTransportNackObj, strings::reason, reason);
+    SendRegisterSecondaryTransportNAck(connection_id,
+                                       primary_connection_id,
+                                       session_id,
+                                       &registerSecondaryTransportNackObj);
     bson_object_deinitialize(&registerSecondaryTransportNackObj);
   }
 
@@ -2330,14 +2404,15 @@ impl::TransportTypes transportTypes = {
     std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
                    impl::TransportDescription("USB", true, false)),
     std::make_pair(std::string("IOS_CARPLAY_WIRELESS"),
-                   impl::TransportDescription("WiFi", true, false))
-};
+                   impl::TransportDescription("WiFi", true, false))};
 
 const impl::TransportDescription
 ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
     std::string& connection_type) const {
-  impl::TransportDescription result = impl::TransportDescription("", false, false);
-  impl::TransportTypes::const_iterator it = transportTypes.find(connection_type);
+  impl::TransportDescription result =
+      impl::TransportDescription("", false, false);
+  impl::TransportTypes::const_iterator it =
+      transportTypes.find(connection_type);
   if (it != transportTypes.end()) {
     result = it->second;
   } else {
@@ -2348,8 +2423,8 @@ ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
 }
 
 const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
-    const ConnectionID connection_id, 
-    std::vector<std::string>& secondaryTransports, 
+    const ConnectionID connection_id,
+    std::vector<std::string>& secondaryTransports,
     std::vector<int32_t>& audioServiceTransports,
     std::vector<int32_t>& videoServiceTransports) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2358,74 +2433,93 @@ const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
 
   // First discover what the connection type of the primary transport is
   // and look up the allowed secondary transports for that primary transport
-  std::string connection_type = session_observer_.connection_type(connection_id);
-  const impl::TransportDescription td = GetTransportTypeFromConnectionType(connection_type);
+  std::string connection_type =
+      session_observer_.connection_type(connection_id);
+  const impl::TransportDescription td =
+      GetTransportTypeFromConnectionType(connection_type);
   if (settings_.multiple_transports_enabled()) {
     if (td.transport_type_ == "USB") {
-        secondary_transport_types = settings_.secondary_transports_for_usb();
+      secondary_transport_types = settings_.secondary_transports_for_usb();
     } else if (td.transport_type_ == "Bluetooth") {
-        secondary_transport_types = settings_.secondary_transports_for_bluetooth();
+      secondary_transport_types =
+          settings_.secondary_transports_for_bluetooth();
     } else if (td.transport_type_ == "WiFi") {
-        secondary_transport_types = settings_.secondary_transports_for_wifi();
+      secondary_transport_types = settings_.secondary_transports_for_wifi();
     } else {
-      LOG4CXX_ERROR(logger_, "Bad or unknown device type in parseSecondaryTransportConfiguration");
+      LOG4CXX_ERROR(
+          logger_,
+          "Bad or unknown device type in parseSecondaryTransportConfiguration");
       return false;
     }
   }
 
   // Then, generate the "secondaryTransports" array for the StartSession ACK
-  generateSecondaryTransportsForStartSessionAck(secondary_transport_types, 
+  generateSecondaryTransportsForStartSessionAck(secondary_transport_types,
                                                 td.ios_transport_,
-                                                td.android_transport_, 
+                                                td.android_transport_,
                                                 secondaryTransports);
 
   // Next, figure out which connections audio or video services are allowed on
-  generateServiceTransportsForStartSessionAck(settings_.audio_service_transports(),
-                                              td.transport_type_, 
-                                              secondary_transport_types, 
-                                              audioServiceTransports);
+  generateServiceTransportsForStartSessionAck(
+      settings_.audio_service_transports(),
+      td.transport_type_,
+      secondary_transport_types,
+      audioServiceTransports);
 
-  generateServiceTransportsForStartSessionAck(settings_.video_service_transports(),
-                                              td.transport_type_, 
-                                              secondary_transport_types, 
-                                              videoServiceTransports);
+  generateServiceTransportsForStartSessionAck(
+      settings_.video_service_transports(),
+      td.transport_type_,
+      secondary_transport_types,
+      videoServiceTransports);
 
   return true;
 }
 
 void ProtocolHandlerImpl::generateSecondaryTransportsForStartSessionAck(
-    const std::vector<std::string>& secondary_transport_types, 
-    bool device_is_ios, 
-    bool device_is_android, 
+    const std::vector<std::string>& secondary_transport_types,
+    bool device_is_ios,
+    bool device_is_android,
     std::vector<std::string>& secondaryTransports) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  
-  // Parse the "secondary_transport_types" vector (which comes from smartDeviceLink.ini)
-  // For each entry in the vector, add an appropriate string to the secondaryTransports
-  std::vector<std::string>::const_iterator it = secondary_transport_types.begin();
+
+  // Parse the "secondary_transport_types" vector (which comes from
+  // smartDeviceLink.ini). For each entry in the vector, add an
+  // appropriate string to the secondaryTransports
+  std::vector<std::string>::const_iterator it =
+      secondary_transport_types.begin();
   while (it != secondary_transport_types.end()) {
     const utils::custom_string::CustomString transport_type(*it);
     if (transport_type.CompareIgnoreCase("USB")) {
       if (device_is_ios) {
-        LOG4CXX_TRACE(logger_, "Adding IAP_USB to secondaryTransports for StartSessionAck");
+        LOG4CXX_TRACE(
+            logger_,
+            "Adding IAP_USB to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("IAP_USB");
       }
       if (device_is_android) {
-        LOG4CXX_TRACE(logger_, "Adding AOA_USB to secondaryTransports for StartSessionAck");
+        LOG4CXX_TRACE(
+            logger_,
+            "Adding AOA_USB to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("AOA_USB");
       }
     } else if (transport_type.CompareIgnoreCase("Bluetooth")) {
       if (device_is_ios) {
-        LOG4CXX_TRACE(logger_, "Adding IAP_BLUETOOTH to secondaryTransports for StartSessionAck");
+        LOG4CXX_TRACE(
+            logger_,
+            "Adding IAP_BLUETOOTH to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("IAP_BLUETOOTH");
       }
       if (device_is_android) {
-        LOG4CXX_TRACE(logger_, "Adding SPP_BLUETOOTH to secondaryTransports for StartSessionAck");
+        LOG4CXX_TRACE(
+            logger_,
+            "Adding SPP_BLUETOOTH to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("SPP_BLUETOOTH");
       }
     }
     if (transport_type.CompareIgnoreCase("WiFi")) {
-      LOG4CXX_TRACE(logger_, "Adding TCP_WIFI to secondaryTransports for StartSessionAck");
+      LOG4CXX_TRACE(
+          logger_,
+          "Adding TCP_WIFI to secondaryTransports for StartSessionAck");
       secondaryTransports.push_back("TCP_WIFI");
     }
 
@@ -2435,22 +2529,26 @@ void ProtocolHandlerImpl::generateSecondaryTransportsForStartSessionAck(
 
 void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
     const std::vector<std::string>& service_transports,
-    const std::string& primary_transport_type, 
-    const std::vector<std::string>& secondary_transport_types, 
+    const std::string& primary_transport_type,
+    const std::vector<std::string>& secondary_transport_types,
     std::vector<int32_t>& serviceTransports) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (service_transports.size() == 0) {
-    LOG4CXX_TRACE(logger_, "Empty Service Transports. Allowing service to run on both connections");
+    LOG4CXX_TRACE(logger_,
+                  "Empty Service Transports. Allowing service to run on both "
+                  "connections");
     serviceTransports.push_back(1);
     serviceTransports.push_back(2);
   } else {
     bool fPrimaryAdded = false;
     bool fSecondaryAdded = false;
     std::vector<std::string>::const_iterator it = service_transports.begin();
-    for ( ; it != service_transports.end(); it++ ) {
+    for (; it != service_transports.end(); it++) {
       const utils::custom_string::CustomString transport(*it);
-      LOG4CXX_TRACE(logger_, "Service Allowed to run on " << transport.c_str() << " transport");
+      LOG4CXX_TRACE(logger_,
+                    "Service Allowed to run on " << transport.c_str()
+                                                 << " transport");
 
       if (!fPrimaryAdded) {
         if (transportTypeFromTransport(transport) == primary_transport_type) {
@@ -2461,11 +2559,15 @@ void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
       }
 
       if (!fSecondaryAdded) {
-        const utils::custom_string::CustomString transport_type(transportTypeFromTransport(transport));
-        std::vector<std::string>::const_iterator found = std::find_if(
-                                                               secondary_transport_types.begin(), 
-                                                               secondary_transport_types.end(), 
-                                                               [&](const std::string& secondary_transport_type) {return transport_type.CompareIgnoreCase(secondary_transport_type.c_str());});
+        const utils::custom_string::CustomString transport_type(
+            transportTypeFromTransport(transport));
+        std::vector<std::string>::const_iterator found =
+            std::find_if(secondary_transport_types.begin(),
+                         secondary_transport_types.end(),
+                         [&](const std::string& secondary_transport_type) {
+                           return transport_type.CompareIgnoreCase(
+                               secondary_transport_type.c_str());
+                         });
         if (found != secondary_transport_types.end()) {
           LOG4CXX_TRACE(logger_, "Service allowed on secondary transport");
           serviceTransports.push_back(2);
@@ -2484,14 +2586,13 @@ const std::string ProtocolHandlerImpl::transportTypeFromTransport(
     const utils::custom_string::CustomString& transport) const {
   std::string transport_type;
 
-  if (transport.CompareIgnoreCase("IAP_BLUETOOTH") || 
+  if (transport.CompareIgnoreCase("IAP_BLUETOOTH") ||
       transport.CompareIgnoreCase("SPP_BLUETOOTH")) {
     transport_type = "Bluetooth";
-  }
-  else if (transport.CompareIgnoreCase("IAP_USB") || 
-           transport.CompareIgnoreCase("AOA_USB") ||
-           transport.CompareIgnoreCase("IAP_USB_HOST_MODE") || 
-           transport.CompareIgnoreCase("IAP_USB_DEVICE_MODE")) {
+  } else if (transport.CompareIgnoreCase("IAP_USB") ||
+             transport.CompareIgnoreCase("AOA_USB") ||
+             transport.CompareIgnoreCase("IAP_USB_HOST_MODE") ||
+             transport.CompareIgnoreCase("IAP_USB_DEVICE_MODE")) {
     transport_type = "USB";
   } else if (transport.CompareIgnoreCase("TCP_WIFI") ||
              transport.CompareIgnoreCase("IAP_CARPLAY")) {
