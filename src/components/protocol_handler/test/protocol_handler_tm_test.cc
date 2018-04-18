@@ -1861,7 +1861,7 @@ TEST_F(ProtocolHandlerImplTest,
   std::vector<int32_t> expected_video_service_transports;
   expected_video_service_transports.push_back(1);
 
-  connection_handler::SessionTransports dummy_st;
+  connection_handler::SessionTransports dummy_st = {0, 0};
   EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
       .WillOnce(Return(dummy_st));
 
@@ -2001,7 +2001,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
-  connection_handler::SessionTransports dummy_st;
+  connection_handler::SessionTransports dummy_st = {0, 0};
   EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
       .WillOnce(Return(dummy_st));
 

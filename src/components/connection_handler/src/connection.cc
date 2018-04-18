@@ -192,7 +192,7 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 DEPRECATED bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
                                const bool request_protection) {
-  return AddNewService(session_id, service_type, 0);
+  return AddNewService(session_id, service_type, request_protection, 0);
 }
 
 bool Connection::AddNewService(uint8_t session_id,

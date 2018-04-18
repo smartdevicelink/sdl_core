@@ -36,6 +36,7 @@
 
 #include "protocol/common.h"
 #include "connection_handler/connection.h"
+#include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
 #include "connection_handler/mock_connection_handler_settings.h"
@@ -55,6 +56,8 @@ namespace components {
 namespace connection_handler_test {
 using namespace ::connection_handler;
 using namespace ::protocol_handler;
+
+using ::testing::Return;
 
 class ConnectionTest : public ::testing::Test {
  protected:
@@ -88,6 +91,7 @@ class ConnectionTest : public ::testing::Test {
         std::find(serviceList.begin(), serviceList.end(), kRpc);
     const bool found_result = (it != serviceList.end());
     EXPECT_TRUE(found_result);
+    EXPECT_EQ(connection_->primary_connection_handle(), 0);
   }
   void AddNewService(const ServiceType service_type,
                      const bool protection,
@@ -110,12 +114,35 @@ class ConnectionTest : public ::testing::Test {
         std::find(newServiceList.begin(), newServiceList.end(), service_type);
     const bool found_result = it != newServiceList.end();
     EXPECT_EQ(expect_exist_service, found_result);
-#ifdef ENABLE_SECURITY
     if (found_result) {
       const Service& service = *it;
+      transport_manager::ConnectionUID expected_connection_handle =
+          kDefaultConnectionHandle;
+      EXPECT_EQ(service.connection_id, expected_connection_handle);
+#ifdef ENABLE_SECURITY
       EXPECT_EQ(service.is_protected_, protection);
-    }
 #endif  // ENABLE_SECURITY
+    }
+  }
+  void AddNewSecondaryService(const ServiceType service_type) {
+    const bool result = connection_->AddNewService(
+        session_id, service_type, false, kSecondaryConnectionHandle);
+    EXPECT_EQ(result, true);
+
+    const SessionMap session_map = connection_->session_map();
+    EXPECT_FALSE(session_map.empty());
+    const ServiceList newServiceList = session_map.begin()->second.service_list;
+    EXPECT_FALSE(newServiceList.empty());
+    const ServiceList::const_iterator it =
+        std::find(newServiceList.begin(), newServiceList.end(), service_type);
+    const bool found_result = it != newServiceList.end();
+    EXPECT_TRUE(found_result);
+    if (found_result) {
+      const Service& service = *it;
+      transport_manager::ConnectionUID expected_secondary_connection_handle =
+          kSecondaryConnectionHandle;
+      EXPECT_EQ(service.connection_id, expected_secondary_connection_handle);
+    }
   }
 
   void RemoveService(const ServiceType service_type,
@@ -142,6 +169,7 @@ class ConnectionTest : public ::testing::Test {
   ConnectionHandlerImpl* connection_handler_;
   uint32_t session_id;
   static const transport_manager::ConnectionUID kDefaultConnectionHandle = 1;
+  static const transport_manager::ConnectionUID kSecondaryConnectionHandle = 2;
 };
 
 TEST_F(ConnectionTest, Session_TryGetProtocolVersionWithoutSession) {
@@ -412,6 +440,151 @@ TEST_F(ConnectionTest, RemoveSession) {
   StartSession();
   EXPECT_EQ(session_id, connection_->RemoveSession(session_id));
   EXPECT_EQ(0u, connection_->RemoveSession(session_id));
+}
+
+TEST_F(ConnectionTest, AddNewSession_VerifySessionConnectionMapAdded) {
+  MockConnectionHandler mock_connection_handler;
+
+  ConnectionHandle connection_handle = 123;
+  DeviceHandle device_handle = 0u;
+  uint32_t heart_beat = 10000u;
+  Connection* connection = new Connection(
+      connection_handle, device_handle, &mock_connection_handler, heart_beat);
+
+  SessionConnectionMap session_connection_map;
+  sync_primitives::Lock session_connection_map_lock;
+  EXPECT_CALL(mock_connection_handler, session_connection_map())
+      .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
+          session_connection_map, session_connection_map_lock)));
+
+  transport_manager::ConnectionUID connection_handle_uid = 1;
+  uint32_t sid = connection->AddNewSession(connection_handle_uid);
+  EXPECT_NE(0u, sid);
+
+  // verify that SessionConnectionMap is updated
+  SessionConnectionMap::iterator it = session_connection_map.find(sid);
+  EXPECT_TRUE(session_connection_map.end() != it);
+
+  SessionTransports st = it->second;
+  EXPECT_EQ(connection_handle_uid, st.primary_transport);
+  EXPECT_EQ(0u, st.secondary_transport);
+
+  delete connection;
+}
+
+TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
+  MockConnectionHandler mock_connection_handler;
+
+  ConnectionHandle connection_handle = 123;
+  DeviceHandle device_handle = 0u;
+  uint32_t heart_beat = 10000u;
+  Connection* connection = new Connection(
+      connection_handle, device_handle, &mock_connection_handler, heart_beat);
+
+  SessionConnectionMap session_connection_map;
+  sync_primitives::Lock session_connection_map_lock;
+  // input some dummy data
+  SessionTransports st1 = {1234, 0};
+  SessionTransports st2 = {2345, 0};
+  session_connection_map[0x12] = st1;
+  session_connection_map[0x23] = st2;
+
+  EXPECT_CALL(mock_connection_handler, session_connection_map())
+      .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
+          session_connection_map, session_connection_map_lock)));
+
+  transport_manager::ConnectionUID connection_handle_uid = 1;
+  uint32_t sid = connection->AddNewSession(connection_handle_uid);
+
+  uint32_t ret = connection->RemoveSession(sid);
+  EXPECT_EQ(sid, ret);
+
+  // verify that SessionConnectionMap is updated
+  SessionConnectionMap::iterator it = session_connection_map.find(sid);
+  EXPECT_TRUE(session_connection_map.end() == it);
+
+  delete connection;
+}
+
+TEST_F(ConnectionTest, SecondarySessionTest) {
+  StartSession();
+  AddNewService(
+    kRpc, PROTECTION_OFF, EXPECT_RETURN_FALSE, EXPECT_SERVICE_EXISTS);
+
+  const ConnectionHandle connectionHandle = 0;
+  const DeviceHandle device_handle = 0u;
+  const uint32_t heart_beat = 0u;
+  Connection* secondary_connection = new Connection(
+        connectionHandle, device_handle, connection_handler_, heart_beat);
+
+  secondary_connection->SetPrimaryConnectionHandle(kDefaultConnectionHandle);
+  connection_handler::ConnectionHandle expected_primary_connection_handle =
+      kDefaultConnectionHandle;
+  EXPECT_EQ(
+      secondary_connection->primary_connection_handle(),
+      expected_primary_connection_handle);
+
+  AddNewSecondaryService(kAudio);
+  AddNewSecondaryService(kMobileNav);
+
+  delete secondary_connection;
+}
+
+TEST_F(ConnectionTest, RemoveSecondaryServices_SUCCESS) {
+  StartSession();
+
+  ServiceType services[2] = {kMobileNav, kAudio};
+  AddNewSecondaryService(services[0]);
+  AddNewSecondaryService(services[1]);
+  size_t services_count = sizeof(services) / sizeof(services[0]);
+
+  std::list<ServiceType> removed_services;
+  uint8_t ret_session_id = connection_->RemoveSecondaryServices(
+      kSecondaryConnectionHandle, removed_services);
+
+  // check return value
+  EXPECT_EQ(session_id, ret_session_id);
+  // check returned list
+  EXPECT_EQ(services_count, removed_services.size());
+  std::list<protocol_handler::ServiceType>::iterator it;
+  it = std::find(removed_services.begin(), removed_services.end(), services[0]);
+  EXPECT_TRUE(it != removed_services.end());
+  it = std::find(removed_services.begin(), removed_services.end(), services[1]);
+  EXPECT_TRUE(it != removed_services.end());
+}
+
+TEST_F(ConnectionTest, RemoveSecondaryServices_NoService) {
+  StartSession();
+  /* do not call AddNewSecondaryService() */
+
+  std::list<ServiceType> removed_services;
+  uint8_t ret_session_id = connection_->RemoveSecondaryServices(
+      kSecondaryConnectionHandle, removed_services);
+
+  // check return value
+  EXPECT_EQ(0, ret_session_id);
+  // check returned list
+  EXPECT_EQ(0u, removed_services.size());
+}
+
+TEST_F(ConnectionTest, RemoveSecondaryServices_InvalidConnectionHandle) {
+  StartSession();
+
+  ServiceType services[2] = {kMobileNav, kAudio};
+  AddNewSecondaryService(services[0]);
+  AddNewSecondaryService(services[1]);
+
+  transport_manager::ConnectionUID invalid_connection_handle = 123;
+  ASSERT_TRUE(kSecondaryConnectionHandle != invalid_connection_handle);
+
+  std::list<ServiceType> removed_services;
+  uint8_t ret_session_id = connection_->RemoveSecondaryServices(
+      invalid_connection_handle, removed_services);
+
+  // check return value
+  EXPECT_EQ(0, ret_session_id);
+  // check returned list
+  EXPECT_EQ(0u, removed_services.size());
 }
 
 #ifdef ENABLE_SECURITY
