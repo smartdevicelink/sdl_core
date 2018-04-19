@@ -48,12 +48,12 @@ namespace policy {
 
 namespace RequestType {
 // Describes available RequestType states in policy table
-enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+enum class State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
 }  // namespace RequestType
 
 namespace RequestSubType {
 // Describes available RequestSubType states in policy table
-enum State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
+enum class State { UNAVAILABLE = 0, AVAILABLE, EMPTY, OMITTED };
 }  // namespace RequestSubType
 
 class CacheManagerInterface {

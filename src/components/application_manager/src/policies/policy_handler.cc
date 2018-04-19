@@ -54,6 +54,7 @@
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
+#include "utils/helpers.h"
 #include "policy/policy_manager.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
@@ -1907,24 +1908,27 @@ bool PolicyHandler::IsRequestTypeAllowed(
 
   const RequestType::State request_type_state =
       policy_manager_->GetAppRequestTypesState(policy_app_id);
-  // If empty array of request types is assigned to app - any is allowed
-  if (RequestType::State::EMPTY == request_type_state) {
-    LOG4CXX_TRACE(logger_, "Any Request Type is allowed by policies.");
-    return true;
-  } else if (RequestType::State::OMITTED == request_type_state) {
-    // If RequestType parameter omitted for app - any is disallowed
-    LOG4CXX_TRACE(logger_, "All Request Types are disallowed by policies.");
-    return false;
+
+  switch (request_type_state) {
+    case RequestType::State::EMPTY: {
+      // If empty array of request types is assigned to app - any is allowed
+      LOG4CXX_TRACE(logger_, "Any Request Type is allowed by policies.");
+      return true;
+    }
+    case RequestType::State::OMITTED: {
+      // If RequestType parameter omitted for app - any is disallowed
+      LOG4CXX_TRACE(logger_, "All Request Types are disallowed by policies.");
+      return false;
+    }
+    case RequestType::State::AVAILABLE: {
+      // If any of request types is available for current application - get them
+      const auto request_types =
+          policy_manager_->GetAppRequestTypes(policy_app_id);
+      return helpers::in_range(request_types, stringified_type);
+    }
+    default:
+      return false;
   }
-  // If any of request types is available for current application - get them
-  if (RequestType::State::AVAILABLE == request_type_state) {
-    const auto request_types =
-        policy_manager_->GetAppRequestTypes(policy_app_id);
-    const auto it =
-        std::find(request_types.begin(), request_types.end(), stringified_type);
-    return request_types.end() != it;
-  }
-  return false;
 }
 
 bool PolicyHandler::IsRequestSubTypeAllowed(
@@ -1934,30 +1938,34 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
   using namespace mobile_apis;
 
   if (request_subtype.empty()) {
-    LOG4CXX_ERROR(logger_, "Unknown request subtype.");
+    LOG4CXX_ERROR(logger_, "Request subtype to check is empty.");
     return false;
   }
 
   const RequestSubType::State request_subtype_state =
       policy_manager_->GetAppRequestSubTypesState(policy_app_id);
-  // If empty array of request subtypes is assigned to app - any is allowed
-  if (RequestSubType::State::EMPTY == request_subtype_state) {
-    LOG4CXX_TRACE(logger_, "Any Request SubType is allowed by policies.");
-    return true;
-  } else if (RequestSubType::State::OMITTED == request_subtype_state) {
-    // If RequestSubType parameter omitted for app - any is disallowed
-    LOG4CXX_TRACE(logger_, "All Request SubTypes are disallowed by policies.");
-    return false;
+  switch (request_subtype_state) {
+    case RequestSubType::State::EMPTY: {
+      // If empty array of request subtypes is assigned to app - any is allowed
+      LOG4CXX_TRACE(logger_, "Any Request SubType is allowed by policies.");
+      return true;
+    }
+    case RequestSubType::State::OMITTED: {
+      // If RequestSubType parameter omitted for app - any is disallowed
+      LOG4CXX_TRACE(logger_,
+                    "All Request SubTypes are disallowed by policies.");
+      return false;
+    }
+    case RequestSubType::State::AVAILABLE: {
+      // If any of request subtypes is available for current application
+      // get them all
+      const auto request_subtypes =
+          policy_manager_->GetAppRequestSubTypes(policy_app_id);
+      return helpers::in_range(request_subtypes, request_subtype);
+    }
+    default:
+      return false;
   }
-  // If any of request subtypes is available for current application - get them
-  if (RequestSubType::State::AVAILABLE == request_subtype_state) {
-    const auto request_subtypes =
-        policy_manager_->GetAppRequestSubTypes(policy_app_id);
-    const auto it = std::find(
-        request_subtypes.begin(), request_subtypes.end(), request_subtype);
-    return request_subtypes.end() != it;
-  }
-  return false;
 }
 
 const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
