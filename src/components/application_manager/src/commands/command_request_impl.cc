@@ -39,6 +39,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -605,10 +606,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
-      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-      params.insert(iter->first);
-    }
+    LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+    params.insert(iter->first);
   }
 
   mobile_apis::Result::eType check_result =

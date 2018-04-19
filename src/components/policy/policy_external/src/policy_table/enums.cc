@@ -591,6 +591,8 @@ bool IsValidEnum(RequestType val) {
       return true;
     case RT_FOTA:
       return true;
+    case RT_OEM_SPECIFIC:
+      return true;
     default:
       return false;
   }
@@ -638,6 +640,8 @@ const char* EnumToJsonString(RequestType val) {
       return "MEDIA";
     case RT_FOTA:
       return "FOTA";
+    case RT_OEM_SPECIFIC:
+      return "OEM_SPECIFIC";
     default:
       return "";
   }
@@ -722,6 +726,10 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
   }
   if ("FOTA" == literal) {
     *result = RT_FOTA;
+    return true;
+  }
+  if ("OEM_SPECIFIC" == literal) {
+    *result = RT_OEM_SPECIFIC;
     return true;
   } else {
     return false;
