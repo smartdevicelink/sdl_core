@@ -69,7 +69,7 @@ endif()
 
 if(BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
@@ -77,7 +77,7 @@ if(BUILD_USB_SUPPORT)
       Libusb-1.0.16
     )
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
       ${COMPONENTS_DIR}/transport_manager/src/usb/libusb
     )
