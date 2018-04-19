@@ -65,19 +65,40 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
-  RequestType::eType request_type = static_cast<RequestType::eType>(
-      (*message_)[strings::msg_params][strings::request_type].asInt());
+  const mobile_apis::RequestType::eType request_type =
+      static_cast<mobile_apis::RequestType::eType>(
+          (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
+
+  const std::string stringified_request_type =
+      rpc::policy_table_interface_base::EnumToJsonString(
+          static_cast<rpc::policy_table_interface_base::RequestType>(
+              request_type));
+
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
     LOG4CXX_WARN(logger_,
-                 "Request type " << request_type
+                 "Request type " << stringified_request_type
                                  << " is not allowed by policies");
     return;
   }
 
-  if (RequestType::PROPRIETARY == request_type) {
+  const bool request_subtype_present =
+      (*message_)[strings::msg_params].keyExists(strings::request_subtype);
+  if (request_subtype_present) {
+    const std::string request_subtype =
+        (*message_)[strings::msg_params][strings::request_subtype].asString();
+    if (!policy_handler.IsRequestSubTypeAllowed(app->policy_app_id(),
+                                                request_subtype)) {
+      LOG4CXX_ERROR(logger_,
+                    "Request subtype: " << request_subtype
+                                        << " is DISALLOWED by policies");
+      return;
+    }
+  }
+
+  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
@@ -97,7 +118,7 @@ void OnSystemRequestNotification::Run() {
 #endif  // PROPRIETARY_MODE
 
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
-  } else if (RequestType::HTTP == request_type) {
+  } else if (mobile_apis::RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =
@@ -183,8 +204,8 @@ size_t OnSystemRequestNotification::ParsePTString(
     if (pt_string[i] == '\"' || pt_string[i] == '\\') {
       result += '\\';
     } else if (pt_string[i] == '\n') {
-      result_length--;  // contentLength is adjusted when this character is not
-                        // copied to result.
+      result_length--;  // contentLength is adjusted when this character is
+                        // not copied to result.
       continue;
     }
     result += pt_string[i];

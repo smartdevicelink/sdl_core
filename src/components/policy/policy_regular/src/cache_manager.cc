@@ -39,6 +39,7 @@
 #include <sstream>
 
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 #include "json/reader.h"
 #include "json/features.h"
 #include "json/writer.h"
@@ -1550,6 +1551,28 @@ int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
   return result;
 }
 
+RequestType::State CacheManager::GetAppRequestTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ApplicationPolicies::iterator app_policies_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == app_policies_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request types for app_id " << policy_app_id);
+    return RequestType::State::UNAVAILABLE;
+  }
+  const policy_table::RequestTypes& request_types =
+      *app_policies_iter->second.RequestType;
+  if (!request_types.is_initialized()) {
+    return RequestType::State::OMITTED;
+  }
+  if (request_types.empty()) {
+    return RequestType::State::EMPTY;
+  }
+  return RequestType::State::AVAILABLE;
+}
+
 void CacheManager::GetAppRequestTypes(
     const std::string& policy_app_id,
     std::vector<std::string>& request_types) const {
@@ -1568,11 +1591,56 @@ void CacheManager::GetAppRequestTypes(
                   "Can't find request types for app_id " << policy_app_id);
     return;
   }
-  policy_table::RequestTypes::iterator it_request_type =
-      policy_iter->second.RequestType->begin();
-  for (; it_request_type != policy_iter->second.RequestType->end();
-       ++it_request_type) {
-    request_types.push_back(EnumToJsonString(*it_request_type));
+
+  for (auto it_request_types : *policy_iter->second.RequestType) {
+    request_types.push_back(EnumToJsonString(it_request_types));
+  }
+  return;
+}
+
+RequestSubType::State CacheManager::GetAppRequestSubTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ApplicationPolicies::iterator app_policies_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == app_policies_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request subtypes for app_id " << policy_app_id);
+    return RequestSubType::State::UNAVAILABLE;
+  }
+  const policy_table::RequestSubTypes& request_types =
+      *app_policies_iter->second.RequestSubType;
+  if (!request_types.is_initialized()) {
+    return RequestSubType::State::OMITTED;
+  }
+  if (request_types.empty()) {
+    return RequestSubType::State::EMPTY;
+  }
+  return RequestSubType::State::AVAILABLE;
+}
+
+void CacheManager::GetAppRequestSubTypes(
+    const std::string& policy_app_id,
+    std::vector<std::string>& request_types) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  if (kDeviceId == policy_app_id) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request subtypes not applicable for app_id " << kDeviceId);
+    return;
+  }
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      pt_->policy_table.app_policies_section.apps.find(policy_app_id);
+  if (pt_->policy_table.app_policies_section.apps.end() == policy_iter) {
+    LOG4CXX_DEBUG(logger_,
+                  "Can't find request subtypes for app_id " << policy_app_id);
+    return;
+  }
+
+  for (auto it_request_subtypes : *policy_iter->second.RequestSubType) {
+    request_types.push_back(it_request_subtypes);
   }
   return;
 }

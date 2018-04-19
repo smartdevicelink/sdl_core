@@ -159,6 +159,7 @@ const char* file_type = "fileType";
 const char* file_size = "fileSize";
 const char* crc32_check_sum = "crc";
 const char* request_type = "requestType";
+const char* request_subtype = "requestSubType";
 const char* persistent_file = "persistentFile";
 const char* file_data = "fileData";
 const char* space_available = "spaceAvailable";
