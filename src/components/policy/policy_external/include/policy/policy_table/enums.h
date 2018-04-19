@@ -147,7 +147,8 @@ enum RequestType {
   RT_VEHICLE_DIAGNOSTICS,
   RT_EMERGENCY,
   RT_MEDIA,
-  RT_FOTA
+  RT_FOTA,
+  RT_OEM_SPECIFIC
 };
 
 bool IsValidEnum(RequestType val);
