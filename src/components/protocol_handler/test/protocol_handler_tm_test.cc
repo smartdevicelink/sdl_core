@@ -2997,7 +2997,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
       transport_manager_mock,
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_CONTROL, FRAME_DATA_HEART_BEAT, PROTECTION_OFF, kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
 
   // Act
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
@@ -3094,7 +3095,8 @@ TEST_F(ProtocolHandlerImplTest,
       transport_manager_mock,
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_SINGLE, FRAME_DATA_SINGLE, PROTECTION_OFF, kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
