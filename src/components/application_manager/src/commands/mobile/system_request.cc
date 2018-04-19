@@ -454,17 +454,43 @@ void SystemRequest::Run() {
 
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
+
+  const std::string stringified_request_type =
+      rpc::policy_table_interface_base::EnumToJsonString(
+          static_cast<rpc::policy_table_interface_base::RequestType>(
+              request_type));
+
   if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
                                            request_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "RequestType " << stringified_request_type
+                                 << " is DISALLOWED by policies");
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
+  LOG4CXX_TRACE(logger_,
+                "RequestType " << stringified_request_type << " is ALLOWED");
 
-  std::string file_name;
+  const bool request_subtype_present =
+      (*message_)[strings::msg_params].keyExists(strings::request_subtype);
+  if (request_subtype_present) {
+    const std::string request_subtype =
+        (*message_)[strings::msg_params][strings::request_subtype].asString();
+    if (!policy_handler.IsRequestSubTypeAllowed(application->policy_app_id(),
+                                                request_subtype)) {
+      LOG4CXX_ERROR(logger_,
+                    "Request subtype: " << request_subtype
+                                        << " is DISALLOWED by policies");
+      SendResponse(false, mobile_apis::Result::DISALLOWED);
+      return;
+    }
+    LOG4CXX_TRACE(logger_,
+                  "Request subtype: " << request_subtype << " is ALLOWED");
+  }
+
+  std::string file_name = kSYNC;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
-  } else {
-    file_name = kSYNC;
   }
 
   if (!CheckSyntax(file_name)) {
@@ -481,8 +507,8 @@ void SystemRequest::Run() {
     return;
   }
 
-  bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
-                        std::string::npos != file_name.find(kIVSU);
+  const bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
+                              std::string::npos != file_name.find(kIVSU);
 
   // to avoid override existing file
   if (is_system_file) {
@@ -587,6 +613,10 @@ void SystemRequest::Run() {
 
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
+  if (request_subtype_present) {
+    msg_params[strings::request_subtype] =
+        (*message_)[strings::msg_params][strings::request_subtype];
+  }
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_SystemRequest,
                  &msg_params,
