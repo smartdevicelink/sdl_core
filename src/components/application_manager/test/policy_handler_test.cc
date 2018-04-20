@@ -1387,6 +1387,22 @@ TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
   policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type);
 }
 
+TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  // Check expectations
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestSubTypesState(kPolicyAppId_))
+      .WillOnce(Return(policy::RequestSubType::State::AVAILABLE));
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestSubTypes(kPolicyAppId_))
+      .WillOnce(
+          Return(std::vector<std::string>({"fakeSubType", "fakeSubType2"})));
+
+  // Act
+  const std::string subtype = "fakeSubType";
+  EXPECT_TRUE(policy_handler_.IsRequestSubTypeAllowed(kPolicyAppId_, subtype));
+}
+
 TEST_F(PolicyHandlerTest, GetVehicleInfo) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
