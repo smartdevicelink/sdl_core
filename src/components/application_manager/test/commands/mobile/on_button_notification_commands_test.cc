@@ -337,6 +337,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   ON_CALL(*mock_app, IsFullscreen()).WillByDefault(Return(true));
+  ON_CALL(this->app_mngr_, application(kAppId)).WillByDefault(Return(mock_app));
 
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
