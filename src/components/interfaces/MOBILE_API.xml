@@ -2126,8 +2126,8 @@
         </param>
         <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
             <description>Omitted if connected not via BT.</description>
-        </param>         
-    </struct>         
+        </param>
+    </struct>
     <enum name="RequestType">
         <description>Enumeration listing possible asynchronous requests.</description>
         <element name="HTTP" />
@@ -2150,7 +2150,7 @@
         <element name="EMERGENCY" />
         <element name="MEDIA" />
         <element name="FOTA" />
-    </enum>         
+    </enum>
     <enum name="AppHMIType">
         <description>Enumeration listing possible app types.</description>
         <element name="DEFAULT" />
@@ -2165,9 +2165,9 @@
         <element name="SYSTEM" />
         <element name="PROJECTION" />
         <element name="REMOTE_CONTROL" />
-    </enum>         
+    </enum>
     <enum name="PredefinedLayout" platform="documentation">
-        <description>Predefined screen layout.</description>         
+        <description>Predefined screen layout.</description>
         <element name="DEFAULT" rootscreen="true">
             <description>
                 Default media / non-media screen.
@@ -2288,7 +2288,7 @@
                 Can be set as a root screen.
             </description>
         </element>
-    </enum>         
+    </enum>
     <enum name="FunctionID" internal_scope="base">
         <description>Enumeration linking function names with function IDs in AppLink protocol. Assumes enumeration starts at value 0.</description>
         <element name="RESERVED" value="0" />

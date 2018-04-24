@@ -32,7 +32,9 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
+
 #include <list>
+#include <map>
 
 #include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
@@ -165,7 +167,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   virtual void OnNaviStreamingStopped();
 
   /**
-   * @brief OnStateChanged send HMIStatusNotification if neded
+   * @brief OnStateChanged send HMIStatusNotification if needed
    * @param app application
    * @param old_state state before change
    * @param new_state state after change
@@ -190,11 +192,11 @@ class StateControllerImpl : public event_engine::EventObserver,
    * Move other application to HmiStates if applied moved to FULL or LIMITED
    */
   struct HmiLevelConflictResolver {
-    ApplicationSharedPtr applied_;
-    HmiStatePtr state_;
+    const ApplicationSharedPtr applied_;
+    const HmiStatePtr state_;
     StateControllerImpl* state_ctrl_;
-    HmiLevelConflictResolver(ApplicationSharedPtr app,
-                             HmiStatePtr state,
+    HmiLevelConflictResolver(const ApplicationSharedPtr app,
+                             const HmiStatePtr state,
                              StateControllerImpl* state_ctrl)
         : applied_(app), state_(state), state_ctrl_(state_ctrl) {}
     void operator()(ApplicationSharedPtr to_resolve);
@@ -456,7 +458,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<HmiState::StateID> StateIDList;
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
-  std::map<uint32_t, HmiStatePtr> waiting_for_activate;
+  std::map<uint32_t, HmiStatePtr> waiting_for_activate_;
   ApplicationManager& app_mngr_;
 };
 }

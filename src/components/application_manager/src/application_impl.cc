@@ -31,22 +31,22 @@
  */
 
 #include "application_manager/application_impl.h"
-#include <string>
 #include <strings.h>
-#include "application_manager/message_helper.h"
-#include "protocol_handler/protocol_handler.h"
+#include <string>
 #include "application_manager/application_manager.h"
-#include "config_profile/profile.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
-#include "utils/gen_hash.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
-#include "utils/timer_task_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "config_profile/profile.h"
+#include "interfaces/MOBILE_API.h"
+#include "protocol_handler/protocol_handler.h"
 #include "transport_manager/common.h"
+#include "utils/gen_hash.h"
+#include "utils/file_system.h"
+#include "utils/logger.h"
+#include "utils/make_shared.h"
+#include "utils/shared_ptr.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 
@@ -195,7 +195,7 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   is_voice_communication_application_ = false;
   mobile_projection_enabled_ = false;
   const smart_objects::SmartObject& array_app_types = *app_types_;
-  uint32_t lenght_app_types = array_app_types.length();
+  const uint32_t lenght_app_types = array_app_types.length();
 
   for (uint32_t i = 0; i < lenght_app_types; ++i) {
     if (mobile_apis::AppHMIType::NAVIGATION ==
@@ -230,12 +230,26 @@ void ApplicationImpl::set_voice_communication_supported(
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
-  return is_media_ || is_voice_communication_application_ || is_navi_ ||
-         mobile_projection_enabled_;
+  const bool is_audio_app =
+      is_media_application() || is_voice_communication_supported() || is_navi();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "is audio app --> ((is_media_app: "
+                               << is_media_application() << ")"
+                               << " || (is_voice_communication_app: "
+                               << is_voice_communication_supported() << ")"
+                               << " || (is_navi: " << is_navi() << ")) --> "
+                               << is_audio_app);
+  return is_audio_app;
 }
 
 bool ApplicationImpl::IsVideoApplication() const {
-  return is_navi_ || mobile_projection_enabled_;
+  const bool is_video_app = is_navi() || mobile_projection_enabled();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha
+                    << "is video app --> ((is_navi: " << is_navi() << ")"
+                    << " || (mobile_projection: " << mobile_projection_enabled()
+                    << ")) --> " << is_video_app);
+  return is_video_app;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
