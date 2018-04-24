@@ -226,9 +226,15 @@
                 },
                 {
                     "name": "graphic",
-                    "imageTypeSupported": [
-
-                    ],
+                    "imageTypeSupported": [],
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "secondaryGraphic",
+                    "imageTypeSupported": [],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -251,7 +257,6 @@
             ],
             "graphicSupported": true,
             "templatesAvailable": [
-
                 "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
                 "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
                 "GRAPHIC_WITH_TILES", "TILES_WITH_GRAPHIC", "GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",

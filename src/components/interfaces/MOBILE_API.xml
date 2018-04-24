@@ -781,7 +781,11 @@
         </element>
         
         <element name="graphic">
-            <description>The image field for Show</description>
+            <description>The primary image field for Show</description>
+        </element>
+        
+        <element name="secondaryGraphic">
+            <description>The secondary image field for Show</description>
         </element>
         
         <element name="showConstantTBTIcon">
