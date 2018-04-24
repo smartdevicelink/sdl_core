@@ -131,7 +131,7 @@ void OnButtonPressNotification::Run() {
     // LIMITED
     if (is_app_id_exists) {
       app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
+          (*message_)[strings::msg_params][strings::app_id].asUInt());
     }
 
     if (app.valid()) {
