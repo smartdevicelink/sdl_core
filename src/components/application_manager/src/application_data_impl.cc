@@ -45,7 +45,9 @@ InitialApplicationDataImpl::InitialApplicationDataImpl()
     , tts_name_(NULL)
     , ngn_media_screen_name_(NULL)
     , language_(mobile_api::Language::INVALID_ENUM)
-    , ui_language_(mobile_api::Language::INVALID_ENUM) {}
+    , ui_language_(mobile_api::Language::INVALID_ENUM)
+    , day_color_scheme_(NULL)
+    , night_color_scheme_(NULL) {}
 
 InitialApplicationDataImpl::~InitialApplicationDataImpl() {
   if (app_types_) {
@@ -66,6 +68,16 @@ InitialApplicationDataImpl::~InitialApplicationDataImpl() {
   if (ngn_media_screen_name_) {
     delete ngn_media_screen_name_;
     ngn_media_screen_name_ = NULL;
+  }
+
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+    day_color_scheme_ = NULL;
+  }
+
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+    night_color_scheme_ = NULL;
   }
 }
 
@@ -100,6 +112,16 @@ const mobile_api::Language::eType& InitialApplicationDataImpl::language()
 const mobile_api::Language::eType& InitialApplicationDataImpl::ui_language()
     const {
   return ui_language_;
+}
+
+const smart_objects::SmartObject*
+InitialApplicationDataImpl::day_color_scheme() const {
+  return day_color_scheme_;
+}
+
+const smart_objects::SmartObject*
+InitialApplicationDataImpl::night_color_scheme() const {
+  return night_color_scheme_;
 }
 
 void InitialApplicationDataImpl::set_app_types(
@@ -160,6 +182,24 @@ void InitialApplicationDataImpl::set_perform_interaction_layout(
 mobile_apis::LayoutMode::eType
 InitialApplicationDataImpl::perform_interaction_layout() const {
   return perform_interaction_layout_;
+}
+
+void InitialApplicationDataImpl::set_day_color_scheme(
+  const smart_objects::SmartObject& color_scheme) {
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+  }
+
+  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void InitialApplicationDataImpl::set_night_color_scheme(
+  const smart_objects::SmartObject& color_scheme) {
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+  }
+
+  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()

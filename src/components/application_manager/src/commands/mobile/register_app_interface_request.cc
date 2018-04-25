@@ -348,6 +348,14 @@ void RegisterAppInterfaceRequest::Run() {
     }
   }
 
+  if (msg_params.keyExists(strings::day_color_scheme)) {
+    application->set_day_color_scheme(msg_params[strings::day_color_scheme]);
+  }
+
+  if (msg_params.keyExists(strings::night_color_scheme)) {
+    application->set_night_color_scheme(msg_params[strings::night_color_scheme]);
+  }
+
   // Add device to policy table and set device info, if any
   policy::DeviceParams dev_params;
   if (-1 ==
@@ -883,6 +891,18 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
 
   device_info[strings::transport_type] =
       application_manager_.GetDeviceTransportType(transport_type);
+
+  const smart_objects::SmartObject* day_color_scheme =
+      application_impl.day_color_scheme();
+  if (day_color_scheme) {
+    application[strings::day_color_scheme] = *day_color_scheme;
+  }
+
+  const smart_objects::SmartObject* night_color_scheme =
+      application_impl.night_color_scheme();
+  if (night_color_scheme) {
+    application[strings::night_color_scheme] = *night_color_scheme;
+  }
 
   DCHECK(application_manager_.ManageHMICommand(notification));
 }
