@@ -1595,6 +1595,7 @@
                "GetVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
@@ -1610,6 +1611,7 @@
                "OnVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
@@ -1625,6 +1627,7 @@
                "SubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
@@ -1639,6 +1642,7 @@
                "UnsubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",

@@ -147,6 +147,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_STEERINGWHEELANGLE:
       return true;
+    case P_ENGINEOILLIFE:
+      return true;
     case P_MYKEY:
       return true;
     case P_AIRBAGSTATUS:
@@ -205,6 +207,8 @@ const char* EnumToJsonString(Parameter val) {
       return "rpm";
     case P_STEERINGWHEELANGLE:
       return "steeringWheelAngle";
+    case P_ENGINEOILLIFE:
+      return "engineOilLife";
     case P_MYKEY:
       return "myKey";
     case P_AIRBAGSTATUS:
@@ -280,6 +284,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("steeringWheelAngle" == literal) {
     *result = P_STEERINGWHEELANGLE;
+    return true;
+  } else if ("engineOilLife" == literal) {
+    *result = P_ENGINEOILLIFE;
     return true;
   } else if ("myKey" == literal) {
     *result = P_MYKEY;
