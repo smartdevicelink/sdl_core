@@ -1276,7 +1276,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app = application_manager_.application(connection_key);
   if (!app.valid()) {
-    LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
+    LOG4CXX_WARN(logger_,
+                 "App activating failed: no app with connection key "
+                     << connection_key << " have been found.");
     return;
   }
   std::string policy_app_id = app->policy_app_id();

@@ -156,8 +156,8 @@ class ApplicationImpl : public virtual Application,
   inline uint32_t app_id() const;
   const custom_str::CustomString& name() const;
   void set_folder_name(const std::string& folder_name) OVERRIDE;
-  const std::string folder_name() const;
-  bool is_media_application() const;
+  const std::string folder_name() const OVERRIDE;
+  bool is_media_application() const OVERRIDE;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
   const mobile_apis::HMILevel::eType hmi_level() const;
@@ -265,7 +265,7 @@ class ApplicationImpl : public virtual Application,
    *
    * @return true if application is media, voice communication or navigation
    */
-  virtual bool IsAudioApplication() const;
+  bool IsAudioApplication() const OVERRIDE;
 
   bool IsVideoApplication() const OVERRIDE;
 
@@ -540,18 +540,16 @@ uint32_t ApplicationImpl::app_id() const {
 
 const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
-  using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->audio_streaming_state()
-                   : AudioStreamingState::INVALID_ENUM;
+                   : mobile_apis::AudioStreamingState::INVALID_ENUM;
 }
 
 const mobile_api::VideoStreamingState::eType
 ApplicationImpl::video_streaming_state() const {
-  using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->video_streaming_state()
-                   : VideoStreamingState::INVALID_ENUM;
+                   : mobile_apis::VideoStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

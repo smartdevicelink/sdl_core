@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
 
+#include <iosfwd>
 #include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
@@ -48,7 +49,7 @@ typedef utils::SharedPtr<HmiState> HmiStatePtr;
 
 /**
 * @brief The HmiState class
-*  Handle Hmi state of application (hmi level,
+*  Handle HMI state of application (HMI level,
 *  audio streaming state, system context)
 *
 */
@@ -56,7 +57,7 @@ class HmiState {
  public:
   /**
    * @brief The StateID enum describes state of application
-   * If no events occured STATE_ID_DEFAULT shuld be presented
+   * If no events occurred STATE_ID_DEFAULT should be presented
    */
   enum StateID {
     STATE_ID_CURRENT,
@@ -129,12 +130,8 @@ class HmiState {
    * @brief hmi_level
    * @return return hmi level member
    */
-  virtual mobile_apis::HMILevel::eType hmi_level() const {
-    if (parent_) {
-      return parent_->hmi_level();
-    }
-    return hmi_level_;
-  }
+  virtual mobile_apis::HMILevel::eType hmi_level() const;
+
   /**
    * @brief set_hmi_level set hmi_level member
    * @param hmi_level hmi level to setup
@@ -147,61 +144,43 @@ class HmiState {
    * @brief audio_streaming_state
    * @return return audio streaming state member
    */
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
-    if (parent_) {
-      return parent_->audio_streaming_state();
-    }
-    return audio_streaming_state_;
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+
+  /**
+   * @brief set_audio_streaming_state set audio_streaming_state member
+   * @param audio_state audio_state to setup
+   */
+  void set_audio_streaming_state(
+      mobile_apis::AudioStreamingState::eType audio_state) {
+    audio_streaming_state_ = audio_state;
   }
 
   /**
    * @brief video_streaming_state
    * @return return video streaming state member
    */
-  virtual mobile_apis::VideoStreamingState::eType video_streaming_state()
-      const {
-    if (parent_) {
-      return parent_->video_streaming_state();
-    }
-    return video_streaming_state_;
-  }
+  virtual mobile_apis::VideoStreamingState::eType video_streaming_state() const;
 
   /**
    * @brief set_video_streaming_state set set_video_streaming_state member
    * @param video_state video_state to setup
    */
-  virtual void set_video_streaming_state(
+  void set_video_streaming_state(
       mobile_apis::VideoStreamingState::eType video_state) {
     video_streaming_state_ = video_state;
-  }
-
-  /**
-   * @brief set_audio_streaming_state set audio_streaming_state member
-   * @param audio_state audio_state to setup
-   */
-  virtual void set_audio_streaming_state(
-      mobile_apis::AudioStreamingState::eType audio_state) {
-    audio_streaming_state_ = audio_state;
   }
 
   /**
    * @brief system_context
    * @return return system context member
    */
-  virtual mobile_apis::SystemContext::eType system_context() const {
-    if (parent_) {
-      return parent_->system_context();
-    }
-    return system_context_;
-  }
+  virtual mobile_apis::SystemContext::eType system_context() const;
 
   /**
    * @brief set_system_context set system_context member
    * @param system_context system_context to setup
    */
-  virtual void set_system_context(
-      mobile_apis::SystemContext::eType system_context) {
+  void set_system_context(mobile_apis::SystemContext::eType system_context) {
     system_context_ = system_context;
   }
 
@@ -217,7 +196,7 @@ class HmiState {
    * @brief set_state_id sets state id
    * @param state_id state id to setup
    */
-  virtual void set_state_id(StateID state_id) {
+  void set_state_id(StateID state_id) {
     state_id_ = state_id;
   }
 
@@ -359,6 +338,10 @@ class DeactivateHMI : public HmiState {
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
 };
 
 /**
@@ -397,5 +380,10 @@ class EmbeddedNavi : public HmiState {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
-}
+
+std::ostream& operator<<(std::ostream& os, const HmiState::StateID src);
+std::ostream& operator<<(std::ostream& os, const HmiState& src);
+
+}  // namespace application_manager
+
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_STATE_H_
