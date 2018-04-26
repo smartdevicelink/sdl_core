@@ -105,6 +105,8 @@ void UIGetCapabilitiesResponse::Run() {
                     [strings::video_streaming_capability]);
     }
   }
+
+  hmi_capabilities.set_is_ui_capabilities_updated(true);
 }
 
 }  // namespace commands

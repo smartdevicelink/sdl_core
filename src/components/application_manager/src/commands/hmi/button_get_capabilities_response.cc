@@ -49,12 +49,13 @@ void ButtonGetCapabilitiesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  hmi_capabilities.set_is_button_capabilities_updated(true);
+
   if (hmi_apis::Common_Result::SUCCESS != code) {
     LOG4CXX_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
     return;
   }
-
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);

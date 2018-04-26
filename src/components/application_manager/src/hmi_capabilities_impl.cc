@@ -370,6 +370,16 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_navi_cooperating_(false)
     , is_ivi_cooperating_(false)
     , is_rc_cooperating_(false)
+    , is_vr_capabilities_updated_(false)
+    , is_tts_capabilities_updated_(false)
+    , is_ui_capabilities_updated_(false)
+    , is_button_capabilities_updated_(false)
+    , is_attenuated_capabilities_updated_(false)
+#ifdef SDL_REMOTE_CONTROL
+    , is_rc_capabilities_updated_(false)
+#else
+    , is_rc_capabilities_updated_(true)
+#endif
     , attenuated_supported_(false)
     , ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , vr_language_(hmi_apis::Common_Language::INVALID_ENUM)
@@ -470,6 +480,48 @@ void HMICapabilitiesImpl::set_is_ivi_cooperating(const bool value) {
 
 void HMICapabilitiesImpl::set_is_rc_cooperating(const bool value) {
   is_rc_cooperating_ = value;
+}
+
+void HMICapabilitiesImpl::set_is_vr_capabilities_updated(const bool value) {
+  is_vr_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
+}
+
+void HMICapabilitiesImpl::set_is_tts_capabilities_updated(const bool value) {
+  is_tts_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
+}
+
+void HMICapabilitiesImpl::set_is_ui_capabilities_updated(const bool value) {
+  is_ui_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
+}
+
+void HMICapabilitiesImpl::set_is_button_capabilities_updated(const bool value) {
+  is_button_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
+}
+
+void HMICapabilitiesImpl::set_is_attenuated_capabilities_updated(const bool value) {
+  is_attenuated_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
+}
+
+void HMICapabilitiesImpl::set_is_rc_capabilities_updated(const bool value) {
+  is_rc_capabilities_updated_ = value;
+  if (is_all_capabilities_updated()) {
+    app_mngr_.SetHMICapabilitiesUpdated(true);
+  }
 }
 
 void HMICapabilitiesImpl::set_attenuated_supported(const bool state) {
@@ -722,6 +774,39 @@ bool HMICapabilitiesImpl::is_ivi_cooperating() const {
 
 bool HMICapabilitiesImpl::is_rc_cooperating() const {
   return is_rc_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_vr_capabilities_updated() const {
+  return is_vr_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_tts_capabilities_updated() const {
+  return is_tts_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_ui_capabilities_updated() const {
+  return is_ui_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_button_capabilities_updated() const {
+  return is_button_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_attenuated_capabilities_updated() const {
+  return is_attenuated_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_rc_capabilities_updated() const {
+  return is_rc_capabilities_updated_;
+}
+
+bool HMICapabilitiesImpl::is_all_capabilities_updated() const {
+  return is_vr_capabilities_updated_ == true &&
+    is_tts_capabilities_updated_ == true &&
+    is_ui_capabilities_updated_ == true &&
+    is_button_capabilities_updated_ == true &&
+    is_attenuated_capabilities_updated_ == true &&
+    is_rc_capabilities_updated_ == true;
 }
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::ui_supported_languages()

@@ -143,6 +143,7 @@ class RegisterAppInterfaceRequestTest
 
   void InitGetters() {
     ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
+    ON_CALL(app_mngr_, IsHMICapabilitiesUpdated()).WillByDefault(Return(true));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(app_mngr_, resume_controller())
@@ -262,7 +263,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillOnce(Return(false))
       .WillOnce(Return(true))
       .WillOnce(Return(false));
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  ON_CALL(app_mngr_, IsHMICapabilitiesUpdated()).WillByDefault(Return(false));
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
@@ -326,7 +327,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(false))
       .WillOnce(Return(true))
       .WillOnce(Return(false));
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  ON_CALL(app_mngr_, IsHMICapabilitiesUpdated()).WillByDefault(Return(false));
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 

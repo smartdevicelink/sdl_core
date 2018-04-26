@@ -53,6 +53,7 @@ void RCGetCapabilitiesResponse::Run() {
         (*message_)[strings::msg_params][strings::rc_capability]);
   }
   hmi_capabilities.set_rc_supported(capability_exists);
+  hmi_capabilities.set_is_rc_capabilities_updated(true);
 }
 
 }  // namespace commands

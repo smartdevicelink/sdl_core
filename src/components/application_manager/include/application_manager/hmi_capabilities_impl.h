@@ -94,6 +94,26 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_rc_cooperating() const OVERRIDE;
   void set_is_rc_cooperating(const bool value) OVERRIDE;
 
+  bool is_vr_capabilities_updated() const OVERRIDE;
+  void set_is_vr_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_tts_capabilities_updated() const OVERRIDE;
+  void set_is_tts_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_ui_capabilities_updated() const OVERRIDE;
+  void set_is_ui_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_button_capabilities_updated() const OVERRIDE;
+  void set_is_button_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_attenuated_capabilities_updated() const OVERRIDE;
+  void set_is_attenuated_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_rc_capabilities_updated() const OVERRIDE;
+  void set_is_rc_capabilities_updated(const bool value) OVERRIDE;
+
+  bool is_all_capabilities_updated() const OVERRIDE;
+
   /*
    * @brief Interface used to store information about software version of the
    *target
@@ -549,6 +569,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_navi_cooperating_;
   bool is_ivi_cooperating_;
   bool is_rc_cooperating_;
+
+  bool is_vr_capabilities_updated_;
+  bool is_tts_capabilities_updated_;
+  bool is_ui_capabilities_updated_;
+  bool is_button_capabilities_updated_;
+  bool is_attenuated_capabilities_updated_;
+  bool is_rc_capabilities_updated_;
 
   bool attenuated_supported_;
   hmi_apis::Common_Language::eType ui_language_;

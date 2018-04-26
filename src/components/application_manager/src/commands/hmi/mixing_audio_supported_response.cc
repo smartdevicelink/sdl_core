@@ -48,6 +48,8 @@ void MixingAudioSupportedResponse::Run() {
   hmi_capabilities.set_attenuated_supported(
       (*message_)[strings::msg_params][hmi_response::attenuated_supported]
           .asBool());
+
+  hmi_capabilities.set_is_attenuated_capabilities_updated(true);
 }
 
 }  // namespace commands

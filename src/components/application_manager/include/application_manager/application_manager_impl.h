@@ -468,6 +468,9 @@ class ApplicationManagerImpl
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
+
+  void SetHMICapabilitiesUpdated(bool updated) OVERRIDE;
+
   void OnHMIStartedCooperation() OVERRIDE;
 
   /*
@@ -1147,6 +1150,11 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  /*
+   * @brief returns true if HMI capabilities are updated by information from HMI
+   */
+  bool IsHMICapabilitiesUpdated() const OVERRIDE;
+
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
@@ -1725,6 +1733,7 @@ class ApplicationManagerImpl
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
+  bool hmi_capabilities_updated_;
   bool is_all_apps_allowed_;
 
   event_engine::EventDispatcherImpl event_dispatcher_;

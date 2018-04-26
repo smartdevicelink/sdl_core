@@ -67,6 +67,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
                                           HmiInterfaces::HMI_INTERFACE_TTS)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_TTS isn't available");
+        hmi_capabilities.set_is_tts_capabilities_updated(true);
         return;
       }
       SendMessageToHMI();

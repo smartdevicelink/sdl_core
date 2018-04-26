@@ -421,9 +421,13 @@ class ApplicationManager {
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
+  virtual void SetHMICapabilitiesUpdated(bool updated) = 0;
+
   virtual void OnHMIStartedCooperation() = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  virtual bool IsHMICapabilitiesUpdated() const = 0;
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications

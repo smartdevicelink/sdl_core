@@ -66,6 +66,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
                                           HmiInterfaces::HMI_INTERFACE_VR)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_VR isn't available");
+        hmi_capabilities.set_is_vr_capabilities_updated(true);
         return;
       }
       SendMessageToHMI();

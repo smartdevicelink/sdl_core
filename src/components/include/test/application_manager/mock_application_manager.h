@@ -167,7 +167,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
   MOCK_METHOD0(OnHMIStartedCooperation, void());
+  MOCK_METHOD1(SetHMICapabilitiesUpdated, void(bool updated));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
+  MOCK_CONST_METHOD0(IsHMICapabilitiesUpdated, bool());
   MOCK_METHOD2(IviInfoUpdated,
                std::vector<application_manager::ApplicationSharedPtr>(
                    mobile_apis::VehicleDataType::eType vehicle_info,

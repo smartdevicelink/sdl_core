@@ -66,6 +66,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
                                           HmiInterfaces::HMI_INTERFACE_UI)) {
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_UI isn't available");
+        hmi_capabilities.set_is_ui_capabilities_updated(true);
         return;
       }
       SendMessageToHMI();

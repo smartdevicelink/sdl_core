@@ -200,7 +200,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   // wait till HMI started
   while (!application_manager_.IsStopping() &&
-         !application_manager_.IsHMICooperating()) {
+         !application_manager_.IsHMICapabilitiesUpdated()) {
     LOG4CXX_DEBUG(logger_,
                   "Waiting for the HMI... conn_key="
                       << connection_key()
@@ -212,6 +212,7 @@ void RegisterAppInterfaceRequest::Run() {
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
   }
+  LOG4CXX_DEBUG(logger_, "RegisterAppInterfaceRequest::Run waiting finished");
 
   if (application_manager_.IsStopping()) {
     LOG4CXX_WARN(logger_, "The ApplicationManager is stopping!");

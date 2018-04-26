@@ -148,6 +148,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           hmi_apis::Common_DriverDistractionState::INVALID_ENUM)
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
+    , hmi_capabilities_updated_(false)
     , is_all_apps_allowed_(true)
     , media_manager_(NULL)
     , hmi_handler_(NULL)
@@ -713,6 +714,11 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
     return;
   }
   connection_handler().ConnectToDevice(handle);
+}
+
+void ApplicationManagerImpl::SetHMICapabilitiesUpdated(bool updated) {
+  LOG4CXX_DEBUG(logger_, "Setting HMI capabilities updated state to " << updated);
+  hmi_capabilities_updated_ = updated;
 }
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
@@ -3082,6 +3088,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   LOG4CXX_DEBUG(logger_, "Unregister reason  " << unregister_reason_);
 
   hmi_cooperating_ = false;
+  hmi_capabilities_updated_ = false;
   bool is_ignition_off = false;
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;
@@ -3964,6 +3971,10 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
 
 bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
+}
+
+bool ApplicationManagerImpl::IsHMICapabilitiesUpdated() const {
+  return hmi_capabilities_updated_;
 }
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {

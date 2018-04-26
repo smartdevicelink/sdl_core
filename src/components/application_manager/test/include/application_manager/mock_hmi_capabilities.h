@@ -64,6 +64,26 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(is_rc_cooperating, bool());
   MOCK_METHOD1(set_is_rc_cooperating, void(const bool value));
 
+  MOCK_CONST_METHOD0(is_vr_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_vr_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_tts_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_tts_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_ui_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_ui_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_button_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_button_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_attenuated_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_attenuated_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_rc_capabilities_updated, bool());
+  MOCK_METHOD1(set_is_rc_capabilities_updated, void(const bool value));
+
+  MOCK_CONST_METHOD0(is_all_capabilities_updated, bool());
+
   MOCK_CONST_METHOD0(attenuated_supported, bool());
 
   MOCK_METHOD1(set_attenuated_supported, void(const bool state));

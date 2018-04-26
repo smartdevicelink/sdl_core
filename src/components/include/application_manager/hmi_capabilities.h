@@ -93,6 +93,25 @@ class HMICapabilities {
   virtual bool is_rc_cooperating() const = 0;
   virtual void set_is_rc_cooperating(const bool value) = 0;
 
+  virtual bool is_vr_capabilities_updated() const = 0;
+  virtual void set_is_vr_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_tts_capabilities_updated() const = 0;
+  virtual void set_is_tts_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_ui_capabilities_updated() const = 0;
+  virtual void set_is_ui_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_button_capabilities_updated() const = 0;
+  virtual void set_is_button_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_attenuated_capabilities_updated() const = 0;
+  virtual void set_is_attenuated_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_rc_capabilities_updated() const = 0;
+  virtual void set_is_rc_capabilities_updated(const bool value) = 0;
+
+  virtual bool is_all_capabilities_updated() const = 0;
   /*
    * @brief Interface used to store information about software version of the
    *target

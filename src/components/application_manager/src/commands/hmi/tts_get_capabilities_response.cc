@@ -56,6 +56,7 @@ void TTSGetCapabilitiesResponse::Run() {
         (*message_)[strings::msg_params]
                    [hmi_response::prerecorded_speech_capabilities]);
   }
+  hmi_capabilities.set_is_tts_capabilities_updated(true);
 }
 
 }  // namespace commands

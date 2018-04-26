@@ -87,6 +87,7 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeSuccess_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_));
+  EXPECT_CALL(mock_hmi_capabilities_, set_is_button_capabilities_updated(true));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_preset_bank_capabilities(preset_bank_capabilities_));
 
@@ -100,7 +101,9 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeAborted_SUCCESS) {
 
   ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).Times(0);
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+  EXPECT_CALL(mock_hmi_capabilities_, set_is_button_capabilities_updated(true));
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_))
       .Times(0);
   EXPECT_CALL(mock_hmi_capabilities_,
