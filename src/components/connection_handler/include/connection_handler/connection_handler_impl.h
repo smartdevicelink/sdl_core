@@ -281,7 +281,7 @@ class ConnectionHandlerImpl
    * @return string representation of the transport of the device
    */
   const std::string TransportTypeProfileStringFromConnHandle(
-    transport_manager::ConnectionUID connection_handle) const;
+      transport_manager::ConnectionUID connection_handle) const;
 
   /**
    * @brief Converts device handle to transport type string used in
@@ -290,7 +290,7 @@ class ConnectionHandlerImpl
    * @return string representation of the transport of the device
    */
   const std::string TransportTypeProfileStringFromDeviceHandle(
-    DeviceHandle device_handle) const;
+      DeviceHandle device_handle) const;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)

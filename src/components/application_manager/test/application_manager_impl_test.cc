@@ -1087,11 +1087,9 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
   EXPECT_CALL(*mock_app_ptr_, secondary_device())
       .WillRepeatedly(Return(secondary_device_handle));
 
-  EXPECT_CALL(
-      mock_session_observer_,
-      TransportTypeProfileStringFromDeviceHandle(primary_device_handle))
-      .WillOnce(
-          Return(primary_transport_device_string));
+  EXPECT_CALL(mock_session_observer_,
+              TransportTypeProfileStringFromDeviceHandle(primary_device_handle))
+      .WillOnce(Return(primary_transport_device_string));
 
   if (secondary_device_handle != 0) {
     EXPECT_CALL(
@@ -1099,10 +1097,9 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
         TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
         .WillOnce(Return(secondary_transport_device_string));
   } else {
-    EXPECT_CALL(
-        mock_session_observer_,
-        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
-        .WillOnce(Return(std::string("")));
+    EXPECT_CALL(mock_session_observer_,
+                TransportTypeProfileStringFromDeviceHandle(
+                    secondary_device_handle)).WillOnce(Return(std::string("")));
   }
 
   return app_manager_impl_->CheckResumptionRequiredTransportAvailable(

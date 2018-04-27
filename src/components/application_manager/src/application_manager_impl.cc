@@ -4578,8 +4578,9 @@ const std::string ApplicationManagerImpl::GetTransportTypeProfileString(
     connection_handler::DeviceHandle device_handle) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  return connection_handler().get_session_observer().
-      TransportTypeProfileStringFromDeviceHandle(device_handle);
+  return connection_handler()
+      .get_session_observer()
+      .TransportTypeProfileStringFromDeviceHandle(device_handle);
 }
 
 static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(

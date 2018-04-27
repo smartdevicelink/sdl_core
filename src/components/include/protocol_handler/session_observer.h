@@ -262,7 +262,7 @@ class SessionObserver {
    * @return string representation of the transport of the device
    */
   virtual const std::string TransportTypeProfileStringFromConnHandle(
-    transport_manager::ConnectionUID connection_handle) const = 0;
+      transport_manager::ConnectionUID connection_handle) const = 0;
 
   /**
    * @brief Converts device handle to transport type string used in
@@ -271,7 +271,7 @@ class SessionObserver {
    * @return string representation of the transport of the device
    */
   virtual const std::string TransportTypeProfileStringFromDeviceHandle(
-    transport_manager::DeviceHandle device_handle) const = 0;
+      transport_manager::DeviceHandle device_handle) const = 0;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)

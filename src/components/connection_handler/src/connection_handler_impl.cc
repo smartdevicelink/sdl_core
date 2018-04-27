@@ -865,7 +865,8 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
   }
 }
 
-const std::string ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
+const std::string
+ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -880,7 +881,8 @@ const std::string ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandl
   }
 }
 
-const std::string ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
+const std::string
+ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     DeviceHandle device_handle) const {
   std::string connection_type;
   DeviceMap::const_iterator it = device_list_.find(device_handle);

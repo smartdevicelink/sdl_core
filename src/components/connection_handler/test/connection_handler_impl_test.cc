@@ -2154,7 +2154,8 @@ TEST_F(ConnectionHandlerTest, ConnectionType_valid) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  std::string ret = connection_handler_->TransportTypeProfileStringFromConnHandle(uid_);
+  std::string ret =
+      connection_handler_->TransportTypeProfileStringFromConnHandle(uid_);
   EXPECT_EQ(connection_type_, ret);
 }
 
@@ -2163,7 +2164,9 @@ TEST_F(ConnectionHandlerTest, ConnectionType_invalid) {
 
   transport_manager::ConnectionUID invalid_uid = 12345;
   ASSERT_TRUE(invalid_uid != uid_);
-  std::string ret = connection_handler_->TransportTypeProfileStringFromConnHandle(invalid_uid);
+  std::string ret =
+      connection_handler_->TransportTypeProfileStringFromConnHandle(
+          invalid_uid);
   EXPECT_EQ(std::string(), ret);
 }
 

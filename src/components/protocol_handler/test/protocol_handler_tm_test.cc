@@ -1518,7 +1518,8 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(config_video_service_transports));
 
-  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   // Prepare expected BSON parameters. When we add another param in Start
@@ -1967,7 +1968,8 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(AtLeast(0))
       .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
 
-  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   // BSON params should not include any of "secondaryTransports",
@@ -2023,13 +2025,12 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       StartSessionAck_PrimaryTransportUSBHostMode) {
+TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
   // config allows secondary transport only when connected through Bluetooth,
   // and the secondary is Wi-Fi
   std::vector<std::string> secondary_transports_for_usb;
   secondary_transports_for_usb.push_back("WiFi");
-  std::vector<std::string> secondary_transports_for_bluetooth;  //empty
+  std::vector<std::string> secondary_transports_for_bluetooth;  // empty
   std::vector<std::string> secondary_transports_for_wifi;  // empty
   // config allows video and audio services to run on all transports except
   // Bluetooth
@@ -2139,7 +2140,8 @@ TEST_F(ProtocolHandlerImplTest,
   // assume the device is iOS and is connected through iAP over Bluetooth
   std::string connection_type_string("IAP_BLUETOOTH");
 
-  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   EXPECT_CALL(
@@ -2249,7 +2251,8 @@ TEST_F(ProtocolHandlerImplTest,
   // assume the device is iOS and is connected through iAP over Bluetooth
   std::string connection_type_string("IAP_BLUETOOTH");
 
-  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   EXPECT_CALL(

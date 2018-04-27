@@ -2554,8 +2554,8 @@ void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
 
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||
-              (transport.CompareIgnoreCase("IAP_USB") && 
-                  primary_transport_type.compare("USB") == 0))) {
+           (transport.CompareIgnoreCase("IAP_USB") &&
+            primary_transport_type.compare("USB") == 0))) {
         LOG4CXX_TRACE(logger_, "Service allowed on primary transport");
         serviceTransports.push_back(1);
         fPrimaryAdded = true;
