@@ -275,12 +275,22 @@ class ConnectionHandlerImpl
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
 
   /**
-   * \brief Returns the connection type associated with the connection handle
-   * \param connection_handle Handle of the connection being queried
-   * \return Connection Type
+   * @brief Converts connection handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param connection_handle A connection identifier
+   * @return string representation of the transport of the device
    */
-  std::string connection_type(
-      transport_manager::ConnectionUID connection_handle) const OVERRIDE;
+  const std::string TransportTypeProfileStringFromConnHandle(
+    transport_manager::ConnectionUID connection_handle) const;
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  const std::string TransportTypeProfileStringFromDeviceHandle(
+    DeviceHandle device_handle) const;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)

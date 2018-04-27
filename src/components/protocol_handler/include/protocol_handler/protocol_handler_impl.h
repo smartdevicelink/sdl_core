@@ -685,7 +685,7 @@ class ProtocolHandlerImpl
   uint8_t SupportedSDLProtocolVersion() const;
 
   const impl::TransportDescription GetTransportTypeFromConnectionType(
-      std::string& device_type) const;
+      const std::string& device_type) const;
 
   const bool parseSecondaryTransportConfiguration(
       const ConnectionID connection_id,
@@ -701,6 +701,7 @@ class ProtocolHandlerImpl
 
   void generateServiceTransportsForStartSessionAck(
       const std::vector<std::string>& service_transports,
+      const std::string& primary_connection_type,
       const std::string& primary_transport_type,
       const std::vector<std::string>& secondary_transport_types,
       std::vector<int32_t>& serviceTransports) const;

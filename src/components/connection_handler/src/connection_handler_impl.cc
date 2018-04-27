@@ -865,27 +865,57 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
   }
 }
 
-std::string ConnectionHandlerImpl::connection_type(
+const std::string ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  std::string connection_type;
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::const_iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_WARN(logger_, "Unknown connection " << connection_handle);
+    return std::string();
   } else {
     DeviceHandle device_handle = it->second->connection_device_handle();
-    DeviceMap::const_iterator it = device_list_.find(device_handle);
-    if (device_list_.end() == it) {
-      LOG4CXX_ERROR(logger_, "Device not found!");
-    } else {
-      connection_type = it->second.connection_type();
-    }
+    return TransportTypeProfileStringFromDeviceHandle(device_handle);
+  }
+}
+
+const std::string ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
+    DeviceHandle device_handle) const {
+  std::string connection_type;
+  DeviceMap::const_iterator it = device_list_.find(device_handle);
+  if (device_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Device not found!");
+  } else {
+    connection_type = it->second.connection_type();
   }
 
-  return connection_type;
+  // Caution: this should be in sync with devicesType map in
+  // transport_adapter_impl.cc
+  if (connection_type == "USB_AOA") {
+    return std::string("AOA_USB");
+  } else if (connection_type == "BLUETOOTH") {
+    return std::string("SPP_BLUETOOTH");
+  } else if (connection_type == "USB_IOS") {
+    return std::string("IAP_USB");
+  } else if (connection_type == "BLUETOOTH_IOS") {
+    return std::string("IAP_BLUETOOTH");
+  } else if (connection_type == "WIFI") {
+    return std::string("TCP_WIFI");
+  } else if (connection_type == "USB_IOS_HOST_MODE") {
+    return std::string("IAP_USB_HOST_MODE");
+  } else if (connection_type == "USB_IOS_DEVICE_MODE") {
+    return std::string("IAP_USB_DEVICE_MODE");
+  } else if (connection_type == "CARPLAY_WIRELESS_IOS") {
+    return std::string("IAP_CARPLAY");
+#ifdef BUILD_TESTS
+  } else if (connection_type == "BTMAC") {
+    return std::string("BTMAC");
+#endif
+  } else {
+    LOG4CXX_WARN(logger_, "Unknown transport type string: " << connection_type);
+    return std::string();
+  }
 }
 
 uint32_t ConnectionHandlerImpl::KeyFromPair(

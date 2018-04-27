@@ -256,12 +256,22 @@ class SessionObserver {
   virtual void OnMalformedMessageCallback(const uint32_t& connection_key) = 0;
 
   /**
-   * \brief Returns the connection type associated with the connection handle
-   * \param connection_handle Handle of the connection being queried
-   * \return Connection Type
+   * @brief Converts connection handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param connection_handle A connection identifier
+   * @return string representation of the transport of the device
    */
-  virtual std::string connection_type(
-      transport_manager::ConnectionUID connection_handle) const = 0;
+  virtual const std::string TransportTypeProfileStringFromConnHandle(
+    transport_manager::ConnectionUID connection_handle) const = 0;
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  virtual const std::string TransportTypeProfileStringFromDeviceHandle(
+    transport_manager::DeviceHandle device_handle) const = 0;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)

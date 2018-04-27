@@ -2389,26 +2389,26 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
 }
 
 impl::TransportTypes transportTypes = {
-    std::make_pair(std::string("USB_AOA"),
+    std::make_pair(std::string("AOA_USB"),
                    impl::TransportDescription("USB", false, true)),
-    std::make_pair(std::string("BLUETOOTH"),
+    std::make_pair(std::string("SPP_BLUETOOTH"),
                    impl::TransportDescription("Bluetooth", false, true)),
-    std::make_pair(std::string("BLUETOOTH_IOS"),
+    std::make_pair(std::string("IAP_BLUETOOTH"),
                    impl::TransportDescription("Bluetooth", true, false)),
-    std::make_pair(std::string("USB_IOS"),
+    std::make_pair(std::string("IAP_USB"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("WIFI"),
+    std::make_pair(std::string("TCP_WIFI"),
                    impl::TransportDescription("WiFi", true, true)),
-    std::make_pair(std::string("USB_IOS_HOST_MODE"),
+    std::make_pair(std::string("IAP_USB_HOST_MODE"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("USB_IOS_DEVICE_MODE"),
+    std::make_pair(std::string("IAP_USB_DEVICE_MODE"),
                    impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("IOS_CARPLAY_WIRELESS"),
+    std::make_pair(std::string("IAP_CARPLAY"),
                    impl::TransportDescription("WiFi", true, false))};
 
 const impl::TransportDescription
 ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
-    std::string& connection_type) const {
+    const std::string& connection_type) const {
   impl::TransportDescription result =
       impl::TransportDescription("", false, false);
   impl::TransportTypes::const_iterator it =
@@ -2416,7 +2416,7 @@ ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
   if (it != transportTypes.end()) {
     result = it->second;
   } else {
-    LOG4CXX_ERROR(logger_, "Unknown device type " << connection_type);
+    LOG4CXX_ERROR(logger_, "Unknown connection type " << connection_type);
   }
 
   return result;
@@ -2428,13 +2428,12 @@ const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
     std::vector<int32_t>& audioServiceTransports,
     std::vector<int32_t>& videoServiceTransports) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::string primary_transport_type;
   std::vector<std::string> secondary_transport_types;
 
   // First discover what the connection type of the primary transport is
   // and look up the allowed secondary transports for that primary transport
-  std::string connection_type =
-      session_observer_.connection_type(connection_id);
+  const std::string connection_type =
+      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
   const impl::TransportDescription td =
       GetTransportTypeFromConnectionType(connection_type);
   if (settings_.multiple_transports_enabled()) {
@@ -2462,12 +2461,14 @@ const bool ProtocolHandlerImpl::parseSecondaryTransportConfiguration(
   // Next, figure out which connections audio or video services are allowed on
   generateServiceTransportsForStartSessionAck(
       settings_.audio_service_transports(),
+      connection_type,
       td.transport_type_,
       secondary_transport_types,
       audioServiceTransports);
 
   generateServiceTransportsForStartSessionAck(
       settings_.video_service_transports(),
+      connection_type,
       td.transport_type_,
       secondary_transport_types,
       videoServiceTransports);
@@ -2529,6 +2530,7 @@ void ProtocolHandlerImpl::generateSecondaryTransportsForStartSessionAck(
 
 void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
     const std::vector<std::string>& service_transports,
+    const std::string& primary_connection_type,
     const std::string& primary_transport_type,
     const std::vector<std::string>& secondary_transport_types,
     std::vector<int32_t>& serviceTransports) const {
@@ -2550,12 +2552,13 @@ void ProtocolHandlerImpl::generateServiceTransportsForStartSessionAck(
                     "Service Allowed to run on " << transport.c_str()
                                                  << " transport");
 
-      if (!fPrimaryAdded) {
-        if (transportTypeFromTransport(transport) == primary_transport_type) {
-          LOG4CXX_TRACE(logger_, "Service allowed on primary transport");
-          serviceTransports.push_back(1);
-          fPrimaryAdded = true;
-        }
+      if (!fPrimaryAdded &&
+          (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||
+              (transport.CompareIgnoreCase("IAP_USB") && 
+                  primary_transport_type.compare("USB") == 0))) {
+        LOG4CXX_TRACE(logger_, "Service allowed on primary transport");
+        serviceTransports.push_back(1);
+        fPrimaryAdded = true;
       }
 
       if (!fSecondaryAdded) {

@@ -1518,7 +1518,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(config_video_service_transports));
 
-  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   // Prepare expected BSON parameters. When we add another param in Start
@@ -1635,7 +1635,7 @@ TEST_F(ProtocolHandlerImplTest,
   video_service_transports.push_back("TCP_WIFI");
 
   // assume the device is Android and is connected through Bluetooth SPP
-  std::string connection_type_string("BLUETOOTH");
+  std::string connection_type_string("SPP_BLUETOOTH");
 
   // Core should specify WiFi for secondary transport, and should allow video
   // and audio services only on secondary transport
@@ -1690,7 +1690,7 @@ TEST_F(ProtocolHandlerImplTest,
   video_service_transports.push_back("TCP_WIFI");
 
   // assume the device is iOS and is connected through iAP over USB
-  std::string connection_type_string("USB_IOS");
+  std::string connection_type_string("IAP_USB");
 
   // Core should not offer any secondary transport. It will allow both video
   // and audio services on primary transport.
@@ -1743,7 +1743,7 @@ TEST_F(ProtocolHandlerImplTest,
   video_service_transports.push_back("TCP_WIFI");
 
   // assume the device is iOS and is connected through iAP over Bluetooth
-  std::string connection_type_string("BLUETOOTH_IOS");
+  std::string connection_type_string("IAP_BLUETOOTH");
 
   // Core should offer both Wi-Fi and USB for secondary transport. Since the
   // device is iOS, Core should specify "IAP_USB".
@@ -1795,7 +1795,7 @@ TEST_F(
   video_service_transports.push_back("TCP_WIFI");
 
   // assume the device is Android and is connected through AOA
-  std::string connection_type_string("USB_AOA");
+  std::string connection_type_string("AOA_USB");
 
   // Core should offer Wi-Fi for secondary transport. It should allow audio
   // service to run on both primary and secondary, while video service to run
@@ -1851,7 +1851,7 @@ TEST_F(ProtocolHandlerImplTest,
   video_service_transports.push_back("TCP_WIFI");
 
   // assume the device is iOS and is connected through iAP over Bluetooth
-  std::string connection_type_string("BLUETOOTH_IOS");
+  std::string connection_type_string("IAP_BLUETOOTH");
 
   // Core should not offer any secondary transport. It should still send
   // the video/audio service transport lists.
@@ -1894,7 +1894,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   // assume the device is connected through Wi-Fi (so not sure if it's iOS or
   // Android)
-  std::string connection_type_string("WIFI");
+  std::string connection_type_string("TCP_WIFI");
 
   // Core should offer USB transport for secondary transport. (Since the OS type
   // is unknown, it will offer both IAP_USB and AOA_USB.) Also, it should allow
@@ -1949,7 +1949,7 @@ TEST_F(ProtocolHandlerImplTest,
   config_secondary_transports_for_wifi.push_back("USB");
 
   // assume the device is iOS and is connected through iAP over Bluetooth
-  std::string connection_type_string("BLUETOOTH_IOS");
+  std::string connection_type_string("IAP_BLUETOOTH");
 
   // configuration setup
   EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
@@ -1967,7 +1967,7 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(AtLeast(0))
       .WillRepeatedly(ReturnRef(config_secondary_transports_for_wifi));
 
-  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   // BSON params should not include any of "secondaryTransports",
@@ -2021,6 +2021,58 @@ TEST_F(ProtocolHandlerImplTest,
                                              full_version);
 
   EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_PrimaryTransportUSBHostMode) {
+  // config allows secondary transport only when connected through Bluetooth,
+  // and the secondary is Wi-Fi
+  std::vector<std::string> secondary_transports_for_usb;
+  secondary_transports_for_usb.push_back("WiFi");
+  std::vector<std::string> secondary_transports_for_bluetooth;  //empty
+  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  // config allows video and audio services to run on all transports except
+  // Bluetooth
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("IAP_USB_DEVICE_MODE");
+  audio_service_transports.push_back("IAP_CARPLAY");
+  audio_service_transports.push_back("AOA_USB");
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("IAP_USB");
+  video_service_transports.push_back("IAP_CARPLAY");
+  video_service_transports.push_back("AOA_USB");
+  video_service_transports.push_back("TCP_WIFI");
+
+  // assume the device is IOS and is connected through USB Host Mode
+  std::string connection_type_string("IAP_USB_HOST_MODE");
+
+  // Core should specify WiFi for secondary transport, and should allow video
+  // services on both transports, and audio only on secondary transport
+  std::vector<std::string> expected_transport_strings;
+  expected_transport_strings.push_back("TCP_WIFI");
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(2);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(1);
+  expected_video_service_transports.push_back(2);
+
+  // A TransportUpdateEvent is also issued after Start Service ACK. We don't
+  // check it in this test case.
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      true,
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -2085,9 +2137,9 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(ReturnRef(config_video_service_transports));
 
   // assume the device is iOS and is connected through iAP over Bluetooth
-  std::string connection_type_string("BLUETOOTH_IOS");
+  std::string connection_type_string("IAP_BLUETOOTH");
 
-  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   EXPECT_CALL(
@@ -2195,9 +2247,9 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(ReturnRef(config_video_service_transports));
 
   // assume the device is iOS and is connected through iAP over Bluetooth
-  std::string connection_type_string("BLUETOOTH_IOS");
+  std::string connection_type_string("IAP_BLUETOOTH");
 
-  EXPECT_CALL(session_observer_mock, connection_type(connection_id))
+  EXPECT_CALL(session_observer_mock, TransportTypeProfileStringFromConnHandle(connection_id))
       .WillRepeatedly(Return(connection_type_string));
 
   EXPECT_CALL(

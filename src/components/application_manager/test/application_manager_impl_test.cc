@@ -1089,21 +1089,20 @@ bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
 
   EXPECT_CALL(
       mock_session_observer_,
-      GetDataOnDeviceID(primary_device_handle, _, _, _, An<std::string*>()))
+      TransportTypeProfileStringFromDeviceHandle(primary_device_handle))
       .WillOnce(
-          DoAll(SetArgPointee<4u>(primary_transport_device_string), Return(0)));
+          Return(primary_transport_device_string));
 
   if (secondary_device_handle != 0) {
     EXPECT_CALL(
         mock_session_observer_,
-        GetDataOnDeviceID(secondary_device_handle, _, _, _, An<std::string*>()))
-        .WillOnce(DoAll(SetArgPointee<4u>(secondary_transport_device_string),
-                        Return(0)));
+        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
+        .WillOnce(Return(secondary_transport_device_string));
   } else {
     EXPECT_CALL(
         mock_session_observer_,
-        GetDataOnDeviceID(secondary_device_handle, _, _, _, An<std::string*>()))
-        .WillOnce(Return(-1));
+        TransportTypeProfileStringFromDeviceHandle(secondary_device_handle))
+        .WillOnce(Return(std::string("")));
   }
 
   return app_manager_impl_->CheckResumptionRequiredTransportAvailable(
@@ -1121,7 +1120,7 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle secondary_device_handle = 0;
 
   // refer to transport_adapter_impl.cc
-  std::string primary_transport_device_string("BLUETOOTH");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
   std::string secondary_transport_device_string("");
 
   // - The app is DEFAULT.
@@ -1148,7 +1147,7 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
 
-  std::string primary_transport_device_string("BLUETOOTH");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
   std::string secondary_transport_device_string("");
 
   // - The app is SOCIAL.
@@ -1173,7 +1172,7 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
 
-  std::string primary_transport_device_string("BLUETOOTH");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
   std::string secondary_transport_device_string("");
 
   // - The app is TESTING.
@@ -1198,7 +1197,7 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
 
-  std::string primary_transport_device_string("BLUETOOTH");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
   std::string secondary_transport_device_string("");
 
   // - The app doesn't specify AppHMIType.
@@ -1220,7 +1219,7 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
 
-  std::string primary_transport_device_string("BLUETOOTH");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
   std::string secondary_transport_device_string("");
 
   // - The app doesn't specify AppHMIType.
@@ -1246,8 +1245,8 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle secondary_device_handle = 2;
 
   // refer to transport_adapter_impl.cc
-  std::string primary_transport_device_string("BLUETOOTH");
-  std::string secondary_transport_device_string("WIFI");
+  std::string primary_transport_device_string("SPP_BLUETOOTH");
+  std::string secondary_transport_device_string("TCP_WIFI");
 
   // - The app is MEDIA.
   // - A MEDIA app is allowed for resumption if either primary or secondary
@@ -1274,8 +1273,8 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle secondary_device_handle = 2;
 
   // refer to transport_adapter_impl.cc
-  std::string primary_transport_device_string("USB_IOS");
-  std::string secondary_transport_device_string("WIFI");
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
 
   // - The app is NAVIGATION.
   // - A NAVIGATION app is allowed for resumption if either primary or secondary
@@ -1302,8 +1301,8 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
 
-  std::string primary_transport_device_string("USB_IOS");
-  std::string secondary_transport_device_string("WIFI");
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
 
   // - The app is MEDIA and NAVIGATION.
   // - A MEDIA app is allowed for resumption if either primary or secondary
@@ -1332,8 +1331,8 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
 
-  std::string primary_transport_device_string("USB_IOS");
-  std::string secondary_transport_device_string("WIFI");
+  std::string primary_transport_device_string("IAP_USB");
+  std::string secondary_transport_device_string("TCP_WIFI");
 
   // - The app is NAVIGATION and SYSTEM.
   // - A NAVIGATION app is allowed for resumption if either primary or secondary
