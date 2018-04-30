@@ -2031,7 +2031,7 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
   std::vector<std::string> secondary_transports_for_usb;
   secondary_transports_for_usb.push_back("WiFi");
   std::vector<std::string> secondary_transports_for_bluetooth;  // empty
-  std::vector<std::string> secondary_transports_for_wifi;  // empty
+  std::vector<std::string> secondary_transports_for_wifi;       // empty
   // config allows video and audio services to run on all transports except
   // Bluetooth
   std::vector<std::string> audio_service_transports;
