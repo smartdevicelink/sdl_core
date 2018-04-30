@@ -9,19 +9,19 @@ https://adc.luxoft.com/confluence/display/PORTAL/Software+Detailed+Design+Templa
 For adding new component documentation please follow this steps:
 1. Copy this document to the 'doc' subdirectory in the Component working directory with a new name
   - Example:
-      + src/components/transport_manager/docs/FORD.OpenSDL.SDD.TM.dox
-      + src/components/utils/docs/FORD.OpenSDL.SDD.Utils.dox
+      + src/components/transport_manager/docs/SDL.SDD.TM.dox
+      + src/components/utils/docs/SDL.SDD.Utils.dox
   - https://adc.luxoft.com/confluence/display/PORTAL/Documentation+Control+Guideline#DocumentationControlGuideline-DocumentNaming
 2. Replace <!Component Name> with a correct naming according to SAD naming
   - Name examples:
       Application Manager, Connection Handler
 	- Replace examples:
-      ~ sed -i 's/<!Component Name>/Utils/g' FORD.OpenSDL.SDD.Utils.dox
+      ~ sed -i 's/<!Component Name>/Utils/g' SDL.SDD.Utils.dox
 3. Replace <!Component_Id> with a shot unique name
 	- Something like app_manage, connection_handler, policy
 	- It shall be one word without spaces and special symbols except '_'
   - Replace examples:
-      ~ sed -i 's/<!Component_Id>/connection_handler/g' FORD.OpenSDL.SDD.Utils.dox
+      ~ sed -i 's/<!Component_Id>/connection_handler/g' SDL.SDD.Utils.dox
   Note: After that step all Doxygen tags becomes working well and IDE could be used
 4. Add reference in mainpage.dox Table of Content using <!Component_Id> used in p.3
 5. Replace blocks marked as following with a content according to instructions in these blocks
@@ -101,7 +101,7 @@ Example:
 Here need to be added a reason and short description of the components functionality
 Example:
   Security Manager component extracted as a separate module for
-  Ford channel data protection.
+  SDL channel data protection.
   This components is used to :
   - Provide security communications
   - Protect income and outcome business layer data from interception
@@ -152,27 +152,27 @@ Example:
 
 \anchor <!Component_Id>_class_structure
 ### 2.2 Class Structure
-The following UML class digram shows the component classes structure.
+The following UML class diagram shows the component classes structure.
 
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Here need to be added class diagram
 Example:
-     ![Security Manager class diagram](sm_class_digram.png)
+     ![Security Manager class diagram](sm_class_diagram.png)
 For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
-As a tool for image preparing could be used Gliffy digram
+As a tool for image preparing could be used Gliffy diagram
 https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
 OR plantuml diagram
 http://plantuml.com/classes.html
 Note: Source files of diagram and output images need to be also committed to git.
 <!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
 
-For more information about class digram follow:
+For more information about class diagram follow:
 - http://www.uml-diagrams.org/class-diagrams-overview.html
 - https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
 
 \anchor <!Component_Id>_sequence_diagram
 ### 2.3 Sequence diagram
-The following UML sequence digram shows how objects operate with one another and in what order.
+The following UML sequence diagram shows how objects operate with one another and in what order.
 
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Here need to be added sequence diagram
@@ -182,34 +182,34 @@ Example:
      ![job](job.png)
      ![disconnection](disconnection.png)
 For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
-As a tool for image preparing could be used Gliffy digram
+As a tool for image preparing could be used Gliffy diagram
 https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
 OR plantuml diagram
 http://plantuml.com/sequence.html
 Note: Source files of diagram and output images need to be also committed to git.
 <!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
 
-For more information about sequence digram follow:
+For more information about sequence diagram follow:
 - http://www.uml-diagrams.org/sequence-diagrams.html
 - https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
 
 \anchor <!Component_Id>_state_chart
 ### 2.4 State chart diagram
-The following UML state digram shows the component life cycle states.
+The following UML state diagram shows the component life cycle states.
 
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Here need to be added state diagram
 Example:
      ![StateControllerImpl state](state_contoroller_states.png)
 For adding images in MD format follow https://www.stack.nl/~dimitri/doxygen/manual/markdown.html#md_images
-As a tool for image preparing could be used Gliffy digram
+As a tool for image preparing could be used Gliffy diagram
 https://adc.luxoft.com/confluence/pages/createpage.action?showGliffyMacro=true&fromCreateDialog=true&spaceKey=APPLINK
 OR plantuml diagram
 http://plantuml.com/state.html
 Note: Source files of diagram and output images need to be also committed to git.
 <!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
 
-For more information about class digram follow:
+For more information about class diagram follow:
 - http://www.uml-diagrams.org/state-machine-diagrams.html
 */
 //-----------------------------------------------------------
@@ -285,7 +285,7 @@ The format of processing/saving/loading data is:
 Here need to be added a list of formats
 Example:
   - Json data according to APPLINK-19421
-  - Binary data array according to Ford Protocol Specification
+  - Binary data array according to SDL Protocol Specification
          + https://github.com/smartdevicelink/protocol_spec
   - PEM certificates according to APPLINK-21512
 All link will be auto-added by doxygen
@@ -314,7 +314,7 @@ Example:
 \page <!Component_Id>_references_and_history 5. References and history
 \anchor <!Component_Id>_references
 ### 5.1 References
-- [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+- [Software Architecture Document](https://smartdevicelink.com/en/docs/sdl-core/master/software-architecture-document/table-of-contents/)
 
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Here need to be added a list of all related to component functionality
@@ -349,7 +349,7 @@ Example:
 For more precise document change history follow github history -
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Example for this template:
-- https://github.com/smartdevicelink/sdl_core/commits/master/docs/software_detailed_design_template.dox
-- https://github.com/smartdevicelink/sdl_core/commits/develop/docs/software_detailed_design_template.dox
+- https://github.com/smartdevicelink/sdl_core/commits/master/docs/SDL.SDD.Template.dox
+- https://github.com/smartdevicelink/sdl_core/commits/develop/docs/SDL.SDD.Template.dox
 <!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
 */

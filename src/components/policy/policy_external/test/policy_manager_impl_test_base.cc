@@ -238,8 +238,8 @@ void PolicyManagerImplTest::TearDown() {
 // PolicyManagerImplTest2 class methods
 PolicyManagerImplTest2::PolicyManagerImplTest2()
     : app_id_1_("123456789")
-    , app_id_2_("1766825573")
-    , app_id_3_("584421907")
+    , app_id_2_("1010101010")
+    , app_id_3_("123454321")
     , device_id_1_("XXX123456789ZZZ")
     , device_id_2_("08-00-27-CE-76-FE")
     , application_id_("1234")
@@ -629,7 +629,7 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
                  "PTU_pre_data_consent_app_one_invalid_value_RequestType_"
                  "array."
                  "json"}
-    , kAppId("1766825573")
+    , kAppId("1010101010")
     , kDefaultAppId(policy::kDefaultId)
     , app_storage_folder_("storage3")
     , preloaded_pt_filename_(kSdlPreloadedPtJson) {}

@@ -13,6 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Note: This file has been modified from its original form.
  */
 #if defined(_MSC_VER)
 #pragma warning ( disable: 4231 4251 4275 4786 )
@@ -36,8 +38,8 @@ ObjectOutputStream::ObjectOutputStream(OutputStreamPtr outputStream, Pool& p)
        objectHandle(0x7E0000),
        classDescriptions(new ClassDescriptionMap())
 {
-   char start[] = { 0xAC, 0xED, 0x00, 0x05 };
-   ByteBuffer buf(start, sizeof(start));
+   unsigned char start[] = { 0xAC, 0xED, 0x00, 0x05 };
+   ByteBuffer buf(reinterpret_cast<char *>(start), sizeof(start));
    os->write(buf, p);
 }
 
@@ -81,7 +83,7 @@ void ObjectOutputStream::writeObject(const MDC::Map& val, Pool& p) {
     //
     //  TC_OBJECT and the classDesc for java.util.Hashtable
     //
-    char prolog[] = {
+    unsigned char prolog[] = {
         0x72, 0x00, 0x13, 0x6A, 0x61, 0x76, 0x61, 
         0x2E, 0x75, 0x74, 0x69, 0x6C, 0x2E, 0x48, 0x61, 
         0x73, 0x68, 0x74, 0x61, 0x62, 0x6C, 0x65, 0x13, 
@@ -90,7 +92,7 @@ void ObjectOutputStream::writeObject(const MDC::Map& val, Pool& p) {
         0x64, 0x46, 0x61, 0x63, 0x74, 0x6F, 0x72, 0x49, 
         0x00, 0x09, 0x74, 0x68, 0x72, 0x65, 0x73, 0x68, 
         0x6F, 0x6C, 0x64, 0x78, 0x70  };
-    writeProlog("java.util.Hashtable", 1, prolog, sizeof(prolog), p);
+    writeProlog("java.util.Hashtable", 1, reinterpret_cast<char *>(prolog), sizeof(prolog), p);
     //
     //   loadFactor = 0.75, threshold = 5, blockdata start, buckets.size = 7
     char data[] = { 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 
