@@ -279,7 +279,12 @@ TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
   (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
   (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
 
-  CommandPtr command(CreateCommand<SliderRequest>(msg_));
+  // Need to pass 0 for the timeout argument, because the SliderRequest
+  // "Init" method will add the message's "timeout" parameter to the
+  // default timeout that is used in CreateCommand, which causes the
+  // test below to fail. Instead of caling "updateRequestTimeout"
+  // with 1000, the timeout parameter in the event ends up as 1100
+  CommandPtr command(CreateCommand<SliderRequest>(0, msg_));
   EXPECT_TRUE(command->Init());
 
   EXPECT_CALL(
