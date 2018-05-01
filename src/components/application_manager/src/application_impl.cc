@@ -523,9 +523,12 @@ void ApplicationImpl::SuspendStreaming(
     video_streaming_suspended_ = true;
 
     if (video_streaming_approved()) {
-      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+      MessageHelper::SendOnDataStreaming(
+          service_type, false, application_manager_);
     } else {
-      LOG4CXX_INFO(logger_, "Do not suspend video streaming because already not approved");
+      LOG4CXX_INFO(
+          logger_,
+          "Do not suspend video streaming because already not approved");
     }
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
@@ -534,9 +537,12 @@ void ApplicationImpl::SuspendStreaming(
     audio_streaming_suspended_ = true;
 
     if (audio_streaming_approved()) {
-      MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
-    }  else {
-      LOG4CXX_INFO(logger_, "Do not suspend audio streaming because already not approved");
+      MessageHelper::SendOnDataStreaming(
+          service_type, false, application_manager_);
+    } else {
+      LOG4CXX_INFO(
+          logger_,
+          "Do not suspend audio streaming because already not approved");
     }
   }
 }
