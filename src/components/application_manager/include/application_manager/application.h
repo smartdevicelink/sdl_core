@@ -113,8 +113,6 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
   virtual const mobile_api::Language::eType& ui_language() const = 0;
-  virtual const smart_objects::SmartObject* day_color_scheme() const = 0;
-  virtual const smart_objects::SmartObject* night_color_scheme() const = 0;
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
@@ -125,10 +123,6 @@ class InitialApplicationData {
   virtual void set_language(const mobile_api::Language::eType& language) = 0;
   virtual void set_ui_language(
       const mobile_api::Language::eType& ui_language) = 0;
-  virtual void set_day_color_scheme(
-      const smart_objects::SmartObject& color_scheme) = 0;
-  virtual void set_night_color_scheme(
-      const smart_objects::SmartObject& color_scheme) = 0;
 };
 
 /*
@@ -195,6 +189,8 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
+  virtual const smart_objects::SmartObject* day_color_scheme() const = 0;
+  virtual const smart_objects::SmartObject* night_color_scheme() const = 0;
 
   virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
   virtual void set_help_prompt(
@@ -226,6 +222,10 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
+  virtual void set_day_color_scheme(
+      const smart_objects::SmartObject& color_scheme) = 0;
+  virtual void set_night_color_scheme(
+      const smart_objects::SmartObject& color_scheme) = 0;
   /**
    * @brief Checks if application is media, voice communication or navigation
    * @return true if application is media, voice communication or navigation,

@@ -55,8 +55,7 @@ class InitialApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* ngn_media_screen_name() const;
   const mobile_api::Language::eType& language() const;
   const mobile_api::Language::eType& ui_language() const;
-  const smart_objects::SmartObject* day_color_scheme() const;
-  const smart_objects::SmartObject* night_color_scheme() const;
+
   void set_app_types(const smart_objects::SmartObject& app_types);
   void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms);
   void set_mobile_app_id(const std::string& policy_app_id);
@@ -64,8 +63,6 @@ class InitialApplicationDataImpl : public virtual Application {
   void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
   void set_language(const mobile_api::Language::eType& language);
   void set_ui_language(const mobile_api::Language::eType& ui_language);
-  void set_day_color_scheme(const smart_objects::SmartObject& color_scheme);
-  void set_night_color_scheme(const smart_objects::SmartObject& color_scheme);
 
   void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) OVERRIDE;
@@ -80,8 +77,6 @@ class InitialApplicationDataImpl : public virtual Application {
   mobile_api::Language::eType language_;
   mobile_api::Language::eType ui_language_;
   mobile_apis::LayoutMode::eType perform_interaction_layout_;
-  smart_objects::SmartObject* day_color_scheme_;
-  smart_objects::SmartObject* night_color_scheme_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InitialApplicationDataImpl);
@@ -101,6 +96,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* keyboard_props() const;
   const smart_objects::SmartObject* menu_title() const;
   const smart_objects::SmartObject* menu_icon() const;
+  const smart_objects::SmartObject* day_color_scheme() const;
+  const smart_objects::SmartObject* night_color_scheme() const;
 
   void load_global_properties(const smart_objects::SmartObject& properties_so);
   void set_help_prompt(const smart_objects::SmartObject& help_prompt);
@@ -115,6 +112,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_keyboard_props(const smart_objects::SmartObject& keyboard_props);
   void set_menu_title(const smart_objects::SmartObject& menu_title);
   void set_menu_icon(const smart_objects::SmartObject& menu_icon);
+  void set_day_color_scheme(const smart_objects::SmartObject& color_scheme);
+  void set_night_color_scheme(const smart_objects::SmartObject& color_scheme);
   /*
    * @brief Adds a command to the in application menu
    */
@@ -269,6 +268,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject* menu_title_;
   smart_objects::SmartObject* menu_icon_;
   smart_objects::SmartObject* tbt_show_command_;
+  smart_objects::SmartObject* day_color_scheme_;
+  smart_objects::SmartObject* night_color_scheme_;
 
   CommandsMap commands_;
   mutable sync_primitives::Lock commands_lock_;

@@ -48,13 +48,24 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {}
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationConstSharedPtr app =
+  ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
+  }
+
+  const smart_objects::SmartObject& msg_params =
+    (*message_)[strings::msg_params];
+
+  if (msg_params.keyExists(strings::day_color_scheme)) {
+    app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
+  }
+
+  if (msg_params.keyExists(strings::night_color_scheme)) {
+    app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
   }
 
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();

@@ -45,9 +45,7 @@ InitialApplicationDataImpl::InitialApplicationDataImpl()
     , tts_name_(NULL)
     , ngn_media_screen_name_(NULL)
     , language_(mobile_api::Language::INVALID_ENUM)
-    , ui_language_(mobile_api::Language::INVALID_ENUM)
-    , day_color_scheme_(NULL)
-    , night_color_scheme_(NULL) {}
+    , ui_language_(mobile_api::Language::INVALID_ENUM) {}
 
 InitialApplicationDataImpl::~InitialApplicationDataImpl() {
   if (app_types_) {
@@ -68,16 +66,6 @@ InitialApplicationDataImpl::~InitialApplicationDataImpl() {
   if (ngn_media_screen_name_) {
     delete ngn_media_screen_name_;
     ngn_media_screen_name_ = NULL;
-  }
-
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-    day_color_scheme_ = NULL;
-  }
-
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-    night_color_scheme_ = NULL;
   }
 }
 
@@ -112,16 +100,6 @@ const mobile_api::Language::eType& InitialApplicationDataImpl::language()
 const mobile_api::Language::eType& InitialApplicationDataImpl::ui_language()
     const {
   return ui_language_;
-}
-
-const smart_objects::SmartObject*
-InitialApplicationDataImpl::day_color_scheme() const {
-  return day_color_scheme_;
-}
-
-const smart_objects::SmartObject*
-InitialApplicationDataImpl::night_color_scheme() const {
-  return night_color_scheme_;
 }
 
 void InitialApplicationDataImpl::set_app_types(
@@ -184,24 +162,6 @@ InitialApplicationDataImpl::perform_interaction_layout() const {
   return perform_interaction_layout_;
 }
 
-void InitialApplicationDataImpl::set_day_color_scheme(
-  const smart_objects::SmartObject& color_scheme) {
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-  }
-
-  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
-}
-
-void InitialApplicationDataImpl::set_night_color_scheme(
-  const smart_objects::SmartObject& color_scheme) {
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-  }
-
-  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
-}
-
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     : help_prompt_(NULL)
     , timeout_prompt_(NULL)
@@ -213,6 +173,8 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , menu_title_(NULL)
     , menu_icon_(NULL)
     , tbt_show_command_(NULL)
+    , day_color_scheme_(NULL)
+    , night_color_scheme_(NULL)
     , commands_()
     , commands_lock_(true)
     , sub_menu_()
@@ -252,6 +214,16 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
+  }
+
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+    day_color_scheme_ = NULL;
+  }
+
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+    night_color_scheme_ = NULL;
   }
 
   for (CommandsMap::iterator command_it = commands_.begin();
@@ -328,6 +300,16 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_title()
 const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
     const {
   return menu_icon_;
+}
+
+const smart_objects::SmartObject*
+DynamicApplicationDataImpl::day_color_scheme() const {
+  return day_color_scheme_;
+}
+
+const smart_objects::SmartObject*
+DynamicApplicationDataImpl::night_color_scheme() const {
+  return night_color_scheme_;
 }
 
 void DynamicApplicationDataImpl::load_global_properties(
@@ -443,6 +425,24 @@ void DynamicApplicationDataImpl::set_menu_icon(
     delete menu_icon_;
   }
   menu_icon_ = new smart_objects::SmartObject(menu_icon);
+}
+
+void DynamicApplicationDataImpl::set_day_color_scheme(
+  const smart_objects::SmartObject& color_scheme) {
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+  }
+
+  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_night_color_scheme(
+  const smart_objects::SmartObject& color_scheme) {
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+  }
+
+  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
 }
 
 void DynamicApplicationDataImpl::SetGlobalProperties(
