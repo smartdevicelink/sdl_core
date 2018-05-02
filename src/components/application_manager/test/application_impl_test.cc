@@ -770,7 +770,7 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming_StreamingNotApproved) {
 }
 
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
-TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingApproved) {
+TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming_StreamingApproved) {
   app_impl->set_audio_streaming_approved(true);
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
@@ -784,7 +784,7 @@ TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingApproved) {
   app_impl->WakeUpStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming_StreamingApproved) {
+TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
