@@ -303,8 +303,8 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
   return menu_icon_;
 }
 
-const smart_objects::SmartObject*
-DynamicApplicationDataImpl::day_color_scheme() const {
+const smart_objects::SmartObject* DynamicApplicationDataImpl::day_color_scheme()
+    const {
   return day_color_scheme_;
 }
 
@@ -433,7 +433,7 @@ void DynamicApplicationDataImpl::set_menu_icon(
 }
 
 void DynamicApplicationDataImpl::set_day_color_scheme(
-  const smart_objects::SmartObject& color_scheme) {
+    const smart_objects::SmartObject& color_scheme) {
   if (day_color_scheme_) {
     delete day_color_scheme_;
   }
@@ -442,7 +442,7 @@ void DynamicApplicationDataImpl::set_day_color_scheme(
 }
 
 void DynamicApplicationDataImpl::set_night_color_scheme(
-  const smart_objects::SmartObject& color_scheme) {
+    const smart_objects::SmartObject& color_scheme) {
   if (night_color_scheme_) {
     delete night_color_scheme_;
   }

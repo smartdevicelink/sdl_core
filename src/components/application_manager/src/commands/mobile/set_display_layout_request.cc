@@ -48,8 +48,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {}
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -58,7 +57,7 @@ void SetDisplayLayoutRequest::Run() {
   }
 
   const smart_objects::SmartObject& msg_params =
-    (*message_)[strings::msg_params];
+      (*message_)[strings::msg_params];
 
   std::string old_layout = app->display_layout();
   std::string new_layout = "";
@@ -68,25 +67,32 @@ void SetDisplayLayoutRequest::Run() {
     new_layout = msg_params[strings::display_layout].asString();
   }
 
-  if(new_layout != old_layout && !new_layout.empty()) { // Template switched, allow any color change
-    LOG4CXX_DEBUG(logger_, "SetDisplayLayoutRequest New Layout: " << new_layout);
+  if (new_layout != old_layout &&
+      !new_layout.empty()) {  // Template switched, allow any color change
+    LOG4CXX_DEBUG(logger_,
+                  "SetDisplayLayoutRequest New Layout: " << new_layout);
     app->set_display_layout(new_layout);
-  } else { 
+  } else {
     LOG4CXX_DEBUG(logger_, "SetDisplayLayoutRequest No Layout Change");
     // Template layout is the same as previous layout
     // Reject message if colors are set
-    if ((msg_params.keyExists(strings::day_color_scheme) && app->day_color_scheme() != NULL)) {
-      if(!(msg_params[strings::day_color_scheme] == *(app->day_color_scheme())) ) {
-        //Color scheme param exists and has been previously set, do not allow color change
+    if ((msg_params.keyExists(strings::day_color_scheme) &&
+         app->day_color_scheme() != NULL)) {
+      if (!(msg_params[strings::day_color_scheme] ==
+            *(app->day_color_scheme()))) {
+        // Color scheme param exists and has been previously set, do not allow
+        // color change
         LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");
-        allow_color_change = false;        
+        allow_color_change = false;
       }
-
     }
 
-    if ((msg_params.keyExists(strings::night_color_scheme) && app->night_color_scheme() != NULL)) {
-      if(!(msg_params[strings::night_color_scheme] == *(app->night_color_scheme())) ) {
-        //Color scheme param exists and has been previously set, do not allow color change
+    if ((msg_params.keyExists(strings::night_color_scheme) &&
+         app->night_color_scheme() != NULL)) {
+      if (!(msg_params[strings::night_color_scheme] ==
+            *(app->night_color_scheme()))) {
+        // Color scheme param exists and has been previously set, do not allow
+        // color change
         LOG4CXX_DEBUG(logger_, "Reject Night Color Scheme Change");
         allow_color_change = false;
       }
@@ -94,17 +100,17 @@ void SetDisplayLayoutRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::day_color_scheme)) {
-    if(allow_color_change) {
+    if (allow_color_change) {
       LOG4CXX_DEBUG(logger_, "Allow Day Color Scheme Change");
       app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
-    }    
+    }
   }
 
   if (msg_params.keyExists(strings::night_color_scheme)) {
-    if(allow_color_change) {
+    if (allow_color_change) {
       LOG4CXX_DEBUG(logger_, "Allow Night Color Scheme Change");
       app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
-    }    
+    }
   }
 
   if (!allow_color_change) {

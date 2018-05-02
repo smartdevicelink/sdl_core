@@ -1677,8 +1677,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* app_types = app->app_types();
   const smart_objects::SmartObject* ngn_media_screen_name =
       app->ngn_media_screen_name();
-  const smart_objects::SmartObject* day_color_scheme =
-      app->day_color_scheme();
+  const smart_objects::SmartObject* day_color_scheme = app->day_color_scheme();
   const smart_objects::SmartObject* night_color_scheme =
       app->night_color_scheme();
   std::string device_name;
@@ -1718,11 +1717,11 @@ bool MessageHelper::CreateHMIApplicationStruct(
     message[strings::app_type] = *app_types;
   }
 
-  if (day_color_scheme) { 
+  if (day_color_scheme) {
     message[strings::day_color_scheme] = *day_color_scheme;
   }
 
-  if (night_color_scheme) { 
+  if (night_color_scheme) {
     message[strings::night_color_scheme] = *night_color_scheme;
   }
 

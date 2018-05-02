@@ -353,7 +353,8 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::night_color_scheme)) {
-    application->set_night_color_scheme(msg_params[strings::night_color_scheme]);
+    application->set_night_color_scheme(
+        msg_params[strings::night_color_scheme]);
   }
 
   // Add device to policy table and set device info, if any
