@@ -1880,13 +1880,13 @@
   <description>
     A color scheme for all display layout templates.
   </description>
-  <param name="primaryColor" type="RGBColor" mandatory="false">
+  <param name="primaryColor" type="Common.RGBColor" mandatory="false">
     <description>The primary "accent" color</description>
   </param>
-  <param name="secondaryColor" type="RGBColor" mandatory="false">
+  <param name="secondaryColor" type="Common.RGBColor" mandatory="false">
       <description>The secondary "accent" color</description>
   </param>
-  <param name="backgroundColor" type="RGBColor" mandatory="false">
+  <param name="backgroundColor" type="Common.RGBColor" mandatory="false">
     <description>The color of the background</description>
   </param>
 </struct>
