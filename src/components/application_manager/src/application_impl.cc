@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/application_impl.h"
+#include <iomanip>
 #include <strings.h>
 #include <string>
 #include "application_manager/application_manager.h"
