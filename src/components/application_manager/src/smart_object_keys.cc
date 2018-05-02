@@ -150,6 +150,7 @@ const char* background_color = "backgroundColor";
 const char* red = "red";
 const char* green = "green";
 const char* blue = "blue";
+const char* display_layout = "displayLayout";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

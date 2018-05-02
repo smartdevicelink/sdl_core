@@ -186,6 +186,7 @@ extern const char* background_color;
 extern const char* red;
 extern const char* green;
 extern const char* blue;
+extern const char* display_layout;
 
 // PutFile
 extern const char* sync_file_name;

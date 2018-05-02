@@ -191,6 +191,7 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
   virtual const smart_objects::SmartObject* day_color_scheme() const = 0;
   virtual const smart_objects::SmartObject* night_color_scheme() const = 0;
+  virtual const std::string& display_layout() const = 0;
 
   virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
   virtual void set_help_prompt(
@@ -226,6 +227,8 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& color_scheme) = 0;
   virtual void set_night_color_scheme(
       const smart_objects::SmartObject& color_scheme) = 0;
+
+  virtual void set_display_layout(const std::string& layout) = 0;
   /**
    * @brief Checks if application is media, voice communication or navigation
    * @return true if application is media, voice communication or navigation,

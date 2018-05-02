@@ -175,6 +175,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , tbt_show_command_(NULL)
     , day_color_scheme_(NULL)
     , night_color_scheme_(NULL)
+    , display_layout_("")
     , commands_()
     , commands_lock_(true)
     , sub_menu_()
@@ -312,6 +313,10 @@ DynamicApplicationDataImpl::night_color_scheme() const {
   return night_color_scheme_;
 }
 
+const std::string& DynamicApplicationDataImpl::display_layout() const {
+  return display_layout_;
+}
+
 void DynamicApplicationDataImpl::load_global_properties(
     const smart_objects::SmartObject& properties_so) {
   SetGlobalProperties(properties_so.getElement(strings::vr_help_title),
@@ -443,6 +448,10 @@ void DynamicApplicationDataImpl::set_night_color_scheme(
   }
 
   night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
+  display_layout_ = layout;
 }
 
 void DynamicApplicationDataImpl::SetGlobalProperties(

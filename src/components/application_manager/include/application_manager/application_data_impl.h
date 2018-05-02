@@ -98,6 +98,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* menu_icon() const;
   const smart_objects::SmartObject* day_color_scheme() const;
   const smart_objects::SmartObject* night_color_scheme() const;
+  const std::string& display_layout() const;
 
   void load_global_properties(const smart_objects::SmartObject& properties_so);
   void set_help_prompt(const smart_objects::SmartObject& help_prompt);
@@ -114,6 +115,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_menu_icon(const smart_objects::SmartObject& menu_icon);
   void set_day_color_scheme(const smart_objects::SmartObject& color_scheme);
   void set_night_color_scheme(const smart_objects::SmartObject& color_scheme);
+  void set_display_layout(const std::string& layout);
   /*
    * @brief Adds a command to the in application menu
    */
@@ -270,6 +272,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject* tbt_show_command_;
   smart_objects::SmartObject* day_color_scheme_;
   smart_objects::SmartObject* night_color_scheme_;
+  std::string display_layout_;
 
   CommandsMap commands_;
   mutable sync_primitives::Lock commands_lock_;
