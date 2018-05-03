@@ -258,7 +258,7 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
   } else if ("fuelRange" == literal) {
     *result = P_FUELRANGE;
     return true;
-  }else if ("odometer" == literal) {
+  } else if ("odometer" == literal) {
     *result = P_ODOMETER;
     return true;
   } else if ("tirePressure" == literal) {
