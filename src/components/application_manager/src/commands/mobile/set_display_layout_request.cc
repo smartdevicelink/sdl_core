@@ -61,7 +61,6 @@ void SetDisplayLayoutRequest::Run() {
 
   std::string old_layout = app->display_layout();
   std::string new_layout = "";
-  bool allow_color_change = true;
 
   if (msg_params.keyExists(strings::display_layout)) {
     new_layout = msg_params[strings::display_layout].asString();
@@ -76,46 +75,37 @@ void SetDisplayLayoutRequest::Run() {
     LOG4CXX_DEBUG(logger_, "SetDisplayLayoutRequest No Layout Change");
     // Template layout is the same as previous layout
     // Reject message if colors are set
-    if ((msg_params.keyExists(strings::day_color_scheme) &&
-         app->day_color_scheme() != NULL)) {
-      if (!(msg_params[strings::day_color_scheme] ==
-            *(app->day_color_scheme()))) {
-        // Color scheme param exists and has been previously set, do not allow
-        // color change
-        LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");
-        allow_color_change = false;
-      }
+    if (msg_params.keyExists(strings::day_color_scheme) &&
+      app->day_color_scheme() != NULL &&
+      !(msg_params[strings::day_color_scheme] ==
+        *(app->day_color_scheme()))) {
+      // Color scheme param exists and has been previously set, do not allow
+      // color change
+      LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
     }
 
-    if ((msg_params.keyExists(strings::night_color_scheme) &&
-         app->night_color_scheme() != NULL)) {
-      if (!(msg_params[strings::night_color_scheme] ==
-            *(app->night_color_scheme()))) {
-        // Color scheme param exists and has been previously set, do not allow
-        // color change
-        LOG4CXX_DEBUG(logger_, "Reject Night Color Scheme Change");
-        allow_color_change = false;
-      }
+    if (msg_params.keyExists(strings::night_color_scheme) &&
+        app->night_color_scheme() != NULL &&
+        !(msg_params[strings::night_color_scheme] ==
+          *(app->night_color_scheme()))) {
+      // Color scheme param exists and has been previously set, do not allow
+      // color change
+      LOG4CXX_DEBUG(logger_, "Reject Night Color Scheme Change");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
     }
   }
 
   if (msg_params.keyExists(strings::day_color_scheme)) {
-    if (allow_color_change) {
-      LOG4CXX_DEBUG(logger_, "Allow Day Color Scheme Change");
-      app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
-    }
+    LOG4CXX_DEBUG(logger_, "Allow Day Color Scheme Change");
+    app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
   }
 
   if (msg_params.keyExists(strings::night_color_scheme)) {
-    if (allow_color_change) {
-      LOG4CXX_DEBUG(logger_, "Allow Night Color Scheme Change");
-      app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
-    }
-  }
-
-  if (!allow_color_change) {
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
+    LOG4CXX_DEBUG(logger_, "Allow Night Color Scheme Change");
+    app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
   }
 
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();

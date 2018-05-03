@@ -239,8 +239,7 @@ class MockApplication : public ::application_manager::Application {
                void(const smart_objects::SmartObject& color_scheme));
   MOCK_METHOD1(set_night_color_scheme,
                void(const smart_objects::SmartObject& color_scheme));
-  MOCK_METHOD1(set_display_layout,
-               void(const std::string& layout));
+  MOCK_METHOD1(set_display_layout, void(const std::string& layout));
   MOCK_CONST_METHOD0(audio_stream_retry_number, uint32_t());
   MOCK_METHOD1(set_audio_stream_retry_number,
                void(const uint32_t& audio_stream_retry_number));
