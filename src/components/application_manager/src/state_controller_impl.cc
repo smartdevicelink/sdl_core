@@ -80,7 +80,7 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
       state->video_streaming_state() ==
           mobile_apis::VideoStreamingState::INVALID_ENUM ||
       state->system_context() == mobile_apis::SystemContext::INVALID_ENUM) {
-    LOG4CXX_ERROR(logger_, "Get invalid state");
+    LOG4CXX_ERROR(logger_, "Invalid state have been gotten");
     return;
   }
 
@@ -245,10 +245,28 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
 }
 
 namespace {
-bool HasStreamingPermissions(mobile_apis::HMILevel::eType val) {
+bool IsStreamableHMIType(mobile_apis::HMILevel::eType val) {
   using namespace helpers;
   return Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
       val, mobile_apis::HMILevel::HMI_FULL, mobile_apis::HMILevel::HMI_LIMITED);
+}
+
+bool IsSameAudioAppType(const Application& app1, const Application& app2) {
+  // compatibility constants
+  const bool both_navi = app1.is_navi() && app2.is_navi();
+  const bool both_vc = app1.is_voice_communication_supported() &&
+                       app2.is_voice_communication_supported();
+  const bool both_media = (app1.is_media_application() && !app1.is_navi() &&
+                           !app1.is_voice_communication_supported()) &&
+                          (app2.is_media_application() && !app2.is_navi() &&
+                           !app2.is_voice_communication_supported());
+  const bool both_other =
+      !app1.IsAudioApplication() && !app2.IsAudioApplication();
+
+  const bool same_app_audio_type =
+      both_navi || both_vc || both_media || both_other;
+
+  return same_app_audio_type;
 }
 }  // unnamed namespace
 
@@ -257,117 +275,155 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
   DCHECK_OR_RETURN_VOID(app_to_resolve);
   DCHECK_OR_RETURN_VOID(state_ctrl_);
   DCHECK_OR_RETURN_VOID(applied_);
+  DCHECK_OR_RETURN_VOID(state_);
 
   if (app_to_resolve == applied_) {
     return;
   }
 
+  const HmiStatePtr state_to_resolve = app_to_resolve->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(state_to_resolve);
+
   // Just for debug
-  //{
-  //  const std::string nl_indent = "\n ---> ";
-  //  std::stringstream ss;
-  //  ss << '\n';
-  //  ss <<
-  //  "-------------------HMI_CONFLICT_RESOLVER_IN_DATA-------------------";
-  //  ss << nl_indent << "Applied app id    - " << applied_->app_id();
-  //  ss << nl_indent << "Applied cur state - " << *applied_->CurrentHmiState();
-  //  ss << nl_indent << "Applied reg state - " << *applied_->RegularHmiState();
-  //  ss << nl_indent << "Resolve app id    - " << app_to_resolve->app_id();
-  //  ss << nl_indent << "Resolve cur state - "
-  //     << *app_to_resolve->CurrentHmiState();
-  //  ss << nl_indent << "Resolve reg state - "
-  //     << *app_to_resolve->RegularHmiState();
-  //  LOG4CXX_DEBUG(logger_, ss.str());
-  //}
+  // {
+  //   const std::string nl_indent = "\n ---> ";
+  //   std::stringstream ss;
+  //   ss << '\n';
+  //   ss <<
+  //   "-------------------HMI_CONFLICT_RESOLVER-------------------";
+  //   ss << nl_indent << "Applied app id    - " << applied_->app_id();
+  //   ss << nl_indent << "Applied reg state - " << *state_;
+  //   ss << nl_indent << "Resolve app id    - " << app_to_resolve->app_id();
+  //   ss << nl_indent << "Resolve reg state - " << *state_to_resolve;
+  //   LOG4CXX_DEBUG(logger_, ss.str());
+  // }
 
-  // TODO(EKuliiev@luxoft.com) update logic description
-  // If applied Hmi state is FULL:
-  //  all not audio applications will get BACKGROUND
-  //  all applications with same HMI type will get BACKGROUND
-  //  all audio applications with other HMI type(navi, vc, media) in FULL will
-  //  get LIMMITED HMI level
+  // If applied HMI state is FULL:
+  // - all NOT audio/video applications becomes BACKGROUND
+  // - all audio/video applications with other app type
+  //  (navi, vc, media, projection) in FULL becomes LIMMITED
+  // - all applications with same app type becomes BACKGROUND
+  //
+  // If applied HMI state is LIMITED:
+  // - all NOT audio/video applications saves their's HMI states
+  // - all applications with other app types saves their's HMI states
+  // - all applications with same app type becomes BACKGROUND
+  //
+  // If applied HMI state is BACKGROUND:
+  // - all applications will save their's HMI states
+  //
+  // Resolve tables to figure out audio/video streaming state
+  // for FULL/LIMITED HMI level.
+  // For example if applied is 'NAVIGATION' and resolve app is
+  // 'PROJECTION' then to resolve becomes 'NOT_STREAMABLE'.
+  // According to video resolve table the only one app may
+  // be 'STREAMABLE' in the same time.
+  //
+  // Video app resolve table
+  // * S --> STREAMABLE, NS --> NOT_STREAMABLE
+  // | resolve / applied -->
+  // V
+  // _______navi___proj__other__
+  // navi  |__NS__|_NS__|__S____|
+  // proj  |__NS__|_NS__|__S ___|
+  // other |__NS__|_NS__|__NS___|
+  //
+  // Audio app resolve table
+  // * A --> AUDIBLE, NS --> NOT_AUDIBLE
+  // | resolve / applied -->
+  // V
+  // _______navi___vc___media__other__
+  // navi  |_NA__|_A___|__A__|____A___|
+  // vc    |__A__|_NA__|__A__|____A___|
+  // media |__A__|_A___|__NA_|____A___|
+  // other |_NA__|_NA__|__NA_|____NA__|
+  //
+  // NOTE: for instance if applied app is 'PROJECTION' & isMedia=true
+  // with applied HMI level 'FULL' (STREAMABLE & AUDIBLE)
+  // and app to resolve is 'NAVIGATION' with HMI level FULL or LIMITED
+  // (STREAMABLE & AUDIBLE) then to resolve becomes LIMITED
+  // (NOT_STREAMABLE & AUDIBLE). So, the only one app may stream video
+  // in the same time. But audio app such types as
+  // NAVIGATION, COMMUNICATION may stream audio/video in LIMITED level
+  // with app of other types.
+  // NOTE: if applied app is 'NAVIGATION'
+  // (STREAMABLE & AUDIBLE) and app to resolve is same type
+  // 'NAVIGATION' (STREAMABLE & AUDIBLE) then to resolve
+  // becomes BACKGROUND (NOT_STREAMABLE & NOT_AUDIBLE).
 
-  // If applied Hmi state is LIMITED:
-  //  all applications with other HMI types will save HMI states
-  //  all not audio  applications will save HMI states
-  //  all applications with same HMI type will get BACKGROUND
+  if (!IsStreamableHMIType(state_->hmi_level())) {
+    return;
+  }
 
-  // If applied Hmi state is BACKGROUND:
-  //  all applications will save HMI states
+  if (!IsStreamableHMIType(state_to_resolve->hmi_level())) {
+    return;
+  }
 
-  const HmiStatePtr reg_state_to_resolve = app_to_resolve->RegularHmiState();
-  DCHECK_OR_RETURN_VOID(reg_state_to_resolve);
-
-  // for applied app constants
-  const bool applied_grabs_full =
-      state_->hmi_level() == mobile_apis::HMILevel::HMI_FULL;
-
-  const bool applied_grabs_audio =
-      HasStreamingPermissions(state_->hmi_level()) &&
-      applied_->IsAudioApplication();
+  // applied app constants
+  const mobile_apis::HMILevel::eType applied_hmi_level = state_->hmi_level();
 
   const bool applied_grabs_video =
-      HasStreamingPermissions(state_->hmi_level()) &&
-      applied_->IsVideoApplication();
+      IsStreamableHMIType(applied_hmi_level) && applied_->IsVideoApplication();
 
-  const bool applied_is_streamable = applied_grabs_audio || applied_grabs_video;
+  // app to resolve constants
+  const mobile_apis::HMILevel::eType to_resolve_hmi_level =
+      state_to_resolve->hmi_level();
 
-  // for app to resolve constants
   const bool to_resolve_grabs_audio =
-      HasStreamingPermissions(reg_state_to_resolve->hmi_level()) &&
+      IsStreamableHMIType(to_resolve_hmi_level) &&
       app_to_resolve->IsAudioApplication();
 
   const bool to_resolve_grabs_video =
-      HasStreamingPermissions(reg_state_to_resolve->hmi_level()) &&
+      IsStreamableHMIType(to_resolve_hmi_level) &&
       app_to_resolve->IsVideoApplication();
 
-  const bool to_resolve_is_streamable =
-      to_resolve_grabs_audio || to_resolve_grabs_video;
+  // compatibility constants
+  const bool same_app_audio_type =
+      IsSameAudioAppType(*applied_, *app_to_resolve);
 
-  const bool to_resolve_handles_full =
-      reg_state_to_resolve->hmi_level() == mobile_apis::HMILevel::HMI_FULL;
+  // result vars
+  mobile_apis::VideoStreamingState::eType result_video_state =
+      mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  mobile_apis::AudioStreamingState::eType result_audio_state =
+      mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
-  const bool same_app_type =
-      state_ctrl_->IsSameAppType(applied_, app_to_resolve);
-
-  mobile_apis::HMILevel::eType result_hmi_level =
-      reg_state_to_resolve->hmi_level();
-
-  if (applied_grabs_full && to_resolve_is_streamable && !same_app_type) {
-    result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
+  if (to_resolve_grabs_audio && !same_app_audio_type) {
+    result_audio_state = mobile_apis::AudioStreamingState::AUDIBLE;
   }
 
-  if ((applied_grabs_full && to_resolve_handles_full &&
-       !to_resolve_is_streamable) ||
-      (applied_is_streamable && to_resolve_is_streamable && same_app_type)) {
-    result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+  if (to_resolve_grabs_video && !applied_grabs_video) {
+    result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
-  if (reg_state_to_resolve->hmi_level() != result_hmi_level) {
-    mobile_apis::VideoStreamingState::eType result_video_state =
-        mobile_apis::VideoStreamingState::NOT_STREAMABLE;
-    mobile_apis::AudioStreamingState::eType result_audio_state =
-        mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();
 
-    if (result_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
-      if (to_resolve_grabs_video && !applied_grabs_video) {
-        result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
-      }
-
-      if (to_resolve_grabs_audio) {
-        result_audio_state = mobile_apis::AudioStreamingState::AUDIBLE;
-      }
+  if (applied_hmi_level == mobile_apis::HMILevel::HMI_FULL) {
+    if (result_video_state == mobile_apis::VideoStreamingState::STREAMABLE ||
+        result_audio_state == mobile_apis::AudioStreamingState::AUDIBLE) {
+      result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
+    } else {
+      result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
     }
+  } else if (applied_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
+    if (to_resolve_hmi_level == applied_hmi_level) {
+      result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+    } else {
+      // other to resolve HMI levels
+      // do nothing
+    }
+  } else {  // BACKGROUND, NONE
+    // do nothing
+  }
 
+  if (to_resolve_hmi_level != result_hmi_level) {
     LOG4CXX_DEBUG(logger_,
                   "Application "
                       << app_to_resolve->app_id() << " will change HMI level "
-                      << reg_state_to_resolve->hmi_level() << " --> "
-                      << result_hmi_level << ", audio "
-                      << reg_state_to_resolve->audio_streaming_state()
+                      << to_resolve_hmi_level << " --> " << result_hmi_level
+                      << ", audio " << state_to_resolve->audio_streaming_state()
                       << " --> " << result_audio_state << ", video "
-                      << reg_state_to_resolve->video_streaming_state()
-                      << " --> " << result_video_state);
+                      << state_to_resolve->video_streaming_state() << " --> "
+                      << result_video_state);
     state_ctrl_->SetupRegularHmiState(app_to_resolve,
                                       result_hmi_level,
                                       result_audio_state,
@@ -381,7 +437,6 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
 
 HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
                                                  HmiStatePtr state) const {
-  using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "State to resolve: " << *state);
 
@@ -489,9 +544,8 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
 bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
                                            HmiStatePtr state) const {
   using namespace mobile_apis;
-  using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Checking state: " << state);
+  LOG4CXX_DEBUG(logger_, "Checking state: " << *state);
 
   if (app->is_resuming()) {
     return IsStateAvailableForResumption(app, state);
@@ -515,11 +569,8 @@ bool StateControllerImpl::IsStateAvailableForResumption(
     ApplicationSharedPtr app, HmiStatePtr state) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
-  using namespace helpers;
 
-  if (!app->is_resuming() ||
-      !Compare<HMILevel::eType, EQ, ONE>(
-          state->hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+  if (!app->is_resuming() || !IsStreamableHMIType(state->hmi_level())) {
     LOG4CXX_DEBUG(logger_,
                   "Application is not in resuming mode."
                       << " Requested state is available");
@@ -555,7 +606,7 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
                                                HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
-  LOG4CXX_DEBUG(logger_, "Setup regular state: " << state);
+  LOG4CXX_DEBUG(logger_, "Setup regular state: " << *state);
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state =
       CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
@@ -585,10 +636,6 @@ void StateControllerImpl::SetupRegularHmiState(
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "hmi_level " << hmi_level << ", audio_state " << audio_state
-                             << ", video_state " << video_state);
-
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
@@ -614,28 +661,6 @@ void StateControllerImpl::ApplyRegularState(ApplicationSharedPtr app,
   LOG4CXX_DEBUG(logger_,
                 "Resolving HMI level conflicts for app id " << app->app_id());
   ForEachApplication(HmiLevelConflictResolver(app, state, this));
-}
-
-bool StateControllerImpl::IsSameAppType(ApplicationConstSharedPtr app1,
-                                        ApplicationConstSharedPtr app2) {
-  // TODO(EKuliiev@luxoft.com):
-  // Provide exact set of HMI types to perform such check
-  const bool both_navi = app1->is_navi() && app2->is_navi();
-
-  const bool both_vc = app1->is_voice_communication_supported() &&
-                       app2->is_voice_communication_supported();
-
-  const bool both_projection =
-      (app1->mobile_projection_enabled() && app1->is_media_application()) &&
-      (app2->mobile_projection_enabled() && app2->is_media_application());
-
-  const bool both_other_type =
-      (app1->is_media_application() && !app1->is_navi() &&
-       !app1->is_voice_communication_supported()) &&
-      (app2->is_media_application() && !app2->is_navi() &&
-       !app2->is_voice_communication_supported());
-
-  return both_other_type || both_navi || both_vc || both_projection;
 }
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
@@ -727,6 +752,9 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
           break;
         }
       }
+
+      LOG4CXX_WARN(logger_,
+                   "Couldn't recognize state id (val='" << state_id << "')");
       break;
     }
     default:
@@ -741,8 +769,8 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(old_state);
   DCHECK_OR_RETURN_VOID(new_state);
-  LOG4CXX_DEBUG(logger_, "old: " << old_state);
-  LOG4CXX_DEBUG(logger_, "new: " << new_state);
+  LOG4CXX_DEBUG(logger_, "Old state: " << *old_state);
+  LOG4CXX_DEBUG(logger_, "New state: " << *new_state);
   if (IsStateChanged(*old_state, *new_state)) {
     app_mngr_.SendHMIStatusNotification(app);
     if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
@@ -752,13 +780,13 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
         app->app_id(), old_state->hmi_level(), new_state->hmi_level());
     app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
   } else {
-    LOG4CXX_ERROR(logger_, "State is NOT changed.");
+    LOG4CXX_ERROR(logger_, "State have NOT been changed.");
   }
 }
 
 bool StateControllerImpl::IsTempStateActive(HmiState::StateID ID) const {
   sync_primitives::AutoLock autolock(active_states_lock_);
-  StateIDList::const_iterator itr =
+  const StateIDList::const_iterator itr =
       std::find(active_states_.begin(), active_states_.end(), ID);
   return active_states_.end() != itr;
 }
@@ -766,9 +794,6 @@ bool StateControllerImpl::IsTempStateActive(HmiState::StateID ID) const {
 void StateControllerImpl::OnApplicationRegistered(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType default_level) {
-  namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
-  namespace SystemContext = mobile_apis::SystemContext;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
@@ -790,7 +815,7 @@ void StateControllerImpl::OnApplicationRegistered(
   default_state->set_hmi_level(default_level);
   default_state->set_audio_streaming_state(CalcAudioState(app, default_level));
   default_state->set_video_streaming_state(CalcVideoState(app, default_level));
-  default_state->set_system_context(SystemContext::SYSCTXT_MAIN);
+  default_state->set_system_context(mobile_apis::SystemContext::SYSCTXT_MAIN);
 
   HmiStatePtr initial_state = app->RegularHmiState();
 
@@ -846,7 +871,7 @@ void StateControllerImpl::TempStateStarted(HmiState::StateID id) {
   if (it == active_states_.end()) {
     active_states_.push_back(id);
   } else {
-    LOG4CXX_ERROR(logger_, "StateID " << id << " is already active");
+    LOG4CXX_ERROR(logger_, "StateID '" << id << "' is already active");
   }
 }
 
@@ -1029,21 +1054,17 @@ mobile_apis::AudioStreamingState::eType StateControllerImpl::CalcAudioState(
     const mobile_apis::HMILevel::eType hmi_level) const {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
-  using helpers::Compare;
-  using helpers::EQ;
-  using helpers::ONE;
 
   AudioStreamingState::eType audio_state = AudioStreamingState::NOT_AUDIBLE;
-  if (Compare<HMILevel::eType, EQ, ONE>(
-          hmi_level, HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+  if (IsStreamableHMIType(hmi_level)) {
     if (app->IsAudioApplication()) {
       audio_state = AudioStreamingState::AUDIBLE;
     }
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Calculated audio state for HMI level " << hmi_level << " --> "
-                                                        << audio_state);
+                "Calculated audio state for HMI level '"
+                    << hmi_level << "' --> '" << audio_state << "'");
   return audio_state;
 }
 
@@ -1052,21 +1073,17 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
     const mobile_apis::HMILevel::eType hmi_level) const {
   namespace HMILevel = mobile_apis::HMILevel;
   namespace VideoStreamingState = mobile_apis::VideoStreamingState;
-  using helpers::Compare;
-  using helpers::EQ;
-  using helpers::ONE;
 
   VideoStreamingState::eType video_state = VideoStreamingState::NOT_STREAMABLE;
-  if (Compare<HMILevel::eType, EQ, ONE>(
-          hmi_level, HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+  if (IsStreamableHMIType(hmi_level)) {
     if (app->IsVideoApplication()) {
       video_state = VideoStreamingState::STREAMABLE;
     }
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Calculated video state for HMI level " << hmi_level << " --> "
-                                                        << video_state);
+                "Calculated video state for HMI level '"
+                    << hmi_level << "' --> '" << video_state << "'");
   return video_state;
 }
 

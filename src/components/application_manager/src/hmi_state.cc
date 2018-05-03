@@ -207,7 +207,6 @@ NaviStreamingHmiState::audio_streaming_state() const {
 
 mobile_apis::VideoStreamingState::eType
 NaviStreamingHmiState::video_streaming_state() const {
-  using namespace helpers;
   using namespace mobile_apis;
 
   VideoStreamingState::eType expected_state = parent()->video_streaming_state();
@@ -349,9 +348,9 @@ std::ostream& operator<<(std::ostream& os, const HmiState::StateID src) {
 
 std::ostream& operator<<(std::ostream& os, const HmiState& src) {
   os << "HMIState(state:'" << src.state_id() << "',hmi_level:'"
-     << src.hmi_level() << "',audio:'" << src.audio_streaming_state()
-     << "',video:'" << src.video_streaming_state() << "',context:'"
-     << src.system_context() << "',has parent:" << std::boolalpha
+     << src.hmi_level() << "', audio:'" << src.audio_streaming_state()
+     << "', video:'" << src.video_streaming_state() << "', context:'"
+     << src.system_context() << "', has parent:" << std::boolalpha
      << (src.parent() ? true : false) << ")";
 
   return os;

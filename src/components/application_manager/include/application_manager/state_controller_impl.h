@@ -362,15 +362,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   void SetupRegularHmiState(ApplicationSharedPtr app, HmiStatePtr state);
 
   /**
-   * @brief IsSameAppType checks if apps has same types
-   * @param app1
-   * @param app2
-   * @return true if aps have same types, otherwise return false
-   */
-  bool IsSameAppType(ApplicationConstSharedPtr app1,
-                     ApplicationConstSharedPtr app2);
-
-  /**
    * @brief SetupRegularHmiState set regular HMI State without
    * resolving conflicts and ActivateApp request
    * @param app application
