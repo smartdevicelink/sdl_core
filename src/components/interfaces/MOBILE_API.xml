@@ -2898,15 +2898,15 @@
         <description>
             A color scheme for all display layout templates.
         </description>
-            <param name="primaryColor" type="RGBColor" mandatory="false">
-                <description>The primary "accent" color</description>
-            </param>
-            <param name="secondaryColor" type="RGBColor" mandatory="false">
-                <description>The secondary "accent" color</description>
-            </param>
-            <param name="backgroundColor" type="RGBColor" mandatory="false">
-                <description>The color of the background</description>
-            </param>
+        <param name="primaryColor" type="RGBColor" mandatory="false">
+            <description>The primary "accent" color</description>
+        </param>
+        <param name="secondaryColor" type="RGBColor" mandatory="false">
+            <description>The secondary "accent" color</description>
+        </param>
+        <param name="backgroundColor" type="RGBColor" mandatory="false">
+            <description>The color of the background</description>
+        </param>
     </struct>
     <!-- Requests/Responses -->
     
@@ -3008,7 +3008,9 @@
                 See AppInfo.
             </description>
         </param>
+
         <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
         <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
@@ -5268,6 +5270,7 @@
         </param>
         
         <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
         <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
