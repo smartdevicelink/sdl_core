@@ -30,6 +30,7 @@
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />
         <element name="instantFuelConsumption" />
+        <element name="fuelRange" />
         <element name="odometer" />
         <element name="tirePressure" />
         <element name="wiperStatus" />

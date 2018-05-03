@@ -1593,6 +1593,7 @@
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1608,6 +1609,7 @@
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1623,6 +1625,7 @@
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1637,6 +1640,7 @@
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"

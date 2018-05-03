@@ -726,6 +726,36 @@
 </enum>
 
 <!--IVI part-->
+<enum name="FuelType">
+    <element name="GASOLINE" />
+    <element name="DIESEL" />
+    <element name="CNG">
+        <description>
+            For vehicles using compressed natural gas.
+        </description>
+    </element>
+    <element name="LPG">
+        <description>
+            For vehicles using liquefied petroleum gas.
+        </description>
+    </element>
+    <element name="HYDROGEN">
+        <description>For FCEV (fuel cell electric vehicle).</description>
+    </element>
+    <element name="BATTERY">
+        <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+    </element>
+</enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+</struct>
+
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
   <element name="UNKNOWN" internal_name="CVS_UNKNOWN">
@@ -978,6 +1008,7 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_FUELRANGE" />
 </enum>
 
 <enum name="WiperStatus">
@@ -4195,6 +4226,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
@@ -4270,6 +4304,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -4353,6 +4390,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
@@ -4428,6 +4468,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4506,6 +4549,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
@@ -4582,6 +4628,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.FuelRange" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4660,6 +4709,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.FuelRange" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>

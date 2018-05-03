@@ -44,7 +44,7 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
-option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(BUILD_TESTS "Possibility to build and run tests" ON)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
