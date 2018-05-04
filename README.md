@@ -1,6 +1,4 @@
-[![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-
-[![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
+[![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)  [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)  [![Build Status](http://opensdl-jenkins.luxoft.com:8080/view/All/job/OpenSDL_PR/badge/icon)](http://opensdl-jenkins.luxoft.com:8080/view/All/job/OpenSDL_PR/)
 
 # SmartDeviceLink (SDL)
 
