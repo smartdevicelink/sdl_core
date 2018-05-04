@@ -421,7 +421,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
-  saved_app[application_manager::strings::application_subscribtions] =
+  saved_app[application_manager::strings::application_subscriptions] =
       test_subscriptions;
 
   // Check RestoreApplicationData
@@ -466,7 +466,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
-  saved_app[application_manager::strings::application_subscribtions] =
+  saved_app[application_manager::strings::application_subscriptions] =
       test_subscriptions;
 
   // Check RestoreApplicationData

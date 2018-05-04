@@ -79,7 +79,7 @@ const string kDeleteData =
     "DELETE FROM `applicationCommandsArray`; "
     "DELETE FROM `applicationFilesArray`; "
     "DELETE FROM `applicationSubMenuArray`; "
-    "DELETE FROM `applicationSubscribtionsArray`; "
+    "DELETE FROM `applicationSubscriptionsArray`; "
     "DELETE FROM `_internal_data`; "
     "COMMIT; "
     "VACUUM;";
@@ -326,7 +326,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     db_schema.push_back("applicationCommandsArray");
     db_schema.push_back("applicationFilesArray");
     db_schema.push_back("applicationSubMenuArray");
-    db_schema.push_back("applicationSubscribtionsArray");
+    db_schema.push_back("applicationSubscriptionsArray");
     db_schema.push_back("_internal_data");
     std::sort(db_schema.begin(), db_schema.end());
   }
@@ -1386,7 +1386,7 @@ TEST_F(ResumptionSqlQueriesTest,
 }
 
 TEST_F(ResumptionSqlQueriesTest,
-       kDeleteApplicationSubscribtionsArray_ExpectDataDeleted) {
+       kDeleteApplicationSubscriptionsArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
@@ -1410,12 +1410,12 @@ TEST_F(ResumptionSqlQueriesTest,
   key1 = FillApplicationFilesArrayTable(temp_query, key1, key2).LastInsertId();
   FillAppSubscriptionsArrayTable(temp_query, 7, 2, key1);
   // Check
-  const std::string select_count_applicationSubscribtionsArray =
-      "SELECT COUNT(*) FROM applicationSubscribtionsArray;";
+  const std::string select_count_applicationSubscriptionsArray =
+      "SELECT COUNT(*) FROM applicationSubscriptionsArray;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_applicationSubscribtionsArray,
-                   kDeleteApplicationSubscribtionsArray,
+  CheckDeleteQuery(select_count_applicationSubscriptionsArray,
+                   kDeleteApplicationSubscriptionsArray,
                    p1,
                    p2,
                    1,
@@ -2211,17 +2211,17 @@ TEST_F(ResumptionSqlQueriesTest, kInsertSubscriptions_ExpectDataInserted) {
   SQLQuery temp_query(db());
   FillAppSubscriptionsArrayTable(temp_query, 2, 3, 4);
   // Checks
-  const std::string select_count_applicationSubscribtionsArray =
-      "SELECT COUNT(*) FROM applicationSubscribtionsArray;";
-  CheckSelectQuery(select_count_applicationSubscribtionsArray, 1, 0);
+  const std::string select_count_applicationSubscriptionsArray =
+      "SELECT COUNT(*) FROM applicationSubscriptionsArray;";
+  CheckSelectQuery(select_count_applicationSubscriptionsArray, 1, 0);
   const std::string select_idApplication =
-      "SELECT idApplication FROM applicationSubscribtionsArray;";
+      "SELECT idApplication FROM applicationSubscriptionsArray;";
   CheckSelectQuery(select_idApplication, 4, 0);
   const std::string select_vehicleValue =
-      "SELECT vehicleValue FROM applicationSubscribtionsArray;";
+      "SELECT vehicleValue FROM applicationSubscriptionsArray;";
   CheckSelectQuery(select_vehicleValue, 2, 0);
   const std::string select_ButtonNameValue =
-      "SELECT ButtonNameValue FROM applicationSubscribtionsArray;";
+      "SELECT ButtonNameValue FROM applicationSubscriptionsArray;";
   CheckSelectQuery(select_ButtonNameValue, 3, 0);
 }
 

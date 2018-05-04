@@ -2,6 +2,9 @@
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -214,10 +217,12 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
+  DEPRECATED static bool SendIVISubscribtions(const uint32_t app_id,
+                                              ApplicationManager& app_mngr);
   /**
    * @brief Sends IVI subscription requests
    */
-  static bool SendIVISubscribtions(const uint32_t app_id,
+  static bool SendIVISubscriptions(const uint32_t app_id,
                                    ApplicationManager& app_mngr);
 
   /**

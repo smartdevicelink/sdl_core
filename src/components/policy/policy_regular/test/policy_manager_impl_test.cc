@@ -181,7 +181,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
  public:
   PolicyManagerImplTest2()
       : app_id1("123456789")
-      , app_id2("1766825573")
+      , app_id2("1010101010")
       , dev_id1("XXX123456789ZZZ")
       , dev_id2("08-00-27-CE-76-FE")
       , PTU_request_types(Json::arrayValue) {}
