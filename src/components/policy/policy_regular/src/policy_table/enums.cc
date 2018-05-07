@@ -153,6 +153,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_BODYINFORMATION:
       return true;
+    case P_TURN_SIGNAL:
+      return true;
     case P_CLUSTERMODESTATUS:
       return true;
     case P_DEVICESTATUS:
@@ -211,6 +213,8 @@ const char* EnumToJsonString(Parameter val) {
       return "airbagStatus";
     case P_BODYINFORMATION:
       return "bodyInformation";
+    case P_TURN_SIGNAL:
+      return "turnSignal";
     case P_CLUSTERMODESTATUS:
       return "clusterModeStatus";
     case P_DEVICESTATUS:
@@ -289,6 +293,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("bodyInformation" == literal) {
     *result = P_BODYINFORMATION;
+    return true;
+  } else if ("turnSignal" == literal) {
+    *result = P_TURN_SIGNAL;
     return true;
   } else if ("clusterModeStatus" == literal) {
     *result = P_CLUSTERMODESTATUS;

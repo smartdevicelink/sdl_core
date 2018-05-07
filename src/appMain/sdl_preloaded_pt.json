@@ -403,6 +403,7 @@
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "turnSignal",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -420,6 +421,7 @@
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "turnSignal",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -437,6 +439,7 @@
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "turnSignal",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -453,6 +456,7 @@
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "turnSignal",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
