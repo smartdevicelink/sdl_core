@@ -787,6 +787,22 @@
   </element>
 </enum>
 
+<enum name="TurnSignal">
+  <description>Enumeration that describes the status of the turn light indicator.</description>
+  <element name="OFF">
+    <description>Turn signal is OFF</description>
+  </element>
+  <element name="LEFT">
+    <description>Left turn signal is on</description>
+  </element>
+  <element name="RIGHT">
+    <description>Right turn signal is on</description>
+  </element>
+  <element name="BOTH">
+    <description>Both signals (left and right) are on.</description>
+  </element>
+</enum>
+
 <enum name="VehicleDataEventStatus">
   <description>Reflects the status of a vehicle data event; e.g. a seat belt event status.</description>
   <element name="NO_EVENT" internal_name="VDES_NO_EVENT">
@@ -978,6 +994,7 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_TURNSIGNAL" />
 </enum>
 
 <enum name="WiperStatus">
@@ -4195,6 +4212,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+      <description>See TurnSignal</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
@@ -4270,6 +4290,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TurnSignal</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -4353,6 +4376,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+      <description>See TurnSignal</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
@@ -4428,6 +4454,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
+      <description>See TurnSignal</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4506,6 +4535,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="turnSignal" type="Boolean" mandatory="false">
+      <description>See TurnSignal</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
@@ -4582,6 +4614,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+      <description>See TurnSignal</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4660,6 +4695,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
+      <description>See TurnSignal</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
