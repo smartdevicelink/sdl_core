@@ -117,8 +117,9 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
     return;
   }
   threads::ThreadDelegate* delegate = it->second->delegate();
-  DeleteThread(it->second);
+  it->second->join();
   delete delegate;
+  DeleteThread(it->second);
   timer_threads_.erase(it);
 }
 
@@ -147,8 +148,9 @@ void TimerDirector::UnregisterAllTimers() {
        timer_threads_.end() != it;
        ++it) {
     threads::ThreadDelegate* delegate = it->second->delegate();
-    DeleteThread(it->second);
+    it->second->join();
     delete delegate;
+    DeleteThread(it->second);
   }
   timer_threads_.clear();
 }
