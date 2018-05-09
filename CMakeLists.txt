@@ -447,3 +447,57 @@ find_package(Doxygen)
     message(STATUS "sudo apt-get install mscgen")
 endif()
 
+#Deliver Build Configuration
+
+set(build_config_path "src/appMain/build_config.txt")
+FILE(WRITE "${build_config_path}" "")
+
+get_property(cHelpString CACHE EXTENDED_POLICY PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE REMOTE_CONTROL PROPERTY HELPSTRING)
+get_property(cType CACHE REMOTE_CONTROL PROPERTY TYPE)
+get_property(cValue CACHE REMOTE_CONTROL PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "REMOTE_CONTROL:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_BT_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_BT_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_USB_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_USB_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_USB_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_USB_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_SECURITY PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_SECURITY PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_MEDIA_MODE:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE TELEMETRY_MONITOR PROPERTY HELPSTRING)
+get_property(cType CACHE TELEMETRY_MONITOR PROPERTY TYPE)
+get_property(cValue CACHE TELEMETRY_MONITOR PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "TELEMETRY_MONITOR:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE HMI PROPERTY HELPSTRING)
+get_property(cType CACHE HMI PROPERTY TYPE)
+get_property(cValue CACHE HMI PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n")
+
+
