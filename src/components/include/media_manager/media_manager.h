@@ -38,6 +38,44 @@
 #include "media_manager/media_manager_settings.h"
 namespace media_manager {
 
+/**
+ * \brief Describes different sampling options for PerformAudioPassThru.
+ */
+typedef enum {
+  /// Invalid sampling rate.
+  SR_INVALID = -1,
+  /// Sampling rate of 8000 Hz.
+  SR_8KHZ = 0,
+  /// Sampling rate of 16000 Hz.
+  SR_16KHZ = 1,
+  /// Sampling rate of 22050 Hz.
+  SR_22KHZ = 2,
+  /// Sampling rate of 44100 Hz.
+  SR_44KHZ = 3
+} SamplingRate;
+
+/**
+ * \brief Describes different quality options for PerformAudioPassThru.
+ */
+typedef enum {
+  /// Invalid audio quality.
+  ACQ_INVALID = -1,
+  /// Audio sample is 8 bits wide, unsigned.
+  ACQ_8_BIT = 0,
+  /// Audio sample is 16 bits wide, signed, and in little endian.
+  ACQ_16_BIT = 1
+} AudioCaptureQuality;
+
+/**
+ * \brief Describes different audio type options for PerformAudioPassThru.
+ */
+typedef enum {
+  /// Invalid audio type.
+  AT_INVALID = -1,
+  /// Linear PCM.
+  AT_PCM = 0
+} AudioType;
+
 class MediaManager {
  public:
   virtual void PlayA2DPSource(int32_t application_key) = 0;
