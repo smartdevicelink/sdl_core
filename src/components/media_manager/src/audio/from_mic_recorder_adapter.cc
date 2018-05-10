@@ -69,7 +69,11 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
   // Todd: No gstreamer recorder thread
   if (!recorder_thread_) {
     FromMicToFileRecorderThread* thread_delegate =
-        new FromMicToFileRecorderThread(output_file_, duration_);
+        new FromMicToFileRecorderThread(output_file_,
+                                        duration_,
+                                        sampling_rate_,
+                                        bits_per_sample_,
+                                        audio_type_);
     recorder_thread_ = threads::CreateThread("MicrophoneRec", thread_delegate);
   }
 

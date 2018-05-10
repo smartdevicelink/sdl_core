@@ -37,6 +37,8 @@
 #include <gst/gst.h>
 #include <string>
 
+#include "media_manager/media_manager.h"
+
 #include "utils/lock.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -45,7 +47,11 @@ namespace media_manager {
 
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
  public:
-  FromMicToFileRecorderThread(const std::string& output_file, int32_t duration);
+  FromMicToFileRecorderThread(const std::string& output_file,
+                              int32_t duration,
+                              SamplingRate sampling_rate = SR_INVALID,
+                              AudioCaptureQuality bits_per_sample = ACQ_INVALID,
+                              AudioType audio_type = AT_INVALID);
   ~FromMicToFileRecorderThread();
   void threadMain();
 
@@ -67,6 +73,8 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   sync_primitives::Lock stopFlagLock_;
 
   std::string outputFileName_, durationString_;
+  SamplingRate samplingRate_;
+  AudioCaptureQuality bitsPerSample_;
 
   typedef struct {
     GstElement* pipeline;
@@ -77,6 +85,7 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   void deinitArgs();
 
   void psleep(void* timeout);
+  std::string create_caps_string();
 
   class SleepThreadDelegate : public threads::ThreadDelegate {
    public:

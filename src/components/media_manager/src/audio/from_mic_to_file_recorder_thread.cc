@@ -46,16 +46,23 @@ GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 static const int kNumAudioChannels = 1;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
-    const std::string& output_file, int32_t duration)
+    const std::string& output_file,
+    int32_t duration,
+    SamplingRate sampling_rate,
+    AudioCaptureQuality bits_per_sample,
+    AudioType audio_type)
     : threads::ThreadDelegate()
     , argc_(5)
     , argv_(NULL)
     , oKey_("-o")
     , tKey_("-t")
     , sleepThread_(NULL)
-    , outputFileName_(output_file) {
+    , outputFileName_(output_file)
+    , samplingRate_(sampling_rate)
+    , bitsPerSample_(bits_per_sample) {
   LOG4CXX_AUTO_TRACE(logger_);
   set_record_duration(duration);
+  // audio_type is not used as we always employ LPCM
 }
 
 FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
@@ -205,9 +212,11 @@ void FromMicToFileRecorderThread::threadMain() {
   wavenc = gst_element_factory_make("wavenc", "wavenc0");
   filesink = gst_element_factory_make("filesink", "filesink0");
 
-  // create a capability to downmix the recorded audio to monaural
-  audiocaps = gst_caps_new_simple(
-      "audio/x-raw", "channels", G_TYPE_INT, kNumAudioChannels, NULL);
+  // Create a capability to specify audio format. It also downmixes the recorded
+  // audio to monaural.
+  std::string caps_string = create_caps_string();
+  LOG4CXX_DEBUG(logger_, "Using audio caps: " << caps_string);
+  audiocaps = gst_caps_from_string(caps_string.c_str());
 
   // Assert that all the elements were created
   if (!alsasrc || !audioconvert || !capsfilter || !wavenc || !filesink ||
@@ -283,6 +292,49 @@ void FromMicToFileRecorderThread::threadMain() {
   deinitArgs();
 
   loop = NULL;
+}
+
+std::string FromMicToFileRecorderThread::create_caps_string() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::stringstream ss;
+  ss << "audio/x-raw";
+
+  switch (bitsPerSample_) {
+    case ACQ_8_BIT:
+      // format is 8-bit unsigned
+      ss << ",format=(string)U8";
+      break;
+    case ACQ_16_BIT:
+      // format is 16-bit signed, in little endian
+      ss << ",format=(string)S16LE";
+      break;
+    default:
+      // do not specify the format; use system default
+      break;
+  }
+
+  switch (samplingRate_) {
+    case SR_8KHZ:
+      ss << ",rate=8000";
+      break;
+    case SR_16KHZ:
+      ss << ",rate=16000";
+      break;
+    case SR_22KHZ:
+      ss << ",rate=22050";
+      break;
+    case SR_44KHZ:
+      ss << ",rate=44100";
+      break;
+    default:
+      // do not specify the sampling rate; use system default
+      break;
+  }
+
+  ss << ",channels=" << kNumAudioChannels;
+
+  return ss.str();
 }
 
 FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(
