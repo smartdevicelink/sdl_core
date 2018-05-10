@@ -36,6 +36,7 @@
 #include <string>
 #include "protocol/service_type.h"
 #include "media_manager/media_manager_settings.h"
+#include "utils/macro.h"  // for "DEPRECATED"
 namespace media_manager {
 
 /**
@@ -81,9 +82,16 @@ class MediaManager {
   virtual void PlayA2DPSource(int32_t application_key) = 0;
   virtual void StopA2DPSource(int32_t application_key) = 0;
 
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration) = 0;
   virtual void StartMicrophoneRecording(int32_t application_key,
                                         const std::string& outputFileName,
-                                        int32_t duration) = 0;
+                                        int32_t duration,
+                                        SamplingRate sampling_rate,
+                                        AudioCaptureQuality bits_per_sample,
+                                        AudioType audio_type) = 0;
   virtual void StopMicrophoneRecording(int32_t application_key) = 0;
 
   virtual void StartStreaming(int32_t application_key,

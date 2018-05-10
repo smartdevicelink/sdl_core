@@ -187,6 +187,21 @@ void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
 void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
                                                 const std::string& output_file,
                                                 int32_t duration) {
+  StartMicrophoneRecording(application_key,
+                           output_file,
+                           duration,
+                           SR_INVALID,
+                           ACQ_INVALID,
+                           AT_INVALID);
+}
+
+void MediaManagerImpl::StartMicrophoneRecording(
+    int32_t application_key,
+    const std::string& output_file,
+    int32_t duration,
+    SamplingRate sampling_rate,
+    AudioCaptureQuality bits_per_sample,
+    AudioType audio_type) {
   LOG4CXX_INFO(logger_,
                "MediaManagerImpl::StartMicrophoneRecording to " << output_file);
   application_manager::ApplicationSharedPtr app =
@@ -202,7 +217,7 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
         ->set_output_file(file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-        ->set_duration(duration);
+        ->set_config(sampling_rate, bits_per_sample, audio_type, duration);
     from_mic_recorder_->StartActivity(application_key);
   }
 #else

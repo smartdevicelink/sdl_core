@@ -44,6 +44,9 @@ FromMicRecorderAdapter::FromMicRecorderAdapter()
     : recorder_thread_(NULL)
     , output_file_("default_recorded_audio.wav")
     , kDefaultDuration(1000)
+    , sampling_rate_(SR_INVALID)
+    , bits_per_sample_(ACQ_INVALID)
+    , audio_type_(AT_INVALID)
     , duration_(kDefaultDuration) {}
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
@@ -104,6 +107,16 @@ void FromMicRecorderAdapter::set_output_file(const std::string& output_file) {
 }
 
 void FromMicRecorderAdapter::set_duration(int32_t duration) {
+  duration_ = duration;
+}
+
+void FromMicRecorderAdapter::set_config(SamplingRate sampling_rate,
+                                        AudioCaptureQuality bits_per_sample,
+                                        AudioType audio_type,
+                                        int32_t duration) {
+  sampling_rate_ = sampling_rate;
+  bits_per_sample_ = bits_per_sample;
+  audio_type_ = audio_type;
   duration_ = duration;
 }
 

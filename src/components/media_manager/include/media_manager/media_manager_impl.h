@@ -61,9 +61,16 @@ class MediaManagerImpl : public MediaManager,
   virtual void PlayA2DPSource(int32_t application_key);
   virtual void StopA2DPSource(int32_t application_key);
 
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration);
   virtual void StartMicrophoneRecording(int32_t application_key,
                                         const std::string& outputFileName,
-                                        int32_t duration);
+                                        int32_t duration,
+                                        SamplingRate sampling_rate,
+                                        AudioCaptureQuality bits_per_sample,
+                                        AudioType audio_type);
   virtual void StopMicrophoneRecording(int32_t application_key);
 
   virtual void StartStreaming(int32_t application_key,
