@@ -214,7 +214,13 @@ get_property(cHelpString CACHE HMI PROPERTY HELPSTRING)
 get_property(cType CACHE HMI PROPERTY TYPE)
 get_property(cValue CACHE HMI PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n")
+file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
