@@ -227,7 +227,8 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   // Should be investigated (used in multiple places here), since looks weird
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
-                                        HMILevel::HMI_NONE)) {
+                                        HMILevel::HMI_NONE,
+                                        HMILevel::HMI_FULL)) {
     return parent()->hmi_level();
   }
   if (is_navi_app() || is_voice_communication_app()) {

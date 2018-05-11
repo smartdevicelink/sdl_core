@@ -39,6 +39,7 @@
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/command_factory.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
@@ -48,10 +49,7 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
 #include "policy/policy_types.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "functional_module/plugin_manager.h"
-#endif
-
+#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 namespace resumption {
 class LastState;
 }
@@ -82,6 +80,12 @@ namespace application_manager {
 namespace event_engine {
 class EventDispatcher;
 }
+namespace rpc_service {
+class RPCService;
+}
+namespace rpc_handler {
+class RPCHandler;
+}
 
 class Application;
 class StateControllerImpl;
@@ -94,7 +98,6 @@ struct ApplicationsAppIdSorter {
     return lhs->app_id() < rhs->app_id();
   }
 };
-
 struct ApplicationsPolicyAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) {
@@ -135,8 +138,15 @@ class ApplicationManager {
 
   virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
+
+  /**
+   * @brief set_protocol_handler
+   * @param handler
+   * set protocol handler
+   */
   virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
+
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
 
@@ -176,12 +186,13 @@ class ApplicationManager {
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
 
-  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
-
-  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
-
-  virtual functional_modules::PluginManager& GetPluginManager() = 0;
 #endif  // SDL_REMOTE_CONTROL
+  virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
+
+#ifdef BUILD_TESTS
+  virtual void SetPluginManager(
+      std::unique_ptr<plugin_manager::RPCPluginManager>& plugin_manager) = 0;
+#endif
 
   virtual std::vector<ApplicationSharedPtr>
   applications_with_mobile_projection() = 0;
@@ -230,6 +241,18 @@ class ApplicationManager {
    */
   virtual void set_application_id(const int32_t correlation_id,
                                   const uint32_t app_id) = 0;
+  /**
+   * @brief get_current_audio_source
+   * @return current audio source
+   */
+  virtual uint32_t get_current_audio_source() const = 0;
+
+  /**
+   * @brief set_current_audio_source
+   * @param source
+   * set current audio source
+   */
+  virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
    * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -308,20 +331,8 @@ class ApplicationManager {
    */
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
-  virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
-                                   bool final_message = false) = 0;
-
-  virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
-
   virtual void RemoveHMIFakeParameters(
-      application_manager::MessagePtr& message) = 0;
-
-  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
-  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                                   commands::Command::CommandOrigin origin) = 0;
-
-  virtual MessageValidationResult ValidateMessageBySchema(
-      const Message& message) = 0;
+      application_manager::commands::MessageSharedPtr& message) = 0;
 
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
@@ -379,6 +390,11 @@ class ApplicationManager {
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
   virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
+
+  virtual rpc_service::RPCService& GetRPCService() const = 0;
+  virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual bool is_stopping() const = 0;
+  virtual bool is_audio_pass_thru_active() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
@@ -462,6 +478,8 @@ class ApplicationManager {
       const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
+
+  virtual bool IsLowVoltage() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
@@ -613,6 +631,9 @@ class ApplicationManager {
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
+  virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
+      const = 0;
+
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType
@@ -688,9 +709,6 @@ class ApplicationManager {
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
-
-  virtual void SendAudioPassThroughNotification(
-      uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
 
   /**
    * @brief Checks if application can stream (streaming service is started and

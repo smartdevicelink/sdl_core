@@ -41,7 +41,7 @@
 #include <forward_list>
 #include <stdint.h>
 
-#include "utils/date_time.h"
+#include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/hmi_state.h"
@@ -53,6 +53,7 @@
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 #include "utils/macro.h"
+#include "utils/date_time.h"
 
 namespace usage_statistics {
 
@@ -120,6 +121,10 @@ class ApplicationImpl : public virtual Application,
     return is_navi_;
   }
   void set_is_navi(bool allow);
+
+  virtual bool is_remote_control_supported() const;
+
+  void set_remote_control_supported(const bool allow);
 
   void set_mobile_projection_enabled(bool option);
 
@@ -316,6 +321,12 @@ class ApplicationImpl : public virtual Application,
   virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
+
+  /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
@@ -447,6 +458,7 @@ class ApplicationImpl : public virtual Application,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;
