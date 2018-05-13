@@ -745,17 +745,18 @@ void StateControllerImpl::OnApplicationRegistered(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
-  active_states_lock_.Acquire();
-  StateIDList::iterator it = active_states_.begin();
-  for (; it != active_states_.end(); ++it) {
-    HmiStatePtr new_state = CreateHmiState(app, *it);
-    DCHECK_OR_RETURN_VOID(new_state);
-    DCHECK_OR_RETURN_VOID(new_state->state_id() != HmiState::STATE_ID_REGULAR);
-    HmiStatePtr old_hmi_state = app->CurrentHmiState();
-    new_state->set_parent(old_hmi_state);
-    app->AddHMIState(new_state);
+  {
+    sync_primitives::AutoLock lck(active_states_lock_);
+    for (const auto state_id : active_states_) {
+      HmiStatePtr new_state = CreateHmiState(app, state_id);
+      DCHECK_OR_RETURN_VOID(new_state);
+      DCHECK_OR_RETURN_VOID(new_state->state_id() !=
+                            HmiState::STATE_ID_REGULAR);
+      HmiStatePtr old_hmi_state = app->CurrentHmiState();
+      new_state->set_parent(old_hmi_state);
+      app->AddHMIState(new_state);
+    }
   }
-  active_states_lock_.Release();
 
   HmiStatePtr default_state =
       CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
@@ -811,16 +812,18 @@ void StateControllerImpl::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
   }
 }
 
-void StateControllerImpl::TempStateStarted(HmiState::StateID ID) {
+void StateControllerImpl::TempStateStarted(HmiState::StateID id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(active_states_lock_);
-  StateIDList::iterator it =
-      std::find(active_states_.begin(), active_states_.end(), ID);
-  if (it == active_states_.end()) {
-    active_states_.push_back(ID);
-  } else {
-    LOG4CXX_ERROR(logger_, "StateID " << ID << " is already active");
+
+  {
+    sync_primitives::AutoLock autolock(active_states_lock_);
+    if (!helpers::in_range(active_states_, id)) {
+      active_states_.push_back(id);
+      return;
+    }
   }
+
+  LOG4CXX_ERROR(logger_, "StateID '" << id << "' is already active");
 }
 
 void StateControllerImpl::TempStateStopped(HmiState::StateID ID) {
