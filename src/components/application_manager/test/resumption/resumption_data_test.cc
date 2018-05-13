@@ -381,6 +381,7 @@ void ResumptionDataTest::SetMenuTitleAndIcon() {
   sm::SmartObject sm_icon;
   sm_icon[am::strings::value] = "test icon";
   sm_icon[am::strings::image_type] = ImageType::STATIC;
+  sm_icon[am::strings::is_template] = false;
 
   sm::SmartObject sm_title;
   sm_title = "test title";

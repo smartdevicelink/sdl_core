@@ -197,8 +197,9 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                  const int64_t glob_prop_key);
 
   SQLQuery& FillImageTable(SQLQuery& query,
-                           const int imageType,
-                           const string& value);
+                           const int image_type,
+                           const string& value,
+                           const bool is_template);
 
   SQLQuery& FillTableLimitedCharacterListTable(
       SQLQuery& query, const string& limitedCharacterList);
@@ -456,11 +457,13 @@ void ResumptionSqlQueriesTest::CheckSelectQuery(const string& query_to_check,
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillImageTable(SQLQuery& query,
-                                                   const int imageType,
-                                                   const string& value) {
+                                                   const int image_type,
+                                                   const string& value,
+                                                   const bool is_template) {
   EXPECT_TRUE(query.Prepare(kInsertImage));
-  query.Bind(0, imageType);
+  query.Bind(0, image_type);
   query.Bind(1, value);
+  query.Bind(2, is_template);
   EXPECT_TRUE(query.Exec());
   return query;
 }
@@ -802,7 +805,10 @@ TEST_F(ResumptionSqlQueriesTest, kChecksResumptionData_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountHMILevel_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -829,7 +835,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMILevel_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectHMILevel_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -854,7 +863,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMILevel_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kCheckHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -879,7 +891,10 @@ TEST_F(ResumptionSqlQueriesTest, kCheckHMIId_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -904,7 +919,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMIId_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -930,7 +948,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMIId_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kCountHashId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -956,7 +977,10 @@ TEST_F(ResumptionSqlQueriesTest, kCountHashId_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectHashId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -990,7 +1014,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectIgnOffTime_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kCheckApplication_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1015,7 +1042,10 @@ TEST_F(ResumptionSqlQueriesTest, kCheckApplication_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kCountApplications_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1032,7 +1062,9 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplications_ExpectDataCorrect) {
                        device_id,
                        key);
 
-  key = FillImageTable(temp_query, 1, "tst_img2").LastInsertId();
+  key = FillImageTable(
+            temp_query, 1 /* image_type */, "tst_img2", true /* is_template */)
+            .LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1056,7 +1088,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kSelectDataForLoadResumeData_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1084,7 +1119,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kUpdateHMILevel_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1117,7 +1155,10 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateHMILevel_ExpectDataUpdated) {
 TEST_F(ResumptionSqlQueriesTest, kUpdateIgnOffCount_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1148,7 +1189,10 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateIgnOffCount_ExpectDataUpdated) {
 TEST_F(ResumptionSqlQueriesTest, kCountApplicationsIgnOff_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1189,7 +1233,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kSelectApplicationsIgnOffCount_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1229,7 +1276,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1258,7 +1308,10 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
 TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   key1 = FillGlobalPropertiesTable(
              temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
              .LastInsertId();
@@ -1288,7 +1341,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationFilesArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   key1 = FillGlobalPropertiesTable(
              temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
              .LastInsertId();
@@ -1324,7 +1380,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1355,7 +1414,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationSubMenuArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key = FillImageTable(temp_query,
+                               /*image_type=*/1,
+                               test_image,
+                               /*is_template=*/true).LastInsertId();
   key = FillGlobalPropertiesTable(
             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
             .LastInsertId();
@@ -1389,7 +1451,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationSubscriptionsArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   key1 = FillGlobalPropertiesTable(
              temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
              .LastInsertId();
@@ -1426,7 +1491,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
   key1 = FillGlobalPropertiesTable(
@@ -1456,7 +1524,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
 TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
   key1 = FillGlobalPropertiesTable(
@@ -1490,7 +1561,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
 TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
 
@@ -1522,7 +1596,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationCommandsArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
 
@@ -1560,7 +1637,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromChoiceSet_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillChoiceTable(temp_query,
                                  2,
                                  "tst_menu_name",
@@ -1595,7 +1675,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteVrCommandsFromChoiceSet_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 =
       FillChoiceTable(
           temp_query, 1, "tst_menu_name", "second_text", "tert_txt", key1)
@@ -1638,7 +1721,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kDeleteChoice_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 =
       FillChoiceTable(
           temp_query, 1, "tst_menu_name", "second_text", "tert_txt", key1)
@@ -1775,7 +1861,10 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteImageFromGlobalProperties_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillGlobalPropertiesTable(
                      temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
                      .LastInsertId();
@@ -1804,7 +1893,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillGlobalPropertiesTable(
                      temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
                      .LastInsertId();
@@ -1834,7 +1926,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  int64_t key1 = FillImageTable(temp_query,
+                                /*image_type=*/1,
+                                test_image,
+                                /*is_template=*/true).LastInsertId();
   int64_t key2 = FillGlobalPropertiesTable(
                      temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
                      .LastInsertId();
@@ -2051,7 +2146,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteGlobalProperties_ExpectDataDeleted) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountImage_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  FillImageTable(temp_query, 2, "tst_image");
+  FillImageTable(
+      temp_query, /*image_type=*/2, "tst_image", /*is_template=*/true);
   ValToPosPair p1(0, "tst_image");
   ValToPosPair p2(1, "");
   // Check
@@ -2061,7 +2157,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountImage_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectPrimaryKeyImage_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
   ValToPosPair p1(0, "tst_image");
   ValToPosPair p2(1, "");
   // Check
@@ -2071,7 +2170,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectPrimaryKeyImage_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kInsertImage_ExpectDataInserted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillImageTable(temp_query, 2, "tst_image");
+  FillImageTable(
+      temp_query, /*image_type=*/2, "tst_image", /*is_template=*/true);
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
   // Check
   CheckSelectQuery(select_count_image, 1, 0);
@@ -2616,7 +2716,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromCommand_ExpectDataCorrect) {
                                          app_id1,
                                          device_id,
                                          9).LastInsertId();
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
 
   FillChoiceTable(
       temp_query, 1, "menu_name", "sec_text", "tert_text", image_key)
@@ -2656,7 +2759,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromChoice_ExpectDataCorrect) {
                                          app_id1,
                                          device_id,
                                          9).LastInsertId();
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
 
   int64_t choice_key =
       FillChoiceTable(
@@ -2776,7 +2882,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectChoiceSets_ExpectDataCorrect) {
                                          app_id1,
                                          device_id,
                                          9).LastInsertId();
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
   int64_t choice_key =
       FillChoiceTable(
           temp_query, 1, "menu_name", "sec_text", "tert_text", image_key)
@@ -2808,7 +2917,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectChoiceSets_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectImage_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
   // Check
   ValToPosPair p1(0, IntToString(image_key));
   ValToPosPair p2(1, "");
@@ -2846,7 +2958,10 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kSelectGlobalProperties_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     test_image,
+                                     /*is_template=*/true).LastInsertId();
   int64_t glob_prop_key =
       FillGlobalPropertiesTable(
           temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)
@@ -2883,7 +2998,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectGlobalProperties_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kChecksVrHelpItem_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
   int64_t glob_prop_key =
       FillGlobalPropertiesTable(
           temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)
@@ -2900,7 +3018,10 @@ TEST_F(ResumptionSqlQueriesTest, kChecksVrHelpItem_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectVrHelpItem_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
+  int64_t image_key = FillImageTable(temp_query,
+                                     /*image_type=*/2,
+                                     "tst_image",
+                                     /*is_template=*/true).LastInsertId();
   int64_t glob_prop_key =
       FillGlobalPropertiesTable(
           temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)

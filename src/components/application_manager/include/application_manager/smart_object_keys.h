@@ -189,6 +189,7 @@ extern const char* persistent_file;
 extern const char* file_data;
 extern const char* space_available;
 extern const char* image_type;
+extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
