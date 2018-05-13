@@ -341,6 +341,10 @@ class SafetyModeHmiState : public HmiState {
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
 };
 
 /**
@@ -359,6 +363,10 @@ class DeactivateHMI : public HmiState {
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
 };
 
 /**
@@ -376,6 +384,10 @@ class AudioSource : public HmiState {
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
   }
 };
 
