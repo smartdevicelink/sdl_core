@@ -375,22 +375,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param hmi_level of new regular state
    * @param audio_state of new regular state
    * @param video_state of new regular state
-   * @param system_context of new regular state
-   */
-  void SetupRegularHmiState(
-      ApplicationSharedPtr app,
-      const mobile_apis::HMILevel::eType hmi_level,
-      const mobile_apis::AudioStreamingState::eType audio_state,
-      const mobile_apis::VideoStreamingState::eType video_state,
-      const mobile_apis::SystemContext::eType system_context);
-
-  /**
-   * @brief SetupRegularHmiState set regular HMI State without
-   * resolving conflicts and ActivateApp request
-   * @param app application
-   * @param hmi_level of new regular state
-   * @param audio_state of new regular state
-   * @param video_state of new regular state
    */
   void SetupRegularHmiState(
       ApplicationSharedPtr app,
