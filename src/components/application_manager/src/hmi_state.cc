@@ -40,6 +40,8 @@
 
 namespace application_manager {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "HmiState")
+
 HmiState::HmiState(utils::SharedPtr<Application> app,
                    const ApplicationManager& app_mngr,
                    StateID state_id)
@@ -49,7 +51,9 @@ HmiState::HmiState(utils::SharedPtr<Application> app,
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
-    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {}
+    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
+  LOG4CXX_DEBUG(logger_, *this);
+}
 
 HmiState::HmiState(utils::SharedPtr<Application> app,
                    const ApplicationManager& app_mngr)
@@ -59,7 +63,9 @@ HmiState::HmiState(utils::SharedPtr<Application> app,
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
-    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {}
+    , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
+  LOG4CXX_DEBUG(logger_, *this);
+}
 
 DEPRECATED HmiState::HmiState(uint32_t app_id,
                               const ApplicationManager& app_mngr,
@@ -71,6 +77,7 @@ DEPRECATED HmiState::HmiState(uint32_t app_id,
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
   app_ = app_mngr_.application(app_id);
+  LOG4CXX_DEBUG(logger_, *this);
 }
 
 DEPRECATED HmiState::HmiState(uint32_t app_id,
@@ -82,6 +89,7 @@ DEPRECATED HmiState::HmiState(uint32_t app_id,
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
   app_ = app_mngr_.application(app_id);
+  LOG4CXX_DEBUG(logger_, *this);
 }
 
 void HmiState::set_parent(HmiStatePtr parent) {

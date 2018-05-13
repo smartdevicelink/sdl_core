@@ -658,15 +658,17 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
+  LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
+
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
-  HMILevel::eType hmi_level = HMILevel::HMI_FULL;
-  AudioStreamingState::eType audio_state;
-  VideoStreamingState::eType video_state;
-  app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE
-                            : audio_state = AudioStreamingState::NOT_AUDIBLE;
-  app->IsVideoApplication() ? video_state = VideoStreamingState::STREAMABLE
-                            : video_state = VideoStreamingState::NOT_STREAMABLE;
+  const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
+  const AudioStreamingState::eType audio_state =
+      app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
+                                : AudioStreamingState::NOT_AUDIBLE;
+  const VideoStreamingState::eType video_state =
+      app->IsVideoApplication() ? VideoStreamingState::STREAMABLE
+                                : VideoStreamingState::NOT_STREAMABLE;
   state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, false);
   return true;
 }
@@ -679,10 +681,10 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
     NOTREACHED();
     return mobile_api::HMILevel::INVALID_ENUM;
   }
-  bool is_audio_app = app->IsAudioApplication();
-  bool does_audio_app_with_same_type_exist =
+  const bool is_audio_app = app->IsAudioApplication();
+  const bool does_audio_app_with_same_type_exist =
       IsAppTypeExistsInFullOrLimited(app);
-  bool is_active_app_exist = active_application().valid();
+  const bool is_active_app_exist = active_application().valid();
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
   if (is_audio_app && does_audio_app_with_same_type_exist) {
@@ -4528,7 +4530,6 @@ std::vector<std::string> ApplicationManagerImpl::devices(
 
 void ApplicationManagerImpl::ChangeAppsHMILevel(
     uint32_t app_id, mobile_apis::HMILevel::eType level) {
-  using namespace mobile_apis::HMILevel;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "AppID to change: " << app_id << " -> " << level);
   ApplicationSharedPtr app = application(app_id);
@@ -4536,14 +4537,13 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
-  eType old_level = app->hmi_level();
+  const mobile_apis::HMILevel::eType old_level = app->hmi_level();
   if (old_level != level) {
     app->set_hmi_level(level);
     OnHMILevelChanged(app_id, old_level, level);
-
     plugin_manager_.OnAppHMILevelChanged(app, old_level);
   } else {
-    LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
+    LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);
   }
 }
 

@@ -59,7 +59,7 @@ class HmiState {
  public:
   /**
    * @brief The StateID enum describes state of application
-   * If no events occured STATE_ID_DEFAULT shuld be presented
+   * If no events occurred STATE_ID_DEFAULT should be presented
    */
   enum StateID {
     STATE_ID_CURRENT,
@@ -220,7 +220,7 @@ class HmiState {
    * @brief set_state_id sets state id
    * @param state_id state id to setup
    */
-  virtual void set_state_id(StateID state_id) {
+  void set_state_id(StateID state_id) {
     state_id_ = state_id;
   }
 

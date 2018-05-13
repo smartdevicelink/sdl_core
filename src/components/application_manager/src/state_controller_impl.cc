@@ -68,14 +68,12 @@ StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
 void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
                                           HmiStatePtr state,
                                           const bool send_activate_app) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
-  DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
+  DCHECK_OR_RETURN_VOID(HmiState::STATE_ID_REGULAR == state->state_id());
+
+  LOG4CXX_DEBUG(logger_, "Set regular state " << *state);
 
   if (state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM ||
       state->audio_streaming_state() ==
@@ -83,7 +81,7 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
       state->video_streaming_state() ==
           mobile_apis::VideoStreamingState::INVALID_ENUM ||
       state->system_context() == mobile_apis::SystemContext::INVALID_ENUM) {
-    LOG4CXX_ERROR(logger_, "Get invalid state");
+    LOG4CXX_ERROR(logger_, "Got invalid state");
     return;
   }
 
@@ -97,7 +95,8 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
     app->SetPostponedState(state);
     return;
   }
-  hmi_apis::Common_HMILevel::eType hmi_level =
+  LOG4CXX_DEBUG(logger_, "Resolved state: " << *resolved_state);
+  const hmi_apis::Common_HMILevel::eType hmi_level =
       static_cast<hmi_apis::Common_HMILevel::eType>(
           resolved_state->hmi_level());
 
@@ -121,12 +120,8 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state,
     const bool send_activate_app) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_regular = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_regular);
   HmiStatePtr hmi_state =
@@ -144,13 +139,8 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::HMILevel::eType hmi_level,
     const bool send_activate_app) {
   using namespace mobile_apis;
-  using namespace helpers;
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   const HmiStatePtr hmi_state =
       CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
 
@@ -169,12 +159,8 @@ void StateControllerImpl::SetRegularState(
     const mobile_apis::VideoStreamingState::eType video_state,
     const mobile_apis::SystemContext::eType system_context,
     const bool send_activate_app) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr hmi_state =
       CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(hmi_state);
@@ -187,12 +173,8 @@ void StateControllerImpl::SetRegularState(
 
 void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app, const mobile_apis::HMILevel::eType hmi_level) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
   HmiStatePtr hmi_state =
       CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
@@ -209,12 +191,8 @@ void StateControllerImpl::SetRegularState(
 void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::SystemContext::eType system_context) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_regular = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_regular);
   HmiStatePtr hmi_state =
@@ -233,12 +211,8 @@ void StateControllerImpl::SetRegularState(
     ApplicationSharedPtr app,
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr hmi_state =
@@ -253,12 +227,8 @@ void StateControllerImpl::SetRegularState(
 
 void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
                                           HmiStatePtr state) {
-  CREATE_LOGGERPTR_LOCAL(logger_, "StateControllerImpl");
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
   if (mobile_apis::HMILevel::HMI_FULL == state->hmi_level()) {
     SetRegularState(app, state, true);
@@ -627,9 +597,6 @@ void StateControllerImpl::SetupRegularHmiState(
     const mobile_apis::HMILevel::eType hmi_level,
     const mobile_apis::AudioStreamingState::eType audio_state,
     const mobile_apis::VideoStreamingState::eType video_state) {
-  namespace HMILevel = mobile_apis::HMILevel;
-  namespace AudioStreamingState = mobile_apis::AudioStreamingState;
-  using helpers::Compare;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
@@ -702,7 +669,7 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
       const uint32_t id =
           message[strings::msg_params][hmi_notification::event_name].asUInt();
       // TODO(AOleynik): Add verification/conversion check here
-      Common_EventTypes::eType state_id =
+      const Common_EventTypes::eType state_id =
           static_cast<Common_EventTypes::eType>(id);
       if (is_active) {
         if (Common_EventTypes::AUDIO_SOURCE == state_id) {
@@ -747,6 +714,9 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
           break;
         }
       }
+
+      LOG4CXX_WARN(logger_,
+                   "Couldn't recognize state id (val='" << state_id << "')");
       break;
     }
     default:
@@ -772,15 +742,13 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
         app->app_id(), old_state->hmi_level(), new_state->hmi_level());
     app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
   } else {
-    LOG4CXX_ERROR(logger_, "Status not changed");
+    LOG4CXX_ERROR(logger_, "State has NOT been changed.");
   }
 }
 
-bool StateControllerImpl::IsTempStateActive(HmiState::StateID ID) const {
+bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
   sync_primitives::AutoLock autolock(active_states_lock_);
-  StateIDList::const_iterator itr =
-      std::find(active_states_.begin(), active_states_.end(), ID);
-  return active_states_.end() != itr;
+  return helpers::in_range(active_states_, id);
 }
 
 void StateControllerImpl::OnApplicationRegistered(
@@ -955,9 +923,7 @@ void StateControllerImpl::OnAppActivated(
 
 void StateControllerImpl::OnAppDeactivated(
     const smart_objects::SmartObject& message) {
-  using namespace hmi_apis;
   using namespace mobile_apis;
-  using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = message[strings::msg_params][strings::app_id].asUInt();

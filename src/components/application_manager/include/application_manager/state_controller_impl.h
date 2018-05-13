@@ -166,7 +166,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   virtual void OnNaviStreamingStopped();
 
   /**
-   * @brief OnStateChanged send HMIStatusNotification if neded
+   * @brief OnStateChanged send HMIStatusNotification if needed
    * @param app application
    * @param old_state state before change
    * @param new_state state after change
