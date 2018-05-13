@@ -32,8 +32,9 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
-#include <list>
 
+#include <list>
+#include <map>
 #include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
