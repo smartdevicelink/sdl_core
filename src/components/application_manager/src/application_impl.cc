@@ -230,12 +230,26 @@ void ApplicationImpl::set_voice_communication_supported(
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
-  return is_media_ || is_voice_communication_application_ || is_navi_ ||
-         mobile_projection_enabled_;
+  const bool is_audio_app =
+      is_media_application() || is_voice_communication_supported() || is_navi();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "is audio app --> ((is_media_app: "
+                               << is_media_application() << ")"
+                               << " || (is_voice_communication_app: "
+                               << is_voice_communication_supported() << ")"
+                               << " || (is_navi: " << is_navi() << ")) --> "
+                               << is_audio_app);
+  return is_audio_app;
 }
 
 bool ApplicationImpl::IsVideoApplication() const {
-  return is_navi_ || mobile_projection_enabled_;
+  const bool is_video_app = is_navi() || mobile_projection_enabled();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha
+                    << "is video app --> ((is_navi: " << is_navi() << ")"
+                    << " || (mobile_projection: " << mobile_projection_enabled()
+                    << ")) --> " << is_video_app);
+  return is_video_app;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {

@@ -864,7 +864,7 @@ class StateControllerImplTest : public ::testing::Test {
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_TTS_SESSION);
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_PHONE_CALL);
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_SAFETY_MODE);
-    valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_NAVI_STREAMING);
+    valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_VIDEO_STREAMING);
   }
 
   void ConfigureApps() {
@@ -1120,7 +1120,7 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
           state_ctrl_->OnNaviStreamingStarted();
           break;
         }
@@ -1179,7 +1179,7 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
           state_ctrl_->OnNaviStreamingStarted();
           break;
         }
@@ -1231,7 +1231,7 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
           state_ctrl_->OnNaviStreamingStopped();
           break;
         }
@@ -2203,8 +2203,8 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(simple_app_,
-                                                   app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(simple_app_,
+                                                    app_manager_mock_);
   TestSetState(simple_app_,
                state_navi_streming,
                APP_TYPE_NON_MEDIA,
@@ -2214,8 +2214,8 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_app_,
-                                                   app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(media_app_,
+                                                    app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(media_app_,
@@ -2227,8 +2227,8 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_app_,
-                                                   app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(media_app_,
+                                                    app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(media_app_,
@@ -2240,7 +2240,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateVCApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(vc_app_,
@@ -2252,7 +2252,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateVCApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(vc_app_,
@@ -2263,8 +2263,8 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateNaviApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(navi_app_,
-                                                   app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(navi_app_,
+                                                    app_manager_mock_);
   TestSetState(navi_app_,
                state_navi_streming,
                APP_TYPE_NAVI,
@@ -2273,8 +2273,8 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateNaviApplication) {
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateMediaNaviApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_navi_app_,
-                                                   app_manager_mock_);
+      utils::MakeShared<am::VideoStreamingHmiState>(media_navi_app_,
+                                                    app_manager_mock_);
   TestSetState(media_navi_app_,
                state_navi_streming,
                APP_TYPE_NAVI,
@@ -2335,7 +2335,7 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
 
-  TestMixState<am::PhoneCallHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::PhoneCallHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PreparePhoneCallHMIStateResults);
 }
 
@@ -2344,7 +2344,7 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
 
-  TestMixState<am::PhoneCallHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::PhoneCallHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PreparePhoneCallHMIStateResults);
 }
 
@@ -2373,7 +2373,7 @@ TEST_F(StateControllerImplTest, MixNaviStreamingWithVRAttenuatedNotSupported) {
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
 
-  TestMixState<am::VRHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::VRHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareVRTTSHMIStateResults);
 }
 
@@ -2381,7 +2381,7 @@ TEST_F(StateControllerImplTest, MixNaviStreamingWithVRAttenuatedSupported) {
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
 
-  TestMixState<am::VRHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::VRHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareVRTTSHMIStateResults);
 }
 
@@ -2395,7 +2395,7 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
 
-  TestMixState<am::TTSHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::TTSHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareVRTTSHMIStateResults);
 }
 
@@ -2403,7 +2403,7 @@ TEST_F(StateControllerImplTest, MixNaviStreamingWithTTSAttenueatedSupported) {
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
 
-  TestMixState<am::TTSHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::TTSHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareNaviStreamTTSStateResult);
 }
 
@@ -2428,7 +2428,7 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
 
-  TestMixState<am::SafetyModeHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::SafetyModeHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareVRTTSHMIStateResults);
 }
 
@@ -2437,7 +2437,7 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
 
-  TestMixState<am::SafetyModeHmiState, am::NaviStreamingHmiState>(
+  TestMixState<am::SafetyModeHmiState, am::VideoStreamingHmiState>(
       &StateControllerImplTest::PrepareVRTTSHMIStateResults);
 }
 

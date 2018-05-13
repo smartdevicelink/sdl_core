@@ -265,7 +265,7 @@ class ApplicationImpl : public virtual Application,
    *
    * @return true if application is media, voice communication or navigation
    */
-  virtual bool IsAudioApplication() const;
+  bool IsAudioApplication() const OVERRIDE;
 
   bool IsVideoApplication() const OVERRIDE;
 
