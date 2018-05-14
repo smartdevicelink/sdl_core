@@ -284,7 +284,7 @@ TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
 
   EXPECT_CALL(
       app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
+      updateRequestTimeout(kConnectionKey, kCorrelationId, _));
 
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);
