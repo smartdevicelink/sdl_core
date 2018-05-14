@@ -85,11 +85,12 @@ class OnSystemRequestNotificationTest
 };
 
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
-  const RequestType::eType kRequestType = RequestType::PROPRIETARY;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::PROPRIETARY;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -129,11 +130,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -166,11 +168,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -190,11 +193,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
