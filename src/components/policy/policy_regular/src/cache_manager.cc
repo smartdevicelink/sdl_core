@@ -1565,9 +1565,13 @@ RequestType::State CacheManager::GetAppRequestTypesState(
   const policy_table::RequestTypes& request_types =
       *app_policies_iter->second.RequestType;
   if (!request_types.is_initialized()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request types for " << policy_app_id << " are OMITTED");
     return RequestType::State::OMITTED;
   }
   if (request_types.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request types for " << policy_app_id << " are EMPTY");
     return RequestType::State::EMPTY;
   }
   return RequestType::State::AVAILABLE;
@@ -1592,8 +1596,8 @@ void CacheManager::GetAppRequestTypes(
     return;
   }
 
-  for (auto it_request_types : *policy_iter->second.RequestType) {
-    request_types.push_back(EnumToJsonString(it_request_types));
+  for (const auto& request_type : *policy_iter->second.RequestType) {
+    request_types.push_back(EnumToJsonString(request_type));
   }
   return;
 }
@@ -1609,12 +1613,16 @@ RequestSubType::State CacheManager::GetAppRequestSubTypesState(
                   "Can't find request subtypes for app_id " << policy_app_id);
     return RequestSubType::State::UNAVAILABLE;
   }
-  const policy_table::RequestSubTypes& request_types =
+  const policy_table::RequestSubTypes& request_subtypes =
       *app_policies_iter->second.RequestSubType;
-  if (!request_types.is_initialized()) {
+  if (!request_subtypes.is_initialized()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request subtypes for " << policy_app_id << " are OMITTED");
     return RequestSubType::State::OMITTED;
   }
-  if (request_types.empty()) {
+  if (request_subtypes.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request subtypes for " << policy_app_id << " are EMPTY");
     return RequestSubType::State::EMPTY;
   }
   return RequestSubType::State::AVAILABLE;
@@ -1639,8 +1647,8 @@ void CacheManager::GetAppRequestSubTypes(
     return;
   }
 
-  for (auto it_request_subtypes : *policy_iter->second.RequestSubType) {
-    request_types.push_back(it_request_subtypes);
+  for (const auto& request_subtype : *policy_iter->second.RequestSubType) {
+    request_types.push_back(request_subtype);
   }
   return;
 }
