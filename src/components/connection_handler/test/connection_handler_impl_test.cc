@@ -37,8 +37,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/common.h"
 // TODO(EZamakhov): move security test
+#ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
+#endif  // ENABLE_SECURITY
 #include "protocol_handler/mock_protocol_handler.h"
 #include "connection_handler/mock_connection_handler_observer.h"
 #include "connection_handler/mock_connection_handler_settings.h"
@@ -183,7 +185,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    const Connection& connection = *connection_list.begin()->second;
+    const Connection& connection = *conn_it->second;
 
     const SessionMap& session_map = connection.session_map();
     SessionMap::const_iterator sess_it = session_map.find(session_id);
@@ -214,7 +216,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    const Connection& connection = *connection_list.begin()->second;
+    const Connection& connection = *conn_it->second;
 
     const SessionMap& session_map = connection.session_map();
     ASSERT_FALSE(session_map.empty());
@@ -504,6 +506,13 @@ TEST_F(ConnectionHandlerTest, GetPairFromKey) {
   connection_handler_->PairFromKey(connection_key_, &test_uid, &session_id);
   EXPECT_EQ(uid_, test_uid);
   EXPECT_EQ(out_context_.new_session_id_, session_id);
+}
+
+MATCHER_P(SameDevice, device, "") {
+  return arg.device_handle() == device.device_handle() &&
+         arg.user_friendly_name() == device.user_friendly_name() &&
+         arg.mac_address() == device.mac_address() &&
+         arg.connection_type() == device.connection_type();
 }
 
 TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
@@ -1975,6 +1984,41 @@ TEST_F(ConnectionHandlerTest, RunAppOnDevice_AppOnDevice_SUCCESS) {
   EXPECT_CALL(mock_transport_manager_,
               RunAppOnDevice(device_handle_, bundle_id));
   connection_handler_->RunAppOnDevice(hash_of_mac_address, bundle_id);
+}
+
+TEST_F(ConnectionHandlerTest, OnDeviceConnectionSwitching) {
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  const transport_manager::DeviceInfo device_info_1(
+      device_handle_, mac_address_, device_name_, connection_type_);
+
+  connection_handler_->OnDeviceAdded(device_info_1);
+
+  const auto second_mac_address = "second_mac_address";
+  const transport_manager::DeviceInfo device_info_2(device_handle_ + 1,
+                                                    second_mac_address,
+                                                    "second_device_name",
+                                                    "second_connection_type");
+
+  connection_handler_->OnDeviceAdded(device_info_2);
+
+  connection_handler::Device d1(device_info_1.device_handle(),
+                                device_info_1.name(),
+                                device_info_1.mac_address(),
+                                device_info_1.connection_type());
+
+  connection_handler::Device d2(device_info_2.device_handle(),
+                                device_info_2.name(),
+                                device_info_2.mac_address(),
+                                device_info_2.connection_type());
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnDeviceSwitchingStart(SameDevice(d1), SameDevice(d2)));
+
+  connection_handler_->OnDeviceSwitchingStart(mac_address_, second_mac_address);
 }
 
 }  // namespace connection_handler_test
