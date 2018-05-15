@@ -129,7 +129,6 @@ class DeleteCommandRequestTest
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(hmi_interfaces_));
-
   }
 
   NiceMock<MockHmiInterfaces> hmi_interfaces_;

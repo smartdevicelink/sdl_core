@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief TTSSetGlobalPropertiesResponse command class
  **/
-class TTSSetGlobalPropertiesResponse : public app_mngr::commands::ResponseFromHMI {
+class TTSSetGlobalPropertiesResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSSetGlobalPropertiesResponse class constructor
