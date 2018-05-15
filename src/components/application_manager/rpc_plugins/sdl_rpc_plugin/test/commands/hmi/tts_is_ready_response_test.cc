@@ -60,7 +60,7 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::TTSIsReadyResponse;
 using am::commands::CommandImpl;
 using test::components::event_engine_test::MockEventDispatcher;
