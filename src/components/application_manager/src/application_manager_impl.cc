@@ -2807,21 +2807,20 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   }
   MobileMessageQueue messages;
   app->SwapMobileMessageQueue(messages);
-  auto push_allowed_messages =
-      [this, &app](smart_objects::SmartObjectSPtr message) {
-        const std::string function_id = MessageHelper::StringifiedFunctionID(
-            static_cast<mobile_apis::FunctionID::eType>(
-                (*message)[strings::params][strings::function_id].asUInt()));
-        const RPCParams params;
-        const mobile_apis::Result::eType check_result =
-            CheckPolicyPermissions(app, function_id, params);
-        if (mobile_api::Result::SUCCESS == check_result) {
-          rpc_service_->ManageMobileCommand(message,
-                              commands::Command::SOURCE_SDL);
-        } else {
-          app->PushMobileMessage(message);
-        }
-      };
+  auto push_allowed_messages = [this, &app](
+      smart_objects::SmartObjectSPtr message) {
+    const std::string function_id = MessageHelper::StringifiedFunctionID(
+        static_cast<mobile_apis::FunctionID::eType>(
+            (*message)[strings::params][strings::function_id].asUInt()));
+    const RPCParams params;
+    const mobile_apis::Result::eType check_result =
+        CheckPolicyPermissions(app, function_id, params);
+    if (mobile_api::Result::SUCCESS == check_result) {
+      rpc_service_->ManageMobileCommand(message, commands::Command::SOURCE_SDL);
+    } else {
+      app->PushMobileMessage(message);
+    }
+  };
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 

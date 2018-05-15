@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief TTSPerformInteractionResponse command class
  **/
-class VRPerformInteractionResponse : public app_mngr::commands::ResponseFromHMI {
+class VRPerformInteractionResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief TTSPerformInteractionResponse class constructor
