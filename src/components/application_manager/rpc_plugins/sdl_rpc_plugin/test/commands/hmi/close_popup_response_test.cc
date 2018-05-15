@@ -51,7 +51,7 @@ namespace close_popup_response {
 
 using ::utils::SharedPtr;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::ClosePopupResponse;
 using am::commands::CommandImpl;
 
