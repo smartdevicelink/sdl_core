@@ -36,6 +36,7 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
@@ -44,6 +45,7 @@
 
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
+using test::components::application_manager_test::MockRPCService;
 
 using ::testing::_;
 using ::testing::Mock;
@@ -88,8 +90,6 @@ class RAManagerTest : public ::testing::Test {
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
     app_ext_ptr_ = utils::MakeShared<rc_rpc_plugin::RCAppExtension>(plugin_id);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
-
-    OnRCStatusNotoficationExpectations();
   }
 
   void CheckResultWithHMILevelAndAccessMode(
@@ -146,6 +146,8 @@ TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
 TEST_F(RAManagerTest,
        AcquireResource_AppRegisteredAnyHmiLevelResourceFree_Expect_Allowed) {
   // Arrange
+  EXPECT_CALL(mock_app_mngr_, application(kAppId1))
+        .WillOnce(Return(mock_app_1_));
   ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
   // Act & Assert
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,

@@ -13,7 +13,7 @@ bool RCRPCPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
   resource_allocation_manager_.reset(
-      new ResourceAllocationManagerImpl(app_manager));
+      new ResourceAllocationManagerImpl(app_manager, rpc_service));
   command_factory_.reset(
       new rc_rpc_plugin::RCCommandFactory(app_manager,
                                           rpc_service,
