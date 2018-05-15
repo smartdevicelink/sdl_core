@@ -754,7 +754,8 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming_StreamingNotApproved) {
   app_impl->set_video_streaming_approved(false);
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
@@ -763,7 +764,8 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming_StreamingNotApproved) {
 TEST_F(ApplicationImplTest, SuspendAudioStreaming_StreamingNotApproved) {
   app_impl->set_audio_streaming_approved(false);
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
@@ -804,7 +806,8 @@ TEST_F(ApplicationImplTest,
 TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingNotApproved) {
   app_impl->set_audio_streaming_approved(false);
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
@@ -820,7 +823,8 @@ TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming_StreamingNotApproved) {
   app_impl->set_video_streaming_approved(false);
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(0);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _)).Times(0);
   app_impl->SuspendStreaming(type);
