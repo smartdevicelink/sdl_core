@@ -57,7 +57,7 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::UIGetCapabilitiesResponse;
 using am::commands::CommandImpl;
 
