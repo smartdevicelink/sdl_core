@@ -82,8 +82,8 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 class ResponseToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
-      CreateCommand<commands::ResponseToHMI>());
+  SharedPtr<application_manager::commands::ResponseToHMI> command(
+      CreateCommand<application_manager::commands::ResponseToHMI>());
 
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
@@ -91,8 +91,8 @@ TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(ResponseToHMITest, Run_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
-      CreateCommand<commands::ResponseToHMI>());
+  SharedPtr<application_manager::commands::ResponseToHMI> command(
+      CreateCommand<application_manager::commands::ResponseToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
