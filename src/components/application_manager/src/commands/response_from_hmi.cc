@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-ResponseFromHMI::ResponseFromHMI(
-    const MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager,
+                                 rpc_service::RPCService& rpc_service,
+                                 HMICapabilities& hmi_capabilities,
+                                 policy::PolicyHandlerInterface& policy_handle)
     : CommandImpl(message,
                   application_manager,
                   rpc_service,
@@ -72,8 +71,7 @@ bool ResponseFromHMI::CleanUp() {
 void ResponseFromHMI::Run() {}
 
 void ResponseFromHMI::SendResponseToMobile(
-    const MessageSharedPtr& message,
-    ApplicationManager& application_manager) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
   rpc_service_.ManageMobileCommand(message, SOURCE_SDL);
