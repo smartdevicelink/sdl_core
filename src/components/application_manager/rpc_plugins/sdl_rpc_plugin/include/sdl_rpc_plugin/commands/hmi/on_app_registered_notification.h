@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnAppRegisteredNotification command class
  **/
-class OnAppRegisteredNotification : public app_mngr::commands::NotificationToHMI {
+class OnAppRegisteredNotification
+    : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnAppRegisteredNotification class constructor

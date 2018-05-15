@@ -64,7 +64,7 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
-  
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -96,13 +96,13 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
       .WillOnce(Return(dummy_msg));
   {
     ::testing::InSequence sequence;
-    
+
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(dummy_msg, _));
 
     EXPECT_CALL(app_mngr_,
                 UnregisterApplication(
                     kConnectionKey, mobile_apis::Result::SUCCESS, _, _));
-    
+
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));

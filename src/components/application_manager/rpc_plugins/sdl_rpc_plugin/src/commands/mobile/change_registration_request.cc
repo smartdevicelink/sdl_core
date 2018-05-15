@@ -441,8 +441,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int32_t& hmi_display_lang) {
-  const HMICapabilities& hmi_capabilities =
-      hmi_capabilities_;
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_;
   const smart_objects::SmartObject* ui_languages =
       hmi_capabilities.ui_supported_languages();
 
@@ -464,8 +463,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int32_t& hmi_display_lang) {
-  const HMICapabilities& hmi_capabilities =
-      hmi_capabilities_;
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_;
   const smart_objects::SmartObject* vr_languages =
       hmi_capabilities.vr_supported_languages();
 
@@ -487,8 +485,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int32_t& hmi_display_lang) {
-  const HMICapabilities& hmi_capabilities =
-      hmi_capabilities_;
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_;
   const smart_objects::SmartObject* tts_languages =
       hmi_capabilities.tts_supported_languages();
 

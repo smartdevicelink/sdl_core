@@ -263,7 +263,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
 
-
   command_->Run();
 }
 
@@ -277,7 +276,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_VerifyImageFail_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::INVALID_DATA));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
-
 
   command_->Run();
 }
@@ -334,7 +332,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
-
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
   command_->Run();
 }
@@ -367,7 +364,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
-
 
   if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
           .keyExists(am::strings::menu_name)) {
@@ -695,7 +691,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
 
   command_->Run();
 
-
   FillMessageFieldsItem2(message_);
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(2);
@@ -737,7 +732,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
   EXPECT_CALL(*mock_app_, AddChoiceSet(kChoiceSetId, _));
-
 
   command_->Run();
 

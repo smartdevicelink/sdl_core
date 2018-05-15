@@ -215,7 +215,6 @@ class SetGlobalPropertiesRequestTest
     ON_CALL(mock_hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,

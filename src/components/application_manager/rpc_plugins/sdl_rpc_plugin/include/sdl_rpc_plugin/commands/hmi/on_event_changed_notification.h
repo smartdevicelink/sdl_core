@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnEventChangedNotification command class
  **/
-class OnEventChangedNotification : public app_mngr::commands::NotificationFromHMI {
+class OnEventChangedNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnEventChangedNotification class constructor
