@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief MixingAudioSupportedResponse command class
  **/
-class MixingAudioSupportedResponse : public app_mngr::commands::ResponseFromHMI {
+class MixingAudioSupportedResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief MixingAudioSupportedResponse class constructor

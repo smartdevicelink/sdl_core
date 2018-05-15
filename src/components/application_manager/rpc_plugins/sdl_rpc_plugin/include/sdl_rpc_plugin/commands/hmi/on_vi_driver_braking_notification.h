@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief OnVIDriverBrakingNotification command class
  **/
-class OnVIDriverBrakingNotification : public app_mngr::commands::NotificationFromHMI {
+class OnVIDriverBrakingNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnVIDriverBrakingNotification class constructor

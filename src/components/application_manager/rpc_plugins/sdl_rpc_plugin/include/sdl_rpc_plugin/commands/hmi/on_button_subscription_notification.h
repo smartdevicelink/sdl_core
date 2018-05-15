@@ -45,7 +45,8 @@ namespace hmi {
 /**
  * @brief OnButtonSubscriptionNotification command class
  **/
-class OnButtonSubscriptionNotification : public app_mngr::commands::NotificationToHMI {
+class OnButtonSubscriptionNotification
+    : public app_mngr::commands::NotificationToHMI {
  public:
   /**
    * @brief OnButtonSubscriptionNotification class constructor

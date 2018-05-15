@@ -959,7 +959,7 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   permissions.push_back(permission);
 
   smart_objects::SmartObjectSPtr result;
-  
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
@@ -997,7 +997,7 @@ TEST_F(MessageHelperTest,
       entity_type_2, entity_id_2, entity_status_2));
 
   smart_objects::SmartObjectSPtr result;
-  
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 

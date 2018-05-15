@@ -70,8 +70,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_IsReady);
       const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_TTS);
-      HMICapabilities& hmi_capabilities =
-          hmi_capabilities_;
+      HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_tts_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_TTS)) {
