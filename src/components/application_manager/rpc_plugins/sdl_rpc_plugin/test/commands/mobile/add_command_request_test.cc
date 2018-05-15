@@ -587,7 +587,6 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
 }
 
 TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
-
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   utils::SharedPtr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);

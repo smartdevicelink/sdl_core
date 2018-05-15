@@ -248,8 +248,7 @@ bool SendLocationRequest::CheckHMICapabilities(
     return true;
   }
 
-  const HMICapabilities& hmi_capabilities =
-      hmi_capabilities_;
+  const HMICapabilities& hmi_capabilities = hmi_capabilities_;
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported.");
     return false;

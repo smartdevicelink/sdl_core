@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief ButtonGetCapabilitiesResponse command class
  **/
-class ButtonGetCapabilitiesResponse : public app_mngr::commands::ResponseFromHMI {
+class ButtonGetCapabilitiesResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief ButtonGetCapabilitiesResponse class constructor

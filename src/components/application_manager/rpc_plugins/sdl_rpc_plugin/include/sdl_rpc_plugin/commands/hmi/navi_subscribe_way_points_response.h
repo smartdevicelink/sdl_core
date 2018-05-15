@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief NaviSubscribeWaypoints command class
  **/
-class NaviSubscribeWayPointsResponse : public app_mngr::commands::ResponseFromHMI {
+class NaviSubscribeWayPointsResponse
+    : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
    * @brief NaviSubscribeWaypoints class constructor

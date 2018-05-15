@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnExitAllApplicationsNotification command class
  **/
-class OnExitAllApplicationsNotification : public app_mngr::commands::NotificationFromHMI {
+class OnExitAllApplicationsNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnExitAllApplicationsNotification class constructor

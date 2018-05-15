@@ -586,8 +586,7 @@ void SystemRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string& file =
         (*message_)[strings::msg_params][strings::file_name].asString();
-    policy_handler_.ReceiveMessageFromSDK(file,
-                                                                  binary_data);
+    policy_handler_.ReceiveMessageFromSDK(file, binary_data);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
