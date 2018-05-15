@@ -60,7 +60,7 @@ using ::utils::SharedPtr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::MixingAudioSupportedResponse;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using am::commands::CommandImpl;
 using am::HMICapabilities;
 namespace hmi_response = ::application_manager::hmi_response;
