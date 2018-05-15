@@ -184,6 +184,30 @@ void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
   }
 }
 
+void ResourceAllocationManagerImpl::SetResourceAquired(
+    const std::string& module_type, const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  allocated_resources_[module_type] = app_id;
+}
+
+void ResourceAllocationManagerImpl::SetResourceFree(
+    const std::string& module_type, const uint32_t app_id) {
+  AllocatedResources::const_iterator allocation =
+      allocated_resources_.find(module_type);
+  if (allocated_resources_.end() == allocation) {
+    LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is not allocated.");
+    return;
+  }
+  if (app_id != allocation->second) {
+    LOG4CXX_ERROR(logger_,
+                  "Resource " << module_type
+                              << " is allocated by different application "
+                              << allocation->second);
+  }
+  allocated_resources_.erase(allocation);
+  LOG4CXX_DEBUG(logger_, "Resource " << module_type << " is released.");
+}
+
 std::vector<std::string> ResourceAllocationManagerImpl::GetAcquiredResources(
     const uint32_t application_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
