@@ -52,7 +52,7 @@ namespace commands = sdl_rpc_plugin::commands;
 
 using ::testing::ReturnRef;
 using ::utils::SharedPtr;
-using sdl_rpc_plugin::commands::ResponseFromHMI;
+using application_manager::commands::ResponseFromHMI;
 using test::components::event_engine_test::MockEventDispatcher;
 
 typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
