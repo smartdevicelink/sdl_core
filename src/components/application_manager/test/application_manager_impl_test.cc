@@ -889,6 +889,10 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   ON_CALL(mock_application_manager_settings_, recording_file_name())
       .WillByDefault(ReturnRef(dummy_file_name));
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      new plugin_manager::MockRPCPluginManager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
+
   const uint32_t app_id_1 = 65537;
   const uint32_t app_id_2 = 65538;
 
