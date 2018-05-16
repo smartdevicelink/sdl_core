@@ -159,15 +159,6 @@ void SetGlobalPropertiesRequest::Run() {
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    if (ValidateVRHelpTitle(app->vr_help_title())) {
-      LOG4CXX_DEBUG(logger_, "App already contains VRHelp data");
-    } else {
-      if (!PrepareUIRequestDefaultVRHelpData(app, params)) {
-        LOG4CXX_ERROR(logger_, "default VRHElp data could not be generated");
-        SendResponse(false, mobile_apis::Result::INVALID_DATA);
-        return;
-      }
-    }
     PrepareUIRequestMenuAndKeyboardData(app, msg_params, params);
 
     // Preparing data
