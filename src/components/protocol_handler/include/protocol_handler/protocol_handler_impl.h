@@ -535,6 +535,10 @@ class ProtocolHandlerImpl
   void OnConnectionClosed(
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
+  void OnUnexpectedDisconnect(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::CommunicationError& error) OVERRIDE;
+
   /**
    * @brief OnPTUFinished the callback which signals PTU has finished
    *

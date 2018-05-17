@@ -1084,6 +1084,12 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   multiframe_builder_.RemoveConnection(connection_id);
 }
 
+void ProtocolHandlerImpl::OnUnexpectedDisconnect(
+    const transport_manager::ConnectionUID connection_id,
+    const transport_manager::CommunicationError& error) {
+  OnConnectionClosed(connection_id);
+}
+
 void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
 

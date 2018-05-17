@@ -1979,7 +1979,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
     const mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
             (*message)[strings::params][strings::function_id].asUInt());
-    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
+    if (app && function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
         (*message)[strings::msg_params][strings::success].asBool()) {
       LOG4CXX_INFO(logger_,
                    "Registered app "
