@@ -1314,6 +1314,8 @@
         <description>Reflects the current primary audio source (if selected).</description>
         <element name="NO_SOURCE_SELECTED">
         </element>
+        <element name="CD">
+        </element>
         <element name="USB">
         </element>
         <element name="USB2">
