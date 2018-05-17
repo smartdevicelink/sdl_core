@@ -48,6 +48,11 @@ const char khmiSettingsControlCapabilities[] = "hmiSettingsControlCapabilities";
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
 const char kSupportedLights[] = "supportedLights";
+
+// LightControlCapabilities
+const char kName[] = "name";
+const char kDensityAvailable[] = "densityAvailable";
+const char kSRGBColorSpaceAvailable[] = "sRGBColorSpaceAvailable";
 }  //  strings
 
 namespace result_codes {

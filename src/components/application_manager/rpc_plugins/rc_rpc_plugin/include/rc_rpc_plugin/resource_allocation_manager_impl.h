@@ -153,6 +153,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
   application_manager::rpc_service::RPCService& rpc_service_;
+  bool is_rc_enabled_;
 };
 }  // rc_rpc_plugin
 
