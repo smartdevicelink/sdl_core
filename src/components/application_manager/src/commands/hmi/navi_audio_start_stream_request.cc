@@ -54,7 +54,10 @@ AudioStartStreamRequest::AudioStartStreamRequest(
                                       << "; retry_number_ = " << retry_number_);
 }
 
-AudioStartStreamRequest::~AudioStartStreamRequest() {}
+AudioStartStreamRequest::~AudioStartStreamRequest() {
+  // see comment in NaviStartStreamRequest
+  unsubscribe_from_event(hmi_apis::FunctionID::Navigation_StartAudioStream);
+}
 
 void AudioStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

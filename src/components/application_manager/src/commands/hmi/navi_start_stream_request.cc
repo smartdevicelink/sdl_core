@@ -54,7 +54,11 @@ NaviStartStreamRequest::NaviStartStreamRequest(
                                       << "; retry_number_ = " << retry_number_);
 }
 
-NaviStartStreamRequest::~NaviStartStreamRequest() {}
+NaviStartStreamRequest::~NaviStartStreamRequest() {
+  // unsubscribe_from_all_events() in EventObserver's destructor isn't enough;
+  // we must unsubscribe before this NaviStartStreamRequest instance is removed
+  unsubscribe_from_event(hmi_apis::FunctionID::Navigation_StartStream);
+}
 
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
