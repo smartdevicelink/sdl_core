@@ -3274,7 +3274,7 @@
         <element name="EXTERIOR_LEFT_LIGHTS" value="903">
             <description>Include exterior lights located at the left side of the vehicle. For example, left puddle lights and spot lights.</description>
         </element>
-        <element name="EXTERIOR_RIGHT_LIGHTS" value="902">
+        <element name="EXTERIOR_RIGHT_LIGHTS" value="904">
             <description>Include exterior lights located at the right side of the vehicle. For example, right puddle lights and spot lights.</description>
         </element>
     </enum>
