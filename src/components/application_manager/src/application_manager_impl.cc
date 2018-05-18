@@ -197,7 +197,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
       new TimerTaskImpl<ApplicationManagerImpl>(
           this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
-  clearing_timer->Start(timeout_ms, timer::kSingleShot);
+  clearing_timer->Start(timeout_ms, timer::kPeriodic);
   timer_pool_.push_back(clearing_timer);
   commands_holder_.reset(new CommandHolderImpl(*this));
 }
