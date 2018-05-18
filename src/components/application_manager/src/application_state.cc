@@ -101,7 +101,6 @@ void ApplicationState::RemoveState(HmiState::StateID state) {
 }
 
 HmiStatePtr ApplicationState::GetState(HmiState::StateID state_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   switch (state_id) {
     case HmiState::StateID::STATE_ID_REGULAR:
       LOG4CXX_DEBUG(logger_, "Getting regular state.");

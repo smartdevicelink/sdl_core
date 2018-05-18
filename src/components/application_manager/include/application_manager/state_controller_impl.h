@@ -32,8 +32,9 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_
-#include <list>
 
+#include <list>
+#include <map>
 #include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
@@ -165,7 +166,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   virtual void OnNaviStreamingStopped();
 
   /**
-   * @brief OnStateChanged send HMIStatusNotification if neded
+   * @brief OnStateChanged send HMIStatusNotification if needed
    * @param app application
    * @param old_state state before change
    * @param new_state state after change
@@ -190,11 +191,11 @@ class StateControllerImpl : public event_engine::EventObserver,
    * Move other application to HmiStates if applied moved to FULL or LIMITED
    */
   struct HmiLevelConflictResolver {
-    ApplicationSharedPtr applied_;
-    HmiStatePtr state_;
+    const ApplicationSharedPtr applied_;
+    const HmiStatePtr state_;
     StateControllerImpl* state_ctrl_;
-    HmiLevelConflictResolver(ApplicationSharedPtr app,
-                             HmiStatePtr state,
+    HmiLevelConflictResolver(const ApplicationSharedPtr app,
+                             const HmiStatePtr state,
                              StateControllerImpl* state_ctrl)
         : applied_(app), state_(state), state_ctrl_(state_ctrl) {}
     void operator()(ApplicationSharedPtr to_resolve);
@@ -360,31 +361,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   void SetupRegularHmiState(ApplicationSharedPtr app, HmiStatePtr state);
 
   /**
-   * @brief IsSameAppType checks if apps has same types
-   * @param app1
-   * @param app2
-   * @return true if aps have same types, otherwise return false
-   */
-  bool IsSameAppType(ApplicationConstSharedPtr app1,
-                     ApplicationConstSharedPtr app2);
-
-  /**
-   * @brief SetupRegularHmiState set regular HMI State without
-   * resolving conflicts and ActivateApp request
-   * @param app application
-   * @param hmi_level of new regular state
-   * @param audio_state of new regular state
-   * @param video_state of new regular state
-   * @param system_context of new regular state
-   */
-  void SetupRegularHmiState(
-      ApplicationSharedPtr app,
-      const mobile_apis::HMILevel::eType hmi_level,
-      const mobile_apis::AudioStreamingState::eType audio_state,
-      const mobile_apis::VideoStreamingState::eType video_state,
-      const mobile_apis::SystemContext::eType system_context);
-
-  /**
    * @brief SetupRegularHmiState set regular HMI State without
    * resolving conflicts and ActivateApp request
    * @param app application
@@ -456,7 +432,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<HmiState::StateID> StateIDList;
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
-  std::map<uint32_t, HmiStatePtr> waiting_for_activate;
+  std::map<uint32_t, HmiStatePtr> waiting_for_activate_;
   ApplicationManager& app_mngr_;
 };
 }
