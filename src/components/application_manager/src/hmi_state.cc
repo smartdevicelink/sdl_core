@@ -276,9 +276,6 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
-  if (is_media_app()) {
-    return HMILevel::HMI_LIMITED;
-  }
   return HMILevel::HMI_BACKGROUND;
 }
 

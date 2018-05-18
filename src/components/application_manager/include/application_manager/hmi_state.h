@@ -411,6 +411,10 @@ class EmbeddedNavi : public HmiState {
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
+  mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE {
+    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, const HmiState::StateID src);
