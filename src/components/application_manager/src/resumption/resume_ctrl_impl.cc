@@ -161,7 +161,17 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
           static_cast<mobile_apis::HMILevel::eType>(
               saved_app[strings::hmi_level].asInt());
       LOG4CXX_DEBUG(logger_, "Saved HMI Level is : " << saved_hmi_level);
-      return SetAppHMIState(application, saved_hmi_level, true);
+      result = SetAppHMIState(application, saved_hmi_level, true);
+      if (result) {
+        const HMILevel::eType def_hmi_level =
+            application_manager_.GetDefaultHmiLevel(application);
+        if (def_hmi_level != saved_hmi_level) {
+          auto& help_prompt_manager = application->help_prompt_manager();
+          const bool is_restore = true;
+          help_prompt_manager.OnAppActivated(is_restore);
+        }
+      }
+      return result;
     } else {
       result = false;
       LOG4CXX_ERROR(logger_, "saved app data corrupted");

@@ -124,6 +124,7 @@ ApplicationImpl::ApplicationImpl(
     , mac_address_(mac_address)
     , device_id_(device_id)
     , usage_report_(mobile_app_id, statistics_manager)
+    , help_prompt_manager_impl_(*this, application_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
@@ -753,6 +754,10 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
+}
+
+HelpPromptManager& ApplicationImpl::help_prompt_manager() {
+  return help_prompt_manager_impl_;
 }
 
 bool ApplicationImpl::AreCommandLimitsExceeded(

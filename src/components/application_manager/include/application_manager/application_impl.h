@@ -44,6 +44,7 @@
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
 #include "protocol_handler/protocol_handler.h"
 
@@ -244,6 +245,11 @@ class ApplicationImpl : public virtual Application,
   void SetHashChangedDuringSuspend(const bool state) OVERRIDE;
 
   UsageStatistics& usage_report();
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  HelpPromptManager& help_prompt_manager() OVERRIDE;
 
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
@@ -475,6 +481,7 @@ class ApplicationImpl : public virtual Application,
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
+  HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;

@@ -427,6 +427,8 @@ void DynamicApplicationDataImpl::AddCommand(
   if (commands_.end() == it) {
     commands_[cmd_id] = new smart_objects::SmartObject(command);
   }
+  auto& help_prompt_mngr = help_prompt_manager();
+  help_prompt_mngr.OnVrCommandAdded(cmd_id, command);
 }
 
 void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
@@ -436,6 +438,8 @@ void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
     delete it->second;
     commands_.erase(it);
   }
+  auto& help_prompt_mngr = help_prompt_manager();
+  help_prompt_mngr.OnVrCommandDeleted(cmd_id);
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(

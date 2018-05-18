@@ -46,6 +46,7 @@
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
+#include "application_manager/help_prompt_manager.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
@@ -623,6 +624,11 @@ class Application : public virtual InitialApplicationData,
    * @return object for recording statistics
    */
   virtual UsageStatistics& usage_report() = 0;
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  virtual HelpPromptManager& help_prompt_manager() = 0;
 
   /**
    * @brief SetInitialState sets initial HMI state for application on

@@ -152,6 +152,9 @@ void SetGlobalPropertiesRequest::Run() {
 
     params[strings::app_id] = app->app_id();
     SendUIRequest(params, true);
+
+    auto& help_prompt_manager = app->help_prompt_manager();
+    help_prompt_manager.OnSetGlobalPropertiesReceived(params, false);
   } else {
     LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
     DCHECK_OR_RETURN_VOID(!is_vr_help_title_present && !is_vr_help_present);
@@ -188,6 +191,9 @@ void SetGlobalPropertiesRequest::Run() {
 
     params[strings::app_id] = app->app_id();
     SendTTSRequest(params, true);
+
+    auto& help_prompt_manager = app->help_prompt_manager();
+    help_prompt_manager.OnSetGlobalPropertiesReceived(params, false);
   }
 }
 
@@ -217,6 +223,9 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
+
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
@@ -225,6 +234,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
+      if (application.valid()) {
+        auto& help_prompt_manager = application->help_prompt_manager();
+        help_prompt_manager.OnSetGlobalPropertiesReceived(message, true);
+      }
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
@@ -234,6 +247,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
+      if (application.valid()) {
+        auto& help_prompt_manager = application->help_prompt_manager();
+        help_prompt_manager.OnSetGlobalPropertiesReceived(message, true);
+      }
       break;
     }
     default: {
@@ -249,10 +266,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   std::string response_info;
   const bool result = PrepareResponseParameters(result_code, response_info);
-
-  // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
 
   SendResponse(result,
                result_code,

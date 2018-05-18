@@ -657,6 +657,10 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
+  auto& help_prompt_manager = app->help_prompt_manager();
+  const bool is_restore = false;
+  help_prompt_manager.OnAppActivated(is_restore);
+
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
@@ -3242,6 +3246,9 @@ void ApplicationManagerImpl::UnregisterApplication(
       SendUpdateAppList();
     }
   }
+
+  auto& help_prompt_manager = app_to_remove->help_prompt_manager();
+  help_prompt_manager.OnAppUnregistered();
 
   commands_holder_->Clear(app_to_remove);
 
