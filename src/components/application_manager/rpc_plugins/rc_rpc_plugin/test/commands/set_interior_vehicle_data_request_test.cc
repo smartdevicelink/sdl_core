@@ -89,6 +89,8 @@ class SetInteriorVehicleDataRequestTest
             CheckHMIType(kPolicyAppId,
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
                          nullptr)).WillByDefault(Return(true));
+    ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
   }
 
   MessageSharedPtr CreateBasicMessage() {
