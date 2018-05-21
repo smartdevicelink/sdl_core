@@ -86,6 +86,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
     , start_session_frame_map_lock_()
     , start_session_frame_map_()
+    , tcp_enabled_(false)
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
