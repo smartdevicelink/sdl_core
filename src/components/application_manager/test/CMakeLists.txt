@@ -73,6 +73,11 @@ set(testSourcesMockHmi
   ${AM_TEST_DIR}/mock_hmi_command_factory.cc
 )
 
+set(testSourcesHelpPromptManager    
+${AM_TEST_DIR}/help_prompt_manager_test.cc
+${AM_TEST_DIR}/mock_message_helper.cc
+)
+
 if(REMOTE_CONTROL)
   list(APPEND testSources ${AM_TEST_DIR}/rc_policy_handler_test.cc)
 endif(REMOTE_CONTROL)
@@ -136,7 +141,9 @@ create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
 add_dependencies("application_manager_test" libbson)
 
-create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
+create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
+
+create_test("request_controller_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
 
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
