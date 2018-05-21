@@ -2308,6 +2308,7 @@
             [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -2328,6 +2329,7 @@
             [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -2348,6 +2350,7 @@
             [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -2367,6 +2370,7 @@
             [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",

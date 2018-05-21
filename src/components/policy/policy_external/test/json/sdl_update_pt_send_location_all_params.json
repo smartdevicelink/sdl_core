@@ -483,6 +483,7 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -505,6 +506,7 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -527,6 +529,7 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
@@ -548,6 +551,7 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",

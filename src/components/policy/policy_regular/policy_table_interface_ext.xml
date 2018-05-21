@@ -42,6 +42,7 @@
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
+        <element name="engineOilLife" />
         <element name="myKey" />
         <element name="airbagStatus" />
         <element name="bodyInformation" />

@@ -514,6 +514,7 @@
         <element name="VEHICLEDATA_ACCPEDAL" />
         <element name="VEHICLEDATA_STEERINGWHEEL" />
         <element name="VEHICLEDATA_FUELRANGE" />
+        <element name="VEHICLEDATA_ENGINEOILLIFE" />
     </enum>
     
     <enum name="ButtonName">
@@ -782,7 +783,11 @@
         </element>
         
         <element name="graphic">
-            <description>The image field for Show</description>
+            <description>The primary image field for Show</description>
+        </element>
+        
+        <element name="secondaryGraphic">
+            <description>The secondary image field for Show</description>
         </element>
         
         <element name="showConstantTBTIcon">
@@ -4129,6 +4134,9 @@
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -4235,6 +4243,9 @@
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4318,6 +4329,9 @@
         </param>
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4423,6 +4437,9 @@
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
         </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
+        </param>
         
         <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
@@ -4509,6 +4526,9 @@
         </param>
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4617,6 +4637,9 @@
         </param>
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -5838,6 +5861,9 @@
         </param>
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Vehicle Data -->

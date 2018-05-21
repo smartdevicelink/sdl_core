@@ -275,6 +275,7 @@ extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
+extern const char* engine_oil_life;
 
 // resuming
 extern const char* application_commands;
