@@ -2996,10 +2996,13 @@ void ApplicationManagerImpl::HeadUnitReset(
 void ApplicationManagerImpl::ClearAppsPersistentData() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<std::string> FilesList;
-  const std::string apps_info_storage_file = get_settings().app_info_storage();
-  file_system::DeleteFile(apps_info_storage_file);
-
   const std::string storage_folder = get_settings().app_storage_folder();
+
+  const std::string apps_info_storage_file =
+      !storage_folder.empty()
+          ? storage_folder + "/" + get_settings().app_info_storage()
+          : get_settings().app_info_storage();
+  file_system::DeleteFile(apps_info_storage_file);
 
   FilesList files = file_system::ListFiles(storage_folder);
   FilesList::iterator element_to_skip =

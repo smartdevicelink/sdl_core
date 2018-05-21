@@ -53,13 +53,17 @@ LastStateImpl::~LastStateImpl() {
 
 void LastStateImpl::SaveStateToFileSystem() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
   const std::string& str = dictionary_.toStyledString();
   const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   LOG4CXX_INFO(logger_,
                "LastState::SaveStateToFileSystem " << app_info_storage_ << str);
-  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+  DCHECK(file_system::Write(full_path, char_vector_pdata));
 }
 
 Json::Value& LastStateImpl::get_dictionary() {
@@ -67,8 +71,12 @@ Json::Value& LastStateImpl::get_dictionary() {
 }
 
 void LastStateImpl::LoadStateFromFileSystem() {
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
   std::string buffer;
-  bool result = file_system::ReadFile(app_info_storage_, buffer);
+  bool result = file_system::ReadFile(full_path, buffer);
   Json::Reader m_reader;
   if (result && m_reader.parse(buffer, dictionary_)) {
     LOG4CXX_INFO(logger_,
