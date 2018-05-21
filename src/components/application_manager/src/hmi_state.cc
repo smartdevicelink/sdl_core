@@ -155,10 +155,6 @@ VideoStreamingHmiState::VideoStreamingHmiState(
     utils::SharedPtr<Application> app, const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_VIDEO_STREAMING) {}
 
-DEPRECATED VideoStreamingHmiState::VideoStreamingHmiState(
-    uint32_t app_id, const ApplicationManager& app_mngr)
-    : HmiState(app_id, app_mngr, STATE_ID_VIDEO_STREAMING) {}
-
 mobile_apis::AudioStreamingState::eType
 VideoStreamingHmiState::audio_streaming_state() const {
   using namespace helpers;

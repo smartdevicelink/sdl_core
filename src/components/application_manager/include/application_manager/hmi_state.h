@@ -300,9 +300,6 @@ class VideoStreamingHmiState : public HmiState {
   VideoStreamingHmiState(utils::SharedPtr<Application> app,
                          const ApplicationManager& app_mngr);
 
-  DEPRECATED VideoStreamingHmiState(uint32_t app_id,
-                                    const ApplicationManager& app_mngr);
-
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
   mobile_apis::VideoStreamingState::eType video_streaming_state()
