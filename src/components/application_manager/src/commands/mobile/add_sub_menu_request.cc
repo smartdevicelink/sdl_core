@@ -58,9 +58,15 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
-    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
-    (*message_)[strings::msg_params][strings::menu_icon],
+
+  smart_objects::SmartObject received_msg_params =
+      (*message_)[strings::msg_params];
+  mobile_apis::Result::eType verification_result =
+      mobile_apis::Result::INVALID_ENUM;
+
+  if (received_msg_params.keyExists(strings::menu_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+    received_msg_params[strings::menu_icon],
     app,
     application_manager_);
 
@@ -72,7 +78,7 @@ void AddSubMenuRequest::Run() {
   }
 
   const int32_t menu_id =
-      (*message_)[strings::msg_params][strings::menu_id].asInt();
+      received_msg_params[strings::menu_id].asInt();
   if (app->FindSubMenu(menu_id)) {
     LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
@@ -80,7 +86,7 @@ void AddSubMenuRequest::Run() {
   }
 
   const std::string& menu_name =
-      (*message_)[strings::msg_params][strings::menu_name].asString();
+      received_msg_params[strings::menu_name].asString();
 
   if (app->IsSubMenuNameAlreadyExist(menu_name)) {
     LOG4CXX_ERROR(logger_, "Menu name " << menu_name << " is duplicated.");
@@ -98,22 +104,17 @@ void AddSubMenuRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
-      (*message_)[strings::msg_params][strings::menu_id];
-  if ((*message_)[strings::msg_params].keyExists(strings::position)) {
+      received_msg_params[strings::menu_id];
+  if (received_msg_params.keyExists(strings::position)) {
     msg_params[strings::menu_params][strings::position] =
-        (*message_)[strings::msg_params][strings::position];
+        received_msg_params[strings::position];
   }
   msg_params[strings::menu_params][strings::menu_name] =
-      (*message_)[strings::msg_params][strings::menu_name];
+      received_msg_params[strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
-  if (((*message_)[strings::msg_params].keyExists(strings::menu_icon)) &&
-      ((*message_)[strings::msg_params][strings::menu_icon].keyExists(
-              strings::value)) &&
-      (0 < (*message_)[strings::msg_params][strings::menu_icon][strings::value]
-              .length())) {
-    msg_params[strings::menu_icon] =
-            (*message_)[strings::msg_params][strings::menu_icon];
+  if (mobile_apis::Result::SUCCESS == verification_result) {
+    msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
   }
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
