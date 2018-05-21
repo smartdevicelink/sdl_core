@@ -60,16 +60,16 @@ using namespace file_system;
 using namespace app_launch;
 
 const std::string kAppStorageFolder = "app_storage_folder";
-const std::string kAppStorageFile = "./app_info.dat";
 const std::string kAppInfoStorage = "app_info_storage";
 
 class AppLaunchDataJsonTest : public ::testing::Test {
  private:
   virtual void SetUp() {
-    ::file_system::DeleteFile(kAppStorageFile);
+    const std::string storage_file = kAppStorageFolder + "/" + kAppInfoStorage;
+    ::file_system::DeleteFile(storage_file);
     test_last_state_ = std::auto_ptr<resumption::LastState>(
         new resumption::LastStateImpl(kAppStorageFolder, kAppInfoStorage));
-    ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
+    ASSERT_TRUE(::file_system::CreateFile(storage_file));
 
     NiceMock<app_launch_test::MockAppLaunchSettings> mock_app_launch_settings_;
     ON_CALL(mock_app_launch_settings_, max_number_of_ios_device())
@@ -84,10 +84,14 @@ class AppLaunchDataJsonTest : public ::testing::Test {
     res_json_.get()->Clear();
   }
 
-  static void SetUpTestCase() {}
+  static void SetUpTestCase() {
+    ::file_system::RemoveDirectory(kAppStorageFolder);
+    ::file_system::CreateDirectoryRecursively(kAppStorageFolder);
+  }
 
   static void TearDownTestCase() {
-    ::file_system::DeleteFile(kAppStorageFile);
+    const std::string storage_file = kAppStorageFolder + "/" + kAppInfoStorage;
+    ::file_system::DeleteFile(storage_file);
     ::file_system::RemoveDirectory(kAppStorageFolder);
   }
 
