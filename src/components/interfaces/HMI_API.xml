@@ -1874,6 +1874,27 @@
     </param>
 </struct>
 
+<struct name="RGBColor">
+  <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+  <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+  <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+</struct>
+
+<struct name="TemplateColorScheme">
+  <description>
+    A color scheme for all display layout templates.
+  </description>
+  <param name="primaryColor" type="Common.RGBColor" mandatory="false">
+    <description>The primary "accent" color</description>
+  </param>
+  <param name="secondaryColor" type="Common.RGBColor" mandatory="false">
+      <description>The secondary "accent" color</description>
+  </param>
+  <param name="backgroundColor" type="Common.RGBColor" mandatory="false">
+    <description>The color of the background</description>
+  </param>
+</struct>
+
 <struct name="HMIApplication">
     <description>Data type containing information about application needed by HMI.</description>
     <param name="appName" type="String" maxlength="100" mandatory="true">
@@ -1931,6 +1952,8 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
 </struct>
 
 <struct name="MenuParams">
@@ -3674,6 +3697,8 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">

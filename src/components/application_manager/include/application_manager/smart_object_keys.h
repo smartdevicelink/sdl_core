@@ -178,6 +178,15 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* day_color_scheme;
+extern const char* night_color_scheme;
+extern const char* primary_color;
+extern const char* secondary_color;
+extern const char* background_color;
+extern const char* red;
+extern const char* green;
+extern const char* blue;
+extern const char* display_layout;
 
 // PutFile
 extern const char* sync_file_name;

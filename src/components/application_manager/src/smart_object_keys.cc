@@ -142,6 +142,15 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* day_color_scheme = "dayColorScheme";
+const char* night_color_scheme = "nightColorScheme";
+const char* primary_color = "primaryColor";
+const char* secondary_color = "secondaryColor";
+const char* background_color = "backgroundColor";
+const char* red = "red";
+const char* green = "green";
+const char* blue = "blue";
+const char* display_layout = "displayLayout";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

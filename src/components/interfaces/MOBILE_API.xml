@@ -2892,7 +2892,27 @@
             <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
         </param>
     </struct>
-    
+
+    <struct name="RGBColor">
+        <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+    </struct>
+
+    <struct name="TemplateColorScheme">
+        <description>
+            A color scheme for all display layout templates.
+        </description>
+        <param name="primaryColor" type="RGBColor" mandatory="false">
+            <description>The primary "accent" color</description>
+        </param>
+        <param name="secondaryColor" type="RGBColor" mandatory="false">
+            <description>The secondary "accent" color</description>
+        </param>
+        <param name="backgroundColor" type="RGBColor" mandatory="false">
+            <description>The color of the background</description>
+        </param>
+    </struct>
     <!-- Requests/Responses -->
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -2993,6 +3013,10 @@
                 See AppInfo.
             </description>
         </param>
+
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="response">
@@ -5268,6 +5292,9 @@
             </description>
         </param>
         
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
