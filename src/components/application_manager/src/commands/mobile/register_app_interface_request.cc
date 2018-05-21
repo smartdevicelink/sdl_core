@@ -410,7 +410,12 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
 
 void FillVRRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
-  response_params[strings::language] = hmi_capabilities.active_vr_language();
+  hmi_apis::Common_Language::eType active_vr_language =
+      hmi_capabilities.active_vr_language();
+  if (active_vr_language != hmi_apis::Common_Language::INVALID_ENUM) {
+    response_params[strings::language] = active_vr_language;
+  }
+
   if (hmi_capabilities.vr_capabilities()) {
     response_params[strings::vr_capabilities] =
         *hmi_capabilities.vr_capabilities();
@@ -427,7 +432,12 @@ void FillVIRelatedFields(smart_objects::SmartObject& response_params,
 
 void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
                           const HMICapabilities& hmi_capabilities) {
-  response_params[strings::language] = hmi_capabilities.active_tts_language();
+  hmi_apis::Common_Language::eType active_tts_language =
+      hmi_capabilities.active_tts_language();
+  if (active_tts_language != hmi_apis::Common_Language::INVALID_ENUM) {
+    response_params[strings::language] = active_tts_language;
+  }
+
   if (hmi_capabilities.speech_capabilities()) {
     response_params[strings::speech_capabilities] =
         *hmi_capabilities.speech_capabilities();
@@ -440,8 +450,12 @@ void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
 
 void FillUIRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
-  response_params[strings::hmi_display_language] =
+  hmi_apis::Common_Language::eType active_ui_language =
       hmi_capabilities.active_ui_language();
+  if (active_ui_language != hmi_apis::Common_Language::INVALID_ENUM) {
+    response_params[strings::hmi_display_language] = active_ui_language;
+  }
+
   if (hmi_capabilities.display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
