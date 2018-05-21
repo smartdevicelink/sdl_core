@@ -838,7 +838,7 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = **/CMakeLists.txt \
-                         docs/FORD.OpenSDL.SDD.TPL.dox
+                         docs/SDL.SDD.Template.dox
                          src/components/test_main.cc
                          src/thirdPartyLibs \
                          tools/FlexeLint \

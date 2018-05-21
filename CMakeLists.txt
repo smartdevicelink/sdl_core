@@ -39,7 +39,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
-option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
@@ -90,15 +89,12 @@ else ()
 endif()
 
 if (HMI_TYPE_OPTION)
-  if (${HMI_TYPE_OPTION} STREQUAL "HTML5")
-    message(STATUS "Jenkins integration: select HTML5 HMI")
-    set (HMI "web")
-  elseif (${HMI_TYPE_OPTION} STREQUAL "NONE")
+  if (${HMI_TYPE_OPTION} STREQUAL "NONE")
     message(STATUS "Jenkins integration: select HMI none")
     set (HMI "no")
   else ()
-    message(STATUS "Jenkins integration: select QML HMI none")
-    set (HMI "qt")
+    message(STATUS "Jenkins integration: select HTML5 HMI")
+    set (HMI "web")
   endif()
 endif()
 
@@ -167,6 +163,65 @@ endif()
 
 #Jenkins integration section end
 
+#Deliver Build Configuration
+
+set(build_config_path "src/appMain/build_config.txt")
+FILE(WRITE "${build_config_path}" "")
+
+get_property(cHelpString CACHE EXTENDED_POLICY PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE REMOTE_CONTROL PROPERTY HELPSTRING)
+get_property(cType CACHE REMOTE_CONTROL PROPERTY TYPE)
+get_property(cValue CACHE REMOTE_CONTROL PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "REMOTE_CONTROL:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_BT_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_BT_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_USB_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_USB_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_USB_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_USB_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_SECURITY PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_SECURITY PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_MEDIA_MODE:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE TELEMETRY_MONITOR PROPERTY HELPSTRING)
+get_property(cType CACHE TELEMETRY_MONITOR PROPERTY TYPE)
+get_property(cValue CACHE TELEMETRY_MONITOR PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "TELEMETRY_MONITOR:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE HMI PROPERTY HELPSTRING)
+get_property(cType CACHE HMI PROPERTY TYPE)
+get_property(cValue CACHE HMI PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
+
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
   COMMAND tar -cz -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
@@ -183,7 +238,6 @@ add_custom_target(genivi-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} genivi
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
-
 
 project (${PROJECT})
 
@@ -324,38 +378,10 @@ if (EXTENDED_MEDIA_MODE)
   add_definitions(${GLIB2_CFLAGS})
 endif()
 
-if(HMI STREQUAL "qt")
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(qt_version "4.8.5")
-  else()
-    set(qt_version "5.1.0")
-  endif()
-
-  execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
-    OUTPUT_VARIABLE qt_bin_dir
-  )
-  message(STATUS "Binary directory Qt ${qt_version} is ${qt_bin_dir}")
-  set(ENV{PATH} ${qt_bin_dir}:$ENV{PATH})
-
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
-  else ()
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5DBus REQUIRED)
-    find_package(Qt5Qml REQUIRED)
-    find_package(Qt5Quick REQUIRED)
-    set(qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
-  endif()
-endif()
-
 # Building application
 
 # --- Type HMI
-if (HMI STREQUAL "qt")
-    set(QT_HMI ON)
-    add_definitions(-DQT_HMI)
-elseif (HMI STREQUAL "web")
+if (HMI STREQUAL "web")
     set(WEB_HMI ON)
     add_definitions(-DWEB_HMI)
 else ()
@@ -363,9 +389,6 @@ else ()
     add_definitions(-DNO_HMI)
 endif ()
 
-if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
-    set(HMIADAPTER "dbus")
-endif()
 if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
@@ -374,7 +397,10 @@ if (HMIADAPTER STREQUAL "dbus")
     set(HMI_DBUS_API ON)
     add_definitions(-DDBUS_HMIADAPTER)
     add_definitions(-DHMI_DBUS_API)
-    set(install-3rd_party_dbus "install-3rd_party_dbus")
+
+    find_package(DBus REQUIRED)
+    set(DBUS_LIBS_DIRECTORY ${DBUS_LIBRARY_DIRS} PARENT_SCOPE)
+    message(${DBUS_INCLUDE_DIRS})
 endif()
 if (HMIADAPTER STREQUAL "messagebroker")
     set(HMI_JSON_API ON)
@@ -478,4 +504,3 @@ find_package(Doxygen)
     message(STATUS "To enable processing of MscGen comments please install mscgen")
     message(STATUS "sudo apt-get install mscgen")
 endif()
-

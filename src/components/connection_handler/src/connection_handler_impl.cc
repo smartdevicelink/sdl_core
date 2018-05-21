@@ -38,6 +38,7 @@
 
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
+#include "encryption/hashing.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
@@ -136,15 +137,21 @@ void ConnectionHandlerImpl::OnDeviceFound(
 void ConnectionHandlerImpl::OnDeviceAdded(
     const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-  device_list_.insert(
-      DeviceMap::value_type(device_info.device_handle(),
-                            Device(device_info.device_handle(),
-                                   device_info.name(),
-                                   device_info.mac_address(),
-                                   device_info.connection_type())));
-  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
+  auto handle = device_info.device_handle();
+
+  Device device(handle,
+                device_info.name(),
+                device_info.mac_address(),
+                device_info.connection_type());
+
+  auto result = device_list_.insert(std::make_pair(handle, device));
+
+  if (!result.second) {
+    LOG4CXX_ERROR(logger_,
+                  "Device with handle " << handle
+                                        << " is known already. "
+                                           "Information won't be updated.");
+    return;
   }
 }
 
@@ -180,6 +187,49 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
   device_list_.erase(device_info.device_handle());
+}
+
+void ConnectionHandlerImpl::OnDeviceSwitchingFinish(
+    const transport_manager::DeviceUID& device_uid) {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceSwitchingFinish(
+        encryption::MakeHash(device_uid));
+  }
+}
+
+namespace {
+struct DeviceFinder {
+  explicit DeviceFinder(const std::string& device_uid)
+      : device_uid_(device_uid) {}
+  bool operator()(const DeviceMap::value_type& device) {
+    return device_uid_ == device.second.mac_address();
+  }
+
+ private:
+  const std::string& device_uid_;
+};
+}  // namespace
+
+void ConnectionHandlerImpl::OnDeviceSwitchingStart(
+    const std::string& device_uid_from, const std::string& device_uid_to) {
+  auto device_from =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_from)));
+
+  auto device_to =
+      std::find_if(device_list_.begin(),
+                   device_list_.end(),
+                   DeviceFinder(encryption::MakeHash(device_uid_to)));
+
+  DCHECK_OR_RETURN_VOID(device_list_.end() != device_from);
+  DCHECK_OR_RETURN_VOID(device_list_.end() != device_to);
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceSwitchingStart(device_from->second,
+                                                         device_to->second);
+  }
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
@@ -284,7 +334,6 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
 }
 #endif  // ENABLE_SECURITY
 
-// DEPRECATED
 uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
@@ -363,18 +412,17 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     const BsonObject* params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint32_t new_session_id = 0;
-  uint32_t hash_id = protocol_handler::HASH_ID_WRONG;
+  std::vector<std::string> rejected_params;
+  protocol_handler::SessionContext context(connection_handle,
+                                           session_id,
+                                           0,
+                                           service_type,
+                                           protocol_handler::HASH_ID_WRONG,
+                                           is_protected);
 
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
-    std::vector<std::string> empty;
-    protocol_handler_->NotifySessionStartedResult(connection_handle,
-                                                  session_id,
-                                                  new_session_id,
-                                                  hash_id,
-                                                  is_protected,
-                                                  empty);
+    protocol_handler_->NotifySessionStarted(context, rejected_params);
     return;
   }
 #endif  // ENABLE_SECURITY
@@ -382,19 +430,22 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    NotifySessionStartedFailure(connection_handle, session_id, is_protected);
+    protocol_handler_->NotifySessionStarted(context, rejected_params);
     return;
   }
 
   Connection* connection = it->second;
+  context.is_new_service_ =
+      !connection->SessionServiceExists(session_id, service_type);
+
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
-    new_session_id = connection->AddNewSession();
-    if (0 == new_session_id) {
+    context.new_session_id_ = connection->AddNewSession();
+    if (0 == context.new_session_id_) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
-      NotifySessionStartedFailure(connection_handle, session_id, is_protected);
+      protocol_handler_->NotifySessionStarted(context, rejected_params);
       return;
     }
-    hash_id = KeyFromPair(connection_handle, new_session_id);
+    context.hash_id_ = KeyFromPair(connection_handle, context.new_session_id_);
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_,
@@ -404,22 +455,25 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 #endif  // ENABLE_SECURITY
                         << " service " << static_cast<int>(service_type)
                         << " for session " << static_cast<int>(session_id));
-      NotifySessionStartedFailure(connection_handle, session_id, is_protected);
+      protocol_handler_->NotifySessionStarted(context, rejected_params);
       return;
     }
-    new_session_id = session_id;
-    hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
+    context.new_session_id_ = session_id;
+    context.hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
-    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
+    const uint32_t session_key =
+        KeyFromPair(connection_handle, context.new_session_id_);
 
-    ServiceStartedContext context(connection_handle,
-                                  session_id,
-                                  new_session_id,
-                                  service_type,
-                                  hash_id,
-                                  is_protected);
+    uint32_t app_id = 0;
+    GetDataOnSessionKey(
+        session_key, &app_id, NULL, static_cast<DeviceHandle*>(NULL));
+    if (app_id > 0) {
+      context.is_ptu_required_ =
+          !connection_handler_observer_->CheckAppIsNavi(app_id);
+    }
+
     {
       sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
       start_service_context_map_[session_key] = context;
@@ -432,13 +486,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
         params);
   } else {
     if (protocol_handler_) {
-      std::vector<std::string> empty;
-      protocol_handler_->NotifySessionStartedResult(connection_handle,
-                                                    session_id,
-                                                    new_session_id,
-                                                    hash_id,
-                                                    is_protected,
-                                                    empty);
+      protocol_handler_->NotifySessionStarted(context, rejected_params);
     }
   }
 }
@@ -449,11 +497,10 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
     std::vector<std::string>& rejected_params) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ServiceStartedContext context;
+  protocol_handler::SessionContext context;
   {
     sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
-    std::map<uint32_t, ServiceStartedContext>::iterator it =
-        start_service_context_map_.find(session_key);
+    auto it = start_service_context_map_.find(session_key);
     if (it == start_service_context_map_.end()) {
       LOG4CXX_ERROR(logger_, "context for start service not found!");
       return;
@@ -465,8 +512,7 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
   Connection* connection = NULL;
   {
     sync_primitives::AutoReadLock lock(connection_list_lock_);
-    ConnectionList::iterator it =
-        connection_list_.find(context.connection_handle_);
+    ConnectionList::iterator it = connection_list_.find(context.connection_id_);
     if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "connection not found");
       return;
@@ -480,35 +526,14 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
     if (protocol_handler::kRpc == context.service_type_) {
       connection->RemoveSession(context.new_session_id_);
     } else {
-      connection->RemoveService(context.session_id_, context.service_type_);
+      connection->RemoveService(context.initial_session_id_,
+                                context.service_type_);
     }
     context.new_session_id_ = 0;
   }
 
   if (protocol_handler_ != NULL) {
-    protocol_handler_->NotifySessionStartedResult(context.connection_handle_,
-                                                  context.session_id_,
-                                                  context.new_session_id_,
-                                                  context.hash_id_,
-                                                  context.is_protected_,
-                                                  rejected_params);
-  }
-}
-
-void ConnectionHandlerImpl::NotifySessionStartedFailure(
-    const transport_manager::ConnectionUID connection_handle,
-    const uint8_t session_id,
-    bool is_protected) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (protocol_handler_) {
-    std::vector<std::string> empty;
-    protocol_handler_->NotifySessionStartedResult(
-        connection_handle,
-        session_id,
-        0,
-        protocol_handler::HASH_ID_WRONG,
-        is_protected,
-        empty);
+    protocol_handler_->NotifySessionStarted(context, rejected_params);
   }
 }
 
@@ -542,7 +567,6 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   CloseConnection(connection_handle);
 }
 
-// DEPRECATED
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
@@ -648,7 +672,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key,
     uint32_t* app_id,
     std::list<int32_t>* sessions_list,
-    uint32_t* device_id) const {
+    connection_handler::DeviceHandle* device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const int32_t error_result = -1;
@@ -692,6 +716,18 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   return 0;
 }
 
+int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
+    uint32_t key,
+    uint32_t* app_id,
+    std::list<int32_t>* sessions_list,
+    uint32_t* device_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DeviceHandle handle;
+  int32_t result = GetDataOnSessionKey(key, app_id, sessions_list, &handle);
+  *device_id = static_cast<uint32_t>(handle);
+  return result;
+}
+
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {
   return settings_;
 }
@@ -717,12 +753,11 @@ struct CompareMAC {
 
 bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
                                         DeviceHandle* device_handle) {
+  DCHECK_OR_RETURN(device_handle, false);
   DeviceMap::const_iterator it = std::find_if(
       device_list_.begin(), device_list_.end(), CompareMAC(mac_address));
   if (it != device_list_.end()) {
-    if (device_handle) {
-      *device_handle = it->first;
-    }
+    *device_handle = it->first;
     return true;
   }
   return false;
@@ -739,7 +774,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   int32_t result = -1;
   DeviceMap::const_iterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Device not found!");
+    LOG4CXX_ERROR(logger_, "Device not found for handle " << device_handle);
     return result;
   }
 
@@ -848,6 +883,24 @@ ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
 }
 
 #endif  // ENABLE_SECURITY
+
+bool ConnectionHandlerImpl::SessionServiceExists(
+    const uint32_t connection_key,
+    const protocol_handler::ServiceType& service_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  ConnectionList::const_iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    return false;
+  }
+  const Connection& connection = *it->second;
+  return connection.SessionServiceExists(session_id, service_type);
+}
 
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
   LOG4CXX_AUTO_TRACE(logger_);

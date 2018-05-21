@@ -47,6 +47,7 @@ EndAudioPassThruRequest::~EndAudioPassThruRequest() {}
 void EndAudioPassThruRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
 }
 
@@ -56,6 +57,7 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_EndAudioPassThru: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt());
@@ -64,9 +66,10 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
       if (result) {
-        bool ended_successfully = application_manager_.EndAudioPassThrough();
+        uint32_t app_id = connection_key();
+        bool ended_successfully = application_manager_.EndAudioPassThru(app_id);
         if (ended_successfully) {
-          application_manager_.StopAudioPassThru(connection_key());
+          application_manager_.StopAudioPassThru(app_id);
         }
       }
 

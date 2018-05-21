@@ -93,6 +93,7 @@ CryptoManagerImpl::CryptoManagerImpl(
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
+  InitCertExpTime();
 }
 
 CryptoManagerImpl::~CryptoManagerImpl() {
@@ -136,8 +137,13 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
+#ifdef OPENSSL_NO_SSL3
+      LOG4CXX_WARN(logger_, "OpenSSL does not support SSL3 protocol");
+      return false;
+#else
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
       break;
+#endif
     case TLSv1:
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
       break;
@@ -295,6 +301,8 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
 }
 
 bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (cert_data.empty()) {
     LOG4CXX_WARN(logger_, "Empty certificate");
     return false;
@@ -324,20 +332,35 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   }
 
   if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate");
+    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
     return false;
   }
 
   asn1_time_to_tm(X509_get_notAfter(cert));
 
   if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key");
+    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
     return false;
   }
+
   if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate ");
+    LOG4CXX_ERROR(logger_, "Could not use certificate: " << LastError());
     return false;
   }
+
+  X509_STORE* store = SSL_CTX_get_cert_store(context_);
+  if (store) {
+    X509* extra_cert = NULL;
+    while ((extra_cert = PEM_read_bio_X509(bio_cert, NULL, 0, 0))) {
+      if (extra_cert != cert) {
+        LOG4CXX_DEBUG(logger_,
+                      "Added new certificate to store: " << extra_cert);
+        X509_STORE_add_cert(store, extra_cert);
+      }
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
   return true;
 }
 
@@ -382,6 +405,10 @@ void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
     const int sec = pull_number_from_buf(buf, &index);
     expiration_time_.tm_sec = sec;
   }
+}
+
+void CryptoManagerImpl::InitCertExpTime() {
+  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
 }
 
 }  // namespace security_manager

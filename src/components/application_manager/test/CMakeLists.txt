@@ -31,12 +31,6 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-# TODO{ALeshin}: APPLINK-10792. Do not write tests which use
-# application manager(AM) singleton while refactoring of AM is finished.
-
-# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
-# cover with UT missed files.
-
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
@@ -68,9 +62,20 @@ set(testSources
   ${AM_TEST_DIR}/application_state_test.cc
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
-  ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
+  ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/command_holder_test.cc
+)
 
+set(testSourcesMockHmi
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+  ${AM_TEST_DIR}/application_manager_impl_mock_hmi_test.cc
+  ${AM_TEST_DIR}/mock_hmi_command_factory.cc
+)
+
+set(testSourcesHelpPromptManager    
+${AM_TEST_DIR}/help_prompt_manager_test.cc
+${AM_TEST_DIR}/mock_message_helper.cc
 )
 
 if(REMOTE_CONTROL)
@@ -101,10 +106,13 @@ set(LIBRARIES
   MediaManager
   Resumption
   ProtocolHandler
-  SecurityManager
   bson -L${BSON_LIBS_DIRECTORY}
   emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
+
+if (ENABLE_SECURITY)
+  list(APPEND LIBRARIES SecurityManager)
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
@@ -130,10 +138,13 @@ set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
+create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
 add_dependencies("application_manager_test" libbson)
-create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
-# TODO [AKozoriz] : Fix not buildable tests
+create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
+
+create_test("request_controller_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
+
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
   ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc

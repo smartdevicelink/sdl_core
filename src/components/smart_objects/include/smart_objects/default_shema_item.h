@@ -50,11 +50,20 @@ class CDefaultSchemaItem : public ISchemaItem {
  public:
   typedef TSchemaItemParameter<Type> ParameterType;
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
+   * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @return Errors::ERROR
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -99,8 +108,23 @@ CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
 
 template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
-  return (getSmartType() == Object.getType()) ? Errors::OK
-                                              : Errors::INVALID_VALUE;
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
+}
+
+template <typename Type>
+Errors::eType CDefaultSchemaItem<Type>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__) {
+  if (getSmartType() != Object.getType()) {
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(getSmartType()) +
+                                  ", got: " +
+                                  SmartObject::typeToString(Object.getType());
+    report__->set_validation_info(validation_info);
+    return Errors::INVALID_VALUE;
+  } else {
+    return Errors::OK;
+  }
 }
 
 template <typename Type>

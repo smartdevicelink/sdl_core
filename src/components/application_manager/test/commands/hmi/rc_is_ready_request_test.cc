@@ -55,7 +55,6 @@ using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::RCIsReadyRequest;
-using am::MockMessageHelper;
 using am::event_engine::Event;
 
 typedef SharedPtr<RCIsReadyRequest> RCIsReadyRequestPtr;
@@ -102,7 +101,7 @@ class RCIsReadyRequestTest
   void ExpectSendMessagesToHMI() {
     smart_objects::SmartObjectSPtr capabilities(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
-    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+    EXPECT_CALL(mock_message_helper_,
                 CreateModuleInfoSO(hmi_apis::FunctionID::RC_GetCapabilities, _))
         .WillOnce(Return(capabilities));
     EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));

@@ -53,6 +53,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/src
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/media_manager/include
@@ -70,22 +71,15 @@ include_directories(
   ${OPENSSL_INCLUDE_DIRECTORY}
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
-
-if (HMIADAPTER STREQUAL "messagebroker")
-  set (BROKER_LIBRARIES
-    message_broker_client
-    message_broker_server
-  )
-endif()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
 # info: cmake --help-policy CMP0015
 cmake_policy(SET CMP0015 NEW)
-link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
 
 if (TELEMETRY_MONITOR)
@@ -110,7 +104,6 @@ set(LIBRARIES
   TransportManager
   ${SecurityManagerLibrary}
   HMIMessageHandler
-  message_broker
   ${BROKER_LIBRARIES}
   Utils
   jsoncpp
@@ -137,7 +130,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    list(APPEND LIBRARIES Libusb-1.0.16)
+    list(APPEND LIBRARIES libusb-1.0.so)
   endif()
 endif()
 
@@ -152,10 +145,16 @@ list(APPEND LIBRARIES bson -L${BSON_LIBS_DIRECTORY})
 list(APPEND LIBRARIES emhashmap -L${EMHASHMAP_LIBS_DIRECTORY})
 
 add_executable(${PROJECT} ${SOURCES})
+
+if (HMIADAPTER STREQUAL "messagebroker")
+  add_dependencies(${PROJECT} Boost)
+  list(APPEND LIBRARIES libboost_system.so)
+endif()
+
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
-
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build_config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -213,7 +212,7 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin

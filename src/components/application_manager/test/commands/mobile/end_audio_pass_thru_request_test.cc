@@ -53,7 +53,6 @@ namespace end_audio_pass_thru_request {
 
 namespace am = ::application_manager;
 using ::testing::_;
-using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using am::commands::MessageSharedPtr;
@@ -64,15 +63,11 @@ using am::MockMessageHelper;
 typedef SharedPtr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
 
 class EndAudioPassThruRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  EndAudioPassThruRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   const uint32_t kConnectionKey = 2u;
+  const uint32_t app_id = kConnectionKey;
 
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -89,11 +84,7 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
-  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+  EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(false));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -120,7 +111,6 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 }  // namespace end_audio_pass_thru_request

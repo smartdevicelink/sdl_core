@@ -87,6 +87,7 @@ void DialNumberRequest::Run() {
       (*message_)[strings::msg_params][strings::number].asString();
   msg_params[strings::app_id] = application->hmi_app_id();
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
   SendHMIRequest(
       hmi_apis::FunctionID::BasicCommunication_DialNumber, &msg_params, true);
 }
@@ -106,6 +107,7 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       LOG4CXX_INFO(logger_, "Received DialNumber event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
       result_code = CommandRequestImpl::GetMobileResultCode(
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt()));

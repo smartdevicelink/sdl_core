@@ -3,6 +3,9 @@
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2017, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -116,7 +119,7 @@ void SubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   bool result = false;
-  CheckVISubscribtions(
+  CheckVISubscriptions(
       app, info, result_code, response_params, msg_params, result);
 
   if (mobile_apis::Result::INVALID_ENUM != result_code) {
@@ -149,6 +152,7 @@ void SubscribeVehicleDataRequest::Run() {
        ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
                  &msg_params,
                  true);
@@ -165,7 +169,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_ERROR(logger_, "Received unknown event.");
     return;
   }
-
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
 
@@ -250,6 +254,15 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       result_code = mobile_apis::Result::IGNORED;
       response_info = "Already subscribed on some provided VehicleData.";
     }
+
+    if (!vi_waiting_for_subscribe_.empty()) {
+      LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
+      VehicleInfoSubscriptions::const_iterator key =
+          vi_waiting_for_subscribe_.begin();
+      for (; key != vi_waiting_for_subscribe_.end(); ++key) {
+        app->SubscribeToIVI(*key);
+      }
+    }
   }
 
   UnsubscribeFailedSubscriptions(app, message[strings::msg_params]);
@@ -276,20 +289,33 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
     smart_objects::SmartObject& msg_params) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
+  auto vi_to_string =
+      [](const mobile_apis::VehicleDataType::eType vehicle_data) {
+        for (auto& vi_str_to_int_pair : MessageHelper::vehicle_data()) {
+          if (vehicle_data == vi_str_to_int_pair.second) {
+            return vi_str_to_int_pair.first;
+          }
+        }
+        return std::string();
+      };
+
   VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_subscribed_by_this_app_.begin();
   for (; vi_already_subscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
-    msg_params[*it_same_app][strings::result_code] =
+    msg_params[vi_to_string(*it_same_app)][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
+    msg_params[vi_to_string(*it_same_app)][strings::data_type] = *it_same_app;
   }
 
   VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_already_subscribed_by_another_apps_.begin();
   for (; vi_already_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {
-    msg_params[*it_another_app][strings::result_code] =
+    msg_params[vi_to_string(*it_another_app)][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
+    msg_params[vi_to_string(*it_another_app)][strings::data_type] =
+        *it_another_app;
   }
 }
 
@@ -342,6 +368,21 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
     smart_objects::SmartObject& out_response_params,
     smart_objects::SmartObject& out_request_params,
     bool& out_result) {
+  CheckVISubscriptions(app,
+                       out_info,
+                       out_result_code,
+                       out_response_params,
+                       out_request_params,
+                       out_result);
+}
+
+void SubscribeVehicleDataRequest::CheckVISubscriptions(
+    ApplicationSharedPtr app,
+    std::string& out_info,
+    mobile_apis::Result::eType& out_result_code,
+    smart_objects::SmartObject& out_response_params,
+    smart_objects::SmartObject& out_request_params,
+    bool& out_result) {
   // counter for items to subscribe
   VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   // counter for subscribed items by application
@@ -366,7 +407,7 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
         ++items_to_subscribe;
       }
       if (!is_interface_not_available && is_key_enabled) {
-        VehicleDataType key_type = it->second;
+        mobile_apis::VehicleDataType::eType key_type = it->second;
         if (app->IsSubscribedToIVI(key_type)) {
           LOG4CXX_DEBUG(logger_,
                         "App with connection key "
@@ -407,12 +448,13 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
 
         out_request_params[key_name] = is_key_enabled;
 
-        if (app->SubscribeToIVI(static_cast<uint32_t>(key_type))) {
+        if (is_key_enabled) {
+          vi_waiting_for_subscribe_.insert(key_type);
           LOG4CXX_DEBUG(
               logger_,
               "App with connection key "
                   << connection_key()
-                  << " have been subscribed for VehicleDataType: " << key_type);
+                  << " will be subscribed for VehicleDataType: " << key_type);
           ++subscribed_items;
         }
       }

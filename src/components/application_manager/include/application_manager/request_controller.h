@@ -289,6 +289,13 @@ class RequestController {
   */
   std::list<RequestPtr> notification_list_;
 
+  /**
+   * @brief Map keeping track of how many duplicate messages were sent for a
+   * given correlation id, to prevent early termination of a request
+   */
+  std::map<uint32_t, uint32_t> duplicate_message_count_;
+  sync_primitives::Lock duplicate_message_count_lock_;
+
   /*
    * timer for checking requests timeout
    */

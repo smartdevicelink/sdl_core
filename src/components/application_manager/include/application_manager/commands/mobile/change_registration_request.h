@@ -167,6 +167,16 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
   std::string vr_response_info_;
   std::string tts_response_info_;
 
+  void SendVRRequest(ApplicationSharedPtr app,
+                     smart_objects::SmartObject& msg_params);
+
+  void SendTTSRequest(ApplicationSharedPtr app,
+                      smart_objects::SmartObject& msg_params);
+
+  void SendUIRequest(ApplicationSharedPtr app,
+                     smart_objects::SmartObject& msg_params,
+                     const int32_t hmi_language);
+
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 };
 

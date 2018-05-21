@@ -313,7 +313,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     utils::SharedPtr<policy_table::Table> policy_table_snapshot =
         cache_->GenerateSnapshot();
     if (!policy_table_snapshot) {
-      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed to create snapshot of policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
@@ -327,7 +330,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
     // Replace current data with updated
     if (!cache_->ApplyUpdate(*pt_update)) {
-      LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
+      LOG4CXX_WARN(
+          logger_,
+          "Unsuccessful save of updated policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
@@ -588,13 +594,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     policy_table::FunctionalGroupings functional_groupings;
     cache_->GetFunctionalGroupings(functional_groupings);
 
-#ifdef SDL_REMOTE_CONTROL
-    ApplicationOnDevice who = {device_id, app_id};
-    const policy_table::Strings app_groups = access_remote_->GetGroups(who);
-#else   // SDL_REMOTE_CONTROL
-    const policy_table::Strings app_groups =
-        GetGroupsNames(app_group_permissions);
-#endif  // SDL_REMOTE_CONTROL
+    policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
 
     // Undefined groups (without user consent) disallowed by default, since
     // OnPermissionsChange notification has no "undefined" section
@@ -614,8 +614,19 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                       << " returns true");
   }
 
+  if (cache_->IsApplicationRevoked(app_id)) {
+    // SDL must be able to notify mobile side with its status after app has
+    // been revoked by backend
+    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
+      result.hmi_level_permitted = kRpcAllowed;
+    } else {
+      result.hmi_level_permitted = kRpcDisallowed;
+    }
+    return;
+  }
+
   const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
-  LOG4CXX_INFO(logger_, "Is known rpc " << known_rpc);
+  LOG4CXX_DEBUG(logger_, "Is known rpc " << (known_rpc ? "true" : "false"));
   if (!known_rpc) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
@@ -637,6 +648,9 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
              rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].find(
                  hmi_level)) {
     // RPC found in allowed == allowed by backend, but disallowed by user
+    LOG4CXX_DEBUG(
+        logger_,
+        "RPC found in allowed == allowed by backend, but disallowed by user");
     result.hmi_level_permitted = kRpcUserDisallowed;
   } else {
     LOG4CXX_DEBUG(logger_,
@@ -714,17 +728,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   } else if (!result.IsAnyAllowed(rpc_params)) {
     LOG4CXX_DEBUG(logger_, "There are no parameters allowed.");
     result.hmi_level_permitted = kRpcDisallowed;
-  }
-
-  if (cache_->IsApplicationRevoked(app_id)) {
-    // SDL must be able to notify mobile side with its status after app has
-    // been revoked by backend
-    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
-      result.hmi_level_permitted = kRpcAllowed;
-    } else {
-      result.hmi_level_permitted = kRpcDisallowed;
-    }
-    return;
   }
 }
 
@@ -967,6 +970,7 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
 void PolicyManagerImpl::NotifyPermissionsChanges(
     const std::string& policy_app_id,
     const std::vector<FunctionalGroupPermission>& app_group_permissions) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // Get current functional groups from DB with RPC permissions
   policy_table::FunctionalGroupings functional_groups;
   cache_->GetFunctionalGroupings(functional_groups);
@@ -985,11 +989,6 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (permissions.group_permissions.empty()) {
-    LOG4CXX_DEBUG(logger_, "Permissions list is empty, skipping update.");
-    return;
-  }
 
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
@@ -1157,14 +1156,8 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
   FunctionalIdType group_types;
 
-#ifdef SDL_REMOTE_CONTROL
-  allowed_by_default = false;
-  const bool ret = access_remote_->GetPermissionsForApp(
-      device_id, app_id_to_check, group_types);
-#else
   const bool ret =
       cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types);
-#endif  // REMOTE_CONTROL
 
   if (!ret) {
     LOG4CXX_WARN(logger_,
@@ -1581,8 +1574,7 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  send_on_update_sent_out_ =
-      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
+  send_on_update_sent_out_ = !update_status_manager_.IsUpdatePending();
 
   if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);
@@ -1679,6 +1671,12 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& application_id) {
   StartPTExchange();
   SendNotificationOnPermissionsUpdated(application_id);
+}
+
+void PolicyManagerImpl::OnDeviceSwitching(const std::string& device_id_from,
+                                          const std::string& device_id_to) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->OnDeviceSwitching(device_id_from, device_id_to);
 }
 
 const MetaInfo PolicyManagerImpl::GetMetaInfo() const {
