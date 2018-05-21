@@ -145,6 +145,10 @@ class ResourceAllocationManager {
       application_manager::ApplicationSharedPtr application) = 0;
 
   virtual ~ResourceAllocationManager() {}
+
+  virtual bool is_rc_enabled() const = 0;
+
+  virtual void set_rc_enabled(const bool value) = 0;
 };
 
 }  // namespace rc_rpc_plugin

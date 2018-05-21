@@ -101,9 +101,6 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   for (Apps::iterator it = apps.begin(); it != apps.end(); ++it) {
     application_manager::ApplicationSharedPtr app = *it;
     DCHECK(app);
-    application_manager_.ChangeAppsHMILevel(
-        app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-
     const RCAppExtensionPtr extension =
         application_manager::AppExtensionPtr::static_pointer_cast<
             RCAppExtension>(app->QueryInterface(RCRPCPlugin::kRCPluginID));
@@ -131,6 +128,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
     hmi_apis::Common_RCAccessMode::eType access_mode =
         hmi_apis::Common_RCAccessMode::INVALID_ENUM;
     LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
+    resource_allocation_manager_.set_rc_enabled(true);
     if ((*message_)[app_mngr::strings::msg_params].keyExists(
             message_params::kAccessMode)) {
       access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
@@ -149,6 +147,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
   } else {
     LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
     DisallowRCFunctionality();
+    resource_allocation_manager_.set_rc_enabled(false);
     resource_allocation_manager_.ResetAllAllocations();
   }
 }
