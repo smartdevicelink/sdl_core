@@ -3455,6 +3455,9 @@
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
       <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
     </param>
+    <param name="menuIcon" type="Common.Image" mandatory="false">
+      <description>The image field for AddSubMenu</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
