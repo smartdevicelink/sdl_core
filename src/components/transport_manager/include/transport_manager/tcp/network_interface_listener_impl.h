@@ -129,6 +129,10 @@ class NetworkInterfaceListenerImpl : public NetworkInterfaceListener {
   bool Stop() OVERRIDE;
 
 #ifdef BUILD_TESTS
+  void SetTesting(bool enabled) {
+    testing_ = enabled;
+  }
+
   int GetSocket() const {
     return socket_;
   }
@@ -179,6 +183,10 @@ class NetworkInterfaceListenerImpl : public NetworkInterfaceListener {
   int socket_;
   int pipe_fds_[2];
   threads::Thread* thread_;
+
+#ifdef BUILD_TESTS
+  bool testing_;
+#endif
 
   void Loop();
   bool StopLoop();

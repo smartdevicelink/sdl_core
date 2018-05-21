@@ -72,6 +72,8 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
   void Init(const std::string interface_name) {
     interface_listener_impl_ = new NetworkInterfaceListenerImpl(
         &mock_tcp_client_listener_, interface_name);
+    // disable events from actual network interfaces
+    interface_listener_impl_->SetTesting(true);
   }
 
   void Deinit() {

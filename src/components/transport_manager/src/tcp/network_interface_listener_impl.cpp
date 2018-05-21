@@ -114,7 +114,11 @@ NetworkInterfaceListenerImpl::NetworkInterfaceListenerImpl(
     , selected_interface_("")
     , notified_ipv4_addr_("")
     , notified_ipv6_addr_("")
-    , socket_(-1) {
+    , socket_(-1)
+#ifdef BUILD_TESTS
+    , testing_(false)
+#endif  // BUILD_TESTS
+{
   pipe_fds_[0] = pipe_fds_[1] = -1;
   thread_ = threads::CreateThread("NetworkInterfaceListenerImpl",
                                   new ListenerThreadDelegate(this));
@@ -274,7 +278,12 @@ void NetworkInterfaceListenerImpl::Loop() {
       }
     }
 
-#ifndef BUILD_TESTS  // don't enable events from network interface while testing
+#ifdef BUILD_TESTS
+    if (testing_) {  // don't enable events from network interface while testing
+      continue;
+    }
+#endif  // BUILD_TESTS
+
     if (FD_ISSET(socket_, &rfds)) {
       ret = recv(socket_, buf, sizeof(buf), 0);
       if (ret < 0) {
@@ -325,7 +334,6 @@ void NetworkInterfaceListenerImpl::Loop() {
 
       NotifyIPAddresses();
     }
-#endif
   }
 }
 
@@ -354,9 +362,11 @@ bool NetworkInterfaceListenerImpl::InitializeStatus() {
   LOG4CXX_AUTO_TRACE(logger_);
 
 #ifdef BUILD_TESTS
-  // don't actually call getifaddrs()
-  return true;
-#endif
+  if (testing_) {
+    // don't actually call getifaddrs()
+    return true;
+  }
+#endif  // BUILD_TESTS
 
   struct ifaddrs* if_list, *interface;
   if (getifaddrs(&if_list) != 0) {

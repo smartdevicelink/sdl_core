@@ -134,6 +134,10 @@ class TcpClientListener : public ClientConnectionListener {
   threads::Thread* thread() const {
     return thread_;
   }
+
+  static void set_testing(bool enabled) {
+    testing_ = enabled;
+  }
 #endif  // BUILD_TESTS
 
  private:
@@ -150,6 +154,10 @@ class TcpClientListener : public ClientConnectionListener {
   const std::string designated_interface_;
   std::string current_ip_address_;
   sync_primitives::Lock start_stop_lock_;
+
+#ifdef BUILD_TESTS
+  static bool testing_;
+#endif  // BUILD_TESTS
 
   void Loop();
   void StopLoop();

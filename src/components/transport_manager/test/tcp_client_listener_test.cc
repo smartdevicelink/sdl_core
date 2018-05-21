@@ -145,6 +145,7 @@ class TcpClientListenerTest : public ::testing::TestWithParam<std::string> {
     tcp_client_listener_ = new TcpClientListener(
         &adapter_controller_mock_, port_, enable_keep_alive_, GetParam());
     interface_listener_mock_ = new MockNetworkInterfaceListener();
+    tcp_client_listener_->set_testing(true);
     tcp_client_listener_->set_network_interface_listener(
         interface_listener_mock_);
   }

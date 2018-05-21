@@ -73,6 +73,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 static bool SetNonblocking(int s);
 
+#ifdef BUILD_TESTS
+bool TcpClientListener::testing_ = false;
+#endif  // BUILD_TESTS
+
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
                                      const bool enable_keepalive,
@@ -599,15 +603,18 @@ bool TcpClientListener::GetIPv4Address(const std::string interface_name,
   LOG4CXX_AUTO_TRACE(logger_);
 
 #ifdef BUILD_TESTS
-  // return a dummy address of INADDR_LOOPBACK
-  struct in_addr dummy_addr;
-  dummy_addr.s_addr = htonl(INADDR_LOOPBACK);
+  if (testing_) {
+    // don't actually call getifaddrs(), instead return a dummy address of
+    // INADDR_LOOPBACK
+    struct in_addr dummy_addr;
+    dummy_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-  if (ip_address != NULL) {
-    *ip_address = dummy_addr;
+    if (ip_address != NULL) {
+      *ip_address = dummy_addr;
+    }
+    return true;
   }
-  return true;
-#endif
+#endif  // BUILD_TESTS
 
   struct ifaddrs* if_list;
   if (getifaddrs(&if_list) != 0) {
