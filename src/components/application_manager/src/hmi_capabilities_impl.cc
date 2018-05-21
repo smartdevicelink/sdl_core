@@ -282,6 +282,9 @@ void InitCapabilities() {
   image_field_name_enum.insert(std::make_pair(
       std::string("graphic"), hmi_apis::Common_ImageFieldName::graphic));
   image_field_name_enum.insert(
+      std::make_pair(std::string("secondaryGraphic"),
+                     hmi_apis::Common_ImageFieldName::secondaryGraphic));
+  image_field_name_enum.insert(
       std::make_pair(std::string("showConstantTBTIcon"),
                      hmi_apis::Common_ImageFieldName::showConstantTBTIcon));
   image_field_name_enum.insert(std::make_pair(
