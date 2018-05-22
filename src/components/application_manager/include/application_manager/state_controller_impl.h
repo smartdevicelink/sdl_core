@@ -421,10 +421,24 @@ class StateControllerImpl : public event_engine::EventObserver,
   HmiStatePtr CreateHmiState(utils::SharedPtr<Application> app,
                              HmiState::StateID state_id) const;
 
+  /**
+   * @brief Determines AudioStreamingState value
+   * for application with HMI level specified.
+   * @param app an application to calculate for
+   * @param hmi_level HMI level
+   * @return AudioStreamingState value
+   */
   mobile_apis::AudioStreamingState::eType CalcAudioState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level) const;
 
+  /**
+   * @brief Determines VideoStreamingState value
+   * for application with HMI level specified.
+   * @param app an application to calculate for
+   * @param hmi_level HMI level
+   * @return VideoStreamingState value
+   */
   mobile_apis::VideoStreamingState::eType CalcVideoState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level) const;

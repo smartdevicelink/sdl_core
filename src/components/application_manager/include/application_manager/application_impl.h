@@ -267,6 +267,11 @@ class ApplicationImpl : public virtual Application,
    */
   bool IsAudioApplication() const OVERRIDE;
 
+  /**
+   * @brief Checks whether the application is navigation or projection
+   *
+   * @return true if application is navigation or projection
+   */
   bool IsVideoApplication() const OVERRIDE;
 
   /**

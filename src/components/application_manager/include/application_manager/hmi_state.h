@@ -414,7 +414,20 @@ class EmbeddedNavi : public HmiState {
   }
 };
 
+/**
+ * @brief Outputs StateID to ostream in human readable format
+ * @param os output stream to insert data to
+ * @param src StateID value to output
+ * @return os
+ */
 std::ostream& operator<<(std::ostream& os, const HmiState::StateID src);
+
+/**
+ * @brief Outputs HmiState to ostream in human readable format
+ * @param os output stream to insert data to
+ * @param src HmiState value to output
+ * @return os
+ */
 std::ostream& operator<<(std::ostream& os, const HmiState& src);
 
 }  // namespace application_manager
