@@ -145,6 +145,11 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   rc_extention_ptr->SubscribeToInteriorVehicleData(enums_value::kClimate);
   ON_CALL(*mock_app_, QueryInterface(_))
       .WillByDefault(Return(rc_extention_ptr));
+  ON_CALL(mock_allocation_manager_, GetAccessMode())
+      .WillByDefault(Return(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
+
+  EXPECT_CALL(mock_allocation_manager_,
+              SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
 
   EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
 

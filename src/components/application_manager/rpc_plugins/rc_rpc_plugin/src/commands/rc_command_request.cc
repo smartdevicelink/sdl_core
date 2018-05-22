@@ -141,11 +141,11 @@ void RCCommandRequest::Run() {
     return;
   }
   if (!resource_allocation_manager_.is_rc_enabled()) {
-    LOG4CXX_WARN(logger_, "Remote control is denied by user");
+    LOG4CXX_WARN(logger_, "Remote control is disabled by user");
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
-                 mobile_apis::Result::REJECTED,
-                 "Remote control is denied by user");
+                 mobile_apis::Result::USER_DISALLOWED,
+                 "Remote control is disabled by user");
     return;
   }
 
