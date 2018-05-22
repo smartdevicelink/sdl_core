@@ -6,3 +6,4 @@ CMakeFiles/
 *.pyc
 .idea
 src/appMain/build_config.txt
+*.DS_Store
