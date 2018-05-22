@@ -151,8 +151,6 @@
 #include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_response.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/vi_read_did_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vi_read_did_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
@@ -622,11 +620,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIIsReadyRequest>()
                  : factory.GetCreator<commands::UIIsReadyResponse>();
-    }
-    case hmi_apis::FunctionID::VehicleInfo_IsReady: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIIsReadyRequest>()
-                 : factory.GetCreator<commands::VIIsReadyResponse>();
     }
     case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
       return hmi_apis::messageType::request == message_type

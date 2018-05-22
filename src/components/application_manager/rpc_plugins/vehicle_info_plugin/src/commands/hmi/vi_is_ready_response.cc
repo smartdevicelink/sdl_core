@@ -29,9 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_is_ready_response.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {

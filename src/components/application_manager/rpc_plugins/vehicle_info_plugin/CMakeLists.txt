@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2018, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
 # disclaimer in the documentation and/or other materials provided with the
 # distribution.
 #
-# Neither the name of the Ford Motor Company nor the names of its contributors
+# Neither the name of the copyright holders nor the names of their contributors
 # may be used to endorse or promote products derived from this software
 # without specific prior written permission.
 #
@@ -28,6 +28,45 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- Utils
-add_subdirectory(vehicle_info_plugin)
-add_subdirectory(sdl_rpc_plugin)
+include_directories(include)
+
+set (HMI_COMMANDS_SOURCE_DIR
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/commands/hmi
+)
+
+set (MOBILE_COMMANDS_SOURCE_DIR
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/commands/mobile
+)
+
+collect_sources(HMI_COMMANDS "${HMI_COMMANDS_SOURCE_DIR}")
+collect_sources(MOBILE_COMMANDS "${MOBILE_COMMANDS_SOURCE_DIR}")
+collect_sources(VEHICLE_INFO_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+set(LIBRARIES
+  HMI_API
+  MOBILE_API
+  ApplicationManager
+  v4_protocol_v1_2_no_extra
+  SmartObjects
+  Utils
+)
+
+if(ENABLE_LOG)
+  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+
+add_library("vehicle_info_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${VEHICLE_INFO_PLUGIN_SOURCES})
+target_link_libraries("vehicle_info_plugin" ${LIBRARIES})
+
+set(INSTALL_DESTINATION bin)
+
+install(TARGETS vehicle_info_plugin
+  DESTINATION ${INSTALL_DESTINATION}
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
