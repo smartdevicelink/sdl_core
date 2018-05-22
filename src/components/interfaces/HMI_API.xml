@@ -1853,10 +1853,13 @@
    </param>
    <param name="rdsData" type="Common.RdsData" mandatory="false">
    </param>
-   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+   <param name="hdRadioEnable" type="Boolean" mandatory="false">
+     <description> True if the hd radio is on, false is the radio is off</description>
+   </param>
+   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
      <description>number of HD sub-channels if available</description>
    </param>
-   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+   <param name="hdChannel" type="Integer" minvalue="1" maxvalue="7" mandatory="false">
      <description>Current HD sub-channel if available</description>
    </param>
    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -1938,6 +1941,18 @@
          Availability of the getting HD radio Station Information Service (SIS) data.
          True: Available, False: Not Available, Not present: Not Available.
        </description>
+   </param>
+   <param name="hdRadioEnableAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of the control of enable/disable HD radio.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
+   </param>
+   <param name="siriusxmRadioAvailable" type="Boolean" mandatory="false">
+     <description>
+       Availability of sirius XM radio.
+       True: Available, False: Not Available, Not present: Not Available.
+     </description>
    </param>
  </struct>
 
@@ -2259,7 +2274,7 @@
            Indicates if the light's density can be set remotely (similar to a dimmer).
          </description>
      </param>
-     <param name="RGBColorSpaceAvailable" type="Boolean" mandatory="false">
+     <param name="rgbColorSpaceAvailable" type="Boolean" mandatory="false">
          <description>
            Indicates if the light's color can be set remotely by using the RGB color space.
          </description>
