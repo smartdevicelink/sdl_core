@@ -29,50 +29,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "vehicle_info_plugin/commands/hmi/vi_is_ready_response.h"
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_IS_READY_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_IS_READY_RESPONSE_H_
-
-#include "application_manager/commands/response_from_hmi.h"
-#include "application_manager/application_manager.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace vehicle_info_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-/**
- * @brief VIIsReadyResponse command class
- **/
-class VIIsReadyResponse : public app_mngr::commands::ResponseFromHMI {
- public:
-  /**
-   * @brief VIIsReadyResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  VIIsReadyResponse(const app_mngr::commands::MessageSharedPtr& message,
-                    app_mngr::ApplicationManager& application_manager,
-                    app_mngr::rpc_service::RPCService& rpc_service,
-                    app_mngr::HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handle);
+VIIsReadyResponse::VIIsReadyResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handle) {}
 
-  /**
-   * @brief VIIsReadyResponse class destructor
-   **/
-  virtual ~VIIsReadyResponse();
+VIIsReadyResponse::~VIIsReadyResponse() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(VIIsReadyResponse);
-};
+void VIIsReadyResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_IS_READY_RESPONSE_H_
