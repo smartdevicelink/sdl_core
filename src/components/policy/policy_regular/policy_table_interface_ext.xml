@@ -1,3 +1,4 @@
+
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
@@ -30,6 +31,7 @@
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />
         <element name="instantFuelConsumption" />
+        <element name="fuelRange" />
         <element name="odometer" />
         <element name="tirePressure" />
         <element name="wiperStatus" />

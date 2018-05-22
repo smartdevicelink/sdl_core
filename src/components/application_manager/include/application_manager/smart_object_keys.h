@@ -247,6 +247,7 @@ extern const char* rpm;
 extern const char* fuel_level;
 extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
+extern const char* fuel_range;
 extern const char* external_temp;
 extern const char* vin;
 extern const char* prndl;
