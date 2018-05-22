@@ -1272,7 +1272,6 @@ void PolicyHandler::OnIgnitionCycleOver() {
 void PolicyHandler::OnActivateApp(uint32_t connection_key,
                                   uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app = application_manager_.application(connection_key);
   if (!app.valid()) {
     LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
