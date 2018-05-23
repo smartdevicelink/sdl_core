@@ -57,12 +57,8 @@
 #include "sdl_rpc_plugin/commands/mobile/end_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/end_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/generic_response.h"
-#include "sdl_rpc_plugin/commands/mobile/get_dtcs_request.h"
-#include "sdl_rpc_plugin/commands/mobile/get_dtcs_response.h"
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_response.h"
-#include "sdl_rpc_plugin/commands/mobile/get_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/mobile/get_vehicle_data_response.h"
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_request.h"
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
@@ -78,7 +74,6 @@
 #include "sdl_rpc_plugin/commands/mobile/on_command_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_permissions_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_vehicle_data_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
@@ -87,8 +82,6 @@
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_response.h"
 #include "sdl_rpc_plugin/commands/mobile/put_file_request.h"
 #include "sdl_rpc_plugin/commands/mobile/put_file_response.h"
-#include "sdl_rpc_plugin/commands/mobile/read_did_request.h"
-#include "sdl_rpc_plugin/commands/mobile/read_did_response.h"
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_request.h"
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
 #include "sdl_rpc_plugin/commands/mobile/reset_global_properties_request.h"
@@ -113,8 +106,6 @@
 #include "sdl_rpc_plugin/commands/mobile/speak_response.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_response.h"
-#include "sdl_rpc_plugin/commands/mobile/subscribe_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/mobile/subscribe_vehicle_data_response.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_request.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
@@ -123,8 +114,6 @@
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_response.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_request.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_response.h"
-#include "sdl_rpc_plugin/commands/mobile/unsubscribe_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
@@ -132,8 +121,6 @@
 #include "sdl_rpc_plugin/commands/mobile/on_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/diagnostic_message_request.h"
-#include "sdl_rpc_plugin/commands/mobile/diagnostic_message_response.h"
 #include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
 #include "sdl_rpc_plugin/commands/mobile/send_location_response.h"
 #include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
@@ -283,17 +270,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::ShowConstantTBTRequest>()
                  : factory.GetCreator<commands::GetWayPointsResponse>();
     }
-    case mobile_apis::FunctionID::SubscribeVehicleDataID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
-                 : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
-    }
-    case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
-                 : factory
-                       .GetCreator<commands::UnsubscribeVehicleDataResponse>();
-    }
     case mobile_apis::FunctionID::SubscribeWayPointsID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::SubscribeWayPointsRequest>()
@@ -308,16 +284,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::GetSystemCapabilityRequest>()
                  : factory.GetCreator<commands::GetSystemCapabilityResponse>();
-    }
-    case mobile_apis::FunctionID::ReadDIDID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::ReadDIDRequest>()
-                 : factory.GetCreator<commands::ReadDIDResponse>();
-    }
-    case mobile_apis::FunctionID::GetVehicleDataID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::GetVehicleDataRequest>()
-                 : factory.GetCreator<commands::GetVehicleDataResponse>();
     }
     case mobile_apis::FunctionID::ScrollableMessageID: {
       return mobile_api::messageType::request == message_type
@@ -349,16 +315,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::ChangeRegistrationRequest>()
                  : factory.GetCreator<commands::ChangeRegistrationResponse>();
-    }
-    case mobile_apis::FunctionID::GetDTCsID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::GetDTCsRequest>()
-                 : factory.GetCreator<commands::GetDTCsResponse>();
-    }
-    case mobile_apis::FunctionID::DiagnosticMessageID: {
-      return mobile_api::messageType::request == message_type
-                 ? factory.GetCreator<commands::DiagnosticMessageRequest>()
-                 : factory.GetCreator<commands::DiagnosticMessageResponse>();
     }
     case mobile_apis::FunctionID::SetMediaClockTimerID: {
       return mobile_api::messageType::request == message_type
@@ -393,9 +349,6 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
     }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
       return factory.GetCreator<commands::OnAudioPassThruNotification>();
-    }
-    case mobile_apis::FunctionID::OnVehicleDataID: {
-      return factory.GetCreator<commands::OnVehicleDataNotification>();
     }
     case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID: {
       return factory

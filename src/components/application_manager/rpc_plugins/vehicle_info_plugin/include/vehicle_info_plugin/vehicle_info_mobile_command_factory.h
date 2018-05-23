@@ -41,7 +41,7 @@ namespace app_mngr = application_manager;
 /**
  * @brief The vehicle info mobile command factory.
  */
-class VehicleInfoMobileCommandFactory : app_mngr::CommandFactory {
+class VehicleInfoMobileCommandFactory : public app_mngr::CommandFactory {
 public:
   VehicleInfoMobileCommandFactory(
     app_mngr::ApplicationManager& application_manager,
@@ -64,7 +64,8 @@ private:
   app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
 
-  app_mngr::CommandCreator& buildCommandCreator(int32_t function_id, int32_t message_type);
+  app_mngr::CommandCreator& buildCommandCreator(
+      const int32_t function_id, const int32_t message_type) const;
 
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoMobileCommandFactory);
 };

@@ -70,6 +70,8 @@ private:
   policy::PolicyHandlerInterface& policy_handler_;
   std::unique_ptr<app_mngr::CommandFactory> hmi_command_factory_;
   std::unique_ptr<app_mngr::CommandFactory> mob_command_factory_;
+  // std::unique_ptr<VehicleInfoHmiCommandFactory> hmi_command_factory_;
+  // std::unique_ptr<VehicleInfoMobileCommandFactory> mob_command_factory_;
 };
 
 }
