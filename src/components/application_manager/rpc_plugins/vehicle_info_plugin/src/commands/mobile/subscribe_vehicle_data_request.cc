@@ -34,13 +34,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/subscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 namespace commands {
 

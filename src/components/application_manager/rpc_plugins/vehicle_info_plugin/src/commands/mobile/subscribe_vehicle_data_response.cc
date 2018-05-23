@@ -31,20 +31,20 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/get_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_response.h"
 #include "application_manager/rpc_service.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
-
 namespace commands {
 
-GetVehicleDataResponse::GetVehicleDataResponse(
+SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandResponseImpl(message,
                           application_manager,
@@ -52,14 +52,12 @@ GetVehicleDataResponse::GetVehicleDataResponse(
                           hmi_capabilities,
                           policy_handler) {}
 
-GetVehicleDataResponse::~GetVehicleDataResponse() {}
+SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}
 
-void GetVehicleDataResponse::Run() {
+void SubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

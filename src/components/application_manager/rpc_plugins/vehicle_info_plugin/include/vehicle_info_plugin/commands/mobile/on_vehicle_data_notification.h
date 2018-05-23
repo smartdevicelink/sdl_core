@@ -38,7 +38,7 @@
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {

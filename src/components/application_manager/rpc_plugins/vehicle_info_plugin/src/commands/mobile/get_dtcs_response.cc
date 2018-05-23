@@ -31,19 +31,19 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/read_did_response.h"
+#include "vehicle_info_plugin/commands/mobile/get_dtcs_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-ReadDIDResponse::ReadDIDResponse(
+GetDTCsResponse::GetDTCsResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandResponseImpl(message,
                           application_manager,
@@ -51,9 +51,9 @@ ReadDIDResponse::ReadDIDResponse(
                           hmi_capabilities,
                           policy_handler) {}
 
-ReadDIDResponse::~ReadDIDResponse() {}
+GetDTCsResponse::~GetDTCsResponse() {}
 
-void ReadDIDResponse::Run() {
+void GetDTCsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   rpc_service_.SendMessageToMobile(message_);

@@ -31,42 +31,55 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
-#include "smart_objects/smart_object.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+#include "application_manager/commands/command_request_impl.h"
+#include "utils/macro.h"
+
+namespace vehicle_info_plugin {
+namespace app_mngr = application_manager;
+
 namespace commands {
 
-UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : CommandResponseImpl(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+/**
+ * @brief GetDTCsRequest command class
+ **/
+class GetDTCsRequest : public app_mngr::commands::CommandRequestImpl {
+ public:
+  /**
+   * @brief GetDTCsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetDTCsRequest(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager,
+                 app_mngr::rpc_service::RPCService& rpc_service,
+                 app_mngr::HMICapabilities& hmi_capabilities,
+                 policy::PolicyHandlerInterface& policy_handler);
 
-UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {}
+  /**
+   * @brief GetDTCsRequest class destructor
+   **/
+  virtual ~GetDTCsRequest();
 
-void UnsubscribeVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event);
 
-  // TODO(DK): Some logic
-  SendResponse(true);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetDTCsRequest);
+};
 
 }  // namespace commands
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_

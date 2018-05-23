@@ -31,55 +31,48 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_RESPONSE_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
- * @brief GetDTCsRequest command class
+ * @brief GetDTCsResponse command class
  **/
-class GetDTCsRequest : public app_mngr::commands::CommandRequestImpl {
+class GetDTCsResponse : public app_mngr::commands::CommandResponseImpl {
  public:
   /**
-   * @brief GetDTCsRequest class constructor
+   * @brief GetDTCsResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetDTCsRequest(const app_mngr::commands::MessageSharedPtr& message,
-                 app_mngr::ApplicationManager& application_manager,
-                 app_mngr::rpc_service::RPCService& rpc_service,
-                 app_mngr::HMICapabilities& hmi_capabilities,
-                 policy::PolicyHandlerInterface& policy_handler);
+  GetDTCsResponse(const app_mngr::commands::MessageSharedPtr& message,
+                  app_mngr::ApplicationManager& application_manager,
+                  app_mngr::rpc_service::RPCService& rpc_service,
+                  app_mngr::HMICapabilities& hmi_capabilities,
+                  policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief GetDTCsRequest class destructor
+   * @brief GetDTCsResponse class destructor
    **/
-  virtual ~GetDTCsRequest();
+  virtual ~GetDTCsResponse();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event);
-
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetDTCsRequest);
+  DISALLOW_COPY_AND_ASSIGN(GetDTCsResponse);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_DTCS_RESPONSE_H_

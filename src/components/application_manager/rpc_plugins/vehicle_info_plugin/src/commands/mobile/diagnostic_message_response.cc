@@ -31,15 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/get_dtcs_response.h"
+#include "vehicle_info_plugin/commands/mobile/diagnostic_message_response.h"
 #include "application_manager/rpc_service.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-GetDTCsResponse::GetDTCsResponse(
+DiagnosticMessageResponse::DiagnosticMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -51,9 +51,9 @@ GetDTCsResponse::GetDTCsResponse(
                           hmi_capabilities,
                           policy_handler) {}
 
-GetDTCsResponse::~GetDTCsResponse() {}
+DiagnosticMessageResponse::~DiagnosticMessageResponse() {}
 
-void GetDTCsResponse::Run() {
+void DiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   rpc_service_.SendMessageToMobile(message_);
