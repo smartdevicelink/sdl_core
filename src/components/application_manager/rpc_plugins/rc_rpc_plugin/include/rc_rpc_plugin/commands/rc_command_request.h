@@ -48,7 +48,12 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
    * @brief RCCommandRequest class constructor
-   *
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
    **/
   RCCommandRequest(
       const app_mngr::commands::MessageSharedPtr& message,
