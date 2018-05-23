@@ -29,38 +29,51 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/vi_diagnostic_message_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+
+#include "application_manager/commands/request_to_hmi.h"
+
+namespace vehicle_info_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : ResponseFromHMI(message,
-                      application_manager,
-                      rpc_service,
-                      hmi_capabilities,
-                      policy_handle) {}
+/**
+ * @brief VIUnsubscribeVehicleDataRequest command class
+ **/
+class VIUnsubscribeVehicleDataRequest
+    : public app_mngr::commands::RequestToHMI {
+ public:
+  /**
+   * @brief VIUnsubscribeVehicleDataRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  VIUnsubscribeVehicleDataRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
-VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {}
+  /**
+   * @brief VIUnsubscribeVehicleDataRequest class destructor
+   **/
+  virtual ~VIUnsubscribeVehicleDataRequest();
 
-void VIDiagnosticMessageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_

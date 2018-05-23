@@ -30,48 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_
+#include "vehicle_info_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
+#include "interfaces/MOBILE_API.h"
 
-#include "application_manager/commands/response_from_hmi.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace vehicle_info_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-/**
- * @brief VIGetDTCsResponse command class
- **/
-class VIGetDTCsResponse : public app_mngr::commands::ResponseFromHMI {
- public:
-  /**
-   * @brief VIGetDTCsResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  VIGetDTCsResponse(const app_mngr::commands::MessageSharedPtr& message,
-                    app_mngr::ApplicationManager& application_manager,
-                    app_mngr::rpc_service::RPCService& rpc_service,
-                    app_mngr::HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handle);
+OnVIVehicleDataNotification::OnVIVehicleDataNotification(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationFromHMI(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handle) {}
 
-  /**
-   * @brief VIGetDTCsResponse class destructor
-   **/
-  virtual ~VIGetDTCsResponse();
+OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnVIVehicleDataNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetDTCsResponse);
-};
+  // prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnVehicleDataID);
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  if (msg_params.keyExists(strings::odometer)) {
+    application_manager_.IviInfoUpdated(
+        mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER,
+        msg_params[strings::odometer].asInt());
+  }
+
+  SendNotificationToMobile(message_);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_

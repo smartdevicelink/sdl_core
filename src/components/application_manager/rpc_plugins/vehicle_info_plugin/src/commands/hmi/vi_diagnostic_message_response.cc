@@ -29,15 +29,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/vi_read_did_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_diagnostic_message_response.h"
 #include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-VIReadDIDResponse::VIReadDIDResponse(
+VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -49,12 +50,13 @@ VIReadDIDResponse::VIReadDIDResponse(
                       hmi_capabilities,
                       policy_handle) {}
 
-VIReadDIDResponse::~VIReadDIDResponse() {}
+VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {}
 
-void VIReadDIDResponse::Run() {
+void VIDiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_ReadDID);
+  event_engine::Event event(
+      hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

@@ -29,16 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/vi_get_dtcs_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
-
 namespace commands {
 
-VIGetDTCsResponse::VIGetDTCsResponse(
+VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -50,16 +49,15 @@ VIGetDTCsResponse::VIGetDTCsResponse(
                       hmi_capabilities,
                       policy_handle) {}
 
-VIGetDTCsResponse::~VIGetDTCsResponse() {}
+VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {}
 
-void VIGetDTCsResponse::Run() {
+void VIUnsubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetDTCs);
+  event_engine::Event event(
+      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

@@ -29,35 +29,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
 
-namespace sdl_rpc_plugin {
+#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
+
+namespace vehicle_info_plugin {
 using namespace application_manager;
+
 namespace commands {
 
-VISubscribeVehicleDataResponse::VISubscribeVehicleDataResponse(
+VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
-    : ResponseFromHMI(message,
-                      application_manager,
-                      rpc_service,
-                      hmi_capabilities,
-                      policy_handle) {}
+    : RequestToHMI(message,
+                   application_manager,
+                   rpc_service,
+                   hmi_capabilities,
+                   policy_handle) {}
 
-VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {}
+VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
-void VISubscribeVehicleDataResponse::Run() {
+void VISubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
+
+  SendRequest();
 }
 
 }  // namespace commands
+
 }  // namespace application_manager
