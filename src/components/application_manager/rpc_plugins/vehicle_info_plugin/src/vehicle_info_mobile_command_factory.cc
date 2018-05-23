@@ -72,11 +72,11 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
   UNUSED(source);
 
   const mobile_apis::FunctionID::eType function_id =
-      static_cast<hmi_apis::FunctionID::eType>(
+      static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asInt());
 
   const mobile_apis::messageType::eType message_type =
-      static_cast<hmi_apis::messageType::eType>(
+      static_cast<mobile_apis::messageType::eType>(
         (*message)[strings::params][strings::message_type].asInt());
 
   auto message_type_str = "";
@@ -104,7 +104,7 @@ bool VehicleInfoMobileCommandFactory::IsAbleToProcess(
 }
 
 app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
-      int32_t function_id, int32_t message_type) {
+      const int32_t function_id, const int32_t message_type) const {
   auto factory =
       app_mngr::CommandCreatorFactory(application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
   auto &creator = factory.GetCreator<app_mngr::InvalidCommand>();

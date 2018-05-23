@@ -45,10 +45,10 @@ VehicleInfoCommandFactory::VehicleInfoCommandFactory(
     rpc_service_(rpc_service),
     hmi_capabilities_(hmi_capabilities),
     policy_handler_(policy_handler),
-    hmi_command_factory_(std::make_shared(new VehicleInfoHmiCommandFactory(
-      application_manager, rpc_service, hmi_capabilities, policy_handler))),
-    mob_command_factory_(std::make_shared(new VehicleInfoMobileCommandFactory(
-      application_manager, rpc_service, hmi_capabilities, policy_handler))) {
+    hmi_command_factory_(new VehicleInfoHmiCommandFactory(
+      application_manager, rpc_service, hmi_capabilities, policy_handler)),
+    mob_command_factory_(new VehicleInfoMobileCommandFactory(
+      application_manager, rpc_service, hmi_capabilities, policy_handler)) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
