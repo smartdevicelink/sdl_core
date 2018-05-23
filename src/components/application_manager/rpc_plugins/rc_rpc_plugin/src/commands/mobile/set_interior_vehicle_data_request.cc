@@ -65,6 +65,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["rdsData"] = "rdsDataAvailable";
   mapping["availableHDs"] = "availableHDsAvailable";
   mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
