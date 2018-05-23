@@ -34,8 +34,21 @@
 #include "application_manager/message.h"
 #include "interfaces/HMI_API.h"
 
+#include "vehicle_info_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
+#include "vehicle_info_plugin/commands/hmi/vi_diagnostic_message_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_diagnostic_message_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_dtcs_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_dtcs_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_read_did_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_read_did_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
 
@@ -80,6 +93,21 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
       logger_, "HMICommandFactory::CreateCommand function_id: " << function_id
                << ", message type: " << message_type_str);
 
+  return buildCommandCreator(function_id, message_type).create(message);
+}
+
+bool VehicleInfoHmiCommandFactory::IsAbleToProcess(
+    const int32_t function_id,
+    const app_mngr::commands::Command::CommandSource source) const {
+  UNUSED(source);
+  return buildCommandCreator(
+        function_id, hmi_apis::messageType::INVALID_ENUM).CanBeCreated();
+}
+
+app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
+      int32_t function_id, int32_t message_type) {
+  UNUSED(message_type);
+
   auto factory =
       app_mngr::CommandCreatorFactory(application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
   auto &creator = factory.GetCreator<app_mngr::InvalidCommand>();
@@ -91,36 +119,39 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
           : factory.GetCreator<commands::VIIsReadyResponse>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
-      // SubscribeVehicleData HMI request/response
+      creator = hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VISubscribeVehicleDataRequest>()
+          : factory.GetCreator<commands::VISubscribeVehicleDataResponse>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData:
-      // UnsubscribeVehicleData HMI request/response
+      creator = hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIUnsubscribeVehicleDataRequest>()
+          : factory.GetCreator<commands::VIUnsubscribeVehicleDataResponse>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_OnVehicleData:
-      // OnVehicleData HMI notification
+      creator = factory.GetCreator<commands::OnVIVehicleDataNotification>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_ReadDID:
-      // ReadDID HMI request/response
+      creator = hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIReadDIDRequest>()
+          : factory.GetCreator<commands::VIReadDIDResponse>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs:
-      // GetDTCs HMI request/response
+      creator = hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIGetDTCsRequest>()
+          : factory.GetCreator<commands::VIGetDTCsResponse>();
       break;
     case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage:
-      // DiagnosticMessage HMI request/response
+      creator = hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIDiagnosticMessageRequest>()
+          : factory.GetCreator<commands::VIDiagnosticMessageResponse>();
       break;
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
       break;
   }
 
-  return creator.create(message);
-}
-
-bool VehicleInfoHmiCommandFactory::IsAbleToProcess(
-    const int32_t function_id,
-    const app_mngr::commands::Command::CommandSource source) const {
-  // TODO: Implement
-  throw -1;
+  return creator;
 }
 
 }
