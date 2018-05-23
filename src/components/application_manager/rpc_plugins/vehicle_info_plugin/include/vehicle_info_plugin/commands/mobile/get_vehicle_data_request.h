@@ -31,58 +31,68 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
 
-#include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
+
+class SmartObject;
 
 namespace commands {
 
 /**
- * @brief OnVehicleDataNotification class is used to send notification
- * to mobile device that some button was pressed on HMI.
+ * @brief GetVehicleDataRequest command class
  **/
-class OnVehicleDataNotification
-    : public app_mngr::commands::CommandNotificationImpl {
+class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
-   * @brief OnVehicleDataNotification class constructor
+   * @brief GetVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnVehicleDataNotification(const app_mngr::commands::MessageSharedPtr& message,
-                            app_mngr::ApplicationManager& application_manager,
-                            app_mngr::rpc_service::RPCService& rpc_service,
-                            app_mngr::HMICapabilities& hmi_capabilities,
-                            policy::PolicyHandlerInterface& policy_handler);
+  GetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
+                        app_mngr::ApplicationManager& application_manager,
+                        app_mngr::rpc_service::RPCService& rpc_service,
+                        app_mngr::HMICapabilities& hmi_capabilities,
+                        policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief OnVehicleDataNotification class destructor
+   * @brief GetVehicleDataRequest class destructor
    **/
-  virtual ~OnVehicleDataNotification();
+  virtual ~GetVehicleDataRequest();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
- private:
-  /*
-   * @brief Sends vehicle data notification to mobile device
-   *
-   * @param app Application to receive notification
-   */
-  void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
+ protected:
+  virtual void on_event(const app_mngr::event_engine::Event& event);
 
-  DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
+#ifdef HMI_DBUS_API
+ private:
+  void SendRequestsToHmi(const int32_t app_id);
+
+  struct HmiRequest {
+    hmi_apis::Common_Result::eType status;
+    bool complete;
+    smart_objects::SmartObject value;
+    const char* str;
+    hmi_apis::FunctionID::eType func_id;
+  };
+
+  typedef std::vector<HmiRequest> HmiRequests;
+  HmiRequests hmi_requests_;
+#endif  // #ifdef HMI_DBUS_API
+
+  DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_VEHICLE_DATA_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
