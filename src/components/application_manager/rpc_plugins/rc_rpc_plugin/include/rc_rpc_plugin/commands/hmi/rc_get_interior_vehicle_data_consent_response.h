@@ -44,6 +44,15 @@ namespace commands {
 class RCGetInteriorVehicleDataConsentResponse
     : public application_manager::commands::ResponseFromHMI {
  public:
+  /**
+   * @brief RCGetInteriorVehicleDataConsentResponse class constructor
+   * @param message MessageSharedPtr
+   * @param application_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handle PolicyHandlerInterface
+   * @param resource_allocation_manager ResourceAllocationManager
+   **/
   RCGetInteriorVehicleDataConsentResponse(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,

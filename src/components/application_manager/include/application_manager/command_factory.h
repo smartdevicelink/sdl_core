@@ -52,7 +52,7 @@ class CommandFactory {
   /**
    * @brief Create command object and return pointer to it
    *
-   * @param  smartObject SmartObject shared pointer.
+   * @param  message SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
   virtual CommandSharedPtr CreateCommand(
@@ -65,7 +65,8 @@ class CommandFactory {
   **/
   virtual bool IsAbleToProcess(
       const int32_t,
-      const application_manager::commands::Command::CommandSource) const = 0;
+      const application_manager::commands::Command::CommandSource source)
+      const = 0;
 };
 
 /**
@@ -83,7 +84,7 @@ class CommandCreator {
   virtual bool CanBeCreated() const = 0;
   /**
    * @brief Create command object and return pointer to it
-   * @param  smartObject SmartObject shared pointer.
+   * @param  message SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
   virtual CommandSharedPtr create(
@@ -98,6 +99,10 @@ class DefaultCommandCreator : public CommandCreator {
  public:
   /**
    * @brief DefaultCommandCreator constructor
+   * @param  application_manager ApplicationManager.
+   * @param  rpc_service RPCService.
+   * @param  hmi_capabilities HMICapabilities.
+   * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
                         RPCService& rpc_service,
@@ -118,7 +123,7 @@ class DefaultCommandCreator : public CommandCreator {
 
   /**
    * @brief Create command object and return pointer to it
-   * @param  smartObject SmartObject shared pointer.
+   * @param  message SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
   CommandSharedPtr create(
@@ -147,6 +152,10 @@ class DefaultCommandCreator<InvalidCommand> : public CommandCreator {
  public:
   /**
    * @brief DefaultCommandCreator constructor
+   * @param  application_manager ApplicationManager.
+   * @param  rpc_service RPCService.
+   * @param  hmi_capabilities HMICapabilities.
+   * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
                         RPCService& rpc_service,
@@ -167,7 +176,7 @@ class DefaultCommandCreator<InvalidCommand> : public CommandCreator {
   }
   /**
    * @brief Create command object and return pointer to it
-   * @param  smartObject SmartObject shared pointer.
+   * @param  message SmartObject shared pointer.
    * @return Pointer to created empty command object.
    **/
   CommandSharedPtr create(
