@@ -32,6 +32,23 @@
 
 #include "vehicle_info_plugin/vehicle_info_mobile_command_factory.h"
 
+#include "application_manager/message.h"
+#include "interfaces/MOBILE_API.h"
+
+#include "vehicle_info_plugin/commands/mobile/diagnostic_message_request.h"
+#include "vehicle_info_plugin/commands/mobile/diagnostic_message_response.h"
+#include "vehicle_info_plugin/commands/mobile/get_dtcs_request.h"
+#include "vehicle_info_plugin/commands/mobile/get_dtcs_response.h"
+#include "vehicle_info_plugin/commands/mobile/get_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/get_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/mobile/on_vehicle_data_notification.h"
+#include "vehicle_info_plugin/commands/mobile/read_did_request.h"
+#include "vehicle_info_plugin/commands/mobile/read_did_response.h"
+#include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
 
 namespace vehicle_info_plugin {
@@ -51,18 +68,87 @@ VehicleInfoMobileCommandFactory::VehicleInfoMobileCommandFactory(
 
 app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::commands::Command::CommandSource command_source) {
+    app_mngr::commands::Command::CommandSource source) {
+  UNUSED(source);
 
-  // TODO: Implement
-  throw -1;
+  const mobile_apis::FunctionID::eType function_id =
+      static_cast<hmi_apis::FunctionID::eType>(
+        (*message)[strings::params][strings::function_id].asInt());
+
+  const mobile_apis::messageType::eType message_type =
+      static_cast<hmi_apis::messageType::eType>(
+        (*message)[strings::params][strings::message_type].asInt());
+
+  auto message_type_str = "";
+  if (mobile_apis::messageType::response == message_type) {
+    message_type_str = "response";
+  } else if (mobile_apis::messageType::notification == message_type) {
+    message_type_str = "notification";
+  } else {
+    message_type_str = "request";
+  }
+
+  LOG4CXX_DEBUG(
+      logger_, "HMICommandFactory::CreateCommand function_id: " << function_id
+               << ", message type: " << message_type_str);
+
+  return buildCommandCreator(function_id, message_type).create(message);
 }
 
 bool VehicleInfoMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
+  UNUSED(source);
+  return buildCommandCreator(
+        function_id, mobile_apis::messageType::INVALID_ENUM).CanBeCreated();
+}
 
-  // TODO: Implement
-  throw -1;
+app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
+      int32_t function_id, int32_t message_type) {
+  auto factory =
+      app_mngr::CommandCreatorFactory(application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+  auto &creator = factory.GetCreator<app_mngr::InvalidCommand>();
+
+  switch (function_id) {
+    case mobile_apis::FunctionID::GetVehicleDataID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::GetVehicleDataRequest>()
+          : factory.GetCreator<commands::GetVehicleDataResponse>();
+      break;
+    case mobile_apis::FunctionID::SubscribeVehicleDataID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
+          : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
+      break;
+    case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
+          : factory.GetCreator<commands::UnsubscribeVehicleDataResponse>();
+      break;
+    case mobile_apis::FunctionID::OnVehicleDataID:
+      creator = factory.GetCreator<commands::OnVehicleDataNotification>();
+      break;
+    case mobile_apis::FunctionID::ReadDIDID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::ReadDIDRequest>()
+          : factory.GetCreator<commands::ReadDIDResponse>();
+      break;
+    case mobile_apis::FunctionID::GetDTCsID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::GetDTCsRequest>()
+          : factory.GetCreator<commands::GetDTCsResponse>();
+      break;
+    case mobile_apis::FunctionID::DiagnosticMessageID:
+      creator = mobile_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::DiagnosticMessageRequest>()
+          : factory.GetCreator<commands::DiagnosticMessageResponse>();
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
+      break;
+  }
+
+  return creator;
 }
 
 }

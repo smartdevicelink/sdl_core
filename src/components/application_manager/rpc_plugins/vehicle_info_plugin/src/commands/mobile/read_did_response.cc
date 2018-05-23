@@ -31,49 +31,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#include "vehicle_info_plugin/commands/mobile/read_did_response.h"
+#include "application_manager/rpc_service.h"
 
-#include "application_manager/commands/command_response_impl.h"
-#include "utils/macro.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace vehicle_info_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-/**
- * @brief DiagnosticMessageResponse command class
- **/
-class DiagnosticMessageResponse
-    : public app_mngr::commands::CommandResponseImpl {
- public:
-  /**
-   * @brief DiagnosticMessageResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  DiagnosticMessageResponse(const app_mngr::commands::MessageSharedPtr& message,
-                            app_mngr::ApplicationManager& application_manager,
-                            app_mngr::rpc_service::RPCService& rpc_service,
-                            app_mngr::HMICapabilities& hmi_capabilities,
-                            policy::PolicyHandlerInterface& policy_handler);
+ReadDIDResponse::ReadDIDResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
-  /**
-   * @brief DiagnosticMessageResponse class destructor
-   **/
-  virtual ~DiagnosticMessageResponse();
+ReadDIDResponse::~ReadDIDResponse() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void ReadDIDResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(DiagnosticMessageResponse);
-};
+  rpc_service_.SendMessageToMobile(message_);
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+}  // namespace application_manager

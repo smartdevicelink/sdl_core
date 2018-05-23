@@ -31,48 +31,42 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_RESPONSE_H_
+#include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
+#include "smart_objects/smart_object.h"
 
-#include "application_manager/commands/command_response_impl.h"
-#include "utils/macro.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
-
+namespace vehicle_info_plugin {
+using namespace application_manager;
 namespace commands {
 
-/**
- * @brief ReadDIDResponse command class
- **/
-class ReadDIDResponse : public app_mngr::commands::CommandResponseImpl {
- public:
-  /**
-   * @brief ReadDIDResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  ReadDIDResponse(const app_mngr::commands::MessageSharedPtr& message,
-                  app_mngr::ApplicationManager& application_manager,
-                  app_mngr::rpc_service::RPCService& rpc_service,
-                  app_mngr::HMICapabilities& hmi_capabilities,
-                  policy::PolicyHandlerInterface& policy_handler);
+UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandResponseImpl(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
-  /**
-   * @brief ReadDIDResponse class destructor
-   **/
-  virtual ~ReadDIDResponse();
+UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void UnsubscribeVehicleDataResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(ReadDIDResponse);
-};
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
+  }
+
+  // TODO(DK): Some logic
+  SendResponse(true);
+}
 
 }  // namespace commands
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_RESPONSE_H_
