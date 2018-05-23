@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
+VIUnsubscribeVehicleDataRequest::VIUnsubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -49,9 +49,9 @@ VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
                    hmi_capabilities,
                    policy_handle) {}
 
-VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
+VIUnsubscribeVehicleDataRequest::~VIUnsubscribeVehicleDataRequest() {}
 
-void VISubscribeVehicleDataRequest::Run() {
+void VIUnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();

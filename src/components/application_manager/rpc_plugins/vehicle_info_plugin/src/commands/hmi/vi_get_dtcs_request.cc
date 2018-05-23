@@ -30,48 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_REQUEST_H_
+#include "vehicle_info_plugin/commands/hmi/vi_get_dtcs_request.h"
 
-#include "application_manager/commands/request_to_hmi.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace vehicle_info_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-/**
- * @brief VIGetDTCsRequest command class
- **/
-class VIGetDTCsRequest : public app_mngr::commands::RequestToHMI {
- public:
-  /**
-   * @brief VIGetDTCsRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  VIGetDTCsRequest(const app_mngr::commands::MessageSharedPtr& message,
-                   app_mngr::ApplicationManager& application_manager,
-                   app_mngr::rpc_service::RPCService& rpc_service,
-                   app_mngr::HMICapabilities& hmi_capabilities,
-                   policy::PolicyHandlerInterface& policy_handle);
+VIGetDTCsRequest::VIGetDTCsRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : RequestToHMI(message,
+                   application_manager,
+                   rpc_service,
+                   hmi_capabilities,
+                   policy_handle) {}
 
-  /**
-   * @brief VIGetDTCsRequest class destructor
-   **/
-  virtual ~VIGetDTCsRequest();
+VIGetDTCsRequest::~VIGetDTCsRequest() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void VIGetDTCsRequest::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetDTCsRequest);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_REQUEST_H_

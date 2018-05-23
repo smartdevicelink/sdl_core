@@ -30,36 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_READ_DID_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_READ_DID_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_
 
 #include "application_manager/commands/response_from_hmi.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
- * @brief VIReadDIDResponse command class
+ * @brief VIDiagnosticMessageResponse command class
  **/
-class VIReadDIDResponse : public app_mngr::commands::ResponseFromHMI {
+class VIDiagnosticMessageResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
-   * @brief VIReadDIDResponse class constructor
+   * @brief VIDiagnosticMessageResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VIReadDIDResponse(const app_mngr::commands::MessageSharedPtr& message,
-                    app_mngr::ApplicationManager& application_manager,
-                    app_mngr::rpc_service::RPCService& rpc_service,
-                    app_mngr::HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handle);
+  VIDiagnosticMessageResponse(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief VIReadDIDResponse class destructor
+   * @brief VIDiagnosticMessageResponse class destructor
    **/
-  virtual ~VIReadDIDResponse();
+  virtual ~VIDiagnosticMessageResponse();
 
   /**
    * @brief Execute command
@@ -67,11 +68,11 @@ class VIReadDIDResponse : public app_mngr::commands::ResponseFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIReadDIDResponse);
+  DISALLOW_COPY_AND_ASSIGN(VIDiagnosticMessageResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_READ_DID_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_

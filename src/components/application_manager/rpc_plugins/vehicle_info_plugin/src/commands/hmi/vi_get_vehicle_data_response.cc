@@ -29,34 +29,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
-#include "sdl_rpc_plugin/commands/hmi/vi_read_did_request.h"
-
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 using namespace application_manager;
-
 namespace commands {
 
-VIReadDIDRequest::VIReadDIDRequest(
+VIGetVehicleDataResponse::VIGetVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handle) {}
 
-VIReadDIDRequest::~VIReadDIDRequest() {}
+VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {}
 
-void VIReadDIDRequest::Run() {
+void VIGetVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SendRequest();
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+
+  if ((*message_)[strings::params][strings::message_type] ==
+      static_cast<int32_t>(hmi_apis::messageType::error_response)) {
+    smart_objects::SmartObject result(smart_objects::SmartType_Map);
+
+    if ((*message_)[strings::params].keyExists(strings::data)) {
+      result[strings::msg_params] = (*message_)[strings::params][strings::data];
+      result[strings::params][hmi_response::code] =
+          (*message_)[strings::params][hmi_response::code];
+      result[strings::params][strings::correlation_id] =
+          (*message_)[strings::params][strings::correlation_id];
+      result[strings::params][strings::error_msg] =
+          (*message_)[strings::params][strings::error_msg];
+      result[strings::params][strings::message_type] =
+          (*message_)[strings::params][strings::message_type];
+      result[strings::params][strings::protocol_type] =
+          (*message_)[strings::params][strings::protocol_type];
+      result[strings::params][strings::protocol_version] =
+          (*message_)[strings::params][strings::protocol_version];
+    }
+
+    event.set_smart_object(result);
+  } else {
+    event.set_smart_object(*message_);
+    policy_handler_.OnVehicleDataUpdated(*message_);
+  }
+
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
-
 }  // namespace application_manager
