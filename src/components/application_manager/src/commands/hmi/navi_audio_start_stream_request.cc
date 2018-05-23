@@ -159,11 +159,9 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
-  LOG4CXX_DEBUG(
+  if (curr_retry_number <= retry_number_) {
+    LOG4CXX_DEBUG(
       logger_, "Retry number " << curr_retry_number << " of " << retry_number_);
-
-  if (curr_retry_number < retry_number_) {
-    LOG4CXX_DEBUG(logger_, "Send AudioStartStream retry");
     MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
