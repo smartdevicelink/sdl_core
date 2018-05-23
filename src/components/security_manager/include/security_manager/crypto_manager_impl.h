@@ -152,12 +152,18 @@ class CryptoManagerImpl : public CryptoManager {
 
  private:
   bool AreForceProtectionSettingsCorrect() const;
-  bool set_certificate(const std::string& cert_data);
+  bool SaveCertificateData(const std::string& cert_data);
 
   /**
    * @brief Sets initial certificate datetime
    */
   void InitCertExpTime();
+
+  bool UpdateModuleCertificateData(X509* certificate, EVP_PKEY* key);
+  X509* LoadModuleCertificateFromFile();
+  EVP_PKEY* LoadModulePrivateKeyFromFile();
+  bool SaveModuleCertificateToFile(X509* certificate) const;
+  bool SaveModuleKeyToFile(EVP_PKEY* key) const;
 
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;

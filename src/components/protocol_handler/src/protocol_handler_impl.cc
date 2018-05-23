@@ -1581,14 +1581,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            bson_object_bytes);
     handshake_handlers_.push_back(handler);
 
-    const bool is_certificate_empty =
-        security_manager_->IsPolicyCertificateDataEmpty();
-
     const bool is_certificate_expired =
         security_manager_->IsCertificateUpdateRequired(connection_key);
 
-    if (context.is_ptu_required_ &&
-        (is_certificate_empty || is_certificate_expired)) {
+    if (context.is_ptu_required_ && is_certificate_expired) {
       LOG4CXX_DEBUG(
           logger_,
           "PTU for StartSessionHandler "
@@ -1613,7 +1609,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     }
 
     security_manager::SSLContext* ssl_context =
-        is_certificate_empty
+        is_certificate_expired
             ? NULL
             : security_manager_->CreateSSLContext(
                   connection_key,

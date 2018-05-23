@@ -54,6 +54,8 @@ class CryptoManagerSettings {
   virtual const std::string& certificate_data() const = 0;
   virtual const std::string& ciphers_list() const = 0;
   virtual const std::string& ca_cert_path() const = 0;
+  virtual const std::string& module_cert_path() const = 0;
+  virtual const std::string& module_key_path() const = 0;
   virtual size_t update_before_hours() const = 0;
   virtual size_t maximum_payload_size() const = 0;
   virtual const std::vector<int>& force_protected_service() const = 0;
