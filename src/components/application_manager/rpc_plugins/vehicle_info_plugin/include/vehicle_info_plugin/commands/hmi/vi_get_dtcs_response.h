@@ -30,36 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_
 
-#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/commands/response_from_hmi.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
- * @brief VIGetVehicleDataRequest command class
+ * @brief VIGetDTCsResponse command class
  **/
-class VIGetVehicleDataRequest : public app_mngr::commands::RequestToHMI {
+class VIGetDTCsResponse : public app_mngr::commands::ResponseFromHMI {
  public:
   /**
-   * @brief VIGetVehicleDataRequest class constructor
+   * @brief VIGetDTCsResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
-                          app_mngr::ApplicationManager& application_manager,
-                          app_mngr::rpc_service::RPCService& rpc_service,
-                          app_mngr::HMICapabilities& hmi_capabilities,
-                          policy::PolicyHandlerInterface& policy_handle);
+  VIGetDTCsResponse(const app_mngr::commands::MessageSharedPtr& message,
+                    app_mngr::ApplicationManager& application_manager,
+                    app_mngr::rpc_service::RPCService& rpc_service,
+                    app_mngr::HMICapabilities& hmi_capabilities,
+                    policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief VIGetVehicleDataRequest class destructor
+   * @brief VIGetDTCsResponse class destructor
    **/
-  virtual ~VIGetVehicleDataRequest();
+  virtual ~VIGetDTCsResponse();
 
   /**
    * @brief Execute command
@@ -67,11 +67,11 @@ class VIGetVehicleDataRequest : public app_mngr::commands::RequestToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetVehicleDataRequest);
+  DISALLOW_COPY_AND_ASSIGN(VIGetDTCsResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_DTCS_RESPONSE_H_

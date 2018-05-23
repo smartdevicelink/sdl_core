@@ -64,6 +64,8 @@ private:
   app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
 
+  app_mngr::CommandCreator& buildCommandCreator(int32_t function_id, int32_t message_type);
+
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoHmiCommandFactory);
 };
 
