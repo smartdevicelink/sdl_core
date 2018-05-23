@@ -105,7 +105,7 @@ bool VehicleInfoHmiCommandFactory::IsAbleToProcess(
 }
 
 app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
-      int32_t function_id, int32_t message_type) {
+      const int32_t function_id, const int32_t message_type) const {
   UNUSED(message_type);
 
   auto factory =
