@@ -68,7 +68,7 @@ struct MessageFromMobile : public utils::SharedPtr<Message> {
   MessageFromMobile() {}
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
@@ -77,7 +77,7 @@ struct MessageFromHmi : public utils::SharedPtr<Message> {
   MessageFromHmi() {}
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }

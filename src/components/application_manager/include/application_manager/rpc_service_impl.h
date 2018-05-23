@@ -63,7 +63,7 @@ struct MessageToMobile : public utils::SharedPtr<Message> {
   explicit MessageToMobile(const utils::SharedPtr<Message>& message,
                            bool final_message)
       : utils::SharedPtr<Message>(message), is_final(final_message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
@@ -75,7 +75,7 @@ struct MessageToHmi : public utils::SharedPtr<Message> {
   MessageToHmi() {}
   explicit MessageToHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
@@ -91,6 +91,14 @@ class RPCServiceImpl : public RPCService,
                        public impl::ToMobileQueue::Handler,
                        public impl::ToHmiQueue::Handler {
  public:
+  /**
+   * @brief RPCServiceImpl class constructor
+   * @param app_manager ApplicationManager
+   * @param request_ctrl RequestController
+   * @param protocol_handler ProtocolHandler
+   * @param hmi_handler HMIMessageHandler
+   * @param commands_holder CommandHolder
+   **/
   RPCServiceImpl(ApplicationManager& app_manager,
                  request_controller::RequestController& request_ctrl,
                  protocol_handler::ProtocolHandler* protocol_handler,
