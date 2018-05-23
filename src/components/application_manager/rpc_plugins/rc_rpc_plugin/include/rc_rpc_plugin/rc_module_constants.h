@@ -54,6 +54,9 @@ const char kSupportedLights[] = "supportedLights";
 const char kName[] = "name";
 const char kDensityAvailable[] = "densityAvailable";
 const char kRGBColorSpaceAvailable[] = "rgbColorSpaceAvailable";
+
+// RadioControlCapabilities
+const char kSiriusxmRadioAvailable[] = "siriusxmRadioAvailable";
 }  //  strings
 
 namespace result_codes {
