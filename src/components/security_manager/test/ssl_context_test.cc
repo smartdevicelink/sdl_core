@@ -358,11 +358,11 @@ INSTANTIATE_TEST_CASE_P(
                                         kFordCipher,
                                         kFordCipher)
 #endif
-                      ,ProtocolAndCipher(security_manager::DTLSv1,
+                          ,
+                      ProtocolAndCipher(security_manager::DTLSv1,
                                         security_manager::DTLSv1,
                                         kFordCipher,
                                         kFordCipher)));
-
 
 INSTANTIATE_TEST_CASE_P(
     IncorrectProtocolAndCiphers,

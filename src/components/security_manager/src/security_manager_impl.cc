@@ -154,14 +154,18 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
 
-  security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
-      connection_key, protocol_handler::kControl);
-  // return existed SSLCOntext for current connection/session
-  if (ssl_context) {
-    return ssl_context;
+  if (kUseExisting == cc_strategy) {
+    security_manager::SSLContext* ssl_context =
+        session_observer_->GetSSLContext(connection_key,
+                                         protocol_handler::kControl);
+    // If SSLContext for current connection/session exists - return it
+    if (ssl_context) {
+      return ssl_context;
+    }
   }
 
-  ssl_context = crypto_manager_->CreateSSLContext();
+  security_manager::SSLContext* ssl_context =
+      crypto_manager_->CreateSSLContext();
   if (!ssl_context) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);

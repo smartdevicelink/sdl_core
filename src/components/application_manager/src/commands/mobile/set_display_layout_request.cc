@@ -76,9 +76,9 @@ void SetDisplayLayoutRequest::Run() {
     // Template layout is the same as previous layout
     // Reject message if colors are set
     if (msg_params.keyExists(strings::day_color_scheme) &&
-      app->day_color_scheme() != NULL &&
-      !(msg_params[strings::day_color_scheme] ==
-        *(app->day_color_scheme()))) {
+        app->day_color_scheme() != NULL &&
+        !(msg_params[strings::day_color_scheme] ==
+          *(app->day_color_scheme()))) {
       // Color scheme param exists and has been previously set, do not allow
       // color change
       LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");

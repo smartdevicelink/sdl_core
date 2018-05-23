@@ -168,6 +168,10 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
+#ifdef OPENSSL_NO_SSL3
+      LOG4CXX_WARN(logger_, "OpenSSL does not support SSL3 protocol");
+      return false;
+#else
       LOG4CXX_DEBUG(logger_, "SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
       break;

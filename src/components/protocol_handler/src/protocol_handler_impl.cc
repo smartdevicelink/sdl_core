@@ -1585,7 +1585,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         security_manager_->IsPolicyCertificateDataEmpty();
 
     const bool is_certificate_expired =
-        security_manager_->IsCertificateUpdateRequired();
+        security_manager_->IsCertificateUpdateRequired(connection_key);
 
     if (context.is_ptu_required_ &&
         (is_certificate_empty || is_certificate_expired)) {

@@ -67,6 +67,7 @@ using security_manager::SecurityQuery;
 using security_manager::SSLContext;
 using security_manager::SecurityManager;
 using security_manager::SecurityManagerImpl;
+using ContextCreationStrategy = SecurityManager::ContextCreationStrategy;
 
 using security_manager_test::InternalErrorWithErrId;
 using ::testing::Return;
@@ -78,6 +79,7 @@ using ::testing::_;
 namespace {
 // Sample data for handshake data emulation
 const int32_t kKey = 0x1;
+const ContextCreationStrategy kStrategy = ContextCreationStrategy::kUseExisting;
 const int32_t kSeqNumber = 0x2;
 const ServiceType kSecureServiceType = kControl;
 const uint32_t kProtocolVersion = PROTOCOL_VERSION_2;
@@ -405,7 +407,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
   EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
       .WillOnce(Return(&mock_ssl_context_new));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
+  const SSLContext* result =
+      security_manager_->CreateSSLContext(kKey, kStrategy);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
@@ -431,7 +434,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
       .WillOnce(ReturnNull());
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext()).WillOnce(ReturnNull());
 
-  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
+  const SSLContext* result =
+      security_manager_->CreateSSLContext(kKey, kStrategy);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -464,7 +468,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(kKey, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
+  const SSLContext* result =
+      security_manager_->CreateSSLContext(kKey, kStrategy);
   EXPECT_EQ(NULL, result);
 }
 /*
@@ -486,7 +491,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(kKey, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_SUCCESS));
 
-  const SSLContext* result = security_manager_->CreateSSLContext(kKey);
+  const SSLContext* result =
+      security_manager_->CreateSSLContext(kKey, kStrategy);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
