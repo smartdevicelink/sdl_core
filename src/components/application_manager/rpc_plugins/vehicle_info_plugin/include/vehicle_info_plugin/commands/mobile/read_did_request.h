@@ -31,68 +31,55 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
-
-class SmartObject;
 
 namespace commands {
 
 /**
- * @brief GetVehicleDataRequest command class
+ * @brief ReadDIDRequest command class
  **/
-class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
+class ReadDIDRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
-   * @brief GetVehicleDataRequest class constructor
+   * @brief ReadDIDRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
-                        app_mngr::ApplicationManager& application_manager,
-                        app_mngr::rpc_service::RPCService& rpc_service,
-                        app_mngr::HMICapabilities& hmi_capabilities,
-                        policy::PolicyHandlerInterface& policy_handler);
+  ReadDIDRequest(const app_mngr::commands::MessageSharedPtr& message,
+                 app_mngr::ApplicationManager& application_manager,
+                 app_mngr::rpc_service::RPCService& rpc_service,
+                 app_mngr::HMICapabilities& hmi_capabilities,
+                 policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief GetVehicleDataRequest class destructor
+   * @brief ReadDIDRequest class destructor
    **/
-  virtual ~GetVehicleDataRequest();
+  virtual ~ReadDIDRequest();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event);
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
- protected:
-  virtual void on_event(const app_mngr::event_engine::Event& event);
-
-#ifdef HMI_DBUS_API
  private:
-  void SendRequestsToHmi(const int32_t app_id);
-
-  struct HmiRequest {
-    hmi_apis::Common_Result::eType status;
-    bool complete;
-    smart_objects::SmartObject value;
-    const char* str;
-    hmi_apis::FunctionID::eType func_id;
-  };
-
-  typedef std::vector<HmiRequest> HmiRequests;
-  HmiRequests hmi_requests_;
-#endif  // #ifdef HMI_DBUS_API
-
-  DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
+  DISALLOW_COPY_AND_ASSIGN(ReadDIDRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_READ_DID_REQUEST_H_

@@ -32,6 +32,8 @@
 
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
+
 namespace vehicle_info_plugin {
 
 VehicleInfoCommandFactory::VehicleInfoCommandFactory(
@@ -42,12 +44,12 @@ VehicleInfoCommandFactory::VehicleInfoCommandFactory(
   : application_manager_(application_manager),
     rpc_service_(rpc_service),
     hmi_capabilities_(hmi_capabilities),
-    policy_handler_(policy_handler) {
-
-  hmi_command_factory_.reset(new VehicleInfoHmiCommandFactory(
-    application_manager, rpc_service, hmi_capabilities, policy_handler));
-  mob_command_factory_.reset(new VehicleInfoMobileCommandFactory(
-    application_manager, rpc_service, hmi_capabilities, policy_handler));
+    policy_handler_(policy_handler),
+    hmi_command_factory_(std::make_shared(new VehicleInfoHmiCommandFactory(
+      application_manager, rpc_service, hmi_capabilities, policy_handler))),
+    mob_command_factory_(std::make_shared(new VehicleInfoMobileCommandFactory(
+      application_manager, rpc_service, hmi_capabilities, policy_handler))) {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 VehicleInfoCommandFactory::~VehicleInfoCommandFactory() {}

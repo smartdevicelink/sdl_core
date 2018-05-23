@@ -3,6 +3,9 @@
  Copyright (c) 2018, Ford Motor Company
  All rights reserved.
 
+ Copyright (c) 2018, Livio, Inc.
+ All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
 
@@ -31,30 +34,30 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
 
-namespace sdl_rpc_plugin {
+namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
 /**
- * @brief UnsubscribeVehicleDataRequest command class
+ * @brief SubscribeVehicleDataRequest command class
  **/
-class UnsubscribeVehicleDataRequest
+class SubscribeVehicleDataRequest
     : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
-   * @brief UnsubscribeVehicleDataRequest class constructor
+   * @brief SubscribeVehicleDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  UnsubscribeVehicleDataRequest(
+  SubscribeVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -62,9 +65,9 @@ class UnsubscribeVehicleDataRequest
       policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief UnsubscribeVehicleDataRequest class destructor
+   * @brief SubscribeButtonCommandRequest class destructor
    **/
-  ~UnsubscribeVehicleDataRequest();
+  ~SubscribeVehicleDataRequest();
 
   /**
    * @brief Execute command
@@ -107,27 +110,70 @@ class UnsubscribeVehicleDataRequest
   bool IsSomeoneSubscribedFor(const uint32_t param_id) const;
 
   /**
-   * @brief Adds VI parameters being unsubscribed by another or the same app to
+   * @brief Adds VI parameters being subscribed by another or the same app to
    * response with appropriate results
    * @param msg_params 'message_params' response section reference
    */
-  void AddAlreadyUnsubscribedVI(smart_objects::SmartObject& response) const;
+  void AddAlreadySubscribedVI(smart_objects::SmartObject& msg_params) const;
 
   /**
-   * @brief VI parameters which still being subscribed by another apps after
-   * particular app had been unsubscribed from these parameters
+   * @brief Removes subscription for VI parameters which subsription attempt
+   * returned an error
+   * @param app Pointer to application sent subscribe request
+   * @param msg_params 'message_parameters' response section reference
    */
-  app_mngr::VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
+  void UnsubscribeFailedSubscriptions(
+      app_mngr::ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params) const;
+
+  DEPRECATED void CheckVISubscribtions(
+      app_mngr::ApplicationSharedPtr app,
+      std::string& out_info,
+      mobile_apis::Result::eType& out_result_code,
+      smart_objects::SmartObject& out_response_params,
+      smart_objects::SmartObject& out_request_params,
+      bool& out_result);
 
   /**
-   * @brief VI parameters which had been unsubscribed already by particular app
+   * @brief Checks if current application and other applications
+   * were subscribed to VI, prepare data that need to send to mobile app
+   * or HMI.
+   * @param app contains application
+   * @param out_info contains resulting info for sending to mobile app
+   * @param out_result_code contains result code for sending to mobile app
+   * @param out_response_params contains parameters that SDL sends to
+   * mobile application
+   * @param out_request_params contains parameters that SDL sends to
+   * HMI
+   * @param result contains result that SDL sends to mobile app.
    */
-  app_mngr::VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+  void CheckVISubscriptions(app_mngr::ApplicationSharedPtr app,
+                            std::string& out_info,
+                            mobile_apis::Result::eType& out_result_code,
+                            smart_objects::SmartObject& out_response_params,
+                            smart_objects::SmartObject& out_request_params,
+                            bool& out_result);
 
-  DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
+  /**
+   * @brief VI parameters which had been already subscribed by another apps
+   * befor particular app subscribed for these parameters
+   */
+  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
+
+  /**
+   * @brief VI parameters which had been subscribed already by particular app
+   */
+  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
+
+  /**
+   * @brief VI parameters which wait for subscribe after HMI respond
+   */
+  app_mngr::VehicleInfoSubscriptions vi_waiting_for_subscribe_;
+
+  DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_

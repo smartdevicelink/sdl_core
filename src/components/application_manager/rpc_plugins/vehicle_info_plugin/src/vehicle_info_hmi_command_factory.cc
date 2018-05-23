@@ -57,6 +57,7 @@ VehicleInfoHmiCommandFactory::VehicleInfoHmiCommandFactory(
 app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
+  UNUSED(source);
 
   const hmi_apis::FunctionID::eType function_id =
       static_cast<hmi_apis::FunctionID::eType>(
@@ -88,6 +89,24 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
       creator = hmi_apis::messageType::request == message_type
           ? factory.GetCreator<commands::VIIsReadyRequest>()
           : factory.GetCreator<commands::VIIsReadyResponse>();
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData:
+      // SubscribeVehicleData HMI request/response
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData:
+      // UnsubscribeVehicleData HMI request/response
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_OnVehicleData:
+      // OnVehicleData HMI notification
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_ReadDID:
+      // ReadDID HMI request/response
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_GetDTCs:
+      // GetDTCs HMI request/response
+      break;
+    case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage:
+      // DiagnosticMessage HMI request/response
       break;
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
