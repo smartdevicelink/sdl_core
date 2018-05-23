@@ -269,6 +269,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
             static_cast<hmi_apis::Common_DisplayType::eType>(
                 display_capabilities_so[hmi_response::display_type].asInt()));
 
+  EXPECT_EQ("GENERIC_DISPLAY", display_capabilities_so[hmi_response::display_name].asString());
+
   EXPECT_TRUE(display_capabilities_so["graphicSupported"].asBool());
 
   // Check text fields

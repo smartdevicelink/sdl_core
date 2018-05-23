@@ -180,13 +180,14 @@ class Enum(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, platform=None, internal_scope=None,
-                 elements=None, scope=None):
+                 elements=None, scope=None, deprecated=None):
         super(Enum, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
             platform=platform, scope=scope)
 
         self.internal_scope = internal_scope
+        self.deprecated = deprecated
         self.elements = \
             elements if elements is not None else collections.OrderedDict()
 
@@ -229,7 +230,7 @@ class Param(InterfaceItemBase):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None, deprecated = None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
@@ -238,6 +239,7 @@ class Param(InterfaceItemBase):
         self.is_mandatory = is_mandatory
         self.param_type = param_type
         self.default_value = default_value
+        self.deprecated = deprecated
 
 
 class FunctionParam(Param):
@@ -251,11 +253,11 @@ class FunctionParam(Param):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None, deprecated=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope)
+            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope, deprecated=deprecated)
 
         self.default_value = default_value
 

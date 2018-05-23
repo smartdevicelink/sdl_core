@@ -479,6 +479,7 @@ extern const char* dtc;
 extern const char* ecu_header;
 extern const char* image_capabilities;
 extern const char* display_type;
+extern const char* display_name;
 extern const char* text_fields;
 extern const char* media_clock_formats;
 extern const char* graphic_supported;

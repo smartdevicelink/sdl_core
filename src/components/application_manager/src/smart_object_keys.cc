@@ -437,6 +437,7 @@ const char* dtc = "dtc";
 const char* ecu_header = "ecuHeader";
 const char* image_capabilities = "imageCapabilities";
 const char* display_type = "displayType";
+const char* display_name = "displayName";
 const char* text_fields = "textFields";
 const char* media_clock_formats = "mediaClockFormats";
 const char* graphic_supported = "graphicSupported";

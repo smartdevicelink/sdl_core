@@ -619,7 +619,7 @@
         </element>
     </enum>
     
-    <enum name="DisplayType">
+    <enum name="DisplayType" deprecated="true">
         <description>See DAES for further infos regarding the displays</description>
         <element name="CID"/>
         <element name="TYPE2" />
@@ -1937,8 +1937,11 @@
     
     <struct name="DisplayCapabilities">
         <description>Contains information about the display capabilities.</description>
-        <param name="displayType" type="DisplayType" mandatory="true">
+        <param name="displayType" type="DisplayType" mandatory="true" deprecated="true">
             <description>The type of the display. See DisplayType</description>
+        </param>
+        <param name="displayName" type="String" mandatory="false">
+            <description>The name of the display the app is connected to.</description>
         </param>
         <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
             <description>A set of all fields that support text data. See TextField</description>
