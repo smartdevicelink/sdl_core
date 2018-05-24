@@ -361,21 +361,15 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
 
   mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();
 
-  if (mobile_apis::HMILevel::HMI_FULL == applied_hmi_level) {
-    using namespace helpers;
-    if (mobile_apis::VideoStreamingState::STREAMABLE == result_video_state ||
-        Compare<mobile_apis::AudioStreamingState::eType, EQ, ONE>(
-            result_audio_state,
-            mobile_apis::AudioStreamingState::AUDIBLE,
-            mobile_apis::AudioStreamingState::ATTENUATED)) {
-      result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
-    } else {
-      result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
-    }
-  } else if (mobile_apis::HMILevel::HMI_LIMITED == applied_hmi_level) {
-    if (to_resolve_hmi_level == applied_hmi_level) {
-      result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
-    }
+  using namespace helpers;
+  if (mobile_apis::VideoStreamingState::STREAMABLE == result_video_state ||
+      Compare<mobile_apis::AudioStreamingState::eType, EQ, ONE>(
+          result_audio_state,
+          mobile_apis::AudioStreamingState::AUDIBLE,
+          mobile_apis::AudioStreamingState::ATTENUATED)) {
+    result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
+  } else {
+    result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
   }
 
   if (std::make_tuple(to_resolve_hmi_level,
