@@ -214,7 +214,7 @@ void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
   }
 
   ssl_context->ResetConnection();
-  if (!ssl_context->HasCertificate()) {
+  if (!waiting_for_certificate_ && !ssl_context->HasCertificate()) {
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Fail);
     return;
@@ -413,6 +413,20 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   while (it != listeners_.end()) {
     (*it)->OnCertificateUpdateRequired();
     ++it;
+  }
+}
+
+void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+  while (it != listeners_.end()) {
+    if ((*it)->OnHandshakeFailed()) {
+      LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+      delete (*it);
+      it = listeners_.erase(it);
+    } else {
+      ++it;
+    }
   }
 }
 

@@ -164,6 +164,11 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   virtual void NotifyOnCertificateUpdateRequired() = 0;
 
   /**
+   * @brief Notify all listeners that handshake was failed
+   */
+  virtual void NotifyListenersOnHandshakeFailed() = 0;
+
+  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;

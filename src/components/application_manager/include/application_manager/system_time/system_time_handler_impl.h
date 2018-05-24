@@ -143,7 +143,7 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
   // Varible used to schedule next GetSystemTime request
   // if at the moment of sending first GetSystemTime request
   // HMI is not ready to provide system time
-  volatile bool schedule_request_;
+  volatile bool get_system_time_pending_;
   // Varible used to store result for GetSystemTime request
   time_t last_time_;
 

@@ -202,6 +202,11 @@ class SecurityManagerImpl : public SecurityManager,
   void NotifyOnCertificateUpdateRequired() OVERRIDE;
 
   /**
+   * @brief Notify all listeners that handshake was failed
+   */
+  void NotifyListenersOnHandshakeFailed() OVERRIDE;
+
+  /**
    * @brief SecurityConfigSection
    * @return Session name in config file
    */
