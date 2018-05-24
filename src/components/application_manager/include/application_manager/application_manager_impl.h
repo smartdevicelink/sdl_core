@@ -311,27 +311,25 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
-   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
+  DEPRECATED bool IsAppSubscribedForWayPoints(
+      const uint32_t app_id) const OVERRIDE;
 
   /**
-   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
-  void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
+  DEPRECATED void SubscribeAppForWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
-   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
-  void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
+  DEPRECATED void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -358,6 +356,18 @@ class ApplicationManagerImpl
    * @return true if some app is subscribed otherwise false
    */
   bool IsAnyAppSubscribedForWayPoints() const OVERRIDE;
+
+  /**
+   * @brief Get current information about waypoints on active route
+   * @return waypoints information if route is set otherwise empty pointer
+   */
+  smart_objects::SmartObjectSPtr GetWaypointsInfo() const OVERRIDE;
+
+  /**
+   * @brief Save current waypoint information from smart object
+   * @param obj Smart object with waypoints information
+   */
+  void SetWaypointsInfo(const smart_objects::SmartObject& obj) OVERRIDE;
 
   /**
    * @brief Get subscribed for way points
@@ -524,20 +534,18 @@ class ApplicationManagerImpl
       const hmi_apis::Common_DriverDistractionState::eType state) OVERRIDE;
 
   /*
-   * DEPRECATED
    * @brief Retrieves if VR session has started
    *
    * @return Current VR session state (started, stopped)
    */
-  inline bool vr_session_started() const;
+  DEPRECATED inline bool vr_session_started() const;
 
   /*
-   * DEPRECATED
    * @brief Sets VR session state
    *
    * @param state Current HMI VR session state
    */
-  void set_vr_session_started(const bool state);
+  DEPRECATED void set_vr_session_started(const bool state);
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -568,7 +576,6 @@ class ApplicationManagerImpl
       mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
-   * DEPRECATED
    * @brief CreateRegularState create regular HMI state for application
    * @param app_id Application id
    * @param hmi_level of returned state
@@ -1112,11 +1119,10 @@ class ApplicationManagerImpl
   void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
 
   /**
-   * DEPRECATED
    * @brief Parse smartObject and replace HMI app ID by mobile app Id
    * @param message Smartobject to be parsed
    */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+  DEPRECATED void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
 
   /*
    * @brief Save binary data to specified directory
@@ -1170,22 +1176,19 @@ class ApplicationManagerImpl
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
   /**
-   * DEPRECATED
    * @brief method adds application in FULL and LIMITED state
    * to on_phone_call_app_list_.
    * Also OnHMIStateNotification with BACKGROUND state sent for these apps
    */
-  void CreatePhoneCallAppList();
+  DEPRECATED void CreatePhoneCallAppList();
 
   /**
-   * DEPRECATED
    * @brief method removes application from on_phone_call_app_list_.
    *
    * Also OnHMIStateNotification with previous HMI state sent for these apps
    */
-  void ResetPhoneCallAppList();
+  DEPRECATED void ResetPhoneCallAppList();
 
-  // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
@@ -1710,7 +1713,12 @@ class ApplicationManagerImpl
   /**
    * @brief Set AppIDs of subscribed apps for way points
    */
-  std::set<int32_t> subscribed_way_points_apps_list_;
+  std::set<ApplicationSharedPtr> subscribed_way_points_apps_list_;
+
+  /**
+   * @brief Object with set of current way points
+   */
+  smart_objects::SmartObjectSPtr way_points_list_;
 
   /**
    * @brief Map contains applications which

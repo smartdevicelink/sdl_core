@@ -106,6 +106,25 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
+std::string CreateInfoForPolicyPermitResult(const PermitResult value) {
+  switch (value) {
+    case PermitResult::kRpcDisallowed: {
+      return "RPC is disallowed by Policies";
+    }
+    case PermitResult::kRpcUserDisallowed: {
+      return "RPC is disallowed by the User";
+    }
+    case PermitResult::kRpcAllParamsDisallowed: {
+      return "Requested parameters are disallowed by Policies";
+    }
+    case PermitResult::kRpcAllParamsUserDisallowed: {
+      return "Requested parameters are disallowed by User";
+    }
+    default:
+      return std::string();
+  }
+}
+
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
@@ -305,25 +324,6 @@ void CommandRequestImpl::SendResponse(
   is_success_result_ = success;
 
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
-}
-
-bool CommandRequestImpl::CheckSyntax(const std::string& str,
-                                     bool allow_empty_line) {
-  if (std::string::npos != str.find_first_of("\t\n")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (std::string::npos != str.find("\\n") ||
-      std::string::npos != str.find("\\t")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (!allow_empty_line) {
-    if ((std::string::npos == str.find_first_not_of(' '))) {
-      return false;
-    }
-  }
-  return true;
 }
 
 smart_objects::SmartObject CreateUnsupportedResourceResponse(
@@ -579,6 +579,13 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
   return mobile_result;
 }
 
+bool CommandRequestImpl::CheckHMIInterfaceAvailability(
+    const HmiInterfaces::InterfaceID interface) const {
+  const HmiInterfaces::InterfaceState interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  return HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != interface_state;
+}
+
 bool CommandRequestImpl::CheckAllowedParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -605,7 +612,10 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
 
   for (; iter != iter_end; ++iter) {
-    if (iter->second.asBool()) {
+    if (helpers::Compare<smart_objects::SmartType, helpers::NEQ, helpers::ALL>(
+            iter->second.getType(),
+            smart_objects::SmartType_Null,
+            smart_objects::SmartType_Invalid)) {
       LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
       params.insert(iter->first);
     }
@@ -627,7 +637,11 @@ bool CommandRequestImpl::CheckAllowedParameters() {
             check_result,
             correlation_id(),
             app->app_id());
-
+    std::string info =
+        CreateInfoForPolicyPermitResult(parameters_permissions_.permit_result);
+    if (!info.empty()) {
+      (*response)[strings::msg_params][strings::info] = info;
+    }
     application_manager_.SendMessageToMobile(response);
     return false;
   }
@@ -766,7 +780,11 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   }
 
   if (!info.empty()) {
-    info += " disallowed by policies.";
+    const uint32_t params_count =
+        removed_parameters_permissions_.disallowed_params.size() +
+        removed_parameters_permissions_.undefined_params.size();
+    info += params_count > 1 ? " parameters are " : " parameter is ";
+    info += "disallowed by Policies";
 
     if (!response[strings::msg_params][strings::info].asString().empty()) {
       // If we already have info add info about disallowed params to it

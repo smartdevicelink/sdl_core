@@ -481,6 +481,7 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
   policy_table::Strings::const_iterator app_groups_iter = groups.begin();
   policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
+  result.hmi_level_permitted = PermitResult::kRpcDisallowed;
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 
   for (; app_groups_iter != app_groups_iter_end; ++app_groups_iter) {
@@ -509,8 +510,6 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
                       hmi_level_e);
 
         if (rpc_param.hmi_levels.end() != hmi_iter) {
-          result.hmi_level_permitted = PermitResult::kRpcAllowed;
-
           policy_table::Parameters::const_iterator params_iter =
               rpc_param.parameters->begin();
           policy_table::Parameters::const_iterator params_iter_end =
@@ -519,6 +518,13 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
           for (; params_iter != params_iter_end; ++params_iter) {
             result.list_of_allowed_params.insert(
                 policy_table::EnumToJsonString(*params_iter));
+          }
+
+          if (rpc_param.parameters.is_initialized() &&
+              result.list_of_allowed_params.empty()) {
+            result.hmi_level_permitted = PermitResult::kRpcAllParamsDisallowed;
+          } else {
+            result.hmi_level_permitted = PermitResult::kRpcAllowed;
           }
         }
       }

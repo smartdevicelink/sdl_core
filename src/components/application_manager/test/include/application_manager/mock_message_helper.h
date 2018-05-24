@@ -91,6 +91,9 @@ class MockMessageHelper {
                void(protocol_handler::ServiceType service,
                     bool available,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendOnWaypointChangeNotification,
+               void(const uint32_t connection_key,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(CreateGetVehicleDataRequest,
                void(uint32_t correlation_id,
                     const std::vector<std::string>& params,

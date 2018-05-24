@@ -2673,6 +2673,36 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
   app_mngr.ManageHMICommand(message);
 }
 
+void MessageHelper::SendOnWaypointChangeNotification(
+    const uint32_t connection_key, ApplicationManager& app_mngr) {
+  smart_objects::SmartObjectSPtr waypoints = app_mngr.GetWaypointsInfo();
+  if (!waypoints) {
+    LOG4CXX_DEBUG(logger_,
+                  "Waypoints stored info is empty."
+                      << " Notification will not be send.");
+    return;
+  }
+
+  smart_objects::SmartObjectSPtr message =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnWayPointChangeID;
+  (*message)[strings::params][strings::message_type] =
+      mobile_apis::messageType::notification;
+  (*message)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  (*message)[strings::params][strings::connection_key] = connection_key;
+
+  (*message)[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::msg_params][strings::way_points] = *waypoints;
+
+  app_mngr.SendMessageToMobile(message);
+}
+
 void MessageHelper::SendGetSystemInfoRequest(ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());

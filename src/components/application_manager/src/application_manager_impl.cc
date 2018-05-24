@@ -142,6 +142,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
     , applications_list_lock_(true)
+    , way_points_list_(
+          new smart_objects::SmartObject(smart_objects::SmartType_Null))
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
@@ -3417,6 +3419,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   GetPolicyHandler().CheckPermissions(app, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
+    params_permissions->permit_result = result.hmi_level_permitted;
     params_permissions->allowed_params = result.list_of_allowed_params;
     params_permissions->disallowed_params = result.list_of_disallowed_params;
     params_permissions->undefined_params = result.list_of_undefined_params;
@@ -3442,8 +3445,10 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
     switch (result.hmi_level_permitted) {
       case policy::kRpcDisallowed:
+      case policy::kRpcAllParamsDisallowed:
         return mobile_apis::Result::DISALLOWED;
       case policy::kRpcUserDisallowed:
+      case policy::kRpcAllParamsUserDisallowed:
         return mobile_apis::Result::USER_DISALLOWED;
       default:
         return mobile_apis::Result::INVALID_ENUM;
@@ -4301,25 +4306,21 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
     const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  if (subscribed_way_points_apps_list_.find(app_id) ==
-      subscribed_way_points_apps_list_.end()) {
-    return false;
-  }
-  return true;
+  ApplicationSharedPtr app = application(app_id);
+  return IsAppSubscribedForWayPoints(app);
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.insert(app_id);
+  ApplicationSharedPtr app = application(app_id);
+  SubscribeAppForWayPoints(app);
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  subscribed_way_points_apps_list_.erase(app_id);
+  ApplicationSharedPtr app = application(app_id);
+  UnsubscribeAppFromWayPoints(app);
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
@@ -4368,8 +4369,29 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
 const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
     const {
   LOG4CXX_AUTO_TRACE(logger_);
+  std::set<int32_t> subscribers_list;
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  return subscribed_way_points_apps_list_;
+  for (ApplicationSharedPtr app : subscribed_way_points_apps_list_) {
+    subscribers_list.insert(app->app_id());
+  }
+  return subscribers_list;
+}
+
+smart_objects::SmartObjectSPtr ApplicationManagerImpl::GetWaypointsInfo()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  return way_points_list_ &&
+                 smart_objects::SmartType_Null != (*way_points_list_).getType()
+             ? way_points_list_
+             : smart_objects::SmartObjectSPtr();
+}
+
+void ApplicationManagerImpl::SetWaypointsInfo(
+    const smart_objects::SmartObject& obj) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  way_points_list_.reset(new smart_objects::SmartObject(obj));
 }
 
 static hmi_apis::Common_VideoStreamingProtocol::eType ConvertVideoProtocol(

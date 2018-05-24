@@ -78,6 +78,12 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
       service, available, app_mngr);
 }
 
+void MessageHelper::SendOnWaypointChangeNotification(
+    const uint32_t connection_key, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendOnWaypointChangeNotification(
+      connection_key, app_mngr);
+}
+
 void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
                                                 ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendDecryptCertificateToHMI(

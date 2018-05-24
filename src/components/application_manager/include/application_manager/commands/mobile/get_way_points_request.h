@@ -67,6 +67,12 @@ class GetWayPointsRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
+  /**
+   * @brief Checks is request allowed by HMI capabilities
+   * @return true if allowed otherwise false
+   */
+  bool CheckHMINaviCapabilities();
+
   DISALLOW_COPY_AND_ASSIGN(GetWayPointsRequest);
 };
 

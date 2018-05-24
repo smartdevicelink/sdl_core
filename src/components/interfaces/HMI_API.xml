@@ -4129,7 +4129,7 @@
   </function>
   <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
     <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
-    <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="0" maxsize="10">
       <description>See LocationDetails</description>
     </param>
   </function>

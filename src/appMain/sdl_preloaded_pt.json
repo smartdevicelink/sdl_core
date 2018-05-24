@@ -995,6 +995,11 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "OnWayPointChange": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     }
                 }
             },

@@ -25,6 +25,14 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
+  if (!CheckHMIInterfaceAvailability(HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_ERROR(logger_, "Navi interface is not available");
+    SendResponse(false,
+                 mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                 "Navi is not supported by system");
+    return;
+  }
+
   if (application_manager_.IsAppSubscribedForWayPoints(app)) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
@@ -33,6 +41,8 @@ void SubscribeWayPointsRequest::Run() {
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
     application_manager_.SubscribeAppForWayPoints(app);
     SendResponse(true, mobile_apis::Result::SUCCESS);
+    MessageHelper::SendOnWaypointChangeNotification(app->app_id(),
+                                                    application_manager_);
     return;
   }
 

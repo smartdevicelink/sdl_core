@@ -501,6 +501,14 @@ class MessageHelper {
                                  ApplicationManager& app_mngr);
 
   /**
+   * @brief Send notification to mobile on navi waypoints changed
+   * @param connection_key Id of application to send message to
+   * @param app_mngr Reference to AM instance
+   */
+  static void SendOnWaypointChangeNotification(const uint32_t connection_key,
+                                               ApplicationManager& app_mngr);
+
+  /**
    * @brief Send GetSystemInfo request to HMI
    */
   static void SendGetSystemInfoRequest(ApplicationManager& app_mngr);

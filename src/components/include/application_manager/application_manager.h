@@ -85,8 +85,9 @@ class EventDispatcher;
 
 class Application;
 class StateControllerImpl;
-struct CommandParametersPermissions;
 using policy::RPCParams;
+using policy::PermitResult;
+struct CommandParametersPermissions;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
@@ -254,27 +255,26 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
-   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
+  DEPRECATED virtual bool IsAppSubscribedForWayPoints(
+      const uint32_t app_id) const = 0;
 
   /**
-   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
-  virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
+  DEPRECATED virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
 
   /**
-   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
-  virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
+  DEPRECATED virtual void UnsubscribeAppFromWayPoints(
+      const uint32_t app_id) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -307,6 +307,18 @@ class ApplicationManager {
    * @return reference to set of subscribed apps for way points
    */
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
+
+  /**
+   * @brief Get current information about waypoints on active route
+   * @return waypoints information if route is set otherwise empty pointer
+   */
+  virtual smart_objects::SmartObjectSPtr GetWaypointsInfo() const = 0;
+
+  /**
+   * @brief Save current waypoint information from smart object
+   * @param obj Smart object with waypoints information
+   */
+  virtual void SetWaypointsInfo(const smart_objects::SmartObject& obj) = 0;
 
   virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
                                    bool final_message = false) = 0;
@@ -675,7 +687,6 @@ class ApplicationManager {
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**
-   * DEPRECATED
    * @brief CreateRegularState create regular HMI state for application
    * @param app_id Application id
    * @param hmi_level of returned state
@@ -683,7 +694,7 @@ class ApplicationManager {
    * @param system_context of returned state
    * @return new regular HMI state
    */
-  virtual HmiStatePtr CreateRegularState(
+  DEPRECATED virtual HmiStatePtr CreateRegularState(
       uint32_t app_id,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
