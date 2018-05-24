@@ -416,19 +416,6 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   }
 }
 
-bool SecurityManagerImpl::IsPolicyCertificateDataEmpty() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  std::string certificate_data;
-  for (auto it = listeners_.begin(); it != listeners_.end(); ++it) {
-    if ((*it)->GetPolicyCertificateData(certificate_data)) {
-      LOG4CXX_DEBUG(logger_, "Certificate data received from listener");
-      return certificate_data.empty();
-    }
-  }
-  return false;
-}
-
 bool SecurityManagerImpl::ProccessHandshakeData(
     const SecurityMessage& inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");

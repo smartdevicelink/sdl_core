@@ -964,17 +964,11 @@ class ApplicationManagerImpl
    * to allow creation of current class instances
    */
   void OnHandshakeFailed() OVERRIDE;
+
   /**
    * @brief Notification that certificate update is required.
    */
   void OnCertificateUpdateRequired() OVERRIDE;
-
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  bool GetPolicyCertificateData(std::string& data) const OVERRIDE;
 
   /**
    * @brief Get unique handshake context by application id

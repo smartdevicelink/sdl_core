@@ -1700,12 +1700,6 @@ void ApplicationManagerImpl::OnCertificateUpdateRequired() {
   GetPolicyHandler().OnPTExchangeNeeded();
 }
 
-bool ApplicationManagerImpl::GetPolicyCertificateData(std::string& data) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  data = GetPolicyHandler().RetrieveCertificate();
-  return true;
-}
-
 security_manager::SSLContext::HandshakeContext
 ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   LOG4CXX_AUTO_TRACE(logger_);

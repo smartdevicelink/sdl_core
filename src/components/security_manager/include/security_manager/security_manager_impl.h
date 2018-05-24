@@ -202,12 +202,6 @@ class SecurityManagerImpl : public SecurityManager,
   void NotifyOnCertificateUpdateRequired() OVERRIDE;
 
   /**
-   * @brief Check is policy certificate data is empty
-   * @return true if policy certificate data is not empty otherwise false
-   */
-  bool IsPolicyCertificateDataEmpty() OVERRIDE;
-
-  /**
    * @brief SecurityConfigSection
    * @return Session name in config file
    */

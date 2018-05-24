@@ -164,12 +164,6 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   virtual void NotifyOnCertificateUpdateRequired() = 0;
 
   /**
-   * @brief Check if policy certificate data is empty
-   * @return true if policy certificate data is empty otherwise false
-   */
-  virtual bool IsPolicyCertificateDataEmpty() = 0;
-
-  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;

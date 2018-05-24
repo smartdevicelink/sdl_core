@@ -58,13 +58,6 @@ class SecurityManagerListener {
    */
   virtual void OnCertificateUpdateRequired() = 0;
 
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
-
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager

@@ -73,13 +73,6 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   ~HandshakeHandler();
 
   /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  bool GetPolicyCertificateData(std::string& data) const OVERRIDE;
-
-  /**
    * @brief Notification about protection result
    * @param connection_key Unique key of session which triggrs handshake
    * @param result result of connection protection

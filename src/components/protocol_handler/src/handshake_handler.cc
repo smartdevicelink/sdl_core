@@ -86,10 +86,6 @@ uint32_t HandshakeHandler::connection_key() const {
                                        context_.new_session_id_);
 }
 
-bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
-  return false;
-}
-
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 void HandshakeHandler::OnHandshakeFailed() {
