@@ -116,7 +116,6 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
     return;
   }
   LOG4CXX_ERROR(logger_, info);
-  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(false, mobile_apis::Result::DISALLOWED, info.c_str());
 }
 
@@ -127,7 +126,6 @@ void RCCommandRequest::Run() {
 
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
     LOG4CXX_WARN(logger_, "HMI interface RC is not available");
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Remote control is not supported by system");
@@ -139,7 +137,6 @@ void RCCommandRequest::Run() {
           mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
           app->app_types())) {
     LOG4CXX_WARN(logger_, "Application has no remote control functions");
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, mobile_apis::Result::DISALLOWED, "");
     return;
   }
@@ -160,7 +157,6 @@ bool RCCommandRequest::AcquireResources() {
 
   if (!IsResourceFree(module_type)) {
     LOG4CXX_WARN(logger_, "Resource is busy.");
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, mobile_apis::Result::IN_USE, "");
     return false;
   }
@@ -172,17 +168,14 @@ bool RCCommandRequest::AcquireResources() {
       return true;
     }
     case AcquireResult::IN_USE: {
-      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false, mobile_apis::Result::IN_USE, "");
       return false;
     }
     case AcquireResult::ASK_DRIVER: {
-      SetResourceState(module_type, ResourceState::BUSY);
       SendGetUserConsent(module_type);
       return false;
     }
     case AcquireResult::REJECTED: {
-      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false, mobile_apis::Result::REJECTED, "");
       return false;
     }
@@ -209,7 +202,6 @@ void RCCommandRequest::ProcessAccessResponse(
   const std::string module_type = ModuleType();
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
     return;
   }
@@ -238,11 +230,11 @@ void RCCommandRequest::ProcessAccessResponse(
     if (is_allowed) {
       resource_allocation_manager_.ForceAcquireResource(module_type,
                                                         app->app_id());
+      SetResourceState(module_type, ResourceState::BUSY);
       Execute();  // run child's logic
     } else {
       resource_allocation_manager_.OnDriverDisallowed(module_type,
                                                       app->app_id());
-      SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(
           false,
           mobile_apis::Result::REJECTED,
@@ -252,7 +244,6 @@ void RCCommandRequest::ProcessAccessResponse(
   } else {
     std::string response_info;
     GetInfo(message, response_info);
-    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false, result_code, response_info.c_str());
   }
 }
