@@ -52,6 +52,8 @@ namespace {
 const size_t kUpdatesBeforeHour = 24;
 const std::string kAllCiphers = "ALL";
 const std::string kCaCertPath = "";
+const std::string kCertPath = "certificate.crt";
+const std::string kPrivateKeyPath = "private.key";
 const uint32_t kServiceNumber = 2u;
 const size_t kMaxSizeVector = 1u;
 #ifdef __QNXNTO__
@@ -118,6 +120,10 @@ class CryptoManagerTest : public testing::Test {
         .WillByDefault(ReturnRef(cipher));
     ON_CALL(*mock_security_manager_settings_, ca_cert_path())
         .WillByDefault(ReturnRef(kCaCertPath));
+    ON_CALL(*mock_security_manager_settings_, module_cert_path())
+        .WillByDefault(ReturnRef(kCertPath));
+    ON_CALL(*mock_security_manager_settings_, module_key_path())
+        .WillByDefault(ReturnRef(kPrivateKeyPath));
     ON_CALL(*mock_security_manager_settings_, verify_peer())
         .WillByDefault(Return(false));
   }
@@ -163,6 +169,10 @@ TEST_F(CryptoManagerTest, WrongInit) {
       .WillOnce(Return(security_manager::TLSv1_2));
   EXPECT_CALL(*mock_security_manager_settings_, certificate_data())
       .WillOnce(ReturnRef(certificate_data_base64_));
+  EXPECT_CALL(*mock_security_manager_settings_, module_cert_path())
+      .WillOnce(ReturnRef(kCertPath));
+  EXPECT_CALL(*mock_security_manager_settings_, module_key_path())
+      .WillOnce(ReturnRef(kPrivateKeyPath));
   EXPECT_CALL(*mock_security_manager_settings_, ciphers_list())
       .WillRepeatedly(ReturnRef(invalid_cipher));
   EXPECT_FALSE(crypto_manager_->Init());

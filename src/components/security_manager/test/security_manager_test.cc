@@ -529,7 +529,7 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
 /*
  * Shall send InternallError on SSL error and notify listeners
  */
-TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
+TEST_F(SecurityManagerTest, DISABLED_StartHandshake_SSLInternalError) {
   SetMockCryptoManager();
 
   uint32_t connection_id = 0;
@@ -572,7 +572,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
 /*
  * Shall send data on call StartHandshake
  */
-TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
+TEST_F(SecurityManagerTest, DISABLED_StartHandshake_SSLInitIsNotComplete) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
@@ -619,7 +619,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
  * Shall notify listeners on call StartHandshake after SSLContext initialization
  * complete
  */
-TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsComplete) {
+TEST_F(SecurityManagerTest, DISABLED_StartHandshake_SSLInitIsComplete) {
   SetMockCryptoManager();
   // Expect no message send
   // Expect notifying listeners (success)
