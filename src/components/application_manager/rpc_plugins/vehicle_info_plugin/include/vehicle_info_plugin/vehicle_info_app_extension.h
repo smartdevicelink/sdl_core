@@ -46,10 +46,10 @@ public:
   explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
   virtual ~VehicleInfoAppExtension();
 
-  void subscribeToVehicleInfo(const std::string &moduleType);
-  void unsubscribeFromVehicleInfo(const std::string &moduleType);
+  void subscribeToVehicleInfo(const std::string& moduleType);
+  void unsubscribeFromVehicleInfo(const std::string& moduleType);
   void unsubscribeFromVehicleInfo();
-  bool isSubscribedToVehicleInfo(const std::string &moduleType) const;
+  bool isSubscribedToVehicleInfo(const std::string& moduleType) const;
 
 private:
   std::set<std::string> subscribed_modules_;
