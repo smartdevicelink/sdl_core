@@ -44,13 +44,13 @@ VehicleInfoAppExtension::VehicleInfoAppExtension(application_manager::AppExtensi
 VehicleInfoAppExtension::~VehicleInfoAppExtension() {}
 
 void VehicleInfoAppExtension::subscribeToVehicleInfo(
-      const std::string &moduleType) {
+      const std::string& moduleType) {
   subscribed_modules_.insert(moduleType);
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
-      const std::string &moduleType) {
-  auto &it = subscribed_modules_.find(moduleType);
+      const std::string& moduleType) {
+  auto& it = subscribed_modules_.find(moduleType);
   if (it != subscribed_modules_.end()) {
     subscribed_modules_.erase(it);
   }
@@ -61,7 +61,7 @@ void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
-      const std::string &moduleType) const {
+      const std::string& moduleType) const {
   return subscribed_modules_.find(moduleType) !=
       subscribed_modules_.end();
 }
