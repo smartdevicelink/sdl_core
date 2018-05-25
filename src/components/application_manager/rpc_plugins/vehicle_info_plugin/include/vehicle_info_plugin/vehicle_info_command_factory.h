@@ -64,10 +64,6 @@ public:
       const commands::Command::CommandSource source) const OVERRIDE;
 
 private:
-  app_mngr::ApplicationManager& application_manager_;
-  app_mngr::rpc_service::RPCService& rpc_service_;
-  app_mngr::HMICapabilities& hmi_capabilities_;
-  policy::PolicyHandlerInterface& policy_handler_;
   std::unique_ptr<app_mngr::CommandFactory> hmi_command_factory_;
   std::unique_ptr<app_mngr::CommandFactory> mob_command_factory_;
 };

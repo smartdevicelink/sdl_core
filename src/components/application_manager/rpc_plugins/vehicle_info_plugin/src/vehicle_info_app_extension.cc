@@ -50,7 +50,7 @@ void VehicleInfoAppExtension::subscribeToVehicleInfo(
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
       const std::string& moduleType) {
-  auto& it = subscribed_modules_.find(moduleType);
+  auto it = subscribed_modules_.find(moduleType);
   if (it != subscribed_modules_.end()) {
     subscribed_modules_.erase(it);
   }
