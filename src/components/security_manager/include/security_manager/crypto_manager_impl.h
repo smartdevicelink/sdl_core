@@ -154,6 +154,14 @@ class CryptoManagerImpl : public CryptoManager {
   bool AreForceProtectionSettingsCorrect() const;
   bool set_certificate(const std::string& cert_data);
 
+  /**
+   * @brief Saves new certificate data on the file system
+   * @param cert_data certificate data in PEM format
+   * @return true if new certificate data was successfully saved on the file
+   * system, otherwise returns false
+   */
+  bool SaveCertificateData(const std::string& cert_data);
+
   int pull_number_from_buf(char* buf, int* idx);
   void asn1_time_to_tm(ASN1_TIME* time);
 
@@ -184,6 +192,24 @@ class CryptoManagerImpl : public CryptoManager {
    * otherwise returns NULL
    */
   EVP_PKEY* LoadModulePrivateKeyFromFile();
+
+  /**
+   * @brief Saves new X509 certificate data to file specified in
+   * CryptoManagerSettings
+   * @param certificate new X509 certificate data
+   * @return true if certificate data was saved to the file system otherwise
+   * returns false
+   */
+  bool SaveModuleCertificateToFile(X509* certificate) const;
+
+  /**
+   * @brief Saves new private key data to file specified in
+   * CryptoManagerSettings
+   * @param key new private key data
+   * @return true if private key data was saved to the file system otherwise
+   * returns false
+   */
+  bool SaveModuleKeyToFile(EVP_PKEY* key) const;
 
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;

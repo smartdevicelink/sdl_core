@@ -221,7 +221,7 @@ bool CryptoManagerImpl::Init() {
   // Disable SSL2 as deprecated
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
-  set_certificate(get_settings().certificate_data());
+  SaveCertificateData(get_settings().certificate_data());
 
   if (get_settings().ciphers_list().empty()) {
     LOG4CXX_WARN(logger_, "Empty ciphers list");
@@ -288,7 +288,7 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
     return false;
   }
 
-  if (!set_certificate(data)) {
+  if (!SaveCertificateData(data)) {
     LOG4CXX_ERROR(logger_, "Failed to save certificate data");
     return false;
   }
@@ -362,7 +362,7 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
   return *settings_;
 }
 
-bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (cert_data.empty()) {
@@ -379,6 +379,8 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   X509* cert = NULL;
   PEM_read_bio_X509(bio_cert, &cert, 0, 0);
 
+  asn1_time_to_tm(X509_get_notAfter(cert));
+
   EVP_PKEY* pkey = NULL;
   if (1 == BIO_reset(bio_cert)) {
     PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
@@ -393,35 +395,10 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     return false;
   }
 
-  if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, pkey);
+  UNUSED(key_guard);
 
-  if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
-    return false;
-  }
-
-  if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
-
-  X509_STORE* store = SSL_CTX_get_cert_store(context_);
-  if (store) {
-    X509* extra_cert = NULL;
-    while ((extra_cert = PEM_read_bio_X509(bio_cert, NULL, 0, 0))) {
-      if (extra_cert != cert) {
-        LOG4CXX_DEBUG(logger_,
-                      "Added new certificate to store: " << extra_cert);
-        X509_STORE_add_cert(store, extra_cert);
-      }
-    }
-  }
-
-  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
-  return true;
+  return SaveModuleCertificateToFile(cert) && SaveModuleKeyToFile(pkey);
 }
 
 int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
@@ -546,6 +523,55 @@ EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
   LOG4CXX_DEBUG(logger_, "Module private key was loaded: " << module_key);
 
   return module_key;
+}
+
+bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (NULL == certificate) {
+    LOG4CXX_WARN(logger_, "Empty certificate. Saving will be skipped");
+    return false;
+  }
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "w");
+  if (NULL == bio_cert) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to open " << cert_path << " file: " << LastError());
+    return false;
+  }
+
+  if (0 == PEM_write_bio_X509(bio_cert, certificate)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to write certificate to file: " << LastError());
+    return false;
+  }
+
+  return true;
+}
+
+bool CryptoManagerImpl::SaveModuleKeyToFile(EVP_PKEY* key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (NULL == key) {
+    LOG4CXX_WARN(logger_, "Empty private key. Saving will be skipped");
+    return false;
+  }
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "w");
+  if (NULL == bio_key) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to open " << key_path << " file: " << LastError());
+    return false;
+  }
+
+  if (0 == PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_, "Failed to write key to file: " << LastError());
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace security_manager
