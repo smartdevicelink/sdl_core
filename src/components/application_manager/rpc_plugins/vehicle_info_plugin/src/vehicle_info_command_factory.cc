@@ -41,11 +41,7 @@ VehicleInfoCommandFactory::VehicleInfoCommandFactory(
         app_mngr::rpc_service::RPCService& rpc_service,
         app_mngr::HMICapabilities& hmi_capabilities,
         policy::PolicyHandlerInterface& policy_handler)
-  : application_manager_(application_manager),
-    rpc_service_(rpc_service),
-    hmi_capabilities_(hmi_capabilities),
-    policy_handler_(policy_handler),
-    hmi_command_factory_(new VehicleInfoHmiCommandFactory(
+  : hmi_command_factory_(new VehicleInfoHmiCommandFactory(
       application_manager, rpc_service, hmi_capabilities, policy_handler)),
     mob_command_factory_(new VehicleInfoMobileCommandFactory(
       application_manager, rpc_service, hmi_capabilities, policy_handler)) {
