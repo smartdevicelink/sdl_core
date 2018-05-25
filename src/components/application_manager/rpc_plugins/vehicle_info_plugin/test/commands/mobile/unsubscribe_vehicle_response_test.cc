@@ -50,7 +50,7 @@ using ::testing::_;
 using ::testing::NotNull;
 using ::testing::Types;
 
-using sdl_rpc_plugin::commands::UnsubscribeVehicleDataResponse;
+using vehicle_info_plugin::commands::UnsubscribeVehicleDataResponse;
 using commands::MessageSharedPtr;
 namespace am = ::application_manager;
 

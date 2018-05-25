@@ -58,7 +58,7 @@ using ::testing::_;
 using ::testing::Return;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::GetDTCsRequest;
+using vehicle_info_plugin::commands::GetDTCsRequest;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 using testing::Mock;

@@ -42,7 +42,6 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
-#include "mobile/read_did_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
