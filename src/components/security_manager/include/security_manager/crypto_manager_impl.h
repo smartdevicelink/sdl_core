@@ -160,10 +160,10 @@ class CryptoManagerImpl : public CryptoManager {
    * @return true if new certificate data was successfully saved on the file
    * system, otherwise returns false
    */
-  bool SaveCertificateData(const std::string& cert_data);
+  bool SaveCertificateData(const std::string& cert_data) const;
 
-  int pull_number_from_buf(char* buf, int* idx);
-  void asn1_time_to_tm(ASN1_TIME* time);
+  int pull_number_from_buf(char* buf, int* idx) const;
+  void asn1_time_to_tm(ASN1_TIME* time) const;
 
   /**
    * @brief Sets initial certificate datetime

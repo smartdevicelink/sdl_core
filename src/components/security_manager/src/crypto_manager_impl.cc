@@ -362,7 +362,8 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
   return *settings_;
 }
 
-bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
+bool CryptoManagerImpl::SaveCertificateData(
+    const std::string& cert_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (cert_data.empty()) {
@@ -377,21 +378,25 @@ bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
   UNUSED(bio_guard)
 
   X509* cert = NULL;
-  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
+  if (!PEM_read_bio_X509(bio_cert, &cert, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read certificate data: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
+  UNUSED(cert_guard);
 
   asn1_time_to_tm(X509_get_notAfter(cert));
 
-  EVP_PKEY* pkey = NULL;
-  if (1 == BIO_reset(bio_cert)) {
-    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
-  } else {
+  if (1 != BIO_reset(bio_cert)) {
     LOG4CXX_WARN(logger_,
                  "Unabled to reset BIO in order to read private key, "
                      << LastError());
   }
 
-  if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+  EVP_PKEY* pkey = NULL;
+  if (!PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read private key data: " << LastError());
     return false;
   }
 
@@ -401,7 +406,7 @@ bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
   return SaveModuleCertificateToFile(cert) && SaveModuleKeyToFile(pkey);
 }
 
-int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
+int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) const {
   if (!idx) {
     return 0;
   }
@@ -410,7 +415,7 @@ int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
   return val;
 }
 
-void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
+void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) const {
   char* buf = (char*)time->data;
   int index = 0;
   const int year = pull_number_from_buf(buf, &index);
@@ -528,20 +533,23 @@ EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
 bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (NULL == certificate) {
+  if (!certificate) {
     LOG4CXX_WARN(logger_, "Empty certificate. Saving will be skipped");
     return false;
   }
 
   const std::string cert_path = get_settings().module_cert_path();
   BIO* bio_cert = BIO_new_file(cert_path.c_str(), "w");
-  if (NULL == bio_cert) {
+  if (!bio_cert) {
     LOG4CXX_ERROR(logger_,
                   "Failed to open " << cert_path << " file: " << LastError());
     return false;
   }
 
-  if (0 == PEM_write_bio_X509(bio_cert, certificate)) {
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_X509(bio_cert, certificate)) {
     LOG4CXX_ERROR(logger_,
                   "Failed to write certificate to file: " << LastError());
     return false;
@@ -553,20 +561,23 @@ bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
 bool CryptoManagerImpl::SaveModuleKeyToFile(EVP_PKEY* key) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (NULL == key) {
+  if (!key) {
     LOG4CXX_WARN(logger_, "Empty private key. Saving will be skipped");
     return false;
   }
 
   const std::string key_path = get_settings().module_key_path();
   BIO* bio_key = BIO_new_file(key_path.c_str(), "w");
-  if (NULL == bio_key) {
+  if (!bio_key) {
     LOG4CXX_ERROR(logger_,
                   "Failed to open " << key_path << " file: " << LastError());
     return false;
   }
 
-  if (0 == PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
     LOG4CXX_ERROR(logger_, "Failed to write key to file: " << LastError());
     return false;
   }
