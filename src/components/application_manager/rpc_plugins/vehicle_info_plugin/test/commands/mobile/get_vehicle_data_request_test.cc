@@ -59,7 +59,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::GetVehicleDataRequest;
+using vehicle_info_plugin::commands::GetVehicleDataRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 

@@ -59,7 +59,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::OnVehicleDataNotification;
+using vehicle_info_plugin::commands::OnVehicleDataNotification;
 
 typedef ::utils::SharedPtr<OnVehicleDataNotification> NotificationPtr;
 

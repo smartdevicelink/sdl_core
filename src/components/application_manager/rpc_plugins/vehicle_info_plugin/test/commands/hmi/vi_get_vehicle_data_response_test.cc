@@ -61,7 +61,7 @@ namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::VIGetVehicleDataResponse;
+using vehicle_info_plugin::commands::VIGetVehicleDataResponse;
 using am::event_engine::Event;
 using test::components::event_engine_test::MockEventDispatcher;
 

@@ -56,7 +56,7 @@ using ::testing::ReturnRef;
 using ::testing::Return;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::VIIsReadyRequest;
+using vehicle_info_plugin::commands::VIIsReadyRequest;
 using am::event_engine::Event;
 
 typedef SharedPtr<VIIsReadyRequest> VIIsReadyRequestPtr;

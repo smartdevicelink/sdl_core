@@ -59,10 +59,7 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "hmi/vi_read_did_response.h"
-#include "hmi/vi_subscribe_vehicle_data_response.h"
 #include "hmi/vi_get_vehicle_type_response.h"
-#include "hmi/vi_is_ready_response.h"
 #include "hmi/dial_number_response.h"
 #include "hmi/close_popup_response.h"
 #include "hmi/tts_set_global_properties_response.h"
@@ -78,12 +75,9 @@
 #include "hmi/ui_end_audio_pass_thru_response.h"
 #include "hmi/ui_perform_audio_pass_thru_response.h"
 #include "hmi/ui_perform_interaction_response.h"
-#include "hmi/vi_diagnostic_message_response.h"
-#include "hmi/vi_get_dtcs_response.h"
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_response.h"
-#include "hmi/vi_unsubscribe_vehicle_data_response.h"
 #include "hmi/vr_add_command_response.h"
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
@@ -183,16 +177,10 @@ typedef Types<
                 hmi_apis::FunctionID::UI_DeleteSubMenu>,
     CommandData<sdl_rpc_plugin::commands::UIEndAudioPassThruResponse,
                 hmi_apis::FunctionID::UI_EndAudioPassThru>,
-    CommandData<sdl_rpc_plugin::commands::VIDiagnosticMessageResponse,
-                hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage>,
-    CommandData<sdl_rpc_plugin::commands::VIGetDTCsResponse,
-                hmi_apis::FunctionID::VehicleInfo_GetDTCs>,
     CommandData<sdl_rpc_plugin::commands::UISetMediaClockTimerResponse,
                 hmi_apis::FunctionID::UI_SetMediaClockTimer>,
     CommandData<sdl_rpc_plugin::commands::UIShowResponse,
                 hmi_apis::FunctionID::UI_Show>,
-    CommandData<sdl_rpc_plugin::commands::VIUnsubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData>,
     CommandData<sdl_rpc_plugin::commands::VRAddCommandResponse,
                 hmi_apis::FunctionID::VR_AddCommand>,
     CommandData<sdl_rpc_plugin::commands::VRChangeRegistrationResponse,

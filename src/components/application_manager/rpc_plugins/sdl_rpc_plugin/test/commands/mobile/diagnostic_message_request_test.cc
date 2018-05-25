@@ -45,7 +45,6 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_message_helper.h"
-#include "mobile/diagnostic_message_request.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {
