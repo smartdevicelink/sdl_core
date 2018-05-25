@@ -362,7 +362,8 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
   return *settings_;
 }
 
-bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
+bool CryptoManagerImpl::SaveCertificateData(
+    const std::string& cert_data) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (cert_data.empty()) {
@@ -377,7 +378,13 @@ bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
   UNUSED(bio_guard)
 
   X509* cert = NULL;
-  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
+  if (!PEM_read_bio_X509(bio_cert, &cert, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read certificate data: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
+  UNUSED(cert_guard);
 
   EVP_PKEY* pkey = NULL;
   if (1 == BIO_reset(bio_cert)) {
@@ -388,8 +395,9 @@ bool CryptoManagerImpl::SaveCertificateData(const std::string& cert_data) {
                      << LastError());
   }
 
-  if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+  EVP_PKEY* pkey = NULL;
+  if (!PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0)) {
+    LOG4CXX_WARN(logger_, "Could not read private key data: " << LastError());
     return false;
   }
 
@@ -479,20 +487,23 @@ EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
 bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (NULL == certificate) {
+  if (!certificate) {
     LOG4CXX_WARN(logger_, "Empty certificate. Saving will be skipped");
     return false;
   }
 
   const std::string cert_path = get_settings().module_cert_path();
   BIO* bio_cert = BIO_new_file(cert_path.c_str(), "w");
-  if (NULL == bio_cert) {
+  if (!bio_cert) {
     LOG4CXX_ERROR(logger_,
                   "Failed to open " << cert_path << " file: " << LastError());
     return false;
   }
 
-  if (0 == PEM_write_bio_X509(bio_cert, certificate)) {
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_X509(bio_cert, certificate)) {
     LOG4CXX_ERROR(logger_,
                   "Failed to write certificate to file: " << LastError());
     return false;
@@ -504,20 +515,23 @@ bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
 bool CryptoManagerImpl::SaveModuleKeyToFile(EVP_PKEY* key) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (NULL == key) {
+  if (!key) {
     LOG4CXX_WARN(logger_, "Empty private key. Saving will be skipped");
     return false;
   }
 
   const std::string key_path = get_settings().module_key_path();
   BIO* bio_key = BIO_new_file(key_path.c_str(), "w");
-  if (NULL == bio_key) {
+  if (!bio_key) {
     LOG4CXX_ERROR(logger_,
                   "Failed to open " << key_path << " file: " << LastError());
     return false;
   }
 
-  if (0 == PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
     LOG4CXX_ERROR(logger_, "Failed to write key to file: " << LastError());
     return false;
   }

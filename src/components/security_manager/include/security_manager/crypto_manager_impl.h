@@ -160,7 +160,7 @@ class CryptoManagerImpl : public CryptoManager {
    * @return true if new certificate data was successfully saved on the file
    * system, otherwise returns false
    */
-  bool SaveCertificateData(const std::string& cert_data);
+  bool SaveCertificateData(const std::string& cert_data) const;
 
   /**
    * @brief Updates certificate and private key for the current SSL context
