@@ -70,6 +70,7 @@ class HmiState {
     STATE_ID_VR_SESSION,
     STATE_ID_TTS_SESSION,
     STATE_ID_VIDEO_STREAMING,
+    STATE_ID_NAVI_STREAMING,
     STATE_ID_DEACTIVATE_HMI,
     STATE_ID_AUDIO_SOURCE,
     STATE_ID_EMBEDDED_NAVI
@@ -300,9 +301,20 @@ class VideoStreamingHmiState : public HmiState {
   VideoStreamingHmiState(utils::SharedPtr<Application> app,
                          const ApplicationManager& app_mngr);
 
-  mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE;
   mobile_apis::VideoStreamingState::eType video_streaming_state()
+      const OVERRIDE;
+};
+
+/**
+ * @brief The NaviStreamingHmiState class implements logic of navigation
+ * streaming temporary state that is more specific than VideoStreamingHmiState
+ */
+class NaviStreamingHmiState : public VideoStreamingHmiState {
+ public:
+  NaviStreamingHmiState(utils::SharedPtr<Application> app,
+                        const ApplicationManager& app_mngr);
+
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
 };
 

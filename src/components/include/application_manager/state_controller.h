@@ -85,9 +85,17 @@ class StateController {
   virtual int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
                                     hmi_apis::Common_HMILevel::eType level,
                                     bool send_policy_priority) = 0;
+  /**
+   * @brief OnVideoStreamingStarted process video streaming started
+   * @param app projection or navigation application starting streaming
+   */
+  virtual void OnVideoStreamingStarted(ApplicationConstSharedPtr app) = 0;
 
-  virtual void OnNaviStreamingStarted() = 0;
-  virtual void OnNaviStreamingStopped() = 0;
+  /**
+   * @brief OnVideoStreamingStopped process video streaming stopped
+   * @param app projection or navigation application stopping streaming
+   */
+  virtual void OnVideoStreamingStopped(ApplicationConstSharedPtr app) = 0;
   virtual void OnStateChanged(ApplicationSharedPtr app,
                               HmiStatePtr old_state,
                               HmiStatePtr new_state) = 0;

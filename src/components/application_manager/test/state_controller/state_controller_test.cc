@@ -864,7 +864,7 @@ class StateControllerImplTest : public ::testing::Test {
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_TTS_SESSION);
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_PHONE_CALL);
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_SAFETY_MODE);
-    valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_VIDEO_STREAMING);
+    valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_NAVI_STREAMING);
   }
 
   void ConfigureApps() {
@@ -1074,18 +1074,19 @@ class StateControllerImplTest : public ::testing::Test {
   }
 
   void ApplyTempStatesForApplication(
-      NiceMock<application_manager_test::MockApplication>& application,
+      am::ApplicationSharedPtr app,
+      NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
     using smart_objects::SmartObject;
     using am::event_engine::Event;
     namespace FunctionID = hmi_apis::FunctionID;
 
-    EXPECT_CALL(application, CurrentHmiState())
+    EXPECT_CALL(app_mock, CurrentHmiState())
         .WillRepeatedly(Return(NoneNotAudibleState()));
 
     for (size_t i = 0; i < state_ids.size(); ++i) {
       am::HmiState::StateID state_id = state_ids[i];
-      EXPECT_CALL(application,
+      EXPECT_CALL(app_mock,
                   AddHMIState(Truly(HmiStatesIDComparator(state_id))));
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
@@ -1120,31 +1121,32 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
-          state_ctrl_->OnNaviStreamingStarted();
+        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+          state_ctrl_->OnVideoStreamingStarted(app);
           break;
         }
         default:
           break;
       }
-      EXPECT_CALL(application, AddHMIState(_)).Times(0);
+      EXPECT_CALL(app_mock, AddHMIState(_)).Times(0);
     }
   }
 
   void CheckStateApplyingForApplication(
-      NiceMock<application_manager_test::MockApplication>& application,
+      am::ApplicationSharedPtr app,
+      NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
     using smart_objects::SmartObject;
     using am::event_engine::Event;
     namespace FunctionID = hmi_apis::FunctionID;
 
-    EXPECT_CALL(application, CurrentHmiState())
+    EXPECT_CALL(app_mock, CurrentHmiState())
         .WillRepeatedly(Return(NoneNotAudibleState()));
 
     for (uint32_t i = 0; i < state_ids.size(); ++i) {
       am::HmiState::StateID state_id = state_ids[i];
-      EXPECT_CALL(application,
-                  AddHMIState(Truly(HmiStatesIDComparator(state_id)))).Times(1);
+      EXPECT_CALL(app_mock, AddHMIState(Truly(HmiStatesIDComparator(state_id))))
+          .Times(1);
 
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
@@ -1179,24 +1181,24 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
-          state_ctrl_->OnNaviStreamingStarted();
+        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+          state_ctrl_->OnVideoStreamingStarted(app);
           break;
         }
         default:
           break;
       }
 
-      EXPECT_CALL(application, AddHMIState(_)).Times(0);
+      EXPECT_CALL(app_mock, AddHMIState(_)).Times(0);
     }
 
     for (uint32_t i = 0; i < state_ids.size(); ++i) {
       am::HmiState::StateID state_id = state_ids[i];
-      EXPECT_CALL(application, RemoveHMIState(state_id)).Times(1);
+      EXPECT_CALL(app_mock, RemoveHMIState(state_id)).Times(1);
 
-      EXPECT_CALL(application, PostponedHmiState())
+      EXPECT_CALL(app_mock, PostponedHmiState())
           .WillOnce(Return(NoneNotAudibleState()));
-      EXPECT_CALL(application, RemovePostponedState());
+      EXPECT_CALL(app_mock, RemovePostponedState());
 
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
@@ -1231,15 +1233,15 @@ class StateControllerImplTest : public ::testing::Test {
           state_ctrl_->on_event(emergency_event);
           break;
         }
-        case am::HmiState::StateID::STATE_ID_VIDEO_STREAMING: {
-          state_ctrl_->OnNaviStreamingStopped();
+        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+          state_ctrl_->OnVideoStreamingStopped(app);
           break;
         }
         default:
           break;
       }
 
-      EXPECT_CALL(application, RemoveHMIState(_)).Times(0);
+      EXPECT_CALL(app_mock, RemoveHMIState(_)).Times(0);
     }
   }
 };
@@ -2046,42 +2048,48 @@ TEST_F(StateControllerImplTest, ActivateAppInvalidCorrelationId) {
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForSimpleApp) {
   InsertApplication(simple_app_);
-  CheckStateApplyingForApplication(*simple_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      simple_app_, *simple_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForMediaApp) {
   InsertApplication(media_app_);
-  CheckStateApplyingForApplication(*media_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      media_app_, *media_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForNaviApp) {
   InsertApplication(navi_app_);
-  CheckStateApplyingForApplication(*navi_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(navi_app_, *navi_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForVCApp) {
   InsertApplication(vc_app_);
-  CheckStateApplyingForApplication(*vc_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(vc_app_, *vc_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForMediaNaviApp) {
   InsertApplication(media_navi_app_);
-  CheckStateApplyingForApplication(*media_navi_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      media_navi_app_, *media_navi_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForMediaVCApp) {
   InsertApplication(media_vc_app_);
-  CheckStateApplyingForApplication(*media_vc_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      media_vc_app_, *media_vc_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForNaviVCApp) {
   InsertApplication(navi_vc_app_);
-  CheckStateApplyingForApplication(*navi_vc_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      navi_vc_app_, *navi_vc_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, ApplyTempStatesForMediaNaviVCApp) {
   InsertApplication(media_navi_vc_app_);
-  CheckStateApplyingForApplication(*media_navi_vc_app_ptr_, valid_state_ids_);
+  CheckStateApplyingForApplication(
+      media_navi_vc_app_, *media_navi_vc_app_ptr_, valid_state_ids_);
 }
 
 TEST_F(StateControllerImplTest, SetStatePhoneCallForNonMediaApplication) {
@@ -2969,7 +2977,8 @@ TEST_F(StateControllerImplTest, IsStateActive) {
 
 TEST_F(StateControllerImplTest, IsStateActiveApplyCorrectTempStates) {
   InsertApplication(simple_app_);
-  ApplyTempStatesForApplication(*simple_app_ptr_, valid_state_ids_);
+  ApplyTempStatesForApplication(
+      simple_app_, *simple_app_ptr_, valid_state_ids_);
   std::vector<am::HmiState::StateID>::const_iterator it =
       valid_state_ids_.begin();
   for (; it != valid_state_ids_.end(); ++it) {

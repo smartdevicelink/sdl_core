@@ -155,17 +155,31 @@ VideoStreamingHmiState::VideoStreamingHmiState(
     utils::SharedPtr<Application> app, const ApplicationManager& app_mngr)
     : HmiState(app, app_mngr, STATE_ID_VIDEO_STREAMING) {}
 
+mobile_apis::VideoStreamingState::eType
+VideoStreamingHmiState::video_streaming_state() const {
+  if (app_->IsVideoApplication()) {
+    return parent()->video_streaming_state();
+  }
+
+  return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+}
+
+NaviStreamingHmiState::NaviStreamingHmiState(utils::SharedPtr<Application> app,
+                                             const ApplicationManager& app_mngr)
+    : VideoStreamingHmiState(app, app_mngr) {
+  set_state_id(STATE_ID_NAVI_STREAMING);
+}
+
 mobile_apis::AudioStreamingState::eType
-VideoStreamingHmiState::audio_streaming_state() const {
+NaviStreamingHmiState::audio_streaming_state() const {
   using namespace helpers;
   using namespace mobile_apis;
 
   AudioStreamingState::eType expected_state = parent()->audio_streaming_state();
-  if (!app_->IsVideoApplication() &&
-      Compare<AudioStreamingState::eType, EQ, ONE>(
-          expected_state,
-          AudioStreamingState::AUDIBLE,
-          AudioStreamingState::ATTENUATED)) {
+  if (!is_navi_app() && Compare<AudioStreamingState::eType, EQ, ONE>(
+                            expected_state,
+                            AudioStreamingState::AUDIBLE,
+                            AudioStreamingState::ATTENUATED)) {
     if (app_mngr_.is_attenuated_supported()) {
       expected_state = AudioStreamingState::ATTENUATED;
     } else {
@@ -174,15 +188,6 @@ VideoStreamingHmiState::audio_streaming_state() const {
   }
 
   return expected_state;
-}
-
-mobile_apis::VideoStreamingState::eType
-VideoStreamingHmiState::video_streaming_state() const {
-  if (app_->IsVideoApplication()) {
-    return parent()->video_streaming_state();
-  }
-
-  return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
 }
 
 PhoneCallHmiState::PhoneCallHmiState(utils::SharedPtr<Application> app,
@@ -287,6 +292,7 @@ const StateID2StrMap kStateID2StrMap =
         HmiState::StateID::STATE_ID_VR_SESSION, "VR_SESSION")(
         HmiState::StateID::STATE_ID_TTS_SESSION, "TTS_SESSION")(
         HmiState::StateID::STATE_ID_VIDEO_STREAMING, "VIDEO_STREAMING")(
+        HmiState::StateID::STATE_ID_NAVI_STREAMING, "NAVI_STREAMING")(
         HmiState::StateID::STATE_ID_DEACTIVATE_HMI, "DEACTIVATE_HMI")(
         HmiState::StateID::STATE_ID_AUDIO_SOURCE, "AUDIO_SOURCE")(
         HmiState::StateID::STATE_ID_EMBEDDED_NAVI, "EMBEDDED_NAVI");

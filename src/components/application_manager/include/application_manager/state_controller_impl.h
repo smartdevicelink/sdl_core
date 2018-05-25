@@ -156,14 +156,16 @@ class StateControllerImpl : public event_engine::EventObserver,
       const mobile_apis::HMILevel::eType default_level);
 
   /**
-   * @brief OnNaviStreamingStarted process Navi streaming started
+   * @brief OnVideoStreamingStarted process video streaming started
+   * @param app projection or navigation application starting streaming
    */
-  virtual void OnNaviStreamingStarted();
+  virtual void OnVideoStreamingStarted(ApplicationConstSharedPtr app);
 
   /**
-   * @brief OnNaviStreamingStopped process Navi streaming stopped
+   * @brief OnVideoStreamingStopped process video streaming stopped
+   * @param app projection or navigation application stopping streaming
    */
-  virtual void OnNaviStreamingStopped();
+  virtual void OnVideoStreamingStopped(ApplicationConstSharedPtr app);
 
   /**
    * @brief OnStateChanged send HMIStatusNotification if needed

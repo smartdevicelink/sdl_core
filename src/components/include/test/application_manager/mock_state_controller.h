@@ -87,8 +87,10 @@ class MockStateController : public am::StateController {
                int64_t(am::ApplicationConstSharedPtr app,
                        hmi_apis::Common_HMILevel::eType level,
                        bool send_policy_priority));
-  MOCK_METHOD0(OnNaviStreamingStarted, void());
-  MOCK_METHOD0(OnNaviStreamingStopped, void());
+  MOCK_METHOD1(OnVideoStreamingStarted,
+               void(am::ApplicationConstSharedPtr app));
+  MOCK_METHOD1(OnVideoStreamingStopped,
+               void(am::ApplicationConstSharedPtr app));
   MOCK_METHOD3(OnStateChanged,
                void(am::ApplicationSharedPtr app,
                     am::HmiStatePtr old_state,
