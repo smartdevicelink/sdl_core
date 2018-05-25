@@ -3562,7 +3562,6 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
 
 void ApplicationManagerImpl::OnAppStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type, bool state) {
-  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
@@ -3575,11 +3574,11 @@ void ApplicationManagerImpl::OnAppStreaming(
   DCHECK_OR_RETURN_VOID(media_manager_);
 
   if (state) {
-    state_ctrl_.OnNaviStreamingStarted();
+    state_ctrl_.OnVideoStreamingStarted(app);
     media_manager_->StartStreaming(app_id, service_type);
   } else {
     media_manager_->StopStreaming(app_id, service_type);
-    state_ctrl_.OnNaviStreamingStopped();
+    state_ctrl_.OnVideoStreamingStarted(app);
   }
 }
 

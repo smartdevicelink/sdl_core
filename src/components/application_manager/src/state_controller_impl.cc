@@ -936,12 +936,22 @@ void StateControllerImpl::OnAppDeactivated(
   DeactivateApp(app);
 }
 
-void StateControllerImpl::OnNaviStreamingStarted() {
-  ApplyTempState<HmiState::STATE_ID_VIDEO_STREAMING>();
+void StateControllerImpl::OnVideoStreamingStarted(
+    ApplicationConstSharedPtr app) {
+  if (app->is_navi()) {
+    ApplyTempState<HmiState::STATE_ID_NAVI_STREAMING>();
+  } else {
+    ApplyTempState<HmiState::STATE_ID_VIDEO_STREAMING>();
+  }
 }
 
-void StateControllerImpl::OnNaviStreamingStopped() {
-  CancelTempState<HmiState::STATE_ID_VIDEO_STREAMING>();
+void StateControllerImpl::OnVideoStreamingStopped(
+    ApplicationConstSharedPtr app) {
+  if (app->is_navi()) {
+    CancelTempState<HmiState::STATE_ID_NAVI_STREAMING>();
+  } else {
+    CancelTempState<HmiState::STATE_ID_VIDEO_STREAMING>();
+  }
 }
 
 bool StateControllerImpl::IsStateActive(HmiState::StateID state_id) const {
@@ -980,6 +990,10 @@ HmiStatePtr StateControllerImpl::CreateHmiState(
     }
     case HmiState::STATE_ID_VIDEO_STREAMING: {
       new_state = MakeShared<VideoStreamingHmiState>(app, app_mngr_);
+      break;
+    }
+    case HmiState::STATE_ID_NAVI_STREAMING: {
+      new_state = MakeShared<NaviStreamingHmiState>(app, app_mngr_);
       break;
     }
     case HmiState::STATE_ID_REGULAR: {
