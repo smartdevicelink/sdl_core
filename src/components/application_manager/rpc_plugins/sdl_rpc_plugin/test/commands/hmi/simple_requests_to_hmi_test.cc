@@ -60,9 +60,6 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_global_properties_request.h"
 #include "application_manager/commands/request_to_hmi.h"
 #include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_read_did_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_set_global_properties_request.h"
@@ -86,13 +83,9 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_perform_interaction_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_diagnostic_message_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_dtcs_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_add_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_delete_command_request.h"
@@ -172,8 +165,6 @@ class RequestToHMICommandsTest3
 };
 
 typedef Types<sdl_rpc_plugin::commands::VIGetVehicleTypeRequest,
-              sdl_rpc_plugin::commands::VIReadDIDRequest,
-              sdl_rpc_plugin::commands::VISubscribeVehicleDataRequest,
               sdl_rpc_plugin::commands::hmi::DialNumberRequest,
               sdl_rpc_plugin::commands::ClosePopupRequest,
               sdl_rpc_plugin::commands::TTSSetGlobalPropertiesRequest,
@@ -192,12 +183,8 @@ typedef Types<sdl_rpc_plugin::commands::VIGetVehicleTypeRequest,
               sdl_rpc_plugin::commands::UIGetSupportedLanguagesRequest,
               sdl_rpc_plugin::commands::UIPerformAudioPassThruRequest,
               sdl_rpc_plugin::commands::UIPerformInteractionRequest,
-              sdl_rpc_plugin::commands::VIDiagnosticMessageRequest,
-              sdl_rpc_plugin::commands::VIGetDTCsRequest,
-              sdl_rpc_plugin::commands::VIGetVehicleDataRequest,
               sdl_rpc_plugin::commands::UISetMediaClockTimerRequest,
               sdl_rpc_plugin::commands::UIShowRequest,
-              sdl_rpc_plugin::commands::VIUnsubscribeVehicleDataRequest,
               sdl_rpc_plugin::commands::VRAddCommandRequest,
               sdl_rpc_plugin::commands::VRChangeRegistrationRequest,
               sdl_rpc_plugin::commands::VRDeleteCommandRequest,
@@ -238,8 +225,7 @@ typedef Types<sdl_rpc_plugin::commands::UIScrollableMessageRequest,
               sdl_rpc_plugin::commands::hmi::DialNumberRequest>
     RequestCommandsList2;
 
-typedef Types<sdl_rpc_plugin::commands::VIIsReadyRequest,
-              sdl_rpc_plugin::commands::TTSIsReadyRequest,
+typedef Types<sdl_rpc_plugin::commands::TTSIsReadyRequest,
               sdl_rpc_plugin::commands::UIIsReadyRequest,
               sdl_rpc_plugin::commands::NaviIsReadyRequest,
               sdl_rpc_plugin::commands::VRIsReadyRequest> RequestCommandsList3;
