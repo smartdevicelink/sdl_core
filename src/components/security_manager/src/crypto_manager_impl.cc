@@ -255,8 +255,15 @@ bool CryptoManagerImpl::Init() {
   }
 
   LOG4CXX_DEBUG(logger_, "Setting up module certificate and private key");
+
   X509* module_certificate = LoadModuleCertificateFromFile();
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
   EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
 
   if (!UpdateModuleCertificateData(module_certificate, module_key)) {
     LOG4CXX_WARN(logger_, "Failed to update module key and certificate");
@@ -288,6 +295,13 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 
   X509* module_certificate = LoadModuleCertificateFromFile();
   EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
 
   return UpdateModuleCertificateData(module_certificate, module_key);
 }
@@ -460,14 +474,14 @@ void CryptoManagerImpl::InitCertExpTime() {
 bool CryptoManagerImpl::UpdateModuleCertificateData(X509* certificate,
                                                     EVP_PKEY* key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (NULL != certificate) {
+  if (certificate) {
     if (!SSL_CTX_use_certificate(context_, certificate)) {
       LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
       return false;
     }
   }
 
-  if (NULL != key) {
+  if (key) {
     if (!SSL_CTX_use_PrivateKey(context_, key)) {
       LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
       return false;
@@ -488,7 +502,7 @@ X509* CryptoManagerImpl::LoadModuleCertificateFromFile() {
 
   const std::string cert_path = get_settings().module_cert_path();
   BIO* bio_cert = BIO_new_file(cert_path.c_str(), "r");
-  if (NULL == bio_cert) {
+  if (!bio_cert) {
     LOG4CXX_WARN(logger_,
                  "Failed to open " << cert_path << " file: " << LastError());
     return NULL;
@@ -498,7 +512,7 @@ X509* CryptoManagerImpl::LoadModuleCertificateFromFile() {
   UNUSED(bio_guard);
 
   X509* module_certificate = NULL;
-  if (0 == PEM_read_bio_X509(bio_cert, &module_certificate, NULL, NULL)) {
+  if (!PEM_read_bio_X509(bio_cert, &module_certificate, NULL, NULL)) {
     LOG4CXX_ERROR(logger_,
                   "Failed to read certificate data from file: " << LastError());
     return NULL;
@@ -514,7 +528,7 @@ EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
 
   const std::string key_path = get_settings().module_key_path();
   BIO* bio_key = BIO_new_file(key_path.c_str(), "r");
-  if (NULL == bio_key) {
+  if (!bio_key) {
     LOG4CXX_WARN(logger_,
                  "Failed to open " << key_path << " file: " << LastError());
     return NULL;
@@ -524,7 +538,7 @@ EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
   UNUSED(bio_guard);
 
   EVP_PKEY* module_key = NULL;
-  if (0 == PEM_read_bio_PrivateKey(bio_key, &module_key, NULL, NULL)) {
+  if (!PEM_read_bio_PrivateKey(bio_key, &module_key, NULL, NULL)) {
     LOG4CXX_ERROR(logger_,
                   "Failed to read private key data from file: " << LastError());
     return NULL;
