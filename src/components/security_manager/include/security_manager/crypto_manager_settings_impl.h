@@ -60,6 +60,14 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     return profile_.ca_cert_path();
   }
 
+  const std::string& module_cert_path() const OVERRIDE {
+    return profile_.cert_path();
+  }
+
+  const std::string& module_key_path() const OVERRIDE {
+    return profile_.key_path();
+  }
+
   size_t update_before_hours() const OVERRIDE {
     return profile_.update_before_hours();
   }

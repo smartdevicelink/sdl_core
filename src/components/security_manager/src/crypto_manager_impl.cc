@@ -254,6 +254,14 @@ bool CryptoManagerImpl::Init() {
                      << '"');
   }
 
+  LOG4CXX_DEBUG(logger_, "Setting up module certificate and private key");
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+
+  if (!UpdateModuleCertificateData(module_certificate, module_key)) {
+    LOG4CXX_WARN(logger_, "Failed to update module key and certificate");
+  }
+
   guard.Dismiss();
 
   const int verify_mode =
@@ -273,7 +281,15 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
     return false;
   }
 
-  return set_certificate(data);
+  if (!set_certificate(data)) {
+    LOG4CXX_ERROR(logger_, "Failed to save certificate data");
+    return false;
+  }
+
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+
+  return UpdateModuleCertificateData(module_certificate, module_key);
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
@@ -392,6 +408,130 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
 
   LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
   return true;
+}
+
+int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
+  if (!idx) {
+    return 0;
+  }
+  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
+  *idx = *idx + 2;
+  return val;
+}
+
+void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
+  char* buf = (char*)time->data;
+  int index = 0;
+  const int year = pull_number_from_buf(buf, &index);
+  if (V_ASN1_GENERALIZEDTIME == time->type) {
+    expiration_time_.tm_year =
+        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
+  } else {
+    expiration_time_.tm_year = year < 50 ? year + 100 : year;
+  }
+
+  const int mon = pull_number_from_buf(buf, &index);
+  const int day = pull_number_from_buf(buf, &index);
+  const int hour = pull_number_from_buf(buf, &index);
+  const int mn = pull_number_from_buf(buf, &index);
+
+  expiration_time_.tm_mon = mon - 1;
+  expiration_time_.tm_mday = day;
+  expiration_time_.tm_hour = hour;
+  expiration_time_.tm_min = mn;
+
+  if (buf[index] == 'Z') {
+    expiration_time_.tm_sec = 0;
+  }
+  if ((buf[index] == '+') || (buf[index] == '-')) {
+    const int mn = pull_number_from_buf(buf, &index);
+    const int mn1 = pull_number_from_buf(buf, &index);
+    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
+  } else {
+    const int sec = pull_number_from_buf(buf, &index);
+    expiration_time_.tm_sec = sec;
+  }
+}
+
+void CryptoManagerImpl::InitCertExpTime() {
+  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
+}
+
+bool CryptoManagerImpl::UpdateModuleCertificateData(X509* certificate,
+                                                    EVP_PKEY* key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (NULL != certificate) {
+    if (!SSL_CTX_use_certificate(context_, certificate)) {
+      LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
+      return false;
+    }
+  }
+
+  if (NULL != key) {
+    if (!SSL_CTX_use_PrivateKey(context_, key)) {
+      LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
+      return false;
+    }
+
+    if (!SSL_CTX_check_private_key(context_)) {
+      LOG4CXX_ERROR(logger_, "Private key is invalid: " << LastError());
+      return false;
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key are successfully updated");
+  return true;
+}
+
+X509* CryptoManagerImpl::LoadModuleCertificateFromFile() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "r");
+  if (NULL == bio_cert) {
+    LOG4CXX_WARN(logger_,
+                 "Failed to open " << cert_path << " file: " << LastError());
+    return NULL;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  X509* module_certificate = NULL;
+  if (0 == PEM_read_bio_X509(bio_cert, &module_certificate, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to read certificate data from file: " << LastError());
+    return NULL;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Module certificate was loaded: " << module_certificate);
+
+  return module_certificate;
+}
+
+EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "r");
+  if (NULL == bio_key) {
+    LOG4CXX_WARN(logger_,
+                 "Failed to open " << key_path << " file: " << LastError());
+    return NULL;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
+
+  EVP_PKEY* module_key = NULL;
+  if (0 == PEM_read_bio_PrivateKey(bio_key, &module_key, NULL, NULL)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to read private key data from file: " << LastError());
+    return NULL;
+  }
+  LOG4CXX_DEBUG(logger_, "Module private key was loaded: " << module_key);
+
+  return module_key;
 }
 
 }  // namespace security_manager
