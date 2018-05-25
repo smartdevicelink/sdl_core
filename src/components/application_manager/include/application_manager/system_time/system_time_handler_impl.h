@@ -140,10 +140,13 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
   mutable sync_primitives::Lock state_lock_;
   // Variable means HMI readiness to provide system time by request
   volatile bool utc_time_can_be_received_;
-  // Varible used to schedule next GetSystemTime request
-  // if at the moment of sending first GetSystemTime request
-  // HMI is not ready to provide system time
-  volatile bool schedule_request_;
+
+  /**
+   * @brief Flag used to control that only GetSystemTime request at time could
+   * be sent to HMI
+   */
+  volatile bool awaiting_get_system_time_;
+
   // Varible used to store result for GetSystemTime request
   time_t last_time_;
 

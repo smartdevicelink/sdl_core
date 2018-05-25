@@ -685,12 +685,6 @@ class ProtocolHandlerImpl
 
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager* security_manager_;
-
-  bool is_ptu_triggered_;
-  std::list<std::shared_ptr<HandshakeHandler> > ptu_pending_handlers_;
-  std::list<std::shared_ptr<HandshakeHandler> > handshake_handlers_;
-  sync_primitives::Lock ptu_handlers_lock_;
-  sync_primitives::Lock handshake_handlers_lock_;
 #endif  // ENABLE_SECURITY
 
   // Thread that pumps non-parsed messages coming from mobile side.
