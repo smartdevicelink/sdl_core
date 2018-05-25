@@ -453,9 +453,11 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::display_type);
 
-    display_caps[hmi_response::display_name] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::display_name);
+    if(hmi_capabilities.display_capabilities()->keyExists(hmi_response::display_name)) {
+      display_caps[hmi_response::display_name] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::display_name);      
+    }
 
     display_caps[hmi_response::text_fields] =
         hmi_capabilities.display_capabilities()->getElement(
