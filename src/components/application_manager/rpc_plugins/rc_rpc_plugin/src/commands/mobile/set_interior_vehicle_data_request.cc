@@ -58,7 +58,10 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
     module_ro_params.push_back(kSisData);
+  } else if (enums_value::kLight == module_type) {
+    module_ro_params.push_back(kStatus);
   }
+
   return module_ro_params;
 }
 
@@ -154,14 +157,16 @@ bool CheckLightDataByCapabilities(
   LOG4CXX_AUTO_TRACE(logger_);
   std::map<std::string, std::string> lightCapsMapping = {
       {message_params::kId, strings::kName},
+      {message_params::kStatus, strings::kStatusAvailable},
       {message_params::kDensity, strings::kDensityAvailable},
       {message_params::kSRGBColor, strings::kSRGBColorSpaceAvailable}};
   auto it = light_data.map_begin();
+
   for (; it != light_data.map_end(); ++it) {
-    if (message_params::kStatus == it->first ||
-        message_params::kId == it->first) {
+    if (message_params::kId == it->first) {
       continue;
     }
+    
     const std::string& caps_key = lightCapsMapping[it->first];
     LOG4CXX_DEBUG(logger_,
                   "Checking request parameter "
@@ -528,11 +533,29 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
     if (module_type_params.keyExists(it)) {
       if (enums_value::kClimate == module_type) {
         module_data[message_params::kClimateControlData].erase(it);
-        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
       } else if (enums_value::kRadio == module_type) {
         module_data[message_params::kRadioControlData].erase(it);
-        LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
+      } else if (enums_value::kLight == module_type) {
+        const mobile_apis::LightStatus::eType light_status =
+            static_cast<mobile_apis::LightStatus::eType>(
+                module_data[message_params::kLightControlData]
+                           [message_params::kStatus]
+                               .asUInt());
+
+        if (helpers::Compare<mobile_apis::LightStatus::eType,
+                             helpers::EQ,
+                             helpers::ONE>(light_status,
+                                           mobile_apis::LightStatus::RAMP_UP,
+                                           mobile_apis::LightStatus::RAMP_DOWN,
+                                           mobile_apis::LightStatus::UNKNOWN,
+                                           mobile_apis::LightStatus::INVALID)) {
+          module_data[message_params::kLightControlData].erase(it);
+        } else {
+          continue;
+        }
       }
+
+      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
     }
   }
 
