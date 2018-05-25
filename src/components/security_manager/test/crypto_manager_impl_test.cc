@@ -144,26 +144,20 @@ TEST_F(CryptoManagerTest, UsingBeforeInit) {
 }
 
 TEST_F(CryptoManagerTest, WrongInit) {
-  forced_protected_services_.push_back(kServiceNumber);
-  forced_unprotected_services_.push_back(kServiceNumber);
-  EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
-      .WillOnce(Return(security_manager::SERVER));
-  EXPECT_CALL(*mock_security_manager_settings_, force_unprotected_service())
-      .WillOnce(ReturnRef(forced_unprotected_services_));
-  EXPECT_CALL(*mock_security_manager_settings_, force_protected_service())
-      .WillOnce(ReturnRef(forced_protected_services_));
-  EXPECT_FALSE(crypto_manager_->Init());
-  forced_protected_services_.pop_back();
-  forced_unprotected_services_.pop_back();
-  EXPECT_NE(std::string(), crypto_manager_->LastError());
+  // We have to cast (-1) to security_manager::Protocol Enum to be accepted by
+  // crypto_manager_->Init(...)
+  // Unknown protocol version
+  security_manager::Protocol UNKNOWN =
+      static_cast<security_manager::Protocol>(-1);
   // Unexistent cipher value
   const std::string invalid_cipher = "INVALID_UNKNOWN_CIPHER";
-  EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
-      .WillOnce(Return(security_manager::SERVER));
-  EXPECT_CALL(*mock_security_manager_settings_, force_unprotected_service())
-      .WillOnce(ReturnRef(forced_unprotected_services_));
-  EXPECT_CALL(*mock_security_manager_settings_, force_protected_service())
-      .WillOnce(ReturnRef(forced_protected_services_));
+  const security_manager::Mode mode = security_manager::SERVER;
+
+  SetInitialValues(mode, UNKNOWN, invalid_cipher);
+
+  EXPECT_FALSE(crypto_manager_->Init());
+  EXPECT_NE(std::string(), crypto_manager_->LastError());
+
   EXPECT_CALL(*mock_security_manager_settings_,
               security_manager_protocol_name())
       .WillOnce(Return(security_manager::TLSv1_2));
