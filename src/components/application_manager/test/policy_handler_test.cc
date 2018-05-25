@@ -1384,7 +1384,7 @@ TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(kPolicyAppId_))
       .WillOnce(Return(std::vector<std::string>({"HTTP"})));
   // Act
-  policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type);
+  EXPECT_FALSE(policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type));
 }
 
 TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {

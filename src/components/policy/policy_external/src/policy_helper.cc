@@ -408,41 +408,32 @@ void policy::CheckAppPolicy::SetPendingPermissions(
       break;
     case RESULT_REQUEST_TYPE_CHANGED:
       permissions_diff.requestTypeChanged = true;
-      {
-        // Getting Request Types from PTU (not from cache)
-        for (const auto& request_type : *app_policy.second.RequestType) {
-          permissions_diff.requestType.push_back(
-              EnumToJsonString(request_type));
-        }
-      }
 
+      // Getting Request Types from PTU (not from cache)
+      for (const auto& request_type : *app_policy.second.RequestType) {
+        permissions_diff.requestType.push_back(EnumToJsonString(request_type));
+      }
       break;
     case RESULT_REQUEST_SUBTYPE_CHANGED:
       permissions_diff.requestSubTypeChanged = true;
-      {
-        // Getting Request SubTypes from PTU (not from cache)
-        for (const auto& request_subtype : *app_policy.second.RequestSubType) {
-          permissions_diff.requestSubType.push_back(request_subtype);
-        }
+      // Getting Request SubTypes from PTU (not from cache)
+      for (const auto& request_subtype : *app_policy.second.RequestSubType) {
+        permissions_diff.requestSubType.push_back(request_subtype);
       }
-
       break;
     case RESULT_REQUEST_TYPE_AND_SUBTYPE_CHANGED:
       permissions_diff.requestTypeChanged = true;
       permissions_diff.requestSubTypeChanged = true;
-      {
-        // Getting Request Types from PTU (not from cache)
-        for (const auto& request_type : *app_policy.second.RequestType) {
-          permissions_diff.requestType.push_back(
-              EnumToJsonString(request_type));
-        }
 
-        // Getting Request SubTypes from PTU (not from cache)
-        for (const auto& request_subtype : *app_policy.second.RequestSubType) {
-          permissions_diff.requestSubType.push_back(request_subtype);
-        }
+      // Getting Request Types from PTU (not from cache)
+      for (const auto& request_type : *app_policy.second.RequestType) {
+        permissions_diff.requestType.push_back(EnumToJsonString(request_type));
       }
 
+      // Getting Request SubTypes from PTU (not from cache)
+      for (const auto& request_subtype : *app_policy.second.RequestSubType) {
+        permissions_diff.requestSubType.push_back(request_subtype);
+      }
       break;
     default:
       return;
