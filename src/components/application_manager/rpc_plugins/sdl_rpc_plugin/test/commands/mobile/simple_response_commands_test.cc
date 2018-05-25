@@ -38,25 +38,20 @@
 #include "utils/shared_ptr.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "mobile/read_did_response.h"
 #include "mobile/delete_command_response.h"
 #include "mobile/alert_maneuver_response.h"
 #include "mobile/alert_response.h"
 #include "mobile/list_files_response.h"
 #include "mobile/subscribe_button_response.h"
 #include "mobile/add_sub_menu_response.h"
-#include "mobile/diagnostic_message_response.h"
 #include "mobile/dial_number_response.h"
 #include "mobile/end_audio_pass_thru_response.h"
-#include "mobile/get_dtcs_response.h"
-#include "mobile/get_vehicle_data_response.h"
 #include "mobile/unregister_app_interface_response.h"
 #include "mobile/unsubscribe_button_response.h"
 #include "mobile/unsubscribe_way_points_response.h"
 #include "mobile/update_turn_list_response.h"
 #include "mobile/slider_response.h"
 #include "mobile/speak_response.h"
-#include "mobile/subscribe_vehicle_data_response.h"
 #include "mobile/subscribe_way_points_response.h"
 #include "mobile/system_response.h"
 #include "mobile/get_way_points_response.h"
@@ -98,24 +93,19 @@ class MobileResponseCommandsTest
 };
 
 typedef Types<commands::ListFilesResponse,
-              commands::ReadDIDResponse,
               commands::DeleteCommandResponse,
               commands::AlertManeuverResponse,
               commands::AlertResponse,
               commands::SubscribeButtonResponse,
               commands::AddSubMenuResponse,
-              commands::DiagnosticMessageResponse,
               commands::DialNumberResponse,
               commands::EndAudioPassThruResponse,
-              commands::GetDTCsResponse,
-              commands::GetVehicleDataResponse,
               commands::UnregisterAppInterfaceResponse,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListResponse,
               commands::UnsubscribeButtonResponse,
               commands::SliderResponse,
               commands::SpeakResponse,
-              commands::SubscribeVehicleDataResponse,
               commands::SubscribeWayPointsResponse,
               commands::SystemResponse,
               commands::GetWayPointsResponse,

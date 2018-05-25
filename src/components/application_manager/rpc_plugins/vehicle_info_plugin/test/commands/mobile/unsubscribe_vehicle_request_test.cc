@@ -51,7 +51,7 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using sdl_rpc_plugin::commands::UnsubscribeVehicleDataRequest;
+using vehicle_info_plugin::commands::UnsubscribeVehicleDataRequest;
 using am::commands::MessageSharedPtr;
 
 typedef ::utils::SharedPtr<UnsubscribeVehicleDataRequest> CommandPtr;
