@@ -164,6 +164,11 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   virtual void NotifyOnCertificateUpdateRequired() = 0;
 
   /**
+   * @brief Notify all listeners that handshake was failed
+   */
+  virtual void NotifyListenersOnHandshakeFailed() = 0;
+
+  /**
    * @brief Check if policy certificate data is empty
    * @return true if policy certificate data is empty otherwise false
    */

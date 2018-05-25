@@ -92,7 +92,7 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
-void HandshakeHandler::OnHandshakeFailed() {
+bool HandshakeHandler::OnHandshakeFailed() {
   BsonObject params;
   if (payload_) {
     params = bson_object_from_bytes(payload_.get());
@@ -101,6 +101,7 @@ void HandshakeHandler::OnHandshakeFailed() {
   }
   ProcessFailedHandshake(params);
   bson_object_deinitialize(&params);
+  return true;
 }
 
 bool HandshakeHandler::OnHandshakeDone(

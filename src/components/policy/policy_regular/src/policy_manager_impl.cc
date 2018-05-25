@@ -219,10 +219,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
 
-    if (pt_update->policy_table.module_config.certificate.is_initialized()) {
-      listener_->OnCertificateUpdated(
-          *(pt_update->policy_table.module_config.certificate));
-    }
+    listener_->OnCertificateUpdated(
+        *(pt_update->policy_table.module_config.certificate));
 
     std::map<std::string, StringArray> app_hmi_types;
     cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
@@ -1082,13 +1080,6 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    const policy_table::AppHMIType type = policy_table::AHT_NAVIGATION;
-    if (helpers::in_range(hmi_types,
-                          (rpc::Enum<policy_table::AppHMIType>)type) &&
-        !HasCertificate()) {
-      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
-      update_status_manager_.ScheduleUpdate();
-    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }

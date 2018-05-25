@@ -1700,8 +1700,9 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   return false;
 }
 
-void ApplicationManagerImpl::OnHandshakeFailed() {
+bool ApplicationManagerImpl::OnHandshakeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
+  return false;
 }
 
 void ApplicationManagerImpl::OnCertificateUpdateRequired() {

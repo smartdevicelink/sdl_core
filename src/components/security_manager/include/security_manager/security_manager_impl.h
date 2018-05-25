@@ -202,6 +202,11 @@ class SecurityManagerImpl : public SecurityManager,
   void NotifyOnCertificateUpdateRequired() OVERRIDE;
 
   /**
+   * @brief Notify all listeners that handshake was failed
+   */
+  void NotifyListenersOnHandshakeFailed() OVERRIDE;
+
+  /**
    * @brief Check is policy certificate data is empty
    * @return true if policy certificate data is not empty otherwise false
    */
