@@ -449,50 +449,62 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     smart_objects::SmartObject& display_caps =
         response_params[hmi_response::display_capabilities];
 
-    display_caps[hmi_response::display_type] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::display_type);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::display_type)) {
+      display_caps[hmi_response::display_type] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::display_type);
+    }
 
-    display_caps[hmi_response::text_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::text_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::text_fields)) {
+      display_caps[hmi_response::text_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::text_fields);
+    }
 
-    display_caps[hmi_response::image_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::image_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_fields)) {
+      display_caps[hmi_response::image_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::image_fields);
+    }
 
-    display_caps[hmi_response::media_clock_formats] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::media_clock_formats);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::media_clock_formats)) {
+      display_caps[hmi_response::media_clock_formats] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::media_clock_formats);
+    }
 
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::templates_available)) {
+      display_caps[hmi_response::templates_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::templates_available);
+    }
 
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::screen_params)) {
+      display_caps[hmi_response::screen_params] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::screen_params);
+    }
 
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::num_custom_presets_available)) {
+      display_caps[hmi_response::num_custom_presets_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::num_custom_presets_available);
+    }
 
-    display_caps[hmi_response::graphic_supported] =
-        (hmi_capabilities.display_capabilities()
-             ->getElement(hmi_response::image_capabilities)
-             .length() > 0);
-
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
-
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
-
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_capabilities)) {
+      display_caps[hmi_response::graphic_supported] =
+          (hmi_capabilities.display_capabilities()
+               ->getElement(hmi_response::image_capabilities)
+               .length() > 0);
+    }
   }
 
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
