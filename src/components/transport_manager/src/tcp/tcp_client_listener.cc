@@ -631,6 +631,9 @@ bool TcpClientListener::GetIPv4Address(const std::string interface_name,
       continue;
     }
     if (interface_name == interface->ifa_name) {
+      if (interface->ifa_addr == NULL) {
+        continue;
+      }
       switch (interface->ifa_addr->sa_family) {
         case AF_INET: {
           struct sockaddr_in* addr =
