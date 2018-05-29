@@ -46,6 +46,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "vehicle_info_plugin/commands/mobile/diagnostic_message_request.h"
 
 namespace test {
 namespace components {
@@ -58,7 +59,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::DiagnosticMessageRequest;
+using vehicle_info_plugin::commands::DiagnosticMessageRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 
