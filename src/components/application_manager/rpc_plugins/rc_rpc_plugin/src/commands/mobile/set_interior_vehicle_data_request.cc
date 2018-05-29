@@ -536,12 +536,19 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
       } else if (enums_value::kRadio == module_type) {
         module_data[message_params::kRadioControlData].erase(it);
       } else if (enums_value::kLight == module_type) {
-        const uint64_t light_status = module_data[message_params::kLightControlData][message_params::kStatus].asUInt();
-        
-        if ((mobile_apis::LightStatus::RAMP_UP == light_status) ||
-            (mobile_apis::LightStatus::RAMP_DOWN == light_status) ||
-            (mobile_apis::LightStatus::UNKNOWN == light_status) ||
-            (mobile_apis::LightStatus::INVALID == light_status)) {
+        const mobile_apis::LightStatus::eType light_status =
+            static_cast<mobile_apis::LightStatus::eType>(
+                module_data[message_params::kLightControlData]
+                           [message_params::kStatus]
+                               .asUInt());
+
+        if (helpers::Compare<mobile_apis::LightStatus::eType,
+                             helpers::EQ,
+                             helpers::ONE>(light_status,
+                                           mobile_apis::LightStatus::RAMP_UP,
+                                           mobile_apis::LightStatus::RAMP_DOWN,
+                                           mobile_apis::LightStatus::UNKNOWN,
+                                           mobile_apis::LightStatus::INVALID)) {
           module_data[message_params::kLightControlData].erase(it);
         } else {
           continue;
