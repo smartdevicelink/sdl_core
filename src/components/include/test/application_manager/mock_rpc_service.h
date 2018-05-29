@@ -22,16 +22,10 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
   MOCK_METHOD1(
       SendMessageToHMI,
       void(const application_manager::commands::MessageSharedPtr message));
-#ifdef SDL_REMOTE_CONTROL
-  MOCK_METHOD1(SendPostMessageToMobile,
-               void(const application_manager::MessagePtr& message));
-  MOCK_METHOD1(SendPostMessageToHMI,
-               void(const application_manager::MessagePtr& message));
   MOCK_METHOD1(set_protocol_handler,
                void(protocol_handler::ProtocolHandler* handler));
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
-#endif  // SDL_REMOTE_CONTROL
 };
 }
 }

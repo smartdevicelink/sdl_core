@@ -861,7 +861,6 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief set_system_context Set system context for application
    * @param system_context Current context
@@ -904,16 +903,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
-   * @brief Removes all extensions
-   */
-  virtual void RemoveExtensions() = 0;
-
-  /**
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
   virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
-#endif  // SDL_REMOTE_CONTROL
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

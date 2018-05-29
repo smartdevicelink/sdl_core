@@ -35,7 +35,6 @@ include_directories(
     ${COMPONENTS_DIR}/media_manager/include/
     ${COMPONENTS_DIR}/media_manager/include/audio/
     ${COMPONENTS_DIR}/media_manager/include/video/
-    ${COMPONENTS_DIR}/remote_control/include/
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/protocol_handler/include/
     ${COMPONENTS_DIR}/connection_handler/include/

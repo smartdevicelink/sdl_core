@@ -47,7 +47,7 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/request_from_hmi.h"
-#include "policy/policy_external/policy/mock_policy_manager.h"
+#include "policy/mock_policy_manager.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 
 namespace test {

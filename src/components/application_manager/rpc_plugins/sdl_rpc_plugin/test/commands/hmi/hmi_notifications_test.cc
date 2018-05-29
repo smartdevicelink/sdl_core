@@ -1086,11 +1086,9 @@ TEST_F(HMICommandsNotificationsTest,
     (*notification)[am::strings::msg_params][am::strings::reason] =
         static_cast<int32_t>(*it_mobile_reason);
 
-#ifdef SDL_REMOTE_CONTROL
     am::plugin_manager::MockRPCPluginManager mock_rpc_plugin_manager_;
     EXPECT_CALL(app_mngr_, GetPluginManager())
         .WillRepeatedly(ReturnRef(mock_rpc_plugin_manager_));
-#endif  // SDL_REMOTE_CONTROL
 
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
     EXPECT_CALL(mock_message_helper_,

@@ -230,7 +230,6 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
       file_path, timeout, retries, app_mngr);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void MessageHelper::SendActivateAppToHMI(
     uint32_t const app_id,
     ApplicationManager& application_manager,
@@ -246,8 +245,6 @@ void MessageHelper::SendHMIStatusNotification(
   MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
       application_impl, application_manager);
 }
-
-#endif  // SDL_REMOTE_CONTROL
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           uint32_t correlation_id,

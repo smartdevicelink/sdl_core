@@ -1071,8 +1071,6 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -1139,11 +1137,6 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 
   return it != extensions_.end();
 }
-
-void ApplicationImpl::RemoveExtensions() {
-  //  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
-}
-#endif  // SDL_REMOTE_CONTROL
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {

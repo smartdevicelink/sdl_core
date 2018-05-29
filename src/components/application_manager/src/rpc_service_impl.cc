@@ -511,14 +511,6 @@ void RPCServiceImpl::SendMessageToHMI(
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 
-void RPCServiceImpl::SendPostMessageToMobile(const MessagePtr& message) {
-  messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
-}
-
-void RPCServiceImpl::SendPostMessageToHMI(const MessagePtr& message) {
-  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
-}
-
 void RPCServiceImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
