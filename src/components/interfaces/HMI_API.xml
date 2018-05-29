@@ -781,6 +781,33 @@
   </element>
 </enum>
 
+<enum name="TPMS">
+  <element name="UNKNOWN">
+    <description>If set the status of the tire is not known.</description>
+  </element>
+  <element name="SYSTEM_FAULT">
+    <description>TPMS does not function.</description>
+  </element>
+  <element name="SENSOR_FAULT">
+    <description>The sensor of the tire does not function.</description>
+  </element>
+  <element name="LOW">
+    <description>TPMS is reporting a low tire pressure for the tire.</description>
+  </element>
+  <element name="SYSTEM_ACTIVE">
+    <description>TPMS is active and the tire pressure is monitored.</description>
+  </element>
+  <element name="TRAIN">
+    <description>TPMS is reporting that the tire must be trained.</description>
+  </element>
+  <element name="TRAINING_COMPLETE">
+    <description>TPMS reports the training for the tire is completed.</description>
+  </element>
+  <element name="NOT_TRAINED">
+    <description>TPMS reports the tire is not trained.</description>
+  </element>
+</enum>
+
 <enum name="PRNDL">
   <description>The selected gear.</description>
   <element name="PARK">
@@ -2311,7 +2338,13 @@
 <struct name="SingleTireStatus">
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
-</param>
+  </param>
+  <param name="tpms" type="TPMS" mandatory="false">
+      <description>The status of TPMS according to the particular tire.</description>
+  </param>
+  <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+    <description>The pressure value of the particular tire in kilo pascal.</description>
+  </param>
 </struct>
 
 <struct name="DIDResult">
