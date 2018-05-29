@@ -44,7 +44,6 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
-  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include

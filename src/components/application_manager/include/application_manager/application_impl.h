@@ -362,7 +362,6 @@ class ApplicationImpl : public virtual Application,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets current system context
    * @param system_context new system context
@@ -393,7 +392,6 @@ class ApplicationImpl : public virtual Application,
    * @return Pointer to extension, if extension was initialized, otherwise NULL
    */
   AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-#endif
 
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
@@ -429,7 +427,6 @@ class ApplicationImpl : public virtual Application,
    */
   void OnAudioStreamSuspend();
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
@@ -443,12 +440,6 @@ class ApplicationImpl : public virtual Application,
    * @return true if success, false if extension is not present
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
-
-  /**
-   * @brief Removes all extensions
-   */
-  void RemoveExtensions() OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   std::string hash_val_;
   uint32_t grammar_id_;
@@ -501,9 +492,7 @@ class ApplicationImpl : public virtual Application,
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
 
-#ifdef SDL_REMOTE_CONTROL
   std::list<AppExtensionPtr> extensions_;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Defines number per time in seconds limits

@@ -5,6 +5,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/sdl_rpc_plugin/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${POLICY_MOCK_INCLUDE_PATH}/
 )  
 
 

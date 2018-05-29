@@ -112,7 +112,6 @@ class PolicyListener {
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * Gets devices ids by policy application id
    * @param policy_app_id
@@ -148,8 +147,6 @@ class PolicyListener {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
-
-#endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_LISTENER_H_

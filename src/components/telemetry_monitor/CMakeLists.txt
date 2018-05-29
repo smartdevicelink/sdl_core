@@ -39,7 +39,6 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/remote_control/include/
   ${POLICY_PATH}/include/
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include/

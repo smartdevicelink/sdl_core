@@ -2476,15 +2476,12 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru(*this);
   }
-
-#ifdef SDL_REMOTE_CONTROL
   auto on_app_unregistered =
       [app_to_remove](plugin_manager::RPCPlugin& plugin) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,
                                   app_to_remove);
       };
   plugin_manager_->ForEachPlugin(on_app_unregistered);
-#endif
 
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
@@ -3598,7 +3595,6 @@ void ApplicationManagerImpl::SetMockMediaManager(
   media_manager_ = mock_media_manager;
 }
 #endif  // BUILD_TESTS
-#ifdef SDL_REMOTE_CONTROL
 struct MobileAppIdPredicate {
   std::string policy_app_id_;
   MobileAppIdPredicate(const std::string& policy_app_id)
@@ -3667,7 +3663,5 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);
   }
 }
-
-#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager
