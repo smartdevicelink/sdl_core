@@ -43,7 +43,7 @@
 namespace file_system {
 
 /**
- * @brief Get available disc space.
+ * @brief Get available disc space of directory. Returns 0 if the directory does not exist.
  *
  * @param path to directory
  * @return free disc space.
