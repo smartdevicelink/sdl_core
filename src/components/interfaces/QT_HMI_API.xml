@@ -1442,6 +1442,9 @@
       <param name="imageType" type="Common.ImageType" mandatory="true">
         <description>Describes, whether it is a static or dynamic image.</description>
       </param>
+      <param name="isTemplate" type="Boolean" mandatory="false">
+    	<description>Describes, whether image is template image.</description>
+      </param>
     </struct>
     <struct name="SoftButton">
       <param name="type" type="Common.SoftButtonType" mandatory="true">
