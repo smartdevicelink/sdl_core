@@ -252,10 +252,16 @@ DEPRECATED AudioSource::AudioSource(uint32_t app_id,
     : HmiState(app_id, app_mngr, STATE_ID_AUDIO_SOURCE) {}
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
-  // Checking for NONE  is necessary to avoid issue during
-  // calculation of HMI level during setting default HMI level
-  if (mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
-    return mobile_apis::HMILevel::HMI_NONE;
+  using namespace helpers;
+  using namespace mobile_apis;
+  if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
+                                        HMILevel::HMI_BACKGROUND,
+                                        HMILevel::HMI_NONE)) {
+    return parent()->hmi_level();
+  }
+
+  if (VideoStreamingState::STREAMABLE == video_streaming_state()) {
+    return mobile_apis::HMILevel::HMI_LIMITED;
   }
 
   return mobile_apis::HMILevel::HMI_BACKGROUND;
