@@ -46,6 +46,7 @@
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/event_engine/event.h"
+#include "vehicle_info_plugin/commands/mobile/read_did_request.h"
 
 namespace test {
 namespace components {
@@ -58,7 +59,7 @@ using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::ReadDIDRequest;
+using vehicle_info_plugin::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using ::utils::SharedPtr;

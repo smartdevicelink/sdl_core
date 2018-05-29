@@ -146,12 +146,8 @@ struct CommandData {
 };
 
 typedef Types<
-    CommandData<sdl_rpc_plugin::commands::VIReadDIDResponse,
-                hmi_apis::FunctionID::VehicleInfo_ReadDID>,
     CommandData<sdl_rpc_plugin::commands::TTSSpeakResponse,
                 hmi_apis::FunctionID::TTS_Speak>,
-    CommandData<sdl_rpc_plugin::commands::VISubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData>,
     CommandData<sdl_rpc_plugin::commands::hmi::DialNumberResponse,
                 hmi_apis::FunctionID::BasicCommunication_DialNumber>,
     CommandData<sdl_rpc_plugin::commands::UIDeleteSubmenuResponse,
@@ -288,18 +284,6 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));
-
-  command->Run();
-}
-
-TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
-  SharedPtr<sdl_rpc_plugin::commands::VIIsReadyResponse> command(
-      CreateCommand<sdl_rpc_plugin::commands::VIIsReadyResponse>());
-
-  MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 
   command->Run();
 }
