@@ -78,8 +78,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
-
-#ifdef SDL_REMOTE_CONTROL
   MOCK_CONST_METHOD2(application,
                      application_manager::ApplicationSharedPtr(
                          const std::string& device_id,
@@ -88,7 +86,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
-#endif  // SDL_REMOTE_CONTROL
   MOCK_METHOD0(GetPluginManager, RPCPluginManager&());
 
   MOCK_METHOD1(SetPluginManager,

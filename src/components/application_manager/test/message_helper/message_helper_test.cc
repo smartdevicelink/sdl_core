@@ -953,6 +953,8 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
 
   smart_objects::SmartObjectSPtr result;
 
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
@@ -991,6 +993,8 @@ TEST_F(MessageHelperTest,
 
   smart_objects::SmartObjectSPtr result;
 
+  ON_CALL(mock_application_manager, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 

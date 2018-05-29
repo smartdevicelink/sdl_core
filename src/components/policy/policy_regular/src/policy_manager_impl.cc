@@ -50,11 +50,8 @@
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
 #include "utils/make_shared.h"
-
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -76,10 +73,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-#ifdef SDL_REMOTE_CONTROL
     , access_remote_(new AccessRemoteImpl(
           CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-#endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
@@ -89,8 +84,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {
-}
+    , trigger_ptu_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -406,12 +400,16 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                "CheckPermissions for " << app_id << " and rpc " << rpc
                                        << " for " << hmi_level << " level.");
 
-#ifdef SDL_REMOTE_CONTROL
   ApplicationOnDevice who = {device_id, app_id};
-  const policy_table::Strings& groups = access_remote_->GetGroups(who);
-#else   // SDL_REMOTE_CONTROL
-  const policy_table::Strings& groups = cache_->GetGroups(app_id);
-#endif  // SDL_REMOTE_CONTROL
+  policy_table::Strings groups;
+  if (access_remote_->IsAppRemoteControl(who)) {
+    groups = access_remote_->GetGroups(who);
+    LOG4CXX_INFO(logger_,
+                 "CheckPermissions for " << app_id << " and rpc " << rpc
+                                         << " for " << hmi_level << " level.");
+  } else {
+    groups = cache_->GetGroups(app_id);
+  }
 
   cache_->CheckPermissions(groups, hmi_level, rpc, result);
   if (cache_->IsApplicationRevoked(app_id)) {
@@ -467,13 +465,11 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   std::string default_hmi;
   default_hmi = "NONE";
 
-#ifdef SDL_REMOTE_CONTROL
   const ApplicationOnDevice who = {device_id, application_id};
   if (access_remote_->IsAppRemoteControl(who)) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-#endif  // SDL_REMOTE_CONTROL
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
@@ -711,14 +707,15 @@ void PolicyManagerImpl::GetPermissionsForApp(
   }
 
   FunctionalIdType group_types;
-#ifdef SDL_REMOTE_CONTROL
-  allowed_by_default = false;
-  bool ret = access_remote_->GetPermissionsForApp(
-      device_id, policy_app_id, group_types);
-#else
-  bool ret =
-      cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types);
-#endif  // REMOTE_CONTROL
+  const ApplicationOnDevice who = {device_id, app_id_to_check};
+  bool ret = false;
+  if (access_remote_->IsAppRemoteControl(who)) {
+    allowed_by_default = false;
+    ret = access_remote_->GetPermissionsForApp(
+        device_id, policy_app_id, group_types);
+  } else {
+    ret = cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types);
+  }
 
   if (!ret) {
     LOG4CXX_WARN(logger_,
@@ -1174,7 +1171,6 @@ void PolicyManagerImpl::RetrySequence() {
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
@@ -1280,6 +1276,5 @@ void PolicyManagerImpl::set_access_remote(
     utils::SharedPtr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

@@ -114,7 +114,6 @@ bool ApplicationPoliciesSection::Validate() const {
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 bool ApplicationParams::ValidateModuleTypes() const {
   // moduleType is optional so see Optional<T>::is_valid()
   bool is_initialized = moduleType->is_initialized();
@@ -148,11 +147,6 @@ bool ApplicationParams::ValidateModuleTypes() const {
 bool ApplicationParams::Validate() const {
   return ValidateModuleTypes();
 }
-#else   // SDL_REMOTE_CONTROL
-bool ApplicationParams::Validate() const {
-  return true;
-}
-#endif  // SDL_REMOTE_CONTROL
 
 bool RpcParameters::Validate() const {
   return true;

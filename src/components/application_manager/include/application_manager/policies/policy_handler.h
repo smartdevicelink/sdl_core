@@ -113,7 +113,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets HMI default type for specified application
    * @param application_id ID application
@@ -177,7 +176,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
@@ -593,7 +591,6 @@ class PolicyHandler : public PolicyHandlerInterface,
       PermissionConsent& out_permissions) OVERRIDE;
 #endif
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Updates HMI level for specified application and send notification
    * @param app application where HMI level was changed
@@ -603,7 +600,6 @@ class PolicyHandler : public PolicyHandlerInterface,
                       mobile_apis::HMILevel::eType level);
   std::vector<std::string> GetDevicesIds(
       const std::string& policy_app_id) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Sets days after epoch on successful policy update

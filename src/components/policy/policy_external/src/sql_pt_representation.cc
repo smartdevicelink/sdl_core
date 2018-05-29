@@ -765,7 +765,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
       return false;
     }
 
-#ifdef SDL_REMOTE_CONTROL
     bool denied = false;
     if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
@@ -775,7 +774,6 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
         return false;
       }
     }
-#endif  // SDL_REMOTE_CONTROL
 
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
@@ -1048,14 +1046,11 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     return false;
   }
 
-#ifdef SDL_REMOTE_CONTROL
-
   bool denied = !app.second.moduleType->is_initialized();
   if (!SaveRemoteControlDenied(app.first, denied) ||
       !SaveModuleType(app.first, *app.second.moduleType)) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
 
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
@@ -1618,8 +1613,6 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
                                                     bool* denied) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1809,7 +1802,6 @@ bool SQLPTRepresentation::GatherRemoteRpc(
   }
   return true;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,

@@ -240,11 +240,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , RequestType(impl::ValueMember(value__, "RequestType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
-#ifdef SDL_REMOTE_CONTROL
-    , moduleType(impl::ValueMember(value__, "moduleType"))
-#endif  // SDL_REMOTE_CONTROL
-{
-}
+    , moduleType(impl::ValueMember(value__, "moduleType")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -254,9 +250,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-#ifdef SDL_REMOTE_CONTROL
   impl::WriteJsonField("moduleType", moduleType, &result__);
-#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 
@@ -278,11 +272,9 @@ bool ApplicationParams::is_valid() const {
   if (!heart_beat_timeout_ms.is_valid()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 
@@ -309,11 +301,9 @@ bool ApplicationParams::struct_empty() const {
   if (heart_beat_timeout_ms.is_initialized()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (moduleType.is_initialized()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 
@@ -356,12 +346,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     heart_beat_timeout_ms.ReportErrors(
         &report__->ReportSubobject("heart_beat_timeout_ms"));
   }
-
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
-#endif  // SDL_REMOTE_CONTROL
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -370,9 +357,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   RequestType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
-#ifdef SDL_REMOTE_CONTROL
   moduleType.SetPolicyTableType(pt_type);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 // RpcParameters methods

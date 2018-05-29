@@ -68,9 +68,7 @@ class Message {
 
   //! --------------------------------------------------------------------------
   int32_t function_id() const;
-#ifdef SDL_REMOTE_CONTROL
   std::string function_name() const;
-#endif  // SDL_REMOTE_CONTROL
   int32_t correlation_id() const;
   int32_t connection_key() const;
 
@@ -87,9 +85,7 @@ class Message {
   //!
   //--------------------------------------------------------------------------.
   void set_function_id(int32_t id);
-#ifdef SDL_REMOTE_CONTROL
   void set_function_name(const std::string& name);
-#endif  // SDL_REMOTE_CONTROL
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
   void set_message_type(MessageType type);
@@ -113,9 +109,7 @@ class Message {
   int32_t function_id_;     // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;        // @remark protocol V2.
-#ifdef SDL_REMOTE_CONTROL
   std::string function_name_;
-#endif  // SDL_REMOTE_CONTROL
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first

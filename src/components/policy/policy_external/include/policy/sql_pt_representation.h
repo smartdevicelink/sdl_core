@@ -98,7 +98,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   }
 #endif  // BUILD_TESTS
  protected:
-#ifdef SDL_REMOTE_CONTROL
   enum TypeAccess { kAllowed, kManual };
   bool GatherModuleType(const std::string& app_id,
                         policy_table::ModuleTypes* module_types) const;
@@ -113,7 +112,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveAccessModule(TypeAccess access,
                         const policy_table::AccessModules& modules);
   bool SaveRemoteRpc(int module_id, const policy_table::RemoteRpcs& rpcs);
-#endif  // SDL_REMOTE_CONTROL
 
   virtual void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
   virtual void GatherModuleConfig(policy_table::ModuleConfig* config) const;

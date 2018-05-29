@@ -83,11 +83,6 @@ class RPCService {
       protocol_handler::ProtocolHandler* handler) = 0;
   virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
-
-#ifdef SDL_REMOTE_CONTROL
-  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
-  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
-#endif  // SDL_REMOTE_CONTROL
 };
 }  // namespace rpc_service
 }  // namespace application_manager
