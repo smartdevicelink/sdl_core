@@ -124,11 +124,6 @@ class RPCServiceImpl : public RPCService,
   void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
-  void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
-
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);

@@ -53,9 +53,8 @@
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 #include "utils/gen_hash.h"
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/mock_access_remote.h"
-#endif  // SDL_REMOTE_CONTROL
+
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
@@ -146,20 +145,15 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockCacheManagerInterface* cache_manager;
   NiceMock<MockPolicyListener> listener;
   const std::string device_id;
-#ifdef SDL_REMOTE_CONTROL
   utils::SharedPtr<access_remote_test::MockAccessRemote> access_remote;
-#endif  // SDL_REMOTE_CONTROL
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
     manager->set_listener(&listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
-
-#ifdef SDL_REMOTE_CONTROL
     access_remote = new access_remote_test::MockAccessRemote();
     manager->set_access_remote(access_remote);
-#endif  // SDL_REMOTE_CONTROL
   }
 
   void TearDown() OVERRIDE {

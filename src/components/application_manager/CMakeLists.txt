@@ -132,11 +132,6 @@ set(PATHS
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
-if (NOT REMOTE_CONTROL)
-    list(REMOVE_ITEM SOURCES
-        ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
-endif()
-
 set(LIBRARIES
   HMI_API
   MOBILE_API

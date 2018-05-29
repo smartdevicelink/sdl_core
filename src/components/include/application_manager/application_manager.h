@@ -169,7 +169,6 @@ class ApplicationManager {
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
  * @brief application find application by device and policy identifier
  * @param device_id device id
@@ -186,7 +185,6 @@ class ApplicationManager {
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
 
-#endif  // SDL_REMOTE_CONTROL
   virtual plugin_manager::RPCPluginManager& GetPluginManager() = 0;
 
 #ifdef BUILD_TESTS

@@ -723,7 +723,6 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
   return HMIResultFromString(result);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
@@ -810,7 +809,6 @@ void MessageHelper::SendActivateAppToHMI(
 
   application_manager.GetRPCService().ManageHMICommand(message);
 }
-#endif  // SDL_REMOTE_CONTROL
 
 mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
     const std::string& hmi_level) {
