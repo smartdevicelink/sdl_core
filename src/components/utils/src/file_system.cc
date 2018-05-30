@@ -224,10 +224,12 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   }
 
   // According to Boost's documentation, removing shouldn't invalidate the
-  // iterator
+  // iterator, although it may cause the removed entry to appear again,
+  // duplicating the warning message. See here:
+  // https://www.boost.org/doc/libs/1_67_0/libs/filesystem/doc/reference.html#Class-directory_iterator
   for (auto& dirent : dir_iter) {
     boost::uintmax_t num_removed = fs::remove_all(dirent, ec);
-    if (num_removed == 0 || ec) {
+    if (ec) {
       LOG4CXX_WARN_WITH_ERRNO(
           logger_, "Unable to remove file: " << dirent.path().string());
     }
@@ -358,9 +360,10 @@ bool file_system::CreateFile(const std::string& path) {
   }
 }
 
-// NOTE: this seems to have two flaws
+// NOTE: this seems to be buggy
 // It returns only the ns _component_ of modify time, not the whole thing
-// It relies on C11 / C++17 behaviour
+// see https://github.com/smartdevicelink/sdl_core/pull/1436/commits for a
+// potential fix / further explanation
 uint64_t file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
   if (0 != stat(path.c_str(), &info)) {

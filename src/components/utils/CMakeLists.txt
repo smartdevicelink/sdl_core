@@ -113,10 +113,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-# Add boost system
+# Add boost libraries to link
 list(APPEND LIBRARIES -lboost_system -lboost_filesystem)
-
-
 target_link_libraries("Utils" ${LIBRARIES})
 
 if(ENABLE_LOG)
