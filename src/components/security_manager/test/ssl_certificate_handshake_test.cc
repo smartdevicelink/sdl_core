@@ -534,15 +534,6 @@ TEST_P(SSLHandshakeTest, AppNameAndAppIDInvalid) {
 
   client_ctx_->SetHandshakeContext(
       security_manager::SSLContext::HandshakeContext(
-          custom_str::CustomString("server"),
-          custom_str::CustomString("Wrong")));
-
-  GTEST_TRACE(HandshakeProcedure_ClientSideFail(
-      security_manager::SSLContext::Handshake_Result_AppNameMismatch));
-
-  ResetConnections();
-  client_ctx_->SetHandshakeContext(
-      security_manager::SSLContext::HandshakeContext(
           custom_str::CustomString("Wrong"),
           custom_str::CustomString("server")));
 
