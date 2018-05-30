@@ -66,20 +66,20 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 }
 
 int64_t file_system::FileSize(const std::string& path) {
-  if (file_system::FileExists(path)) {
-    struct stat file_info = {0};
-    if (0 != stat(path.c_str(), &file_info)) {
-      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
-    } else {
-      return file_info.st_size;
-    }
+  error_code ec;
+  // Boost returns sizes as unsigned
+  int64_t fsize = (int64_t)fs::file_size(path, ec);
+
+  if (ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file size: " << path);
+    return 0;
   }
-  return 0;
+  return fsize;
 }
 
 size_t file_system::DirectorySize(const std::string& path) {
   size_t dir_size = 0;
-  boost::system::error_code ec;
+  error_code ec;
   fs::recursive_directory_iterator iter(path, ec);
   // Directory does not exist
   if (ec) {
@@ -89,9 +89,8 @@ size_t file_system::DirectorySize(const std::string& path) {
   fs::recursive_directory_iterator end;
   while (iter != end) {
     size_t fsize = fs::file_size(iter->path(), ec);
-    if (ec) {
-      // do nothing, can't get size of file
-    } else {
+    // No error means we can add the file
+    if (!ec) {
       dir_size += fsize;
     }
     iter++;  // next entry
@@ -99,18 +98,18 @@ size_t file_system::DirectorySize(const std::string& path) {
   return dir_size;
 }
 
+// NOTE that boost puts different permissions on the created directory
 std::string file_system::CreateDirectory(const std::string& name) {
-  if (!DirectoryExists(name)) {
-    if (0 != mkdir(name.c_str(), S_IRWXU)) {
-      LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
-    }
+  error_code ec;
+  bool success = fs::create_directory(name, ec);
+  if (!success || ec) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
   }
-
-  return name;
+  return name;  // why? we already passed this in
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
-  boost::system::error_code ec;
+  error_code ec;
   // Create directory and all parents
   fs::create_directories(path, ec);
 
@@ -127,23 +126,12 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 }
 
 bool file_system::IsDirectory(const std::string& name) {
-  struct stat status = {0};
-
-  if (-1 == stat(name.c_str(), &status)) {
-    return false;
-  }
-
-  return S_ISDIR(status.st_mode);
+  error_code ec;
+  return fs::is_directory(name, ec);
 }
-
+// NOTE this may be a duplicate of IsDirectory since it already checks existence
 bool file_system::DirectoryExists(const std::string& name) {
-  struct stat status = {0};
-
-  if (-1 == stat(name.c_str(), &status) || !S_ISDIR(status.st_mode)) {
-    return false;
-  }
-
-  return true;
+  return FileExists(name) && IsDirectory(name);
 }
 
 bool file_system::FileExists(const std::string& name) {
@@ -206,26 +194,24 @@ std::string file_system::CurrentWorkingDirectory() {
 }
 
 std::string file_system::GetAbsolutePath(const std::string& path) {
-  char abs_path[PATH_MAX];
-  if (NULL == realpath(path.c_str(), abs_path)) {
-    return std::string();
+  error_code ec;
+  fs::path absolute = fs::canonical(path, ec);
+  if (ec) {
+    return std::string();  // invalid path
   }
-
-  return std::string(abs_path);
+  return absolute.string();
 }
 
 bool file_system::IsFileNameValid(const std::string& file_name) {
   return file_name.end() == std::find(file_name.begin(), file_name.end(), '/');
 }
 
+// Does not remove if file is write-protected
 bool file_system::DeleteFile(const std::string& name) {
-  error_code ec;
-  bool success = fs::remove(name, ec);
-  if (ec || !success) {
-    // File could not be removed
-    return false;
+  if (FileExists(name) && IsAccessible(name, W_OK)) {
+    return !remove(name.c_str());
   }
-  return true;
+  return false;
 }
 
 void file_system::remove_directory_content(const std::string& directory_name) {
