@@ -481,6 +481,7 @@
                         "sourceAvailable": true,
                         "volumeAvailable": true,
                         "equalizerAvailable": true,
+                        "keepContextAvailable" : true,
                         "equalizerMaxChannelId": 80
 
                     }
