@@ -2076,9 +2076,9 @@
          <description>
          This parameter shall not be present in any getter responses or notifications.
          This parameter is optional in a setter request. The default value is false.
-         If it is true, the system not only changes the audio source but also brings the default application
+         If it is false, the system not only changes the audio source but also brings the default application
          or system UI associated with the audio source to foreground.
-         If it is false, the system changes the audio source, but still keeps the current application in foreground.
+         If it is true, the system changes the audio source, but still keeps the current application in foreground.
          </description>
      </param>
      <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
@@ -2098,6 +2098,9 @@
      </param>
      <param name="sourceAvailable" type="Boolean" mandatory="false">
          <description>Availability of the control of audio source. </description>
+     </param>
+     <param name="keepContextAvailable" type="Boolean" mandatory="false">
+         <description>Availability of the keepContext paramter. </description>
      </param>
      <param name="volumeAvailable" type="Boolean" mandatory="false">
          <description>Availability of the control of audio volume.</description>

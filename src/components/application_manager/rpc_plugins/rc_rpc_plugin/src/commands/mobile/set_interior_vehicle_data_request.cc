@@ -124,7 +124,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["memory"] = "memoryAvailable";
   // audio
   mapping["source"] = "sourceAvailable";
-  mapping["keepContext"] = "sourceAvailable";
+  mapping["keepContext"] = "keepContextAvailable";
   mapping["volume"] = "volumeAvailable";
   mapping["equalizerSettings"] = "equalizerAvailable";
 
@@ -232,9 +232,15 @@ bool CheckControlDataByCapabilities(
   for (; it != control_data.map_end(); ++it) {
     const std::string& request_parameter = it->first;
     if (message_params::kLightState == request_parameter) {
-      return CheckLightNameByCapabilities(
-          module_caps[strings::kSupportedLights],
-          control_data[request_parameter][0]);
+      auto light_data = control_data[request_parameter].asArray()->begin();
+      for (; light_data != control_data[request_parameter].asArray()->end();
+           ++light_data) {
+        if(!CheckLightNameByCapabilities(
+            module_caps[strings::kSupportedLights], *light_data)){
+            return false;
+        }
+      }
+      return true;
     }
     const std::string& caps_key = mapping[request_parameter];
     LOG4CXX_DEBUG(logger_,
@@ -397,10 +403,6 @@ void SetInteriorVehicleDataRequest::Execute() {
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
-
-    if (enums_value::kAudio == module_type) {
-      CheckAudioSource(module_data[message_params::kAudioControlData]);
-    }
   } else {
     LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
     SendResponse(false,
@@ -433,6 +435,11 @@ void SetInteriorVehicleDataRequest::on_event(
   smart_objects::SmartObject response_params;
   if (result) {
     response_params = hmi_response[app_mngr::strings::msg_params];
+    if (enums_value::kAudio == ModuleType()) {
+      CheckAudioSource((
+          *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                    [message_params::kAudioControlData]);
+    }
   }
   std::string info;
   GetInfo(hmi_response, info);
