@@ -271,6 +271,10 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
                 select_image.GetInteger(0));
       EXPECT_EQ((*menu_icon_)[am::strings::value].asString(),
                 select_image.GetString(1));
+      if ((*menu_icon_).keyExists(am::strings::is_template)) {
+        EXPECT_EQ((*menu_icon_)[am::strings::is_template].asBool(),
+                  select_image.GetBoolean(2));
+      }
     }
     if (!select_globalproperties.IsNull(8)) {
       utils::dbms::SQLQuery select_tts_chunk(test_db());
