@@ -72,6 +72,7 @@ bool CheckIfModuleTypeExistInCapabilities(
     if (param.first == module_type) {
       if (rc_capabilities.keyExists(param.second)) {
         is_module_type_valid = true;
+        break;
       }
     }
   }

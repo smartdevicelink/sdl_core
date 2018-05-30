@@ -1267,9 +1267,6 @@
         </element>
         <element name="MOBILE_APP">
         </element>
-        <element name="RADIO_TUNER">
-          <description>Radio may be on AM, FM or XM</description>
-        </element>
     </enum>
     
     <enum name="WiperStatus">

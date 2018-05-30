@@ -202,6 +202,7 @@ bool isModuleTypeAndDataMatch(const std::string& module_type,
   for (const auto& data : data_mapping) {
     if (data.first == module_type) {
       module_type_and_data_match = module_data.keyExists(data.second);
+      break;
     }
   }
   return module_type_and_data_match;
