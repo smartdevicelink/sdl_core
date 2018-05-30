@@ -80,6 +80,7 @@ int64_t file_system::FileSize(const std::string& path) {
 size_t file_system::DirectorySize(const std::string& path) {
   size_t dir_size = 0;
   error_code ec;
+  // Recursively iterate through directory to accumulate file sizes
   fs::recursive_directory_iterator iter(path, ec);
   // Directory does not exist
   if (ec) {
@@ -98,14 +99,17 @@ size_t file_system::DirectorySize(const std::string& path) {
   return dir_size;
 }
 
-// NOTE that boost puts different permissions on the created directory
+// NOTE that boost makes 0777 permissions by default
 std::string file_system::CreateDirectory(const std::string& name) {
   error_code ec;
   bool success = fs::create_directory(name, ec);
   if (!success || ec) {
     LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to create directory: " << name);
+  } else {
+    // Set 0700 permissions to maintain previous API
+    fs::permissions(name, fs::perms::owner_all, ec);
   }
-  return name;  // why? we already passed this in
+  return name;
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& path) {
@@ -129,7 +133,8 @@ bool file_system::IsDirectory(const std::string& name) {
   error_code ec;
   return fs::is_directory(name, ec);
 }
-// NOTE this may be a duplicate of IsDirectory since it already checks existence
+// NOTE this may be a duplicate of IsDirectory since it already checks
+// existence
 bool file_system::DirectoryExists(const std::string& name) {
   return FileExists(name) && IsDirectory(name);
 }
@@ -228,7 +233,7 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   // duplicating the warning message. See here:
   // https://www.boost.org/doc/libs/1_67_0/libs/filesystem/doc/reference.html#Class-directory_iterator
   for (auto& dirent : dir_iter) {
-    boost::uintmax_t num_removed = fs::remove_all(dirent, ec);
+    fs::remove_all(dirent, ec);
     if (ec) {
       LOG4CXX_WARN_WITH_ERRNO(
           logger_, "Unable to remove file: " << dirent.path().string());

@@ -68,7 +68,7 @@ size_t DirectorySize(const std::string& path);
 int64_t FileSize(const std::string& path);
 
 /**
- * @brief Creates directory
+ * @brief Creates directory with owner_all permissions
  * @param name path to directory
  * @return path to created directory.
  */
