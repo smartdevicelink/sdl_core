@@ -343,12 +343,10 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     const bool is_request_type_changed = IsRequestTypeChanged(app_policy);
     const bool is_request_subtype_changed = IsRequestSubTypeChanged(app_policy);
 
-    if (is_request_type_changed && is_request_subtype_changed) {
-      SetPendingPermissions(app_policy,
-                            RESULT_REQUEST_TYPE_AND_SUBTYPE_CHANGED);
-    } else if (is_request_type_changed) {
+    if (is_request_type_changed) {
       SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
-    } else if (is_request_subtype_changed) {
+    }
+    if (is_request_subtype_changed) {
       SetPendingPermissions(app_policy, RESULT_REQUEST_SUBTYPE_CHANGED);
     }
 
@@ -421,21 +419,6 @@ void policy::CheckAppPolicy::SetPendingPermissions(
       permissions_diff.appPermissionsConsentNeeded = true;
       permissions_diff.appRevokedPermissions = GetRevokedGroups(app_policy);
       RemoveRevokedConsents(app_policy, permissions_diff.appRevokedPermissions);
-      break;
-    case RESULT_REQUEST_TYPE_AND_SUBTYPE_CHANGED:
-      permissions_diff.priority.clear();
-      permissions_diff.requestTypeChanged = true;
-      permissions_diff.requestSubTypeChanged = true;
-
-      // Getting Request Types from PTU (not from cache)
-      for (const auto& request_type : *app_policy.second.RequestType) {
-        permissions_diff.requestType.push_back(EnumToJsonString(request_type));
-      }
-
-      // Getting Request SubTypes from PTU (not from cache)
-      for (const auto& request_subtype : *app_policy.second.RequestSubType) {
-        permissions_diff.requestSubType.push_back(request_subtype);
-      }
       break;
     case RESULT_REQUEST_TYPE_CHANGED:
       permissions_diff.priority.clear();
