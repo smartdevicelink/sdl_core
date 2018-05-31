@@ -121,8 +121,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
     LOG4CXX_WARN_WITH_ERRNO(logger_,
                             "Unable to create directory recursively: "
                                 << path << " reason: " << ec.message());
-    std::cerr << "Unable to create directory recursively: " << path
-              << " reason: " << ec.message() << std::endl;
+
     return false;
   }
   // return true if we made something or if it already existed
