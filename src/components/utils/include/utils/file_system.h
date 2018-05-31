@@ -96,7 +96,7 @@ bool IsDirectory(const std::string& name);
 bool DirectoryExists(const std::string& name);
 
 /**
- * @brief Doe file exist
+ * @brief Does file exist
  * @param name path to file
  * @return returns true if the file exists.
  */
