@@ -216,16 +216,6 @@ void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
 }
 
 template <typename EnumType>
-std::string EnumToString(EnumType enum_type) {
-  using smart_objects::EnumConversionHelper;
-  const char* str = 0;
-  if (EnumConversionHelper<EnumType>::EnumToCString(enum_type, &str)) {
-    return str;
-  }
-  return std::string("INVALID_ENUM");
-}
-
-template <typename EnumType>
 EnumType StringToEnum(const std::string& str) {
   using smart_objects::EnumConversionHelper;
   EnumType val;
@@ -237,7 +227,7 @@ void ConstructOnRCStatusNotificationParams(
     smart_objects::SmartObject& msg_params,
     const std::map<std::string, uint32_t>& allocated_resources,
     const std::vector<std::string>& supported_resources,
-    const u_int32_t app_id) {
+    const uint32_t app_id) {
   namespace strings = application_manager::strings;
   namespace message_params = rc_rpc_plugin::message_params;
   using smart_objects::SmartObject;
