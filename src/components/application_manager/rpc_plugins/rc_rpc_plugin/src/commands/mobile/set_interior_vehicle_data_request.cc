@@ -235,9 +235,9 @@ bool CheckControlDataByCapabilities(
       auto light_data = control_data[request_parameter].asArray()->begin();
       for (; light_data != control_data[request_parameter].asArray()->end();
            ++light_data) {
-        if(!CheckLightNameByCapabilities(
-            module_caps[strings::kSupportedLights], *light_data)){
-            return false;
+        if (!CheckLightNameByCapabilities(
+                module_caps[strings::kSupportedLights], *light_data)) {
+          return false;
         }
       }
       return true;
@@ -473,8 +473,13 @@ void SetInteriorVehicleDataRequest::CheckAudioSource(
           application_manager_.get_current_audio_source()) {
         app_mngr::ApplicationSharedPtr app =
             application_manager_.application(connection_key());
-        application_manager_.ChangeAppsHMILevel(
-            app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+        if (app->mobile_projection_enabled()) {
+          application_manager_.ChangeAppsHMILevel(
+              app->app_id(), mobile_apis::HMILevel::eType::HMI_LIMITED);
+        } else {
+          application_manager_.ChangeAppsHMILevel(
+              app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+        }
       }
     }
   }
