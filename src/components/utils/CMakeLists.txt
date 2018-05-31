@@ -101,7 +101,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    # --- QDB Wrapper 
+    # --- QDB Wrapper
     add_subdirectory(./src/qdb_wrapper)
 else ()
     # --- SQLite Wrapper
@@ -109,10 +109,11 @@ else ()
 endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
- list(APPEND LIBRARIES dl pthread ${RTLIB}) 
+ list(APPEND LIBRARIES dl pthread ${RTLIB})
 endif()
 
 add_library("Utils" ${SOURCES})
+list(APPEND LIBRARIES -lboost_system -lboost_filesystem -lboost_thread)
 target_link_libraries("Utils" ${LIBRARIES})
 
 if(ENABLE_LOG)

@@ -41,108 +41,98 @@ namespace {
 const long kNanosecondsPerSecond = 1000000000;
 const long kMillisecondsPerSecond = 1000;
 const long kNanosecondsPerMillisecond = 1000000;
-}
+}  // namespace
 
 namespace sync_primitives {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-ConditionalVariable::ConditionalVariable() {
-  pthread_condattr_t attrs;
-  int initialized = pthread_condattr_init(&attrs);
-  if (initialized != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to initialize "
-                  "conditional variable attributes");
-  pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
-  initialized = pthread_cond_init(&cond_var_, &attrs);
-  if (initialized != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to initialize "
-                  "conditional variable");
-  int rv = pthread_condattr_destroy(&attrs);
-  if (rv != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to destroy "
-                  "conditional variable attributes");
-}
+ConditionalVariable::ConditionalVariable() {}
 
-ConditionalVariable::~ConditionalVariable() {
-  pthread_cond_destroy(&cond_var_);
-}
+ConditionalVariable::~ConditionalVariable() {}
 
 void ConditionalVariable::NotifyOne() {
-  int signaled = pthread_cond_signal(&cond_var_);
-  if (signaled != 0)
-    LOG4CXX_ERROR(logger_, "Failed to signal conditional variable");
+  cond_var_.notify_one();
 }
 
 void ConditionalVariable::Broadcast() {
-  int signaled = pthread_cond_broadcast(&cond_var_);
-  if (signaled != 0)
-    LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
+  cond_var_.notify_all();
 }
 
-bool ConditionalVariable::Wait(Lock& lock) {
-  lock.AssertTakenAndMarkFree();
-  int wait_status = pthread_cond_wait(&cond_var_, &lock.mutex_);
-  lock.AssertFreeAndMarkTaken();
-  if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
+bool ConditionalVariable::Wait(BaseLock& lock) {
+  // NOTE this grossness is due to boost mutex and recursive mutex not sharing a
+  // superclass
+
+  try {
+    lock.AssertTakenAndMarkFree();
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      cond_var_.wait<boost::mutex>(test_lock->mutex_);
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+    } else {
+      // unknown
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      return false;
+    }
+    lock.AssertFreeAndMarkTaken();
+  } catch (std::exception err) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to wait for conditional variable, exception:" << err.what());
     return false;
   }
+
   return true;
 }
 
 bool ConditionalVariable::Wait(AutoLock& auto_lock) {
-  Lock& lock = auto_lock.GetLock();
-  lock.AssertTakenAndMarkFree();
-  int wait_status = pthread_cond_wait(&cond_var_, &lock.mutex_);
-  lock.AssertFreeAndMarkTaken();
-  if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
-    return false;
-  }
-  return true;
+  BaseLock& lock = auto_lock.GetLock();
+  return Wait(lock);
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     AutoLock& auto_lock, uint32_t milliseconds) {
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  timespec wait_interval;
-  wait_interval.tv_sec = now.tv_sec + (milliseconds / kMillisecondsPerSecond);
-  wait_interval.tv_nsec =
-      now.tv_nsec +
-      (milliseconds % kMillisecondsPerSecond) * kNanosecondsPerMillisecond;
-  wait_interval.tv_sec += wait_interval.tv_nsec / kNanosecondsPerSecond;
-  wait_interval.tv_nsec %= kNanosecondsPerSecond;
-  Lock& lock = auto_lock.GetLock();
-  lock.AssertTakenAndMarkFree();
-  int timedwait_status =
-      pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
-  lock.AssertFreeAndMarkTaken();
+  BaseLock& lock = auto_lock.GetLock();
+
   WaitStatus wait_status = kNoTimeout;
-  switch (timedwait_status) {
-    case 0: {
-      wait_status = kNoTimeout;
-      break;
+  lock.AssertTakenAndMarkFree();
+  try {
+    bool timeout = true;
+
+    // What kind of lock are we ?
+    if (Lock* test_lock = dynamic_cast<Lock*>(&lock)) {
+      // Regular lock
+      // cond_var_.wait<boost::mutex>(test_lock->mutex_);
+      timeout = cond_var_.timed_wait<boost::mutex>(
+          test_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
+    } else if (RecursiveLock* test_rec_lock =
+                   dynamic_cast<RecursiveLock*>(&lock)) {
+      // Recursive lock
+      // cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
+      timeout = cond_var_.timed_wait<boost::recursive_mutex>(
+          test_rec_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
+    } else {
+      // unknown
+      LOG4CXX_ERROR(logger_, "Unknown lock type!");
     }
-    case EINTR: {
-      wait_status = kNoTimeout;
-      break;
-    }
-    case ETIMEDOUT: {
+
+    if (!timeout) {
       wait_status = kTimeout;
-      break;
     }
-    default: {
-      LOG4CXX_ERROR(
-          logger_,
-          "Failed to timewait for conditional variable timedwait_status: "
-              << timedwait_status);
-    }
+  } catch (boost::thread_interrupted inter) {
+    wait_status = kNoTimeout;
+
+  } catch (std::exception err) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to timewait for conditional variable timedwait_status: "
+            << err.what());
   }
+
   return wait_status;
 }
 

@@ -53,8 +53,7 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , expected_chs_count_(0)
     , received_chs_count_(0)
     , error_from_hmi_(false)
-    , is_timed_out_(false)
-    , vr_commands_lock_(true) {}
+    , is_timed_out_(false) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
   LOG4CXX_AUTO_TRACE(logger_);

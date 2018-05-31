@@ -726,7 +726,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::map<std::string, std::string> app_to_device_link_;
 
   // Lock for app to device list
-  sync_primitives::Lock app_to_device_link_lock_;
+  sync_primitives::RecursiveLock app_to_device_link_lock_;
 
   utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;

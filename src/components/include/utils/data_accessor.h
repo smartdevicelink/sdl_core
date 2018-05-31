@@ -39,9 +39,9 @@
 template <class T>
 class DataAccessor {
  public:
-  DataAccessor(const T& data, const sync_primitives::Lock& lock)
+  DataAccessor(const T& data, const sync_primitives::BaseLock& lock)
       : data_(data)
-      , lock_(const_cast<sync_primitives::Lock&>(lock))
+      , lock_(const_cast<sync_primitives::BaseLock&>(lock))
       , counter_(new uint32_t(0)) {
     lock_.Acquire();
   }
@@ -65,7 +65,7 @@ class DataAccessor {
  private:
   void* operator new(size_t size);
   const T& data_;
-  sync_primitives::Lock& lock_;
+  sync_primitives::BaseLock& lock_;
   utils::SharedPtr<uint32_t> counter_;
 };
 

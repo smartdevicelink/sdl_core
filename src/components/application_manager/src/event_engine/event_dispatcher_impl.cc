@@ -40,7 +40,7 @@ namespace event_engine {
 using namespace sync_primitives;
 
 EventDispatcherImpl::EventDispatcherImpl()
-    : state_lock_(false), observer_lock_(true), observers_event_() {}
+    :  observers_event_() {}
 
 EventDispatcherImpl::~EventDispatcherImpl() {}
 

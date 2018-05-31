@@ -141,7 +141,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
-    , applications_list_lock_(true)
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
@@ -168,7 +167,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , resume_ctrl_(new resumption::ResumeCtrlImpl(*this))
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
-    , stopping_application_mng_lock_(true)
     , state_ctrl_(*this)
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)

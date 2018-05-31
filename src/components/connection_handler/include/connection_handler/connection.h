@@ -304,7 +304,7 @@ class Connection {
    */
   SessionMap session_map_;
 
-  mutable sync_primitives::Lock session_map_lock_;
+  mutable sync_primitives::RecursiveLock session_map_lock_;
 
   /**
    * @brief monitor that closes connection if there is no traffic over it

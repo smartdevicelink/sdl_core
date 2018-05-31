@@ -57,7 +57,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
-    , queue_lock_(false)
     , restore_hmi_level_timer_(
           "RsmCtrlRstore",
           new timer::TimerTaskImpl<ResumeCtrlImpl>(

@@ -136,7 +136,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   volatile bool is_timed_out_;
   sync_primitives::Lock is_timed_out_lock_;
 
-  sync_primitives::Lock vr_commands_lock_;
+  sync_primitives::RecursiveLock vr_commands_lock_;
   /*
    * @brief Sends VR AddCommand request to HMI
    *
