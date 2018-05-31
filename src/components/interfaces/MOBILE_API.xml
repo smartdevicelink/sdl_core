@@ -1118,7 +1118,6 @@
             <description>TPMS reports the tire is not trained.</description>
         </element>
     </enum>
-
     
     <enum name="FuelType">
         <element name="GASOLINE" />
