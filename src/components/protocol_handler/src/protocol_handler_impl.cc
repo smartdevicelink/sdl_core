@@ -1554,12 +1554,18 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                           *fullVersion,
                           *start_session_ack_params);
     } else {
-      LOG4CXX_DEBUG(logger_, "Adding Handshake handler to listenets:");
-      security_manager_->AddListener(new HandshakeHandler(*handler));
+      LOG4CXX_DEBUG(logger_,
+                    "Adding Handshake handler to listeners: " << handler.get());
+      security_manager::SecurityManagerListener* listener =
+          new HandshakeHandler(*handler);
+      security_manager_->AddListener(listener);
+
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
+
         if (!security_manager_->IsSystemTimeProviderReady()) {
+          security_manager_->RemoveListener(listener);
           SendStartSessionNAck(context.connection_id_,
                                packet->session_id(),
                                protocol_version,
@@ -1568,6 +1574,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         }
       }
     }
+
     LOG4CXX_DEBUG(logger_,
                   "Protection establishing for connection "
                       << connection_key << " is in progress");
