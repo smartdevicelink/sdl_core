@@ -151,6 +151,7 @@ const char* red = "red";
 const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
+const char* icon_resumed = "iconResumed";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -164,6 +165,7 @@ const char* persistent_file = "persistentFile";
 const char* file_data = "fileData";
 const char* space_available = "spaceAvailable";
 const char* image_type = "imageType";
+const char* is_template = "isTemplate";
 const char* image = "image";
 const char* type = "type";
 const char* system_file = "systemFile";
