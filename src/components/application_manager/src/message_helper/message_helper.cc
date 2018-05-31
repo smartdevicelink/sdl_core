@@ -309,7 +309,7 @@ MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
       utils::MakeShared<SmartObject>(SmartType_Map);
   SmartObject& notification = *notification_ptr;
   notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
+      static_cast<int32_t>(kNotification);
   notification[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
   notification[strings::params][strings::protocol_type] =

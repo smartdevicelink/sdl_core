@@ -91,7 +91,7 @@ class RAManagerTest : public ::testing::Test {
     app_ext_ptr_ = utils::MakeShared<rc_rpc_plugin::RCAppExtension>(plugin_id);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
 
-    OnRCStatusNotoficationExpectations();
+    OnRCStatusNotificationExpectations();
   }
 
   void CheckResultWithHMILevelAndAccessMode(
@@ -100,7 +100,7 @@ class RAManagerTest : public ::testing::Test {
       const rc_rpc_plugin::AcquireResult::eType expected_result,
       const hmi_apis::Common_RCAccessMode::eType access_mode);
 
-  void OnRCStatusNotoficationExpectations();
+  void OnRCStatusNotificationExpectations();
 
  protected:
   NiceMock<MockApplicationManager> mock_app_mngr_;
@@ -137,7 +137,7 @@ void RAManagerTest::CheckResultWithHMILevelAndAccessMode(
   EXPECT_EQ(expected_result, ra_manager.AcquireResource(kModuleType1, kAppId2));
 }
 
-void RAManagerTest::OnRCStatusNotoficationExpectations() {
+void RAManagerTest::OnRCStatusNotificationExpectations() {
   ON_CALL(mock_app_mngr_, application(kAppId1))
       .WillByDefault(Return(mock_app_1_));
   ON_CALL(*mock_app_1_, QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
