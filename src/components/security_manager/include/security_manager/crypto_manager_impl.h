@@ -162,14 +162,6 @@ class CryptoManagerImpl : public CryptoManager {
    */
   bool SaveCertificateData(const std::string& cert_data) const;
 
-  int pull_number_from_buf(char* buf, int* idx) const;
-  void asn1_time_to_tm(ASN1_TIME* time) const;
-
-  /**
-   * @brief Sets initial certificate datetime
-   */
-  void InitCertExpTime();
-
   /**
    * @brief Updates certificate and private key for the current SSL context
    * @param certificate new certificate to update

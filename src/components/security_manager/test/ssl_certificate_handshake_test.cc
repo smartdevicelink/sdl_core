@@ -130,11 +130,11 @@ class SSLHandshakeTest : public testing::TestWithParam<Protocol> {
         .WillByDefault(ReturnRef(server_ciphers_list_));
     ON_CALL(*mock_server_manager_settings_, ca_cert_path())
         .WillByDefault(ReturnRef(server_ca_certificate_path_));
-    ON_CALL(*mock_server_manager_settings, module_cert_path())
+    ON_CALL(*mock_server_manager_settings_, module_cert_path())
         .WillByDefault(ReturnRef(server_cert_filename));
-    ON_CALL(*mock_server_manager_settings, module_key_path())
+    ON_CALL(*mock_server_manager_settings_, module_key_path())
         .WillByDefault(ReturnRef(server_key_filename));
-    ON_CALL(*mock_server_manager_settings, verify_peer())
+    ON_CALL(*mock_server_manager_settings_, verify_peer())
         .WillByDefault(Return(verify_peer));
   }
   void SetClientInitialValues(const security_manager::Protocol protocol,
@@ -160,11 +160,11 @@ class SSLHandshakeTest : public testing::TestWithParam<Protocol> {
         .WillByDefault(ReturnRef(client_ciphers_list_));
     ON_CALL(*mock_client_manager_settings_, ca_cert_path())
         .WillByDefault(ReturnRef(client_ca_certificate_path_));
-    ON_CALL(*mock_client_manager_settings, module_cert_path())
+    ON_CALL(*mock_client_manager_settings_, module_cert_path())
         .WillByDefault(ReturnRef(client_cert_filename));
-    ON_CALL(*mock_client_manager_settings, module_key_path())
+    ON_CALL(*mock_client_manager_settings_, module_key_path())
         .WillByDefault(ReturnRef(client_key_filename));
-    ON_CALL(*mock_client_manager_settings, verify_peer())
+    ON_CALL(*mock_client_manager_settings_, verify_peer())
         .WillByDefault(Return(verify_peer));
   }
 

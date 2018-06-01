@@ -494,8 +494,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
 
   const SSLContext* result = security_manager_->CreateSSLContext(
       kKey,
-      security_manager::SecurityManager::ContextCreationStrategy::
-          kForceRecreation);
+      security_manager::SecurityManager::ContextCreationStrategy::kUseExisting);
   EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
@@ -537,38 +536,24 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
 
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
-  // uint8_t protocol_version = 0;
+
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
-  EXPECT_CALL(mock_session_observer, GetHandshakeContext(kKey))
-      .WillOnce(Return(SSLContext::HandshakeContext()));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
-
+  // Expect notifying listeners (unsuccess)
+  EXPECT_CALL(*mock_sm_listener,
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
+      .WillOnce(ReturnNull());
   // Expect InternalError with ERROR_ID
   EXPECT_CALL(
       mock_protocol_handler,
       SendMessageToMobileApp(
           InternalErrorWithErrId(SecurityManager::ERROR_INTERNAL), kIsFinal));
-  // Expect notifying listeners (unsuccess)
-  EXPECT_CALL(*mock_sm_listener,
-              OnHandshakeDone(kKey, SSLContext::Handshake_Result_Fail))
-      .WillOnce(Return(true));
-
-  // Emulate SessionObserver result
-  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
-      .WillOnce(Return(&mock_ssl_context_exists));
-  EXPECT_CALL(mock_ssl_context_exists, IsInitCompleted())
-      .WillOnce(Return(false));
-  EXPECT_CALL(mock_ssl_context_exists, SetHandshakeContext(_));
-  EXPECT_CALL(mock_ssl_context_exists, StartHandshake(_, _))
-      .WillOnce(DoAll(SetArgPointee<0>(handshake_data_out_pointer),
-                      SetArgPointee<1>(handshake_data_out_size),
-                      Return(SSLContext::Handshake_Result_Fail)));
 
   security_manager_->StartHandshake(kKey);
-
-  // Listener was destroyed after OnHandshakeDone call
   mock_sm_listener.release();
 }
 

@@ -149,7 +149,6 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
                  "Not all observers have unsubscribed"
                  " from ProtocolHandlerImpl");
   }
-  handshake_handlers_.clear();
 }
 
 void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
@@ -843,6 +842,11 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
                                    << "Error_text: " << error.text());
 }
 
+void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->NotifyListenersOnHandshakeFailed();
+}
+
 void ProtocolHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID connection_id) {
@@ -1530,7 +1534,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            start_session_ack_params);
 
     security_manager::SSLContext* ssl_context =
-        security_manager_->CreateSSLContext(connection_key);
+        security_manager_->CreateSSLContext(
+            connection_key,
+            security_manager::SecurityManager::ContextCreationStrategy::
+                kUseExisting);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);

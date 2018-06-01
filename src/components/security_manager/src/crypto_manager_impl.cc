@@ -386,8 +386,6 @@ bool CryptoManagerImpl::SaveCertificateData(
   utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
   UNUSED(cert_guard);
 
-  asn1_time_to_tm(X509_get_notAfter(cert));
-
   if (1 != BIO_reset(bio_cert)) {
     LOG4CXX_WARN(logger_,
                  "Unabled to reset BIO in order to read private key, "
@@ -404,53 +402,6 @@ bool CryptoManagerImpl::SaveCertificateData(
   UNUSED(key_guard);
 
   return SaveModuleCertificateToFile(cert) && SaveModuleKeyToFile(pkey);
-}
-
-int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) const {
-  if (!idx) {
-    return 0;
-  }
-  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
-  *idx = *idx + 2;
-  return val;
-}
-
-void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) const {
-  char* buf = (char*)time->data;
-  int index = 0;
-  const int year = pull_number_from_buf(buf, &index);
-  if (V_ASN1_GENERALIZEDTIME == time->type) {
-    expiration_time_.tm_year =
-        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
-  } else {
-    expiration_time_.tm_year = year < 50 ? year + 100 : year;
-  }
-
-  const int mon = pull_number_from_buf(buf, &index);
-  const int day = pull_number_from_buf(buf, &index);
-  const int hour = pull_number_from_buf(buf, &index);
-  const int mn = pull_number_from_buf(buf, &index);
-
-  expiration_time_.tm_mon = mon - 1;
-  expiration_time_.tm_mday = day;
-  expiration_time_.tm_hour = hour;
-  expiration_time_.tm_min = mn;
-
-  if (buf[index] == 'Z') {
-    expiration_time_.tm_sec = 0;
-  }
-  if ((buf[index] == '+') || (buf[index] == '-')) {
-    const int mn = pull_number_from_buf(buf, &index);
-    const int mn1 = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
-  } else {
-    const int sec = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = sec;
-  }
-}
-
-void CryptoManagerImpl::InitCertExpTime() {
-  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
 }
 
 bool CryptoManagerImpl::UpdateModuleCertificateData(X509* certificate,

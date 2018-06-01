@@ -1073,13 +1073,6 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    const policy_table::AppHMIType type = policy_table::AHT_NAVIGATION;
-    if (helpers::in_range(hmi_types,
-                          (rpc::Enum<policy_table::AppHMIType>)type) &&
-        !HasCertificate()) {
-      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
-      update_status_manager_.ScheduleUpdate();
-    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }
