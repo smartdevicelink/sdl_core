@@ -279,16 +279,28 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   if (ack_protocol_version >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
-    bson_object_put_int64(
+    const bool mtu_written = bson_object_put_int64(
         &params,
         strings::mtu,
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
+    LOG4CXX_DEBUG(logger_,
+                  "MTU parameter was written to bson params: "
+                      << mtu_written << "; Value: "
+                      << static_cast<int32_t>(
+                             bson_object_get_int64(&params, strings::mtu)));
+
     if (serviceTypeValue == kRpc) {
       // Hash ID is only used in RPC case
-      bson_object_put_int32(
+      const bool hash_written = bson_object_put_int32(
           &params, strings::hash_id, static_cast<int32_t>(hash_id));
+      LOG4CXX_DEBUG(logger_,
+                    "Hash parameter was written to bson params: "
+                        << hash_written << "; Value: "
+                        << static_cast<int32_t>(bson_object_get_int32(
+                               &params, strings::hash_id)));
+
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
@@ -297,8 +309,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                                      defaultProtocolVersion);
       char protocolVersionString[256];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
-      bson_object_put_string(
+
+      const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Protocol version parameter was written to bson params: "
+              << protocol_ver_written << "; Value: "
+              << bson_object_get_string(&params, strings::protocol_version));
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&params);
     ptr->set_data(payloadBytes, bson_object_size(&params));
@@ -1845,7 +1863,9 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   DCHECK(packet);
   // Control frames and data over control service shall be unprotected
   if (packet->service_type() == kControl ||
-      packet->frame_type() == FRAME_TYPE_CONTROL) {
+      // For protocol v5 control frames could be protected
+      (packet->frame_type() == FRAME_TYPE_CONTROL &&
+       packet->protocol_version() < PROTOCOL_VERSION_5)) {
     return RESULT_OK;
   }
   if (!security_manager_) {
@@ -1891,7 +1911,9 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   if (!packet->protection_flag() ||
       // Control frames and data over control service shall be unprotected
       packet->service_type() == kControl ||
-      packet->frame_type() == FRAME_TYPE_CONTROL) {
+      (packet->frame_type() == FRAME_TYPE_CONTROL &&
+       // For protocol v5 control frames could be protected
+       packet->protocol_version() < PROTOCOL_VERSION_5)) {
     return RESULT_OK;
   }
   if (!security_manager_) {
