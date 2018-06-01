@@ -179,7 +179,7 @@ namespace commands {
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , result_checking_app_hmi_type_(mobile_apis::Result::INVALID_ENUM) {}
+    , result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {}
 
@@ -320,7 +320,20 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::tts_name)) {
-    application->set_tts_name(msg_params[strings::tts_name]);
+    smart_objects::SmartObject& tts_name =
+        (*message_)[strings::msg_params][strings::tts_name];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(
+            tts_name, application, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_WARN(logger_,
+                   "MessageHelper::VerifyTtsFiles return "
+                       << verification_result);
+      response_info_ = "One or more files needed for tts_name are not present";
+      result_code_ = mobile_apis::Result::WARNINGS;
+    }
+    application->set_tts_name(tts_name);
   }
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
@@ -694,9 +707,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
   if ((mobile_apis::Result::SUCCESS == result_code) &&
-      (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
+      (mobile_apis::Result::INVALID_ENUM != result_code_)) {
     add_info += response_info_;
-    result_code = result_checking_app_hmi_type_;
+    result_code = result_code_;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
@@ -1023,7 +1036,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
             "Following AppHmiTypes are not present in policy "
             "table:" +
             log;
-        result_checking_app_hmi_type_ = mobile_apis::Result::WARNINGS;
+        result_code_ = mobile_apis::Result::WARNINGS;
       }
     }
     // Replace AppHmiTypes in request with values allowed by policy table

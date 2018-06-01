@@ -210,7 +210,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
 
  private:
   std::string response_info_;
-  mobile_apis::Result::eType result_checking_app_hmi_type_;
+  mobile_apis::Result::eType result_code_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

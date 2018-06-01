@@ -548,6 +548,16 @@ class MessageHelper {
       const uint32_t correlation_id,
       int32_t result_code);
 
+  static utils::SharedPtr<std::string> CheckAppFileExists(
+      std::string file_name,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
+
+  static mobile_apis::Result::eType VerifyTtsFiles(
+      smart_objects::SmartObject& tts_chunks,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
+
   /**
     * @brief Verify image and add image file full path
     * and add path, although the image doesn't exist
