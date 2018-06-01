@@ -91,6 +91,7 @@ class HmiState {
            StateID state_id);
 
   /**
+   * DEPRECATED
    * @brief HmiState constructor
    * @param app_id Application id
    * @param app_mngr Application manager
@@ -98,6 +99,7 @@ class HmiState {
   HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 
   /**
+   * DEPRECATED
    * @brief HmiState constructor
    * @param app_id Application id
    * @param app_mngr Application manager
@@ -198,7 +200,7 @@ class HmiState {
   }
 
  protected:
-  uint32_t app_id_;
+  uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
@@ -246,7 +248,7 @@ class VRHmiState : public HmiState {
   VRHmiState(utils::SharedPtr<Application> app,
              const ApplicationManager& app_mngr);
 
-  VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
 /**
@@ -257,7 +259,7 @@ class TTSHmiState : public HmiState {
   TTSHmiState(utils::SharedPtr<Application> app,
               const ApplicationManager& app_mngr);
 
-  TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
@@ -272,7 +274,8 @@ class NaviStreamingHmiState : public HmiState {
   NaviStreamingHmiState(utils::SharedPtr<Application> app,
                         const ApplicationManager& app_mngr);
 
-  NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED NaviStreamingHmiState(uint32_t app_id,
+                                   const ApplicationManager& app_mngr);
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
@@ -287,7 +290,8 @@ class PhoneCallHmiState : public HmiState {
   PhoneCallHmiState(utils::SharedPtr<Application> app,
                     const ApplicationManager& app_mngr);
 
-  PhoneCallHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED PhoneCallHmiState(uint32_t app_id,
+                               const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -305,7 +309,8 @@ class SafetyModeHmiState : public HmiState {
   SafetyModeHmiState(utils::SharedPtr<Application> app,
                      const ApplicationManager& app_mngr);
 
-  SafetyModeHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED SafetyModeHmiState(uint32_t app_id,
+                                const ApplicationManager& app_mngr);
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -322,7 +327,7 @@ class DeactivateHMI : public HmiState {
   DeactivateHMI(utils::SharedPtr<Application> app,
                 const ApplicationManager& app_mngr);
 
-  DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -340,7 +345,7 @@ class AudioSource : public HmiState {
   AudioSource(utils::SharedPtr<Application> app,
               const ApplicationManager& app_mngr);
 
-  AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
@@ -359,7 +364,7 @@ class EmbeddedNavi : public HmiState {
   EmbeddedNavi(utils::SharedPtr<Application> app,
                const ApplicationManager& app_mngr);
 
-  EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
+  DEPRECATED EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
 
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
