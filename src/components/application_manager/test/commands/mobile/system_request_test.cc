@@ -43,6 +43,9 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application.h"
+#include "utils/file_system.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -68,23 +71,35 @@ const std::string kAppPolicyId = "fake-app-id";
 const uint32_t kDefaultTimeout = 1000u;
 const std::string kAppFolderName = "fake-app-name";
 const std::string kAppStorageFolder = "fake-storage";
-const std::string kSystemFilesPath = "/fake/system/files";
+const std::string kSystemFilesPath = "fake/system/files";
 const std::string kFileName = "Filename";
+const mobile_apis::RequestType::eType kRequestHttpType =
+    mobile_apis::RequestType::HTTP;
+const mobile_apis::RequestType::eType kRequestClimate =
+    mobile_apis::RequestType::CLIMATE;
+const mobile_apis::RequestType::eType kRequestQueryApps =
+    mobile_apis::RequestType::QUERY_APPS;
 }  // namespace
 
 class SystemRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SystemRequestTest() : mock_app_(CreateMockApp()) {}
+  SystemRequestTest()
+      : mock_app_(CreateMockApp())
+      , binary_data_folder(kAppStorageFolder + "/" + kAppFolderName + "/")
+      , app_full_file_path(binary_data_folder + kFileName)
+      , binary_data_(10, 10) {}
 
  protected:
-  MessageSharedPtr CreateIVSUMessage() {
-    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-    (*msg)[am::strings::msg_params][am::strings::request_type] =
-        mobile_apis::RequestType::HTTP;
-    (*msg)[am::strings::msg_params][am::strings::file_name] = kFileName;
-    return msg;
+  MessageSharedPtr CreateIVSUMessage(
+      const mobile_apis::RequestType::eType request_type = kRequestHttpType) {
+    MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
+    (*message)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    (*message)[am::strings::msg_params][am::strings::request_type] =
+        request_type;
+    (*message)[am::strings::msg_params][am::strings::file_name] = kFileName;
+    return message;
   }
 
   void PreConditions() {
@@ -101,9 +116,6 @@ class SystemRequestTest
         .WillByDefault(ReturnRef(kSystemFilesPath));
     ON_CALL(app_mngr_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-
-    ON_CALL(mock_policy_handler_, IsRequestTypeAllowed(kAppPolicyId, _))
-        .WillByDefault(Return(true));
   }
 
   void ExpectManageMobileCommandWithResultCode(
@@ -114,18 +126,237 @@ class SystemRequestTest
                             am::commands::Command::CommandOrigin::ORIGIN_SDL));
   }
 
+  void Run(MessageSharedPtr message) {
+    SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(message));
+    ASSERT_TRUE(command->Init());
+    command->Run();
+  }
+
+  void SetUp() OVERRIDE {
+    file_system::CreateDirectoryRecursively(binary_data_folder);
+    file_system::CreateDirectoryRecursively(kSystemFilesPath + "/");
+    file_system::CreateFile(app_full_file_path);
+    file_system::CreateFile(kSystemFilesPath + "/" + kFileName);
+  }
+
+  void TearDown() OVERRIDE {
+    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::RemoveDirectory(kSystemFilesPath);
+  }
+
   MockAppPtr mock_app_;
   MockPolicyHandlerInterface mock_policy_handler_;
+  const std::string binary_data_folder;
+  const std::string app_full_file_path;
+  std::vector<uint8_t> binary_data_;
 };
 
 TEST_F(SystemRequestTest, Run_HTTP_FileName_no_binary_data_REJECTED) {
   PreConditions();
-  MessageSharedPtr msg = CreateIVSUMessage();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(true));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::REJECTED);
 
-  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
-  command->Run();
+  Run(CreateIVSUMessage());
+}
+
+TEST_F(SystemRequestTest,
+       Run_HttpRequestTypeAndExistsFileName_SuccessResponce) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(true));
+
+  am::AppFile file;
+  file.is_download_complete = true;
+  EXPECT_CALL(*mock_app_, GetFile(app_full_file_path)).WillOnce(Return(&file));
+
+  EXPECT_CALL(mock_policy_handler_, ReceiveMessageFromSDK(kFileName, _));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+  Run(CreateIVSUMessage());
+}
+
+TEST_F(SystemRequestTest, Run_RequestType_SuccessRequest) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestClimate))
+      .WillOnce(Return(true));
+
+  am::AppFile file;
+  file.is_download_complete = true;
+  EXPECT_CALL(*mock_app_, GetFile(app_full_file_path)).WillOnce(Return(&file));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::BasicCommunication_SystemRequest)));
+
+  Run(CreateIVSUMessage(kRequestClimate));
+}
+
+TEST_F(SystemRequestTest, Run_NonExistentApp_ApplicationNotRegisteredResponse) {
+  mock_app_.reset();
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  ExpectManageMobileCommandWithResultCode(
+      mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+
+  Run(CreateIVSUMessage());
+}
+
+TEST_F(SystemRequestTest,
+       Run_EmptyParams_DisallowedRequestType_DisallowedResponse) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(false));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
+
+  Run(CreateIVSUMessage());
+}
+
+TEST_F(SystemRequestTest, Run_InvalidFileNameSyntax_InvalidData) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(true));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  MessageSharedPtr message = CreateIVSUMessage();
+  (*message)[am::strings::msg_params][am::strings::file_name] =
+      kFileName + "\n";
+
+  Run(message);
+}
+
+TEST_F(SystemRequestTest, Run_InvalidFileName_InvalidData) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(true));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  MessageSharedPtr message = CreateIVSUMessage();
+  (*message)[am::strings::msg_params][am::strings::file_name] = kFileName + "/";
+
+  Run(message);
+}
+TEST_F(SystemRequestTest, Run_InvalidSaveBinary_GenericError) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestHttpType))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_,
+              SaveBinary(binary_data_, kSystemFilesPath, kFileName, 0))
+      .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::GENERIC_ERROR);
+
+  MessageSharedPtr message = CreateIVSUMessage();
+  (*message)[am::strings::params][am::strings::binary_data] = binary_data_;
+
+  Run(message);
+}
+
+TEST_F(SystemRequestTest,
+       Run_QueryAppsRequestTypeAndValidJson_SuccessResponce) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestQueryApps))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, SaveBinary(_, kSystemFilesPath, kFileName, 0))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(app_mngr_, application_by_policy_id(_))
+      .WillRepeatedly(Return(mock_app_));
+
+  EXPECT_CALL(app_mngr_, ProcessQueryApp(_, kConnectionKey));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+
+  binary_data_.clear();
+  file_system::ReadBinaryFile("validJSON.json", binary_data_);
+
+  MessageSharedPtr message = CreateIVSUMessage(kRequestQueryApps);
+  (*message)[am::strings::params][am::strings::binary_data] = binary_data_;
+
+  Run(message);
+}
+
+TEST_F(SystemRequestTest, Run_QueryAppsRequestTypeAndInvalidJson_GenericError) {
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId, kRequestQueryApps))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_, SaveBinary(_, kSystemFilesPath, kFileName, 0))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(app_mngr_, application_by_policy_id(_))
+      .WillRepeatedly(Return(mock_app_));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::GENERIC_ERROR);
+
+  binary_data_.clear();
+  file_system::ReadBinaryFile("invalidJSON.json", binary_data_);
+
+  MessageSharedPtr message = CreateIVSUMessage(kRequestQueryApps);
+  (*message)[am::strings::params][am::strings::binary_data] = binary_data_;
+
+  Run(message);
+}
+
+TEST_F(SystemRequestTest, OnEvent_BasicCommunicationSystemRequest_Success) {
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+
+  MessageSharedPtr message = CreateIVSUMessage();
+  Event event(hmi_apis::FunctionID::BasicCommunication_SystemRequest);
+  event.set_smart_object(*message);
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(message));
+  command->on_event(event);
+}
+
+TEST_F(SystemRequestTest, OnEvent_NonExistentApp_NullPointer) {
+  MockAppPtr mock_app_nonexistent;
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_nonexistent));
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  MessageSharedPtr message = CreateIVSUMessage();
+  Event event(hmi_apis::FunctionID::BasicCommunication_SystemRequest);
+  event.set_smart_object(*message);
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(message));
+  command->on_event(event);
+}
+
+TEST_F(SystemRequestTest, OnEvent_InvalidEnum_ReceivedUnknownEvent) {
+  EXPECT_CALL(app_mngr_, application(_)).Times(0);
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  MessageSharedPtr message = CreateIVSUMessage();
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  event.set_smart_object(*message);
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(message));
+  command->on_event(event);
 }
 
 }  // namespace system_request

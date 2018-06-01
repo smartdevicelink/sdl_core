@@ -1,0 +1,62 @@
+{
+    "status": "200 ok",
+    "responseType": "array",
+    "response": [
+        {
+            "_id": "53f75cfb891ec700002d3592",
+            "__v": 0,
+            "appId": "853426",
+            "development": false,
+            "iconUrl": "http://i.imgur.com/S0FAk3.png",
+            "android": {
+                "appHmiType": "MEDIA",
+                "category": "MusicAndAudio",
+                "isMediaApplication": true,
+                "packageName": "com.awesome.fake",
+                "playStoreUrl": "http://play.google.com/store/apps/details?id=com.awesome.fake",
+                "sdlMaxVersion": "3.0",
+                "sdlMinVersion": "1.0",
+                 "languages": [
+                    {
+                        "default": {
+                            "ttsName": "Awesome music App tts name default",
+                            "vrSynonyms": [
+                                "Awesome music App 1 default",
+                                "Awesome music App 2 default"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "name": "Awesome Music App"
+        },
+        {
+            "_id": "45275cfb891ec700002d3845",
+            "__v": 0,
+            "ios": {
+                "appHmiType": "MEDIA",
+                "category": "Music",
+                "isMediaApplication": true,
+                "itunesUrl": "http://itunes.apple.com/app/rock-music-app/id324384482?mt=8",
+                "sdlMaxVersion": "3.0",
+                "sdlMinVersion": "1.0",
+                "urlScheme": "awesomemusicapp://",
+                "languages": [
+                    {
+                        "default": {
+                            "ttsName": "Rock music App tts name default",
+                            "vrSynonyms": [
+                                "Rock music App 1 default",
+                                "Rock music App 2 default"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "appId": "553426",
+            "development": false,
+            "iconUrl": "http://i.imgur.com/R3a11YFAk3.png",
+            "name": "Rock music App"
+        }
+    ]
+}
