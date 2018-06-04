@@ -1157,10 +1157,6 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
-    const std::string certificate_data = cache_->GetCertificate();
-    if (!certificate_data.empty()) {
-      listener_->OnCertificateUpdated(certificate_data);
-    }
   }
   return ret;
 }
