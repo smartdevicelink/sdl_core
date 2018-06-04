@@ -1791,11 +1791,6 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    if (helpers::in_range(hmi_types, policy_table::AHT_NAVIGATION) &&
-        !HasCertificate()) {
-      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
-      update_status_manager_.ScheduleUpdate();
-    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }

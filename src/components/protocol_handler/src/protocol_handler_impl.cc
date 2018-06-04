@@ -75,7 +75,6 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)
-    , is_ptu_triggered_(false)
     ,
 #endif  // ENABLE_SECURITY
     raw_ford_messages_from_mobile_(
@@ -840,65 +839,7 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   multiframe_builder_.RemoveConnection(connection_id);
 }
 
-void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  security_manager_->NotifyListenersOnHandshakeFailed();
-}
-
-void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-#ifdef ENABLE_SECURITY
-  sync_primitives::AutoLock lock(ptu_handlers_lock_);
-
-  if (!is_ptu_triggered_) {
-    LOG4CXX_ERROR(logger_,
-                  "PTU was not triggered by service starting. Ignored");
-    return;
-  }
-
-  for (auto handler : ptu_pending_handlers_) {
-    const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired(
-        handler->connection_key());
-    security_manager::SSLContext* ssl_context =
-        is_cert_expired ? NULL
-                        : security_manager_->CreateSSLContext(
-                              handler->connection_key(),
-                              security_manager::SecurityManager::kUseExisting);
-
-    if (!ssl_context) {
-      const std::string error("CreateSSLContext failed");
-      LOG4CXX_ERROR(logger_, error);
-      security_manager_->SendInternalError(
-          handler->connection_key(),
-          security_manager::SecurityManager::ERROR_INTERNAL,
-          error);
-
-      handler->OnHandshakeDone(
-          handler->connection_key(),
-          security_manager::SSLContext::Handshake_Result_Fail);
-
-      continue;
-    }
-
-    if (ssl_context->IsInitCompleted()) {
-      handler->OnHandshakeDone(
-          handler->connection_key(),
-          security_manager::SSLContext::Handshake_Result_Success);
-    } else {
-      security_manager_->AddListener(new HandshakeHandler(*handler));
-      if (!ssl_context->IsHandshakePending()) {
-        // Start handshake process
-        security_manager_->StartHandshake(handler->connection_key());
-      }
-    }
-  }
-
-  LOG4CXX_DEBUG(logger_, "Handshake handlers were notified");
-  ptu_pending_handlers_.clear();
-  is_ptu_triggered_ = false;
-#endif  // ENABLE_SECURITY
-}
+void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {}
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1574,43 +1515,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            bson_object_bytes);
     handshake_handlers_.push_back(handler);
 
-    const bool is_certificate_empty =
-        security_manager_->IsPolicyCertificateDataEmpty();
-
-    const bool is_certificate_expired =
-        security_manager_->IsCertificateUpdateRequired();
-
-    if (context.is_ptu_required_ &&
-        (is_certificate_empty || is_certificate_expired)) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "PTU for StartSessionHandler "
-              << handler.get()
-              << " is required and certificate data is empty or expired");
-
-      sync_primitives::AutoLock lock(ptu_handlers_lock_);
-      if (!is_ptu_triggered_) {
-        LOG4CXX_DEBUG(logger_,
-                      "PTU is not triggered yet. "
-                          << "Starting PTU and postponing SSL handshake");
-
-        ptu_pending_handlers_.push_back(handler);
-        is_ptu_triggered_ = true;
-        security_manager_->NotifyOnCertificateUpdateRequired();
-        security_manager_->PostponeHandshake(connection_key);
-      } else {
-        LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
-        ptu_pending_handlers_.push_back(handler);
-      }
-      return;
-    }
-
     security_manager::SSLContext* ssl_context =
-        is_certificate_empty
-            ? NULL
-            : security_manager_->CreateSSLContext(
-                  connection_key,
-                  security_manager::SecurityManager::kUseExisting);
+        security_manager_->CreateSSLContext(connection_key);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
