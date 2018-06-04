@@ -1273,9 +1273,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
           true,
           ByRef(empty)));
 
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
-
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
   EXPECT_CALL(mock_protocol_handler_, NotifySessionStarted(_, _))
       .WillOnce(SaveArg<0>(&out_context_));
@@ -1312,8 +1309,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_SUCCESS) {
           session_key,
           true,
           ByRef(empty)));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1354,8 +1349,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
           session_key,
           false,
           ByRef(empty)));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .WillOnce(Return(true));
 
   // confirm that NotifySessionStarted() is called
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
@@ -1446,9 +1439,6 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
                           session_key1,
                           true,
                           ByRef(empty))));
-  EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
-      .Times(2)
-      .WillOnce(Return(true));
 
   // verify that connection handler will not mix up the two results
   SessionContext new_context_first, new_context_second;

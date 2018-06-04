@@ -386,10 +386,7 @@ bool CryptoManagerImpl::SaveCertificateData(
   utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
   UNUSED(cert_guard);
 
-  EVP_PKEY* pkey = NULL;
-  if (1 == BIO_reset(bio_cert)) {
-    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
-  } else {
+  if (1 != BIO_reset(bio_cert)) {
     LOG4CXX_WARN(logger_,
                  "Unabled to reset BIO in order to read private key, "
                      << LastError());

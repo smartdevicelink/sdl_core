@@ -159,7 +159,6 @@ TEST_F(CryptoManagerTest, WrongInit) {
   EXPECT_FALSE(crypto_manager_->Init());
   EXPECT_NE(std::string(), crypto_manager_->LastError());
 
->>>>>>> Fixed affected mocks and UT's
   EXPECT_CALL(*mock_security_manager_settings_,
               security_manager_protocol_name())
       .WillOnce(Return(security_manager::TLSv1_2));
