@@ -588,7 +588,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     policy_table::FunctionalGroupings functional_groupings;
     cache_->GetFunctionalGroupings(functional_groupings);
 
-    policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
+    policy_table::Strings app_groups =
+        GetGroupsNames(app_group_permissions);
 
     // Undefined groups (without user consent) disallowed by default, since
     // OnPermissionsChange notification has no "undefined" section
@@ -620,7 +621,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   }
 
   const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
-  LOG4CXX_DEBUG(logger_, "Is known rpc " << (known_rpc ? "true" : "false"));
+  LOG4CXX_DEBUG(logger_, "Is known rpc " <<
+                (known_rpc ? "true" : "false"));
   if (!known_rpc) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
@@ -642,9 +644,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
              rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].find(
                  hmi_level)) {
     // RPC found in allowed == allowed by backend, but disallowed by user
-    LOG4CXX_DEBUG(
-        logger_,
-        "RPC found in allowed == allowed by backend, but disallowed by user");
+    LOG4CXX_DEBUG(logger_, "RPC found in allowed == allowed by backend, but disallowed by user");
     result.hmi_level_permitted = kRpcUserDisallowed;
   } else {
     LOG4CXX_DEBUG(logger_,
@@ -983,6 +983,7 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
+
 
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
@@ -1766,6 +1767,11 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    if (helpers::in_range(hmi_types, policy_table::AHT_NAVIGATION) &&
+        !HasCertificate()) {
+      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
+      update_status_manager_.ScheduleUpdate();
+    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }
