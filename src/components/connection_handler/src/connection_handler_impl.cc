@@ -467,6 +467,14 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint32_t session_key =
         KeyFromPair(connection_handle, context.new_session_id_);
 
+    uint32_t app_id = 0;
+    GetDataOnSessionKey(
+        session_key, &app_id, NULL, static_cast<DeviceHandle*>(NULL));
+    if (app_id > 0) {
+      context.is_ptu_required_ =
+          !connection_handler_observer_->CheckAppIsNavi(app_id);
+    }
+
     {
       sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
       start_service_context_map_[session_key] = context;
