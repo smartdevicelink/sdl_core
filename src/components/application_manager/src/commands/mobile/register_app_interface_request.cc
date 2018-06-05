@@ -50,6 +50,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
+#include "utils/file_system.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -346,6 +347,15 @@ void RegisterAppInterfaceRequest::Run() {
         application->set_mobile_projection_enabled(true);
       }
     }
+  }
+
+  if (msg_params.keyExists(strings::day_color_scheme)) {
+    application->set_day_color_scheme(msg_params[strings::day_color_scheme]);
+  }
+
+  if (msg_params.keyExists(strings::night_color_scheme)) {
+    application->set_night_color_scheme(
+        msg_params[strings::night_color_scheme]);
   }
 
   // Add device to policy table and set device info, if any
@@ -710,6 +720,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
   policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
       application->policy_app_id(), hmi_types);
+
+  response_params[strings::icon_resumed] =
+      file_system::FileExists(application->app_icon_path());
+
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
@@ -825,7 +839,9 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
   application[hmi_response::policy_app_id] = application_impl.policy_app_id();
-  application[strings::icon] = application_impl.app_icon_path();
+  if (file_system::FileExists(application_impl.app_icon_path())) {
+    application[strings::icon] = application_impl.app_icon_path();
+  }
 
   const smart_objects::SmartObject* ngn_media_screen_name =
       application_impl.ngn_media_screen_name();
@@ -883,6 +899,18 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
 
   device_info[strings::transport_type] =
       application_manager_.GetDeviceTransportType(transport_type);
+
+  const smart_objects::SmartObject* day_color_scheme =
+      application_impl.day_color_scheme();
+  if (day_color_scheme) {
+    application[strings::day_color_scheme] = *day_color_scheme;
+  }
+
+  const smart_objects::SmartObject* night_color_scheme =
+      application_impl.night_color_scheme();
+  if (night_color_scheme) {
+    application[strings::night_color_scheme] = *night_color_scheme;
+  }
 
   DCHECK(application_manager_.ManageHMICommand(notification));
 }

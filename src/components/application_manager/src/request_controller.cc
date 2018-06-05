@@ -50,6 +50,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     : pool_state_(UNDEFINED)
     , pool_size_(settings.thread_pool_size())
     , request_tracker_(settings)
+    , duplicate_message_count_()
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::TimeoutThread))
@@ -230,6 +231,21 @@ void RequestController::TerminateRequest(const uint32_t correlation_id,
                     << correlation_id << " connection_key = " << connection_key
                     << " function_id = " << function_id
                     << " force_terminate = " << force_terminate);
+  {
+    AutoLock auto_lock(duplicate_message_count_lock_);
+    auto dup_it = duplicate_message_count_.find(correlation_id);
+    if (duplicate_message_count_.end() != dup_it) {
+      duplicate_message_count_[correlation_id]--;
+      if (0 == duplicate_message_count_[correlation_id]) {
+        duplicate_message_count_.erase(dup_it);
+      }
+      LOG4CXX_DEBUG(logger_,
+                    "Ignoring termination request due to duplicate correlation "
+                    "ID being sent");
+      return;
+    }
+  }
+
   RequestInfoPtr request =
       waiting_for_response_.Find(connection_key, correlation_id);
   if (!request) {
@@ -474,7 +490,24 @@ void RequestController::Worker::threadMain() {
     RequestInfoPtr request_info_ptr =
         utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
-    request_controller_->waiting_for_response_.Add(request_info_ptr);
+    if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
+      commands::CommandRequestImpl* cmd_request =
+          dynamic_cast<commands::CommandRequestImpl*>(request_ptr.get());
+      if (cmd_request != NULL) {
+        uint32_t corr_id = cmd_request->correlation_id();
+        request_controller_->duplicate_message_count_lock_.Acquire();
+        auto dup_it =
+            request_controller_->duplicate_message_count_.find(corr_id);
+        if (request_controller_->duplicate_message_count_.end() == dup_it) {
+          request_controller_->duplicate_message_count_[corr_id] = 0;
+        }
+        request_controller_->duplicate_message_count_[corr_id]++;
+        request_controller_->duplicate_message_count_lock_.Release();
+        cmd_request->SendResponse(
+            false, mobile_apis::Result::INVALID_ID, "Duplicate correlation_id");
+      }
+      continue;
+    }
     LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
 
     if (0 != timeout_in_mseconds) {

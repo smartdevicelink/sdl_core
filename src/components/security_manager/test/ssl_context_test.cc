@@ -228,7 +228,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
                            GetParam().server_ciphers_list);
 
     const bool crypto_manager_initialization = crypto_manager->Init();
-    EXPECT_TRUE(crypto_manager_initialization);
+    ASSERT_TRUE(crypto_manager_initialization);
 
     mock_client_manager_settings_ = utils::MakeShared<
         NiceMock<security_manager_test::MockCryptoManagerSettings> >();
@@ -241,7 +241,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
                            GetParam().client_ciphers_list);
 
     const bool client_manager_initialization = client_manager->Init();
-    EXPECT_TRUE(client_manager_initialization);
+    ASSERT_TRUE(client_manager_initialization);
 
     server_ctx = crypto_manager->CreateSSLContext();
     client_ctx = client_manager->CreateSSLContext();
@@ -261,9 +261,12 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
   }
 
   void TearDown() OVERRIDE {
-    crypto_manager->ReleaseSSLContext(server_ctx);
-    client_manager->ReleaseSSLContext(client_ctx);
-
+    if (crypto_manager) {
+      crypto_manager->ReleaseSSLContext(server_ctx);
+    }
+    if (client_manager) {
+      client_manager->ReleaseSSLContext(client_ctx);
+    }
     delete crypto_manager;
     delete client_manager;
   }
@@ -303,10 +306,10 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
       mock_crypto_manager_settings_;
   utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_client_manager_settings_;
-  security_manager::CryptoManager* crypto_manager;
-  security_manager::CryptoManager* client_manager;
-  security_manager::SSLContext* server_ctx;
-  security_manager::SSLContext* client_ctx;
+  security_manager::CryptoManager* crypto_manager = NULL;
+  security_manager::CryptoManager* client_manager = NULL;
+  security_manager::SSLContext* server_ctx = NULL;
+  security_manager::SSLContext* client_ctx = NULL;
   std::string certificate_data_base64_;
 };
 
@@ -323,11 +326,15 @@ INSTANTIATE_TEST_CASE_P(
                       ProtocolAndCipher(security_manager::TLSv1_1,
                                         security_manager::TLSv1_1,
                                         kFordCipher,
-                                        kFordCipher),
+                                        kFordCipher)
+#ifndef OPENSSL_NO_SSL3
+                          ,
                       ProtocolAndCipher(security_manager::SSLv3,
                                         security_manager::SSLv3,
                                         kFordCipher,
-                                        kFordCipher)));
+                                        kFordCipher)
+#endif
+                          ));
 
 INSTANTIATE_TEST_CASE_P(
     IncorrectProtocolAndCiphers,
@@ -336,24 +343,26 @@ INSTANTIATE_TEST_CASE_P(
                                         security_manager::TLSv1_1,
                                         kFordCipher,
                                         kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::TLSv1,
+                                        kFordCipher,
+                                        kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::TLSv1,
+                                        kFordCipher,
+                                        kFordCipher),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::TLSv1_1,
+                                        kFordCipher,
+                                        kFordCipher)
+#ifndef OPENSSL_NO_SSL3
+                          ,
                       ProtocolAndCipher(security_manager::TLSv1,
                                         security_manager::SSLv3,
                                         kFordCipher,
                                         kFordCipher),
                       ProtocolAndCipher(security_manager::TLSv1_1,
-                                        security_manager::TLSv1,
-                                        kFordCipher,
-                                        kFordCipher),
-                      ProtocolAndCipher(security_manager::TLSv1_1,
                                         security_manager::SSLv3,
-                                        kFordCipher,
-                                        kFordCipher),
-                      ProtocolAndCipher(security_manager::TLSv1_2,
-                                        security_manager::TLSv1,
-                                        kFordCipher,
-                                        kFordCipher),
-                      ProtocolAndCipher(security_manager::TLSv1_2,
-                                        security_manager::TLSv1_1,
                                         kFordCipher,
                                         kFordCipher),
                       ProtocolAndCipher(security_manager::TLSv1_2,
@@ -367,7 +376,9 @@ INSTANTIATE_TEST_CASE_P(
                       ProtocolAndCipher(security_manager::SSLv3,
                                         security_manager::TLSv1_1,
                                         kFordCipher,
-                                        kFordCipher)));
+                                        kFordCipher)
+#endif
+                          ));
 
 TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
@@ -521,11 +532,15 @@ INSTANTIATE_TEST_CASE_P(
                       ProtocolAndCipher(security_manager::TLSv1_1,
                                         security_manager::TLSv1_2,
                                         kFordCipher,
-                                        kFordCipher),
+                                        kFordCipher)
+#ifndef OPENSSL_NO_SSL3
+                          ,
                       ProtocolAndCipher(security_manager::SSLv3,
                                         security_manager::TLSv1_2,
                                         kFordCipher,
-                                        kFordCipher)));
+                                        kFordCipher)
+#endif
+                          ));
 
 TEST_P(SSLTestForTLS1_2, HandshakeFailed) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,

@@ -156,7 +156,7 @@ endif()
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
-
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build_config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -214,7 +214,7 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin

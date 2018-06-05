@@ -313,7 +313,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     utils::SharedPtr<policy_table::Table> policy_table_snapshot =
         cache_->GenerateSnapshot();
     if (!policy_table_snapshot) {
-      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed to create snapshot of policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
@@ -327,7 +330,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
     // Replace current data with updated
     if (!cache_->ApplyUpdate(*pt_update)) {
-      LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
+      LOG4CXX_WARN(
+          logger_,
+          "Unsuccessful save of updated policy table, trying another exchange");
+      ForcePTExchange();
       return false;
     }
 
@@ -588,8 +594,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     policy_table::FunctionalGroupings functional_groupings;
     cache_->GetFunctionalGroupings(functional_groupings);
 
-    policy_table::Strings app_groups =
-        GetGroupsNames(app_group_permissions);
+    policy_table::Strings app_groups = GetGroupsNames(app_group_permissions);
 
     // Undefined groups (without user consent) disallowed by default, since
     // OnPermissionsChange notification has no "undefined" section
@@ -621,8 +626,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   }
 
   const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
-  LOG4CXX_DEBUG(logger_, "Is known rpc " <<
-                (known_rpc ? "true" : "false"));
+  LOG4CXX_DEBUG(logger_, "Is known rpc " << (known_rpc ? "true" : "false"));
   if (!known_rpc) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
@@ -644,7 +648,9 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
              rpc_permissions[rpc].hmi_permissions[kUserDisallowedKey].find(
                  hmi_level)) {
     // RPC found in allowed == allowed by backend, but disallowed by user
-    LOG4CXX_DEBUG(logger_, "RPC found in allowed == allowed by backend, but disallowed by user");
+    LOG4CXX_DEBUG(
+        logger_,
+        "RPC found in allowed == allowed by backend, but disallowed by user");
     result.hmi_level_permitted = kRpcUserDisallowed;
   } else {
     LOG4CXX_DEBUG(logger_,
@@ -983,7 +989,6 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
-
 
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
@@ -1569,8 +1574,7 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  send_on_update_sent_out_ =
-      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
+  send_on_update_sent_out_ = !update_status_manager_.IsUpdatePending();
 
   if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);

@@ -135,6 +135,9 @@
         <element name="READ_ONLY">
             <description>The value being set is read only</description>
         </element>
+        <element name="CORRUPTED_DATA">
+            <description>The data sent failed to pass CRC check in receiver end</description>
+        </element>
     </enum>
     
     <enum name="ButtonPressMode">
@@ -513,6 +516,8 @@
         <element name="VEHICLEDATA_ENGINETORQUE" />
         <element name="VEHICLEDATA_ACCPEDAL" />
         <element name="VEHICLEDATA_STEERINGWHEEL" />
+        <element name="VEHICLEDATA_FUELRANGE" />
+        <element name="VEHICLEDATA_ENGINEOILLIFE" />
     </enum>
     
     <enum name="ButtonName">
@@ -781,7 +786,11 @@
         </element>
         
         <element name="graphic">
-            <description>The image field for Show</description>
+            <description>The primary image field for Show</description>
+        </element>
+        
+        <element name="secondaryGraphic">
+            <description>The secondary image field for Show</description>
         </element>
         
         <element name="showConstantTBTIcon">
@@ -898,6 +907,9 @@
         </param>
         <param name="imageType" type="ImageType" mandatory="true">
             <description>Describes, whether it is a static or dynamic image.</description>
+        </param>
+        <param name="isTemplate" type="Boolean" mandatory="false">
+            <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
         </param>
     </struct>
     
@@ -1082,10 +1094,73 @@
         <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
         </element>
     </enum>
+
+    <enum name="TPMS">
+        <element name="UNKNOWN">
+            <description>If set the status of the tire is not known.</description>
+        </element>
+        <element name="SYSTEM_FAULT">
+            <description>TPMS does not function.</description>
+        </element>
+        <element name="SENSOR_FAULT">
+            <description>The sensor of the tire does not function.</description>
+        </element>
+        <element name="LOW">
+            <description>TPMS is reporting a low tire pressure for the tire.</description>
+        </element>
+        <element name="SYSTEM_ACTIVE">
+            <description>TPMS is active and the tire pressure is monitored.</description>
+        </element>
+        <element name="TRAIN">
+            <description>TPMS is reporting that the tire must be trained.</description>
+        </element>
+        <element name="TRAINING_COMPLETE">
+            <description>TPMS reports the training for the tire is completed.</description>
+        </element>
+        <element name="NOT_TRAINED">
+            <description>TPMS reports the tire is not trained.</description>
+        </element>
+    </enum>
     
+    <enum name="FuelType">
+        <element name="GASOLINE" />
+        <element name="DIESEL" />
+        <element name="CNG">
+            <description>
+                For vehicles using compressed natural gas.
+            </description>
+        </element>
+        <element name="LPG">
+            <description>
+                For vehicles using liquefied petroleum gas.
+            </description>
+        </element>
+        <element name="HYDROGEN">
+            <description>For FCEV (fuel cell electric vehicle).</description>
+        </element>
+        <element name="BATTERY">
+            <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+        </element>
+    </enum>
+
+    <struct name="FuelRange">
+        <param name="type" type="FuelType" mandatory="false"/>
+        <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+            <description>
+                The estimate range in KM the vehicle can travel based on fuel level and consumption.
+            </description>
+        </param>
+    </struct>
+
     <struct name="SingleTireStatus">
         <param name="status" type="ComponentVolumeStatus" mandatory="true">
             <description>See ComponentVolumeStatus.</description>
+        </param>
+        <param name="tpms" type="TPMS" mandatory="false">
+            <description>The status of TPMS according to the particular tire.</description>
+        </param>
+        <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+            <description>The pressure value of the particular tire in kilo pascal.</description>
         </param>
     </struct>
     
@@ -2887,7 +2962,27 @@
             <description>The position of the haptic rectangle to be highlighted. The center of this rectangle will be "touched" when a press occurs.</description>
         </param>
     </struct>
-    
+
+    <struct name="RGBColor">
+        <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+        <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+    </struct>
+
+    <struct name="TemplateColorScheme">
+        <description>
+            A color scheme for all display layout templates.
+        </description>
+        <param name="primaryColor" type="RGBColor" mandatory="false">
+            <description>The primary "accent" color</description>
+        </param>
+        <param name="secondaryColor" type="RGBColor" mandatory="false">
+            <description>The secondary "accent" color</description>
+        </param>
+        <param name="backgroundColor" type="RGBColor" mandatory="false">
+            <description>The color of the background</description>
+        </param>
+    </struct>
     <!-- Requests/Responses -->
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -2988,6 +3083,10 @@
                 See AppInfo.
             </description>
         </param>
+
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="response">
@@ -3089,6 +3188,10 @@
         
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
+        </param>
+        <param name="iconResumed" type="Boolean" mandatory="true">
+            <description>Existence of apps icon at system. If true, apps icon
+            was resumed at system. If false, apps icon is not resumed at system</description>
         </param>
     </function>
     
@@ -4056,6 +4159,9 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
@@ -4094,6 +4200,9 @@
         </param>
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4159,6 +4268,9 @@
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="VehicleDataResult" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
         </param>
@@ -4197,6 +4309,9 @@
         </param>
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4240,6 +4355,9 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
         </param>
@@ -4278,6 +4396,9 @@
         </param>
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4341,6 +4462,9 @@
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="VehicleDataResult" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
@@ -4379,6 +4503,9 @@
         </param>
         <param name="steeringWheelAngle" type="VehicleDataResult" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4422,6 +4549,9 @@
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="Boolean" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
@@ -4463,6 +4593,9 @@
         </param>
         <param name="steeringWheelAngle" type="Boolean" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Boolean" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -4527,6 +4660,9 @@
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
@@ -4568,6 +4704,9 @@
         </param>
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Data Items -->
@@ -5073,6 +5212,9 @@
                 If offset is set to 0, then length is the total length of the file to be downloaded
             </description>
         </param>
+        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits . </description>
+        </param>
     </function>
     
     <function name="PutFile" functionID="PutFileID" messagetype="response">
@@ -5092,6 +5234,7 @@
             <element name="GENERIC_ERROR"/>
             <element name="REJECTED"/>
             <element name="UNSUPPORTED_REQUEST"/>
+            <element name="CORRUPTED_DATA"/>
         </param>
         
         <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
@@ -5245,6 +5388,9 @@
             </description>
         </param>
         
+        <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false"/>
+
+        <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false"/>
     </function>
     
     <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
@@ -5745,6 +5891,9 @@
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
+        <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+        </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
         </param>
@@ -5786,6 +5935,9 @@
         </param>
         <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
             <description>Current angle of the steering wheel (in deg)</description>
+        </param>
+        <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+            <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
         
         <!-- Ford Specific Vehicle Data -->

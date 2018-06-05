@@ -142,17 +142,29 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* rc_capability = "remoteControlCapability";
+const char* day_color_scheme = "dayColorScheme";
+const char* night_color_scheme = "nightColorScheme";
+const char* primary_color = "primaryColor";
+const char* secondary_color = "secondaryColor";
+const char* background_color = "backgroundColor";
+const char* red = "red";
+const char* green = "green";
+const char* blue = "blue";
+const char* display_layout = "displayLayout";
+const char* icon_resumed = "iconResumed";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
 const char* file_type = "fileType";
 const char* file_size = "fileSize";
+const char* crc32_check_sum = "crc";
 const char* request_type = "requestType";
 const char* persistent_file = "persistentFile";
 const char* file_data = "fileData";
 const char* space_available = "spaceAvailable";
 const char* image_type = "imageType";
+const char* is_template = "isTemplate";
 const char* image = "image";
 const char* type = "type";
 const char* system_file = "systemFile";
@@ -202,6 +214,7 @@ const char* rpm = "rpm";
 const char* fuel_level = "fuelLevel";
 const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
+const char* fuel_range = "fuelRange";
 const char* external_temp = "externalTemperature";
 const char* vin = "vin";
 const char* prndl = "prndl";
@@ -238,6 +251,7 @@ const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
+const char* engine_oil_life = "engineOilLife";
 
 // resuming
 const char* application_commands = "applicationCommands";

@@ -175,6 +175,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
     std::make_pair(strings::instant_fuel_consumption,
                    mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+    std::make_pair(strings::fuel_range,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
     std::make_pair(strings::external_temp,
                    mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
     std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
@@ -217,7 +219,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
     std::make_pair(strings::steering_wheel_angle,
                    mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-};
+    std::make_pair(strings::engine_oil_life,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -1691,6 +1694,9 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* app_types = app->app_types();
   const smart_objects::SmartObject* ngn_media_screen_name =
       app->ngn_media_screen_name();
+  const smart_objects::SmartObject* day_color_scheme = app->day_color_scheme();
+  const smart_objects::SmartObject* night_color_scheme =
+      app->night_color_scheme();
   std::string device_name;
   std::string mac_address;
   std::string transport_type;
@@ -1726,6 +1732,14 @@ bool MessageHelper::CreateHMIApplicationStruct(
   }
   if (app_types) {
     message[strings::app_type] = *app_types;
+  }
+
+  if (day_color_scheme) {
+    message[strings::day_color_scheme] = *day_color_scheme;
+  }
+
+  if (night_color_scheme) {
+    message[strings::night_color_scheme] = *night_color_scheme;
   }
 
   message[strings::device_info] =

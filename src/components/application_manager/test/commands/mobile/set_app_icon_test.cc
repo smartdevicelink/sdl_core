@@ -40,6 +40,8 @@
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "protocol_handler/mock_protocol_handler.h"
+#include "protocol_handler/mock_protocol_handler_settings.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
@@ -55,6 +57,9 @@ using am::commands::SetAppIconRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
+using am::MockHmiInterfaces;
+using test::components::protocol_handler_test::MockProtocolHandler;
+using test::components::protocol_handler_test::MockProtocolHandlerSettings;
 using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Return;
@@ -88,6 +93,10 @@ class SetAppIconRequestTest
 
     return msg;
   }
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  protocol_handler_test::MockProtocolHandler mock_protocol_handler_;
+  protocol_handler_test::MockProtocolHandlerSettings
+      mock_protocol_handler_settings_;
 };
 
 TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
@@ -107,6 +116,20 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
+  ON_CALL(app_mngr_, hmi_interfaces())
+      .WillByDefault(ReturnRef(hmi_interfaces_));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  ON_CALL(app_mngr_, protocol_handler())
+      .WillByDefault(ReturnRef(mock_protocol_handler_));
+  ON_CALL(mock_protocol_handler_, get_settings())
+      .WillByDefault(ReturnRef(mock_protocol_handler_settings_));
+
+  ON_CALL(mock_protocol_handler_settings_, max_supported_protocol_version())
+      .WillByDefault(
+          Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
   ON_CALL(*mock_app, set_app_icon_path(_)).WillByDefault(Return(true));

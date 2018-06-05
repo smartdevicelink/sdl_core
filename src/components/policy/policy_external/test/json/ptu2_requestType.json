@@ -16,12 +16,12 @@
       "endpoints": {
         "0x07": {
           "default": [
-            "http://policies.telematics.ford.com/api/policies"
+            "http://x.x.x.x:3000/api/1/policies"
           ]
         },
         "0x04": {
           "default": [
-            "http://ivsu.software.ford.com/api/getsoftwareupdates"
+            "http://x.x.x.x:3000/api/1/softwareUpdate"
           ]
         }
       },
@@ -484,12 +484,14 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "vin",
@@ -505,12 +507,14 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "vin",
@@ -526,12 +530,14 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "wiperStatus"
@@ -546,12 +552,14 @@
             "parameters": [
               "bodyInformation",
               "deviceStatus",
+              "engineOilLife",
               "engineTorque",
               "externalTemperature",
               "fuelLevel",
               "fuelLevel_State",
               "headLampStatus",
               "instantFuelConsumption",
+              "fuelRange",
               "odometer",
               "tirePressure",
               "wiperStatus"
@@ -2594,7 +2602,7 @@
           "PROPRIETARY"
         ]
       },
-      "584421907": {
+      "123454321": {
         "keep_context" : false,
                          "steal_focus" : false,
                                          "priority"

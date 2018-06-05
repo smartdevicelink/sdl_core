@@ -83,7 +83,7 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://policies.telematics.ford.com/api/policies"]
+                    "default": ["http://x.x.x.x:3000/api/1/policies"]
                 }
             },
             "notifications_per_minute_by_priority": {
@@ -349,12 +349,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -366,12 +368,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -383,12 +387,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -399,12 +405,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]

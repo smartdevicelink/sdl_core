@@ -178,17 +178,29 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* day_color_scheme;
+extern const char* night_color_scheme;
+extern const char* primary_color;
+extern const char* secondary_color;
+extern const char* background_color;
+extern const char* red;
+extern const char* green;
+extern const char* blue;
+extern const char* display_layout;
+extern const char* icon_resumed;
 
 // PutFile
 extern const char* sync_file_name;
 extern const char* file_name;
 extern const char* file_type;
 extern const char* file_size;
+extern const char* crc32_check_sum;
 extern const char* request_type;
 extern const char* persistent_file;
 extern const char* file_data;
 extern const char* space_available;
 extern const char* image_type;
+extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
@@ -238,6 +250,7 @@ extern const char* rpm;
 extern const char* fuel_level;
 extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
+extern const char* fuel_range;
 extern const char* external_temp;
 extern const char* vin;
 extern const char* prndl;
@@ -274,6 +287,7 @@ extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
+extern const char* engine_oil_life;
 
 // resuming
 extern const char* application_commands;

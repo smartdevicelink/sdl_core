@@ -32,12 +32,12 @@ deployment concepts, to accomplish their respective tasks without reliance on th
 \anchor security_manager_rationale
 ## 1.1 Rationale
 Security Manager implements SDL Architectural Solution according to:
-- https://smartdevicelink.com/en/guides/core/software-architecture-document/components-view/#security-manager
+- https://smartdevicelink.com/en/docs/sdl-core/master/software-architecture-document/components-view/#security-manager
 
 \anchor security_manager_scope
 ## 1.2 Scope
 Security Manager component extracted as a separate module for
-Ford channel data protection.
+SDL channel data protection.
 This components is used to:
 - Provide security communications
 - Protect income and outcome business layer data from interception
@@ -100,30 +100,30 @@ protocol layer response on handshake procedure finish.
 
 \anchor security_manager_class_structure
 ### 2.2 Class Structure
-The following UML class digram shows the component structure.
-![Security Manager class diagram](sm_class_digram.png)
-For more information about class digram follow:
+The following UML class diagram shows the component structure.
+![Security Manager class diagram](sm_class_diagram.png)
+For more information about class diagram follow:
 - http://www.uml-diagrams.org/class-diagrams-overview.htqml
 - https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
 
 \anchor security_manager_sequence_diagram
 ### 2.3 Sequence diagram
-The following UML sequence digram shows the component dynamic behavior.
-For more information about sequence digram follow:
+The following UML sequence diagram shows the component dynamic behavior.
+For more information about sequence diagram follow:
 - http://www.uml-diagrams.org/sequence-diagrams.html
 - https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
 
 Security first initialization on session:
-![Start encryption](sm_sequence_digram_init.png)
+![Start encryption](sm_sequence_diagram_init.png)
 
 Security initialization for service on session with already initialized security:
-![Initialization](sm_sequence_digram_verify.png)
+![Initialization](sm_sequence_diagram_verify.png)
 
 Decryption procedure:
-![Decryption](sm_sequence_digram_decryption.png)
+![Decryption](sm_sequence_diagram_decryption.png)
 
 Encryption procedure:
-![Encryption](sm_sequence_digram_encryption.png)
+![Encryption](sm_sequence_diagram_encryption.png)
 
 \anchor security_manager_state_chart
 ### 2.4 State chart diagram
@@ -215,7 +215,7 @@ data using OpenSSl API.
 \page security_manager_references_and_history 5 References and history
 \anchor security_manager_references
 ### 5.1 References
-- [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+- [Software Architecture Document](https://smartdevicelink.com/en/docs/sdl-core/master/software-architecture-document/table-of-contents/)
 - [OpenSSL API](https://www.openssl.org/docs/manmaster/ssl/)
 - [TLS 1.1 RFC](https://tools.ietf.org/html/rfc4346)
 - [TLS 1.2 RFC](https://tools.ietf.org/html/rfc5246)
@@ -236,6 +236,6 @@ Document approve history
 | | | | |
 
 For more precise document change history follow github history -
-- https://github.com/smartdevicelink/sdl_core/commits/master/src/components/security_manager/docs/security_manager_software_detailed_design.dox
-- https://github.com/smartdevicelink/sdl_core/commits/develop/src/components/security_manager/docs/security_manager_software_detailed_design.dox
+- https://github.com/smartdevicelink/sdl_core/commits/master/src/components/security_manager/docs/SDL.SDD.Security.dox
+- https://github.com/smartdevicelink/sdl_core/commits/develop/src/components/security_manager/docs/SDL.SDD.Security.dox
 */

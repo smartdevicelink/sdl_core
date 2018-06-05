@@ -1,7 +1,7 @@
 {
    "policy_table" : {
       "app_policies" : {
-         "1766825573" : {
+         "1010101010" : {
             "AppHMIType" : [ "MEDIA" ],
             "certificate" : "akdjfhaliuygrglurng",
             "default_hmi" : "BACKGROUND",
@@ -1587,12 +1587,14 @@
                "GetVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1602,12 +1604,14 @@
                "OnVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1617,12 +1621,14 @@
                "SubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1631,12 +1637,14 @@
                "UnsubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1698,7 +1706,7 @@
          },
          "endpoints" : {
             "0x07" : {
-               "default" : [ "http://policies.telematics.ford.com/api/policies" ]
+               "default" : [ "http://x.x.x.x:3000/api/1/policies" ]
             }
          },
          "exchange_after_x_days" : 30,

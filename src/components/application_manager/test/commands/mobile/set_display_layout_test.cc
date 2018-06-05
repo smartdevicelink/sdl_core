@@ -69,6 +69,7 @@ const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
 const uint32_t kCorrelationKey = 2u;
+const std::string kLayout = "media";
 }  // namespace
 
 MATCHER_P(CheckMshCorrId, corr_id, "") {
@@ -189,6 +190,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
+  EXPECT_CALL(*mock_app, display_layout()).WillOnce(ReturnRef(kLayout));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())

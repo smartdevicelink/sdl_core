@@ -13,10 +13,10 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://localhost:3000/api/1/policies/proprietary"]
+                    "default": ["http://x.x.x.x:3000/api/1/policies/proprietary"]
                 },
                 "0x04": {
-                    "default": ["http://localhost:3000/api/1/softwareUpdate"]
+                    "default": ["http://x.x.x.x:3000/api/1/softwareUpdate"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]
@@ -397,12 +397,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -414,12 +416,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "vin",
@@ -431,12 +435,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
@@ -447,12 +453,14 @@
                         "LIMITED"],
                         "parameters": ["bodyInformation",
                         "deviceStatus",
+                        "engineOilLife",
                         "engineTorque",
                         "externalTemperature",
                         "fuelLevel",
                         "fuelLevel_State",
                         "headLampStatus",
                         "instantFuelConsumption",
+                        "fuelRange",
                         "odometer",
                         "tirePressure",
                         "wiperStatus"]
