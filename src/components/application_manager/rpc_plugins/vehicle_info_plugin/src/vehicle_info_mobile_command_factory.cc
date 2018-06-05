@@ -49,7 +49,7 @@
 #include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
+CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
@@ -79,13 +79,11 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
       static_cast<mobile_apis::messageType::eType>(
         (*message)[strings::params][strings::message_type].asInt());
 
-  auto message_type_str = "";
+  auto message_type_str = "request";
   if (mobile_apis::messageType::response == message_type) {
     message_type_str = "response";
   } else if (mobile_apis::messageType::notification == message_type) {
     message_type_str = "notification";
-  } else {
-    message_type_str = "request";
   }
 
   LOG4CXX_DEBUG(
