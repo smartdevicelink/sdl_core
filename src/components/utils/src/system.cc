@@ -42,12 +42,6 @@ namespace utils {
 
 CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
 
-struct GetCString {
-  char* operator()(const std::string& string) {
-    return const_cast<char*>(string.c_str());
-  }
-};
-
 System::System(const std::string& command) : command_(command) {
   argv_.push_back(command);
 }
