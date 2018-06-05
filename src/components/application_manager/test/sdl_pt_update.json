@@ -1716,6 +1716,7 @@
             "COMMUNICATION" : 6,
             "EMERGENCY" : 60,
             "NAVIGATION" : 15,
+            "PROJECTION": 15,
             "NONE" : 0,
             "NORMAL" : 4,
             "VOICECOMM" : 10
