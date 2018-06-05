@@ -35,10 +35,10 @@
 #include <stdint.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <iostream>
 #include "utils/atomic.h"
 #include "utils/macro.h"
 #include "utils/memory_barrier.h"
-#include <iostream>
 
 using boost::system::error_code;
 
@@ -76,7 +76,8 @@ class SpinMutex {
  */
 class BaseLock {
  public:
-  BaseLock() : lock_taken_(0) {}
+  BaseLock() {}
+  virtual ~BaseLock() {}
   // Ackquire the lock. Must be called only once on a thread.
   // Please consider using AutoLock to capture it.
   virtual void Acquire() = 0;
@@ -91,18 +92,11 @@ class BaseLock {
   virtual bool Try() = 0;
 
  protected:
-  /**
-   * @brief Basic debugging aid, a flag that signals wether this lock is
-   * currently taken
-   * Allows detection of abandoned and recursively captured mutexes
-   */
-  uint32_t lock_taken_;
-
   // Ensures safety in locking
   virtual void AssertTakenAndMarkFree() = 0;
   virtual void AssertFreeAndMarkTaken() = 0;
 
-friend class ConditionalVariable;
+  friend class ConditionalVariable;
 };
 
 /*
@@ -120,6 +114,12 @@ class Lock : public BaseLock {
   virtual bool Try();
 
  private:
+  /**
+   * @brief Basic debugging aid, a flag that signals wether this lock is
+   * currently taken
+   * Allows detection of abandoned and recursively captured mutexes
+   */
+  uint32_t lock_taken_;
   virtual void AssertTakenAndMarkFree();
   virtual void AssertFreeAndMarkTaken();
   boost::mutex mutex_;
@@ -142,6 +142,12 @@ class RecursiveLock : public BaseLock {
   virtual bool Try();
 
  private:
+  /**
+   * @brief Basic debugging aid, a flag that signals wether this lock is
+   * currently taken
+   * Allows detection of abandoned and recursively captured mutexes
+   */
+  uint32_t lock_taken_;
   virtual void AssertTakenAndMarkFree();
   virtual void AssertFreeAndMarkTaken();
   boost::recursive_mutex mutex_;
@@ -153,7 +159,7 @@ class RecursiveLock : public BaseLock {
 class AutoLock {
  public:
   explicit AutoLock(BaseLock& lock) : lock_(lock) {
-    std::cerr << "lock is at " << &lock << std::endl;
+    // std::cerr << "lock is at " << &lock << std::endl;
     lock_.Acquire();
   }
   ~AutoLock() {

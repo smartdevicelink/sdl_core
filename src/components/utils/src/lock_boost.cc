@@ -42,26 +42,33 @@ namespace sync_primitives {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-Lock::Lock() {}
+Lock::Lock() : lock_taken_(0) {}
 
 Lock::~Lock() {
+  // std::cerr << "destructing lock " << &mutex_ << " with lock count "
+  //           << lock_taken_ << '\n';
   if (lock_taken_ > 0) {
-    LOG4CXX_ERROR(logger_, "Destroying non-released regular mutex " << &mutex_);
+    LOG4CXX_FATAL(logger_, "Destroying non-released regular mutex " << &mutex_);
   }
 }
 
 void Lock::Acquire() {
-  try {
-    mutex_.lock();
-  } catch (std::exception err) {
-    LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": " << err.what());
-    NOTREACHED();
-  }
+  // try {
+  mutex_.lock();
+  // std::cerr << "acquiring lock " << &mutex_ << " with lock count "
+  //           << lock_taken_ << '\n';
+  // } catch (std::exception err) {
+  //   LOG4CXX_FATAL(logger_,
+  //                 "Failed to acquire mutex " << &mutex_ << ": " <<
+  //                 err.what());
+  //   NOTREACHED();
+  // }
   AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
+  // std::cerr << "releasing lock " << &mutex_ << " with lock count "
+  //           << lock_taken_ << '\n';
   AssertTakenAndMarkFree();
 
   mutex_.unlock();
@@ -69,15 +76,17 @@ void Lock::Release() {
 
 bool Lock::Try() {
   bool status = mutex_.try_lock();
+  // std::cerr << "trying lock " << &mutex_ << " with lock count " << lock_taken_
+  //           << " status was " << status << '\n';
   if (status) {
-    lock_taken_++;
+    AssertFreeAndMarkTaken();
   }
   return status;
 }
 
 void Lock::AssertFreeAndMarkTaken() {
   if (lock_taken_ != 0) {
-    LOG4CXX_ERROR(logger_, "Locking already taken not recursive mutex");
+    LOG4CXX_FATAL(logger_, "Locking already taken not recursive mutex");
     NOTREACHED();
   }
 
@@ -86,7 +95,7 @@ void Lock::AssertFreeAndMarkTaken() {
 
 void Lock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOG4CXX_ERROR(logger_, "Unlocking a mutex that is not taken");
+    LOG4CXX_FATAL(logger_, "Unlocking a mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;
@@ -94,36 +103,45 @@ void Lock::AssertTakenAndMarkFree() {
 
 // Recursive lock looks the same on the surface, some code duplication is
 // necessary since they don't have a shared parent superclass
-RecursiveLock::RecursiveLock() {}
+RecursiveLock::RecursiveLock() : lock_taken_(0) {}
 
 RecursiveLock::~RecursiveLock() {
+  // std::cerr << "destructing recursive lock " << &mutex_ << " with lock count "
+  //           << lock_taken_ << '\n';
   if (lock_taken_ > 0) {
-    LOG4CXX_ERROR(logger_,
+    LOG4CXX_FATAL(logger_,
                   "Destroying non-released recursive mutex " << &mutex_);
   }
 }
 
 void RecursiveLock::Acquire() {
-  try {
-    mutex_.lock();
-  } catch (std::exception err) {
-    LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": " << err.what());
-    NOTREACHED();
-  }
+  // try {
+  mutex_.lock();
+  // std::cerr << "acquiring recursive lock " << &mutex_ << " with lock count "
+  //   << lock_taken_ << '\n';
+  // } catch (std::exception err) {
+  //   LOG4CXX_FATAL(logger_,
+  //                 "Failed to acquire mutex " << &mutex_ << ": " <<
+  //                 err.what());
+  //   NOTREACHED();
+  // }
 
   AssertFreeAndMarkTaken();
-}  // namespace sync_primitives_boost
+}
 
 void RecursiveLock::Release() {
+  std::cerr << "releasing recursive lock " << &mutex_ << " with lock count "
+            << lock_taken_ << '\n';
   AssertTakenAndMarkFree();
   mutex_.unlock();
 }
 
 bool RecursiveLock::Try() {
   bool status = mutex_.try_lock();
+  // std::cerr << "trying recursive lock " << &mutex_ << " with lock count "
+    //           << lock_taken_ << " status was " << status << '\n';
   if (status) {
-    lock_taken_++;
+    AssertFreeAndMarkTaken();
   }
   return status;
 }
@@ -134,7 +152,7 @@ void RecursiveLock::AssertFreeAndMarkTaken() {
 
 void RecursiveLock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOG4CXX_ERROR(logger_, "Unlocking a recursive mutex that is not taken");
+    LOG4CXX_FATAL(logger_, "Unlocking a recursive mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;

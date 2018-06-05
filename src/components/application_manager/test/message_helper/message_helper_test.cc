@@ -33,18 +33,17 @@
 #include <string>
 #include <vector>
 
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
 #include "gmock/gmock.h"
+#include "policy/mock_policy_settings.h"
+#include "utils/custom_string.h"
 #include "utils/macro.h"
 #include "utils/make_shared.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/mock_application.h"
-#include "utils/custom_string.h"
-#include "policy/mock_policy_settings.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
@@ -64,12 +63,12 @@ typedef utils::SharedPtr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef utils::SharedPtr<application_manager::Application> ApplicationSharedPtr;
 
-using testing::AtLeast;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRef;
-using testing::Return;
-using testing::SaveArg;
 using testing::_;
+using testing::AtLeast;
+using testing::Return;
+using testing::ReturnRef;
+using testing::ReturnRefOfCopy;
+using testing::SaveArg;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -234,9 +233,13 @@ TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Empty) {
+  sync_primitives::RecursiveLock access_lock;
+
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   ::application_manager::CommandsMap vis;
-  DataAccessor<application_manager::CommandsMap> data_accessor(vis, sync_primitives::RecursiveLock());
+
+  DataAccessor<application_manager::CommandsMap> data_accessor(vis,
+                                                               access_lock);
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -249,9 +252,11 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
+  sync_primitives::RecursiveLock access_lock;
+
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   CommandsMap vis;
-  DataAccessor<CommandsMap> data_accessor(vis, sync_primitives::RecursiveLock());
+  DataAccessor<CommandsMap> data_accessor(vis, access_lock);
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -290,9 +295,12 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
+  sync_primitives::RecursiveLock access_lock;
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, sync_primitives::RecursiveLock());
+
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis,
+                                                                   access_lock);
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -305,9 +313,12 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
+  sync_primitives::RecursiveLock access_lock;
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, sync_primitives::RecursiveLock());
+
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis,
+                                                                   access_lock);
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -351,9 +362,12 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
+  sync_primitives::RecursiveLock access_lock;
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, sync_primitives::RecursiveLock());
+
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis,
+                                                                 access_lock);
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -390,9 +404,12 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
+  sync_primitives::RecursiveLock access_lock;
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, sync_primitives::RecursiveLock());
+
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis,
+                                                                 access_lock);
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 
@@ -708,12 +725,14 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
 
 TEST_F(MessageHelperTest,
        GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
+  sync_primitives::RecursiveLock access_lock;
   // Creating sharedPtr to MockApplication
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating data acessor
   application_manager::VehicleInfoSubscriptions vis;
+
   DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
-      vis, sync_primitives::RecursiveLock());
+      vis, access_lock);
   // Calls for ApplicationManager
   EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
   EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
@@ -937,7 +956,8 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   size_t function_id = 1;
   //
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
+              SubscribeToSoftButtons(function_id, SoftButtonID()))
+      .Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }

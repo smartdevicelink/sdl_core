@@ -52,6 +52,8 @@ class DataAccessor {
   }
 
   ~DataAccessor() {
+    // std::cerr << "destructing accessor, counter is " << *counter_ << "for lock "
+    //           << &lock_ << "\n";
     if (0 == *counter_) {
       lock_.Release();
     } else {
