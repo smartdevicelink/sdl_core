@@ -29,23 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifdef __QNX__
-#include <process.h>
-#else  // __QNX__
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#endif  // __QNX__
-
-#include <algorithm>
-#include <functional>
-#include <cstring>
-#include <iostream>
+#include <boost/process/io.hpp>
+#include <boost/process/spawn.hpp>
+#include <boost/process/system.hpp>
 
 #include "utils/logger.h"
 #include "utils/system.h"
+
+namespace bp = boost::process;  // easier access
 
 namespace utils {
 
@@ -83,94 +74,50 @@ bool System::Execute() {
   return Execute(false);
 }
 
-#ifdef __QNX__
-
 bool System::Execute(bool wait) {
-  size_t size = argv_.size();
-  char** argv = new char* [size + 1];
-  std::transform(argv_.begin(), argv_.end(), argv, GetCString());
-  argv[size] = NULL;
+  // Empty command does nothing
+  if (command_.empty()) {
+    if (wait) {
+      // we couldn't wait for the command because it didn't exists
+      return false;
+    } else {
+      // we don't care if it ran, so return true
+      // This is to maintain compatibility with pre-boost API
+      return true;
+    }
+  }
 
-  int mode = wait ? P_WAIT : P_NOWAIT;
-  int ret = spawnvp(mode, command_.c_str(), argv);
-  delete[] argv;
+  // for some reason boost.process uses STL error codes
+  std::error_code ec;
+  // launch new process with no I/O, can optionally wait
+  bp::child c(command_,
+              argv_,
+              bp::std_out > bp::null,
+              bp::std_in<bp::null, bp::std_err> bp::null,
+              ec);
 
-  if (ret == -1) {
+  // Catch errors
+  if (ec) {
     LOG4CXX_ERROR(logger_,
-                  "Can't execute command: " << command_ << " Errno is: "
-                                            << std::strerror(errno));
+                  "Can't execute command: " << command_ << " Error message is: "
+                                            << ec.message());
     return false;
   }
 
   if (wait) {
-    return WEXITSTATUS(ret) == 0;
+    c.wait(ec);  // wait for the process to exit
+    if (ec) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to wait for command: "
+                        << command_ << " Error message is: " << ec.message());
+      return false;
+    }
+    // did the child run successfully and exit cleanly?
+    return c.exit_code() == 0;
   }
 
+  // if we got this far everything went well
   return true;
 }
 
-#else  // __QNX__
-
-bool System::Execute(bool wait) {
-  // Create a child process.
-  pid_t pid_command = fork();
-
-  switch (pid_command) {
-    case -1: {  // Error
-      LOG4CXX_FATAL(logger_, "fork() failed!");
-      return false;
-    }
-    case 0: {  // Child process
-      int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
-      if (0 > fd_dev0) {
-        LOG4CXX_FATAL(logger_, "Open dev0 failed!");
-        return false;
-      }
-      // close input/output file descriptors.
-      close(STDIN_FILENO);
-      close(STDOUT_FILENO);
-      close(STDERR_FILENO);
-
-      // move input/output to /dev/null.
-      dup2(fd_dev0, STDIN_FILENO);
-      dup2(fd_dev0, STDOUT_FILENO);
-      dup2(fd_dev0, STDERR_FILENO);
-
-      size_t size = argv_.size();
-      char** argv = new char* [size + 1];
-      std::transform(argv_.begin(), argv_.end(), argv, GetCString());
-      argv[size] = NULL;
-
-      // Execute the program.
-      if (execvp(command_.c_str(), argv) == -1) {
-        LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
-        _exit(EXIT_FAILURE);
-      }
-      delete[] argv;
-
-      return true;
-    }
-    default: { /* Parent process */
-      LOG4CXX_INFO(logger_, "Process created with pid " << pid_command);
-      if (wait) {
-        int status;
-        pid_t wait_pid;
-        do {
-          wait_pid = waitpid(pid_command, &status, WUNTRACED | WCONTINUED);
-          if (wait_pid == -1) {
-            LOG4CXX_ERROR_WITH_ERRNO(logger_, "Can't wait");
-            _exit(EXIT_FAILURE);
-            return false;
-          }
-        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-        return WEXITSTATUS(status) == 0;
-      }
-
-      return true;
-    }
-  }
-}
-
-#endif  // __QNX__
-
-}  // utils
+}  // namespace utils
