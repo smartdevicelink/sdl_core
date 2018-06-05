@@ -105,48 +105,38 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
       const int32_t function_id, const int32_t message_type) const {
   auto factory =
       app_mngr::CommandCreatorFactory(application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
-  auto &creator = factory.GetCreator<app_mngr::InvalidCommand>();
 
   switch (function_id) {
     case mobile_apis::FunctionID::GetVehicleDataID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::GetVehicleDataRequest>()
           : factory.GetCreator<commands::GetVehicleDataResponse>();
-      break;
     case mobile_apis::FunctionID::SubscribeVehicleDataID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
           : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
-      break;
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
           : factory.GetCreator<commands::UnsubscribeVehicleDataResponse>();
-      break;
     case mobile_apis::FunctionID::OnVehicleDataID:
-      creator = factory.GetCreator<commands::OnVehicleDataNotification>();
-      break;
+      return factory.GetCreator<commands::OnVehicleDataNotification>();
     case mobile_apis::FunctionID::ReadDIDID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::ReadDIDRequest>()
           : factory.GetCreator<commands::ReadDIDResponse>();
-      break;
     case mobile_apis::FunctionID::GetDTCsID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::GetDTCsRequest>()
           : factory.GetCreator<commands::GetDTCsResponse>();
-      break;
     case mobile_apis::FunctionID::DiagnosticMessageID:
-      creator = mobile_apis::messageType::request == message_type
+      return mobile_apis::messageType::request == message_type
           ? factory.GetCreator<commands::DiagnosticMessageRequest>()
           : factory.GetCreator<commands::DiagnosticMessageResponse>();
-      break;
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
-      break;
+      return factory.GetCreator<app_mngr::InvalidCommand>();
   }
-
-  return creator;
 }
 
 }
