@@ -50,7 +50,7 @@
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
+CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
@@ -80,13 +80,11 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
       static_cast<hmi_apis::messageType::eType>(
         (*message)[strings::params][strings::message_type].asInt());
 
-  auto message_type_str = "";
+  auto message_type_str = "request";
   if (hmi_apis::messageType::response == message_type) {
     message_type_str = "response";
   } else if (hmi_apis::messageType::error_response == message_type) {
     message_type_str = "error response";
-  } else {
-    message_type_str = "request";
   }
 
   LOG4CXX_DEBUG(

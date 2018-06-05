@@ -32,7 +32,7 @@
 
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Vehicle Info Plugin")
+CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
@@ -41,15 +41,19 @@ VehicleInfoAppExtension::VehicleInfoAppExtension(application_manager::AppExtensi
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-VehicleInfoAppExtension::~VehicleInfoAppExtension() {}
+VehicleInfoAppExtension::~VehicleInfoAppExtension() {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
 
 void VehicleInfoAppExtension::subscribeToVehicleInfo(
       const std::string& moduleType) {
+  LOG4CXX_DEBUG(logger_, moduleType);
   subscribed_modules_.insert(moduleType);
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
       const std::string& moduleType) {
+  LOG4CXX_DEBUG(logger_, moduleType);
   auto it = subscribed_modules_.find(moduleType);
   if (it != subscribed_modules_.end()) {
     subscribed_modules_.erase(it);
@@ -57,11 +61,13 @@ void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
+  LOG4CXX_AUTO_TRACE(logger_);
   subscribed_modules_.clear();
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
       const std::string& moduleType) const {
+  LOG4CXX_DEBUG(logger_, moduleType);
   return subscribed_modules_.find(moduleType) !=
       subscribed_modules_.end();
 }
