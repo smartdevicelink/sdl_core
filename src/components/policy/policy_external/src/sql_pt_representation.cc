@@ -786,6 +786,9 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherRequestType(app_id, &*params.RequestType)) {
       return false;
     }
+    if (!GatherRequestSubType(app_id, &*params.RequestSubType)) {
+      return false;
+    }
 
     (*policies).apps[app_id] = params;
   }
@@ -1175,15 +1178,83 @@ bool SQLPTRepresentation::SaveRequestType(
   }
 
   policy_table::RequestTypes::const_iterator it;
-  for (it = types.begin(); it != types.end(); ++it) {
+  if (!types.empty()) {
+    LOG4CXX_WARN(logger_, "Request types not empty.");
+    for (it = types.begin(); it != types.end(); ++it) {
+      query.Bind(0, app_id);
+      query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
+        return false;
+      }
+    }
+  } else if (types.is_initialized()) {
+    LOG4CXX_WARN(logger_, "Request types empty.");
     query.Bind(0, app_id);
-    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::RequestType::RT_EMPTY)));
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
+  } else {
+    utils::dbms::SQLQuery query_omitted(db());
+    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestType)) {
+      LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
+      return false;
+    }
+    LOG4CXX_WARN(logger_, "Request types omitted.");
+    query_omitted.Bind(0, app_id);
+    if (!query_omitted.Exec() || !query_omitted.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRequestSubType(
+    const std::string& app_id,
+    const policy_table::RequestSubTypes& request_subtypes) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRequestSubType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
+    return false;
   }
 
+  policy_table::Strings::const_iterator it;
+  if (!request_subtypes.empty()) {
+    LOG4CXX_TRACE(logger_, "Request subtypes are not empty.");
+    for (it = request_subtypes.begin(); it != request_subtypes.end(); ++it) {
+      query.Bind(0, app_id);
+      query.Bind(1, *it);
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
+        return false;
+      }
+    }
+  } else if (request_subtypes.is_initialized()) {
+    LOG4CXX_WARN(logger_, "Request subtypes empty.");
+    query.Bind(0, app_id);
+    query.Bind(1, std::string("EMPTY"));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
+      return false;
+    }
+  } else {
+    utils::dbms::SQLQuery query_omitted(db());
+    if (!query_omitted.Prepare(sql_pt::kInsertOmittedRequestSubType)) {
+      LOG4CXX_WARN(logger_, "Incorrect insert statement for request subtypes.");
+      return false;
+    }
+    LOG4CXX_WARN(logger_, "Request subtypes omitted.");
+    query_omitted.Bind(0, app_id);
+    if (!query_omitted.Exec() || !query_omitted.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
+      return false;
+    }
+  }
   return true;
 }
 
@@ -1583,7 +1654,32 @@ bool SQLPTRepresentation::GatherRequestType(
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
     }
+    if (policy_table::RequestType::RT_EMPTY == type) {
+      request_types->mark_initialized();
+      continue;
+    }
     request_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRequestSubType(
+    const std::string& app_id,
+    policy_table::RequestSubTypes* request_subtypes) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRequestSubTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from request subtypes.");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    const std::string request_subtype = query.GetString(0);
+    if ("EMPTY" == request_subtype) {
+      request_subtypes->mark_initialized();
+      continue;
+    }
+    request_subtypes->push_back(request_subtype);
   }
   return true;
 }
@@ -1907,6 +2003,13 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
       !SaveRequestType(app_id, request_types)) {
     return false;
   }
+
+  policy_table::Strings request_subtypes;
+  if (!GatherRequestSubType(kDefaultId, &request_subtypes) ||
+      !SaveRequestSubType(app_id, request_subtypes)) {
+    return false;
+  }
+
   policy_table::AppHMITypes app_types;
   if (!GatherAppType(kDefaultId, &app_types) ||
       !SaveAppType(app_id, app_types)) {

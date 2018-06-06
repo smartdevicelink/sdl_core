@@ -827,8 +827,9 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     msg_params[strings::tts_name] = *(application_impl.tts_name());
   }
 
+  const std::string policy_app_id = application_impl.policy_app_id();
   std::string priority;
-  GetPolicyHandler().GetPriority(application_impl.policy_app_id(), &priority);
+  GetPolicyHandler().GetPriority(policy_app_id, &priority);
 
   if (!priority.empty()) {
     msg_params[strings::priority] = MessageHelper::GetPriorityCode(priority);
@@ -838,7 +839,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   smart_objects::SmartObject& application = msg_params[strings::application];
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
-  application[hmi_response::policy_app_id] = application_impl.policy_app_id();
+  application[hmi_response::policy_app_id] = policy_app_id;
   if (file_system::FileExists(application_impl.app_icon_path())) {
     application[strings::icon] = application_impl.app_icon_path();
   }
@@ -860,18 +861,41 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::app_type] = *app_type;
   }
 
-  std::vector<std::string> request_types =
-      GetPolicyHandler().GetAppRequestTypes(application_impl.policy_app_id());
+  const policy::RequestType::State app_request_types_state =
+      GetPolicyHandler().GetAppRequestTypeState(policy_app_id);
+  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
+    const auto request_types =
+        GetPolicyHandler().GetAppRequestTypes(policy_app_id);
+    application[strings::request_type] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_types_array =
+        application[strings::request_type];
 
-  application[strings::request_type] = SmartObject(SmartType_Array);
-  smart_objects::SmartObject& request_array =
-      application[strings::request_type];
+    size_t index = 0;
+    for (auto it : request_types) {
+      request_types_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
+    application[strings::request_type] = SmartObject(SmartType_Array);
+  }
 
-  uint32_t index = 0;
-  std::vector<std::string>::const_iterator it = request_types.begin();
-  for (; request_types.end() != it; ++it) {
-    request_array[index] = *it;
-    ++index;
+  const policy::RequestSubType::State app_request_subtypes_state =
+      GetPolicyHandler().GetAppRequestSubTypeState(policy_app_id);
+  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
+    const auto request_subtypes =
+        GetPolicyHandler().GetAppRequestSubTypes(policy_app_id);
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_subtypes_array =
+        application[strings::request_subtype];
+
+    size_t index = 0;
+    for (auto it : request_subtypes) {
+      request_subtypes_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestSubType::State::EMPTY ==
+             app_request_subtypes_state) {
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
   }
 
   application[strings::device_info] = SmartObject(SmartType_Map);
