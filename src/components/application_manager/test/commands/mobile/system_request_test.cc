@@ -56,11 +56,14 @@ using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockHmiInterfaces;
 using am::event_engine::Event;
+using am::MessageType;
 using policy_test::MockPolicyHandlerInterface;
 using ::utils::SharedPtr;
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SaveArg;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -70,6 +73,7 @@ const std::string kAppFolderName = "fake-app-name";
 const std::string kAppStorageFolder = "fake-storage";
 const std::string kSystemFilesPath = "/fake/system/files";
 const std::string kFileName = "Filename";
+const uint32_t kHmiAppId = 3u;
 }  // namespace
 
 class SystemRequestTest
@@ -96,6 +100,7 @@ class SystemRequestTest
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kAppPolicyId));
     ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kAppFolderName));
+    ON_CALL(*mock_app_, hmi_app_id()).WillByDefault(Return(kHmiAppId));
 
     ON_CALL(app_mngr_settings_, system_files_path())
         .WillByDefault(ReturnRef(kSystemFilesPath));
@@ -125,6 +130,105 @@ TEST_F(SystemRequestTest, Run_HTTP_FileName_no_binary_data_REJECTED) {
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::REJECTED);
 
   SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  command->Run();
+}
+
+TEST_F(SystemRequestTest,
+       Run_RequestTypeAllowedAndRequestSubTypeAllowed_SendHMIRequest) {
+  MessageSharedPtr msg = CreateIVSUMessage();
+
+  (*msg)[am::strings::msg_params][am::strings::request_type] =
+      mobile_apis::RequestType::OEM_SPECIFIC;
+
+  const std::string request_subtype = "fakeSubType";
+  (*msg)[am::strings::msg_params][am::strings::request_subtype] =
+      request_subtype;
+
+  const std::vector<uint8_t> binary_data = {1u, 2u};
+  (*msg)[am::strings::params][am::strings::binary_data] = binary_data;
+
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId,
+                                   mobile_apis::RequestType::OEM_SPECIFIC))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestSubTypeAllowed(kAppPolicyId, request_subtype))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_,
+              SaveBinary(binary_data, kSystemFilesPath, kFileName, 0u))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  EXPECT_EQ(MessageType::kRequest,
+            (*result)[am::strings::params][am::strings::message_type].asInt());
+  EXPECT_EQ(
+      mobile_apis::RequestType::OEM_SPECIFIC,
+      (*result)[am::strings::msg_params][am::strings::request_type].asInt());
+  EXPECT_EQ(
+      request_subtype,
+      (*msg)[am::strings::msg_params][am::strings::request_subtype].asString());
+}
+
+TEST_F(
+    SystemRequestTest,
+    Run_RequestTypeAllowedAndRequestSubTypeDisallowed_SendDisallowedResponse) {
+  MessageSharedPtr msg = CreateIVSUMessage();
+
+  (*msg)[am::strings::msg_params][am::strings::request_type] =
+      mobile_apis::RequestType::OEM_SPECIFIC;
+
+  const std::string request_subtype = "fakeSubType2";
+  (*msg)[am::strings::msg_params][am::strings::request_subtype] =
+      request_subtype;
+
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId,
+                                   mobile_apis::RequestType::OEM_SPECIFIC))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestSubTypeAllowed(kAppPolicyId, request_subtype))
+      .WillOnce(Return(false));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
+  MessageSharedPtr msg = CreateIVSUMessage();
+
+  (*msg)[am::strings::msg_params][am::strings::request_type] =
+      mobile_apis::RequestType::OEM_SPECIFIC;
+
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kAppPolicyId,
+                                   mobile_apis::RequestType::OEM_SPECIFIC))
+      .WillOnce(Return(false));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+
+  SharedPtr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 

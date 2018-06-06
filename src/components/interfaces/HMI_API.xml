@@ -1165,13 +1165,13 @@
 </enum>
 
 <enum name="RequestType">
-    <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
-    <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
-    <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+  <description>Enumeration listing possible asynchronous requests.</description>
+  <element name="HTTP" />
+  <element name="FILE_RESUME" />
+  <element name="AUTH_REQUEST" />
+  <element name="AUTH_CHALLENGE" />
+  <element name="AUTH_ACK" />
+  <element name="PROPRIETARY" />
   <element name="QUERY_APPS" />
   <element name="LAUNCH_APP" />
   <element name="LOCK_SCREEN_ICON_URL" />
@@ -1186,6 +1186,7 @@
   <element name="EMERGENCY" />
   <element name="MEDIA" />
   <element name="FOTA" />
+  <element name="OEM_SPECIFIC"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -2013,6 +2014,14 @@
       <description>If SDL sends an empty array - any RequestType is allowed for this app.</description>
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
+    </param>
+	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>
+            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+            An empty array signifies that any value of requestSubType is allowed for this app.
+            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+        </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
@@ -3023,6 +3032,11 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+        <description>
+          This parameter is filled for supporting OEM proprietary data exchanges.
+        </description>
+      </param>
       <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
@@ -3048,6 +3062,11 @@
       <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
           <description>The type of system request.</description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+          <description>
+              This parameter is filled for supporting OEM proprietary data exchanges.
+          </description>
       </param>
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
@@ -4973,6 +4992,14 @@
         If SDL sends an empty array - any RequestType is allowed for this app.
         If SDL omits this parameter - nothing is changed for RequestType in the policies
       </description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+          <description>
+              The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+              If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+              An empty array signifies that any value of requestSubType is allowed for this app.
+              If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+          </description>
       </param>
     </function>
 
