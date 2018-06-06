@@ -120,6 +120,10 @@ app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
       return hmi_apis::messageType::request == message_type
           ? factory.GetCreator<commands::VIUnsubscribeVehicleDataRequest>()
           : factory.GetCreator<commands::VIUnsubscribeVehicleDataResponse>();
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData:
+      return hmi_apis::messageType::request == message_type
+          ? factory.GetCreator<commands::VIGetVehicleDataRequest>()
+          : factory.GetCreator<commands::VIGetVehicleDataResponse>();
     case hmi_apis::FunctionID::VehicleInfo_OnVehicleData:
       return factory.GetCreator<commands::OnVIVehicleDataNotification>();
     case hmi_apis::FunctionID::VehicleInfo_ReadDID:
