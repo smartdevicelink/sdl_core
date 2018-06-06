@@ -449,11 +449,15 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     smart_objects::SmartObject& display_caps =
         response_params[hmi_response::display_capabilities];
 
+    bool missing_mandatory_capabilities = false;
+
     if (hmi_capabilities.display_capabilities()->keyExists(
             hmi_response::display_type)) {
       display_caps[hmi_response::display_type] =
           hmi_capabilities.display_capabilities()->getElement(
               hmi_response::display_type);
+    } else {
+      missing_mandatory_capabilities = true;
     }
 
     if (hmi_capabilities.display_capabilities()->keyExists(
@@ -461,6 +465,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       display_caps[hmi_response::text_fields] =
           hmi_capabilities.display_capabilities()->getElement(
               hmi_response::text_fields);
+    } else {
+      missing_mandatory_capabilities = true;
     }
 
     if (hmi_capabilities.display_capabilities()->keyExists(
@@ -475,6 +481,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       display_caps[hmi_response::media_clock_formats] =
           hmi_capabilities.display_capabilities()->getElement(
               hmi_response::media_clock_formats);
+    } else {
+      missing_mandatory_capabilities = true;
     }
 
     if (hmi_capabilities.display_capabilities()->keyExists(
@@ -504,6 +512,11 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
           (hmi_capabilities.display_capabilities()
                ->getElement(hmi_response::image_capabilities)
                .length() > 0);
+    }
+
+    if (missing_mandatory_capabilities) {
+      // Mandatory Display Capability Parameters were missing,
+      response_params.erase(hmi_response::display_capabilities);
     }
   }
 
