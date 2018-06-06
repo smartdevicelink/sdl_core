@@ -744,6 +744,30 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
     const {
+  if (!display_capabilities_->keyExists(hmi_response::display_type)) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Core is missing mandatory displayCapability paramter: displayType");
+    return NULL;
+  }
+  if (!display_capabilities_->keyExists(hmi_response::text_fields)) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Core is missing mandatory displayCapability paramter: textFields");
+    return NULL;
+  }
+  if (!display_capabilities_->keyExists(hmi_response::media_clock_formats)) {
+    LOG4CXX_ERROR(logger_,
+                  "Core is missing mandatory displayCapability paramter: "
+                  "mediaClockFormats");
+    return NULL;
+  }
+  if (!display_capabilities_->keyExists(hmi_response::graphic_supported)) {
+    LOG4CXX_ERROR(logger_,
+                  "Core is missing mandatory displayCapability paramter: "
+                  "graphicSupported");
+    return NULL;
+  }
   return display_capabilities_;
 }
 
