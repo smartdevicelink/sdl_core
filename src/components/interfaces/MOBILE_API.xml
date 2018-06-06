@@ -619,7 +619,7 @@
         </element>
     </enum>
     
-    <enum name="DisplayType" deprecated="true">
+    <enum name="DisplayType">
         <description>See DAES for further infos regarding the displays</description>
         <element name="CID"/>
         <element name="TYPE2" />
@@ -1937,7 +1937,7 @@
     
     <struct name="DisplayCapabilities">
         <description>Contains information about the display capabilities.</description>
-        <param name="displayType" type="DisplayType" mandatory="true" deprecated="true">
+        <param name="displayType" type="DisplayType" mandatory="true">
             <description>The type of the display. See DisplayType</description>
         </param>
         <param name="displayName" type="String" mandatory="false">

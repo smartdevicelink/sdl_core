@@ -409,7 +409,7 @@
   <element name="SUSPEND" />
 </enum>
 
-<enum name="DisplayType" deprecated="true">
+<enum name="DisplayType">
     <description>The possible types of HU display.</description>
     <element name="CID">
     <description> A 2-line x 20 character "dot matrix" display </description>
@@ -2114,7 +2114,7 @@
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
-  <param name="displayType" type="Common.DisplayType" mandatory="true" deprecated="true">
+  <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
   </param>
   <param name="displayName" type="String" mandatory="false">

@@ -203,20 +203,16 @@ class Parser(object):
 
         internal_scope = None
         scope = None
-        deprecated = None
         for attribute in attributes:
             if attribute == "internal_scope":
                 internal_scope = attributes[attribute]
             elif attribute == "scope":
                 scope = attributes[attribute]
-            elif attribute == "deprecated":
-                deprecated = attributes[attribute]
             else:
                 raise ParseError("Unexpected attribute '" + attribute +
                                  "' in enum '" + params["name"] + "'")
         params["internal_scope"] = internal_scope
         params["scope"] = scope
-        params["deprecated"] = deprecated
 
         elements = collections.OrderedDict()
         for subelement in subelements:
@@ -558,11 +554,6 @@ class Parser(object):
                              params["name"] + "'")
         
         params["is_mandatory"] = self._get_bool_from_string(is_mandatory)
-
-        deprecated = None
-        deprecated = self._extract_optional_bool_attrib(attrib, "deprecated", False)
-        if deprecated is not None:
-            params["deprecated"] = deprecated
 
         scope = self._extract_attrib(attrib, "scope")
         if scope is not None:
