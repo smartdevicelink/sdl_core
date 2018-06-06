@@ -74,10 +74,8 @@ DEPRECATED HmiState::HmiState(uint32_t app_id,
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
-    , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
   app_ = app_mngr_.application(app_id);
-  LOG4CXX_DEBUG(logger_, *this);
 }
 
 DEPRECATED HmiState::HmiState(uint32_t app_id,
@@ -86,10 +84,8 @@ DEPRECATED HmiState::HmiState(uint32_t app_id,
     , app_mngr_(app_mngr)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
-    , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
   app_ = app_mngr_.application(app_id);
-  LOG4CXX_DEBUG(logger_, *this);
 }
 
 void HmiState::set_parent(HmiStatePtr parent) {
@@ -147,7 +143,6 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
           hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
     expected_state = AudioStreamingState::ATTENUATED;
   }
-
   return expected_state;
 }
 
