@@ -39,6 +39,8 @@ namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
+typedef std::pair<std::string, mobile_apis::Result::eType> ModuleCapability;
+
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   SetInteriorVehicleDataRequest(
@@ -85,10 +87,12 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that check if READ_ONLY parameters present
-   * @param request_params params from received message
+   * @param request_params params from received message,
+   * @param module_data_capabilities info for notification to mobile
    * @return true if present , false - otherwise
    */
-  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data);
+  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data,
+                                ModuleCapability& module_data_capabilities);
 
   /**
    * @brief Method that check if all request parameters are READ_ONLY
@@ -99,7 +103,7 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that cuts-off READ_ONLY parameters
-   * @param request_params params to handle
+   * @param module_data params to handle
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
