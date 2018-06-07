@@ -85,10 +85,11 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that check if READ_ONLY parameters present
-   * @param request_params params from received message
+   * @param request_params params from received message, notification to mobile
    * @return true if present , false - otherwise
    */
-  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data);
+  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data,
+                                mobile_apis::Result::eType& notification);
 
   /**
    * @brief Method that check if all request parameters are READ_ONLY
@@ -99,7 +100,7 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 
   /**
    * @brief Method that cuts-off READ_ONLY parameters
-   * @param request_params params to handle
+   * @param module_data params to handle
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
