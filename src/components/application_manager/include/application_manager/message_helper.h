@@ -548,11 +548,33 @@ class MessageHelper {
       const uint32_t correlation_id,
       int32_t result_code);
 
+  /**
+   * @brief Verify that a file exists for a given application
+   *
+   * @param file_name The relative path of an application file
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return The full file path of the application file if found,
+   * NULL otherwise
+   */
   static utils::SharedPtr<std::string> CheckAppFileExists(
       std::string file_name,
       ApplicationConstSharedPtr app,
       ApplicationManager& app_mngr);
 
+  /**
+   * @brief Verify that all ttsChunks with FILE type
+   * in an array include an existing file and set full path
+   *
+   * @param tts_chunks SmartObject with an array of TTSChunks
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return FILE_NOT_FOUND if one of the TTSChunks
+   * included a file which wasn't present on disk,
+   * SUCCESS otherwise
+   */
   static mobile_apis::Result::eType VerifyTtsFiles(
       smart_objects::SmartObject& tts_chunks,
       ApplicationConstSharedPtr app,

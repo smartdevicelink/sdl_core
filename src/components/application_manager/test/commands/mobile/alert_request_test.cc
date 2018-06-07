@@ -382,6 +382,12 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
               SubscribeApplicationToSoftButton(
                   (*msg_)[am::strings::msg_params], _, kFunctionId));
 
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   ExpectManageHmiCommandTTSAndUI();
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
@@ -435,6 +441,11 @@ TEST_F(AlertRequestTest, OnEvent_UIAlertHasHmiResponsesToWait_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   ExpectManageHmiCommandTTSAndUI();
 
@@ -465,6 +476,12 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
       .WillOnce(Return(true));
@@ -490,6 +507,11 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
 
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
@@ -523,6 +545,11 @@ TEST_F(AlertRequestTest,
   ExpectCallHmiLevel(mobile_apis::HMILevel::HMI_FULL);
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(mock_message_helper_,
               SubscribeApplicationToSoftButton(
@@ -565,6 +592,11 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSuccess_SUCCESS) {
   ExpectCallHmiLevel(mobile_apis::HMILevel::HMI_FULL);
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(mock_message_helper_,
               SubscribeApplicationToSoftButton(
@@ -611,6 +643,11 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
       .WillOnce(Return(true));
@@ -654,6 +691,11 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
   ExpectCallHmiLevel(mobile_apis::HMILevel::HMI_FULL);
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
