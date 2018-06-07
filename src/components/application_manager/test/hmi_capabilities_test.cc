@@ -186,6 +186,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
+  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
+
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
 
   // Check active languages
@@ -562,6 +564,7 @@ TEST_F(HMICapabilitiesTest,
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;
+  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
   sm_obj[hmi_response::image_capabilities][0] = image_type;
   hmi_capabilities_test->set_display_capabilities(sm_obj);
 

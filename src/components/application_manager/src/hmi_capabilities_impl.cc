@@ -551,10 +551,15 @@ void HMICapabilitiesImpl::set_vr_supported_languages(
 
 void HMICapabilitiesImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  if (display_capabilities_) {
-    delete display_capabilities_;
+  if (app_mngr_.IsSOStructValid(
+          hmi_apis::StructIdentifiers::Common_DisplayCapabilities,
+          display_capabilities)) {
+    if (display_capabilities_) {
+      delete display_capabilities_;
+    }
+    display_capabilities_ =
+        new smart_objects::SmartObject(display_capabilities);
   }
-  display_capabilities_ = new smart_objects::SmartObject(display_capabilities);
 }
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
@@ -744,30 +749,6 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
     const {
-  if (!display_capabilities_->keyExists(hmi_response::display_type)) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Core is missing mandatory displayCapability paramter: displayType");
-    return NULL;
-  }
-  if (!display_capabilities_->keyExists(hmi_response::text_fields)) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Core is missing mandatory displayCapability paramter: textFields");
-    return NULL;
-  }
-  if (!display_capabilities_->keyExists(hmi_response::media_clock_formats)) {
-    LOG4CXX_ERROR(logger_,
-                  "Core is missing mandatory displayCapability paramter: "
-                  "mediaClockFormats");
-    return NULL;
-  }
-  if (!display_capabilities_->keyExists(hmi_response::graphic_supported)) {
-    LOG4CXX_ERROR(logger_,
-                  "Core is missing mandatory displayCapability paramter: "
-                  "graphicSupported");
-    return NULL;
-  }
   return display_capabilities_;
 }
 

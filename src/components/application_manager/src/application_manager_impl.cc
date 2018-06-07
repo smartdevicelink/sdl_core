@@ -4456,6 +4456,23 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
   return output;
 }
 
+bool ApplicationManagerImpl::IsSOStructValid(
+    const hmi_apis::StructIdentifiers::eType struct_id,
+    const smart_objects::SmartObject& display_capabilities) {
+  smart_objects::SmartObject display_capabilities_so = display_capabilities;
+  if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
+    if (display_capabilities_so.isValid()) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
+    return false;
+  }
+  return true;
+}
+
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_list_lock_.Acquire();
