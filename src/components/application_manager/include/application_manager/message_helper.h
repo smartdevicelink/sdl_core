@@ -549,19 +549,18 @@ class MessageHelper {
       int32_t result_code);
 
   /**
-   * @brief Verify that a file exists for a given application
+   * @brief Get the full file path of an app file
    *
    * @param file_name The relative path of an application file
    * @param app Current application
    * @param app_mngr Application manager
    *
-   * @return The full file path of the application file if found,
-   * NULL otherwise
+   * @return The full file path of the application file if valid,
+   * empty string otherwise
    */
-  static utils::SharedPtr<std::string> CheckAppFileExists(
-      std::string file_name,
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr);
+  static std::string GetAppFilePath(std::string file_name,
+                                    ApplicationConstSharedPtr app,
+                                    ApplicationManager& app_mngr);
 
   /**
    * @brief Verify that all ttsChunks with FILE type
