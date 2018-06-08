@@ -115,7 +115,7 @@ class SecurityManagerTest : public ::testing::Test {
   void call_OnMessageReceived(const uint8_t* const data,
                               uint32_t dataSize,
                               const ServiceType serviceType) {
-    const RawMessagePtr rawMessagePtr(utils::MakeShared<RawMessage>(
+    const RawMessagePtr rawMessagePtr(std::make_shared<RawMessage>(
         key, protocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
@@ -152,7 +152,7 @@ class SecurityManagerTest : public ::testing::Test {
       EmulateMobileMessage(header, data, data_size);
     }
   }
-  ::utils::SharedPtr<SecurityManagerImpl> security_manager_;
+  ::std::shared_ptr<SecurityManagerImpl> security_manager_;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::StrictMock<protocol_handler_test::MockSessionObserver>
       mock_session_observer;
@@ -298,7 +298,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
   const uint8_t* data_param = NULL;
   const RawMessagePtr rawMessagePtr(
-      utils::MakeShared<RawMessage>(key, protocolVersion, data_param, 0));
+      std::make_shared<RawMessage>(key, protocolVersion, data_param, 0));
   security_manager_->OnMobileMessageSent(rawMessagePtr);
 }
 /*

@@ -54,7 +54,7 @@ using ::testing::_;
 using am::commands::UnsubscribeVehicleDataRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnsubscribeVehicleDataRequest> CommandPtr;
+typedef ::std::shared_ptr<UnsubscribeVehicleDataRequest> CommandPtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;

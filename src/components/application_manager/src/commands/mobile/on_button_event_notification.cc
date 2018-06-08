@@ -139,8 +139,8 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
     return;
   }
 
-  smart_objects::SmartObjectSPtr on_btn_event =
-      new smart_objects::SmartObject();
+  smart_objects::SmartObjectSPtr on_btn_event(
+      new smart_objects::SmartObject());
 
   if (!on_btn_event) {
     LOG4CXX_ERROR(logger_, "OnButtonEvent NULL pointer");

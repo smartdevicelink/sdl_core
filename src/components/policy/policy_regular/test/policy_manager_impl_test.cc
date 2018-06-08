@@ -147,7 +147,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   NiceMock<MockPolicyListener> listener;
   const std::string device_id;
 #ifdef SDL_REMOTE_CONTROL
-  utils::SharedPtr<access_remote_test::MockAccessRemote> access_remote;
+  std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
 #endif  // SDL_REMOTE_CONTROL
 
   void SetUp() OVERRIDE {
@@ -157,7 +157,7 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_cache_manager(cache_manager);
 
 #ifdef SDL_REMOTE_CONTROL
-    access_remote = new access_remote_test::MockAccessRemote();
+    access_remote = std::make_shared<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
 #endif  // SDL_REMOTE_CONTROL
   }
@@ -358,7 +358,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // Get cache
     ::policy::CacheManagerInterfaceSPtr cache = manager->GetCache();
     // Get table_snapshot
-    utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+    std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
     // Set functional groupings from policy table
     input_functional_groupings = table->policy_table.functional_groupings;
   }
@@ -726,8 +726,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
-      utils::MakeShared<policy_table::Table>(update.policy_table);
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -967,7 +967,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
 
   // Arrange
   ::policy::CacheManagerInterfaceSPtr cache = manager->GetCache();
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Get FunctionalGroupings
   policy_table::FunctionalGroupings& fc =
       table->policy_table.functional_groupings;
@@ -1259,7 +1259,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   GetPTU("valid_sdl_pt_update.json");
-  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->pt();
+  std::shared_ptr<policy_table::Table> pt = (manager->GetCache())->pt();
   policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
   ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
 
@@ -1340,7 +1340,7 @@ TEST_F(
     HertBeatTimeout_AddApp_UpdateAppPolicies_ExpectReceivedHertBeatTimeoutCorrect) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->pt();
+  std::shared_ptr<policy_table::Table> pt = (manager->GetCache())->pt();
   ::policy_table::PolicyTableType type1 =
       ::policy_table::PolicyTableType::PT_PRELOADED;
   pt->SetPolicyTableType(type1);

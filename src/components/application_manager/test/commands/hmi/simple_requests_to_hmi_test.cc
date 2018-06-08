@@ -131,7 +131,7 @@ using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 
 namespace am_commands = application_manager::commands;
 using am_commands::MessageSharedPtr;
@@ -140,7 +140,7 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
   // Current implementation always return `true`
@@ -150,7 +150,7 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
   EXPECT_CALL(app_mngr_, SendMessageToHMI(NotNull()));
@@ -253,7 +253,7 @@ TYPED_TEST_CASE(RequestToHMICommandsTest3, RequestCommandsList3);
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
 
   command->Run();
@@ -262,7 +262,7 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
 
   command->Run();
@@ -271,7 +271,7 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
 

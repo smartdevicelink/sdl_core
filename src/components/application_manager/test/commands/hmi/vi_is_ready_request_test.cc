@@ -59,7 +59,7 @@ using am::commands::MessageSharedPtr;
 using am::commands::VIIsReadyRequest;
 using am::event_engine::Event;
 
-typedef SharedPtr<VIIsReadyRequest> VIIsReadyRequestPtr;
+typedef std::shared_ptr<VIIsReadyRequest> VIIsReadyRequestPtr;
 
 class VIIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

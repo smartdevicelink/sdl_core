@@ -57,7 +57,7 @@ using am::event_engine::Event;
 using ::testing::_;
 using ::testing::Return;
 
-typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
+typedef std::shared_ptr<AddSubMenuRequest> AddSubMenuPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -72,7 +72,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = menu_id;
 
-  utils::SharedPtr<AddSubMenuRequest> command =
+  std::shared_ptr<AddSubMenuRequest> command =
       CreateCommand<AddSubMenuRequest>(msg);
 
   MockAppPtr mock_app = CreateMockApp();

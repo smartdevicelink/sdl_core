@@ -60,7 +60,7 @@ void OnExitApplicationNotification::Run() {
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app_impl = application_manager_.application(app_id);
 
-  if (!(app_impl.valid())) {
+  if (!(utils::ValidSPtr(app_impl))) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }

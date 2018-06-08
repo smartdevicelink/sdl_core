@@ -87,12 +87,12 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     mock_storage_ =
-        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+        ::std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
             app_mngr_);
-    app_mock_ = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock_ = std::make_shared<NiceMock<MockApplication> >();
     const_app_ =
         static_cast<application_manager::ApplicationConstSharedPtr>(app_mock_);
-    res_ctrl_ = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
+    res_ctrl_ = std::make_shared<ResumeCtrlImpl>(app_mngr_);
     res_ctrl_->set_resumption_storage(mock_storage_);
 
     ON_CALL(app_mngr_, state_controller())
@@ -121,10 +121,10 @@ class ResumeCtrlTest : public ::testing::Test {
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager app_mngr_;
   MockStateController state_controller_;
-  utils::SharedPtr<ResumeCtrl> res_ctrl_;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
+  std::shared_ptr<ResumeCtrl> res_ctrl_;
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
-  utils::SharedPtr<NiceMock<MockApplication> > app_mock_;
+  std::shared_ptr<NiceMock<MockApplication> > app_mock_;
   application_manager::ApplicationConstSharedPtr const_app_;
   const uint32_t kTestAppId_;
   const std::string kTestPolicyAppId_;
@@ -722,8 +722,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
 }
 
 TEST_F(ResumeCtrlTest, SaveAllApplications) {
-  utils::SharedPtr<application_manager_test::MockApplication> test_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> test_app =
+      ::std::make_shared<application_manager_test::MockApplication>();
   EXPECT_CALL(*test_app, app_id()).WillRepeatedly(Return(kTestAppId_));
 
   application_manager::ApplicationSet app_set;
@@ -738,8 +738,8 @@ TEST_F(ResumeCtrlTest, SaveAllApplications) {
 }
 
 TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> mock_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> mock_app =
+      ::std::make_shared<application_manager_test::MockApplication>();
 
   application_manager::ApplicationSet app_set;
 
@@ -752,8 +752,8 @@ TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
 }
 
 TEST_F(ResumeCtrlTest, SaveApplication) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> app_sh_mock =
+      ::std::make_shared<application_manager_test::MockApplication>();
 
   EXPECT_CALL(*mock_storage_, SaveApplication(app_sh_mock));
   res_ctrl_->SaveApplication(app_sh_mock);
@@ -773,16 +773,16 @@ TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionHasStarted) {
   const bool res = res_ctrl_->StartResumptionOnlyHMILevel(app_mock_);
   EXPECT_TRUE(res);
 
-  utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> app_sh_mock =
+      ::std::make_shared<application_manager_test::MockApplication>();
 
   EXPECT_CALL(*app_sh_mock, app_id()).WillOnce(Return(kTestAppId_));
   res_ctrl_->OnAppActivated(app_sh_mock);
 }
 
 TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionNotActive) {
-  utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager_test::MockApplication> app_sh_mock =
+      ::std::make_shared<application_manager_test::MockApplication>();
   EXPECT_CALL(*app_sh_mock, app_id()).Times(0);
   res_ctrl_->OnAppActivated(app_sh_mock);
 }
@@ -888,8 +888,8 @@ TEST_F(ResumeCtrlTest, DISABLED_OnSuspend) {
 }
 
 TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> mock_app =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
+  std::shared_ptr<application_manager::Application> mock_app =
+      ::std::make_shared<application_manager_test::MockApplication>();
 
   application_manager::ApplicationSet app_set;
 

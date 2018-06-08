@@ -69,7 +69,7 @@ class AppsLauncher {
     connection_handler::ConnectionHandler& connection_handler_;
     AppsLauncher& parent_;
   };
-  typedef utils::SharedPtr<Launcher> LauncherPtr;
+  typedef std::shared_ptr<Launcher> LauncherPtr;
   typedef std::vector<LauncherPtr> AppLaunchers;
 
  private:

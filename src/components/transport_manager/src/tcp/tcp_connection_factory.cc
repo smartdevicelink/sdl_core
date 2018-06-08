@@ -56,8 +56,8 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   LOG4CXX_DEBUG(logger_,
                 "DeviceUID: " << &device_uid
                               << ", ApplicationHandle: " << &app_handle);
-  utils::SharedPtr<TcpServerOriginatedSocketConnection> connection =
-      utils::MakeShared<TcpServerOriginatedSocketConnection>(
+  std::shared_ptr<TcpServerOriginatedSocketConnection> connection =
+      std::make_shared<TcpServerOriginatedSocketConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   const TransportAdapter::Error error = connection->Start();

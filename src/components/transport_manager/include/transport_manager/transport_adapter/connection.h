@@ -67,7 +67,7 @@ class Connection {
   virtual TransportAdapter::Error Disconnect() = 0;
 };
 
-typedef utils::SharedPtr<Connection> ConnectionSPtr;
+typedef std::shared_ptr<Connection> ConnectionSPtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

@@ -112,13 +112,13 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
-    app_impl_ = new ApplicationImpl(
+    app_impl_ = std::make_shared<ApplicationImpl>(
         application_id,
         policy_app_id,
         mac_address,
         device_id,
         app_name,
-        utils::MakeShared<usage_statistics_test::MockStatisticsManager>(),
+        std::make_shared<usage_statistics_test::MockStatisticsManager>(),
         app_manager_impl_);
   }
 

@@ -59,7 +59,7 @@ struct ApplicationData {
            bundle_id_ == app_data.bundle_id_ && device_mac_ == device_mac_;
   }
 };
-typedef utils::SharedPtr<ApplicationData> ApplicationDataPtr;
+typedef std::shared_ptr<ApplicationData> ApplicationDataPtr;
 
 /**
  * @brief class contains interfaces to AppLaunchDataDB and AppLaunchDataJson

@@ -98,10 +98,10 @@ namespace on_remote_control_settings_notification_test {
 class OnRemoteControlSettingsNotificationTest : public ::testing::Test {
  public:
   OnRemoteControlSettingsNotificationTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(
-            utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
+            std::make_shared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(mock_module_, resource_allocation_manager())
         .WillByDefault(ReturnRef(mock_allocation_manager_));
     ON_CALL(*mock_service_, IsInterfaceAvailable(_))
@@ -118,7 +118,7 @@ class OnRemoteControlSettingsNotificationTest : public ::testing::Test {
 
   application_manager::MessagePtr CreateBasicMessage(
       const std::string& json_message) {
-    application_manager::MessagePtr message = utils::MakeShared<Message>(
+    application_manager::MessagePtr message = std::make_shared<Message>(
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_function_id(RCFunctionID::ON_REMOTE_CONTROL_SETTINGS);
     message->set_function_name(
@@ -128,9 +128,9 @@ class OnRemoteControlSettingsNotificationTest : public ::testing::Test {
   }
 
  protected:
-  utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
-  utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
+  std::shared_ptr<NiceMock<application_manager::MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<remote_control::RCAppExtension> rc_app_extention_;
   remote_control_test::MockRemotePluginInterface mock_module_;
   std::vector<ApplicationSharedPtr> apps_;
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>

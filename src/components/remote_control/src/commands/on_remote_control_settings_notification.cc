@@ -70,7 +70,7 @@ void OnRemoteControlSettingsNotification::DisallowRCFunctionality() {
     service_->ChangeNotifyHMILevel(app, mobile_apis::HMILevel::eType::HMI_NONE);
 
     const RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
+        std::static_pointer_cast<
             RCAppExtension>(app->QueryInterface(rc_module_.GetModuleID()));
     if (extension) {
       UnsubscribeFromInteriorVehicleDataForAllModules(extension);

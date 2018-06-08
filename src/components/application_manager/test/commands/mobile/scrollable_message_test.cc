@@ -61,7 +61,7 @@ using am::commands::ScrollableMessageRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;
@@ -119,7 +119,7 @@ class ScrollableMessageRequestTest
   MockPolicyHandlerInterface mock_policy_handler_;
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
-  SharedPtr<ScrollableMessageRequest> command_;
+  std::shared_ptr<ScrollableMessageRequest> command_;
 };
 
 typedef ScrollableMessageRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -128,7 +128,7 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<ScrollableMessageRequest> command =
+  std::shared_ptr<ScrollableMessageRequest> command =
       CreateCommand<ScrollableMessageRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();

@@ -582,30 +582,30 @@ TYPED_TEST_CASE(HMICommandsTestFourth, HMICommandsListFourth);
 TYPED_TEST_CASE(HMICommandsTestFifth, HMICommandsListFifth);
 
 TYPED_TEST(HMICommandsTestFirst, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 
 TYPED_TEST(HMICommandsTestSecond, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 TYPED_TEST(HMICommandsTestThird, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 
 TYPED_TEST(HMICommandsTestFourth, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 
 TYPED_TEST(HMICommandsTestFifth, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }

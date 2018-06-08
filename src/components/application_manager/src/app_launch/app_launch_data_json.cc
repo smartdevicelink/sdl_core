@@ -185,7 +185,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataJson::GetAppDataByDevMac(
 
       if (deviceMac == dev_mac) {
         dev_apps.push_back(
-            utils::MakeShared<ApplicationData>(appID, bundleID, deviceMac));
+            std::make_shared<ApplicationData>(appID, bundleID, deviceMac));
       }
     }
   }

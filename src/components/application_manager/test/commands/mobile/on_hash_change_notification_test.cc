@@ -63,7 +63,7 @@ TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-  SharedPtr<OnHashChangeNotification> command =
+  std::shared_ptr<OnHashChangeNotification> command =
       CreateCommand<OnHashChangeNotification>(msg);
 
   std::string return_string = "1234";
@@ -92,7 +92,7 @@ TEST_F(OnHashChangeNotificationTest, Run_InvalidApp_NoNotification) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-  SharedPtr<OnHashChangeNotification> command =
+  std::shared_ptr<OnHashChangeNotification> command =
       CreateCommand<OnHashChangeNotification>(msg);
 
   std::string return_string;

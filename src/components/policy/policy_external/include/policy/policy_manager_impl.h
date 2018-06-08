@@ -476,7 +476,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Setter for access_remote instance
    * @param access_remote pointer to new access_remote instance
    */
-  void set_access_remote(utils::SharedPtr<AccessRemote> access_remote) OVERRIDE;
+  void set_access_remote(std::shared_ptr<AccessRemote> access_remote) OVERRIDE;
 
   /**
    * @brief Sends notification about application HMI level changed
@@ -722,7 +722,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content binary content of PT
    * @return pointer to converted PT
    */
-  virtual utils::SharedPtr<policy_table::Table> Parse(
+  virtual std::shared_ptr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
 
  private:
@@ -741,8 +741,8 @@ class PolicyManagerImpl : public PolicyManager {
    * @return Collection per-application results
    */
   CheckAppPolicyResults CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
+      const std::shared_ptr<policy_table::Table> update,
+      const std::shared_ptr<policy_table::Table> snapshot);
 
   /**
    * @brief Processes results from policy table update analysis done by
@@ -865,7 +865,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @param type policy table type
    * @return true if policy table valid, otherwise false
    */
-  bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
+  bool IsPTValid(std::shared_ptr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1025,7 +1025,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief pointer to AccessRemote instance for working with RC applications
    */
-  utils::SharedPtr<AccessRemote> access_remote_;
+  std::shared_ptr<AccessRemote> access_remote_;
 #endif
 
   /**

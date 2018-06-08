@@ -12,7 +12,7 @@ namespace components {
 namespace remote_control_test {
 
 class RCAppExtension;
-typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;
+typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
 
 class MockRemotePluginInterface : public remote_control::RemotePluginInterface {
  public:

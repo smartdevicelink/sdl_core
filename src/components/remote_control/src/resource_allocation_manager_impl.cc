@@ -175,7 +175,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
   }
 
   rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+      std::static_pointer_cast<RCAppExtension>(
           app_extension);
 
   return rc_app_extension;

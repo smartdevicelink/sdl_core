@@ -60,7 +60,7 @@ using am::commands::MessageSharedPtr;
 using am::commands::UIIsReadyRequest;
 using am::event_engine::Event;
 
-typedef SharedPtr<UIIsReadyRequest> UIIsReadyRequestPtr;
+typedef std::shared_ptr<UIIsReadyRequest> UIIsReadyRequestPtr;
 
 class UIIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

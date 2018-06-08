@@ -65,17 +65,17 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
                 "enter DeviceUID: " << &device_uid
                                     << ", ApplicationHandle: " << &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
+  if (!device || device.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
     LOG4CXX_TRACE(
         logger_,
-        "exit with TransportAdapter::BAD_PARAM. Condition: !device.valid()");
+        "exit with TransportAdapter::BAD_PARAM. Condition: !utils::ValidSPtr(device)");
     return TransportAdapter::BAD_PARAM;
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  utils::SharedPtr<UsbConnection> connection =
-      utils::MakeShared<UsbConnection>(device_uid,
+  std::shared_ptr<UsbConnection> connection =
+      std::make_shared<UsbConnection>(device_uid,
                                        app_handle,
                                        controller_,
                                        usb_handler_,

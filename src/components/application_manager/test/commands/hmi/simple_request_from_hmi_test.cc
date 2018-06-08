@@ -51,7 +51,7 @@ using ::testing::Types;
 using ::testing::NotNull;
 using ::testing::NiceMock;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
 using ::application_manager::event_engine::EventObserver;
@@ -67,7 +67,7 @@ class RequestFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::RequestFromHMI> command(
+  std::shared_ptr<commands::RequestFromHMI> command(
       CreateCommand<commands::RequestFromHMI>());
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_ActivateApp);
@@ -79,7 +79,7 @@ TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
-  SharedPtr<commands::RequestFromHMI> command(
+  std::shared_ptr<commands::RequestFromHMI> command(
       CreateCommand<commands::RequestFromHMI>());
 
   const bool success = false;

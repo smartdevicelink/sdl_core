@@ -58,7 +58,7 @@ void ProtocolHandlerObserver::StartMessageProcess(
 }
 
 void ProtocolHandlerObserver::EndMessageProcess(
-    utils::SharedPtr<MessageMetric> m) {
+    std::shared_ptr<MessageMetric> m) {
   uint32_t message_id = m->message_id;
   std::map<uint32_t, TimevalStruct>::const_iterator it =
       time_starts.find(message_id);
@@ -68,7 +68,7 @@ void ProtocolHandlerObserver::EndMessageProcess(
   }
   m->begin = time_starts[message_id];
   m->end = date_time::DateTime::getCurrentTime();
-  ProtocolHandlerMecticWrapper* metric = new ProtocolHandlerMecticWrapper();
+  auto metric = std::make_shared<ProtocolHandlerMecticWrapper>();
   metric->message_metric = m;
   metric->grabResources();
   telemetry_monitor_->SendMetric(metric);

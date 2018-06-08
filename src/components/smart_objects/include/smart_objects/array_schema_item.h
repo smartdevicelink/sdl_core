@@ -55,7 +55,7 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CArraySchemaItem> create(
+  static std::shared_ptr<CArraySchemaItem> create(
       const ISchemaItemPtr ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
       const TSchemaItemParameter<size_t>& MinSize =
           TSchemaItemParameter<size_t>(),

@@ -319,18 +319,18 @@ TYPED_TEST_CASE(MobileCommandsTestSecond, MobileCommandsListSecond);
 TYPED_TEST_CASE(MobileCommandsTestThird, MobileCommandsListThird);
 
 TYPED_TEST(MobileCommandsTestFirst, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 
 TYPED_TEST(MobileCommandsTestSecond, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }
 TYPED_TEST(MobileCommandsTestThird, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   UNUSED(command);
 }

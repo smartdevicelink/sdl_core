@@ -393,7 +393,7 @@ TEST_F(SQLPTExtRepresentationTest,
   ASSERT_TRUE(reps_->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
   policy_table["module_meta"] = Json::Value(Json::objectValue);
@@ -1506,7 +1506,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   // Act
   EXPECT_TRUE(reps_->Save(original_table));
-  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+  std::shared_ptr<Table> loaded_table = reps_->GenerateSnapshot();
 
   // GetData/GetKeyData methods do internal existence check - no need to do it
   // separately. In case of data is missing expectations will be violated.
@@ -1591,7 +1591,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
 
   // Act
   EXPECT_TRUE(reps_->Save(original_table));
-  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+  std::shared_ptr<Table> loaded_table = reps_->GenerateSnapshot();
 
   FunctionalGroupings loaded_groupings =
       GetData<Table, FunctionalGroupings>(*loaded_table);

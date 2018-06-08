@@ -56,7 +56,7 @@ namespace mixing_audio_supported_response {
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::ResponseFromHMI;
@@ -65,7 +65,7 @@ using am::commands::CommandImpl;
 using am::HMICapabilities;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

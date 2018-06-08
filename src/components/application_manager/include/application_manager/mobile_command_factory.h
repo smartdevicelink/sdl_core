@@ -38,7 +38,7 @@
 
 namespace application_manager {
 
-typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+typedef std::shared_ptr<commands::Command> CommandSharedPtr;
 class ApplicationManager;
 
 /**

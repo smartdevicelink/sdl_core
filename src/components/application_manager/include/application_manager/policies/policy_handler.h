@@ -208,7 +208,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void add_listener(PolicyHandlerObserver* listener) OVERRIDE;
   void remove_listener(PolicyHandlerObserver* listener) OVERRIDE;
 
-  utils::SharedPtr<usage_statistics::StatisticsManager> GetStatisticManager()
+  std::shared_ptr<usage_statistics::StatisticsManager> GetStatisticManager()
       const OVERRIDE;
 
   /**
@@ -554,7 +554,7 @@ class PolicyHandler : public PolicyHandlerInterface,
            int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
-  void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
+  void SetPolicyManager(std::shared_ptr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
 #endif  // BUILD_TESTS
@@ -736,9 +736,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
  private:
   mutable sync_primitives::RWLock policy_manager_lock_;
-  utils::SharedPtr<PolicyManager> policy_manager_;
+  std::shared_ptr<PolicyManager> policy_manager_;
   void* dl_handle_;
-  utils::SharedPtr<PolicyEventObserver> event_observer_;
+  std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 
   /**
@@ -762,7 +762,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;
 
-  utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
+  std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;

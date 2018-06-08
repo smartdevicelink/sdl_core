@@ -237,7 +237,7 @@ class CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() = 0;
 
   /**
    * Applies policy table to the current table
@@ -828,11 +828,11 @@ class CacheManagerInterface {
    * @return SharedPTR to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
+  virtual std::shared_ptr<policy_table::Table> GetPT() const = 0;
 #endif
 };
 
-typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
+typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;
 
 }  // namespace policy
 

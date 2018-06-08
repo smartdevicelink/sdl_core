@@ -48,7 +48,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace rc_get_capabilities_response {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
@@ -56,7 +56,7 @@ namespace hmi_response = am::hmi_response;
 using am::commands::RCGetCapabilitiesResponse;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<RCGetCapabilitiesResponse> RCGetCapabilitiesResponsePtr;
+typedef std::shared_ptr<RCGetCapabilitiesResponse> RCGetCapabilitiesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

@@ -54,7 +54,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_device_list_request {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using testing::_;
 using testing::ReturnRef;
 using testing::Return;
@@ -68,7 +68,7 @@ using am::event_engine::Event;
 using am::commands::UpdateDeviceListRequest;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
+typedef std::shared_ptr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

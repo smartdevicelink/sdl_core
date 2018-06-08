@@ -112,7 +112,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(add_listener, void(policy::PolicyHandlerObserver* listener));
   MOCK_METHOD1(remove_listener, void(policy::PolicyHandlerObserver* listener));
   MOCK_CONST_METHOD0(GetStatisticManager,
-                     utils::SharedPtr<usage_statistics::StatisticsManager>());
+                     std::shared_ptr<usage_statistics::StatisticsManager>());
   MOCK_CONST_METHOD2(CheckSystemAction,
                      bool(mobile_apis::SystemAction::eType system_action,
                           const std::string& policy_app_id));

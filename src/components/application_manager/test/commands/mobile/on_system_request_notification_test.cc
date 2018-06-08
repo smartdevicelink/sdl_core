@@ -92,7 +92,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = request_type;
 
-  SharedPtr<OnSystemRequestNotification> command =
+  std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -137,7 +137,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = request_type;
 
-  SharedPtr<OnSystemRequestNotification> command =
+  std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -175,7 +175,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = request_type;
 
-  SharedPtr<OnSystemRequestNotification> command =
+  std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -200,7 +200,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][strings::request_type] = request_type;
 
-  SharedPtr<OnSystemRequestNotification> command =
+  std::shared_ptr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();

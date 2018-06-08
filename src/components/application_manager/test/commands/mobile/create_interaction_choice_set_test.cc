@@ -65,7 +65,7 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -77,9 +77,9 @@ namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef SharedPtr<CreateInteractionChoiceSetRequest>
+typedef std::shared_ptr<CreateInteractionChoiceSetRequest>
     CreateInteractionChoiceSetRequestPtr;
-typedef SharedPtr<CreateInteractionChoiceSetResponse>
+typedef std::shared_ptr<CreateInteractionChoiceSetResponse>
     CreateInteractionChoiceSetResponsePtr;
 
 typedef NiceMock<
@@ -170,7 +170,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
       am::mobile_api::Result::GENERIC_ERROR;
   (*msg_vr)[strings::msg_params][strings::success] = false;
 
-  utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
+  std::shared_ptr<CreateInteractionChoiceSetRequest> req_vr =
       CreateCommand<CreateInteractionChoiceSetRequest>();
 
   MockAppPtr mock_app = CreateMockApp();
@@ -201,7 +201,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::menu_name] =
       "menu_name";
   (*msg_vr)[strings::msg_params][strings::interaction_choice_set_id] = 11;
-  utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
+  std::shared_ptr<CreateInteractionChoiceSetRequest> req_vr =
       CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));

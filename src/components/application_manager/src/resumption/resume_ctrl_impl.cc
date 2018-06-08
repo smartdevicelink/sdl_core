@@ -72,7 +72,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
-    utils::SharedPtr<ResumptionData> mock_storage) {
+    std::shared_ptr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
 #endif  // BUILD_TESTS

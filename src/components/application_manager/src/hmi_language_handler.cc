@@ -222,7 +222,7 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
     const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  smart_objects::SmartObjectSPtr notification = std::make_shared<smart_objects::SmartObject>();
   DCHECK_OR_RETURN_VOID(notification);
   smart_objects::SmartObject& message = *notification;
   message[strings::params][strings::function_id] =

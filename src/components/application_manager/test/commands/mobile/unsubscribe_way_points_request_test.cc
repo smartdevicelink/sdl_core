@@ -78,7 +78,7 @@ class UnSubscribeWayPointsRequestTest
   }
 
   MessageSharedPtr command_msg_;
-  ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
+  ::std::shared_ptr<UnSubscribeWayPointsRequest> command_;
 };
 
 TEST_F(UnSubscribeWayPointsRequestTest,

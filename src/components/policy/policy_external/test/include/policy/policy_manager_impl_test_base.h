@@ -54,7 +54,7 @@ using ::policy::PolicyManagerImpl;
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
 
-typedef utils::SharedPtr<policy_table::Table> PolicyTableSPtr;
+typedef std::shared_ptr<policy_table::Table> PolicyTableSPtr;
 
 namespace {
 const std::string kSdlPreloadedPtJson = "json/sdl_preloaded_pt.json";
@@ -203,7 +203,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   void EmulatePTAppRevoked(const std::string& ptu_name);
 
-  utils::SharedPtr<policy_table::Table> PreconditionForBasicValidateSnapshot();
+  std::shared_ptr<policy_table::Table> PreconditionForBasicValidateSnapshot();
 
   template <typename ParentType, typename Value>
   bool IsKeyExisted(const ParentType& parent, const Value& value) const {
@@ -236,7 +236,7 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   const std::string app_storage_folder_;
   const std::string preloaded_pt_filename_;
 
-  utils::SharedPtr<PolicyManagerImpl> policy_manager_impl_sptr_;
+  std::shared_ptr<PolicyManagerImpl> policy_manager_impl_sptr_;
   NiceMock<MockPolicyListener> listener_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
 

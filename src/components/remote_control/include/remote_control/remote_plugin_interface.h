@@ -46,7 +46,7 @@ namespace remote_control {
 class RCAppExtension;
 class ResourceAllocationManager;
 
-typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;
+typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
 
 class RemotePluginInterface : public functional_modules::GenericModule {
  public:

@@ -91,7 +91,7 @@ void VIIsReadyRequest::onTimeOut() {
 }
 
 void VIIsReadyRequest::SendMessageToHMI() {
-  utils::SharedPtr<smart_objects::SmartObject> get_type(
+  std::shared_ptr<smart_objects::SmartObject> get_type(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
           application_manager_));

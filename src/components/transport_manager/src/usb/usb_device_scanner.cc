@@ -33,9 +33,9 @@
 #include <sstream>
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/usb_device.h"
+#include "transport_manager/usb/usb_device_scanner.h"
 
 #include "utils/logger.h"
 
@@ -232,7 +232,9 @@ void UsbDeviceScanner::UpdateList() {
     oss << (*it)->GetManufacturer() << ":" << (*it)->GetProductName() << ":"
         << (*it)->GetSerialNumber();
     const DeviceUID device_uid = oss.str();
-    DeviceSptr device(new UsbDevice(*it, device_name, device_uid));
+    // Pass empty destructor to match protected one
+    DeviceSptr device(new UsbDevice(*it, device_name, device_uid),
+                      [](UsbDevice* dev) {});
     device_vector.push_back(device);
   }
   devices_mutex_.Release();
@@ -247,5 +249,5 @@ bool UsbDeviceScanner::IsInitialised() const {
   return true;
 }
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager

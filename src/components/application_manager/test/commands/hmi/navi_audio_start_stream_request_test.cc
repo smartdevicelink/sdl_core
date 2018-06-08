@@ -75,7 +75,7 @@ class AudioStartStreamRequestTest
 
   std::pair<uint32_t, int32_t> start_stream_retry_amount_;
   MessageSharedPtr msg_;
-  SharedPtr<AudioStartStreamRequest> command_;
+  std::shared_ptr<AudioStartStreamRequest> command_;
 };
 
 TEST_F(AudioStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {

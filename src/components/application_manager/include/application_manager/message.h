@@ -132,8 +132,8 @@ class Message {
   protocol_handler::MajorProtocolVersion version_;
 };
 
-typedef utils::SharedPtr<application_manager::Message> MobileMessage;
-typedef utils::SharedPtr<application_manager::Message> MessagePtr;
+typedef std::shared_ptr<application_manager::Message> MobileMessage;
+typedef std::shared_ptr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

@@ -56,14 +56,14 @@ namespace on_driver_distraction_notification {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::Eq;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::hmi::OnDriverDistractionNotification;
 using namespace am::commands;
 
-typedef ::utils::SharedPtr<OnDriverDistractionNotification> NotificationPtr;
+typedef ::std::shared_ptr<OnDriverDistractionNotification> NotificationPtr;
 
 class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {

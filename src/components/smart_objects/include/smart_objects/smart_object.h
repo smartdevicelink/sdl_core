@@ -126,7 +126,7 @@ typedef std::map<std::string, SmartObject> SmartMap;
  **/
 typedef std::vector<uint8_t> SmartBinary;
 
-typedef utils::SharedPtr<SmartObject> SmartObjectSPtr;
+typedef std::shared_ptr<SmartObject> SmartObjectSPtr;
 
 /**
  * @brief List of SmartObjects

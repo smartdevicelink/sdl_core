@@ -67,7 +67,7 @@ const std::string kPath =
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
-    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock = std::make_shared<NiceMock<MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;

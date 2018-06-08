@@ -81,10 +81,10 @@ namespace on_interior_vehicle_data_notification_test {
 class OnInteriorVehicleDataNotificationTest : public ::testing::Test {
  public:
   OnInteriorVehicleDataNotificationTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(
-            utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
+            std::make_shared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(mock_module_, service()).WillByDefault(Return(mock_service_));
     ServicePtr exp_service(mock_service_);
     mock_module_.set_service(exp_service);
@@ -96,7 +96,7 @@ class OnInteriorVehicleDataNotificationTest : public ::testing::Test {
   }
 
   application_manager::MessagePtr CreateBasicMessage() {
-    application_manager::MessagePtr message = utils::MakeShared<Message>(
+    application_manager::MessagePtr message = std::make_shared<Message>(
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_function_id(RCFunctionID::ON_INTERIOR_VEHICLE_DATA);
     message->set_function_name("OnInteriorVehicleData");
@@ -105,9 +105,9 @@ class OnInteriorVehicleDataNotificationTest : public ::testing::Test {
   }
 
  protected:
-  utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
-  utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
+  std::shared_ptr<NiceMock<application_manager::MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<remote_control::RCAppExtension> rc_app_extention_;
   remote_control_test::MockRemotePluginInterface mock_module_;
   std::vector<ApplicationSharedPtr> apps_;
 };

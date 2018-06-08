@@ -60,7 +60,7 @@ void AppLaunchCtrlImpl::OnAppRegistered(
     const application_manager::Application& app) {
   LOG4CXX_AUTO_TRACE(logger_);
   // TODO (AKutsan) : get device mac
-  ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+  ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
       app.policy_app_id(), app.bundle_id(), app.mac_address());
   apps_launcher_.OnLaunched(app_data);
   app_launch_data_.AddApplicationData(*app_data);

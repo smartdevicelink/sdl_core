@@ -44,7 +44,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace vr_get_language_response {
 
-using utils::SharedPtr;
+using std::shared_ptr;
 using application_manager::commands::VRGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
@@ -70,7 +70,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
-  SharedPtr<VRGetLanguageResponse> command(
+  std::shared_ptr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;
@@ -89,7 +89,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 TEST_F(VRGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<VRGetLanguageResponse> command(
+  std::shared_ptr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;

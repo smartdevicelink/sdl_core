@@ -151,7 +151,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 using ::testing::InSequence;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::smart_objects::SmartObject;
 using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;
@@ -164,7 +164,7 @@ using ::application_manager::MockMessageHelper;
 
 using namespace am::commands;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
@@ -405,7 +405,7 @@ TYPED_TEST_CASE(HMIOnNotificationsEventDispatcher,
 TYPED_TEST(HMIOnViNotifications, CommandsSendNotificationToMobile) {
   MessageSharedPtr message =
       commands_test::CommandsTest<kIsNice>::CreateMessage();
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>(message);
   EXPECT_CALL(commands_test::CommandsTest<kIsNice>::app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
@@ -420,7 +420,7 @@ TYPED_TEST(HMIOnViNotifications, CommandsSendNotificationToMobile) {
 TYPED_TEST(HMIOnNotificationsListToHMI, CommandsSendNotificationToHmi) {
   MessageSharedPtr message =
       commands_test::CommandsTest<kIsNice>::CreateMessage();
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>(message);
   EXPECT_CALL(commands_test::CommandsTest<kIsNice>::app_mngr_,
               SendMessageToHMI(_));
@@ -438,7 +438,7 @@ TYPED_TEST(HMIOnNotificationsEventDispatcher,
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message =
       commands_test::CommandsTest<kIsNice>::CreateMessage();
-  utils::SharedPtr<typename TestFixture::CommandType::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType::CommandType> command =
       this->template CreateCommand<
           typename TestFixture::CommandType::CommandType>(message);
   EXPECT_CALL(commands_test::CommandsTest<kIsNice>::app_mngr_,
@@ -453,7 +453,7 @@ TYPED_TEST(HMIOnNotificationsEventDispatcher,
 // notifications(SendNotificationToMobile)
 TEST_F(HMICommandsNotificationsTest, OnButtonEventSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnButtonEventNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -467,7 +467,7 @@ TEST_F(HMICommandsNotificationsTest, OnButtonEventSendNotificationToMobile) {
 
 TEST_F(HMICommandsNotificationsTest, OnNaviTBTClientSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnNaviTBTClientStateNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -482,7 +482,7 @@ TEST_F(HMICommandsNotificationsTest, OnNaviTBTClientSendNotificationToMobile) {
 TEST_F(HMICommandsNotificationsTest,
        OnNaviWayPointChangeSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnNaviWayPointChangeNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -496,7 +496,7 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest, OnUICommandSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnUICommandNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -514,7 +514,7 @@ TEST_F(HMICommandsNotificationsTest, OnUICommandSendNotificationToMobile) {
 TEST_F(HMICommandsNotificationsTest,
        OnUIKeyBoardInputSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnUIKeyBoardInputNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -528,7 +528,7 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest, OnUITouchEventSendNotificationToMobile) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnUITouchEventNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -544,7 +544,7 @@ TEST_F(HMICommandsNotificationsTest,
        OnAppRegisteredNotificationSendNotificationToHmi) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppRegisteredNotification>(message);
 
   EXPECT_CALL(app_mngr_, SendMessageToHMI(_));
@@ -567,7 +567,7 @@ TEST_F(HMICommandsNotificationsTest,
        OnAppUnregisteredNotificationEventDispatcher) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppUnregisteredNotification>(message);
 
   EXPECT_CALL(app_mngr_, SendMessageToHMI(_));
@@ -589,7 +589,7 @@ TEST_F(HMICommandsNotificationsTest,
 TEST_F(HMICommandsNotificationsTest, OnButtonPressNotificationEventDispatcher) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnButtonPressNotification>(message);
 
   EXPECT_CALL(app_mngr_,
@@ -607,7 +607,7 @@ TEST_F(HMICommandsNotificationsTest, OnButtonPressNotificationEventDispatcher) {
 TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnReadyNotification>(message);
 
   EXPECT_CALL(app_mngr_, OnHMIStartedCooperation());
@@ -622,7 +622,7 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
 TEST_F(HMICommandsNotificationsTest,
        OnIgnitionCycleOverNotificationPolicyHandler) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnIgnitionCycleOverNotification>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
@@ -632,7 +632,7 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest, OnPolicyUpdateNotificationPolicyHandler) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command = CreateCommand<OnPolicyUpdate>(message);
+  std::shared_ptr<Command> command = CreateCommand<OnPolicyUpdate>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
   EXPECT_CALL(policy_interface_, OnPTExchangeNeeded());
@@ -650,7 +650,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   MessageSharedPtr message = CreateMessage(smart_objects::SmartType_String);
   (*message)[am::strings::msg_params][am::hmi_notification::policyfile] = kFile;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnReceivedPolicyUpdate>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
@@ -663,7 +663,7 @@ TEST_F(HMICommandsNotificationsTest,
 TEST_F(HMICommandsNotificationsTest,
        OnReceivePolicyUpdateNotification_UNSUCCESS) {
   MessageSharedPtr message = CreateMessage(smart_objects::SmartType_String);
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnReceivedPolicyUpdate>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
@@ -682,7 +682,7 @@ TEST_F(HMICommandsNotificationsTest,
   smart_objects::SmartObject hmi_application_temp(smart_objects::SmartType_Map);
   applications[0] = hmi_application_temp;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppPermissionConsentNotification>(message);
 
   int32_t connection_id = -1;
@@ -705,11 +705,11 @@ TEST_F(HMICommandsNotificationsTest,
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*message)[am::strings::msg_params]["consentedFunctions"][0] =
       *consented_function;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppPermissionConsentNotification>(message);
 
   int32_t connection_id = -1;
@@ -740,14 +740,14 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params]["source"] = "test_content_source";
 
   smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*consented_function)["allowed"] = true;
   (*consented_function)[am::strings::id] = 999;
   (*consented_function)[am::strings::name] = "test_group_alias";
   (*message)[am::strings::msg_params]["consentedFunctions"][0] =
       *consented_function;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppPermissionConsentNotification>(message);
 
   int32_t connection_id = -1;
@@ -782,14 +782,14 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params]["source"] = "test_content_source";
 
   smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*consented_function)["allowed"] = false;
   (*consented_function)[am::strings::id] = 999;
   (*consented_function)[am::strings::name] = "test_group_alias";
   (*message)[am::strings::msg_params]["consentedFunctions"][0] =
       *consented_function;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAppPermissionConsentNotification>(message);
 
   int32_t connection_id = -1;
@@ -821,7 +821,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::hmi_notification::error] =
       hmi_apis::Common_SystemError::SYNC_REBOOTED;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemErrorNotification>(message);
 
   int32_t code = hmi_apis::Common_SystemError::INVALID_ENUM;
@@ -838,7 +838,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLangCode;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemInfoChangedNotification>(message);
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_));
@@ -852,7 +852,7 @@ TEST_F(HMICommandsNotificationsTest,
   const std::string kDeviceId = "";
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_response::allowed] = true;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAllowSDLFunctionalityNotification>(message);
 
   bool value = false;
@@ -871,7 +871,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_response::allowed] = true;
   (*message)[am::strings::msg_params]["device"]["id"] = kDeviceId;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnAllowSDLFunctionalityNotification>(message);
 
   bool value;
@@ -889,7 +889,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params]["deviceState"] =
       hmi_apis::Common_DeviceState::INVALID_ENUM;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
@@ -906,7 +906,7 @@ TEST_F(HMICommandsNotificationsTest,
       hmi_apis::Common_DeviceState::UNPAIRED;
   (*message)[am::strings::msg_params]["deviceInternalId"] = device_id;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
@@ -922,7 +922,7 @@ TEST_F(HMICommandsNotificationsTest,
       hmi_apis::Common_DeviceState::UNPAIRED;
   (*message)[am::strings::msg_params]["deviceInternalId"] = empty_device_id;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
@@ -942,7 +942,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params]["deviceInternalId"] = empty_device_id;
   (*message)[am::strings::msg_params]["deviceId"]["id"] = id;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
   std::string device_id = "default_id";
@@ -959,7 +959,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::hmi_request::reason] =
       hmi_apis::Common_ApplicationsCloseReason::IGNITION_OFF;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitAllApplicationsNotification>(message);
 #if defined(OS_POSIX)
   am::mobile_api::AppInterfaceUnregisteredReason::eType mob_reason;
@@ -1001,7 +1001,7 @@ TEST_F(HMICommandsNotificationsTest,
   for (; it_reason != reason_list.end(); ++it_reason, ++it_mob_reason) {
     (*message)[am::strings::msg_params][am::hmi_request::reason] = *it_reason;
 
-    utils::SharedPtr<Command> command =
+    std::shared_ptr<Command> command =
         CreateCommand<OnExitAllApplicationsNotification>(message);
 #if defined(OS_POSIX)
     am::mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
@@ -1023,7 +1023,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::hmi_request::reason] =
       hmi_apis::Common_ApplicationsCloseReason::SUSPEND;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitAllApplicationsNotification>(message);
 
   MessageSharedPtr ethalon_message =
@@ -1065,7 +1065,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::hmi_request::reason] =
       hmi_apis::Common_ApplicationsCloseReason::INVALID_ENUM;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitAllApplicationsNotification>(message);
 
   EXPECT_CALL(app_mngr_, SetUnregisterAllApplicationsReason(_)).Times(0);
@@ -1080,7 +1080,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(
           mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
@@ -1108,7 +1108,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   for (; it_reason != reason_list.end(); ++it_reason, ++it_mobile_reason) {
     (*message)[am::strings::msg_params][am::strings::reason] = *it_reason;
-    utils::SharedPtr<Command> command =
+    std::shared_ptr<Command> command =
         CreateCommand<OnExitApplicationNotification>(message);
 
     (*notification)[am::strings::msg_params][am::strings::reason] =
@@ -1141,7 +1141,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::strings::reason] =
       hmi_apis::Common_ApplicationExitReason::INVALID_ENUM;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1162,7 +1162,7 @@ TEST_F(HMICommandsNotificationsTest, OnExitApplicationNotificationInvalidApp) {
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
 
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
   am::ApplicationSharedPtr invalid_app;
@@ -1180,7 +1180,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::reason] =
       hmi_apis::Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
@@ -1201,7 +1201,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::reason] =
       hmi_apis::Common_ApplicationExitReason::USER_EXIT;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1230,7 +1230,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::cmd_id] = cmd_id;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
@@ -1252,7 +1252,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   am::ApplicationSharedPtr invalid_app;
@@ -1271,7 +1271,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
@@ -1288,7 +1288,7 @@ TEST_F(HMICommandsNotificationsTest,
 
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   am::ApplicationSharedPtr invalid_app;
@@ -1309,7 +1309,7 @@ TEST_F(HMICommandsNotificationsTest,
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
@@ -1335,7 +1335,7 @@ TEST_F(HMICommandsNotificationsTest,
   (*message)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
   (*message)[am::strings::msg_params][am::strings::function_id] =
       mobile_apis::FunctionID::eType::OnCommandID;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRCommandNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
@@ -1362,7 +1362,7 @@ TEST_F(HMICommandsNotificationsTest, OnVRLanguageChangeNotificationEmptyData) {
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRLanguageChangeNotification>(message);
 
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
@@ -1382,7 +1382,7 @@ TEST_F(HMICommandsNotificationsTest,
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
@@ -1417,12 +1417,12 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] =
       mobile_apis::Language::EN_US;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnVRLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =
@@ -1472,7 +1472,7 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest, OnStartDeviceDiscoveryRun) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnStartDeviceDiscovery>(message);
   EXPECT_CALL(app_mngr_, StartDevicesDiscovery());
   command->Run();
@@ -1483,7 +1483,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::device_info]
             [am::strings::id] = "2014";
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceChosenNotification>(message);
   EXPECT_CALL(app_mngr_,
               ConnectToDevice(
@@ -1495,7 +1495,7 @@ TEST_F(HMICommandsNotificationsTest,
 TEST_F(HMICommandsNotificationsTest,
        OnDeviceChosenNotificationDeviceInfoNotExists) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnDeviceChosenNotification>(message);
   EXPECT_CALL(app_mngr_, ConnectToDevice(_)).Times(0);
   command->Run();
@@ -1516,7 +1516,7 @@ TEST_F(HMICommandsNotificationsTest,
   for (; it != system_context_list.end(); ++it) {
     (*message)[am::strings::msg_params][am::hmi_notification::system_context] =
         *it;
-    utils::SharedPtr<Command> command =
+    std::shared_ptr<Command> command =
         CreateCommand<OnSystemContextNotification>(message);
     EXPECT_CALL(app_mngr_, active_application()).WillOnce(Return(app_));
     EXPECT_CALL(app_mngr_, state_controller())
@@ -1531,7 +1531,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::system_context] =
       am::mobile_api::SystemContext::SYSCTXT_VRSESSION;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemContextNotification>(message);
   ApplicationSharedPtr invalid_app;
   EXPECT_CALL(app_mngr_, active_application()).WillOnce(Return(invalid_app));
@@ -1544,7 +1544,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::system_context] =
       am::mobile_api::SystemContext::INVALID_ENUM;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemContextNotification>(message);
   EXPECT_CALL(app_mngr_, active_application()).Times(0);
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
@@ -1565,7 +1565,7 @@ TEST_F(HMICommandsNotificationsTest,
   for (; it != system_context_list.end(); ++it) {
     (*message)[am::strings::msg_params][am::hmi_notification::system_context] =
         *it;
-    utils::SharedPtr<Command> command =
+    std::shared_ptr<Command> command =
         CreateCommand<OnSystemContextNotification>(message);
     EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
     EXPECT_CALL(app_mngr_, state_controller())
@@ -1580,7 +1580,7 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::system_context] =
       am::mobile_api::SystemContext::SYSCTXT_ALERT;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemContextNotification>(message);
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
   EXPECT_CALL(app_mngr_, state_controller()).Times(0);
@@ -1591,7 +1591,7 @@ TEST_F(HMICommandsNotificationsTest,
        OnSystemRequestNotificationAppIdExistsAndValidApp) {
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(app_));
@@ -1626,7 +1626,7 @@ TEST_F(HMICommandsNotificationsTest,
        OnSystemRequestNotificationAppIdExistsAndInvalidApp) {
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
   ApplicationSharedPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(invalid_app));
@@ -1641,7 +1641,7 @@ TEST_F(HMICommandsNotificationsTest,
 TEST_F(HMICommandsNotificationsTest,
        OnSystemRequestNotificationAppIdDoesntExistsAndValidApp) {
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(ReturnRef(policy_interface_));
@@ -1678,7 +1678,7 @@ TEST_F(HMICommandsNotificationsTest,
        OnSystemRequestNotificationAppIdDoesntExistsAndNullAppId) {
   const uint32_t kNullApppId = 0u;
   MessageSharedPtr message = CreateMessage();
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
   EXPECT_CALL(policy_interface_, GetAppIdForSending())
@@ -1692,7 +1692,7 @@ TEST_F(HMICommandsNotificationsTest, OnTTSLanguageChangeNotificationEmptyData) {
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnTTSLanguageChangeNotification>(message);
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
@@ -1713,7 +1713,7 @@ TEST_F(HMICommandsNotificationsTest,
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnTTSLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
@@ -1749,12 +1749,12 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] =
       mobile_apis::Language::EN_US;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnTTSLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =
@@ -1803,7 +1803,7 @@ TEST_F(HMICommandsNotificationsTest, OnUILanguageChangeNotificationEmptyData) {
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnUILanguageChangeNotification>(message);
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(_));
@@ -1823,7 +1823,7 @@ TEST_F(HMICommandsNotificationsTest,
   const mobile_apis::Language::eType& kLang = mobile_apis::Language::EN_GB;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] = kLang;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnUILanguageChangeNotification>(message);
 
   application_set_.insert(app_);
@@ -1858,12 +1858,12 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::language] =
       mobile_apis::Language::EN_US;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<OnUILanguageChangeNotification>(message);
 
   application_set_.insert(app_);
   smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =
@@ -1912,7 +1912,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
@@ -1929,7 +1929,7 @@ TEST_F(HMICommandsNotificationsTest,
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   ApplicationSharedPtr invalid_app;
@@ -1946,7 +1946,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::mobile_notification::state] = state;
-  utils::SharedPtr<Command> command =
+  std::shared_ptr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);

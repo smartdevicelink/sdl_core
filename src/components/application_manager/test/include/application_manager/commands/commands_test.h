@@ -57,7 +57,7 @@ using ::testing::NiceMock;
 using ::testing::Mock;
 using ::testing::_;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::smart_objects::SmartObject;
 using am::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;
@@ -100,7 +100,7 @@ class CommandsTest : public ::testing::Test {
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;
-  typedef SharedPtr<MockApp> MockAppPtr;
+  typedef std::shared_ptr<MockApp> MockAppPtr;
 
   virtual ~CommandsTest() {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
@@ -108,31 +108,31 @@ class CommandsTest : public ::testing::Test {
 
   static MessageSharedPtr CreateMessage(
       const smart_objects::SmartType type = smart_objects::SmartType_Null) {
-    return ::utils::MakeShared<SmartObject>(type);
+    return ::std::make_shared<SmartObject>(type);
   }
 
   static MockAppPtr CreateMockApp() {
-    return ::utils::MakeShared<MockApp>();
+    return ::std::make_shared<MockApp>();
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(const uint32_t timeout,
+  std::shared_ptr<Command> CreateCommand(const uint32_t timeout,
                                    MessageSharedPtr& msg) {
     InitCommand(timeout);
-    return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
+    return ::std::make_shared<Command>((msg ? msg : msg = CreateMessage()),
                                         app_mngr_);
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(MessageSharedPtr& msg) {
+  std::shared_ptr<Command> CreateCommand(MessageSharedPtr& msg) {
     return CreateCommand<Command>(kDefaultTimeout_, msg);
   }
 
   template <class Command>
-  SharedPtr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
+  std::shared_ptr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
-    return ::utils::MakeShared<Command>(msg, app_mngr_);
+    return ::std::make_shared<Command>(msg, app_mngr_);
   }
 
   enum { kDefaultTimeout_ = 100 };

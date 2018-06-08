@@ -23,7 +23,7 @@ using ::testing::_;
 using am::commands::UnsubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnsubscribeButtonRequest> CommandPtr;
+typedef ::std::shared_ptr<UnsubscribeButtonRequest> CommandPtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;

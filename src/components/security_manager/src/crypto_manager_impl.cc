@@ -81,7 +81,7 @@ void free_ctx(SSL_CTX** ctx) {
 }
 
 CryptoManagerImpl::CryptoManagerImpl(
-    const utils::SharedPtr<const CryptoManagerSettings> set)
+    const std::shared_ptr<const CryptoManagerSettings> set)
     : settings_(set), context_(NULL) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(instance_lock_);

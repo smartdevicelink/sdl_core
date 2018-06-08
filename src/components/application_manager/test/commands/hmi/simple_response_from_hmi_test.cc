@@ -119,7 +119,7 @@ using ::testing::ReturnRef;
 using ::testing::Types;
 using ::testing::Eq;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
@@ -260,7 +260,7 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandData CommandData;
   typedef typename CommandData::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->event_dispatcher_,
               raise_event(EventIdIsEqualTo(CommandData::kEventId)));
@@ -271,7 +271,7 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(EmptyResponseFromHMICommandsTest, Run_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   command->Run();
 }
@@ -290,7 +290,7 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_response::vehicle_type] =
       kVehicleType;
 
-  SharedPtr<commands::VIGetVehicleTypeResponse> command(
+  std::shared_ptr<commands::VIGetVehicleTypeResponse> command(
       CreateCommand<commands::VIGetVehicleTypeResponse>(command_msg));
 
   application_manager_test::MockHMICapabilities hmi_capabilities;
@@ -304,7 +304,7 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
 }
 
 TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
-  SharedPtr<commands::VIIsReadyResponse> command(
+  std::shared_ptr<commands::VIIsReadyResponse> command(
       CreateCommand<commands::VIIsReadyResponse>());
 
   MockEventDispatcher mock_event_dispatcher;
@@ -325,7 +325,7 @@ class NotificationFromHMITest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(NotificationFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::NotificationFromHMI> command(
+  std::shared_ptr<commands::NotificationFromHMI> command(
       CreateCommand<commands::NotificationFromHMI>());
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
@@ -338,7 +338,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::message_type] =
       static_cast<int32_t>(am::MessageType::kNotification);
 
-  SharedPtr<commands::NotificationFromHMI> command(
+  std::shared_ptr<commands::NotificationFromHMI> command(
       CreateCommand<commands::NotificationFromHMI>());
 
   EXPECT_CALL(
@@ -352,7 +352,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params] = 0;
-  SharedPtr<commands::NotificationFromHMI> command(
+  std::shared_ptr<commands::NotificationFromHMI> command(
       CreateCommand<commands::NotificationFromHMI>(command_msg));
 
   const uint32_t correlation_id = 1u;

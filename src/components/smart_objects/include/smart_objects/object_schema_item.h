@@ -82,7 +82,7 @@ class CObjectSchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
+  static std::shared_ptr<CObjectSchemaItem> create(const Members& Members);
   /**
    * @deprecated
    * @brief Validate smart object.

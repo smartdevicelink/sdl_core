@@ -72,13 +72,13 @@ void OnInteriorVehicleDataNotification::Execute() {
     application_manager::Application& app = **it;
 
     RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
+        std::static_pointer_cast<
             RCAppExtension>(app.QueryInterface(rc_module_.GetModuleID()));
     DCHECK(extension);
     LOG4CXX_TRACE(logger_, "Check subscription for " << app.app_id());
     if (extension->IsSubscibedToInteriorVehicleData(module_type)) {
       application_manager::MessagePtr message =
-          utils::MakeShared<application_manager::Message>(*msg);
+          std::make_shared<application_manager::Message>(*msg);
       message->set_message_type(
           application_manager::MessageType::kNotification);
       message->set_protocol_version(app.protocol_version());

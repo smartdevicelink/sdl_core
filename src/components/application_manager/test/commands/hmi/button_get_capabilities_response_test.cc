@@ -51,7 +51,7 @@ using ::testing::NiceMock;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef ::utils::SharedPtr<ButtonGetCapabilitiesResponse> ResponsePtr;
+typedef ::std::shared_ptr<ButtonGetCapabilitiesResponse> ResponsePtr;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>

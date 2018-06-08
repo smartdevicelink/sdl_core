@@ -79,7 +79,7 @@ enum PolicyTableStatus {
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
-typedef utils::SharedPtr<BinaryMessage> BinaryMessageSptr;
+typedef std::shared_ptr<BinaryMessage> BinaryMessageSptr;
 
 typedef std::string HMILevel;
 typedef std::string Parameter;

@@ -63,9 +63,9 @@ using am::commands::DeleteInteractionChoiceSetResponse;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 
-typedef SharedPtr<DeleteInteractionChoiceSetRequest>
+typedef std::shared_ptr<DeleteInteractionChoiceSetRequest>
     DeleteInteractionChoiceSetRequestPtr;
-typedef SharedPtr<DeleteInteractionChoiceSetResponse>
+typedef std::shared_ptr<DeleteInteractionChoiceSetResponse>
     DeleteInteractionChoiceSetResponsePtr;
 
 MATCHER_P(CheckMessageSuccess, success, "") {

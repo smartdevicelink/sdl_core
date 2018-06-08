@@ -50,7 +50,7 @@ using application_manager::commands::AllowAllAppsResponse;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef ::utils::SharedPtr<AllowAllAppsResponse> ResponsePtr;
+typedef ::std::shared_ptr<AllowAllAppsResponse> ResponsePtr;
 
 namespace {
 const bool kResponseIsAllowed = true;

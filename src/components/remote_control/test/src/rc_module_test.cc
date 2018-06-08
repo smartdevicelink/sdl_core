@@ -78,16 +78,16 @@ namespace remote_control {
 class RCModuleTest : public ::testing::Test {
  public:
   RCModuleTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
       , mock_settings_(
-            utils::MakeShared<NiceMock<MockApplicationManagerSettings> >())
+            std::make_shared<NiceMock<MockApplicationManagerSettings> >())
       , mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , app0_(utils::MakeShared<NiceMock<MockApplication> >())
-      , app1_(utils::MakeShared<NiceMock<MockApplication> >())
-      , message_(utils::MakeShared<Message>(MessagePriority::FromServiceType(
+      , app0_(std::make_shared<NiceMock<MockApplication> >())
+      , app1_(std::make_shared<NiceMock<MockApplication> >())
+      , message_(std::make_shared<Message>(MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kRpc)))
       , rc_app_extention_(
-            utils::MakeShared<RCAppExtension>(module_.GetModuleID())) {}
+            std::make_shared<RCAppExtension>(module_.GetModuleID())) {}
 
   void HandleMessage() {
     module_.ProcessHMIMessage(message_);
@@ -95,14 +95,14 @@ class RCModuleTest : public ::testing::Test {
 
  protected:
   RemoteControlPlugin module_;
-  utils::SharedPtr<NiceMock<MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplicationManagerSettings> > mock_settings_;
+  std::shared_ptr<NiceMock<MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplicationManagerSettings> > mock_settings_;
   MockMessageHelper& mock_message_helper_;
   std::vector<ApplicationSharedPtr> apps_;
-  utils::SharedPtr<NiceMock<MockApplication> > app0_;
-  utils::SharedPtr<NiceMock<MockApplication> > app1_;
+  std::shared_ptr<NiceMock<MockApplication> > app0_;
+  std::shared_ptr<NiceMock<MockApplication> > app1_;
   application_manager::MessagePtr message_;
-  utils::SharedPtr<RCAppExtension> rc_app_extention_;
+  std::shared_ptr<RCAppExtension> rc_app_extention_;
 
   void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);

@@ -46,36 +46,36 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControl")
 
 using functional_modules::RCFunctionID;
 
-utils::SharedPtr<commands::Command> RCCommandFactory::CreateCommand(
+std::shared_ptr<commands::Command> RCCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg,
     RemotePluginInterface& rc_module) {
   switch (msg->function_id()) {
     case RCFunctionID::GET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(
+      return std::make_shared<commands::GetInteriorVehicleDataRequest>(
           msg, rc_module);
       break;
     }
     case RCFunctionID::SET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(
+      return std::make_shared<commands::SetInteriorVehicleDataRequest>(
           msg, rc_module);
       break;
     }
     case RCFunctionID::BUTTON_PRESS: {
-      return utils::MakeShared<commands::ButtonPressRequest>(msg, rc_module);
+      return std::make_shared<commands::ButtonPressRequest>(msg, rc_module);
       break;
     }
     case RCFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
+      return std::make_shared<commands::OnInteriorVehicleDataNotification>(
           msg, rc_module);
       break;
     }
     case RCFunctionID::ON_REMOTE_CONTROL_SETTINGS: {
-      return utils::MakeShared<commands::OnRemoteControlSettingsNotification>(
+      return std::make_shared<commands::OnRemoteControlSettingsNotification>(
           msg, rc_module);
       break;
     }
     default: {
-      utils::SharedPtr<commands::Command> invalid_command;
+      std::shared_ptr<commands::Command> invalid_command;
       LOG4CXX_DEBUG(logger_,
                     "RSDL unable to proces function " << msg->function_id());
       return invalid_command;

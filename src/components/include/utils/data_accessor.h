@@ -66,7 +66,7 @@ class DataAccessor {
   void* operator new(size_t size);
   const T& data_;
   sync_primitives::Lock& lock_;
-  utils::SharedPtr<uint32_t> counter_;
+  std::shared_ptr<uint32_t> counter_;
 };
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_

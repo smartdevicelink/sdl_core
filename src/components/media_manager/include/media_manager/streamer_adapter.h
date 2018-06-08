@@ -96,7 +96,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   DISALLOW_COPY_AND_ASSIGN(StreamerAdapter);
 };
 
-typedef utils::SharedPtr<StreamerAdapter> StreamerAdapterPtr;
+typedef std::shared_ptr<StreamerAdapter> StreamerAdapterPtr;
 
 }  // namespace media_manager
 

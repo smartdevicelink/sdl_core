@@ -64,7 +64,7 @@ static const uint16_t kApplePid8 = 0x12a8;  // iPhone 5
 
 static const int kUsbConfiguration = 1;
 
-typedef utils::SharedPtr<UsbHandler> UsbHandlerSptr;
+typedef std::shared_ptr<UsbHandler> UsbHandlerSptr;
 
 class UsbDeviceListener {
  public:

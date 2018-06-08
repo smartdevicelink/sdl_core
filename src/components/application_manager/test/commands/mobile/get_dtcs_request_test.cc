@@ -64,7 +64,7 @@ using am::MockMessageHelper;
 using testing::Mock;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
+typedef std::shared_ptr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

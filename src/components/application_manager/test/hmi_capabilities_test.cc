@@ -81,7 +81,7 @@ class HMICapabilitiesTest : public ::testing::Test {
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
         .WillOnce(Return(false));
     hmi_capabilities_test =
-        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
+        std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
     hmi_capabilities_test->Init(&last_state_);
   }
 
@@ -99,7 +99,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
   resumption::LastStateImpl last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
 };
 
@@ -499,8 +499,8 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only phone capability is available
@@ -539,8 +539,8 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(&last_state_);
 
   // Check system capabilities; only navigation capability is valid, the other

@@ -48,7 +48,7 @@ using testing::NiceMock;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  utils::SharedPtr<UpdateStatusManager> manager_;
+  std::shared_ptr<UpdateStatusManager> manager_;
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   NiceMock<MockPolicyListener> listener_;
@@ -58,7 +58,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
  public:
   UpdateStatusManagerTest()
-      : manager_(utils::MakeShared<UpdateStatusManager>())
+      : manager_(std::make_shared<UpdateStatusManager>())
       , k_timeout_(1000)
       , listener_()
       , up_to_date_status_("UP_TO_DATE")

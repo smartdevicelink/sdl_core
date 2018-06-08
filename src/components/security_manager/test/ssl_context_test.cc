@@ -108,9 +108,9 @@ class SSLTest : public testing::Test {
   }
 
   virtual void SetUp() OVERRIDE {
-    mock_crypto_manager_settings_ = utils::MakeShared<
+    mock_crypto_manager_settings_ = std::make_shared<
         NiceMock<security_manager_test::MockCryptoManagerSettings> >();
-    utils::SharedPtr<security_manager::CryptoManagerSettings> crypto_set(
+    std::shared_ptr<security_manager::CryptoManagerSettings> crypto_set(
         mock_crypto_manager_settings_);
     crypto_manager_ = new security_manager::CryptoManagerImpl(crypto_set);
 
@@ -130,9 +130,9 @@ class SSLTest : public testing::Test {
     const bool crypto_manager_initialization = crypto_manager_->Init();
     EXPECT_TRUE(crypto_manager_initialization);
 
-    mock_client_manager_settings_ = utils::MakeShared<
+    mock_client_manager_settings_ = std::make_shared<
         NiceMock<security_manager_test::MockCryptoManagerSettings> >();
-    utils::SharedPtr<security_manager::CryptoManagerSettings> client_crypto(
+    std::shared_ptr<security_manager::CryptoManagerSettings> client_crypto(
         mock_client_manager_settings_);
     client_manager_ = new security_manager::CryptoManagerImpl(client_crypto);
 
@@ -190,9 +190,9 @@ class SSLTest : public testing::Test {
   const size_t kMaximumPayloadSize = 1000u;
   security_manager::CryptoManager* crypto_manager_;
   security_manager::CryptoManager* client_manager_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
+  std::shared_ptr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_crypto_manager_settings_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
+  std::shared_ptr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_client_manager_settings_;
   security_manager::SSLContext* server_ctx;
   security_manager::SSLContext* client_ctx;
@@ -218,9 +218,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     ASSERT_FALSE(certificate.empty()) << "Certificate data file is empty";
     certificate_data_base64_ = certificate;
 
-    mock_crypto_manager_settings_ = utils::MakeShared<
+    mock_crypto_manager_settings_ = std::make_shared<
         NiceMock<security_manager_test::MockCryptoManagerSettings> >();
-    utils::SharedPtr<security_manager::CryptoManagerSettings> server_crypto(
+    std::shared_ptr<security_manager::CryptoManagerSettings> server_crypto(
         mock_crypto_manager_settings_);
     crypto_manager = new security_manager::CryptoManagerImpl(server_crypto);
 
@@ -230,10 +230,10 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     const bool crypto_manager_initialization = crypto_manager->Init();
     ASSERT_TRUE(crypto_manager_initialization);
 
-    mock_client_manager_settings_ = utils::MakeShared<
+    mock_client_manager_settings_ = std::make_shared<
         NiceMock<security_manager_test::MockCryptoManagerSettings> >();
 
-    utils::SharedPtr<security_manager::CryptoManagerSettings> client_crypto(
+    std::shared_ptr<security_manager::CryptoManagerSettings> client_crypto(
         mock_client_manager_settings_);
     client_manager = new security_manager::CryptoManagerImpl(client_crypto);
 
@@ -302,9 +302,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
         .WillByDefault(Return(false));
   }
 
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
+  std::shared_ptr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_crypto_manager_settings_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
+  std::shared_ptr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_client_manager_settings_;
   security_manager::CryptoManager* crypto_manager = NULL;
   security_manager::CryptoManager* client_manager = NULL;

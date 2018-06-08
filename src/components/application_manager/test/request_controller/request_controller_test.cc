@@ -65,8 +65,8 @@ using ::testing::NiceMock;
 using ::testing::_;
 
 typedef NiceMock<application_manager_test::MockRequest> MRequest;
-typedef utils::SharedPtr<MRequest> RequestPtr;
-typedef utils::SharedPtr<RequestController> RequestControllerSPtr;
+typedef std::shared_ptr<MRequest> RequestPtr;
+typedef std::shared_ptr<RequestController> RequestControllerSPtr;
 
 namespace {
 const size_t kNumberOfRequests = 10u;
@@ -105,7 +105,7 @@ class RequestControllerTestClass : public ::testing::Test {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
         .WillByDefault(Return(kThreadPoolSize));
     request_ctrl_ =
-        utils::MakeShared<RequestController>(mock_request_controller_settings_);
+        std::make_shared<RequestController>(mock_request_controller_settings_);
   }
 
   RequestPtr GetMockRequest(
@@ -113,7 +113,7 @@ class RequestControllerTestClass : public ::testing::Test {
       const uint32_t connection_key = kDefaultConnectionKey,
       const uint32_t default_timeout = kDefaultTimeout) {
     RequestPtr output =
-        utils::MakeShared<MRequest>(connection_key, correlation_id);
+        std::make_shared<MRequest>(connection_key, correlation_id);
     ON_CALL(*output, default_timeout()).WillByDefault(Return(default_timeout));
     ON_CALL(*output, CheckPermissions()).WillByDefault(Return(true));
     return output;

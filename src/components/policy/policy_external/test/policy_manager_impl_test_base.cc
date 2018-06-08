@@ -414,7 +414,7 @@ void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
   // Get cache
   ::policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   // Get table_snapshot
-  utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> table = cache->GenerateSnapshot();
   // Set functional groupings from policy table
   input_functional_groupings = table->policy_table.functional_groupings;
 }
@@ -639,7 +639,7 @@ void PolicyManagerImplTest_RequestTypes::SetUp() {
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
-  policy_manager_impl_sptr_ = utils::MakeShared<PolicyManagerImpl>(in_memory);
+  policy_manager_impl_sptr_ = std::make_shared<PolicyManagerImpl>(in_memory);
   policy_manager_impl_sptr_->set_listener(&listener_);
 }
 

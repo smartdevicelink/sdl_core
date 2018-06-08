@@ -54,7 +54,7 @@ using ::testing::_;
 using am::commands::UnregisterAppInterfaceRequest;
 using am::commands::MessageSharedPtr;
 
-typedef ::utils::SharedPtr<UnregisterAppInterfaceRequest> CommandPtr;
+typedef ::std::shared_ptr<UnregisterAppInterfaceRequest> CommandPtr;
 
 class UnregisterAppInterfaceRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

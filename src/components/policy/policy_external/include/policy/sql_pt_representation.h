@@ -85,7 +85,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool Clear();
   bool Drop();
   virtual void WriteDb();
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() const;
   virtual bool Save(const policy_table::Table& table);
   bool GetInitialAppData(const std::string& app_id,
                          StringArray* nicknames = NULL,

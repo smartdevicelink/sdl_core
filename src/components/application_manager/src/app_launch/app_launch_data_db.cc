@@ -276,7 +276,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataDB::GetAppDataByDevMac(
       const std::string device_mac = query.GetString(device_mac_index);
       const std::string mobile_app_id = query.GetString(application_id_index);
       const std::string bundle_id = query.GetString(bundle_id_index);
-      dev_apps.push_back(utils::MakeShared<ApplicationData>(
+      dev_apps.push_back(std::make_shared<ApplicationData>(
           mobile_app_id, bundle_id, device_mac));
     } while (query.Next());
     LOG4CXX_DEBUG(logger_, "All application data has been successfully loaded");

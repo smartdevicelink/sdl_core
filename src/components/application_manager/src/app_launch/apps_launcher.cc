@@ -15,7 +15,7 @@ struct LauncherGenerator {
       , app_launch_max_retry_attempt_(app_launch_max_retry_attempt)
       , app_launch_retry_wait_time_(app_launch_retry_wait_time) {}
   AppsLauncher::LauncherPtr operator()() {
-    return utils::MakeShared<AppsLauncher::Launcher>(
+    return std::make_shared<AppsLauncher::Launcher>(
         apps_laucnher_,
         connection_handler_,
         app_launch_max_retry_attempt_,

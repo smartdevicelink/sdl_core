@@ -270,12 +270,12 @@ RCAppExtensionPtr BaseCommandRequest::GetAppExtension(
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
   if (!app_extension) {
     LOG4CXX_DEBUG(logger_, "New app extension will be created");
-    app_extension = new RCAppExtension(id);
+    app_extension = std::make_shared<RCAppExtension>(id);
     app->AddExtension(app_extension);
   }
 
   rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+      std::static_pointer_cast<RCAppExtension>(
           app_extension);
 
   return rc_app_extension;

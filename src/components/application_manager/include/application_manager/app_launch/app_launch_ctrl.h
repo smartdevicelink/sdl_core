@@ -37,7 +37,7 @@
 
 namespace application_manager {
 class Application;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 }  // namespace application_manager
 
 namespace app_launch {

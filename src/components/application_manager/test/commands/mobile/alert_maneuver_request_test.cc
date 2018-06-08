@@ -64,7 +64,7 @@ using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 
-typedef SharedPtr<AlertManeuverRequest> CommandPtr;
+typedef std::shared_ptr<AlertManeuverRequest> CommandPtr;
 
 class AlertManeuverRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -80,7 +80,7 @@ class AlertManeuverRequestTest
     am::event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
     event.set_smart_object(*response);
 
-    utils::SharedPtr<AlertManeuverRequest> command =
+    std::shared_ptr<AlertManeuverRequest> command =
         CreateCommand<AlertManeuverRequest>(response);
 
     MockAppPtr mock_app(CreateMockApp());

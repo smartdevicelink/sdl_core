@@ -57,12 +57,12 @@ using am::commands::SetDisplayLayoutRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-typedef ::utils::SharedPtr<SetDisplayLayoutRequest> CommandPtr;
+typedef ::std::shared_ptr<SetDisplayLayoutRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 1u;
@@ -132,7 +132,7 @@ TEST_F(SetDisplayLayoutRequestTest,
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<SetDisplayLayoutRequest> command =
+  std::shared_ptr<SetDisplayLayoutRequest> command =
       CreateCommand<SetDisplayLayoutRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();

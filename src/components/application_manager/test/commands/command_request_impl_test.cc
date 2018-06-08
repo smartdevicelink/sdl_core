@@ -65,7 +65,7 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using am::commands::MessageSharedPtr;
 using am::CommandParametersPermissions;
 using am::event_engine::EventObserver;
@@ -127,8 +127,8 @@ class CommandRequestImplTest
     }
   };
 
-  MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {
-    app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
+  MockAppPtr InitAppSetDataAccessor(std::shared_ptr<ApplicationSet>& app_set) {
+    app_set = (!app_set ? ::std::make_shared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
     app_set->insert(app);
     EXPECT_CALL(app_mngr_, applications())
@@ -141,7 +141,7 @@ class CommandRequestImplTest
 };
 
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
-typedef SharedPtr<UCommandRequestImpl> CommandPtr;
+typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
 
 TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();

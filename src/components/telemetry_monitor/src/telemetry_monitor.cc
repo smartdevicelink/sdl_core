@@ -60,13 +60,13 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
     , ph_observer(this) {}
 
 void TelemetryMonitor::Start() {
-  streamer_ = streamer_ ? streamer_ : utils::MakeShared<Streamer>(this);
+  streamer_ = streamer_ ? streamer_ : std::make_shared<Streamer>(this);
   thread_ = threads::CreateThread("TelemetryMonitor", streamer_.get());
 }
 
 void TelemetryMonitor::set_streamer(Streamer* streamer) {}
 
-void TelemetryMonitor::set_streamer(utils::SharedPtr<Streamer> streamer) {
+void TelemetryMonitor::set_streamer(std::shared_ptr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_ && !thread_->is_running()) {
     streamer_ = streamer;
@@ -115,7 +115,7 @@ void TelemetryMonitor::Stop() {
   thread_ = NULL;
 }
 
-void TelemetryMonitor::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
+void TelemetryMonitor::SendMetric(std::shared_ptr<MetricWrapper> metric) {
   if (streamer_ && streamer_->is_client_connected_) {
     streamer_->PushMessage(metric);
   }
@@ -149,7 +149,7 @@ void Streamer::threadMain() {
     is_client_connected_ = true;
     while (is_client_connected_) {
       while (!messages_.empty()) {
-        utils::SharedPtr<MetricWrapper> metric;
+        std::shared_ptr<MetricWrapper> metric;
         if (!messages_.pop(metric)) {
           continue;
         }
@@ -282,7 +282,7 @@ bool Streamer::Send(const std::string& msg) {
   return true;
 }
 
-void Streamer::PushMessage(utils::SharedPtr<MetricWrapper> metric) {
+void Streamer::PushMessage(std::shared_ptr<MetricWrapper> metric) {
   messages_.push(metric);
 }
 }  // namespace telemetry_monitor

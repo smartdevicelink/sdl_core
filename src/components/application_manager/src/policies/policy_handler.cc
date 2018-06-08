@@ -224,7 +224,7 @@ struct LinksCollector {
   }
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!app.valid()) {
+    if (!utils::ValidSPtr(app)) {
       LOG4CXX_WARN(logger_,
                    "Invalid pointer to application was passed."
                    "Skip current application.");
@@ -258,7 +258,7 @@ struct LinkAppToDevice {
   }
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!app.valid()) {
+    if (!utils::ValidSPtr(app)) {
       LOG4CXX_WARN(logger_,
                    "Invalid pointer to application was passed."
                    "Skip current application.");
@@ -328,7 +328,7 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
     , dl_handle_(0)
     , last_activated_app_id_(0)
     , app_to_device_link_lock_(true)
-    , statistic_manager_impl_(utils::MakeShared<StatisticManagerImpl>(this))
+    , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager) {}
 
@@ -355,14 +355,14 @@ bool PolicyHandler::LoadPolicyLibrary() {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
       event_observer_ =
-          utils::SharedPtr<PolicyEventObserver>(new PolicyEventObserver(
+          std::shared_ptr<PolicyEventObserver>(new PolicyEventObserver(
               this, application_manager_.event_dispatcher()));
     }
   } else {
     LOG4CXX_ERROR(logger_, error);
   }
 
-  return policy_manager_.valid();
+  return utils::ValidSPtr(policy_manager_);
 }
 
 bool PolicyHandler::CreateManager() {
@@ -375,11 +375,11 @@ bool PolicyHandler::CreateManager() {
   char* error_string = dlerror();
   if (NULL == error_string) {
     policy_manager_ =
-        utils::SharedPtr<PolicyManager>(create_manager(), delete_manager);
+        std::shared_ptr<PolicyManager>(create_manager(), delete_manager);
   } else {
     LOG4CXX_WARN(logger_, error_string);
   }
-  return policy_manager_.valid();
+  return utils::ValidSPtr(policy_manager_);
 }
 
 const PolicySettings& PolicyHandler::get_settings() const {
@@ -520,7 +520,7 @@ void PolicyHandler::SendOnAppPermissionsChanged(
                     << policy_app_id);
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(logger_, "No app found for policy app id = " << policy_app_id);
     return;
   }
@@ -555,7 +555,7 @@ struct SmartObjectToInt {
 StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id,
     const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
-  POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
+  POLICY_LIB_CHECK(std::make_shared<utils::CallNothing>());
   return policy_manager_->AddApplication(application_id, hmi_types);
 }
 
@@ -591,7 +591,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   if (connection_key) {
     ApplicationSharedPtr app = application_manager_.application(connection_key);
 
-    if (app.valid()) {
+    if (utils::ValidSPtr(app)) {
       out_permissions.policy_app_id = app->policy_app_id();
       DeviceParams device_params = GetDeviceParams(
           app->device(),
@@ -618,7 +618,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       // If list of apps sent to HMI for user consents is not the same as
       // current,
       // permissions should be set only for coincident to registered apps
-      if (!app.valid()) {
+      if (!utils::ValidSPtr(app)) {
         LOG4CXX_WARN(logger_,
                      "Invalid pointer to application was passed."
                      "Permissions setting skipped.");
@@ -733,7 +733,7 @@ std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
   ApplicationSharedPtr app = application_manager_.application(connection_key);
   std::vector<FunctionalGroupPermission> group_permissions;
 
-  if (NULL == app.get() || !app.valid()) {
+  if (NULL == app.get() || !utils::ValidSPtr(app)) {
     LOG4CXX_WARN(logger_,
                  "Connection key '"
                      << connection_key
@@ -883,7 +883,7 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
 
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(logger_,
                  "Application with id '"
                      << policy_app_id
@@ -958,7 +958,7 @@ void PolicyHandler::OnPendingPermissionChange(
   POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(logger_,
                  "No app found for " << policy_app_id << " policy app id.");
     return;
@@ -1274,7 +1274,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app = application_manager_.application(connection_key);
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
     return;
   }
@@ -1368,7 +1368,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(
         logger_,
         "Connection_key not found for application_id:" << policy_app_id);
@@ -1421,7 +1421,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(
         logger_,
         "Connection_key not found for application_id:" << policy_app_id);
@@ -1625,7 +1625,7 @@ void PolicyHandler::remove_listener(PolicyHandlerObserver* listener) {
   listeners_.remove(listener);
 }
 
-utils::SharedPtr<usage_statistics::StatisticsManager>
+std::shared_ptr<usage_statistics::StatisticsManager>
 PolicyHandler::GetStatisticManager() const {
   return statistic_manager_impl_;
 }
@@ -1667,7 +1667,7 @@ custom_str::CustomString PolicyHandler::GetAppName(
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
 
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_WARN(
         logger_,
         "Connection_key not found for application_id:" << policy_app_id);

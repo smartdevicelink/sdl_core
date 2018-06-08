@@ -50,7 +50,7 @@ using application_manager::commands::SendLocationRequest;
 using application_manager::MockMessageHelper;
 using test::components::application_manager_test::MockHMICapabilities;
 using smart_objects::SmartObject;
-using utils::SharedPtr;
+using std::shared_ptr;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
@@ -89,11 +89,11 @@ class SendLocationRequestTest
     }
   };
 
-  typedef SharedPtr<UnwrappedSendLocationRequest> CommandSPrt;
+  typedef std::shared_ptr<UnwrappedSendLocationRequest> CommandSPrt;
 
   SendLocationRequestTest() {
     mock_app_ = CreateMockApp();
-    disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+    disp_cap_ = std::make_shared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
   }
@@ -152,7 +152,7 @@ class SendLocationRequestTest
 
   MockAppPtr mock_app_;
   MockHMICapabilities mock_hmi_capabilities_;
-  SharedPtr<SmartObject> disp_cap_;
+  std::shared_ptr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;
 };

@@ -45,7 +45,7 @@ namespace hmi_message_handler_test {
 using ::testing::Return;
 using hmi_message_handler::HMIMessageHandlerImpl;
 
-typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
+typedef std::shared_ptr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
 
 TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
@@ -60,7 +60,7 @@ TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
   ;
 
   MockHMIMessageAdapterImplSPtr message_adapter_impl =
-      utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);
+      std::make_shared<MockHMIMessageAdapterImpl>(message_handler);
 
   EXPECT_EQ(message_handler, message_adapter_impl->get_handler());
 
@@ -71,7 +71,7 @@ TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
 TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {
   HMIMessageHandler* message_handler = NULL;
   MockHMIMessageAdapterImplSPtr message_adapter_impl =
-      utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);
+      std::make_shared<MockHMIMessageAdapterImpl>(message_handler);
 
   EXPECT_EQ(NULL, message_adapter_impl->get_handler());
 }

@@ -48,14 +48,14 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_sdl_request {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::UpdateSDLRequest;
 
-typedef SharedPtr<UpdateSDLRequest> UpdateSDLRequestPtr;
+typedef std::shared_ptr<UpdateSDLRequest> UpdateSDLRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

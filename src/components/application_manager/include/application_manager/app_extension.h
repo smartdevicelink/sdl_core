@@ -51,7 +51,7 @@ class AppExtension {
   const AppExtensionUID kUid_;
 };
 
-typedef utils::SharedPtr<AppExtension> AppExtensionPtr;
+typedef std::shared_ptr<AppExtension> AppExtensionPtr;
 
 }  //  namespace application_manager
 

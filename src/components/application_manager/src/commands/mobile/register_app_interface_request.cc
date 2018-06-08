@@ -391,7 +391,7 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
     const uint32_t connection_key, ApplicationSharedPtr app) {
   DCHECK_OR_RETURN(app.get(), smart_objects::SmartObjectSPtr());
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
+      std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnSystemRequestID;
@@ -797,7 +797,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     bool resumption,
     bool need_restore_vr) {
   using namespace smart_objects;
-  SmartObjectSPtr notification = utils::MakeShared<SmartObject>(SmartType_Map);
+  SmartObjectSPtr notification = std::make_shared<SmartObject>(SmartType_Map);
   if (!notification) {
     LOG4CXX_ERROR(logger_, "Failed to create smart object");
     return;

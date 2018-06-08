@@ -42,7 +42,7 @@ namespace telemetry_monitor {
 
 class ProtocolHandlerMecticWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric>
+  std::shared_ptr<protocol_handler::PHTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };

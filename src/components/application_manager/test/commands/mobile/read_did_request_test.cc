@@ -62,14 +62,14 @@ namespace am = ::application_manager;
 using am::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 
 class ReadDIDRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
@@ -78,7 +78,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
 TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   Event event(Event::EventID::VehicleInfo_ReadDID);
 
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   const hmi_apis::Common_Result::eType hmi_response_code =
       hmi_apis::Common_Result::SUCCESS;
@@ -100,10 +100,10 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 }
 
 TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   ON_CALL(app_mngr_, application(_))
-      .WillByDefault(Return(SharedPtr<am::Application>()));
+      .WillByDefault(Return(std::shared_ptr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
@@ -113,7 +113,7 @@ TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
@@ -129,7 +129,7 @@ TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
 
 TEST_F(ReadDIDRequestTest, Run_EmptyDidLocation_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
@@ -146,7 +146,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
   (*msg)[am::strings::msg_params][am::strings::did_location]["SomeData"] = 0;
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>(msg));
+  std::shared_ptr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>(msg));
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 

@@ -57,7 +57,7 @@ using am::commands::MessageSharedPtr;
 using am::commands::RCIsReadyRequest;
 using am::event_engine::Event;
 
-typedef SharedPtr<RCIsReadyRequest> RCIsReadyRequestPtr;
+typedef std::shared_ptr<RCIsReadyRequest> RCIsReadyRequestPtr;
 
 class RCIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

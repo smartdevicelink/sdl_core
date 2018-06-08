@@ -63,8 +63,8 @@ using am::MockMessageHelper;
 using am::commands::DeleteSubMenuRequest;
 using am::commands::DeleteSubMenuResponse;
 
-typedef SharedPtr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
-typedef SharedPtr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
+typedef std::shared_ptr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
+typedef std::shared_ptr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
 
 MATCHER_P(CheckMessageResultCode, result_code, "") {
   return (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
@@ -117,7 +117,7 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = 10u;
 
-  utils::SharedPtr<DeleteSubMenuRequest> command =
+  std::shared_ptr<DeleteSubMenuRequest> command =
       CreateCommand<DeleteSubMenuRequest>(msg);
 
   MockAppPtr mock_app = CreateMockApp();

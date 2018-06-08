@@ -84,7 +84,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD2(Init,
                bool(const std::string& file_name,
                     const PolicySettings* settings));
-  MOCK_METHOD0(GenerateSnapshot, utils::SharedPtr<policy_table::Table>());
+  MOCK_METHOD0(GenerateSnapshot, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD1(ApplyUpdate, bool(const policy_table::Table& update_pt));
   MOCK_METHOD1(Save, bool(const policy_table::Table& table));
   MOCK_CONST_METHOD0(UpdateRequired, bool());
@@ -202,7 +202,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                bool(const std::string& device_id,
                     const std::string& policy_app_id,
                     policy::Permissions& permission));
-  MOCK_CONST_METHOD0(pt, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(pt, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD1(GetHMITypes,
                const policy_table::AppHMITypes*(const std::string& app_id));
   MOCK_CONST_METHOD0(GetCertificate, std::string());

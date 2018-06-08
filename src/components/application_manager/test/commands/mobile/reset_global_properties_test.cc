@@ -69,8 +69,8 @@ using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockMessageHelper;
 
-typedef SharedPtr<ResetGlobalPropertiesRequest> ResetGlobalPropertiesRequestPtr;
-typedef SharedPtr<ResetGlobalPropertiesResponse>
+typedef std::shared_ptr<ResetGlobalPropertiesRequest> ResetGlobalPropertiesRequestPtr;
+typedef std::shared_ptr<ResetGlobalPropertiesResponse>
     ResetGlobalPropertiesResponsePtr;
 
 namespace {
@@ -219,7 +219,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   smart_objects::SmartObjectSPtr vr_help =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
@@ -232,7 +232,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
               set_menu_title(msg_params[am::hmi_request::menu_title]));
 
   const smart_objects::SmartObjectSPtr so_help_prompt =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
   EXPECT_CALL(*mock_app_, timeout_prompt())
@@ -272,7 +272,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   smart_objects::SmartObjectSPtr vr_help =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
@@ -308,7 +308,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
 
   smart_objects::SmartObjectSPtr prompt =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   *prompt = "prompt";
 
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
@@ -357,7 +357,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
   smart_objects::SmartObjectSPtr vr_help =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   EXPECT_CALL(mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
@@ -396,7 +396,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
 
   smart_objects::SmartObjectSPtr prompt =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   *prompt = "prompt";
 
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
@@ -429,7 +429,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   // TTS doesn't respond, so timeout should send generic error
   smart_objects::SmartObjectSPtr response =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
   EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
@@ -461,7 +461,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
 
   smart_objects::SmartObjectSPtr prompt =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   *prompt = "prompt";
 
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
@@ -491,7 +491,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   // UI doesn't respond, so timeout should send generic error
   smart_objects::SmartObjectSPtr response =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
   EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
@@ -525,7 +525,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
 
   smart_objects::SmartObjectSPtr prompt =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   *prompt = "prompt";
 
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(prompt.get()));
@@ -545,7 +545,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   // TTS and UI don't respond, so timeout should send generic error
   std::string info = "TTS, UI component does not respond";
   smart_objects::SmartObjectSPtr response =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
       mobile_apis::Result::GENERIC_ERROR;
   EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))

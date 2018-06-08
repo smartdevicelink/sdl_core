@@ -52,7 +52,7 @@ namespace request_controller {
  * @brief Typedef for active mobile request
  *
  */
-typedef utils::SharedPtr<commands::Command> RequestPtr;
+typedef std::shared_ptr<commands::Command> RequestPtr;
 
 struct RequestInfo {
   enum RequestType { RequestNone, MobileRequest, HMIRequest };
@@ -136,7 +136,7 @@ struct RequestInfo {
   uint32_t correlation_id_;
 };
 
-typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
+typedef std::shared_ptr<RequestInfo> RequestInfoPtr;
 
 struct MobileRequestInfo : public RequestInfo {
   MobileRequestInfo(RequestPtr request, const uint64_t timeout_msec);
@@ -276,7 +276,7 @@ struct TimeScale {
       : start_(start), end_(end), app_id_(app_id) {}
 
   bool operator()(RequestInfoPtr setEntry) {
-    if (!setEntry.valid()) {
+    if (!utils::ValidSPtr(setEntry)) {
       return false;
     }
 

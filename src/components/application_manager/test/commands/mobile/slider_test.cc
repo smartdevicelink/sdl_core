@@ -57,12 +57,12 @@ using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-typedef SharedPtr<SliderRequest> CommandPtr;
+typedef std::shared_ptr<SliderRequest> CommandPtr;
 
 namespace {
 const int32_t kCommandId = 1;
@@ -140,7 +140,7 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<SliderRequest> command =
+  std::shared_ptr<SliderRequest> command =
       CreateCommand<SliderRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();

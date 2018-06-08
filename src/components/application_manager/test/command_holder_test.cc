@@ -71,8 +71,8 @@ class CommandHolderImplTest : public testing::Test {
   const std::string kPolicyAppId_;
   const uint32_t kHmiApplicationId_;
   const uint32_t kConnectionKey_;
-  utils::SharedPtr<smart_objects::SmartObject> cmd_ptr_;
-  utils::SharedPtr<MockApplication> mock_app_ptr_;
+  std::shared_ptr<smart_objects::SmartObject> cmd_ptr_;
+  std::shared_ptr<MockApplication> mock_app_ptr_;
 };
 
 TEST_F(CommandHolderImplTest, HoldOne_ExpectReleaseOne) {
@@ -121,8 +121,8 @@ TEST_F(CommandHolderImplTest, Hold_ReleaseAnotherId_ExpectNoReleased) {
       mock_app_ptr_, am::CommandHolder::CommandType::kHmiCommand, cmd_ptr_);
 
   // Act
-  utils::SharedPtr<MockApplication> another_app =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> another_app =
+      std::make_shared<MockApplication>();
 
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(0);
   cmd_holder.Resume(another_app, am::CommandHolder::CommandType::kHmiCommand);
@@ -139,8 +139,8 @@ TEST_F(CommandHolderImplTest, Hold_DropAnotherId_ExpectReleased) {
   } while (iterations < 3);
 
   // Act
-  utils::SharedPtr<MockApplication> another_app =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> another_app =
+      std::make_shared<MockApplication>();
   cmd_holder.Clear(another_app);
 
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(cmd_ptr_)).Times(iterations);
