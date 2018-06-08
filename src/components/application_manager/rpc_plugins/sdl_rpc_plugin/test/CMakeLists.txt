@@ -18,6 +18,7 @@ file(GLOB SOURCES
   ${COMMANDS_TEST_DIR}/mobile/*
   ${COMPONENTS_DIR}/application_manager/src/message.cc
   ${COMPONENTS_DIR}/application_manager/src/event_engine/*
+  ${COMPONENTS_DIR}/policy/policy_regular/src/policy_table/enums.cc
 )
 
 set(LIBRARIES
