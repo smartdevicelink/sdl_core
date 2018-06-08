@@ -58,8 +58,6 @@ std::vector<std::string> GetModuleReadOnlyParams(
     module_ro_params.push_back(kSignalChangeThreshold);
     module_ro_params.push_back(kState);
     module_ro_params.push_back(kSisData);
-  } else if (enums_value::kLight == module_type) {
-    module_ro_params.push_back(kStatus);
   }
 
   return module_ro_params;
@@ -387,7 +385,9 @@ void SetInteriorVehicleDataRequest::Execute() {
         SetResourceState(ModuleType(), ResourceState::FREE);
 
         SendResponse(
-            false, module_data_capabilities, "The requested LightName is not supported by the vehicle.");
+            false,
+            module_data_capabilities,
+            "The requested LightName is not supported by the vehicle.");
         return;
       }
     }
@@ -400,11 +400,23 @@ void SetInteriorVehicleDataRequest::Execute() {
                    "All request params in module type are READ ONLY!");
       return;
     }
-    if (AreReadOnlyParamsPresent(module_data)) {
+
+    mobile_apis::Result::eType notification = mobile_apis::Result::SUCCESS;
+
+    if (AreReadOnlyParamsPresent(module_data, notification)) {
       LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
+
+      if (mobile_apis::Result::SUCCESS != notification) {
+        SendResponse(
+            false, notification, "The LightStatus enum passed is READ ONLY and cannot be written.");
+        return;
+      }
+
       LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameters... ");
+
       CutOffReadOnlyParams(module_data);
     }
+
     application_manager_.RemoveHMIFakeParameters(message_);
 
     app_mngr::ApplicationSharedPtr app =
@@ -524,6 +536,8 @@ bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
       return false;
     }
   }
+
+  LOG4CXX_DEBUG(logger_, "All params are ReadOnly");
   return true;
 }
 
@@ -533,32 +547,79 @@ bool CheckReadOnlyParamsForAudio(
     const auto& equalizer_settings =
         module_type_params[message_params::kEqualizerSettings];
     auto it = equalizer_settings.asArray()->begin();
+
     for (; it != equalizer_settings.asArray()->end(); ++it) {
       if (it->keyExists(message_params::kChannelName)) {
-        LOG4CXX_DEBUG(logger_, " READ ONLY parameter: ");
+        LOG4CXX_DEBUG(logger_, "READ ONLY parameter. ChannelName = " << (*it)[message_params::kChannelName].asString());
         return true;
       }
     }
   }
+
+  return false;
+}
+
+bool CheckReadOnlyParamsForlight(
+    const smart_objects::SmartObject& module_type_params) {
+  if (module_type_params.keyExists(message_params::kLightState)) {
+    const auto& light_state = module_type_params[message_params::kLightState];
+    auto it = light_state.asArray()->begin();
+
+    for (; it != light_state.asArray()->end(); ++it) {
+        if (it->keyExists(message_params::kStatus)) {
+          const mobile_apis::LightStatus::eType light_status =
+              static_cast<mobile_apis::LightStatus::eType>(
+                  (*it)[message_params::kStatus].asUInt());
+
+          if (helpers::Compare<mobile_apis::LightStatus::eType,
+                               helpers::EQ,
+                               helpers::ONE>(
+                  light_status,
+                  mobile_apis::LightStatus::RAMP_UP,
+                  mobile_apis::LightStatus::RAMP_DOWN,
+                  mobile_apis::LightStatus::UNKNOWN,
+                  mobile_apis::LightStatus::INVALID)) {
+            LOG4CXX_DEBUG(logger_, "READ ONLY parameter. Status = " << (*it)[message_params::kStatus].asInt());
+            return true;
+          }
+        }
+      }
+    }
+
   return false;
 }
 
 bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
-    const smart_objects::SmartObject& module_data) {
+    const smart_objects::SmartObject& module_data,
+    mobile_apis::Result::eType& notification) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
   auto it = module_type_params.map_begin();
   const std::string module_type = ModuleType();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+
   if (enums_value::kAudio == module_type) {
     return CheckReadOnlyParamsForAudio(module_type_params);
   }
+
+  if (enums_value::kLight == module_type) {
+    bool result = CheckReadOnlyParamsForlight(module_type_params);
+
+    if (result) {
+      notification = mobile_apis::Result::READ_ONLY;
+    }
+    
+    return result;
+  }
+
+  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
       return true;
     }
   }
+
   return false;
 }
 
@@ -576,24 +637,8 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
         module_data[message_params::kClimateControlData].erase(it);
       } else if (enums_value::kRadio == module_type) {
         module_data[message_params::kRadioControlData].erase(it);
-      } else if (enums_value::kLight == module_type) {
-        const mobile_apis::LightStatus::eType light_status =
-            static_cast<mobile_apis::LightStatus::eType>(
-                module_data[message_params::kLightControlData]
-                           [message_params::kStatus]
-                               .asUInt());
-
-        if (helpers::Compare<mobile_apis::LightStatus::eType,
-                             helpers::EQ,
-                             helpers::ONE>(light_status,
-                                           mobile_apis::LightStatus::RAMP_UP,
-                                           mobile_apis::LightStatus::RAMP_DOWN,
-                                           mobile_apis::LightStatus::UNKNOWN,
-                                           mobile_apis::LightStatus::INVALID)) {
-          module_data[message_params::kLightControlData].erase(it);
-        } else {
-          continue;
-        }
+      } else {
+        continue;
       }
 
       LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
