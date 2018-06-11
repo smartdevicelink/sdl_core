@@ -39,8 +39,9 @@
 #error Please implement lock for your OS
 #endif
 #include <stdint.h>
-#include "utils/macro.h"
+#include <memory>
 #include "utils/atomic.h"
+#include "utils/macro.h"
 #include "utils/memory_barrier.h"
 
 namespace sync_primitives {
@@ -115,15 +116,15 @@ class Lock {
 
 #ifndef NDEBUG
   /**
-  * @brief Basic debugging aid, a flag that signals wether this lock is
-  * currently taken
-  * Allows detection of abandoned and recursively captured mutexes
-  */
+   * @brief Basic debugging aid, a flag that signals wether this lock is
+   * currently taken
+   * Allows detection of abandoned and recursively captured mutexes
+   */
   uint32_t lock_taken_;
 
   /**
-  * @brief Describe if mutex is recurcive or not
-  */
+   * @brief Describe if mutex is recurcive or not
+   */
   bool is_mutex_recursive_;
 
   void AssertFreeAndMarkTaken();
@@ -143,6 +144,10 @@ class Lock {
 class AutoLock {
  public:
   explicit AutoLock(Lock& lock) : lock_(lock) {
+    lock_.Acquire();
+  }
+  // Autolock a shared pointer to a lock
+  explicit AutoLock(std::shared_ptr<Lock>& lock) : lock_(*lock) {
     lock_.Acquire();
   }
   ~AutoLock() {
@@ -180,5 +185,9 @@ class AutoUnlock {
  private:
   DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
+
+// For easy reference to
+typedef std::shared_ptr<Lock> LockSPtr;
+
 }  // namespace sync_primitives
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_

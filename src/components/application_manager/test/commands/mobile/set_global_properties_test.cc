@@ -74,7 +74,9 @@ const uint32_t kPosition = 1u;
 class SetGlobalPropertiesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SetGlobalPropertiesRequestTest() : mock_app_(CreateMockApp()) {}
+  SetGlobalPropertiesRequestTest()
+      : lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , mock_app_(CreateMockApp()) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -244,7 +246,7 @@ class SetGlobalPropertiesRequestTest
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   MockAppPtr mock_app_;
 };
 
@@ -606,7 +608,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
   CommandsMap commands_map;
   SmartObject empty_msg(smart_objects::SmartType_Map);
   commands_map.insert(std::pair<uint32_t, SmartObject*>(1u, &empty_msg));
-  DataAccessor<CommandsMap> accessor(commands_map, lock_);
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
   EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(vr_help_title));
   EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
@@ -638,7 +640,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataNoDefault_Canceled) {
       .WillOnce(Return(&vr_help_title));
 
   CommandsMap commands_map;
-  DataAccessor<CommandsMap> accessor(commands_map, lock_);
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
   EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
   const CustomString name("name");
   EXPECT_CALL(*mock_app_, name()).WillOnce(ReturnRef(name));
@@ -681,7 +683,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataDefaultCreated_SUCCESS) {
   SmartObject command_text(smart_objects::SmartType_Map);
   commands_map[0] = &command_text;
   (*commands_map[0])[am::strings::vr_commands] = SmartObject("one");
-  DataAccessor<CommandsMap> accessor(commands_map, lock_);
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
   EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
   EXPECT_CALL(*mock_app_, set_vr_help(_));
   const CustomString name("name");
@@ -723,7 +725,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataFromSynonyms_SUCCESS) {
       .WillRepeatedly(Return(&vr_help_title));
 
   CommandsMap commands_map;
-  DataAccessor<CommandsMap> accessor(commands_map, lock_);
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
   EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
   SmartObject vr_help_array(smart_objects::SmartType_Array);
   vr_help_array[0] = SmartObject(smart_objects::SmartType_Map);
@@ -1226,4 +1228,4 @@ TEST_F(SetGlobalPropertiesRequestTest,
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

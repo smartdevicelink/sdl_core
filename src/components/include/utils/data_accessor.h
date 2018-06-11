@@ -32,6 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
+#include <iostream>
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
 
@@ -39,22 +40,29 @@
 template <class T>
 class DataAccessor {
  public:
-  DataAccessor(const T& data, const sync_primitives::Lock& lock)
+  DataAccessor(const T& data,
+               const std::shared_ptr<sync_primitives::Lock>& lock)
       : data_(data)
-      , lock_(const_cast<sync_primitives::Lock&>(lock))
+      , lock_(const_cast<std::shared_ptr<sync_primitives::Lock> &>(lock))
       , counter_(new uint32_t(0)) {
-    lock_.Acquire();
+    lock_->Acquire();
+    // std::cerr << "new DA constructed! \n";
   }
 
   DataAccessor(const DataAccessor<T>& other)
       : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
     ++(*counter_);
+    // std::cerr << "DA copied with count " << *counter_ << "\n";
   }
 
   ~DataAccessor() {
     if (0 == *counter_) {
-      lock_.Release();
+      // std::cerr << "releasing lock in DA destructor!!\n";
+      lock_->Release();
     } else {
+      // std::cerr << "ignoring lock in DA destructor!! count is " << *counter_
+      //           << "\n";
+      ;
       --(*counter_);
     }
   }
@@ -65,7 +73,8 @@ class DataAccessor {
  private:
   void* operator new(size_t size);
   const T& data_;
-  sync_primitives::Lock& lock_;
+  // Require that the lock lives at least as long as the DataAccessor
+  std::shared_ptr<sync_primitives::Lock> lock_;
   utils::SharedPtr<uint32_t> counter_;
 };
 

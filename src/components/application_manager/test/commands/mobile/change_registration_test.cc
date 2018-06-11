@@ -88,7 +88,8 @@ class ChangeRegistrationRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   ChangeRegistrationRequestTest()
-      : mock_app_(CreateMockApp())
+      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , mock_app_(CreateMockApp())
       , supported_languages_(CreateMessage(smart_objects::SmartType_Array)) {}
 
   MessageSharedPtr CreateMsgFromMobile() {
@@ -160,7 +161,8 @@ class ChangeRegistrationRequestTest
     MockAppPtr app = CreateMockApp();
     app->set_name(name);
 
-    DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_);
+    DataAccessor<am::ApplicationSet> accessor(application_set,
+                                              app_set_lock_ptr_);
 
     application_set.insert(app);
 
@@ -269,7 +271,7 @@ class ChangeRegistrationRequestTest
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
-  sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   MockHMICapabilities hmi_capabilities_;
   MockAppPtr mock_app_;
   MessageSharedPtr supported_languages_;
@@ -289,7 +291,7 @@ TEST_F(ChangeRegistrationRequestTest,
   MockAppPtr app = CreateMockApp();
   app->set_name(name);
 
-  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_);
+  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_ptr_);
 
   application_set.insert(app);
 
@@ -378,7 +380,7 @@ TEST_F(ChangeRegistrationRequestTest,
   const utils::custom_string::CustomString name("name");
   MockAppPtr app = CreateMockApp();
   app->set_name(name);
-  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_);
+  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_ptr_);
   application_set.insert(app);
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
   EXPECT_CALL(*app, name()).WillOnce(ReturnRef(name));
@@ -483,7 +485,7 @@ TEST_F(ChangeRegistrationRequestTest,
   MockAppPtr app = CreateMockApp();
   app->set_name(name);
 
-  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_);
+  DataAccessor<am::ApplicationSet> accessor(application_set, app_set_lock_ptr_);
 
   application_set.insert(app);
 
@@ -562,4 +564,4 @@ TEST_F(ChangeRegistrationRequestTest,
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

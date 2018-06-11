@@ -37,6 +37,8 @@
 #include <string.h>
 #include <cstring>
 #include "utils/logger.h"
+#include <iostream>
+#include <signal.h>
 
 namespace sync_primitives {
 
@@ -63,6 +65,8 @@ Lock::Lock(bool is_recursive)
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_ > 0) {
+    std::cerr << "LOCK DESTRUCT ERRROR!!!\n";
+    exit(1);
     LOG4CXX_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
   }
 #endif
@@ -77,6 +81,8 @@ Lock::~Lock() {
 void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
+    std::cerr << "LOCK ACQUIRE ERRROR!!!\n";
+    exit(1);
     LOG4CXX_FATAL(logger_,
                   "Failed to acquire mutex " << &mutex_ << ": "
                                              << strerror(status));
@@ -90,6 +96,8 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
+    std::cerr << "LOCK RELEASE ERRROR!!!\n";
+    exit(1);
     LOG4CXX_ERROR(logger_,
                   "Failed to unlock mutex" << &mutex_ << ": "
                                            << strerror(status));

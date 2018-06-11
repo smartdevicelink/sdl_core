@@ -33,19 +33,19 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 
-#include <string>
 #include <algorithm>
-#include "gtest/gtest.h"
-#include "application_manager/usage_statistics.h"
+#include <string>
+#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "utils/data_accessor.h"
-#include "config_profile/profile.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/usage_statistics.h"
+#include "config_profile/profile.h"
+#include "gtest/gtest.h"
+#include "utils/data_accessor.h"
 
 namespace test {
 namespace components {
@@ -68,7 +68,13 @@ class ResumptionDataTest : public ::testing::Test {
       , kCountOfSubmenues_(3u)
       , kCountOfFiles_(8u)
       , kCountOfVrhelptitle_(2u)
-      , kMacAddress_("12345") {}
+      , kMacAddress_("12345")
+
+      , sublock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , comlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , setlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , btnlock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , ivilock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
@@ -139,11 +145,11 @@ class ResumptionDataTest : public ::testing::Test {
   am::ButtonSubscriptions btn_subscr;
   am::VehicleInfoSubscriptions ivi;
 
-  sync_primitives::Lock sublock_;
-  sync_primitives::Lock comlock_;
-  sync_primitives::Lock setlock_;
-  sync_primitives::Lock btnlock_;
-  sync_primitives::Lock ivilock_;
+  std::shared_ptr<sync_primitives::Lock> sublock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> comlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> setlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> btnlock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> ivilock_ptr_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_application_manager_;

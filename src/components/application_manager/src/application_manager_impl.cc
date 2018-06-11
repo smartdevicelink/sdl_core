@@ -32,58 +32,58 @@
 
 #include <stdlib.h>  // for rand()
 
-#include <climits>
-#include <string>
-#include <fstream>
-#include <utility>
 #include <bson_object.h>
+#include <climits>
+#include <fstream>
+#include <string>
+#include <utility>
 
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/mobile_message_handler.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
-#include "application_manager/helpers/application_helper.h"
-#include "protocol_handler/protocol_handler.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/helpers/application_helper.h"
+#include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mobile_command_factory.h"
+#include "application_manager/mobile_message_handler.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 #include "protocol/bson_object_keys.h"
+#include "protocol_handler/protocol_handler.h"
 
-#include "utils/threads/thread.h"
+#include <time.h>
+#include "application_manager/application_impl.h"
+#include "interfaces/HMI_API_schema.h"
+#include "media_manager/media_manager.h"
+#include "policy/usage_statistics/counter.h"
+#include "smart_objects/enum_schema_item.h"
+#include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
+#include "utils/threads/thread.h"
 #include "utils/timer_task_impl.h"
-#include "smart_objects/enum_schema_item.h"
-#include "interfaces/HMI_API_schema.h"
-#include "application_manager/application_impl.h"
-#include "media_manager/media_manager.h"
-#include "policy/usage_statistics/counter.h"
-#include "utils/custom_string.h"
-#include <time.h>
 
 #ifdef SDL_REMOTE_CONTROL
-#include "policy/usage_statistics/counter.h"
-#include "functional_module/plugin_manager.h"
 #include "application_manager/core_service.h"
+#include "functional_module/plugin_manager.h"
+#include "policy/usage_statistics/counter.h"
 #endif  // SDL_REMOTE_CONTROL
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
 }
-}
+}  // namespace
 
 namespace application_manager {
 
@@ -141,7 +141,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
-    , applications_list_lock_(true)
+    , applications_list_lock_ptr_(std::make_shared<sync_primitives::Lock>(true))
+    , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
@@ -230,7 +231,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
-  DataAccessor<ApplicationSet> accessor(applications_, applications_list_lock_);
+  DataAccessor<ApplicationSet> accessor(applications_,
+                                        applications_list_lock_ptr_);
   return accessor;
 }
 
@@ -373,7 +375,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-  sync_primitives::AutoLock lock(applications_list_lock_);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
 
@@ -576,11 +578,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   Version version;
   int32_t min_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::minor_version].asInt();
+                               [strings::minor_version]
+                                   .asInt();
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int32_t max_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::major_version].asInt();
+                               [strings::major_version]
+                                   .asInt();
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
@@ -601,13 +605,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   // Keep HMI add id in case app is present in "waiting for registration" list
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
   if (apps_to_register_.end() != it) {
     application->set_hmi_application_id((*it)->hmi_app_id());
     apps_to_register_.erase(application);
   }
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
 
   if (!application->hmi_app_id()) {
     const bool is_saved =
@@ -640,11 +644,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Add application to registered app list and set appropriate mark.
   // Lock has to be released before adding app to policy DB to avoid possible
   // deadlock with simultaneous PTU processing
-  applications_list_lock_.Acquire();
+  applications_list_lock_ptr_->Acquire();
   application->MarkRegistered();
   applications_.insert(application);
   apps_size_ = applications_.size();
-  applications_list_lock_.Release();
+  applications_list_lock_ptr_->Release();
 
   return application;
 }
@@ -995,12 +999,12 @@ ApplicationConstSharedPtr ApplicationManagerImpl::WaitingApplicationByID(
 DataAccessor<AppsWaitRegistrationSet>
 ApplicationManagerImpl::AppsWaitingForRegistration() const {
   return DataAccessor<AppsWaitRegistrationSet>(apps_to_register_,
-                                               apps_to_register_list_lock_);
+                                               apps_to_register_list_lock_ptr_);
 }
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
@@ -1021,7 +1025,7 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
     const connection_handler::DeviceHandle handle, bool is_greyed_out) {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
@@ -1191,7 +1195,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                                const std::string& mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-  sync_primitives::AutoLock lock(applications_list_lock_);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   DCHECK_OR_RETURN_VOID(1 == applications_.erase(app));
 
   LOG4CXX_DEBUG(logger_,
@@ -1514,9 +1518,9 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "ServiceType = " << type << ". Session = " << std::hex
-                                 << session_key);
+  LOG4CXX_DEBUG(
+      logger_,
+      "ServiceType = " << type << ". Session = " << std::hex << session_key);
 
   if (type == kRpc) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
@@ -1524,9 +1528,9 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "The application with id:" << session_key
-                                            << " doesn't exists.");
+    LOG4CXX_WARN(
+        logger_,
+        "The application with id:" << session_key << " doesn't exists.");
     return false;
   }
 
@@ -1552,9 +1556,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "ServiceType = " << type << ". Session = " << std::hex
-                                 << session_key);
+  LOG4CXX_DEBUG(
+      logger_,
+      "ServiceType = " << type << ". Session = " << std::hex << session_key);
   std::vector<std::string> empty;
 
   if (type == kRpc) {
@@ -1564,9 +1568,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_WARN(logger_,
-                 "The application with id:" << session_key
-                                            << " doesn't exists.");
+    LOG4CXX_WARN(
+        logger_,
+        "The application with id:" << session_key << " doesn't exists.");
     connection_handler().NotifyServiceStartedResult(session_key, false, empty);
     return;
   }
@@ -2366,9 +2370,9 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       rpc::ValidationReport report("RPC");
 
       if (output.validate(&report) != smart_objects::Errors::OK) {
-        LOG4CXX_ERROR(logger_,
-                      "Incorrect parameter from HMI"
-                          << rpc::PrettyFormat(report));
+        LOG4CXX_ERROR(
+            logger_,
+            "Incorrect parameter from HMI" << rpc::PrettyFormat(report));
 
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
@@ -2826,9 +2830,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     connection_handler::DeviceHandle device_id = 0;
 
-    if (-1 ==
-        connection_handler().get_session_observer().GetDataOnSessionKey(
-            connection_key, NULL, NULL, &device_id)) {
+    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
+                  connection_key, NULL, NULL, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
@@ -2862,7 +2865,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     app->set_vr_synonyms(vrSynonym);
     app->set_tts_name(ttsName);
 
-    sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
     LOG4CXX_DEBUG(
         logger_, "apps_to_register_ size before: " << apps_to_register_.size());
     apps_to_register_.insert(app);
@@ -3128,20 +3131,20 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
     const connection_handler::DeviceHandle handle) {
   DevicePredicate device_finder(handle);
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   AppsWaitRegistrationSet::iterator it_app = std::find_if(
       apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
   while (apps_to_register_.end() != it_app) {
-    LOG4CXX_DEBUG(logger_,
-                  "Waiting app: " << (*it_app)->name().c_str()
-                                  << " is removed.");
+    LOG4CXX_DEBUG(
+        logger_,
+        "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
     apps_to_register_.erase(it_app);
     it_app = std::find_if(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);
   }
 
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(
@@ -3212,7 +3215,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   ApplicationSharedPtr app_to_remove;
   connection_handler::DeviceHandle handle = 0;
   {
-    sync_primitives::AutoLock lock(applications_list_lock_);
+    sync_primitives::AutoLock lock(applications_list_lock_ptr_);
     auto it_app = applications_.begin();
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
@@ -3659,21 +3662,21 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   }
   MobileMessageQueue messages;
   app->SwapMobileMessageQueue(messages);
-  auto push_allowed_messages =
-      [this, &app](smart_objects::SmartObjectSPtr message) {
-        const std::string function_id = MessageHelper::StringifiedFunctionID(
-            static_cast<mobile_apis::FunctionID::eType>(
-                (*message)[strings::params][strings::function_id].asUInt()));
-        const RPCParams params;
-        const mobile_apis::Result::eType check_result =
-            CheckPolicyPermissions(app, function_id, params);
-        if (mobile_api::Result::SUCCESS == check_result) {
-          ManageMobileCommand(message,
-                              commands::Command::CommandOrigin::ORIGIN_SDL);
-        } else {
-          app->PushMobileMessage(message);
-        }
-      };
+  auto push_allowed_messages = [this,
+                                &app](smart_objects::SmartObjectSPtr message) {
+    const std::string function_id = MessageHelper::StringifiedFunctionID(
+        static_cast<mobile_apis::FunctionID::eType>(
+            (*message)[strings::params][strings::function_id].asUInt()));
+    const RPCParams params;
+    const mobile_apis::Result::eType check_result =
+        CheckPolicyPermissions(app, function_id, params);
+    if (mobile_api::Result::SUCCESS == check_result) {
+      ManageMobileCommand(message,
+                          commands::Command::CommandOrigin::ORIGIN_SDL);
+    } else {
+      app->PushMobileMessage(message);
+    }
+  };
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 
@@ -3976,9 +3979,9 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
 
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   const bool trigger_ptu = apps_size_ != applications_.size();
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
   SendUpdateAppList();
   GetPolicyHandler().OnAppsSearchCompleted(trigger_ptu);
 }
@@ -4270,9 +4273,9 @@ bool ApplicationManagerImpl::InitDirectory(
     LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist.");
     // if storage directory doesn't exist try to create it
     if (!file_system::CreateDirectoryRecursively(path)) {
-      LOG4CXX_ERROR(logger_,
-                    "Unable to create " << directory_type << " directory "
-                                        << path);
+      LOG4CXX_ERROR(
+          logger_,
+          "Unable to create " << directory_type << " directory " << path);
       return false;
     }
     LOG4CXX_DEBUG(logger_,
@@ -4287,9 +4290,9 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(const std::string& path,
   const std::string directory_type = DirectoryTypeToString(type);
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
-    LOG4CXX_ERROR(logger_,
-                  directory_type
-                      << " directory doesn't have read/write permissions.");
+    LOG4CXX_ERROR(
+        logger_,
+        directory_type << " directory doesn't have read/write permissions.");
     return false;
   }
 
@@ -4465,10 +4468,10 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
 
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
-  applications_list_lock_.Acquire();
+  applications_list_lock_ptr_->Acquire();
   applications_.insert(mock_app);
   apps_size_ = applications_.size();
-  applications_list_lock_.Release();
+  applications_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::SetMockMediaManager(

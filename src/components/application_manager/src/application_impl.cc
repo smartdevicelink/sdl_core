@@ -72,7 +72,7 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
     return mobile_apis::FileType::BINARY;
   }
 }
-}
+}  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -139,6 +139,8 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
@@ -712,13 +714,13 @@ const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
 
 bool ApplicationImpl::SubscribeToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.insert(btn_name).second;
 }
 
 bool ApplicationImpl::IsSubscribedToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   std::set<mobile_apis::ButtonName::eType>::iterator it =
       subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
@@ -726,27 +728,27 @@ bool ApplicationImpl::IsSubscribedToButton(
 
 bool ApplicationImpl::UnsubscribeFromButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.erase(btn_name);
 }
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
+  sync_primitives::AutoLock lock(vi_lock_ptr_);
   return subscribed_vehicle_info_
       .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+          static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
       .second;
 }
 
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
-  sync_primitives::AutoLock lock(vi_lock_);
+  sync_primitives::AutoLock lock(vi_lock_ptr_);
   VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
       static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
   return (subscribed_vehicle_info_.end() != it);
 }
 
 bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
+  sync_primitives::AutoLock lock(vi_lock_ptr_);
   return subscribed_vehicle_info_.erase(
       static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
@@ -857,12 +859,13 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 }
 
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
-  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
+  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
+                                           button_lock_ptr_);
 }
 
 DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
   return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_);
+                                                vi_lock_ptr_);
 }
 
 const std::string& ApplicationImpl::curHash() const {

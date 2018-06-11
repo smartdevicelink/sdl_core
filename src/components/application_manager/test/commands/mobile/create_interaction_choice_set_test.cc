@@ -113,7 +113,7 @@ class CreateInteractionChoiceSetRequestTest
   CreateInteractionChoiceSetRequestTest()
       : message_(CreateMessage())
       , command_(CreateCommand<CreateInteractionChoiceSetRequest>(message_))
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp()), lock_(std::make_shared<sync_primitives::Lock>()) {}
 
   MessageSharedPtr CreateFullParamsVRSO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -158,7 +158,7 @@ class CreateInteractionChoiceSetRequestTest
   MessageSharedPtr message_;
   CreateInteractionChoiceSetRequestPtr command_;
   MockAppPtr mock_app_;
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_;
 };
 
 class CreateInteractionChoiceSetResponseTest
