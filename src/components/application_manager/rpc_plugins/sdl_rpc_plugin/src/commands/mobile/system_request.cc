@@ -462,8 +462,7 @@ void SystemRequest::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
-  const policy::PolicyHandlerInterface& policy_handler =
-     policy_handler_;
+  const policy::PolicyHandlerInterface& policy_handler = policy_handler_;
 
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(

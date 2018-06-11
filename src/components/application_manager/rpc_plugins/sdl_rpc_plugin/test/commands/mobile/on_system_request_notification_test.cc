@@ -73,15 +73,11 @@ class OnSystemRequestNotificationTest
   void PreConditions() {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
-
-    ON_CALL(app_mngr_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
   }
 
  protected:
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
@@ -95,13 +91,13 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
-  std::string policy_app_id;
-  EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(mock_app_));
+
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kPolicyAppId, request_type))
+      .WillRepeatedly(Return(true));
 
 #ifdef PROPRIETARY_MODE
   EXPECT_CALL(mock_policy_handler_, TimeoutExchangeSec()).WillOnce(Return(5u));
@@ -135,11 +131,9 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
-  std::string policy_app_id;
-  EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
@@ -171,10 +165,9 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(*mock_app, policy_app_id()).Times(0);
+  EXPECT_CALL(*mock_app_, policy_app_id()).Times(0);
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
@@ -195,18 +188,15 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
-  std::string policy_app_id;
-  EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(false));
 
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, _)).Times(0);
-  ;
 
   command->Run();
 }
@@ -231,7 +221,7 @@ TEST_F(
               IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   auto command = CreateCommand<OnSystemRequestNotification>(msg);
 
@@ -259,7 +249,7 @@ TEST_F(OnSystemRequestNotificationTest,
       .WillOnce(Return(true));
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _))
       .WillOnce((SaveArg<0>(&result)));
 
   auto command = CreateCommand<OnSystemRequestNotification>(msg);
