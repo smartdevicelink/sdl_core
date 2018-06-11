@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/lock.h"
 #include <errno.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <cstring>
-#include "utils/logger.h"
 #include <iostream>
-#include <signal.h>
+#include "utils/lock.h"
+#include "utils/logger.h"
 
 namespace sync_primitives {
 
@@ -65,27 +65,25 @@ Lock::Lock(bool is_recursive)
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_ > 0) {
-    std::cerr << "LOCK DESTRUCT ERRROR!!!\n";
-    exit(1);
-    LOG4CXX_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
+    LOG4CXX_FATAL(logger_, "Destroying non-released mutex " << &mutex_);
+    NOTREACHED();
   }
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to destroy mutex " << &mutex_ << ": "
-                                             << strerror(status));
+    LOG4CXX_FATAL(
+        logger_,
+        "Failed to destroy mutex " << &mutex_ << ": " << strerror(status));
+    NOTREACHED();
   }
 }
 
 void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    std::cerr << "LOCK ACQUIRE ERRROR!!!\n";
-    exit(1);
-    LOG4CXX_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": "
-                                             << strerror(status));
+    LOG4CXX_FATAL(
+        logger_,
+        "Failed to acquire mutex " << &mutex_ << ": " << strerror(status));
     NOTREACHED();
   } else {
     AssertFreeAndMarkTaken();
@@ -96,11 +94,10 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    std::cerr << "LOCK RELEASE ERRROR!!!\n";
-    exit(1);
-    LOG4CXX_ERROR(logger_,
-                  "Failed to unlock mutex" << &mutex_ << ": "
-                                           << strerror(status));
+    LOG4CXX_FATAL(
+        logger_,
+        "Failed to unlock mutex" << &mutex_ << ": " << strerror(status));
+    NOTREACHED();
   }
 }
 
@@ -118,14 +115,14 @@ bool Lock::Try() {
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
   if ((lock_taken_ > 0) && !is_mutex_recursive_) {
-    LOG4CXX_ERROR(logger_, "Locking already taken not recursive mutex");
+    LOG4CXX_FATAL(logger_, "Locking already taken not recursive mutex");
     NOTREACHED();
   }
   lock_taken_++;
 }
 void Lock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOG4CXX_ERROR(logger_, "Unlocking a mutex that is not taken");
+    LOG4CXX_FATAL(logger_, "Unlocking a mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;
