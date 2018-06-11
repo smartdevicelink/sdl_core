@@ -51,6 +51,7 @@ const char kSupportedLights[] = "supportedLights";
 
 // LightControlCapabilities
 const char kName[] = "name";
+const char kStatusAvailable[] = "statusAvailable";
 const char kDensityAvailable[] = "densityAvailable";
 const char kSRGBColorSpaceAvailable[] = "sRGBColorSpaceAvailable";
 }  //  strings
