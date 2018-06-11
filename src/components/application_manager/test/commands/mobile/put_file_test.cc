@@ -42,7 +42,7 @@
 #include "mobile/put_file_response.h"
 #include "mobile/put_file_request.h"
 
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"

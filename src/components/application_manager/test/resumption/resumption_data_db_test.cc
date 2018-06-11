@@ -38,7 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"

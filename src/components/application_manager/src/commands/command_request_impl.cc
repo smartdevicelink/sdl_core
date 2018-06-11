@@ -34,7 +34,7 @@
 #include <numeric>
 #include <string>
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"

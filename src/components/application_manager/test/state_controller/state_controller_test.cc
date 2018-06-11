@@ -41,7 +41,7 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/smart_object_keys.h"

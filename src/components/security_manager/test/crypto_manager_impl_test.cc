@@ -39,7 +39,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "utils/make_shared.h"
+#include <memory>
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"

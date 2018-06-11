@@ -44,7 +44,7 @@
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;

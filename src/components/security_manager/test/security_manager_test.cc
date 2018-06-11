@@ -44,7 +44,7 @@
 #include "security_manager/mock_ssl_context.h"
 #include "security_manager/mock_crypto_manager.h"
 #include "security_manager/mock_security_manager_listener.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/test_async_waiter.h"
 
 namespace test {

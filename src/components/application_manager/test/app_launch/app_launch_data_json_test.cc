@@ -36,7 +36,7 @@
 #include "json/json.h"
 #include "gtest/gtest.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "resumption/last_state_impl.h"

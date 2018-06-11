@@ -31,7 +31,7 @@
  */
 
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "remote_control/rc_command_factory.h"
 #include "functional_module/function_ids.h"
 #include "remote_control/commands/get_interior_vehicle_data_request.h"

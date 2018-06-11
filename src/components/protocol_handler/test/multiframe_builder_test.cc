@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <utility>
 #include <limits>
-#include "utils/make_shared.h"
+#include <memory>
 #include "protocol_handler/multiframe_builder.h"
 
 namespace test {

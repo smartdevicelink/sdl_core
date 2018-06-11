@@ -40,7 +40,7 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"

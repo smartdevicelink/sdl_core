@@ -40,7 +40,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/test_async_waiter.h"
 
 namespace test {

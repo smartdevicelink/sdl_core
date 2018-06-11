@@ -38,7 +38,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "utils/custom_string.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "encryption/hashing.h"
 
 #include "application_manager/mock_application_manager_settings.h"

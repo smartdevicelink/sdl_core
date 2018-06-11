@@ -37,7 +37,7 @@
 #include "utils/threads/async_runner.h"
 #include "utils/conditional_variable.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

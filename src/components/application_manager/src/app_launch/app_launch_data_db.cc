@@ -37,7 +37,7 @@
 #include "application_manager/app_launch/app_launch_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")

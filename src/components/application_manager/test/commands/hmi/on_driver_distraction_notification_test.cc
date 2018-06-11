@@ -38,7 +38,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/data_accessor.h"
 #include "commands/commands_test.h"
 #include "application_manager/mock_application.h"

@@ -5,7 +5,7 @@
 #include "mock_service.h"
 #include "application_manager/mock_application.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using application_manager::Message;
 using protocol_handler::MajorProtocolVersion;

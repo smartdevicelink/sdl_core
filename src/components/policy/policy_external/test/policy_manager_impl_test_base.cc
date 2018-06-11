@@ -38,7 +38,7 @@
 #include "policy/policy_manager_impl_test_base.h"
 
 #include "utils/file_system.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/gen_hash.h"
 #include "json/reader.h"
 

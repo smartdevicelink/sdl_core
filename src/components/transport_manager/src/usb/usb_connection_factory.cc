@@ -34,7 +34,7 @@
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"

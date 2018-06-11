@@ -33,7 +33,7 @@
 #include <string>
 #include "remote_control/message_helper.h"
 #include "remote_control/rc_module_constants.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace remote_control {
 using functional_modules::RCFunctionID;

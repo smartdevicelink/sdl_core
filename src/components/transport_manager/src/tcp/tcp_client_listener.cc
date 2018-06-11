@@ -53,7 +53,7 @@
 #include <sstream>
 
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"

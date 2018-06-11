@@ -36,7 +36,7 @@
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"

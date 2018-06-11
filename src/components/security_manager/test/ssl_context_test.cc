@@ -42,7 +42,7 @@
 #include "utils/custom_string.h"
 #include "security_manager/mock_security_manager_settings.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using ::testing::Return;
 using ::testing::ReturnRef;

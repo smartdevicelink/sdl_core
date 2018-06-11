@@ -35,7 +35,7 @@
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using namespace mobile_apis;
 using namespace NsSmartDeviceLink::NsSmartObjects;

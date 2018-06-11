@@ -49,7 +49,7 @@
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"

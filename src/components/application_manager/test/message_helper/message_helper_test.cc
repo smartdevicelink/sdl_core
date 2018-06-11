@@ -35,7 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application.h"
 #include "utils/custom_string.h"

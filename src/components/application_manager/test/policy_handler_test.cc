@@ -53,13 +53,13 @@
 #include "json/value.h"
 #include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/custom_string.h"
 #include "policy/usage_statistics/counter.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"

@@ -48,7 +48,7 @@
 #include "json/reader.h"
 #include "rpc_base/rpc_base.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 

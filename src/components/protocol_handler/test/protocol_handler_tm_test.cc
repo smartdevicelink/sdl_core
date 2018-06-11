@@ -46,7 +46,7 @@
 #include "security_manager/mock_ssl_context.h"
 #endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/test_async_waiter.h"
 #include <bson_object.h>
 

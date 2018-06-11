@@ -7,7 +7,7 @@
 #include "application_manager/app_launch/apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 #include <iostream>

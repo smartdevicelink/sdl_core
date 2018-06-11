@@ -4,7 +4,7 @@
 #include "remote_control/rc_module_constants.h"
 #include "json/json.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "remote_control/message_helper.h"
 #include "remote_control/rc_app_extension.h"
 

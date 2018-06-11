@@ -41,7 +41,7 @@
 #include "transport_manager/tcp/mock_tcp_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace test {
 namespace components {

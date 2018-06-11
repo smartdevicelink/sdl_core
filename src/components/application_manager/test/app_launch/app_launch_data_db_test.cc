@@ -38,7 +38,7 @@
 #include "utils/macro.h"
 #include "sql_database.h"
 #include "sql_query.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "application_manager/mock_app_launch_settings.h"
 #include "application_manager/app_launch/app_launch_data_db.h"

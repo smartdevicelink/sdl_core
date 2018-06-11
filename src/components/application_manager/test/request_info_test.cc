@@ -37,7 +37,7 @@
 #include <limits>
 #include "gmock/gmock.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace request_info = application_manager::request_controller;
 

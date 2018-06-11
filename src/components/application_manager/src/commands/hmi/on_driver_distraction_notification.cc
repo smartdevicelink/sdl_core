@@ -37,7 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace application_manager {
 

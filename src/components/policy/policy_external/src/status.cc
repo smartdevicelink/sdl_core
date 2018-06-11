@@ -32,7 +32,7 @@
 
 #include "policy/status.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 policy::UpToDateStatus::UpToDateStatus()
     : Status(kUpToDate, policy::PolicyTableStatus::StatusUpToDate) {}

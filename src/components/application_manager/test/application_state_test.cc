@@ -41,7 +41,7 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace test {
 namespace components {

@@ -42,7 +42,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"

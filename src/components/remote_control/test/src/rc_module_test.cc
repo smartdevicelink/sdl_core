@@ -39,7 +39,7 @@
 #include "application_manager/mock_application.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager_settings.h"
 

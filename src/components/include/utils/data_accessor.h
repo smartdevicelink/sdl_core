@@ -46,10 +46,8 @@ class DataAccessor {
     lock_.Acquire();
   }
 
-  DataAccessor(const DataAccessor<T>& other)
-      : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
-    ++(*counter_);
-  }
+explicit  DataAccessor(const DataAccessor<T>& other) = delete;
+explicit  DataAccessor() = delete;
 
   ~DataAccessor() {
     if (0 == *counter_) {

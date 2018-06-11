@@ -141,7 +141,7 @@
 #include "application_manager/commands/mobile/send_haptic_data_request.h"
 #include "application_manager/commands/mobile/send_haptic_data_response.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace application_manager {
 

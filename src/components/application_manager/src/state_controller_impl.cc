@@ -33,7 +33,7 @@
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "connection_handler/connection_handler.h"
 
 namespace application_manager {

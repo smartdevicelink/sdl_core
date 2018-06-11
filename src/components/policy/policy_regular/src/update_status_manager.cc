@@ -33,7 +33,7 @@
 #include "policy/update_status_manager.h"
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace policy {
 

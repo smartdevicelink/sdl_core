@@ -60,7 +60,7 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"

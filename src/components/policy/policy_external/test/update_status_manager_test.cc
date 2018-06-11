@@ -34,7 +34,7 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/conditional_variable.h"
 
 namespace test {

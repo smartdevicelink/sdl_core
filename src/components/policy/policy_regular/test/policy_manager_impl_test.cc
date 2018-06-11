@@ -51,7 +51,7 @@
 #include "utils/macro.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/gen_hash.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/mock_access_remote.h"

@@ -35,7 +35,7 @@
 #include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
 
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace transport_manager {
 namespace transport_adapter {

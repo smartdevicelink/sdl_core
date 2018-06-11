@@ -41,7 +41,7 @@
 #include "application_manager/mock_application.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 

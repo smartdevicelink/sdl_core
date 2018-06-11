@@ -32,7 +32,7 @@
 
 #include "remote_control/commands/base_command_request.h"
 #include <cstring>
-#include "utils/make_shared.h"
+#include <memory>
 #include "remote_control/event_engine/event_dispatcher.h"
 #include "remote_control/message_helper.h"
 #include "remote_control/remote_control_plugin.h"

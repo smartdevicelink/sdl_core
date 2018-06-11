@@ -113,7 +113,7 @@
 #include "utils/data_accessor.h"
 #include "utils/signals.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"

@@ -40,7 +40,7 @@
 #include "gmock/gmock.h"
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;

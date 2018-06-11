@@ -32,7 +32,7 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
 

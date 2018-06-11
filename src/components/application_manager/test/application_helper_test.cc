@@ -51,7 +51,7 @@
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;

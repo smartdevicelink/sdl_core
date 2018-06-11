@@ -44,7 +44,7 @@
 #include "application_manager/state_controller.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol/common.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/shared_ptr.h"
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"

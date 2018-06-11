@@ -38,7 +38,7 @@
 #include "connection_handler/connection_handler.h"
 #include "application_manager/application.h"
 #include "utils/timer_task_impl.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")

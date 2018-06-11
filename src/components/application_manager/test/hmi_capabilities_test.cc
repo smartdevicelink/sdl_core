@@ -41,7 +41,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "smart_objects/enum_schema_item.h"
 #include "interfaces/HMI_API.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/hmi_capabilities_for_testing.h"
 #include "utils/file_system.h"
 #include "application_manager/mock_application_manager.h"

@@ -47,7 +47,7 @@
 #include "utils/helpers.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer_task_impl.h"
 
 namespace resumption {

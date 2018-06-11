@@ -42,7 +42,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/shared_ptr.h"
 #include "telemetry_monitor/telemetry_observable.h"
 

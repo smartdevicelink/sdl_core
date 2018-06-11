@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "application_manager/app_launch/apps_launcher.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer_task_impl.h"
 #include <iostream>
 

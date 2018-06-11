@@ -37,7 +37,7 @@
 #include <utility>
 
 #include "policy/policy_manager_impl_test_base.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/shared_ptr.h"
 
 using ::testing::_;

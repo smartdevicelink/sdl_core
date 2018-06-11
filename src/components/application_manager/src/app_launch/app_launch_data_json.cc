@@ -33,7 +33,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/date_time.h"
 #include "json/json.h"
 

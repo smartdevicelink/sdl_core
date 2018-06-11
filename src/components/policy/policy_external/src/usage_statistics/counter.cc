@@ -36,7 +36,7 @@
 #include <cassert>
 #include "policy/usage_statistics/counter.h"
 #include "utils/date_time.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer_task_impl.h"
 
 namespace usage_statistics {

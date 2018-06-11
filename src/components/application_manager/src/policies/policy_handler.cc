@@ -53,7 +53,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
 #ifdef SDL_REMOTE_CONTROL

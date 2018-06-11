@@ -39,7 +39,7 @@
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/smart_object_keys.h"
 
 namespace remote_control {

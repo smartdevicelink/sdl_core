@@ -45,7 +45,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/raw_message.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "resumption/last_state_impl.h"
 #include "config_profile/profile.h"
 

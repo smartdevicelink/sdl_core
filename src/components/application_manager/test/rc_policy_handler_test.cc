@@ -46,7 +46,7 @@
 #include "json/writer.h"
 #include "json/value.h"
 #include "smart_objects/smart_object.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/custom_string.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"

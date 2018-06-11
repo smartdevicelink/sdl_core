@@ -37,7 +37,7 @@
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace transport_manager {
 namespace transport_adapter {
