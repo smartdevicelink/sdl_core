@@ -591,7 +591,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void set_access_remote(
       utils::SharedPtr<AccessRemote> access_remote) = 0;
 
-
   /**
    * @brief Checks if there is existing URL in the EndpointUrls vector with
    * index saved in the policy manager and if not, it moves to the next
