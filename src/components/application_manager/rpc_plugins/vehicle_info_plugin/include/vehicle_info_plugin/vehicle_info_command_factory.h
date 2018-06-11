@@ -46,13 +46,11 @@ namespace commands = application_manager::commands;
  * @brief The Vehicle Info command factory.
  */
 class VehicleInfoCommandFactory : public app_mngr::CommandFactory {
-public:
-  VehicleInfoCommandFactory(
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler
-  );
+ public:
+  VehicleInfoCommandFactory(app_mngr::ApplicationManager& application_manager,
+                            app_mngr::rpc_service::RPCService& rpc_service,
+                            app_mngr::HMICapabilities& hmi_capabilities,
+                            policy::PolicyHandlerInterface& policy_handler);
   virtual ~VehicleInfoCommandFactory();
 
   app_mngr::CommandSharedPtr CreateCommand(
@@ -63,11 +61,10 @@ public:
       const int32_t function_id,
       const commands::Command::CommandSource source) const OVERRIDE;
 
-private:
+ private:
   std::unique_ptr<app_mngr::CommandFactory> hmi_command_factory_;
   std::unique_ptr<app_mngr::CommandFactory> mob_command_factory_;
 };
-
 }
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_COMMAND_FACTORY_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_COMMAND_FACTORY_H

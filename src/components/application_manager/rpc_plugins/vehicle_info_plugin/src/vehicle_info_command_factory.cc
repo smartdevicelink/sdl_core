@@ -37,14 +37,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 namespace vehicle_info_plugin {
 
 VehicleInfoCommandFactory::VehicleInfoCommandFactory(
-        app_mngr::ApplicationManager& application_manager,
-        app_mngr::rpc_service::RPCService& rpc_service,
-        app_mngr::HMICapabilities& hmi_capabilities,
-        policy::PolicyHandlerInterface& policy_handler)
-  : hmi_command_factory_(new VehicleInfoHmiCommandFactory(
-      application_manager, rpc_service, hmi_capabilities, policy_handler)),
-    mob_command_factory_(new VehicleInfoMobileCommandFactory(
-      application_manager, rpc_service, hmi_capabilities, policy_handler)) {
+    app_mngr::ApplicationManager& application_manager,
+    app_mngr::rpc_service::RPCService& rpc_service,
+    app_mngr::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : hmi_command_factory_(new VehicleInfoHmiCommandFactory(
+          application_manager, rpc_service, hmi_capabilities, policy_handler))
+    , mob_command_factory_(new VehicleInfoMobileCommandFactory(
+          application_manager, rpc_service, hmi_capabilities, policy_handler)) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -64,8 +64,7 @@ bool VehicleInfoCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource source) const {
   return commands::Command::SOURCE_HMI == source
-            ? hmi_command_factory_->IsAbleToProcess(function_id, source)
-            : mob_command_factory_->IsAbleToProcess(function_id, source);
+             ? hmi_command_factory_->IsAbleToProcess(function_id, source)
+             : mob_command_factory_->IsAbleToProcess(function_id, source);
 }
-
 }

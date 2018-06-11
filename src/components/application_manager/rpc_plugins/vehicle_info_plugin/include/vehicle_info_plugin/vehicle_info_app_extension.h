@@ -42,7 +42,7 @@ namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
 class VehicleInfoAppExtension : app_mngr::AppExtension {
-public:
+ public:
   explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
   virtual ~VehicleInfoAppExtension();
 
@@ -51,10 +51,9 @@ public:
   void unsubscribeFromVehicleInfo();
   bool isSubscribedToVehicleInfo(const std::string& moduleType) const;
 
-private:
+ private:
   std::set<std::string> subscribed_modules_;
 };
-
 }
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_APP_EXTENSION_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_APP_EXTENSION_H
