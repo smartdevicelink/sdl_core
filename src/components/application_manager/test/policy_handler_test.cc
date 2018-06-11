@@ -1377,10 +1377,30 @@ TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
 
   mobile_apis::RequestType::eType type =
       mobile_apis::RequestType::eType::EMERGENCY;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypesState(kPolicyAppId_))
+      .WillOnce(Return(policy::RequestType::State::AVAILABLE));
+
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(kPolicyAppId_))
-      .WillOnce(Return(std::vector<std::string>()));
+      .WillOnce(Return(std::vector<std::string>({"HTTP"})));
   // Act
-  policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type);
+  EXPECT_FALSE(policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type));
+}
+
+TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  // Check expectations
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestSubTypesState(kPolicyAppId_))
+      .WillOnce(Return(policy::RequestSubType::State::AVAILABLE));
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestSubTypes(kPolicyAppId_))
+      .WillOnce(
+          Return(std::vector<std::string>({"fakeSubType", "fakeSubType2"})));
+
+  // Act
+  const std::string subtype = "fakeSubType";
+  EXPECT_TRUE(policy_handler_.IsRequestSubTypeAllowed(kPolicyAppId_, subtype));
 }
 
 TEST_F(PolicyHandlerTest, GetVehicleInfo) {

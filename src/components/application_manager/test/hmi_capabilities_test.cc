@@ -186,6 +186,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
+  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
+
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
 
   // Check active languages
@@ -269,7 +271,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
             static_cast<hmi_apis::Common_DisplayType::eType>(
                 display_capabilities_so[hmi_response::display_type].asInt()));
 
-  EXPECT_EQ("GENERIC_DISPLAY", display_capabilities_so[hmi_response::display_name].asString());
+  EXPECT_EQ("GENERIC_DISPLAY",
+            display_capabilities_so[hmi_response::display_name].asString());
 
   EXPECT_TRUE(display_capabilities_so["graphicSupported"].asBool());
 
@@ -564,6 +567,7 @@ TEST_F(HMICapabilitiesTest,
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;
+  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
   sm_obj[hmi_response::image_capabilities][0] = image_type;
   hmi_capabilities_test->set_display_capabilities(sm_obj);
 

@@ -50,6 +50,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
+#include "utils/file_system.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -449,56 +450,69 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     smart_objects::SmartObject& display_caps =
         response_params[hmi_response::display_capabilities];
 
-    display_caps[hmi_response::display_type] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::display_type);
-
-    if(hmi_capabilities.display_capabilities()->keyExists(hmi_response::display_name)) {
-      display_caps[hmi_response::display_name] =
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::display_type)) {
+      display_caps[hmi_response::display_type] =
           hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::display_name);      
+              hmi_response::display_type);
     }
 
-    display_caps[hmi_response::text_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::text_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::display_name)) {
+      display_caps[hmi_response::display_name] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::display_name);
+    }
 
-    display_caps[hmi_response::image_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::image_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::text_fields)) {
+      display_caps[hmi_response::text_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::text_fields);
+    }
 
-    display_caps[hmi_response::media_clock_formats] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::media_clock_formats);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_fields)) {
+      display_caps[hmi_response::image_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::image_fields);
+    }
 
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::media_clock_formats)) {
+      display_caps[hmi_response::media_clock_formats] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::media_clock_formats);
+    }
 
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::templates_available)) {
+      display_caps[hmi_response::templates_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::templates_available);
+    }
 
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::screen_params)) {
+      display_caps[hmi_response::screen_params] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::screen_params);
+    }
 
-    display_caps[hmi_response::graphic_supported] =
-        (hmi_capabilities.display_capabilities()
-             ->getElement(hmi_response::image_capabilities)
-             .length() > 0);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::num_custom_presets_available)) {
+      display_caps[hmi_response::num_custom_presets_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::num_custom_presets_available);
+    }
 
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
-
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
-
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_capabilities)) {
+      display_caps[hmi_response::graphic_supported] =
+          (hmi_capabilities.display_capabilities()
+               ->getElement(hmi_response::image_capabilities)
+               .length() > 0);
+    }
   }
 
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
@@ -725,6 +739,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
   policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
       application->policy_app_id(), hmi_types);
+
+  response_params[strings::icon_resumed] =
+      file_system::FileExists(application->app_icon_path());
+
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
@@ -828,8 +846,9 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     msg_params[strings::tts_name] = *(application_impl.tts_name());
   }
 
+  const std::string policy_app_id = application_impl.policy_app_id();
   std::string priority;
-  GetPolicyHandler().GetPriority(application_impl.policy_app_id(), &priority);
+  GetPolicyHandler().GetPriority(policy_app_id, &priority);
 
   if (!priority.empty()) {
     msg_params[strings::priority] = MessageHelper::GetPriorityCode(priority);
@@ -839,8 +858,10 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   smart_objects::SmartObject& application = msg_params[strings::application];
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
-  application[hmi_response::policy_app_id] = application_impl.policy_app_id();
-  application[strings::icon] = application_impl.app_icon_path();
+  application[hmi_response::policy_app_id] = policy_app_id;
+  if (file_system::FileExists(application_impl.app_icon_path())) {
+    application[strings::icon] = application_impl.app_icon_path();
+  }
 
   const smart_objects::SmartObject* ngn_media_screen_name =
       application_impl.ngn_media_screen_name();
@@ -859,18 +880,41 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::app_type] = *app_type;
   }
 
-  std::vector<std::string> request_types =
-      GetPolicyHandler().GetAppRequestTypes(application_impl.policy_app_id());
+  const policy::RequestType::State app_request_types_state =
+      GetPolicyHandler().GetAppRequestTypeState(policy_app_id);
+  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
+    const auto request_types =
+        GetPolicyHandler().GetAppRequestTypes(policy_app_id);
+    application[strings::request_type] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_types_array =
+        application[strings::request_type];
 
-  application[strings::request_type] = SmartObject(SmartType_Array);
-  smart_objects::SmartObject& request_array =
-      application[strings::request_type];
+    size_t index = 0;
+    for (auto it : request_types) {
+      request_types_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
+    application[strings::request_type] = SmartObject(SmartType_Array);
+  }
 
-  uint32_t index = 0;
-  std::vector<std::string>::const_iterator it = request_types.begin();
-  for (; request_types.end() != it; ++it) {
-    request_array[index] = *it;
-    ++index;
+  const policy::RequestSubType::State app_request_subtypes_state =
+      GetPolicyHandler().GetAppRequestSubTypeState(policy_app_id);
+  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
+    const auto request_subtypes =
+        GetPolicyHandler().GetAppRequestSubTypes(policy_app_id);
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_subtypes_array =
+        application[strings::request_subtype];
+
+    size_t index = 0;
+    for (auto it : request_subtypes) {
+      request_subtypes_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestSubType::State::EMPTY ==
+             app_request_subtypes_state) {
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
   }
 
   application[strings::device_info] = SmartObject(SmartType_Map);

@@ -135,6 +135,9 @@
         <element name="READ_ONLY">
             <description>The value being set is read only</description>
         </element>
+        <element name="CORRUPTED_DATA">
+            <description>The data sent failed to pass CRC check in receiver end</description>
+        </element>
     </enum>
     
     <enum name="ButtonPressMode">
@@ -905,6 +908,9 @@
         <param name="imageType" type="ImageType" mandatory="true">
             <description>Describes, whether it is a static or dynamic image.</description>
         </param>
+        <param name="isTemplate" type="Boolean" mandatory="false">
+            <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
+        </param>
     </struct>
     
     <struct name="SoftButton">
@@ -1088,6 +1094,33 @@
         <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
         </element>
     </enum>
+
+    <enum name="TPMS">
+        <element name="UNKNOWN">
+            <description>If set the status of the tire is not known.</description>
+        </element>
+        <element name="SYSTEM_FAULT">
+            <description>TPMS does not function.</description>
+        </element>
+        <element name="SENSOR_FAULT">
+            <description>The sensor of the tire does not function.</description>
+        </element>
+        <element name="LOW">
+            <description>TPMS is reporting a low tire pressure for the tire.</description>
+        </element>
+        <element name="SYSTEM_ACTIVE">
+            <description>TPMS is active and the tire pressure is monitored.</description>
+        </element>
+        <element name="TRAIN">
+            <description>TPMS is reporting that the tire must be trained.</description>
+        </element>
+        <element name="TRAINING_COMPLETE">
+            <description>TPMS reports the training for the tire is completed.</description>
+        </element>
+        <element name="NOT_TRAINED">
+            <description>TPMS reports the tire is not trained.</description>
+        </element>
+    </enum>
     
     <enum name="FuelType">
         <element name="GASOLINE" />
@@ -1122,6 +1155,12 @@
     <struct name="SingleTireStatus">
         <param name="status" type="ComponentVolumeStatus" mandatory="true">
             <description>See ComponentVolumeStatus.</description>
+        </param>
+        <param name="tpms" type="TPMS" mandatory="false">
+            <description>The status of TPMS according to the particular tire.</description>
+        </param>
+        <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+            <description>The pressure value of the particular tire in kilo pascal.</description>
         </param>
     </struct>
     
@@ -2183,6 +2222,7 @@
         <element name="EMERGENCY" />
         <element name="MEDIA" />
         <element name="FOTA" />
+        <element name="OEM_SPECIFIC" />
     </enum>         
     <enum name="AppHMIType">
         <description>Enumeration listing possible app types.</description>
@@ -3152,6 +3192,10 @@
         
         <param name="systemSoftwareVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
             <description>The software version of the system that implements the SmartDeviceLink core.</description>
+        </param>
+        <param name="iconResumed" type="Boolean" mandatory="true">
+            <description>Existence of apps icon at system. If true, apps icon
+            was resumed at system. If false, apps icon is not resumed at system</description>
         </param>
     </function>
     
@@ -5172,6 +5216,9 @@
                 If offset is set to 0, then length is the total length of the file to be downloaded
             </description>
         </param>
+        <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+            <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits . </description>
+        </param>
     </function>
     
     <function name="PutFile" functionID="PutFileID" messagetype="response">
@@ -5191,6 +5238,7 @@
             <element name="GENERIC_ERROR"/>
             <element name="REJECTED"/>
             <element name="UNSUPPORTED_REQUEST"/>
+            <element name="CORRUPTED_DATA"/>
         </param>
         
         <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
@@ -5395,6 +5443,11 @@
             <description>
                 The type of system request.
                 Note that Proprietary requests should forward the binary data to the known proprietary module on the system.
+            </description>
+        </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
             </description>
         </param>
         <param name="fileName" type="String" maxlength="255" mandatory="false">
@@ -5995,6 +6048,11 @@
         </description>
         <param name="requestType" type="RequestType" mandatory="true">
             <description>The type of system request.</description>
+        </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
         </param>
         <param name="url" type="String" maxlength="1000" mandatory="false">
             <description>

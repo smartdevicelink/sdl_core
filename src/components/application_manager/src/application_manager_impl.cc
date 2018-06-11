@@ -623,6 +623,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     const std::string& bundle_id = app_info[strings::bundle_id].asString();
     application->set_bundle_id(bundle_id);
   }
+
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
+  }
+
   PutDriverDistractionMessageToPostponed(application);
 
   // Stops timer of saving data to resumption in order to
@@ -4454,6 +4461,23 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
     // ignore unknown parameters
   }
   return output;
+}
+
+bool ApplicationManagerImpl::IsSOStructValid(
+    const hmi_apis::StructIdentifiers::eType struct_id,
+    const smart_objects::SmartObject& display_capabilities) {
+  smart_objects::SmartObject display_capabilities_so = display_capabilities;
+  if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
+    if (display_capabilities_so.isValid()) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
+    return false;
+  }
+  return true;
 }
 
 #ifdef BUILD_TESTS

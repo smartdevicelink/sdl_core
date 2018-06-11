@@ -273,6 +273,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(event_dispatcher,
                application_manager::event_engine::EventDispatcher&());
 
+  MOCK_METHOD2(IsSOStructValid,
+               bool(const hmi_apis::StructIdentifiers::eType struct_id,
+                    const smart_objects::SmartObject& display_capabilities));
+
   DEPRECATED MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                                 bool(const uint32_t));
   DEPRECATED MOCK_METHOD1(SubscribeAppForWayPoints, void(const uint32_t));

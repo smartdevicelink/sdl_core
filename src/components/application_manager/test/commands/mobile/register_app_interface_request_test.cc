@@ -161,6 +161,12 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_))
         .WillByDefault(Return(std::vector<std::string>()));
+    ON_CALL(mock_policy_handler_, GetAppRequestTypeState(_))
+        .WillByDefault(Return(policy::RequestType::State::EMPTY));
+    ON_CALL(mock_policy_handler_, GetAppRequestSubTypes(_))
+        .WillByDefault(Return(std::vector<std::string>()));
+    ON_CALL(mock_policy_handler_, GetAppRequestSubTypeState(_))
+        .WillByDefault(Return(policy::RequestSubType::State::EMPTY));
     ON_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))

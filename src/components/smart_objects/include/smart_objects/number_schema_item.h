@@ -39,6 +39,7 @@
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "utils/convert_utils.h"
+#include "utils/helpers.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -123,15 +124,16 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   NumberType value(0);
   if ((SmartType_Double == type) && (typeid(double) == typeid(value))) {
     return true;
-  } else if ((SmartType_Integer == type) &&
-             (typeid(int32_t) == typeid(value) ||
-              typeid(uint32_t) == typeid(value) ||
-              typeid(int64_t) == typeid(value) ||
-              typeid(double) == typeid(value))) {
+  } else if (((SmartType_Integer == type) || (SmartType_UInteger == type)) &&
+             helpers::Compare<const std::type_info&, helpers::EQ, helpers::ONE>(
+                 typeid(value),
+                 typeid(int32_t),
+                 typeid(uint32_t),
+                 typeid(int64_t),
+                 typeid(double))) {
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 template <typename NumberType>

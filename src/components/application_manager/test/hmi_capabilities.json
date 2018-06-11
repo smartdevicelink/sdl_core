@@ -216,7 +216,9 @@
       "imageFields": [
         {
                     "name": "softButtonImage",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -224,7 +226,9 @@
                 },
                 {
                     "name": "choiceImage",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -232,7 +236,9 @@
                 },
                 {
                     "name": "choiceSecondaryImage",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -240,7 +246,9 @@
                 },
                 {
                     "name": "menuIcon",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -248,7 +256,9 @@
                 },
                 {
                     "name": "cmdIcon",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -256,7 +266,9 @@
                 },
                 {
                     "name": "appIcon",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -264,7 +276,9 @@
                 },
                 {
                     "name": "graphic",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -272,7 +286,9 @@
                 },
                 {
                     "name": "secondaryGraphic",
-                    "imageTypeSupported": [],
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35

@@ -40,11 +40,12 @@ bool ApplicationPoliciesSection::Validate() const {
     return false;
   }
 
-  PolicyTableType pt_type = GetPolicyTableType();
+  const PolicyTableType pt_type = GetPolicyTableType();
   if (PT_PRELOADED != pt_type && PT_UPDATE != pt_type) {
     return true;
   }
 
+  LOG4CXX_TRACE(logger_, "Checking app Request Types...");
   if (!it_default_policy->second.RequestType.is_valid()) {
     LOG4CXX_WARN(logger_,
                  "Default policy RequestTypes are not valid. Will be cleaned.");
@@ -65,10 +66,15 @@ bool ApplicationPoliciesSection::Validate() const {
   ApplicationPolicies::iterator end_iter = apps.end();
 
   while (iter != end_iter) {
+    if (it_default_policy == iter || it_pre_data_policy == iter) {
+      ++iter;
+      continue;
+    }
     ApplicationParams& app_params = (*iter).second;
-    bool is_request_type_omitted = !app_params.RequestType.is_initialized();
-    bool is_request_type_valid = app_params.RequestType.is_valid();
-    bool is_request_type_empty = app_params.RequestType->empty();
+    const bool is_request_type_omitted =
+        !app_params.RequestType.is_initialized();
+    const bool is_request_type_valid = app_params.RequestType.is_valid();
+    const bool is_request_type_empty = app_params.RequestType->empty();
 
     if (PT_PRELOADED == pt_type) {
       if (!is_request_type_valid) {
@@ -107,6 +113,33 @@ bool ApplicationPoliciesSection::Validate() const {
       if (is_request_type_empty) {
         LOG4CXX_WARN(logger_, "App policy RequestTypes empty.");
       }
+    }
+    ++iter;
+  }
+
+  LOG4CXX_TRACE(logger_, "Checking app Request SubTypes...");
+  iter = apps.begin();
+  while (iter != end_iter) {
+    if (it_default_policy == iter || it_pre_data_policy == iter) {
+      ++iter;
+      continue;
+    }
+    ApplicationParams& app_params = (*iter).second;
+    const bool is_request_subtype_omitted =
+        !app_params.RequestSubType.is_initialized();
+
+    if (is_request_subtype_omitted) {
+      LOG4CXX_WARN(logger_,
+                   "App policy RequestSubTypes omitted."
+                   " Will be replaced with default.");
+      app_params.RequestSubType = apps[kDefaultApp].RequestSubType;
+      ++iter;
+      continue;
+    }
+
+    const bool is_request_subtype_empty = app_params.RequestSubType->empty();
+    if (is_request_subtype_empty) {
+      LOG4CXX_WARN(logger_, "App policy RequestSubTypes empty.");
     }
     ++iter;
   }

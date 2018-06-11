@@ -102,6 +102,8 @@ typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
 
+typedef Strings RequestSubTypes;
+
 #ifdef SDL_REMOTE_CONTROL
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
@@ -173,6 +175,7 @@ struct ApplicationParams : PolicyBase {
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
+  Optional<RequestSubTypes> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
 #ifdef SDL_REMOTE_CONTROL
