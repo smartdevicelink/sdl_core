@@ -948,23 +948,36 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoWriteLock lock(connections_lock_);
-  ConnectionMap::iterator it_conn =
-      connections_.find(std::make_pair(device_uid, app_handle));
-  if (it_conn == connections_.end()) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not found");
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
+    ConnectionMap::iterator it_conn =
+        connections_.find(std::make_pair(device_uid, app_handle));
+    if (it_conn == connections_.end()) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not found");
+      return;
+    }
+    const ConnectionInfo& info = it_conn->second;
+    if (info.state != ConnectionInfo::FINALISING) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not finalized");
+      return;
+    }
+    connections_.erase(it_conn);
+  }
+
+  DeviceSptr device = FindDevice(device_handle);
+  if (!device) {
+    LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");
     return;
   }
-  const ConnectionInfo& info = it_conn->second;
-  if (info.state != ConnectionInfo::FINALISING) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not finalized");
-    return;
+
+  if (ToBeAutoDisconnected(device) &&
+      IsSingleApplication(device_handle, app_handle)) {
+    RemoveDevice(device_uid);
   }
-  connections_.erase(it_conn);
 }
 
 void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
