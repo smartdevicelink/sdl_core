@@ -55,14 +55,14 @@ namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
 
 VehicleInfoMobileCommandFactory::VehicleInfoMobileCommandFactory(
-        application_manager::ApplicationManager &application_manager,
-        application_manager::rpc_service::RPCService &rpc_service,
-        application_manager::HMICapabilities &hmi_capabilities,
-        policy::PolicyHandlerInterface &policy_handler)
-  : application_manager_(application_manager),
-    rpc_service_(rpc_service),
-    hmi_capabilities_(hmi_capabilities),
-    policy_handler_(policy_handler) {
+    application_manager::ApplicationManager& application_manager,
+    application_manager::rpc_service::RPCService& rpc_service,
+    application_manager::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : application_manager_(application_manager)
+    , rpc_service_(rpc_service)
+    , hmi_capabilities_(hmi_capabilities)
+    , policy_handler_(policy_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -73,11 +73,11 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
 
   const mobile_apis::FunctionID::eType function_id =
       static_cast<mobile_apis::FunctionID::eType>(
-        (*message)[strings::params][strings::function_id].asInt());
+          (*message)[strings::params][strings::function_id].asInt());
 
   const mobile_apis::messageType::eType message_type =
       static_cast<mobile_apis::messageType::eType>(
-        (*message)[strings::params][strings::message_type].asInt());
+          (*message)[strings::params][strings::message_type].asInt());
 
   auto message_type_str = "request";
   if (mobile_apis::messageType::response == message_type) {
@@ -86,9 +86,9 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
     message_type_str = "notification";
   }
 
-  LOG4CXX_DEBUG(
-      logger_, "HMICommandFactory::CreateCommand function_id: " << function_id
-               << ", message type: " << message_type_str);
+  LOG4CXX_DEBUG(logger_,
+                "HMICommandFactory::CreateCommand function_id: "
+                    << function_id << ", message type: " << message_type_str);
 
   return buildCommandCreator(function_id, message_type).create(message);
 }
@@ -97,46 +97,47 @@ bool VehicleInfoMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(
-        function_id, mobile_apis::messageType::INVALID_ENUM).CanBeCreated();
+  return buildCommandCreator(function_id,
+                             mobile_apis::messageType::INVALID_ENUM)
+      .CanBeCreated();
 }
 
 app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::buildCommandCreator(
-      const int32_t function_id, const int32_t message_type) const {
-  auto factory =
-      app_mngr::CommandCreatorFactory(application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
+    const int32_t function_id, const int32_t message_type) const {
+  auto factory = app_mngr::CommandCreatorFactory(
+      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
   switch (function_id) {
     case mobile_apis::FunctionID::GetVehicleDataID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::GetVehicleDataRequest>()
-          : factory.GetCreator<commands::GetVehicleDataResponse>();
+                 ? factory.GetCreator<commands::GetVehicleDataRequest>()
+                 : factory.GetCreator<commands::GetVehicleDataResponse>();
     case mobile_apis::FunctionID::SubscribeVehicleDataID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
-          : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
+                 ? factory.GetCreator<commands::SubscribeVehicleDataRequest>()
+                 : factory.GetCreator<commands::SubscribeVehicleDataResponse>();
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
-          : factory.GetCreator<commands::UnsubscribeVehicleDataResponse>();
+                 ? factory.GetCreator<commands::UnsubscribeVehicleDataRequest>()
+                 : factory
+                       .GetCreator<commands::UnsubscribeVehicleDataResponse>();
     case mobile_apis::FunctionID::OnVehicleDataID:
       return factory.GetCreator<commands::OnVehicleDataNotification>();
     case mobile_apis::FunctionID::ReadDIDID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::ReadDIDRequest>()
-          : factory.GetCreator<commands::ReadDIDResponse>();
+                 ? factory.GetCreator<commands::ReadDIDRequest>()
+                 : factory.GetCreator<commands::ReadDIDResponse>();
     case mobile_apis::FunctionID::GetDTCsID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::GetDTCsRequest>()
-          : factory.GetCreator<commands::GetDTCsResponse>();
+                 ? factory.GetCreator<commands::GetDTCsRequest>()
+                 : factory.GetCreator<commands::GetDTCsResponse>();
     case mobile_apis::FunctionID::DiagnosticMessageID:
       return mobile_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::DiagnosticMessageRequest>()
-          : factory.GetCreator<commands::DiagnosticMessageResponse>();
+                 ? factory.GetCreator<commands::DiagnosticMessageRequest>()
+                 : factory.GetCreator<commands::DiagnosticMessageResponse>();
     default:
       LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
       return factory.GetCreator<app_mngr::InvalidCommand>();
   }
 }
-
 }

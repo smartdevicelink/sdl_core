@@ -46,8 +46,7 @@ bool VehicleInfoPlugin::Init(
 }
 
 bool VehicleInfoPlugin::IsAbleToProcess(
-    const int32_t function_id,
-    const commands::Command::CommandSource source) {
+    const int32_t function_id, const commands::Command::CommandSource source) {
   return command_factory_->IsAbleToProcess(function_id, source);
 }
 
@@ -64,7 +63,6 @@ void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {}
-
 }
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {

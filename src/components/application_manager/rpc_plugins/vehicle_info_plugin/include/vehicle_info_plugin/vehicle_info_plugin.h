@@ -42,32 +42,27 @@ namespace commands = application_manager::commands;
 namespace plugins = application_manager::plugin_manager;
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
-public:
-  
-  bool Init(
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+ public:
+  bool Init(app_mngr::ApplicationManager& application_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
+            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
 
-  bool IsAbleToProcess(
-      const int32_t function_id,
-      const commands::Command::CommandSource source) OVERRIDE;
+  bool IsAbleToProcess(const int32_t function_id,
+                       const commands::Command::CommandSource source) OVERRIDE;
 
   std::string PluginName() OVERRIDE;
   app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;
 
   void OnPolicyEvent(plugins::PolicyEvent event) OVERRIDE;
-  void OnApplicationEvent(
-      plugins::ApplicationEvent event,
-      app_mngr::ApplicationSharedPtr application) OVERRIDE;
+  void OnApplicationEvent(plugins::ApplicationEvent event,
+                          app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
-private:
+ private:
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
 };
-
 }
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
