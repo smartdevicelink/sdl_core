@@ -407,6 +407,7 @@ void SetInteriorVehicleDataRequest::Execute() {
       LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
 
       if (mobile_apis::Result::SUCCESS != notification) {
+        SetResourceState(ModuleType(), ResourceState::FREE);
         SendResponse(
             false, notification, "The LightStatus enum passed is READ ONLY and cannot be written.");
         return;
