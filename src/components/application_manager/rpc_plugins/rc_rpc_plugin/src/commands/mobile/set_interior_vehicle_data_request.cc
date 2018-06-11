@@ -258,7 +258,7 @@ mobile_apis::Result::eType GetLightNameCapabilities(
   return mobile_apis::Result::UNSUPPORTED_RESOURCE;
 }
 
-module_capability GetControlDataCapabilities(
+ModuleCapability GetControlDataCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& control_data) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -297,7 +297,7 @@ module_capability GetControlDataCapabilities(
   return std::make_pair("", mobile_apis::Result::SUCCESS);
 }
 
-module_capability GetHmiControlDataCapabilities(
+ModuleCapability GetHmiControlDataCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& control_data) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -319,13 +319,13 @@ module_capability GetHmiControlDataCapabilities(
   return std::make_pair("", mobile_apis::Result::SUCCESS);
 }
 
-module_capability GetModuleDataCapabilities(
+ModuleCapability GetModuleDataCapabilities(
     const smart_objects::SmartObject& rc_capabilities,
     const smart_objects::SmartObject& module_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::map<std::string, std::string> params =
       GetModuleDataCapabilitiesMapping();
-  module_capability module_data_capabilities =
+  ModuleCapability module_data_capabilities =
       std::make_pair("", mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
   for (const auto& param : params) {
@@ -375,7 +375,7 @@ void SetInteriorVehicleDataRequest::Execute() {
   if (isModuleTypeAndDataMatch(module_type, module_data)) {
     const smart_objects::SmartObject* rc_capabilities =
         hmi_capabilities_.rc_capability();
-    module_capability module_data_capabilities;
+    ModuleCapability module_data_capabilities;
 
     if (rc_capabilities) {
       module_data_capabilities =
@@ -383,7 +383,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
       if (mobile_apis::Result::SUCCESS != module_data_capabilities.second) {
         SetResourceState(ModuleType(), ResourceState::FREE);
-        std::string responce_msg = "";
+        std::string responce_msg;
 
         if (message_params::kLightState == module_data_capabilities.first) {
           responce_msg =
@@ -603,7 +603,7 @@ bool CheckReadOnlyParamsForLight(
 
 bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
     const smart_objects::SmartObject& module_data,
-    module_capability& module_data_capabilities) {
+    ModuleCapability& module_data_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
@@ -615,7 +615,7 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
   }
 
   if (enums_value::kLight == module_type) {
-    bool result = CheckReadOnlyParamsForLight(module_type_params);
+    const bool result = CheckReadOnlyParamsForLight(module_type_params);
 
     if (result) {
       module_data_capabilities = std::make_pair(module_type, mobile_apis::Result::READ_ONLY);
@@ -624,7 +624,7 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
     return result;
   }
 
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  const std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
 
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
