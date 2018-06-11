@@ -1357,6 +1357,9 @@ class ApplicationManagerImpl
 
   app_launch::AppLaunchCtrl& app_launch_ctrl() OVERRIDE;
 
+  bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
+                       const smart_objects::SmartObject& display_capabilities);
+
  private:
   /**
    * @brief PullLanguagesInfo allows to pull information about languages.

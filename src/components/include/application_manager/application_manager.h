@@ -730,6 +730,10 @@ class ApplicationManager {
   virtual void OnTimerSendTTSGlobalProperties() = 0;
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
+
+  virtual bool IsSOStructValid(
+      const hmi_apis::StructIdentifiers::eType struct_id,
+      const smart_objects::SmartObject& display_capabilities) = 0;
 };
 
 }  // namespace application_manager

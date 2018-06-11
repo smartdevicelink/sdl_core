@@ -551,10 +551,15 @@ void HMICapabilitiesImpl::set_vr_supported_languages(
 
 void HMICapabilitiesImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  if (display_capabilities_) {
-    delete display_capabilities_;
+  if (app_mngr_.IsSOStructValid(
+          hmi_apis::StructIdentifiers::Common_DisplayCapabilities,
+          display_capabilities)) {
+    if (display_capabilities_) {
+      delete display_capabilities_;
+    }
+    display_capabilities_ =
+        new smart_objects::SmartObject(display_capabilities);
   }
-  display_capabilities_ = new smart_objects::SmartObject(display_capabilities);
 }
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
