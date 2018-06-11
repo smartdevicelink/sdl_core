@@ -215,6 +215,9 @@
       "imageFields": [
         {
                     "name": "softButtonImage",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -222,6 +225,9 @@
                 },
                 {
                     "name": "choiceImage",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -229,6 +235,9 @@
                 },
                 {
                     "name": "choiceSecondaryImage",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -236,6 +245,9 @@
                 },
                 {
                     "name": "menuIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -243,6 +255,9 @@
                 },
                 {
                     "name": "cmdIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -250,6 +265,9 @@
                 },
                 {
                     "name": "appIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -257,6 +275,9 @@
                 },
                 {
                     "name": "graphic",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -264,6 +285,9 @@
                 },
                 {
                     "name": "secondaryGraphic",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
