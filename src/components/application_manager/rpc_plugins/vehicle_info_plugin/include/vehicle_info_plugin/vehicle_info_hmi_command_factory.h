@@ -42,13 +42,12 @@ namespace app_mngr = application_manager;
  * @brief The vehicle info hmi command factory.
  */
 class VehicleInfoHmiCommandFactory : public app_mngr::CommandFactory {
-public:
+ public:
   VehicleInfoHmiCommandFactory(
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler
-  );
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
 
   app_mngr::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,
@@ -58,7 +57,7 @@ public:
       const int32_t function_id,
       const app_mngr::commands::Command::CommandSource source) const OVERRIDE;
 
-private:
+ private:
   app_mngr::ApplicationManager& application_manager_;
   app_mngr::rpc_service::RPCService& rpc_service_;
   app_mngr::HMICapabilities& hmi_capabilities_;
@@ -69,7 +68,6 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoHmiCommandFactory);
 };
-
 }
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_HMI_COMMAND_FACTORY_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_HMI_COMMAND_FACTORY_H

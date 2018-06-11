@@ -61,7 +61,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vi_speed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_steering_wheel_angle_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_tire_pressure_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_vin_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_wiper_status_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
@@ -339,29 +338,6 @@ class HMIOnNotificationsEventDispatcher
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };
 
-typedef Types<OnVIAccPedalPositionNotification,
-              OnVIBeltStatusNotification,
-              OnVIBodyInformationNotification,
-              OnVIDeviceStatusNotification,
-              OnVIDriverBrakingNotification,
-              OnVIEngineTorqueNotification,
-              OnVIExternalTemperatureNotification,
-              OnVIFuelLevelNotification,
-              OnVIFuelLevelStateNotification,
-              OnVIGpsDataNotification,
-              OnVIHeadLampStatusNotification,
-              OnVIInstantFuelConsumptionNotification,
-              OnVIMyKeyNotification,
-              OnVIOdometerNotification,
-              OnVIPrndlNotification,
-              OnVIRpmNotification,
-              OnVISpeedNotification,
-              OnVISteeringWheelAngleNotification,
-              OnVITirePressureNotification,
-              OnVIVehicleDataNotification,
-              OnVIVinNotification,
-              OnVIWiperStatusNotification> HMIOnViNotificationsTypes;
-
 typedef Types<OnAppPermissionChangedNotification,
               OnAudioDataStreamingNotification,
               hmi::OnButtonSubscriptionNotification,
@@ -392,25 +368,9 @@ typedef Types<
     CommandPair<OnVRStoppedNotification, hmi_apis::FunctionID::VR_Stopped> >
     HMIOnNotificationsEventDispatcherTypes;
 
-TYPED_TEST_CASE(HMIOnViNotifications, HMIOnViNotificationsTypes);
 TYPED_TEST_CASE(HMIOnNotificationsListToHMI, HMIOnNotificationsListToHMITypes);
 TYPED_TEST_CASE(HMIOnNotificationsEventDispatcher,
                 HMIOnNotificationsEventDispatcherTypes);
-
-TYPED_TEST(HMIOnViNotifications, CommandsSendNotificationToMobile) {
-  MessageSharedPtr message =
-      commands_test::CommandsTest<kIsNice>::CreateMessage();
-  utils::SharedPtr<typename TestFixture::CommandType> command =
-      this->template CreateCommand<typename TestFixture::CommandType>(message);
-  EXPECT_CALL(commands_test::CommandsTest<kIsNice>::mock_rpc_service_,
-              ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
-  command->Run();
-  EXPECT_EQ(
-      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnVehicleDataID),
-      (*message)[am::strings::params][am::strings::function_id].asInt());
-  EXPECT_EQ(static_cast<int32_t>(am::MessageType::kNotification),
-            (*message)[am::strings::params][am::strings::message_type].asInt());
-}
 
 TYPED_TEST(HMIOnNotificationsListToHMI, CommandsSendNotificationToHmi) {
   MessageSharedPtr message =
