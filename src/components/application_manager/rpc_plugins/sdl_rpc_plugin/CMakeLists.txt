@@ -53,6 +53,7 @@ set(LIBRARIES
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
+  Policy
 )
 
 if(ENABLE_LOG)

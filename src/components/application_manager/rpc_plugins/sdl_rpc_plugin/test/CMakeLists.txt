@@ -30,6 +30,7 @@ set(LIBRARIES
   connectionHandler
   sdl_rpc_plugin
   jsoncpp
+  Policy
 )
 
 create_cotired_test("sdl_commands_test" "${SOURCES}" "${LIBRARIES}" )
