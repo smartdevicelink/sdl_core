@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,7 @@ ApplicationImpl::ApplicationImpl(
     , active_message_(NULL)
     , is_media_(false)
     , is_navi_(false)
+    , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
@@ -220,6 +221,14 @@ void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
 }
 
+bool ApplicationImpl::is_remote_control_supported() const {
+  return is_remote_control_supported_;
+}
+
+void ApplicationImpl::set_remote_control_supported(const bool allow) {
+  is_remote_control_supported_ = allow;
+}
+
 bool ApplicationImpl::is_voice_communication_supported() const {
   return is_voice_communication_application_;
 }
@@ -281,6 +290,13 @@ const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
 
 const HmiStatePtr ApplicationImpl::RegularHmiState() const {
   return state_.GetState(HmiState::STATE_ID_REGULAR);
+}
+
+bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
+  if (is_remote_control_supported() && is_media_application()) {
+    return true;
+  }
+  return false;
 }
 
 const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
@@ -1040,8 +1056,6 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -1101,21 +1115,13 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
-  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
-       extensions_.end() != it;
-       ++it) {
-    if ((*it)->uid() == uid) {
-      extensions_.erase(it);
-      return true;
-    }
-  }
-  return false;
-}
+  auto it = std::find_if(
+      extensions_.begin(),
+      extensions_.end(),
+      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
 
-void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+  return it != extensions_.end();
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {

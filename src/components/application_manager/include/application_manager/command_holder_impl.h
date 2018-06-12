@@ -39,6 +39,7 @@
 #include <vector>
 #include <map>
 #include "application_manager/application.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"

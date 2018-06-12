@@ -33,6 +33,7 @@
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "utils/helpers.h"
 #include "resumption/last_state.h"
@@ -236,8 +237,8 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
       hmi_capabilities.active_ui_language();
   message[strings::msg_params][strings::language] =
       hmi_capabilities.active_vr_language();
-  if (application_manager_.ManageMobileCommand(notification,
-                                               commands::Command::ORIGIN_SDL)) {
+  if (application_manager_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL)) {
     LOG4CXX_INFO(logger_, "Mobile command sent");
   } else {
     LOG4CXX_WARN(logger_, "Cannot send mobile command");
@@ -306,11 +307,11 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
     }
   }
   SendOnLanguageChangeToMobile(app.first);
-  application_manager_.ManageMobileCommand(
+  application_manager_.GetRPCService().ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
           app.first,
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
-      commands::Command::ORIGIN_SDL);
+      commands::Command::SOURCE_SDL);
   application_manager_.UnregisterApplication(
       app.first, mobile_apis::Result::SUCCESS, false);
   LOG4CXX_INFO(logger_,

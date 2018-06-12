@@ -1248,6 +1248,8 @@
         <description>Reflects the current primary audio source (if selected).</description>
         <element name="NO_SOURCE_SELECTED">
         </element>
+        <element name="CD">
+        </element>
         <element name="USB">
         </element>
         <element name="USB2">
@@ -1259,6 +1261,9 @@
         <element name="IPOD">
         </element>
         <element name="MOBILE_APP">
+        </element>
+        <element name="RADIO_TUNER">
+          <description>Radio may be on AM, FM or XM</description>
         </element>
     </enum>
     
@@ -1332,6 +1337,9 @@
     <enum name="ModuleType">
         <element name="CLIMATE"/>
         <element name="RADIO"/>
+        <element name="AUDIO"/>
+        <element name="LIGHT"/>
+        <element name="HMI_SETTINGS"/>
     </enum>
     
     <enum name="DefrostZone">
@@ -2652,6 +2660,42 @@
             <description>Region</description>
         </param>
     </struct>
+
+    <struct name="StationIDNumber">
+        <param name="countryCode" type="Integer" minvalue="0" maxvalue="999"  mandatory="false">
+            <description>Binary Representation of ITU Country Code. USA Code is 001.</description>
+        </param>
+        <param name="fccFacilityId" type="Integer" minvalue="0" maxvalue="999999"  mandatory="false">
+            <description>Binary representation  of unique facility ID assigned by the FCC; FCC controlled for U.S. territory</description>
+        </param>
+    </struct>
+
+    <struct name="GPSLocation">
+        <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+        </param>
+        <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+        </param>
+        <param name="altitudeMeters" type="Float" minvalue="-99999" maxvalue="99999" mandatory="false">
+        </param>
+    </struct>
+
+    <struct name="SisData">
+        <param name="stationShortName" type="String" minlength="4" maxlength="7"  mandatory="false">
+            <description>Identifies the 4-alpha-character station call sign plus an optional (-FM) extension</description>
+        </param>
+        <param name="stationIDNumber" type="StationIDNumber"  mandatory="false">
+            <description>Used for network Application. Consists of Country Code and FCC Facility ID.</description>
+        </param>
+        <param name="stationLongName" type="String" minlength="0" maxlength="56"  mandatory="false">
+            <description>Identifies the station call sign or other identifying information in the long format.</description>
+        </param>
+        <param name="stationLocation" type="GPSLocation" mandatory="false">
+            <description>Provides the 3-dimensional geographic station location.</description>
+        </param>
+        <param name="stationMessage" type="String" minlength="0" maxlength="56"  mandatory="false">
+            <description>May be used to convey textual information of general interest to the consumer such as weather forecasts or public service announcements. Includes a high priority delivery feature to convey emergencies that may be in the listening area.</description>
+        </param>
+    </struct>
     
     <struct name="RadioControlData">
         <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
@@ -2680,6 +2724,9 @@
         </param>
         <param name="state" type="RadioState" mandatory="false">
         </param>
+        <param name="sisData" type="SisData" mandatory="false">
+            <description>Read-only Station Information Service (SIS) data provides basic information about the station such as call sign, as well as information not displayable to the consumer such as the station identification number</description>
+        </param>
     </struct>
     
     <struct name="ClimateControlData">
@@ -2703,15 +2750,17 @@
         </param>
         <param name="ventilationMode" type="VentilationMode" mandatory="false">
         </param>
-    </struct>
-    
-    <struct name="ModuleData">
-        <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
-        <param name="moduleType" type="ModuleType" mandatory="true">
+        <param name="heatedSteeringWheelEnable" type="Boolean" mandatory="false">
+          <description>value false means disabled/turn off, value true means enabled/turn on.</description>
         </param>
-        <param name="radioControlData" type="RadioControlData" mandatory="false">
+        <param name="heatedWindshieldEnable" type="Boolean" mandatory="false">
+          <description>value false means disabled, value true means enabled.</description>
         </param>
-        <param name="climateControlData" type="ClimateControlData" mandatory="false">
+        <param name="heatedRearWindowEnable" type="Boolean" mandatory="false">
+          <description>value false means disabled, value true means enabled.</description>
+        </param>
+        <param name="heatedMirrorsEnable" type="Boolean" mandatory="false">
+          <description>value false means disabled, value true means enabled.</description>
         </param>
     </struct>
     
@@ -2778,6 +2827,12 @@
                 True: Available, False: Not Available, Not present: Not Available.
             </description>
         </param>
+        <param name="sisDataAvailable" type="Boolean" mandatory="false">
+          <description>
+            Availability of the getting HD radio Station Information Service (SIS) data.
+            True: Available, False: Not Available, Not present: Not Available.
+          </description>
+        </param>
     </struct>
     
     <struct name="ClimateControlCapabilities">
@@ -2786,6 +2841,12 @@
         <param name="moduleName" type="String" maxlength="100" mandatory="true">
             <description>The short friendly name of the climate control module.
                 It should not be used to identify a module by mobile application.</description>
+        </param>
+        <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
+              <description>
+                Availability of the reading of current temperature.
+                True: Available, False: Not Available, Not present: Not Available.
+        </description>
         </param>
         <param name="fanSpeedAvailable" type="Boolean" mandatory="false">
             <description>
@@ -2851,8 +2912,302 @@
                 A set of all ventilation modes that are controllable.
             </description>
         </param>
+        <param name="heatedSteeringWheelAvailable" type="Boolean" mandatory="false">
+          <description>
+            Availability of the control (enable/disable) of heated Steering Wheel.
+            True: Available, False: Not Available, Not present: Not Available.
+          </description>
+        </param>
+        <param name="heatedWindshieldAvailable" type="Boolean" mandatory="false">
+          <description>
+            Availability of the control (enable/disable) of heated Windshield.
+            True: Available, False: Not Available, Not present: Not Available.
+          </description>
+        </param>
+        <param name="heatedRearWindowAvailable" type="Boolean" mandatory="false">
+          <description>
+            Availability of the control (enable/disable) of heated Rear Window.
+            True: Available, False: Not Available, Not present: Not Available.
+          </description>
+        </param>
+        <param name="heatedMirrorsAvailable" type="Boolean" mandatory="false">
+          <description>
+            Availability of the control (enable/disable) of heated Mirrors.
+            True: Available, False: Not Available, Not present: Not Available.
+          </description>
+        </param>
+    </struct>
+
+    <struct name="EqualizerSettings">
+        <description>Defines the each Equalizer channel settings.</description>
+        <param name="channelId" type="Integer" minvalue="1" maxvalue="100" mandatory="true"></param>
+        <param name="channelName" type="String" mandatory="false" maxlength="50">
+           <description>read-only channel / frequency name (e.i. "Treble, Midrange, Bass" or "125 Hz")</description>
+        </param>
+        <param name="channelSetting" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
+    </struct>
+
+    <struct name="AudioControlData">
+        <param name="source" type="PrimaryAudioSource" mandatory="false">
+            <description>
+            In a getter response or a notification, it is the current primary audio source of the system.
+            In a setter request, it is the target audio source that the system shall switch to.
+            If the value is MOBILE_APP, the system shall switch to the mobile media app that issues the setter RPC.
+        </description>
+        </param>
+        <param name="keepContext" type="Boolean" mandatory="false">
+            <description>
+            This parameter shall not be present in any getter responses or notifications.
+            This parameter is optional in a setter request. The default value is false.
+            If it is false, the system not only changes the audio source but also brings the default application
+            or system UI associated with the audio source to foreground.
+            If it is true, the system changes the audio source, but still keeps the current application in foreground.
+            </description>
+        </param>
+        <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
+            <description>Reflects the volume of audio, from 0%-100%.</description>
+        </param>
+        <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array ="true">
+                <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
+        </param>
+    </struct>
+
+    <struct name="AudioControlCapabilities">
+        <param name="moduleName" type="String" maxlength="100" mandatory="true">
+            <description>
+            The short friendly name of the light control module.
+            It should not be used to identify a module by mobile application.
+            </description>
+        </param>
+        <param name="sourceAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of audio source. </description>
+        </param>
+        <param name="keepContextAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the keepContext paramter. </description>
+        </param>
+        <param name="volumeAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of audio volume.</description>
+        </param>
+        <param name="equalizerAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of Equalizer Settings.</description>
+        </param>
+        <param name="equalizerMaxChannelId" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+            <description>Must be included if equalizerAvailable=true, and assume all IDs starting from 1 to this value are valid</description>
+        </param>
+    </struct>
+
+    <enum name="LightName">
+        <!-- Common Single Light 0~500 -->
+        <element name="FRONT_LEFT_HIGH_BEAM" value="0"/>
+        <element name="FRONT_RIGHT_HIGH_BEAM" value="1"/>
+        <element name="FRONT_LEFT_LOW_BEAM" value="2"/>
+        <element name="FRONT_RIGHT_LOW_BEAM" value="3"/>
+        <element name="FRONT_LEFT_PARKING_LIGHT" value="4"/>
+        <element name="FRONT_RIGHT_PARKING_LIGHT" value="5"/>
+        <element name="FRONT_LEFT_FOG_LIGHT" value="6"/>
+        <element name="FRONT_RIGHT_FOG_LIGHT" value="7"/>
+        <element name="FRONT_LEFT_DAYTIME_RUNNING_LIGHT" value="8"/>
+        <element name="FRONT_RIGHT_DAYTIME_RUNNING_LIGHT" value="9"/>
+        <element name="FRONT_LEFT_TURN_LIGHT" value="10"/>
+        <element name="FRONT_RIGHT_TURN_LIGHT" value="11"/>
+        <element name="REAR_LEFT_FOG_LIGHT" value="12"/>
+        <element name="REAR_RIGHT_FOG_LIGHT" value="13"/>
+        <element name="REAR_LEFT_TAIL_LIGHT" value="14"/>
+        <element name="REAR_RIGHT_TAIL_LIGHT" value="15"/>
+        <element name="REAR_LEFT_BREAK_LIGHT" value="16"/>
+        <element name="REAR_RIGHT_BREAK_LIGHT" value="17"/>
+        <element name="REAR_LEFT_TURN_LIGHT" value="18"/>
+        <element name="REAR_RIGHT_TURN_LIGHT" value="19"/>
+        <element name="REAR_REGISTRATION_PLATE_LIGHT" value="20"/>
+
+        <!-- Exterior Lights by common function groups 501~800 -->
+        <element name="HIGH_BEAMS" value="501">
+            <description>Include all high beam lights: front_left and front_right.</description>
+        </element>
+        <element name="LOW_BEAMS" value="502">
+            <description>Include all low beam lights: front_left and front_right.</description>
+        </element>
+        <element name="FOG_LIGHTS" value="503">
+            <description>Include all fog lights: front_left, front_right, rear_left and rear_right.</description>
+        </element>
+        <element name="RUNNING_LIGHTS" value="504">
+            <description>Include all daytime running lights: front, left and right.</description>
+        </element>
+        <element name="PARKING_LIGHTS" value="505">
+            <description>Include all parking lights: front_left and front_right.</description>
+        </element>
+        <element name="BRAKE_LIGHTS" value="506">
+            <description>Include all brake lights: rear_left and rear_right.</description>
+        </element>
+        <element name="REAR_REVERSING_LIGHTS" value="507"/>
+        <element name="SIDE_MARKER_LIGHTS" value="508"/>
+        <element name="LEFT_TURN_LIGHTS" value="509">
+            <description>Include all left turn signal lights: front_left, rear_left, left_side and mirror_mounted.</description>
+        </element>
+        <element name="RIGHT_TURN_LIGHTS" value="510">
+            <description>Include all right turn signal lights: front_right, rear_right, right_side and mirror_mounted.</description>
+        </element>
+        <element name="HAZARD_LIGHTS" value="511">
+            <description>Include all hazard lights: front_left, front_right, rear_left and rear_right.</description>
+        </element>
+        <element name="REAR_CARGO_LIGHTS" value="512">
+            <description>Cargo lamps illuminate the cargo area.</description>
+        </element>
+        <element name="REAR_TRUCK_BED_LIGHTS" value="513">
+            <description>Truck bed lamps light up the bed of the truck.</description>
+        </element>
+        <element name="REAR_TRAILER_LIGHTS" value="514">
+            <description>Trailer lights are lamps mounted on a trailer hitch.</description>
+        </element>
+        <element name="LEFT_SPOT_LIGHTS" value="515">
+            <description>It is the spotlights mounted on the left side of a vehicle.</description>
+        </element>
+        <element name="RIGHT_SPOT_LIGHTS" value="516">
+            <description>It is the spotlights mounted on the right side of a vehicle.</description>
+        </element>
+        <element name="LEFT_PUDDLE_LIGHTS" value="517">
+            <description>Puddle lamps illuminate the ground beside the door as the customer is opening or approaching the door.</description>
+        </element>
+        <element name="RIGHT_PUDDLE_LIGHTS" value="518">
+            <description>Puddle lamps illuminate the ground beside the door as the customer is opening or approaching the door.</description>
+        </element>
+
+        <!-- Interior Lights by common function groups 801~900 -->
+        <element name="AMBIENT_LIGHTS" value="801"/>
+        <element name="OVERHEAD_LIGHTS" value="802"/>
+        <element name="READING_LIGHTS" value="803"/>
+        <element name="TRUNK_LIGHTS" value="804"/>
+
+        <!-- Lights by location 901~1000-->
+        <element name="EXTERIOR_FRONT_LIGHTS" value="901">
+            <description>Include exterior lights located in front of the vehicle. For example, fog lights and low beams.</description>
+        </element>
+        <element name="EXTERIOR_REAR_LIGHTS" value="902">
+            <description>Include exterior lights located at the back of the vehicle. For example, license plate lights, reverse lights, cargo lights, bed lights an trailer assist lights.</description>
+        </element>
+        <element name="EXTERIOR_LEFT_LIGHTS" value="903">
+            <description>Include exterior lights located at the left side of the vehicle. For example, left puddle lights and spot lights.</description>
+        </element>
+        <element name="EXTERIOR_RIGHT_LIGHTS" value="904">
+            <description>Include exterior lights located at the right side of the vehicle. For example, right puddle lights and spot lights.</description>
+        </element>
+        <element name="EXTERIOR_ALL_LIGHTS" value="905">
+            <description> Include all exterior lights around the vehicle.</description>
+        </element>
+    </enum>
+
+    <enum name="LightStatus">
+        <element name="ON"/>
+        <element name="OFF"/>
+        <element name="RAMP_UP"/>
+        <element name="RAMP_DOWN"/>
+        <element name="UNKNOWN"/>
+        <element name="INVALID"/>
+    </enum>
+
+    <struct name="SRGBColor">
+        <param name="red" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+        <param name="green" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+        <param name="blue" type="Integer" minvalue="0" maxvalue="255"  mandatory="true"/>
+    </struct>
+
+    <struct name="LightCapabilities">
+        <param name="name" type="LightName" mandatory="true" />
+        <param name="statusAvailable" type="Boolean" mandatory="false">
+          <description>
+            Indicates if the status (ON/OFF) can be set remotely. App shall not use read-only values (RAMP_UP/RAMP_DOWN/UNKNOWN/INVALID) in a setInteriorVehicleData request.
+          </description>
+        </param>
+        <param name="densityAvailable" type="Boolean" mandatory="false">
+            <description>
+            Indicates if the light's density can be set remotely (similar to a dimmer).
+            </description>
+        </param>
+        <param name="sRGBColorSpaceAvailable" type="Boolean" mandatory="false">
+            <description>
+            Indicates if the light's color can be set remotely by using the sRGB color space.
+            </description>
+        </param>
+    </struct>
+
+    <struct name="LightControlCapabilities">
+        <param name="moduleName" type="String" maxlength="100" mandatory="true">
+            <description>
+            The short friendly name of the light control module.
+            It should not be used to identify a module by mobile application.
+            </description>
+        </param>
+        <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
+        <description> An array of available light names that are controllable. </description>
+        </param>
+    </struct>
+
+    <struct name="LightState">
+        <param name="id" type="LightName" mandatory="true">
+            <description>The name of a light or a group of lights. </description>
+        </param>
+        <param name="status" type="LightStatus" mandatory="true"/>
+        <param name="density" type="Float" minvalue="0" maxvalue="1" mandatory="false" />
+        <param name="sRGBColor" type="SRGBColor" mandatory="false" />
+    </struct>
+
+    <struct name="LightControlData">
+        <param name="lightState" type="LightState" mandatory="true" minsize="1" maxsize="100" array="true">
+            <description>An array of LightNames and their current or desired status. No change to the status of the LightNames that are not listed in the array.</description>
+        </param>
+    </struct>
+
+    <enum name="DisplayMode">
+        <element name="DAY"/>
+        <element name="NIGHT"/>
+        <element name="AUTO"/>
+    </enum>
+    <enum name="DistanceUnit">
+        <element name="MILES"/>
+        <element name="KILOMETERS"/>
+    </enum>
+
+    <struct name="HMISettingsControlData">
+        <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
+        <param name="displayMode" type="DisplayMode" mandatory="false"></param>
+        <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
+        <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
+    </struct>
+
+    <struct name="HMISettingsControlCapabilities">
+        <param name="moduleName" type="String" maxlength="100" mandatory="true">
+            <description>
+            The short friendly name of the hmi setting module.
+            It should not be used to identify a module by mobile application.
+            </description>
+        </param>
+        <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of distance unit. </description>
+        </param>
+        <param name="temperatureUnitAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of temperature unit. </description>
+        </param>
+        <param name="displayModeUnitAvailable" type="Boolean" mandatory="false">
+            <description>Availability of the control of HMI display mode. </description>
+        </param>
     </struct>
     
+    <struct name="ModuleData">
+        <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+        <param name="moduleType" type="ModuleType" mandatory="true">
+        </param>
+        <param name="radioControlData" type="RadioControlData" mandatory="false">
+        </param>
+        <param name="climateControlData" type="ClimateControlData" mandatory="false">
+        </param>
+        <param name="audioControlData" type="AudioControlData" mandatory="false">
+        </param>
+        <param name="lightControlData" type="LightControlData" mandatory="false">
+        </param>
+        <param name="hmiSettingsControlData" type="HMISettingsControlData" mandatory="false">
+        </param>
+    </struct>
+
     <struct name="RemoteControlCapabilities">
         <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
             <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
@@ -2862,6 +3217,15 @@
         </param>
         <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
             <description>If included, the platform supports RC button controls with the included button names.</description >
+        </param>
+        <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+            <description> If included, the platform supports audio controls. </description >
+        </param>
+        <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false">
+            <description> If included, the platform supports hmi setting controls. </description >
+        </param>
+        <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false">
+            <description> If included, the platform supports light controls. </description >
         </param>
     </struct>
     
@@ -5623,7 +5987,7 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+        <param name="subscribe" type="Boolean" mandatory="false">
             <description>
                 If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
                 If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.

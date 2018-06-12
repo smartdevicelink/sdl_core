@@ -773,7 +773,6 @@ class MessageHelper {
                                         ApplicationSharedPtr application,
                                         ApplicationManager& app_mngr);
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sends HMI status notification to mobile
    * @param application_impl application with changed HMI status
@@ -796,7 +795,6 @@ class MessageHelper {
       ApplicationManager& application_manager,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
-#endif  // SDL_REMOTE_CONTROL
 
  private:
   /**

@@ -457,6 +457,20 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
+  /**
+   * @brief Returns is_remote_control_supported_
+   * @return true if app supports remote control, else false
+   */
+  virtual bool is_remote_control_supported() const = 0;
+
+  /**
+   * @brief Sets remote control supported,
+   * which is used to determine app with remote control
+   * @param allow, if true - remote control is supported,
+   * else remote control is disable
+   */
+  virtual void set_remote_control_supported(const bool allow) = 0;
+
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
 
@@ -690,6 +704,12 @@ class Application : public virtual InitialApplicationData,
   virtual const HmiStatePtr RegularHmiState() const = 0;
 
   /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const = 0;
+
+  /**
    * @brief PostponedHmiState returns postponed hmi state of application
    * if it's present
    *
@@ -838,7 +858,6 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief set_system_context Set system context for application
    * @param system_context Current context
@@ -881,16 +900,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
-   * @brief Removes all extensions
-   */
-  virtual void RemoveExtensions() = 0;
-
-  /**
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
   virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
-#endif  // SDL_REMOTE_CONTROL
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
