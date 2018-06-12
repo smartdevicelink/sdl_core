@@ -33,19 +33,19 @@
 #include <stdint.h>
 #include <string>
 
+#include "gtest/gtest.h"
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
+#include "utils/shared_ptr.h"
+#include "utils/lock.h"
+#include "utils/make_shared.h"
+#include "utils/data_accessor.h"
+#include "commands/commands_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/smart_object_keys.h"
-#include "commands/commands_test.h"
-#include "gtest/gtest.h"
 #include "hmi/on_driver_distraction_notification.h"
 #include "interfaces/MOBILE_API.h"
-#include "smart_objects/smart_object.h"
-#include "utils/data_accessor.h"
-#include "utils/lock.h"
-#include "utils/make_shared.h"
-#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
@@ -54,8 +54,8 @@ namespace hmi_commands_test {
 namespace on_driver_distraction_notification {
 
 using ::testing::_;
-using ::testing::Eq;
 using ::testing::Return;
+using ::testing::Eq;
 using ::utils::SharedPtr;
 
 namespace am = ::application_manager;
@@ -68,10 +68,9 @@ typedef ::utils::SharedPtr<OnDriverDistractionNotification> NotificationPtr;
 class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  HMIOnDriverDistractionNotificationTest()
-      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
-  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
-
+   HMIOnDriverDistractionNotificationTest()
+      : app_set_lock_(std::make_shared<sync_primitives::Lock>()) {}
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
@@ -107,7 +106,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
   am::ApplicationSet app_set;
   app_set.insert(mock_app);
 
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_ptr_);
+  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcDisallowed;
@@ -139,7 +138,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   am::ApplicationSet app_set;
   app_set.insert(mock_app);
 
-  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_ptr_);
+  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
   policy::CheckPermissionResult result;
@@ -157,7 +156,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   command->Run();
 }
 
-}  // namespace on_driver_distraction_notification
+}  // on_driver_distraction_notification
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

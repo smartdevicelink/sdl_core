@@ -33,19 +33,19 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
 
-#include <algorithm>
 #include <string>
-#include "application_manager/event_engine/event_dispatcher.h"
+#include <algorithm>
+#include "gtest/gtest.h"
+#include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application_manager_settings.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/usage_statistics.h"
-#include "config_profile/profile.h"
-#include "gtest/gtest.h"
 #include "utils/data_accessor.h"
+#include "config_profile/profile.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/mock_application_manager_settings.h"
 
 namespace test {
 namespace components {
@@ -69,7 +69,6 @@ class ResumptionDataTest : public ::testing::Test {
       , kCountOfFiles_(8u)
       , kCountOfVrhelptitle_(2u)
       , kMacAddress_("12345")
-
       , sublock_ptr_(std::make_shared<sync_primitives::Lock>())
       , comlock_ptr_(std::make_shared<sync_primitives::Lock>())
       , setlock_ptr_(std::make_shared<sync_primitives::Lock>())

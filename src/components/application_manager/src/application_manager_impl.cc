@@ -32,51 +32,51 @@
 
 #include <stdlib.h>  // for rand()
 
-#include <bson_object.h>
 #include <climits>
-#include <fstream>
 #include <string>
+#include <fstream>
 #include <utility>
+#include <bson_object.h>
 
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/mobile_command_factory.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mobile_message_handler.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_data_json.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/command_holder_impl.h"
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/helpers/application_helper.h"
-#include "application_manager/hmi_capabilities_impl.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/mobile_command_factory.h"
-#include "application_manager/mobile_message_handler.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
-#include "formatters/formatter_json_rpc.h"
-#include "hmi_message_handler/hmi_message_handler.h"
-#include "protocol/bson_object_keys.h"
 #include "protocol_handler/protocol_handler.h"
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "application_manager/command_holder_impl.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "formatters/formatter_json_rpc.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "protocol/bson_object_keys.h"
 
-#include <time.h>
-#include "application_manager/application_impl.h"
-#include "interfaces/HMI_API_schema.h"
-#include "media_manager/media_manager.h"
-#include "policy/usage_statistics/counter.h"
-#include "smart_objects/enum_schema_item.h"
-#include "utils/custom_string.h"
+#include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
-#include "utils/threads/thread.h"
 #include "utils/timer_task_impl.h"
+#include "smart_objects/enum_schema_item.h"
+#include "interfaces/HMI_API_schema.h"
+#include "application_manager/application_impl.h"
+#include "media_manager/media_manager.h"
+#include "policy/usage_statistics/counter.h"
+#include "utils/custom_string.h"
+#include <time.h>
 
 #ifdef SDL_REMOTE_CONTROL
-#include "application_manager/core_service.h"
-#include "functional_module/plugin_manager.h"
 #include "policy/usage_statistics/counter.h"
+#include "functional_module/plugin_manager.h"
+#include "application_manager/core_service.h"
 #endif  // SDL_REMOTE_CONTROL
 
 namespace {
@@ -142,7 +142,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
     , applications_list_lock_ptr_(std::make_shared<sync_primitives::Lock>(true))
-    , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , apps_to_register_list_lock_ptr_(
+          std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(

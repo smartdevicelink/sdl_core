@@ -30,45 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include "gmock/gmock.h"
 
-#include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #ifdef ENABLE_SECURITY
-#include "security_manager/mock_crypto_manager.h"
 #include "security_manager/mock_security_manager.h"
+#include "security_manager/mock_crypto_manager.h"
 #endif  // ENABLE_SECURITY
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_state_controller.h"
-#include "application_manager/policies/mock_policy_handler_observer.h"
-#include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "interfaces/MOBILE_API.h"
-#include "json/reader.h"
-#include "json/value.h"
-#include "json/writer.h"
-#include "policy/mock_policy_manager.h"
-#include "policy/mock_policy_settings.h"
-#include "policy/policy_types.h"
-#include "policy/usage_statistics/counter.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "protocol_handler/mock_session_observer.h"
-#include "smart_objects/smart_object.h"
 #include "transport_manager/mock_transport_manager.h"
-#include "utils/custom_string.h"
+#include "policy/policy_types.h"
+#include "json/reader.h"
+#include "json/writer.h"
+#include "json/value.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/make_shared.h"
+#include "utils/custom_string.h"
+#include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/mock_policy_settings.h"
+#include "utils/make_shared.h"
+#include "application_manager/mock_application.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/policies/mock_policy_handler_observer.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_state_controller.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "policy/mock_policy_manager.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 
 namespace test {
 namespace components {
@@ -78,13 +80,15 @@ using namespace application_manager;
 using namespace policy;
 using namespace utils::custom_string;
 using testing::_;
-using ::testing::DoAll;
 using ::testing::Mock;
-using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::SetArgPointee;
+using ::testing::NiceMock;
 using ::testing::SetArgReferee;
+using ::testing::SetArgPointee;
+using ::testing::DoAll;
+using ::testing::SetArgReferee;
+using ::testing::Mock;
 
 const std::string kDummyData = "some_data";
 
@@ -101,8 +105,8 @@ class PolicyHandlerTest : public ::testing::Test {
       , default_hmi_("fake_hmi")
       , kPreloadPTFile_("sdl_preloaded_pt.json")
       , kAppStorageFolder_("storage")
-      , app_lock_ptr_(std::make_shared<sync_primitives::Lock>())
-      , app_set(test_app, app_lock_ptr_)
+      , app_lock_(std::make_shared<sync_primitives::Lock>())
+      , app_set(test_app, app_lock_)
       , kAppId1_(10u)
       , kAppId2_(11u)
       , kConnectionKey_(1u)
@@ -146,7 +150,7 @@ class PolicyHandlerTest : public ::testing::Test {
   const std::string kPreloadPTFile_;
   const std::string kAppStorageFolder_;
   ApplicationSet test_app;
-  std::shared_ptr<sync_primitives::Lock> app_lock_ptr_;
+  std::shared_ptr<sync_primitives::Lock> app_lock_;
   DataAccessor<ApplicationSet> app_set;
   const uint32_t kAppId1_;
   const uint32_t kAppId2_;
