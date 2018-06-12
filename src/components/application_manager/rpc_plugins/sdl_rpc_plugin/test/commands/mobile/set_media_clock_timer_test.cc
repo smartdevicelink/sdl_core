@@ -59,6 +59,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace UpdateMode = mobile_apis::UpdateMode;
+namespace AudioStreamingIndicator = mobile_apis::AudioStreamingIndicator;
 
 typedef SharedPtr<SetMediaClockRequest> SetMediaClockRequestPtr;
 
@@ -159,6 +160,8 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
       kMinutes;
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
       kSeconds;
+  (*msg)[am::strings::msg_params][am::strings::audioStreamingIndicator] =
+      AudioStreamingIndicator::PLAY;
 
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
@@ -195,6 +198,8 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
       kHours;
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
       kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::audioStreamingIndicator] =
+      AudioStreamingIndicator::PLAY;
 
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
@@ -231,6 +236,8 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUpWrongTime_Canceled) {
       kHours;
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
       kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::audioStreamingIndicator] =
+      AudioStreamingIndicator::PLAY_PAUSE;
 
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
@@ -254,6 +261,8 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
       kMinutes;
   (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
       kSeconds;
+  (*msg)[am::strings::msg_params][am::strings::audioStreamingIndicator] =
+      AudioStreamingIndicator::PLAY_PAUSE;
 
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
