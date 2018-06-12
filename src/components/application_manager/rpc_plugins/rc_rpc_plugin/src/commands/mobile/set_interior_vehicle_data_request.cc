@@ -63,7 +63,7 @@ std::vector<std::string> GetModuleReadOnlyParams(
   return module_ro_params;
 }
 
-const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
+std::map<std::string, std::string> GetModuleTypeToDataMapping() {
   std::map<std::string, std::string> mapping = {
       {enums_value::kRadio, message_params::kRadioControlData},
       {enums_value::kClimate, message_params::kClimateControlData},
@@ -73,7 +73,7 @@ const std::map<std::string, std::string> GetModuleTypeToDataMapping() {
   return mapping;
 }
 
-const std::map<std::string, std::string> GetLightCapabilitiesMapping() {
+std::map<std::string, std::string> GetLightCapabilitiesMapping() {
   std::map<std::string, std::string> mapping = {
       {message_params::kId, strings::kName},
       {message_params::kStatus, strings::kStatusAvailable},
@@ -82,7 +82,7 @@ const std::map<std::string, std::string> GetLightCapabilitiesMapping() {
   return mapping;
 }
 
-const std::map<std::string, std::string> GetModuleDataCapabilitiesMapping() {
+std::map<std::string, std::string> GetModuleDataCapabilitiesMapping() {
   std::map<std::string, std::string> mapping = {
       {message_params::kRadioControlData, strings::kradioControlCapabilities},
       {message_params::kClimateControlData,
@@ -94,7 +94,7 @@ const std::map<std::string, std::string> GetModuleDataCapabilitiesMapping() {
   return mapping;
 }
 
-const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
+std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   std::map<std::string, std::string> mapping;
   // climate
   mapping["fanSpeed"] = "fanSpeedAvailable";
@@ -176,7 +176,7 @@ mobile_apis::Result::eType GetItemCapability(
     const std::string& request_parameter,
     const mobile_apis::Result::eType& switched_off_result) {
 
-  std::map<std::string, std::string>::const_iterator it = mapping.find(request_parameter);
+  const auto it = mapping.find(request_parameter);
 
   if (it == mapping.end()) {
     LOG4CXX_DEBUG(logger_,
@@ -607,7 +607,6 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& module_type_params =
       ControlData(module_data);
-  auto it = module_type_params.map_begin();
   const std::string module_type = ModuleType();
 
   if (enums_value::kAudio == module_type) {
@@ -625,6 +624,7 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
   }
 
   const std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
+  auto it = module_type_params.map_begin();
 
   for (; it != module_type_params.map_end(); ++it) {
     if (helpers::in_range(ro_params, it->first)) {
