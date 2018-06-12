@@ -43,6 +43,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -52,6 +54,7 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
@@ -97,12 +100,15 @@ const std::string kAppName = "appName";
 class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
-      : mock_storage_(
+      : app_id_(0u)
+      , mock_storage_(
             ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
+      , mock_rpc_service_(new MockRPCService)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
-      , app_id_(0u) {
+
+  {
     logger::create_log_message_loop_thread();
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
@@ -117,7 +123,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-
+    app_manager_impl_->SetRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -145,7 +151,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
-
+    app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -179,25 +185,27 @@ class ApplicationManagerImplTest : public ::testing::Test {
                         SetArgPointee<4u>(connection_type),
                         Return(0)));
   }
-
+  uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
+
+  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
-  uint32_t app_id_;
+
   utils::SharedPtr<MockApplication> mock_app_ptr_;
+  NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject app_data;
   const uint32_t connection_key = 65537u;
-
   app_data[am::json::name] = "application_manager_test";
   app_data[am::json::appId] = app_id_;
   app_data[am::json::android] = "bucket";
@@ -742,6 +750,12 @@ TEST_F(ApplicationManagerImplTest,
   utils::SharedPtr<MockApplication> switching_app_ptr =
       utils::MakeShared<MockApplication>();
 
+  plugin_manager::MockRPCPluginManager* mock_rpc_plugin_manager =
+      new plugin_manager::MockRPCPluginManager;
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      mock_rpc_plugin_manager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
+
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
       encryption::MakeHash(switching_device_id);
@@ -788,7 +802,6 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
       .WillOnce(Return(smart_objects::SmartObjectSPtr()));
-
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 
@@ -875,6 +888,10 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   std::string dummy_file_name;
   ON_CALL(mock_application_manager_settings_, recording_file_name())
       .WillByDefault(ReturnRef(dummy_file_name));
+
+  std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
+      new plugin_manager::MockRPCPluginManager);
+  app_manager_impl_->SetPluginManager(mock_rpc_plugin_manager_ptr);
 
   const uint32_t app_id_1 = 65537;
   const uint32_t app_id_2 = 65538;

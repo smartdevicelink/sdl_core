@@ -121,6 +121,10 @@ class ApplicationImpl : public virtual Application,
   }
   void set_is_navi(bool allow);
 
+  virtual bool is_remote_control_supported() const;
+
+  void set_remote_control_supported(const bool allow);
+
   void set_mobile_projection_enabled(bool option);
 
   bool mobile_projection_enabled() const;
@@ -349,7 +353,6 @@ class ApplicationImpl : public virtual Application,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets current system context
    * @param system_context new system context
@@ -380,7 +383,6 @@ class ApplicationImpl : public virtual Application,
    * @return Pointer to extension, if extension was initialized, otherwise NULL
    */
   AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-#endif
 
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
@@ -416,7 +418,6 @@ class ApplicationImpl : public virtual Application,
    */
   void OnAudioStreamSuspend();
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
@@ -431,12 +432,6 @@ class ApplicationImpl : public virtual Application,
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
 
-  /**
-   * @brief Removes all extensions
-   */
-  void RemoveExtensions() OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
-
   std::string hash_val_;
   uint32_t grammar_id_;
 
@@ -447,6 +442,7 @@ class ApplicationImpl : public virtual Application,
   smart_objects::SmartObject* active_message_;
   bool is_media_;
   bool is_navi_;
+  bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
 
   bool video_streaming_approved_;
@@ -487,9 +483,7 @@ class ApplicationImpl : public virtual Application,
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
 
-#ifdef SDL_REMOTE_CONTROL
   std::list<AppExtensionPtr> extensions_;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Defines number per time in seconds limits

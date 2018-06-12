@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,8 +40,16 @@ namespace application_manager {
 namespace commands {
 
 CommandNotificationFromMobileImpl::CommandNotificationFromMobileImpl(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {}
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler) {}
 
 CommandNotificationFromMobileImpl::~CommandNotificationFromMobileImpl() {}
 
@@ -63,7 +72,7 @@ void CommandNotificationFromMobileImpl::SendNotification() {
   LOG4CXX_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
-  application_manager_.SendMessageToMobile(message_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

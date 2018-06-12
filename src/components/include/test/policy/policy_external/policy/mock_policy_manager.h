@@ -112,7 +112,7 @@ class MockPolicyManager : public PolicyManager {
                     const policy::DeviceInfo& device_info));
   MOCK_METHOD2(SetUserConsentForApp,
                void(const policy::PermissionConsent& permissions,
-                    const NotificationMode mode));
+                    const policy::PolicyManager::NotificationMode mode));
   MOCK_CONST_METHOD2(GetDefaultHmi,
                      bool(const std::string& policy_app_id,
                           std::string* default_hmi));
@@ -148,7 +148,6 @@ class MockPolicyManager : public PolicyManager {
       StatusNotifier(
           const std::string& application_id,
           const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
-#ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD2(SetDefaultHmiTypes,
                void(const std::string& application_id,
                     const std::vector<int>& hmi_types));
@@ -165,7 +164,6 @@ class MockPolicyManager : public PolicyManager {
                           std::vector<std::string>* modules));
   MOCK_METHOD1(set_access_remote,
                void(utils::SharedPtr<AccessRemote> access_remote));
-#endif  // SDL_REMOTE_CONTROL
 
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));

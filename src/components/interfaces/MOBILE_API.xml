@@ -5623,7 +5623,7 @@
                 In the future, this should be the Identification of a module.
             </description>
         </param>
-        <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+        <param name="subscribe" type="Boolean" mandatory="false">
             <description>
                 If subscribe is true, the head unit will register onInteriorVehicleData notifications for the requested moduelType.
                 If subscribe is false, the head unit will unregister onInteriorVehicleData notifications for the requested moduelType.
