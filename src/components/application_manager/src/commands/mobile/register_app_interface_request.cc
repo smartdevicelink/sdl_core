@@ -38,7 +38,7 @@
 #include <map>
 #include <string.h>
 
-#include <utils/make_shared.h>
+#include <memory>
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_impl.h"
