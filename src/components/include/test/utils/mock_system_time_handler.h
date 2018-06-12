@@ -46,7 +46,7 @@ class MockSystemTimeHandler : public ::utils::SystemTimeHandler {
   MOCK_METHOD0(QuerySystemTime, void());
   MOCK_METHOD1(SubscribeOnSystemTime,
                void(utils::SystemTimeListener* listener));
-  MOCK_METHOD1(UnSubscribeFromSystemTime,
+  MOCK_METHOD1(UnsubscribeFromSystemTime,
                void(utils::SystemTimeListener* listener));
   MOCK_METHOD0(GetUTCTime, time_t());
   MOCK_CONST_METHOD0(system_time_can_be_received, bool());

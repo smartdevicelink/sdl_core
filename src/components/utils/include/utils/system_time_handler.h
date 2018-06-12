@@ -82,12 +82,12 @@ class SystemTimeHandler {
   void SubscribeOnSystemTime(SystemTimeListener* listener);
 
   /**
-   * @brief UnSubscribeFromSystemTime allows to unsubscribe listener
+   * @brief UnsubscribeFromSystemTime allows to unsubscribe listener
    * from the certain event. This class does not manipulate with storage.
    * It rather uses private pure virtual function. So the final behaviour
    * should be defined within the descendant class
    */
-  void UnSubscribeFromSystemTime(SystemTimeListener* listener);
+  void UnsubscribeFromSystemTime(SystemTimeListener* listener);
 
   /**
    * @brief GetUTCTime allows to obtain cached result for the

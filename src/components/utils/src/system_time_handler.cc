@@ -31,7 +31,6 @@
  */
 
 #include "utils/system_time_handler.h"
-//#include <algorithm>
 
 namespace utils {
 
@@ -47,7 +46,7 @@ void SystemTimeHandler::SubscribeOnSystemTime(SystemTimeListener* listener) {
   DoSubscribe(listener);
 }
 
-void SystemTimeHandler::UnSubscribeFromSystemTime(
+void SystemTimeHandler::UnsubscribeFromSystemTime(
     SystemTimeListener* listener) {
   DoUnsubscribe(listener);
 }

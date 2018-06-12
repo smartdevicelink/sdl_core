@@ -280,6 +280,16 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   return Handshake_Result_Success;
 }
 
+int CryptoManagerImpl::SSLContextImpl::get_number_from_char_buf(
+    char* buf, int* idx) const {
+  if (!idx) {
+    return 0;
+  }
+  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
+  *idx = *idx + 2;
+  return val;
+}
+
 time_t CryptoManagerImpl::SSLContextImpl::convert_asn1_time_to_time_t(
     ASN1_TIME* time_to_convert) const {
   struct tm cert_time;

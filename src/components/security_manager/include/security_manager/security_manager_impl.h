@@ -143,6 +143,7 @@ class SecurityManagerImpl : public SecurityManager,
    * Do not notify listeners, send security error on occure
    * \param connection_key Unique key used by other components as session
    * identifier
+   * @param cc_strategy - SSL context creation strategy
    * @return new \c  SSLContext or \c NULL on any error
    */
   SSLContext* CreateSSLContext(const uint32_t& connection_key,
@@ -163,6 +164,7 @@ class SecurityManagerImpl : public SecurityManager,
 
   /**
    * @brief Checks whether certificate should be updated
+   * @param connection_key the connection identifier to check certificate for.
    * @return true if certificate should be updated otherwise false
    */
   bool IsCertificateUpdateRequired(const uint32_t connection_key) OVERRIDE;
