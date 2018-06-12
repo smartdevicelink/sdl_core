@@ -52,14 +52,14 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
 
 using am::commands::ResponseFromHMI;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class ResponseFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
@@ -100,7 +100,7 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   MessageSharedPtr dummy_msg_params = CreateMessage();
   command->CreateHMIRequest(posted_function_id, *dummy_msg_params);
 
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
 
   const application_manager::MessageType received_message_tipe =
       static_cast<application_manager::MessageType>(

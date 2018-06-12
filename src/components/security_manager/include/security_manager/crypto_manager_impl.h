@@ -120,7 +120,7 @@ class CryptoManagerImpl : public CryptoManager {
 
  public:
   explicit CryptoManagerImpl(
-      const utils::SharedPtr<const CryptoManagerSettings> set);
+      const std::shared_ptr<const CryptoManagerSettings> set);
   ~CryptoManagerImpl();
 
   bool Init() OVERRIDE;
@@ -142,7 +142,7 @@ class CryptoManagerImpl : public CryptoManager {
    */
   void InitCertExpTime();
 
-  const utils::SharedPtr<const CryptoManagerSettings> settings_;
+  const std::shared_ptr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
   mutable struct tm expiration_time_;
   static uint32_t instance_count_;

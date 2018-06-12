@@ -44,7 +44,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace tts_get_language_response {
 
-using utils::SharedPtr;
+using std::shared_ptr;
 using application_manager::commands::TTSGetLanguageResponse;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::event_engine_test::MockEventDispatcher;
@@ -66,7 +66,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
-  SharedPtr<TTSGetLanguageResponse> command(
+  std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;
@@ -85,7 +85,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<TTSGetLanguageResponse> command(
+  std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;

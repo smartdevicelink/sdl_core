@@ -39,7 +39,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "utils/make_shared.h"
+#include <memory>
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"
@@ -86,9 +86,9 @@ class CryptoManagerTest : public testing::Test {
   void SetUp() OVERRIDE {
     ASSERT_FALSE(certificate_data_base64_.empty());
     mock_security_manager_settings_ =
-        utils::MakeShared<MockCryptoManagerSettings>();
+        std::make_shared<MockCryptoManagerSettings>();
     crypto_manager_ =
-        utils::MakeShared<CryptoManagerImpl>(mock_security_manager_settings_);
+        std::make_shared<CryptoManagerImpl>(mock_security_manager_settings_);
   }
 
   void InitSecurityManager() {
@@ -115,8 +115,8 @@ class CryptoManagerTest : public testing::Test {
         .WillByDefault(Return(false));
   }
 
-  utils::SharedPtr<CryptoManagerImpl> crypto_manager_;
-  utils::SharedPtr<MockCryptoManagerSettings> mock_security_manager_settings_;
+  std::shared_ptr<CryptoManagerImpl> crypto_manager_;
+  std::shared_ptr<MockCryptoManagerSettings> mock_security_manager_settings_;
   static std::string certificate_data_base64_;
 };
 std::string CryptoManagerTest::certificate_data_base64_;

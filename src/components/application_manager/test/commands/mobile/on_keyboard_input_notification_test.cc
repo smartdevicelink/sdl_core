@@ -76,8 +76,8 @@ class OnKeyBoardInputNotificationTest
               (*msg)[strings::params][strings::protocol_version].asInt());
   }
 
-  MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {
-    app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
+  MockAppPtr InitAppSetDataAccessor(std::shared_ptr<ApplicationSet>& app_set) {
+    app_set = (!app_set ? ::std::make_shared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
     app_set->insert(app);
     EXPECT_CALL(app_mngr_, applications())
@@ -85,14 +85,14 @@ class OnKeyBoardInputNotificationTest
     return app;
   }
 
-  SharedPtr<ApplicationSet> app_set_;
+  std::shared_ptr<ApplicationSet> app_set_;
   sync_primitives::Lock lock_;
 };
 
 TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<OnKeyBoardInputNotification> command =
+  std::shared_ptr<OnKeyBoardInputNotification> command =
       CreateCommand<OnKeyBoardInputNotification>(msg);
 
   MockAppPtr mock_app(InitAppSetDataAccessor(app_set_));
@@ -116,7 +116,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
 TEST_F(OnKeyBoardInputNotificationTest, Run_ActionNotActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<OnKeyBoardInputNotification> command =
+  std::shared_ptr<OnKeyBoardInputNotification> command =
       CreateCommand<OnKeyBoardInputNotification>(msg);
 
   MockAppPtr mock_app(InitAppSetDataAccessor(app_set_));
@@ -141,7 +141,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionNotActive_SUCCESS) {
 TEST_F(OnKeyBoardInputNotificationTest, Run_InvalidApp_NoNotification) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<OnKeyBoardInputNotification> command =
+  std::shared_ptr<OnKeyBoardInputNotification> command =
       CreateCommand<OnKeyBoardInputNotification>(msg);
 
   MockAppPtr mock_app(InitAppSetDataAccessor(app_set_));

@@ -49,14 +49,14 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace get_system_info_request {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::RequestToHMI;
 using am::commands::GetSystemInfoRequest;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<RequestToHMI> RequestToHMIPtr;
+typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

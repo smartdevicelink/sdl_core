@@ -58,7 +58,7 @@ namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::NiceMock;
 using ::testing::SetArgReferee;
 using ::test::components::application_manager_test::MockApplication;
@@ -70,7 +70,7 @@ using am::commands::CommandImpl;
 using policy::PolicyHandler;
 using policy_test::MockPolicyHandlerInterface;
 
-typedef SharedPtr<RequestFromHMI> RequestFromHMIPtr;
+typedef std::shared_ptr<RequestFromHMI> RequestFromHMIPtr;
 
 namespace {
 const uint32_t kInvalidAppId_ = 0u;

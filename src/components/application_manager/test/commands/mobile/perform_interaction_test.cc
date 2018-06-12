@@ -39,7 +39,7 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"
@@ -63,7 +63,7 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using am::commands::PerformInteractionRequest;
@@ -113,7 +113,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
   MessageSharedPtr request_msg = CreateMessage(smart_objects::SmartType_Map);
   (*request_msg)[strings::msg_params][strings::interaction_mode] =
       mobile_apis::InteractionMode::BOTH;
-  utils::SharedPtr<PerformInteractionRequest> command =
+  std::shared_ptr<PerformInteractionRequest> command =
       CreateCommand<PerformInteractionRequest>(request_msg);
   MockAppPtr mock_app;
 
@@ -155,7 +155,7 @@ TEST_F(PerformInteractionRequestTest,
   (*msg_from_mobile)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg_from_mobile)[strings::msg_params][strings::interaction_mode] =
       mobile_apis::InteractionMode::VR_ONLY;
-  utils::SharedPtr<PerformInteractionRequest> command =
+  std::shared_ptr<PerformInteractionRequest> command =
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
   command->Init();
 
@@ -209,7 +209,7 @@ TEST_F(PerformInteractionRequestTest,
   (*msg_from_mobile)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg_from_mobile)[strings::msg_params][strings::interaction_mode] =
       mobile_apis::InteractionMode::VR_ONLY;
-  utils::SharedPtr<PerformInteractionRequest> command =
+  std::shared_ptr<PerformInteractionRequest> command =
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
 
   ON_CALL(mock_hmi_interfaces_,

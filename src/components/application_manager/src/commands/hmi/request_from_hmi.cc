@@ -32,7 +32,7 @@
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
 #include "application_manager/application_manager.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace application_manager {
 
@@ -66,7 +66,7 @@ void RequestFromHMI::SendResponse(
     const hmi_apis::FunctionID::eType function_id,
     const hmi_apis::Common_Result::eType result_code) {
   smart_objects::SmartObjectSPtr message =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
@@ -83,7 +83,7 @@ void RequestFromHMI::SendErrorResponse(
     const hmi_apis::Common_Result::eType result_code,
     const std::string error_message) {
   smart_objects::SmartObjectSPtr message =
-      ::utils::MakeShared<smart_objects::SmartObject>(
+      ::std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] =

@@ -37,7 +37,7 @@
 #include <utility>
 
 #include "policy/policy_manager_impl_test_base.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/shared_ptr.h"
 
 using ::testing::_;
@@ -148,7 +148,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
+  std::shared_ptr<policy_table::Table> snapshot =
       new policy_table::Table(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(snapshot));
@@ -236,8 +236,8 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
 TEST_F(PolicyManagerImplTest,
        RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate) {
   Json::Value table = createPTforLoad();
-  utils::SharedPtr<policy_table::Table> p_table =
-      utils::MakeShared<policy_table::Table>(&table);
+  std::shared_ptr<policy_table::Table> p_table =
+      std::make_shared<policy_table::Table>(&table);
   ASSERT_TRUE(p_table);
   p_table->SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   EXPECT_TRUE(IsValid(*p_table));
@@ -249,8 +249,8 @@ TEST_F(PolicyManagerImplTest,
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
-  utils::SharedPtr<policy_table::Table> p_table =
-      utils::MakeShared<policy_table::Table>();
+  std::shared_ptr<policy_table::Table> p_table =
+      std::make_shared<policy_table::Table>();
   ASSERT_TRUE(p_table);
   EXPECT_FALSE(IsValid(*p_table));
 
@@ -261,7 +261,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidSnapshot_PTUpdateFail) {
-  utils::SharedPtr<policy_table::Table> p_table;
+  std::shared_ptr<policy_table::Table> p_table;
   EXPECT_FALSE(p_table);
 
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
@@ -355,7 +355,7 @@ TEST_F(
 
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking groups consents before setting ExternalConsent status
@@ -420,7 +420,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking ExternalConsent consents before setting new ExternalConsent status
@@ -484,7 +484,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -552,7 +552,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -634,7 +634,7 @@ TEST_F(
                                   HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -724,7 +724,7 @@ TEST_F(
                                   HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -818,7 +818,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
   policy_manager_->AddApplication(app_id_1_,
                                   HmiTypes(policy_table::AHT_DEFAULT));
 
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Check ExternalConsent consents for application
@@ -943,7 +943,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
   policy_manager_->AddApplication(app_id_1_,
                                   HmiTypes(policy_table::AHT_DEFAULT));
 
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Check ExternalConsent consents for application
@@ -1046,7 +1046,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking ExternalConsent consents before setting new ExternalConsent status

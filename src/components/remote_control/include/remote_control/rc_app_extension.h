@@ -75,7 +75,7 @@ class RCAppExtension : public application_manager::AppExtension {
   std::set<Json::Value> subscribed_interior_vehicle_data_;
 };
 
-typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;
+typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
 
 }  //  namespace remote_control
 

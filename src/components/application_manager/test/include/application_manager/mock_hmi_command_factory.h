@@ -46,8 +46,8 @@ namespace application_manager_test {
 class MockHMICommandFactory {
  public:
   MOCK_METHOD2(CreateCommand,
-               utils::SharedPtr<application_manager::commands::Command>(
-                   const utils::SharedPtr<smart_objects::SmartObject>&,
+               std::shared_ptr<application_manager::commands::Command>(
+                   const std::shared_ptr<smart_objects::SmartObject>&,
                    application_manager::ApplicationManager&));
 
   static MockHMICommandFactory* mock_hmi_command_factory();

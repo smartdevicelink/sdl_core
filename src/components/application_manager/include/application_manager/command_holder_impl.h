@@ -98,7 +98,7 @@ class CommandHolderImpl : public CommandHolder {
 
   using AppCommands =
       std::map<ApplicationSharedPtr,
-               std::vector<utils::SharedPtr<smart_objects::SmartObject> > >;
+               std::vector<std::shared_ptr<smart_objects::SmartObject> > >;
 
   ApplicationManager& app_manager_;
   sync_primitives::Lock commands_lock_;

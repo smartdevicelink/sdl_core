@@ -58,7 +58,7 @@ using application_manager::commands::GetWayPointsRequest;
 using application_manager::MockMessageHelper;
 using application_manager::MockHmiInterfaces;
 
-typedef SharedPtr<GetWayPointsRequest> CommandPtr;
+typedef std::shared_ptr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
 typedef hmi_apis::Common_Result::eType HmiResult;
 
@@ -75,7 +75,7 @@ class GetWayPointsRequestTest
   GetWayPointsRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
-    message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
+    message_ = std::make_shared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =
         ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
 
@@ -87,7 +87,7 @@ class GetWayPointsRequestTest
 
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
-  utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
+  std::shared_ptr<application_manager::commands::GetWayPointsRequest>
       command_sptr_;
 };
 
@@ -136,7 +136,7 @@ TEST_F(GetWayPointsRequestTest,
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  utils::SharedPtr<am::Application> null_application_sptr;
+  std::shared_ptr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
 

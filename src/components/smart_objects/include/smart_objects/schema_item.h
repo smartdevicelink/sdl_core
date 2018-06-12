@@ -126,7 +126,7 @@ class ISchemaItem {
 
   virtual ~ISchemaItem() {}
 };
-typedef utils::SharedPtr<ISchemaItem> ISchemaItemPtr;
+typedef std::shared_ptr<ISchemaItem> ISchemaItemPtr;
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_

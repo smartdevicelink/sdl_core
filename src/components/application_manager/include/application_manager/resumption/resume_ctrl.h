@@ -40,8 +40,8 @@
 namespace application_manager {
 class ApplicationManager;
 class Application;
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 }
 namespace app_mngr = application_manager;
 
@@ -263,7 +263,7 @@ class ResumeCtrl {
 
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
-      utils::SharedPtr<ResumptionData> mock_storage) = 0;
+      std::shared_ptr<ResumptionData> mock_storage) = 0;
 #endif  // BUILD_TESTS
 };
 

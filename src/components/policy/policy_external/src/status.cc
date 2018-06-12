@@ -32,7 +32,7 @@
 
 #include "policy/status.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 policy::UpToDateStatus::UpToDateStatus()
     : Status(kUpToDate, policy::PolicyTableStatus::StatusUpToDate) {}
@@ -45,7 +45,7 @@ void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
     case kScheduleUpdate:
     case kScheduleManualUpdate:
     case kOnResetRetrySequence:
-      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;
@@ -59,14 +59,14 @@ void policy::UpdateNeededStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
   switch (event) {
     case kOnUpdateSentOut:
-      manager->SetNextStatus(utils::MakeShared<UpdatingStatus>());
+      manager->SetNextStatus(std::make_shared<UpdatingStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableNoUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
     default:
       break;
@@ -85,23 +85,23 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
   switch (event) {
     case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
     case kOnNewAppRegistered:
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:
-      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kScheduleUpdate:
     case kScheduleManualUpdate:
     case kOnResetRetrySequence:
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;

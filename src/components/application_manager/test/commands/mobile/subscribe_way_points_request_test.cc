@@ -61,7 +61,7 @@ namespace am = ::application_manager;
 using am::commands::SubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
 
-typedef SharedPtr<SubscribeWayPointsRequest> CommandPtr;
+typedef std::shared_ptr<SubscribeWayPointsRequest> CommandPtr;
 
 class SubscribeWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

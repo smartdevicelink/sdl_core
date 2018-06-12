@@ -56,7 +56,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using am::commands::OnTBTClientStateNotification;
 
-typedef ::utils::SharedPtr<OnTBTClientStateNotification> NotificationPtr;
+typedef ::std::shared_ptr<OnTBTClientStateNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

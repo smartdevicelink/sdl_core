@@ -33,7 +33,7 @@
 #include <string>
 #include "remote_control/message_helper.h"
 #include "remote_control/rc_module_constants.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace remote_control {
 using functional_modules::RCFunctionID;
@@ -114,7 +114,7 @@ application_manager::MessagePtr MessageHelper::CreateHmiRequest(
 
   Json::FastWriter writer;
   application_manager::MessagePtr message_to_send =
-      utils::MakeShared<application_manager::Message>(
+      std::make_shared<application_manager::Message>(
           application_manager::Message(
               protocol_handler::MessagePriority::kDefault));
   message_to_send->set_protocol_version(

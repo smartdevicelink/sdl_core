@@ -55,7 +55,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using am::commands::OnCommandNotification;
 
-typedef ::utils::SharedPtr<OnCommandNotification> CommandPtr;
+typedef ::std::shared_ptr<OnCommandNotification> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

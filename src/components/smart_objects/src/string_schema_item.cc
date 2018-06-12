@@ -38,11 +38,11 @@ namespace NsSmartObjects {
 
 namespace custom_str = utils::custom_string;
 
-utils::SharedPtr<CStringSchemaItem> CStringSchemaItem::create(
+std::shared_ptr<CStringSchemaItem> CStringSchemaItem::create(
     const TSchemaItemParameter<size_t>& MinLength,
     const TSchemaItemParameter<size_t>& MaxLength,
     const TSchemaItemParameter<std::string>& DefaultValue) {
-  return new CStringSchemaItem(MinLength, MaxLength, DefaultValue);
+  return std::shared_ptr<CStringSchemaItem>(new CStringSchemaItem(MinLength, MaxLength, DefaultValue));
 }
 
 Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {

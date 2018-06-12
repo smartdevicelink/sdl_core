@@ -164,7 +164,7 @@ class MockPolicyManager : public PolicyManager {
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
   MOCK_METHOD1(set_access_remote,
-               void(utils::SharedPtr<AccessRemote> access_remote));
+               void(std::shared_ptr<AccessRemote> access_remote));
 #endif  // SDL_REMOTE_CONTROL
 
   MOCK_METHOD0(CleanupUnpairedDevices, bool());

@@ -53,7 +53,7 @@ TEST(ProtocolHandlerObserverTest, MessageProcess) {
   pr_handler.StartMessageProcess(message_id, start_time);
 
   typedef protocol_handler::PHTelemetryObserver::MessageMetric MetricType;
-  utils::SharedPtr<MetricType> message_metric = new MetricType();
+  std::shared_ptr<MetricType> message_metric = std::make_shared<MetricType>();
   message_metric->message_id = 1;
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_));
   pr_handler.EndMessageProcess(message_metric);
@@ -70,7 +70,7 @@ TEST(ProtocolHandlerObserverTest, MessageProcessWithZeroMessageId) {
   pr_handler.StartMessageProcess(message_id, start_time);
 
   typedef protocol_handler::PHTelemetryObserver::MessageMetric MetricType;
-  utils::SharedPtr<MetricType> message_metric = new MetricType();
+  std::shared_ptr<MetricType> message_metric = std::make_shared<MetricType>();
   message_metric->message_id = 0;
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_)).Times(0);
   pr_handler.EndMessageProcess(message_metric);

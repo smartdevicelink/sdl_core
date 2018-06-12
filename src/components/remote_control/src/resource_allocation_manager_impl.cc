@@ -4,7 +4,7 @@
 #include "remote_control/rc_module_constants.h"
 #include "json/json.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "remote_control/message_helper.h"
 #include "remote_control/rc_app_extension.h"
 
@@ -175,7 +175,7 @@ RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
   }
 
   rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
+      std::static_pointer_cast<RCAppExtension>(
           app_extension);
 
   return rc_app_extension;

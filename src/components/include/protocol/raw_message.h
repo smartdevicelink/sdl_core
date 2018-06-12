@@ -114,6 +114,6 @@ class RawMessage {
   bool waiting_;
   DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
-typedef utils::SharedPtr<RawMessage> RawMessagePtr;
+typedef std::shared_ptr<RawMessage> RawMessagePtr;
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_

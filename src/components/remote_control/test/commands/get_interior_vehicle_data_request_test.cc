@@ -43,7 +43,7 @@
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;
@@ -100,15 +100,15 @@ namespace get_interior_vehicle_data_request_test {
 
 class GetInteriorVehicleDataRequestTest : public ::testing::Test {
  public:
-  typedef utils::SharedPtr<remote_control::commands::BaseCommandRequest>
+  typedef std::shared_ptr<remote_control::commands::BaseCommandRequest>
       GIVDRequestPtr;
   typedef rc_event_engine::Event<application_manager::MessagePtr, std::string>
       GIVD_HMI_Response;
   GetInteriorVehicleDataRequestTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(
-            utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
+            std::make_shared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(app_id_));
     ON_CALL(mock_module_, service()).WillByDefault(Return(mock_service_));
     ON_CALL(*mock_service_, GetApplication(app_id_))
@@ -129,7 +129,7 @@ class GetInteriorVehicleDataRequestTest : public ::testing::Test {
   }
 
   application_manager::MessagePtr CreateBasicMessage() {
-    application_manager::MessagePtr message = utils::MakeShared<Message>(
+    application_manager::MessagePtr message = std::make_shared<Message>(
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_connection_key(kConnectionKey);
     message->set_function_id(RCFunctionID::GET_INTERIOR_VEHICLE_DATA);
@@ -138,9 +138,9 @@ class GetInteriorVehicleDataRequestTest : public ::testing::Test {
   }
 
  protected:
-  utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
-  utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
+  std::shared_ptr<NiceMock<application_manager::MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<remote_control::RCAppExtension> rc_app_extention_;
   remote_control_test::MockRemotePluginInterface mock_module_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
   const uint32_t app_id_ = 11u;

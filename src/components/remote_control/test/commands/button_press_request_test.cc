@@ -45,7 +45,7 @@
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;
@@ -93,10 +93,10 @@ class ButtonPressRequestTest : public ::testing::Test {
  public:
   ButtonPressRequestTest()
       : rc_capabilities_(smart_objects::SmartType_Map)
-      , mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      , mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(
-            utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
+            std::make_shared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(mock_module_, service()).WillByDefault(Return(mock_service_));
     ON_CALL(mock_module_, resource_allocation_manager())
         .WillByDefault(ReturnRef(mock_allocation_manager_));
@@ -158,7 +158,7 @@ class ButtonPressRequestTest : public ::testing::Test {
   }
 
   application_manager::MessagePtr CreateBasicMessage() {
-    application_manager::MessagePtr message = utils::MakeShared<Message>(
+    application_manager::MessagePtr message = std::make_shared<Message>(
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_function_id(RCFunctionID::BUTTON_PRESS);
     message->set_function_name(
@@ -169,9 +169,9 @@ class ButtonPressRequestTest : public ::testing::Test {
 
  protected:
   smart_objects::SmartObject rc_capabilities_;
-  utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
-  utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
+  std::shared_ptr<NiceMock<application_manager::MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<remote_control::RCAppExtension> rc_app_extention_;
   testing::NiceMock<remote_control_test::MockRemotePluginInterface>
       mock_module_;
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>

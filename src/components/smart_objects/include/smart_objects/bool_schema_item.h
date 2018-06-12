@@ -49,7 +49,7 @@ class CBoolSchemaItem : public CDefaultSchemaItem<bool> {
    * @param DefaultValue Default value of a parameter.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CBoolSchemaItem> create(
+  static std::shared_ptr<CBoolSchemaItem> create(
       const TSchemaItemParameter<bool>& DefaultValue =
           TSchemaItemParameter<bool>());
 

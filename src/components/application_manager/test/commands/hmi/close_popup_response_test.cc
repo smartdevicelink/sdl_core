@@ -48,13 +48,13 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace close_popup_response {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 using am::commands::ResponseFromHMI;
 using am::commands::ClosePopupResponse;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class ClosePopupResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };

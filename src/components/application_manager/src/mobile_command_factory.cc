@@ -141,7 +141,7 @@
 #include "application_manager/commands/mobile/send_haptic_data_request.h"
 #include "application_manager/commands/mobile/send_haptic_data_response.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace application_manager {
 
@@ -405,10 +405,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::GetWayPointsID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::GetWayPointsResponse>(
+        command = std::make_shared<commands::GetWayPointsResponse>(
             message, application_manager);
       } else {
-        command = utils::MakeShared<commands::GetWayPointsRequest>(
+        command = std::make_shared<commands::GetWayPointsRequest>(
             message, application_manager);
       }
       break;
@@ -438,10 +438,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::SubscribeWayPointsID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::SubscribeWayPointsResponse>(
+        command = std::make_shared<commands::SubscribeWayPointsResponse>(
             message, application_manager);
       } else {
-        command = utils::MakeShared<commands::SubscribeWayPointsRequest>(
+        command = std::make_shared<commands::SubscribeWayPointsRequest>(
             message, application_manager);
       }
       break;
@@ -449,10 +449,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::UnsubscribeWayPointsResponse>(
+        command = std::make_shared<commands::UnsubscribeWayPointsResponse>(
             message, application_manager);
       } else {
-        command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(
+        command = std::make_shared<commands::UnSubscribeWayPointsRequest>(
             message, application_manager);
       }
       break;
@@ -714,7 +714,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
-      command = utils::MakeShared<commands::OnWayPointChangeNotification>(
+      command = std::make_shared<commands::OnWayPointChangeNotification>(
           message, application_manager);
       break;
     }

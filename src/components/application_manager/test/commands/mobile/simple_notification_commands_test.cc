@@ -85,7 +85,7 @@ MATCHER(CheckNotificationMessage, "") {
 TYPED_TEST_CASE(MobileNotificationCommandsTest, NotificationCommandsList);
 
 TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
-  ::utils::SharedPtr<typename TestFixture::CommandType> command =
+  ::std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->app_mngr_,
               SendMessageToMobile(CheckNotificationMessage(), _));

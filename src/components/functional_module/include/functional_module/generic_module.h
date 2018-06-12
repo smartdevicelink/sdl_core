@@ -65,7 +65,7 @@ enum ServiceState { IDLE = 0, SUSPENDED, LOWVOLTAGE, HMI_ADAPTER_INITIALIZED };
 typedef std::string HMIFunctionID;
 
 class GenericModule;
-typedef utils::SharedPtr<GenericModule> ModulePtr;
+typedef std::shared_ptr<GenericModule> ModulePtr;
 
 struct PluginInfo {
   std::string name;

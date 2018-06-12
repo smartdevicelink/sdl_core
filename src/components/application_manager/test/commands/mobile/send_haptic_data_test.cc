@@ -57,8 +57,8 @@ using am::commands::SendHapticDataRequest;
 using am::commands::SendHapticDataResponse;
 using am::commands::MessageSharedPtr;
 
-typedef SharedPtr<SendHapticDataRequest> SendHapticDataRequestPtr;
-typedef SharedPtr<SendHapticDataResponse> SendHapticDataResponsePtr;
+typedef std::shared_ptr<SendHapticDataRequest> SendHapticDataRequestPtr;
+typedef std::shared_ptr<SendHapticDataResponse> SendHapticDataResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -91,7 +91,7 @@ class SendHapticDataResponseTest
   }
 
   MessageSharedPtr message_;
-  SharedPtr<SendHapticDataResponse> command_sptr_;
+  std::shared_ptr<SendHapticDataResponse> command_sptr_;
 };
 
 TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {

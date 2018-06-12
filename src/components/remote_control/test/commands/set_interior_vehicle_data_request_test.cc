@@ -44,7 +44,7 @@
 #include "functional_module/function_ids.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using functional_modules::RCFunctionID;
 using application_manager::ServicePtr;
@@ -113,10 +113,10 @@ namespace set_interior_vehicle_data_request_test {
 class SetInteriorVehicleDataRequestTest : public ::testing::Test {
  public:
   SetInteriorVehicleDataRequestTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_(utils::MakeShared<NiceMock<MockApplication> >())
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(
-            utils::MakeShared<remote_control::RCAppExtension>(kModuleId)) {
+            std::make_shared<remote_control::RCAppExtension>(kModuleId)) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(mock_module_, resource_allocation_manager())
         .WillByDefault(ReturnRef(mock_allocation_manager_));
@@ -137,7 +137,7 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
   }
 
   application_manager::MessagePtr CreateBasicMessage() {
-    application_manager::MessagePtr message = utils::MakeShared<Message>(
+    application_manager::MessagePtr message = std::make_shared<Message>(
         MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
     message->set_connection_key(kConnectionKey);
     message->set_function_id(RCFunctionID::SET_INTERIOR_VEHICLE_DATA);
@@ -147,9 +147,9 @@ class SetInteriorVehicleDataRequestTest : public ::testing::Test {
   }
 
  protected:
-  utils::SharedPtr<NiceMock<application_manager::MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_;
-  utils::SharedPtr<remote_control::RCAppExtension> rc_app_extention_;
+  std::shared_ptr<NiceMock<application_manager::MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_;
+  std::shared_ptr<remote_control::RCAppExtension> rc_app_extention_;
   testing::NiceMock<remote_control_test::MockRemotePluginInterface>
       mock_module_;
   testing::NiceMock<remote_control_test::MockResourceAllocationManager>

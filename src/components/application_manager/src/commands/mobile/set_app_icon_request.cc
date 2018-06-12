@@ -251,7 +251,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         ApplicationSharedPtr app =
             application_manager_.application(connection_key());
 
-        if (!message_.valid() || !app.valid()) {
+        if (!utils::ValidSPtr(message_) || !utils::ValidSPtr(app)) {
           LOG4CXX_ERROR(logger_, "NULL pointer.");
           return;
         }

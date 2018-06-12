@@ -55,7 +55,7 @@ using am::commands::PerformAudioPassThruRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -80,7 +80,7 @@ class PerformAudioPassThruRequestTest
  public:
   PerformAudioPassThruRequestTest()
       : mock_app_(CreateMockApp())
-      , message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
+      , message_(std::make_shared<SmartObject>(::smart_objects::SmartType_Map))
       , msg_params_((*message_)[am::strings::msg_params]) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -152,7 +152,7 @@ class PerformAudioPassThruRequestTest
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   ::smart_objects::SmartObject& msg_params_;
-  utils::SharedPtr<am::commands::PerformAudioPassThruRequest> command_sptr_;
+  std::shared_ptr<am::commands::PerformAudioPassThruRequest> command_sptr_;
   MockAppPtr application_sptr_;
 };
 
@@ -163,10 +163,10 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   (*msg_ui)[am::strings::msg_params][am::strings::success] = false;
 
   MessageSharedPtr message =
-      utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
+      std::make_shared<SmartObject>(::smart_objects::SmartType_Map);
   (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<PerformAudioPassThruRequest> command =
+  std::shared_ptr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>(message);
 
   uint32_t app_id = kConnectionKey;
@@ -210,7 +210,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   EXPECT_CALL(*application_sptr_, hmi_level())
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
-  utils::SharedPtr<PerformAudioPassThruRequest> command =
+  std::shared_ptr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>(mobile_request);
 
   ON_CALL(mock_hmi_interfaces_,
@@ -265,7 +265,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  utils::SharedPtr<am::Application> null_application_sptr;
+  std::shared_ptr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(null_application_sptr));
 

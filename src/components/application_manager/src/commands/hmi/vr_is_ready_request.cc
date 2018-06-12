@@ -84,18 +84,18 @@ void VRIsReadyRequest::onTimeOut() {
 }
 
 void VRIsReadyRequest::SendMessageToHMI() {
-  utils::SharedPtr<smart_objects::SmartObject> get_language(
+  std::shared_ptr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
                                         application_manager_));
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_handle_response_for(*get_language);
   application_manager_.ManageHMICommand(get_language);
-  utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VR_GetSupportedLanguages,
           application_manager_));
   application_manager_.ManageHMICommand(get_all_languages);
-  utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));
   application_manager_.ManageHMICommand(get_capabilities);

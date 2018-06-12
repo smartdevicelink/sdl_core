@@ -51,11 +51,11 @@ namespace am = ::application_manager;
 namespace commands = am::commands;
 
 using ::testing::ReturnRef;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using commands::ResponseFromHMI;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class NaviIsReadyResponseTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

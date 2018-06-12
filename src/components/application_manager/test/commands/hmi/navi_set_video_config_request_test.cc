@@ -65,7 +65,7 @@ const hmi_apis::FunctionID::eType kEventID =
     hmi_apis::FunctionID::Navigation_SetVideoConfig;
 }  // namespace
 
-typedef SharedPtr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
+typedef std::shared_ptr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
 
 class NaviSetVideoConfigRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

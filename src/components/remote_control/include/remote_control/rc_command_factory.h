@@ -52,7 +52,7 @@ class RCCommandFactory {
    * @param  message Message shared pointer.
    * @return Pointer to created command object.
    **/
-  static utils::SharedPtr<commands::Command> CreateCommand(
+  static std::shared_ptr<commands::Command> CreateCommand(
       const application_manager::MessagePtr& msg,
       RemotePluginInterface& rc_module);
 

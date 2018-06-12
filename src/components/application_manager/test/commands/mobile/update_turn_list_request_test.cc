@@ -88,7 +88,7 @@ class UpdateTurnListRequestTest
   }
 
   MessageSharedPtr command_msg_;
-  ::utils::SharedPtr<UpdateTurnListRequest> command_;
+  ::std::shared_ptr<UpdateTurnListRequest> command_;
   TypeIf<kMocksAreNice,
          NiceMock<policy_test::MockPolicyHandlerInterface>,
          policy_test::MockPolicyHandlerInterface>::Result mock_policy_handler_;
@@ -226,7 +226,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
               SubscribeApplicationToSoftButton(_, _, kFunctionId));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command_)));
-  ASSERT_TRUE(result_msg);
+  ASSERT_TRUE((bool)result_msg);
   EXPECT_EQ(
       hmi_apis::FunctionID::Navigation_UpdateTurnList,
       (*result_msg)[am::strings::params][am::strings::function_id].asInt());

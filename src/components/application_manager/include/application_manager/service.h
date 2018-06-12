@@ -176,7 +176,7 @@ class Service {
   virtual const ApplicationManagerSettings& GetSettings() const = 0;
 };
 
-typedef utils::SharedPtr<Service> ServicePtr;
+typedef std::shared_ptr<Service> ServicePtr;
 
 }  // namespace application_manager
 

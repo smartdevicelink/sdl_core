@@ -30,28 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "media_manager/media_manager_impl.h"
-#include "media_manager/audio/from_mic_recorder_listener.h"
-#include "media_manager/streamer_listener.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/application.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
+#include "media_manager/audio/from_mic_recorder_listener.h"
+#include "media_manager/media_manager_impl.h"
+#include "media_manager/streamer_listener.h"
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #endif
-#include "media_manager/video/socket_video_streamer_adapter.h"
-#include "media_manager/audio/socket_audio_streamer_adapter.h"
-#include "media_manager/video/pipe_video_streamer_adapter.h"
-#include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/audio/file_audio_streamer_adapter.h"
+#include "media_manager/audio/pipe_audio_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/media_manager_settings.h"
+#include "media_manager/video/file_video_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
@@ -98,13 +98,13 @@ void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
 
 void MediaManagerImpl::set_mock_streamer(
     protocol_handler::ServiceType stype,
-    ::utils::SharedPtr<MediaAdapterImpl> mock_stream) {
+    ::std::shared_ptr<MediaAdapterImpl> mock_stream) {
   streamer_[stype] = mock_stream;
 }
 
 void MediaManagerImpl::set_mock_streamer_listener(
     protocol_handler::ServiceType stype,
-    ::utils::SharedPtr<MediaAdapterListener> mock_stream) {
+    ::std::shared_ptr<MediaAdapterListener> mock_stream) {
   streamer_listener_[stype] = mock_stream;
 }
 
@@ -120,29 +120,34 @@ void MediaManagerImpl::Init() {
 #endif
 
   if ("socket" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
-        settings().server_address(), settings().video_streaming_port());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<SocketVideoStreamerAdapter>(
+            settings().server_address(), settings().video_streaming_port());
   } else if ("pipe" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter(
-        settings().named_video_pipe_path(), settings().app_storage_folder());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<PipeVideoStreamerAdapter>(
+            settings().named_video_pipe_path(),
+            settings().app_storage_folder());
   } else if ("file" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter(
-        settings().video_stream_file(), settings().app_storage_folder());
+    streamer_[ServiceType::kMobileNav] =
+        std::make_shared<FileVideoStreamerAdapter>(
+            settings().video_stream_file(), settings().app_storage_folder());
   }
 
   if ("socket" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new SocketAudioStreamerAdapter(
-        settings().server_address(), settings().audio_streaming_port());
+    streamer_[ServiceType::kAudio] =
+        std::make_shared<SocketAudioStreamerAdapter>(
+            settings().server_address(), settings().audio_streaming_port());
   } else if ("pipe" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter(
+    streamer_[ServiceType::kAudio] = std::make_shared<PipeAudioStreamerAdapter>(
         settings().named_audio_pipe_path(), settings().app_storage_folder());
   } else if ("file" == settings().audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter(
+    streamer_[ServiceType::kAudio] = std::make_shared<FileAudioStreamerAdapter>(
         settings().audio_stream_file(), settings().app_storage_folder());
   }
 
-  streamer_listener_[ServiceType::kMobileNav] = new StreamerListener(*this);
-  streamer_listener_[ServiceType::kAudio] = new StreamerListener(*this);
+  streamer_listener_[ServiceType::kMobileNav] = std::make_shared<StreamerListener>(*this);
+  streamer_listener_[ServiceType::kAudio] = std::make_shared<StreamerListener>(*this);
 
   if (streamer_[ServiceType::kMobileNav]) {
     streamer_[ServiceType::kMobileNav]->AddListener(
@@ -188,7 +193,7 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   file_path += "/";
   file_path += output_file;
   from_mic_listener_ =
-      new FromMicRecorderListener(file_path, application_manager_);
+      std::make_shared<FromMicRecorderListener>(file_path, application_manager_);
 #ifdef EXTENDED_MEDIA_MODE
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
@@ -213,9 +218,9 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
-      LOG4CXX_INFO(logger_,
-                   "File " << record_file_source << " copied to "
-                           << output_file);
+      LOG4CXX_INFO(
+          logger_,
+          "File " << record_file_source << " copied to " << output_file);
     } else {
       LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
     }

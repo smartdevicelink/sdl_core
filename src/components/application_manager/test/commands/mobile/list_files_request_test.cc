@@ -69,10 +69,10 @@ class ListFilesRequestTest
 };
 
 TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
-  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
+  std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   ON_CALL(app_mngr_, application(_))
-      .WillByDefault(Return(SharedPtr<am::Application>()));
+      .WillByDefault(Return(std::shared_ptr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
@@ -83,7 +83,7 @@ TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 
 TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
-  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
+  std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
@@ -108,7 +108,7 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
 
 TEST_F(ListFilesRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
-  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
+  std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   EXPECT_CALL(app_mngr_, get_settings())
       .WillRepeatedly(ReturnRef(app_mngr_settings_));

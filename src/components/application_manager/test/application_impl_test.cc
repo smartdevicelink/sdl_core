@@ -39,7 +39,7 @@
 #include "application_manager/hmi_state.h"
 #include "utils/file_system.h"
 
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/mock_message_helper.h"
 #include "utils/custom_string.h"
 #include "application_manager/mock_application_manager.h"
@@ -100,7 +100,7 @@ class ApplicationImplTest : public ::testing::Test {
                             mac_address,
                             device_handle,
                             app_name,
-                            utils::MakeShared<MockStatisticsManager>(),
+                            std::make_shared<MockStatisticsManager>(),
                             mock_application_manager_));
 
     HmiStatePtr initial_state = CreateTestHmiState();
@@ -115,7 +115,7 @@ class ApplicationImplTest : public ::testing::Test {
   void CheckCurrentHMIState();
   MockApplicationManagerSettings mock_application_manager_settings_;
   MockApplicationManager mock_application_manager_;
-  utils::SharedPtr<ApplicationImpl> app_impl;
+  std::shared_ptr<ApplicationImpl> app_impl;
   uint32_t app_id;
   std::string policy_app_id;
   std::string mac_address;
@@ -130,8 +130,8 @@ class ApplicationImplTest : public ::testing::Test {
 };
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
-  HmiStatePtr testState = utils::MakeShared<HmiState>(
-      static_cast<utils::SharedPtr<Application> >(app_impl),
+  HmiStatePtr testState = std::make_shared<HmiState>(
+      static_cast<std::shared_ptr<Application> >(app_impl),
       mock_application_manager_,
       state_id);
   testState->set_hmi_level(test_lvl);
@@ -265,7 +265,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
-  EXPECT_EQ(NULL, current_state->parent());
+  EXPECT_EQ(nullptr, current_state->parent());
 }
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
@@ -304,7 +304,7 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
   // Check that state was correctly removed
   app_impl->RemovePostponedState();
   state2 = app_impl->PostponedHmiState();
-  EXPECT_EQ(NULL, state2);
+  EXPECT_EQ(nullptr, state2);
 }
 
 TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
@@ -806,7 +806,7 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
 
 TEST_F(ApplicationImplTest, PushPopMobileMessage) {
   smart_objects::SmartObjectSPtr on_driver_distraction =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
   (*on_driver_distraction)[strings::params][strings::function_id] =

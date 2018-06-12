@@ -61,7 +61,7 @@ using am::commands::DialNumberRequest;
 using am::event_engine::Event;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<DialNumberRequest> DialNumberRequestPtr;
+typedef std::shared_ptr<DialNumberRequest> DialNumberRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

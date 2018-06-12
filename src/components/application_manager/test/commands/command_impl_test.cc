@@ -55,7 +55,7 @@ using ::testing::Return;
 using ::testing::AtLeast;
 using ::testing::_;
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace strings = ::application_manager::strings;
 using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;
@@ -63,7 +63,7 @@ using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::ApplicationSharedPtr;
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
 
 namespace {
 const uint32_t kDefaultMsgCount = 5u;
@@ -118,11 +118,11 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 typedef CommandImplTest::UnwrappedCommandImpl UCommandImpl;
-typedef SharedPtr<UCommandImpl> UCommandImplPtr;
+typedef std::shared_ptr<UCommandImpl> UCommandImplPtr;
 
 TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandImpl> command =
+  std::shared_ptr<CommandImpl> command =
       CreateCommand<CommandImpl>(kDefaultTimeout_, msg);
 
   // Current implementation always return `true`

@@ -128,21 +128,21 @@ using namespace threads;
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct MessageFromMobile : public utils::SharedPtr<Message> {
+struct MessageFromMobile : public std::shared_ptr<Message> {
   MessageFromMobile() {}
-  explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromMobile(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
 };
 
-struct MessageToMobile : public utils::SharedPtr<Message> {
+struct MessageToMobile : public std::shared_ptr<Message> {
   MessageToMobile() : is_final(false) {}
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
+  explicit MessageToMobile(const std::shared_ptr<Message>& message,
                            bool final_message)
-      : utils::SharedPtr<Message>(message), is_final(final_message) {}
+      : std::shared_ptr<Message>(message), is_final(final_message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
@@ -151,20 +151,20 @@ struct MessageToMobile : public utils::SharedPtr<Message> {
   bool is_final;
 };
 
-struct MessageFromHmi : public utils::SharedPtr<Message> {
+struct MessageFromHmi : public std::shared_ptr<Message> {
   MessageFromHmi() {}
-  explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromHmi(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
 };
 
-struct MessageToHmi : public utils::SharedPtr<Message> {
+struct MessageToHmi : public std::shared_ptr<Message> {
   MessageToHmi() {}
-  explicit MessageToHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageToHmi(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
@@ -190,7 +190,7 @@ typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
     : public ApplicationManager,
@@ -264,7 +264,7 @@ class ApplicationManagerImpl
                          mobile_apis::HMILevel::eType to) OVERRIDE;
 
   void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) OVERRIDE;
+      const std::shared_ptr<Application> app) OVERRIDE;
 
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr application(
@@ -408,7 +408,7 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+  ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
       smart_objects::SmartObject>& request_for_registration) OVERRIDE;
   /*
    * @brief Closes application by id
@@ -562,7 +562,7 @@ class ApplicationManagerImpl
    * @return new regular HMI state
    */
   HmiStatePtr CreateRegularState(
-      utils::SharedPtr<Application> app,
+      std::shared_ptr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const OVERRIDE;
@@ -1400,11 +1400,11 @@ class ApplicationManagerImpl
   MessageValidationResult ValidateMessageBySchema(
       const Message& message) OVERRIDE;
 
-  utils::SharedPtr<Message> ConvertRawMsgToMessage(
+  std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
 
-  void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
-  void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
+  void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
+  void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
 
   // threads::MessageLoopThread<*>::Handler implementations
   /*
@@ -1436,7 +1436,7 @@ class ApplicationManagerImpl
     uint32_t app_count = NULL == app_array ? 0 : app_array->size();
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
-      if (!it->valid()) {
+      if (!ValidSPtr(*it)) {
         LOG4CXX_ERROR(logger_, "Application not found ");
         continue;
       }

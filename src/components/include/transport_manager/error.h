@@ -79,7 +79,7 @@ class BaseError {
  private:
   std::string description_;
 };
-typedef utils::SharedPtr<BaseError> BaseErrorPtr;
+typedef std::shared_ptr<BaseError> BaseErrorPtr;
 
 /**
  * @brief Error that originates during device search.

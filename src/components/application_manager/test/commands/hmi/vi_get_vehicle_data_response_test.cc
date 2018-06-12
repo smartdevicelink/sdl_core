@@ -65,7 +65,7 @@ using am::commands::VIGetVehicleDataResponse;
 using am::event_engine::Event;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
+typedef std::shared_ptr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

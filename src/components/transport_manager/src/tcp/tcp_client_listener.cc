@@ -53,7 +53,7 @@
 #include <sstream>
 
 #include "utils/logger.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -240,20 +240,20 @@ void TcpClientListener::Loop() {
         device_name + std::string(":") + std::to_string(port_);
 
 #if defined(BUILD_TESTS)
-    TcpDevice* tcp_device =
-        new TcpDevice(client_address.sin_addr.s_addr, device_uid, device_name);
+    std::shared_ptr<TcpDevice> tcp_device =
+        std::make_shared<TcpDevice>(client_address.sin_addr.s_addr, device_uid, device_name);
 #else
-    TcpDevice* tcp_device =
-        new TcpDevice(client_address.sin_addr.s_addr, device_uid);
+    std::shared_ptr<TcpDevice> tcp_device =
+        std::make_shared<TcpDevice>(client_address.sin_addr.s_addr, device_uid);
 #endif  // BUILD_TESTS
 
     DeviceSptr device = controller_->AddDevice(tcp_device);
-    tcp_device = static_cast<TcpDevice*>(device.get());
+    tcp_device = std::static_pointer_cast<TcpDevice>(device);
     const ApplicationHandle app_handle =
         tcp_device->AddIncomingApplication(connection_fd);
 
-    utils::SharedPtr<TcpSocketConnection> connection =
-        utils::MakeShared<TcpSocketConnection>(
+    std::shared_ptr<TcpSocketConnection> connection =
+        std::make_shared<TcpSocketConnection>(
             device->unique_device_id(), app_handle, controller_);
     controller_->ConnectionCreated(
         connection, device->unique_device_id(), app_handle);

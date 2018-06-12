@@ -266,7 +266,7 @@ void ShowRequest::Run() {
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);
 
-  MessageSharedPtr persistentData = new smart_objects::SmartObject(msg_params);
+  MessageSharedPtr persistentData (new smart_objects::SmartObject(msg_params));
   app->set_show_command(*persistentData);
 }
 

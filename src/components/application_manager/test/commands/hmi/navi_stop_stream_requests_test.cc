@@ -72,7 +72,7 @@ class NaviStopStreamRequestsTest
   }
 
   MessageSharedPtr msg_;
-  SharedPtr<Command> command_;
+  std::shared_ptr<Command> command_;
 };
 
 typedef testing::Types<commands::AudioStopStreamRequest,

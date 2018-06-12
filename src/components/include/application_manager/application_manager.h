@@ -251,7 +251,7 @@ class ApplicationManager {
    *
    **/
   virtual void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) = 0;
+      const std::shared_ptr<Application> app) = 0;
 
   /**
    * DEPRECATED
@@ -434,7 +434,7 @@ class ApplicationManager {
   virtual AppSharedPtrs IviInfoUpdated(
       mobile_apis::VehicleDataType::eType vehicle_info, int value) = 0;
 
-  virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+  virtual ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
       smart_objects::SmartObject>& request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
@@ -669,7 +669,7 @@ class ApplicationManager {
    * @return new regular HMI state
    */
   virtual HmiStatePtr CreateRegularState(
-      utils::SharedPtr<Application> app,
+      std::shared_ptr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
       mobile_apis::SystemContext::eType system_context) const = 0;

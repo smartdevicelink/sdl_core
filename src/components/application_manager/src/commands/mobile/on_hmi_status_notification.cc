@@ -52,7 +52,7 @@ void OnHMIStatusNotification::Run() {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if (!app.valid()) {
+  if (!utils::ValidSPtr(app)) {
     LOG4CXX_ERROR(logger_, "OnHMIStatusNotification application doesn't exist");
     return;
   }

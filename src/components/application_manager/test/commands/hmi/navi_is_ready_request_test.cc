@@ -61,7 +61,7 @@ const hmi_apis::FunctionID::eType kEventID =
     hmi_apis::FunctionID::Navigation_IsReady;
 }  // namespace
 
-typedef SharedPtr<NaviIsReadyRequest> NaviIsReadyRequestPtr;
+typedef std::shared_ptr<NaviIsReadyRequest> NaviIsReadyRequestPtr;
 
 class NaviIsReadyRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

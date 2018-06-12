@@ -56,7 +56,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using am::commands::mobile::OnTouchEventNotification;
 
-typedef ::utils::SharedPtr<OnTouchEventNotification> NotificationPtr;
+typedef ::std::shared_ptr<OnTouchEventNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

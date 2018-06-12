@@ -36,13 +36,13 @@
 #include <cassert>
 #include "policy/usage_statistics/counter.h"
 #include "utils/date_time.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer_task_impl.h"
 
 namespace usage_statistics {
 
 GlobalCounter::GlobalCounter(
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     GlobalCounterId counter_type)
     : counter_type_(counter_type), statistics_manager_(statistics_manager) {}
 
@@ -53,7 +53,7 @@ void GlobalCounter::operator++() const {
 }
 
 AppCounter::AppCounter(
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     const std::string& app_id,
     AppCounterId counter_type)
     : app_id_(app_id)
@@ -67,7 +67,7 @@ void AppCounter::operator++() const {
 }
 
 AppInfo::AppInfo(
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     const std::string& app_id,
     AppInfoId info_type)
     : app_id_(app_id)
@@ -81,7 +81,7 @@ void AppInfo::Update(const std::string& new_info) const {
 }
 
 AppStopwatchImpl::AppStopwatchImpl(
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
     const std::string& app_id)
     : app_id_(app_id)
     , stopwatch_type_(SECONDS_HMI_NONE)
@@ -92,7 +92,7 @@ AppStopwatchImpl::AppStopwatchImpl(
     , time_out_(60) {}
 
 AppStopwatchImpl::AppStopwatchImpl(
-    utils::SharedPtr<StatisticsManager> statistics_manager,
+    std::shared_ptr<StatisticsManager> statistics_manager,
     const std::string& app_id,
     uint32_t timeout)
     : app_id_(app_id)

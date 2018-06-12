@@ -55,7 +55,7 @@ const uint32_t kConnectionKey = 1u;
 const bool kIsResponseAllowed = true;
 }
 
-typedef ::utils::SharedPtr<AllowAppResponse> ResponsePtr;
+typedef ::std::shared_ptr<AllowAppResponse> ResponsePtr;
 
 class AllowAppResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 

@@ -85,8 +85,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
-                 const utils::SharedPtr<policy_table::Table> update,
-                 const utils::SharedPtr<policy_table::Table> snapshot,
+                 const std::shared_ptr<policy_table::Table> update,
+                 const std::shared_ptr<policy_table::Table> snapshot,
                  CheckAppPolicyResults& out_results);
 
   bool operator()(const AppPoliciesValueType& app_policy);
@@ -202,8 +202,8 @@ struct CheckAppPolicy {
 
  private:
   PolicyManagerImpl* pm_;
-  const utils::SharedPtr<policy_table::Table> update_;
-  const utils::SharedPtr<policy_table::Table> snapshot_;
+  const std::shared_ptr<policy_table::Table> update_;
+  const std::shared_ptr<policy_table::Table> snapshot_;
   CheckAppPolicyResults& out_results_;
 };
 

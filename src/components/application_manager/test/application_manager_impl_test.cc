@@ -55,7 +55,7 @@
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/push_log.h"
 #include "encryption/hashing.h"
 
@@ -98,7 +98,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
       : mock_storage_(
-            ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
+            ::std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
@@ -144,7 +144,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
-    mock_app_ptr_ = utils::SharedPtr<MockApplication>(new MockApplication());
+    mock_app_ptr_ = std::shared_ptr<MockApplication>(new MockApplication());
 
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
@@ -181,7 +181,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   }
 
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> >
+  std::shared_ptr<NiceMock<resumption_test::MockResumptionData> >
       mock_storage_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
@@ -190,7 +190,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
-  utils::SharedPtr<MockApplication> mock_app_ptr_;
+  std::shared_ptr<MockApplication> mock_app_ptr_;
 };
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
@@ -204,7 +204,7 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   app_data[am::json::android][am::json::packageName] = "com.android.test";
   smart_objects::SmartObject sm_object(SmartType_Map);
   sm_object[am::json::response][0] = app_data;
-  SmartObjectSPtr sptr = MakeShared<SmartObject>(sm_object);
+  SmartObjectSPtr sptr = std::make_shared<SmartObject>(sm_object);
 
   ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
       .WillByDefault(Return(sptr));
@@ -216,7 +216,7 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
   auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+      std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
 }
@@ -224,7 +224,7 @@ TEST_F(ApplicationManagerImplTest,
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
   auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+      std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
@@ -246,11 +246,11 @@ TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   auto app_ptr =
-      ApplicationSharedPtr::static_pointer_cast<am::Application>(mock_app_ptr_);
+      std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
   std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
-  EXPECT_TRUE(result.find(app_ptr) != result.end());
+  EXPECT_TRUE(result.find(app_ptr->app_id()) != result.end());
 }
 
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
@@ -681,8 +681,8 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingStart_ExpectPutAppsInWaitList) {
-  utils::SharedPtr<MockApplication> switching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> switching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
@@ -699,8 +699,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*switching_app_ptr, hmi_level())
       .WillRepeatedly(Return(hmi_level_switching_app));
 
-  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> nonswitching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
@@ -739,8 +739,8 @@ TEST_F(ApplicationManagerImplTest,
 
 TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
-  utils::SharedPtr<MockApplication> switching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> switching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string switching_device_id = "switching";
   const std::string switching_device_id_hash =
@@ -757,8 +757,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*switching_app_ptr, hmi_level())
       .WillRepeatedly(Return(hmi_level_switching_app));
 
-  utils::SharedPtr<MockApplication> nonswitching_app_ptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<MockApplication> nonswitching_app_ptr =
+      std::make_shared<MockApplication>();
 
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
@@ -807,13 +807,13 @@ TEST_F(ApplicationManagerImplTest,
   const connection_handler::DeviceHandle device_id = 1;
   const custom_str::CustomString app_name("");
 
-  utils::SharedPtr<ApplicationImpl> app_impl = new ApplicationImpl(
+  std::shared_ptr<ApplicationImpl> app_impl = std::make_shared<ApplicationImpl>(
       application_id,
       policy_app_id,
       mac_address,
       device_id,
       app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager>(
+      std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager()),
       *app_manager_impl_);
 
@@ -880,8 +880,8 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   const uint32_t app_id_2 = 65538;
 
   std::string dummy_mac_address;
-  utils::SharedPtr<MockApplication> mock_app_1 =
-      utils::SharedPtr<MockApplication>(new MockApplication());
+  std::shared_ptr<MockApplication> mock_app_1 =
+      std::shared_ptr<MockApplication>(new MockApplication());
   EXPECT_CALL(*mock_app_1, app_id()).WillRepeatedly(Return(app_id_1));
   EXPECT_CALL(*mock_app_1, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_1, mac_address())
@@ -891,8 +891,8 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
       .WillRepeatedly(
           Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
 
-  utils::SharedPtr<MockApplication> mock_app_2 =
-      utils::SharedPtr<MockApplication>(new MockApplication());
+  std::shared_ptr<MockApplication> mock_app_2 =
+      std::shared_ptr<MockApplication>(new MockApplication());
   EXPECT_CALL(*mock_app_2, app_id()).WillRepeatedly(Return(app_id_2));
   EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_2, mac_address())
@@ -973,7 +973,7 @@ TEST_F(ApplicationManagerImplTest,
       protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
 
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
-      MakeShared<smart_objects::SmartObject>(request_for_registration);
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);

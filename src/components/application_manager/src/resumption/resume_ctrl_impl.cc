@@ -47,7 +47,7 @@
 #include "utils/helpers.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/timer_task_impl.h"
 
 namespace resumption {
@@ -72,7 +72,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
-    utils::SharedPtr<ResumptionData> mock_storage) {
+    std::shared_ptr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
 #endif  // BUILD_TESTS

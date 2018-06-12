@@ -47,13 +47,13 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_sdl_response {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::UpdateSDLResponse;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<UpdateSDLResponse> UpdateSDLResponsePtr;
+typedef std::shared_ptr<UpdateSDLResponse> UpdateSDLResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

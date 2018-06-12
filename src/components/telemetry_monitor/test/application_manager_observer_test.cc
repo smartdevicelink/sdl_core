@@ -49,7 +49,7 @@ TEST(ApplicationManagerObserver, CallOnMessage) {
   MockTelemetryMonitor mock_telemetry_monitor;
   ApplicationManagerObserver app_observer(&mock_telemetry_monitor);
   typedef application_manager::AMTelemetryObserver::MessageMetric AMMetric;
-  utils::SharedPtr<AMMetric> ptr =
+  std::shared_ptr<AMMetric> ptr =
       application_manager::AMTelemetryObserver::MessageMetricSharedPtr();
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_));
   app_observer.OnMessage(ptr);

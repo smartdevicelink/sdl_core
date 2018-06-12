@@ -160,7 +160,7 @@ class Device {
    **/
   bool keep_on_disconnect_;
 };
-typedef utils::SharedPtr<Device> DeviceSptr;
+typedef std::shared_ptr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;
 }  // namespace transport_adapter
 }  // namespace transport_manager

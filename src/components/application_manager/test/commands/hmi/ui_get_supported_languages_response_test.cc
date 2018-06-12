@@ -51,14 +51,14 @@ namespace hmi_commands_test {
 namespace ui_get_supported_languages_response {
 
 using ::testing::Return;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::UIGetSupportedLanguagesResponse;
 
-typedef SharedPtr<UIGetSupportedLanguagesResponse>
+typedef std::shared_ptr<UIGetSupportedLanguagesResponse>
     UIGetSupportedLanguagesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>

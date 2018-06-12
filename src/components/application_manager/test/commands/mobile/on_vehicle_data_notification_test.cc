@@ -61,7 +61,7 @@ using ::testing::ReturnRef;
 using am::commands::MessageSharedPtr;
 using am::commands::OnVehicleDataNotification;
 
-typedef ::utils::SharedPtr<OnVehicleDataNotification> NotificationPtr;
+typedef ::std::shared_ptr<OnVehicleDataNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

@@ -51,7 +51,7 @@
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
@@ -112,13 +112,13 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
-    app_impl_ = new ApplicationImpl(
+    app_impl_ = std::make_shared<ApplicationImpl>(
         application_id,
         policy_app_id,
         mac_address,
         device_id,
         app_name,
-        utils::MakeShared<usage_statistics_test::MockStatisticsManager>(),
+        std::make_shared<usage_statistics_test::MockStatisticsManager>(),
         app_manager_impl_);
   }
 

@@ -40,7 +40,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -60,12 +60,12 @@ namespace ch_test = test::components::connection_handler_test;
 namespace am_test = test::components::application_manager_test;
 
 const uint32_t MAX_TEST_DURATION = 1000;  // 1 second
-typedef utils::SharedPtr<am_test::MockApplication> MockAppPtr;
+typedef std::shared_ptr<am_test::MockApplication> MockAppPtr;
 class AppLaunchCtrlTest : public ::testing::Test {
  public:
   MockAppPtr AppFromAppData(const app_launch::ApplicationData& app_data) {
-    utils::SharedPtr<NiceMock<am_test::MockApplication> > app =
-        utils::MakeShared<NiceMock<am_test::MockApplication> >();
+    std::shared_ptr<NiceMock<am_test::MockApplication> > app =
+        std::make_shared<NiceMock<am_test::MockApplication> >();
 
     ON_CALL(*app, mac_address()).WillByDefault(ReturnRef(app_data.device_mac_));
     ON_CALL(*app, bundle_id()).WillByDefault(ReturnRef(app_data.bundle_id_));
@@ -77,7 +77,7 @@ class AppLaunchCtrlTest : public ::testing::Test {
   app_launch::ApplicationDataPtr AppDataFromApp(
       const am_test::MockApplication& app) {
     app_launch::ApplicationDataPtr app_data =
-        utils::MakeShared<NiceMock<app_launch::ApplicationData> >(
+        std::make_shared<NiceMock<app_launch::ApplicationData> >(
             app.policy_app_id(), app.bundle_id(), app.mac_address());
     return app_data;
   }
@@ -137,7 +137,7 @@ class AppLaunchCtrlTest : public ::testing::Test {
     using app_launch::ApplicationData;
     AppAndAppData app;
     app.second =
-        utils::MakeShared<ApplicationData>(app_id, bundle_id, device_mac);
+        std::make_shared<ApplicationData>(app_id, bundle_id, device_mac);
     app.first = AppFromAppData(*app.second);
     return app;
   }

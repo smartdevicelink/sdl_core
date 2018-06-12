@@ -41,7 +41,7 @@
 #include "application_manager/mock_application.h"
 #include "include/mock_service.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -86,10 +86,10 @@ namespace remote_control {
 class RAManagerTest : public ::testing::Test {
  public:
   RAManagerTest()
-      : mock_service_(utils::MakeShared<NiceMock<MockService> >())
-      , mock_app_1_(utils::MakeShared<NiceMock<MockApplication> >())
-      , mock_app_2_(utils::MakeShared<NiceMock<MockApplication> >())
-      , message_(utils::MakeShared<Message>(MessagePriority::FromServiceType(
+      : mock_service_(std::make_shared<NiceMock<MockService> >())
+      , mock_app_1_(std::make_shared<NiceMock<MockApplication> >())
+      , mock_app_2_(std::make_shared<NiceMock<MockApplication> >())
+      , message_(std::make_shared<Message>(MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kRpc))) {
     EXPECT_CALL(mock_module_, service()).WillRepeatedly(Return(mock_service_));
     EXPECT_CALL(mock_module_, GetModuleID())
@@ -116,9 +116,9 @@ class RAManagerTest : public ::testing::Test {
   }
 
  protected:
-  utils::SharedPtr<NiceMock<MockService> > mock_service_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_1_;
-  utils::SharedPtr<NiceMock<MockApplication> > mock_app_2_;
+  std::shared_ptr<NiceMock<MockService> > mock_service_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_1_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_2_;
   application_manager::MessagePtr message_;
   remote_control_test::MockRemotePluginInterface mock_module_;
   RemotePluginInterface::RCPluginEventDispatcher event_dispatcher_;
@@ -248,7 +248,7 @@ TEST_F(RAManagerTest, AppExit_ReleaseResource) {
   EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
       .WillRepeatedly(Return(mock_app_1_));
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(_))
@@ -285,7 +285,7 @@ TEST_F(RAManagerTest, AnotherAppExit_NoReleaseResource) {
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_2_, QueryInterface(_))
@@ -310,7 +310,7 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
   ResourceAllocationManagerImpl ra_manager(mock_module_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(_))
@@ -349,7 +349,7 @@ TEST_F(RAManagerTest, AnotherAppUnregistered_NoReleaseResource) {
   EXPECT_CALL(*mock_service_, GetApplication(kAppId2))
       .WillRepeatedly(Return(mock_app_2_));
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_2_, QueryInterface(_))
@@ -387,7 +387,7 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
   apps.push_back(mock_app_1_);
   EXPECT_CALL(*mock_service_, GetApplications(_)).WillRepeatedly(Return(apps));
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(_))
@@ -415,7 +415,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
   EXPECT_CALL(*mock_service_, GetApplication(kAppId1))
       .WillRepeatedly(Return(mock_app_1_));
 
-  RCAppExtensionPtr rc_extention_ptr = utils::MakeShared<RCAppExtension>(
+  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(kDefaultModuleID));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(_))

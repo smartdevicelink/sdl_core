@@ -51,7 +51,7 @@ namespace simple_response_to_hmi_test {
 using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
@@ -73,7 +73,7 @@ TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
 TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command = this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
 
@@ -83,7 +83,7 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 class ResponseToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
+  std::shared_ptr<commands::ResponseToHMI> command(
       CreateCommand<commands::ResponseToHMI>());
 
   // Current implementation always return `true`
@@ -92,7 +92,7 @@ TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(ResponseToHMITest, Run_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
+  std::shared_ptr<commands::ResponseToHMI> command(
       CreateCommand<commands::ResponseToHMI>());
 
   EXPECT_CALL(app_mngr_, SendMessageToHMI(NotNull()));

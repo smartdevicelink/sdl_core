@@ -45,7 +45,7 @@ namespace hmi_commands_test {
 namespace activate_app_request {
 
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::MessageSharedPtr;
@@ -54,8 +54,8 @@ using am::commands::CommandImpl;
 
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
-typedef ::utils::SharedPtr<ActivateAppRequest> ActivateAppRequestPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
+typedef ::std::shared_ptr<ActivateAppRequest> ActivateAppRequestPtr;
 
 MATCHER_P(CheckMessage, level, "") {
   return level ==

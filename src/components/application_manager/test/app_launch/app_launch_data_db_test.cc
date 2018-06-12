@@ -38,7 +38,7 @@
 #include "utils/macro.h"
 #include "sql_database.h"
 #include "sql_query.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/file_system.h"
 #include "application_manager/mock_app_launch_settings.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
@@ -284,7 +284,7 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d1_mobile_app_id", i);
     const std::string bundle_id = AddCounter("d1_bundle_id", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_1);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data1.push_back(app_data);
@@ -294,7 +294,7 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
     const std::string mobile_app_id = AddCounter("d2_mobile_app_id", i);
     const std::string bundle_id = AddCounter("d2_bundle_id", i);
 
-    ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
+    ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_2);
     AddApplicationDataWithIncreaseTable(*app_data);
     input_data2.push_back(app_data);

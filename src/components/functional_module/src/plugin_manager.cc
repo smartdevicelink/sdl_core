@@ -117,7 +117,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       dlclose(generic_plugin_dll);
       continue;
     }
-    ModulePtr module = create_manager();
+    ModulePtr module = std::shared_ptr<GenericModule>(create_manager());
     if (!module) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create plugin main class " << plugin_files[i]);

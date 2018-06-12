@@ -5,7 +5,7 @@
 #include "mock_service.h"
 #include "application_manager/mock_application.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 using application_manager::Message;
 using protocol_handler::MajorProtocolVersion;
@@ -20,12 +20,12 @@ namespace functional_modules {
 class PluginManagerTest : public ::testing::Test {
  public:
   PluginManagerTest()
-      : manager(utils::MakeShared<PluginManager>())
-      , service(utils::MakeShared<MockService>()) {}
+      : manager(std::make_shared<PluginManager>())
+      , service(std::make_shared<MockService>()) {}
 
  protected:
-  utils::SharedPtr<PluginManager> manager;
-  utils::SharedPtr<MockService> service;
+  std::shared_ptr<PluginManager> manager;
+  std::shared_ptr<MockService> service;
   MockGenericModule* module;
 
   void SetUp() OVERRIDE {
@@ -78,7 +78,7 @@ TEST_F(PluginManagerTest, SDL_events_triggers_module) {
   app_events.push_back(ApplicationEvent::kApplicationUnregistered);
 
   application_manager::ApplicationSharedPtr dummy_ptr =
-      utils::MakeShared<MockApplication>();
+      std::make_shared<MockApplication>();
   std::vector<ApplicationEvent>::const_iterator ev = app_events.begin();
   for (; app_events.end() != ev; ++ev) {
     EXPECT_CALL(*module, OnApplicationEvent(*ev, dummy_ptr));

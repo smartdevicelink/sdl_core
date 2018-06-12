@@ -47,7 +47,7 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
    * @brief Create a new schema item.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CAlwaysFalseSchemaItem> create();
+  static std::shared_ptr<CAlwaysFalseSchemaItem> create();
   /**
    * @deprecated
    * @brief Validate smart object.

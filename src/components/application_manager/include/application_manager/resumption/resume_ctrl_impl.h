@@ -297,7 +297,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
 
 #ifdef BUILD_TESTS
   void set_resumption_storage(
-      utils::SharedPtr<ResumptionData> mock_storage) OVERRIDE;
+      std::shared_ptr<ResumptionData> mock_storage) OVERRIDE;
 #endif  // BUILD_TESTS
  private:
   /**
@@ -513,7 +513,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
   bool is_data_saved_;
   bool is_suspended_;
   time_t launch_time_;
-  utils::SharedPtr<ResumptionData> resumption_storage_;
+  std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
 };
 

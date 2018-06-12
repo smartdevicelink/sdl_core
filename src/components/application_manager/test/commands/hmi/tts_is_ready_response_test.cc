@@ -55,7 +55,7 @@ namespace tts_is_ready_response {
 
 using ::testing::_;
 using ::testing::Return;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
@@ -65,7 +65,7 @@ using am::commands::TTSIsReadyResponse;
 using am::commands::CommandImpl;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

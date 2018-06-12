@@ -41,7 +41,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/application.h"
@@ -68,13 +68,13 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using am::commands::SpeakRequest;
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<SpeakRequest> CommandPtr;
+typedef std::shared_ptr<SpeakRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 10u;
@@ -92,7 +92,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
                          const bool success) {
-    utils::SharedPtr<SpeakRequest> command =
+    std::shared_ptr<SpeakRequest> command =
         CreateCommand<SpeakRequest>(request_);
 
     (*response_)[strings::params][hmi_response::code] = hmi_response;
@@ -129,7 +129,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
-  utils::SharedPtr<SpeakRequest> command =
+  std::shared_ptr<SpeakRequest> command =
       CreateCommand<SpeakRequest>(request_);
 
   (*response_)[strings::params][hmi_response::code] =

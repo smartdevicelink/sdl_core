@@ -39,7 +39,7 @@
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/smart_object_keys.h"
 
 namespace remote_control {
@@ -192,7 +192,7 @@ ProcessResult RemoteControlPlugin::ProcessHMIMessage(
       }
       const application_manager::MessageValidationResult validation_result =
           service()->ValidateMessageBySchema(*msg);
-      utils::SharedPtr<commands::Command> command =
+      std::shared_ptr<commands::Command> command =
           RCCommandFactory::CreateCommand(msg, *this);
       if ((validation_result ==
            application_manager::MessageValidationResult::SUCCESS) &&
@@ -211,7 +211,7 @@ ProcessResult RemoteControlPlugin::ProcessHMIMessage(
 void RemoteControlPlugin::SendHmiStatusNotification(
     application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::MessagePtr msg = new application_manager::Message(
+  application_manager::MessagePtr msg = std::make_shared<application_manager::Message>(
       protocol_handler::MessagePriority::kDefault);
   Json::Value msg_params;
 
@@ -282,7 +282,7 @@ bool RemoteControlPlugin::IsAppForPlugin(
   }
 
   if (service()->IsRemoteControlApplication(app)) {
-    RCAppExtensionPtr rc_app_extension = new RCAppExtension(GetModuleID());
+    RCAppExtensionPtr rc_app_extension = std::make_shared<RCAppExtension>(GetModuleID());
     app->AddExtension(rc_app_extension);
     return true;
   }

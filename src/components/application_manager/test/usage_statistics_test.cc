@@ -36,7 +36,7 @@
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/mock_app_stopwatch.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "utils/shared_ptr.h"
 
 namespace test {
@@ -70,14 +70,14 @@ class UsageStatisticsTest : public testing::Test {
  public:
   UsageStatisticsTest()
       : mock_statistics_manager_sptr_(
-            utils::MakeShared<MockStatisticsManager>())
+            std::make_shared<MockStatisticsManager>())
       , usage_statistics_test_object1_sptr_(
             new application_manager::UsageStatistics(
                 kAppId, mock_statistics_manager_sptr_))
       , language_(LanguageIdToString(kTestLanguageId)) {}
 
  protected:
-  utils::SharedPtr<MockStatisticsManager> mock_statistics_manager_sptr_;
+  std::shared_ptr<MockStatisticsManager> mock_statistics_manager_sptr_;
   std::auto_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object1_sptr_;
   const std::string language_;

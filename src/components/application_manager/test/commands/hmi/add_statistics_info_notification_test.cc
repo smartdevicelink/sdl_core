@@ -58,7 +58,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-typedef ::utils::SharedPtr<AddStatisticsInfoNotification> NotificationPtr;
+typedef ::std::shared_ptr<AddStatisticsInfoNotification> NotificationPtr;
 
 namespace {
 const uint32_t kStatisticType = 1u;

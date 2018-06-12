@@ -56,7 +56,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using am::commands::OnWayPointChangeNotification;
 
-typedef ::utils::SharedPtr<OnWayPointChangeNotification> NotificationPtr;
+typedef ::std::shared_ptr<OnWayPointChangeNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

@@ -41,7 +41,7 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
-#include "utils/make_shared.h"
+#include <memory>
 #include "application_manager/message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/smart_object_keys.h"
@@ -132,7 +132,7 @@ class StateControllerImplTest : public ::testing::Test {
   StateControllerImplTest()
       : ::testing::Test()
       , usage_stat("0",
-                   utils::SharedPtr<usage_statistics::StatisticsManager>(
+                   std::shared_ptr<usage_statistics::StatisticsManager>(
                        new usage_statistics_test::MockStatisticsManager))
       , applications_(application_set_, applications_lock_)
       , message_helper_mock_(
@@ -156,7 +156,7 @@ class StateControllerImplTest : public ::testing::Test {
   am::ApplicationSet application_set_;
   mutable sync_primitives::Lock applications_lock_;
   DataAccessor<am::ApplicationSet> applications_;
-  utils::SharedPtr<am::StateControllerImpl> state_ctrl_;
+  std::shared_ptr<am::StateControllerImpl> state_ctrl_;
 
   am::ApplicationSharedPtr simple_app_;
   NiceMock<application_manager_test::MockApplication>* simple_app_ptr_;
@@ -213,7 +213,7 @@ class StateControllerImplTest : public ::testing::Test {
     namespace SystemContext = mobile_apis::SystemContext;
 
     am::HmiStatePtr state =
-        utils::MakeShared<am::HmiState>(simple_app_, app_manager_mock_);
+        std::make_shared<am::HmiState>(simple_app_, app_manager_mock_);
     state->set_hmi_level(hmi_level);
     state->set_audio_streaming_state(aidio_ss);
     state->set_system_context(system_context);
@@ -231,7 +231,7 @@ class StateControllerImplTest : public ::testing::Test {
       const mobile_apis::SystemContext::eType system_context,
       const am::ApplicationSharedPtr app) {
     am::HmiStatePtr new_state =
-        utils::MakeShared<HmiStateType>(app, app_manager_mock_);
+        std::make_shared<HmiStateType>(app, app_manager_mock_);
 
     new_state->set_hmi_level(hmi_level);
     new_state->set_audio_streaming_state(audio_ss);
@@ -591,9 +591,9 @@ class StateControllerImplTest : public ::testing::Test {
       app_type = AppType(app_id);
       app = (*it_begin);
       am::HmiStatePtr state_first =
-          utils::MakeShared<T>(app, app_manager_mock_);
+          std::make_shared<T>(app, app_manager_mock_);
       am::HmiStatePtr state_second =
-          utils::MakeShared<Q>(app, app_manager_mock_);
+          std::make_shared<Q>(app, app_manager_mock_);
       TestSetSeveralState(
           app, state_first, state_second, app_type, call_back_result);
       TestSetSeveralState(
@@ -864,7 +864,7 @@ class StateControllerImplTest : public ::testing::Test {
   virtual void SetUp() OVERRIDE {
     ON_CALL(app_manager_mock_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
-    state_ctrl_ = utils::MakeShared<am::StateControllerImpl>(app_manager_mock_);
+    state_ctrl_ = std::make_shared<am::StateControllerImpl>(app_manager_mock_);
 
     ON_CALL(app_manager_mock_, applications())
         .WillByDefault(Return(applications_));
@@ -894,7 +894,7 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(app_manager_mock_, GetPolicyHandler())
         .WillByDefault(ReturnRef(policy_interface_));
     smart_objects::SmartObjectSPtr bc_activate_app_request =
-        new smart_objects::SmartObject();
+        std::make_shared<smart_objects::SmartObject>();
     (*bc_activate_app_request)[am::strings::params]
                               [am::strings::correlation_id] = corr_id;
     ON_CALL(message_helper_mock_,
@@ -1823,7 +1823,7 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
   std::vector<StateLevelPair>::iterator it = hmi_states.begin();
   std::vector<StateLevelPair>::iterator it2 = initial_hmi_states.begin();
   smart_objects::SmartObjectSPtr bc_activate_app_request =
-      new smart_objects::SmartObject();
+      std::make_shared<smart_objects::SmartObject>();
   (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =
       corr_id;
 
@@ -1982,7 +1982,7 @@ TEST_F(StateControllerImplTest, ApplyTempStatesForMediaNaviVCApp) {
 
 TEST_F(StateControllerImplTest, SetStatePhoneCallForNonMediaApplication) {
   am::HmiStatePtr state_phone_call =
-      utils::MakeShared<am::PhoneCallHmiState>(simple_app_, app_manager_mock_);
+      std::make_shared<am::PhoneCallHmiState>(simple_app_, app_manager_mock_);
   TestSetState(simple_app_,
                state_phone_call,
                APP_TYPE_NON_MEDIA,
@@ -1991,7 +1991,7 @@ TEST_F(StateControllerImplTest, SetStatePhoneCallForNonMediaApplication) {
 
 TEST_F(StateControllerImplTest, SetStatePhoneCallForMediaApplication) {
   am::HmiStatePtr state_phone_call =
-      utils::MakeShared<am::PhoneCallHmiState>(media_app_, app_manager_mock_);
+      std::make_shared<am::PhoneCallHmiState>(media_app_, app_manager_mock_);
   TestSetState(media_app_,
                state_phone_call,
                APP_TYPE_MEDIA,
@@ -1999,7 +1999,7 @@ TEST_F(StateControllerImplTest, SetStatePhoneCallForMediaApplication) {
 }
 
 TEST_F(StateControllerImplTest, SetStatePhoneCallForMediaNaviApplication) {
-  am::HmiStatePtr state_phone_call = utils::MakeShared<am::PhoneCallHmiState>(
+  am::HmiStatePtr state_phone_call = std::make_shared<am::PhoneCallHmiState>(
       media_navi_app_, app_manager_mock_);
   TestSetState(media_navi_app_,
                state_phone_call,
@@ -2009,7 +2009,7 @@ TEST_F(StateControllerImplTest, SetStatePhoneCallForMediaNaviApplication) {
 
 TEST_F(StateControllerImplTest, SetVRStateForNonMediaApplication) {
   am::HmiStatePtr state_vr =
-      utils::MakeShared<am::VRHmiState>(simple_app_, app_manager_mock_);
+      std::make_shared<am::VRHmiState>(simple_app_, app_manager_mock_);
   TestSetState(simple_app_,
                state_vr,
                APP_TYPE_NON_MEDIA,
@@ -2018,7 +2018,7 @@ TEST_F(StateControllerImplTest, SetVRStateForNonMediaApplication) {
 
 TEST_F(StateControllerImplTest, SetVRStateForMediaApplication) {
   am::HmiStatePtr state_vr =
-      utils::MakeShared<am::VRHmiState>(media_app_, app_manager_mock_);
+      std::make_shared<am::VRHmiState>(media_app_, app_manager_mock_);
   TestSetState(media_app_,
                state_vr,
                APP_TYPE_MEDIA,
@@ -2027,7 +2027,7 @@ TEST_F(StateControllerImplTest, SetVRStateForMediaApplication) {
 
 TEST_F(StateControllerImplTest, SetVRStateForMediaNaviVoiceApplication) {
   am::HmiStatePtr state_vr =
-      utils::MakeShared<am::VRHmiState>(media_navi_vc_app_, app_manager_mock_);
+      std::make_shared<am::VRHmiState>(media_navi_vc_app_, app_manager_mock_);
   TestSetState(media_navi_vc_app_,
                state_vr,
                APP_TYPE_MEDIA,
@@ -2037,7 +2037,7 @@ TEST_F(StateControllerImplTest, SetVRStateForMediaNaviVoiceApplication) {
 TEST_F(StateControllerImplTest,
        SetTTSStateForNonMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(simple_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(simple_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(simple_app_,
@@ -2049,7 +2049,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetTTSStateForNonMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(simple_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(simple_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(simple_app_,
@@ -2061,7 +2061,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetTTSStateForMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(media_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(media_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(media_app_,
@@ -2073,7 +2073,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetTTSStateForMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(media_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(media_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(media_app_,
@@ -2085,7 +2085,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetTTSStateForMediaNaviVCApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(media_navi_vc_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(media_navi_vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(media_navi_vc_app_,
@@ -2097,7 +2097,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetTTSStateForMediaNaviVCApplicationAttenuatedSupported) {
   am::HmiStatePtr state_tts =
-      utils::MakeShared<am::TTSHmiState>(media_navi_vc_app_, app_manager_mock_);
+      std::make_shared<am::TTSHmiState>(media_navi_vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(media_navi_vc_app_,
@@ -2108,7 +2108,7 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(simple_app_,
+      std::make_shared<am::NaviStreamingHmiState>(simple_app_,
                                                    app_manager_mock_);
   TestSetState(simple_app_,
                state_navi_streming,
@@ -2119,7 +2119,7 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_app_,
+      std::make_shared<am::NaviStreamingHmiState>(media_app_,
                                                    app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
@@ -2132,7 +2132,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateMediaApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_app_,
+      std::make_shared<am::NaviStreamingHmiState>(media_app_,
                                                    app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
@@ -2145,7 +2145,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateVCApplicationAttenuatedNotSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
+      std::make_shared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(false));
   TestSetState(vc_app_,
@@ -2157,7 +2157,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest,
        SetNaviStreamingStateVCApplicationAttenuatedSupported) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
+      std::make_shared<am::NaviStreamingHmiState>(vc_app_, app_manager_mock_);
   EXPECT_CALL(app_manager_mock_, is_attenuated_supported())
       .WillRepeatedly(Return(true));
   TestSetState(vc_app_,
@@ -2168,7 +2168,7 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateNaviApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(navi_app_,
+      std::make_shared<am::NaviStreamingHmiState>(navi_app_,
                                                    app_manager_mock_);
   TestSetState(navi_app_,
                state_navi_streming,
@@ -2178,7 +2178,7 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateNaviApplication) {
 
 TEST_F(StateControllerImplTest, SetNaviStreamingStateMediaNaviApplication) {
   am::HmiStatePtr state_navi_streming =
-      utils::MakeShared<am::NaviStreamingHmiState>(media_navi_app_,
+      std::make_shared<am::NaviStreamingHmiState>(media_navi_app_,
                                                    app_manager_mock_);
   TestSetState(media_navi_app_,
                state_navi_streming,
@@ -2188,7 +2188,7 @@ TEST_F(StateControllerImplTest, SetNaviStreamingStateMediaNaviApplication) {
 
 TEST_F(StateControllerImplTest, SetSafetyModeStateForNonMediaApplication) {
   am::HmiStatePtr state_safety_mode =
-      utils::MakeShared<am::SafetyModeHmiState>(simple_app_, app_manager_mock_);
+      std::make_shared<am::SafetyModeHmiState>(simple_app_, app_manager_mock_);
   TestSetState(simple_app_,
                state_safety_mode,
                APP_TYPE_NON_MEDIA,
@@ -2197,7 +2197,7 @@ TEST_F(StateControllerImplTest, SetSafetyModeStateForNonMediaApplication) {
 
 TEST_F(StateControllerImplTest, SetSafetyModeStateForMediaApplication) {
   am::HmiStatePtr state_safety_mode =
-      utils::MakeShared<am::VRHmiState>(media_app_, app_manager_mock_);
+      std::make_shared<am::VRHmiState>(media_app_, app_manager_mock_);
   TestSetState(media_app_,
                state_safety_mode,
                APP_TYPE_MEDIA,
@@ -2207,7 +2207,7 @@ TEST_F(StateControllerImplTest, SetSafetyModeStateForMediaApplication) {
 TEST_F(StateControllerImplTest,
        SetSafetyModeStateForMediaNaviVoiceApplication) {
   am::HmiStatePtr state_safety_mode =
-      utils::MakeShared<am::VRHmiState>(media_navi_vc_app_, app_manager_mock_);
+      std::make_shared<am::VRHmiState>(media_navi_vc_app_, app_manager_mock_);
   TestSetState(media_navi_vc_app_,
                state_safety_mode,
                APP_TYPE_MEDIA,
@@ -2836,7 +2836,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppActivated) {
         .WillRepeatedly(Return(true));
 
     smart_objects::SmartObjectSPtr activate_app =
-        utils::MakeShared<smart_objects::SmartObject>();
+        std::make_shared<smart_objects::SmartObject>();
     (*activate_app)[am::strings::params][am::strings::correlation_id] = kCorrID;
     SetBCActivateAppRequestToHMI(hmi_apis::Common_HMILevel::FULL, kCorrID);
     state_ctrl_->on_event(event);

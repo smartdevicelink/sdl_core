@@ -75,7 +75,7 @@ class NaviStartStreamRequestTest
 
   std::pair<uint32_t, int32_t> start_stream_retry_amount_;
   MessageSharedPtr msg_;
-  SharedPtr<NaviStartStreamRequest> command_;
+  std::shared_ptr<NaviStartStreamRequest> command_;
 };
 
 TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {

@@ -47,13 +47,13 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace sdl_activate_app_response {
 
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::SDLActivateAppResponse;
 using am::commands::CommandImpl;
 
-typedef SharedPtr<SDLActivateAppResponse> SDLActivateAppResponsePtr;
+typedef std::shared_ptr<SDLActivateAppResponse> SDLActivateAppResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;

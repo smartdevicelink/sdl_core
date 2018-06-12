@@ -37,7 +37,7 @@
 #include "application_manager/app_launch/app_launch_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
-#include "utils/make_shared.h"
+#include <memory>
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
@@ -276,7 +276,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataDB::GetAppDataByDevMac(
       const std::string device_mac = query.GetString(device_mac_index);
       const std::string mobile_app_id = query.GetString(application_id_index);
       const std::string bundle_id = query.GetString(bundle_id_index);
-      dev_apps.push_back(utils::MakeShared<ApplicationData>(
+      dev_apps.push_back(std::make_shared<ApplicationData>(
           mobile_app_id, bundle_id, device_mac));
     } while (query.Next());
     LOG4CXX_DEBUG(logger_, "All application data has been successfully loaded");

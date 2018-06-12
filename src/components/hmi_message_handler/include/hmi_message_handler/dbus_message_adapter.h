@@ -46,7 +46,7 @@ namespace hmi_message_handler {
 class DBusMessageAdapter : public HMIMessageAdapterImpl,
                            public dbus::DBusMessageController {
  public:
-  typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+  typedef std::shared_ptr<application_manager::Message> MessageSharedPointer;
   explicit DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler);
   ~DBusMessageAdapter();
   void SendMessageToHMI(MessageSharedPointer message);

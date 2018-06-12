@@ -48,7 +48,7 @@ namespace hmi_commands_test {
 namespace ui_is_ready_response {
 
 using ::testing::Return;
-using ::utils::SharedPtr;
+using ::std::shared_ptr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
@@ -56,7 +56,7 @@ namespace hmi_response = am::hmi_response;
 using am::commands::UIIsReadyResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<UIIsReadyResponse> UIIsReadyResponsePtr;
+typedef std::shared_ptr<UIIsReadyResponse> UIIsReadyResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
