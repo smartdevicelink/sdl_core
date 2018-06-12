@@ -1979,6 +1979,9 @@
         <param name="displayType" type="DisplayType" mandatory="true">
             <description>The type of the display. See DisplayType</description>
         </param>
+        <param name="displayName" type="String" mandatory="false">
+            <description>The name of the display the app is connected to.</description>
+        </param>
         <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
             <description>A set of all fields that support text data. See TextField</description>
         </param>

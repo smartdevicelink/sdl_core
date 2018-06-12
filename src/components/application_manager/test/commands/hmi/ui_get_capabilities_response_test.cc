@@ -95,6 +95,8 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*command_msg)[strings::msg_params][hmi_response::display_capabilities]
                 [hmi_response::display_type] = "GEN2_8_DMA";
+  (*command_msg)[strings::msg_params][hmi_response::display_capabilities]
+                [hmi_response::display_name] = "GENERIC_DISPLAY";
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));

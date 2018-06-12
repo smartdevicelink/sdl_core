@@ -2156,6 +2156,9 @@
   <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
   </param>
+  <param name="displayName" type="String" mandatory="false">
+      <description>The name of the display the app is connected to.</description>
+  </param>
   <param name="textFields" type="Common.TextField" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>

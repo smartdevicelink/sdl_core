@@ -350,6 +350,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   SmartObject& display_capabilities =
       (*expected_message)[am::hmi_response::display_capabilities];
   display_capabilities[am::hmi_response::display_type] = "test_display_type";
+  display_capabilities[am::hmi_response::display_name] = "GENERIC_DISPLAY";
   display_capabilities[am::hmi_response::text_fields] = "test_text_fields";
   display_capabilities[am::hmi_response::image_fields] = "test_image_fields";
   display_capabilities[am::hmi_response::media_clock_formats] =
