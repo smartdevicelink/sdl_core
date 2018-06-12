@@ -95,13 +95,12 @@ UsbHandler::~UsbHandler() {
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
-  thread_->stop();
+  thread_->join();
   LOG4CXX_INFO(logger_, "UsbHandler thread finished");
   if (libusb_context_) {
     libusb_exit(libusb_context_);
     libusb_context_ = 0;
   }
-  thread_->join();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 }
