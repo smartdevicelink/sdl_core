@@ -36,6 +36,7 @@
 #include <map>
 #include <algorithm>
 #include <vector>
+#include <time.h>
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -112,6 +113,12 @@ size_t des_cbc3_sha_max_block_size(size_t mtu) {
   if (mtu < 37)
     return 0;
   return ((mtu - 29) & 0xfffffff8) - 5;
+}
+time_t get_time_zone_offset(time_t in_time) {
+  tm gmt_cert_tm = *gmtime(&in_time);
+  tm local_cert_tm = *localtime(&in_time);
+
+  return mktime(&local_cert_tm) - mktime(&gmt_cert_tm);
 }
 }  // namespace
 
@@ -328,7 +335,10 @@ time_t CryptoManagerImpl::SSLContextImpl::convert_asn1_time_to_time_t(
     cert_time.tm_sec = sec;
   }
 
-  return mktime(&cert_time);
+  const time_t local_cert_time = mktime(&cert_time);
+  const time_t time_offset = get_time_zone_offset(local_cert_time);
+
+  return local_cert_time + time_offset;
 }
 
 bool CryptoManagerImpl::SSLContextImpl::ReadHandshakeData(
