@@ -62,13 +62,22 @@ using namespace mobile_apis;
 class ResumptionDataTest : public ::testing::Test {
  protected:
   ResumptionDataTest()
-      : kCountOfCommands_(5u)
+      : help_prompt_(NULL)
+      , timeout_prompt_(NULL)
+      , vr_help_(NULL)
+      , vr_help_title_(NULL)
+      , vr_synonyms_(NULL)
+      , keyboard_props_(NULL)
+      , menu_title_(NULL)
+      , menu_icon_(NULL)
+      , kCountOfCommands_(5u)
       , kCountOfChoice_(2u)
       , kCountOfChoiceSets_(4u)
       , kCountOfSubmenues_(3u)
       , kCountOfFiles_(8u)
       , kCountOfVrhelptitle_(2u)
       , kMacAddress_("12345") {}
+  virtual ~ResumptionDataTest();
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption

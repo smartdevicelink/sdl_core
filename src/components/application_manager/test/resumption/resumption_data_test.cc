@@ -51,6 +51,33 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
 
+ResumptionDataTest::~ResumptionDataTest() {
+  delete help_prompt_;
+  delete timeout_prompt_;
+  delete vr_help_;
+  delete vr_help_title_;
+  delete vr_synonyms_;
+  delete keyboard_props_;
+  delete menu_title_;
+  delete menu_icon_;
+
+  for (am::CommandsMap::iterator it = test_commands_map.begin();
+       test_commands_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  for (am::SubMenuMap::iterator it = test_submenu_map.begin();
+       test_submenu_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  for (am::ChoiceSetMap::iterator it = test_choiceset_map.begin();
+       test_choiceset_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+}
+
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
   EXPECT_EQ(grammar_id_, resume_app_list[am::strings::grammar_id].asUInt());
