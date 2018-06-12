@@ -152,15 +152,8 @@ class CryptoManagerImpl : public CryptoManager {
 
  private:
   bool set_certificate(const std::string& cert_data);
-
-  /**
-   * @brief Sets initial certificate datetime
-   */
-  void InitCertExpTime();
-
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
-  mutable struct tm expiration_time_;
   static uint32_t instance_count_;
   static sync_primitives::Lock instance_lock_;
   DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);

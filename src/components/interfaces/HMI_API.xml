@@ -2855,14 +2855,15 @@
 
 <interface name="BasicCommunication" version="1.2.1" date="2017-08-02">
     <function name="GetSystemTime" messagetype="request">
-      <description> Allows to obtain current sytem time</description>
+      <description>Request from SDL to HMI to obtain current UTC time.</description>
     </function>
     <function name="GetSystemTime" messagetype="response">
       <param name="systemTime" type="Common.DateTime" mandatory="true">
+        <description>Current UTC system time</description>
       </param>
     </function>
     <function name="OnSystemTimeReady" messagetype="notification">
-      <description>HMI notifies SDL with this notification that NAVI module is ready to provide system time.</description>
+      <description>HMI must notify SDL about readiness to provide system time.</description>
     </function>
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>

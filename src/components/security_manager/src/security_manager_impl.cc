@@ -60,7 +60,7 @@ SecurityManagerImpl::SecurityManagerImpl(
 }
 
 SecurityManagerImpl::~SecurityManagerImpl() {
-  system_time_handler_->UnSubscribeFromSystemTime(this);
+  system_time_handler_->UnsubscribeFromSystemTime(this);
 }
 
 void SecurityManagerImpl::OnMessageReceived(
@@ -242,7 +242,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     LOG4CXX_ERROR(logger_, "Security certificate is absent");
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_certificate_ = true;
-    NotifyOnCertififcateUpdateRequired();
+    NotifyOnCertificateUpdateRequired();
   }
 
   {
@@ -293,7 +293,7 @@ void SecurityManagerImpl::ProceedHandshake(
       waiting_for_certificate_ = true;
     }
     PostponeHandshake(connection_key);
-    NotifyOnCertififcateUpdateRequired();
+    NotifyOnCertificateUpdateRequired();
     return;
   }
 
@@ -369,7 +369,7 @@ bool SecurityManagerImpl::OnCertificateUpdated(const std::string& data) {
       awaiting_certificate_connections_.end(),
       std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
 
-  std::set<uint32_t>().swap(awaiting_certificate_connections_);
+  awaiting_certificate_connections_.clear();
   return true;
 }
 
@@ -385,7 +385,7 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
       awaiting_time_connections_.end(),
       std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
 
-  std::set<uint32_t>().swap(awaiting_time_connections_);
+  awaiting_time_connections_.clear();
 }
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
