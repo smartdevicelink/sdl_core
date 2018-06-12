@@ -66,9 +66,9 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr,
 bool TcpDevice::IsSameAs(const Device* other) const {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device: " << other);
-  const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
+  const TcpDevice* other_tcp_device = dynamic_cast<const TcpDevice*>(other);
 
-  if (other_tcp_device->in_addr_ == in_addr_) {
+  if (other_tcp_device && other_tcp_device->in_addr_ == in_addr_) {
     LOG4CXX_TRACE(
         logger_,
         "exit with TRUE. Condition: other_tcp_device->in_addr_ == in_addr_");
