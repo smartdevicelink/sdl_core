@@ -43,60 +43,85 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-set(EXCLUDE_PATHS)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/qnx")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/linux")
+endif ()
 
 set(LIBRARIES
   ProtocolLibrary
   Utils
 )
 
+set(SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_manager_default.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_manager_impl.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/network_interface_listener_impl.cc
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_client_listener.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_connection_factory.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_device.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_server_originated_socket_connection.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_socket_connection.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_transport_adapter.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/tcp_transport_adapter.cc
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_adapter/threaded_socket_connection.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_adapter/transport_adapter_impl.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_adapter/transport_adapter_listener_impl.cc
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
+
+)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  list(APPEND SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/platform_specific/qnx/platform_specific_network_interface_listener.cc
+  )
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tcp/platform_specific/linux/platform_specific_network_interface_listener.cc
+  )
+endif ()
+
 if(BUILD_BT_SUPPORT)
   list(APPEND LIBRARIES
     bluetooth
   )
-else()
-  list(APPEND EXCLUDE_PATHS
-    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/bluetooth
-    ${COMPONENTS_DIR}/transport_manager/src/bluetooth
+  list(APPEND SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth/bluetooth_connection_factory.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth/bluetooth_device.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth/bluetooth_device_scanner.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth/bluetooth_socket_connection.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bluetooth/bluetooth_transport_adapter.cc
   )
 endif()
 
 if(BUILD_USB_SUPPORT)
+  list(APPEND SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/usb_aoa_adapter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/usb_connection_factory.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/usb_device_scanner.cc
+  )
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(EXCLUDE_PATHS
-      ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
-      ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
+    list(APPEND SOURCES
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/libusb/platform_usb_device.cc
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/libusb/usb_connection.cc
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/libusb/usb_handler.cc
     )
-
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(EXCLUDE_PATHS
-      ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
-      ${COMPONENTS_DIR}/transport_manager/src/usb/libusb
-    )
     list(APPEND LIBRARIES
       usbdi
     )
+    list(APPEND SOURCES
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/qnx/platform_usb_device.cc
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/qnx/usb_connection.cc
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/usb/qnx/usb_handler.cc
+    )
   endif()
-else()
-  list(APPEND EXCLUDE_PATHS
-    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb
-    ${COMPONENTS_DIR}/transport_manager/src/usb
-  )
 endif()
 
-if(NOT BUILD_TESTS)
-  list (APPEND EXCLUDE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
-  )
-endif()
-
-collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})

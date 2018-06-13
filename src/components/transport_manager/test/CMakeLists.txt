@@ -47,6 +47,11 @@ set(EXCLUDE_PATHS
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
+set (
+  "${CMAKE_CURRENT_SOURCE_DIR}"/platform_specific/linux
+  "${SOURCES}"
+)
+
 set(LIBRARIES
   gmock
   ConfigProfile
