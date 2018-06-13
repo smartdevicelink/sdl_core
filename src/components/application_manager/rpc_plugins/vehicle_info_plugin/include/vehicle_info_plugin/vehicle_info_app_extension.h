@@ -46,13 +46,13 @@ class VehicleInfoAppExtension : app_mngr::AppExtension {
   explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
   virtual ~VehicleInfoAppExtension();
 
-  void subscribeToVehicleInfo(const std::string& moduleType);
-  void unsubscribeFromVehicleInfo(const std::string& moduleType);
+  void subscribeToVehicleInfo(const std::string& vehicle_data_type);
+  void unsubscribeFromVehicleInfo(const std::string& vehicle_data_type);
   void unsubscribeFromVehicleInfo();
-  bool isSubscribedToVehicleInfo(const std::string& moduleType) const;
+  bool isSubscribedToVehicleInfo(const std::string& vehicle_data_type) const;
 
  private:
-  std::set<std::string> subscribed_modules_;
+  std::set<std::string> subscribed_data_;
 };
 }
 
