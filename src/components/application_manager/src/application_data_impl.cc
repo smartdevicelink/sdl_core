@@ -212,6 +212,21 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     show_command_ = NULL;
   }
 
+  if (keyboard_props_) {
+    delete keyboard_props_;
+    keyboard_props_ = NULL;
+  }
+
+  if (menu_title_) {
+    delete menu_title_;
+    menu_title_ = NULL;
+  }
+
+  if (menu_icon_) {
+    delete menu_icon_;
+    menu_icon_ = NULL;
+  }
+
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
