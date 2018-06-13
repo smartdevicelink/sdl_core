@@ -47,28 +47,28 @@ VehicleInfoAppExtension::~VehicleInfoAppExtension() {
 }
 
 void VehicleInfoAppExtension::subscribeToVehicleInfo(
-    const std::string& moduleType) {
-  LOG4CXX_DEBUG(logger_, moduleType);
-  subscribed_modules_.insert(moduleType);
+    const std::string& vehicle_data_type) {
+  LOG4CXX_DEBUG(logger_, vehicle_data_type);
+  subscribed_data_.insert(vehicle_data_type);
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
-    const std::string& moduleType) {
-  LOG4CXX_DEBUG(logger_, moduleType);
-  auto it = subscribed_modules_.find(moduleType);
-  if (it != subscribed_modules_.end()) {
-    subscribed_modules_.erase(it);
+    const std::string& vehicle_data_type) {
+  LOG4CXX_DEBUG(logger_, vehicle_data_type);
+  auto it = subscribed_data_.find(vehicle_data_type);
+  if (it != subscribed_data_.end()) {
+    subscribed_data_.erase(it);
   }
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
   LOG4CXX_AUTO_TRACE(logger_);
-  subscribed_modules_.clear();
+  subscribed_data_.clear();
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
-    const std::string& moduleType) const {
-  LOG4CXX_DEBUG(logger_, moduleType);
-  return subscribed_modules_.find(moduleType) != subscribed_modules_.end();
+    const std::string& vehicle_data_type) const {
+  LOG4CXX_DEBUG(logger_, vehicle_data_type);
+  return subscribed_data_.find(vehicle_data_type) != subscribed_data_.end();
 }
 }
