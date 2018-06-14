@@ -1250,12 +1250,15 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
     if (is_allowed) {
       // Send HMI status notification to mobile
       // Put application in full
-      AudioStreamingState::eType state = app->is_audio()
+      AudioStreamingState::eType audio_state = app->IsAudioApplication()
                                              ? AudioStreamingState::AUDIBLE
                                              : AudioStreamingState::NOT_AUDIBLE;
+      VideoStreamingState::eType video_state = app->IsVideoApplication()
+                                             ? VideoStreamingState::STREAMABLE
+                                             : VideoStreamingState::NOT_STREAMABLE;
 
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, state, true);
+          app, mobile_apis::HMILevel::HMI_FULL, audio_state, video_state, true);
       last_activated_app_id_ = 0;
     } else {
       DeactivateApplication deactivate_notification(
