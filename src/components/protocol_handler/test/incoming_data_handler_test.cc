@@ -55,7 +55,14 @@ class IncomingDataHandlerTest : public ::testing::Test {
     some_data_size = 4;
     some_data2_size = 512;
     some_data = new uint8_t[some_data_size];
+    for (size_t i = 0; i < some_data_size; i++) {
+      // put some data in the buffer
+      some_data[i] = i % 256;
+    }
     some_data2 = new uint8_t[some_data2_size];
+    for (size_t i = 0; i < some_data2_size; i++) {
+      some_data2[i] = i % 256;
+    }
     protov1_message_id = 0x0;
     some_message_id = 0xABCDEF0;
     some_session_id = 0xFEDCBA0;
@@ -248,7 +255,6 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
     EXPECT_EQ(**it, **it_exp) << "Element number "
                               << std::distance(mobile_packets.begin(), it_exp);
   }
