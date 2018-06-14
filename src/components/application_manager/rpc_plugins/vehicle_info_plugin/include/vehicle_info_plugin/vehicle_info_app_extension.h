@@ -41,6 +41,11 @@
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
+/**
+ * @brief Defines set of vehicle info types
+ */
+typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
+
 class VehicleInfoAppExtension : app_mngr::AppExtension {
  public:
   explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
