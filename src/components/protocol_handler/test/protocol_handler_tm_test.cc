@@ -1979,7 +1979,7 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
@@ -2018,7 +2018,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeat
   EXPECT_CALL(
       transport_manager_mock,
