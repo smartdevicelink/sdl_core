@@ -20,13 +20,13 @@ before_install:
   - sudo apt-get install -f clang-format-3.6
 
 script:
-  - mkdir build 
-  - pushd build
-  - cmake ../ -DBUILD_TESTS=ON
-  - make install && sudo ldconfig && make test
-  - popd
   - cppcheck --force -isrc/3rd_party -isrc/3rd_party-static --quiet --error-exitcode=1 src
   - ./tools/infrastructure/check_style.sh
+  - mkdir build && cd build
+  - cmake ../ -DBUILD_TESTS=ON
+  - make install && sudo ldconfig
+after_success:
+  - make test
 env:
   global:
   - LC_CTYPE=en_US.UTF-8
