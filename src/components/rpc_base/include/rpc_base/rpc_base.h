@@ -260,7 +260,6 @@ class Enum : public PrimitiveType {
   // Types
   typedef T EnumType;
 
- public:
   // Methods
   Enum();
   explicit Enum(EnumType value);
@@ -283,7 +282,39 @@ class Array : public std::vector<T>, public CompositeType {
   // Types
   typedef std::vector<T> ArrayType;
 
+  // Methods
+  Array();
+  // Need const and non-const versions to beat all-type accepting constructor
+  explicit Array(Json::Value* value);
+  explicit Array(const Json::Value* value);
+  explicit Array(dbus::MessageReader* reader);
+  template <typename U>
+  explicit Array(const U& value);
+  template <typename U>
+  Array& operator=(const U& that);
+  using ArrayType::push_back;
+  template <typename U>
+  void push_back(const U& value);
+  Json::Value ToJsonValue() const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
+
+  virtual bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
+  virtual void SetPolicyTableType(
+      policy_table_interface_base::PolicyTableType pt_type);
+};
+
+// Partial specialization of Array for Enum<E> type because of different
+// validation rules
+
+template <typename E, size_t minsize, size_t maxsize>
+class Array<Enum<E>, minsize, maxsize> : public std::vector<Enum<E> >,
+                                         public CompositeType {
  public:
+  // Types
+  typedef std::vector<Enum<E> > ArrayType;
+
   // Methods
   Array();
   // Need const and non-const versions to beat all-type accepting constructor
@@ -314,7 +345,6 @@ class Map : public std::map<std::string, T>, public CompositeType {
   typedef Map<T, minsize, maxsize> Frankenbase;
   typedef std::map<std::string, T> MapType;
 
- public:
   // Methods
   Map();
   // Need const and non-const versions to beat all-type accepting constructor

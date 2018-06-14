@@ -331,7 +331,7 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
   CreateLocalPT(preloaded_pt_filename_);
   // Add app
   policy_manager_->AddApplication(section_name,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
@@ -451,7 +451,7 @@ void PolicyManagerImplTest2::
 
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
@@ -577,7 +577,7 @@ void PolicyManagerImplTest2::AddSetDeviceData() {
 
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   (policy_manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
 }
 

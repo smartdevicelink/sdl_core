@@ -1075,7 +1075,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    const policy_table::AppHMIType type = policy_table::AHT_NAVIGATION;
+    const policy_table::AppHMIType type = policy_table::NAVIGATION;
     if (helpers::in_range(hmi_types,
                           (rpc::Enum<policy_table::AppHMIType>)type) &&
         !HasCertificate()) {

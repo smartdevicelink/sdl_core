@@ -505,7 +505,7 @@ TEST_F(
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -573,7 +573,7 @@ TEST_F(
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -631,7 +631,7 @@ TEST_F(
 
   // First register w/o app having groups to consent
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
@@ -663,7 +663,7 @@ TEST_F(
 
   // Second time register w/ app having groups to consent
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -721,7 +721,7 @@ TEST_F(
 
   // First register w/o app having groups to consent
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
@@ -753,7 +753,7 @@ TEST_F(
 
   // Second time register w/ app having groups to consent
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -816,7 +816,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
@@ -941,7 +941,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
       .WillRepeatedly(Return(device_id_1_));
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();

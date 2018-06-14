@@ -55,7 +55,7 @@ TEST_F(
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
@@ -82,7 +82,7 @@ TEST_F(
   policy_manager_->SetUserConsentForDevice(device_id_1_, false);
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
@@ -93,7 +93,7 @@ TEST_F(
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ASSERT_TRUE(policy_manager_->IsPredataPolicy(app_id_1_));
   policy_manager_->ReactOnUserDevConsentForApp(app_id_1_, false);
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_1_));
@@ -107,7 +107,7 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(
       (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   // Expect RPCs from pre_dataConsent group are allowed
   // Next checks are equal to BaseBeforeDataConsent_APIs.xml checks from task
@@ -156,7 +156,7 @@ TEST_F(PolicyManagerImplTest2, CheckPreDataConsent_GetDefaultHmiLevel_NONE) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   std::string default_hmi;
   // Default HMI level is NONE
   policy_manager_->GetDefaultHmi(app_id_2_, &default_hmi);
@@ -174,7 +174,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(kSdlPreloadedPtJson2);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   std::string default_hmi;
   // Default HMI level is BACKGROUND
   policy_manager_->GetDefaultHmi(app_id_2_, &default_hmi);
@@ -192,7 +192,7 @@ TEST_F(
   // RequestTypes for default & preDataConsent are different
   CreateLocalPT("json/ptu_requestType.json");
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ASSERT_TRUE(policy_manager_->IsPredataPolicy(app_id_1_));
   policy_manager_->ReactOnUserDevConsentForApp(app_id_1_, true);
   EXPECT_FALSE(policy_manager_->IsPredataPolicy(app_id_1_));
@@ -207,7 +207,7 @@ TEST_F(
   // RequestTypes for default & preDataConsent are the same
   CreateLocalPT(kPtu2RequestTypeJson);
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ASSERT_TRUE(policy_manager_->IsPredataPolicy(app_id_1_));
   EXPECT_CALL(listener_, OnPendingPermissionChange(app_id_1_)).Times(0);
   policy_manager_->ReactOnUserDevConsentForApp(app_id_1_, true);
@@ -300,7 +300,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   std::string default_hmi;
   policy_manager_->GetDefaultHmi(app_id_2_, &default_hmi);
   EXPECT_EQ("NONE", default_hmi);
@@ -311,7 +311,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(kPtu2RequestTypeJson);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
   std::string default_hmi1;
@@ -336,7 +336,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_2_));
   std::string default_hmi2;
   policy_manager_->GetDefaultHmi(app_id_2_, &default_hmi2);
@@ -348,7 +348,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(kPtu2RequestTypeJson);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
   std::string priority1;
@@ -373,7 +373,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_2_));
   std::string priority2;
   EXPECT_TRUE(policy_manager_->GetPriority(app_id_2_, &priority2));
@@ -491,7 +491,7 @@ TEST_F(PolicyManagerImplTest2, GetInitialAppData_ExpectReceivedConsentCorrect) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ::policy::StringArray app_nicknames;
   ::policy::StringArray app_hmi_types;
   policy_manager_->GetInitialAppData(app_id_2_, &app_nicknames, &app_hmi_types);
@@ -535,7 +535,7 @@ TEST_F(
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
   // Check keep context in preData policy
@@ -549,7 +549,7 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(
       (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ASSERT_TRUE((policy_manager_->GetCache())
                   ->SetDeviceData(device_id_2_,
                                   "hardware IPX",
@@ -566,7 +566,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_2_));
   // Check keep context in default policy
   EXPECT_FALSE(policy_manager_->CanAppKeepContext(app_id_2_));
@@ -577,7 +577,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
   // Check keep context in preData policy
@@ -591,7 +591,7 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(
       (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ASSERT_TRUE((policy_manager_->GetCache())
                   ->SetDeviceData(device_id_2_,
                                   "hardware IPX",
@@ -608,7 +608,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_2_));
   // Check keep context in default policy
   EXPECT_FALSE(policy_manager_->CanAppStealFocus(app_id_2_));
@@ -619,7 +619,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
 }
@@ -630,7 +630,7 @@ TEST_F(
   // Arrange
   CreateLocalPT(kPtu2RequestTypeJson);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check if app has preData policy
   EXPECT_TRUE(policy_manager_->IsPredataPolicy(app_id_2_));
   std::string default_hmi1;
@@ -661,7 +661,7 @@ TEST_F(
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_TRUE((policy_manager_->GetCache())->IsDefaultPolicy(app_id_2_));
   std::string default_hmi2;
   policy_manager_->GetDefaultHmi(app_id_2_, &default_hmi2);

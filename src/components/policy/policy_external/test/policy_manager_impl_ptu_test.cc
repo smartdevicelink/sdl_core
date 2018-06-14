@@ -93,7 +93,7 @@ TEST_F(PolicyManagerImplTest,
       .WillOnce(Return(true));
   EXPECT_EQ(policy_manager_->GetPolicyTableStatus(), "UP_TO_DATE");
   policy_manager_->AddApplication(kDefaultId,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_EQ(policy_manager_->GetPolicyTableStatus(), "UP_TO_DATE");
 }
 
@@ -143,7 +143,7 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   CreateLocalPT(preloaded_pt_filename_);
 
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
@@ -175,7 +175,7 @@ TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered) {
   ASSERT_TRUE(
       (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Registration is allowed
   CheckRpcPermissions("RegisterAppInterface", ::policy::kRpcAllowed);
 }
@@ -188,7 +188,7 @@ TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered_HMIDefault) {
 
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   std::string default_hmi;
   // Default HMI level is NONE
@@ -215,7 +215,7 @@ TEST_F(PolicyManagerImplTest2,
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check before action
   policy_table::RpcParameters rpc_parameters;
   rpc_parameters.hmi_levels.push_back(policy_table::HL_FULL);
@@ -274,7 +274,7 @@ TEST_F(PolicyManagerImplTest2,
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_MEDIA));
+                                  HmiTypes(policy_table::MEDIA));
   // Emulate PTU with new policies for app added above
   std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
@@ -588,7 +588,7 @@ TEST_F(PolicyManagerImplTest2, GetCorrectStatus_PTUSuccessful) {
 
   // Adding changes PT status
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Before load PT we should send notification about start updating
   policy_manager_->OnUpdateStarted();
@@ -728,7 +728,7 @@ TEST_F(PolicyManagerImplTest2,
 
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   std::ifstream ifile("json/sdl_update_pt_2_groups_no_params_in1.json");
   Json::Reader reader;
@@ -815,7 +815,7 @@ TEST_F(PolicyManagerImplTest2,
 
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(application_id_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   std::ifstream ifile(
       "json/sdl_update_pt_2_groups_no_params_in1_omitted_in2.json");
@@ -918,7 +918,7 @@ TEST_F(
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Try to add existing app
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   // Check no update required
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
@@ -940,7 +940,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   ::policy::Counters counter = ::policy::Counters::DAYS_AFTER_EPOCH;
   // Set PT was updated 10 days ago (limit is 30 days for now)
@@ -960,7 +960,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   ::policy::Counters counter = ::policy::Counters::DAYS_AFTER_EPOCH;
   // Set PT was updated 50 days ago (limit is 30 days for now)
@@ -980,7 +980,7 @@ TEST_F(
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Try to add existing app
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   ::policy::Counters counter = ::policy::Counters::DAYS_AFTER_EPOCH;
   // Set PT was updated 10 days ago (limit is 30 days for now)
@@ -1025,7 +1025,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   GetPTU(kValidSdlPtUpdateJson);
 
   ::policy::PermissionConsent perm_consent;
@@ -1070,7 +1070,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   GetPTU(kValidSdlPtUpdateJson);
   // Check keep context in updated policies for app
   EXPECT_TRUE(policy_manager_->CanAppKeepContext(app_id_2_));
@@ -1081,7 +1081,7 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   GetPTU(kValidSdlPtUpdateJson);
   // Check keep context in updated policies for app
   EXPECT_TRUE(policy_manager_->CanAppKeepContext(app_id_2_));
@@ -1133,7 +1133,7 @@ TEST_F(
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
 
   GetPTU(kValidSdlPtUpdateJson);
   ::policy::PermissionConsent perm_consent;
@@ -1180,7 +1180,7 @@ TEST_F(
   CreateLocalPT(preloaded_pt_filename_);
 
   policy_manager_->AddApplication(app_id_3_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   ::policy::StringArray app_requests =
       policy_manager_->GetAppRequestTypes(app_id_3_);
   EXPECT_EQ(1u, app_requests.size());
@@ -1215,7 +1215,7 @@ TEST_F(
   }
   // Add new app
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   uint32_t result = policy_manager_->HeartBeatTimeout(app_id_2_);
   // By default hertbeat timeout is 0
   EXPECT_EQ(0u, result);
@@ -1264,7 +1264,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_))
       .WillRepeatedly(Return(device_id_2_));
   policy_manager_->AddApplication(app_id_2_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   GetPTU(kValidSdlPtUpdateJson);
 
   ::policy::PermissionConsent perm_consent;
@@ -1342,7 +1342,7 @@ TEST_F(PolicyManagerImplTest2,
 
   // Add app
   policy_manager_->AddApplication(section_name,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+                                  HmiTypes(policy_table::DEFAULT));
   EXPECT_CALL(listener_, OnPendingPermissionChange(section_name));
 
   // PTU has single invalid RequestTypes, which must be dropped and replaced

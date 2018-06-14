@@ -49,7 +49,7 @@ struct ToHMIType {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
       LOG4CXX_WARN(logger_, "HMI type isn't known " << item);
-      type = policy_table::AHT_DEFAULT;
+      type = policy_table::DEFAULT;
     }
     LOG4CXX_DEBUG(logger_,
                   "HMI type: " << item << " - " << EnumToJsonString(type));
@@ -189,7 +189,7 @@ bool AccessRemoteImpl::IsAppRemoteControl(const ApplicationOnDevice& who) {
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(),
                    hmi_types.end(),
-                   policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
+                   policy_table::REMOTE_CONTROL) != hmi_types.end();
 }
 
 bool AccessRemoteImpl::GetPermissionsForApp(const std::string& device_id,
