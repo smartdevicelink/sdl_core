@@ -549,6 +549,37 @@ class MessageHelper {
       int32_t result_code);
 
   /**
+   * @brief Get the full file path of an app file
+   *
+   * @param file_name The relative path of an application file
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return The full file path of the application file if valid,
+   * empty string otherwise
+   */
+  static std::string GetAppFilePath(std::string file_name,
+                                    ApplicationConstSharedPtr app,
+                                    ApplicationManager& app_mngr);
+
+  /**
+   * @brief Verify that all ttsChunks with FILE type
+   * in an array include an existing file and set full path
+   *
+   * @param tts_chunks SmartObject with an array of TTSChunks
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return FILE_NOT_FOUND if one of the TTSChunks
+   * included a file which wasn't present on disk,
+   * SUCCESS otherwise
+   */
+  static mobile_apis::Result::eType VerifyTtsFiles(
+      smart_objects::SmartObject& tts_chunks,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
+
+  /**
     * @brief Verify image and add image file full path
     * and add path, although the image doesn't exist
     * @param SmartObject with image

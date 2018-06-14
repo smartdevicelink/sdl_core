@@ -371,6 +371,7 @@
   <element name="LHPLUS_PHONEMES" />
   <element name="PRE_RECORDED" />
   <element name="SILENCE" />
+  <element name="FILE" />
 </enum>
 
 <enum name="VrCapabilities">
@@ -1927,12 +1928,12 @@
  </struct>
 
 <struct name="TTSChunk">
-    <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
+    <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
-        <description>The text or phonemes to be spoken.</description>
+        <description>The text or phonemes to be spoken, or the name of an audio file to play.</description>
     </param>
     <param name="type" type="Common.SpeechCapabilities" mandatory="true">
-      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+      <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities.</description>
     </param>
 </struct>
 
@@ -3348,10 +3349,10 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See SpeechCapabilities</description>
     </param>
-    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See PrerecordedSpeech</description>
     </param>
   </function>
