@@ -1464,7 +1464,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
   std::shared_ptr<BsonObject> start_session_ack_params(
-      new BsonObject(), [](BsonObject* obj) { bson_object_deinitialize(obj); });
+      new BsonObject(),
+      [](BsonObject* obj) {
+        bson_object_deinitialize(obj);
+        delete obj;
+      });
   bson_object_initialize_default(start_session_ack_params.get());
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet
