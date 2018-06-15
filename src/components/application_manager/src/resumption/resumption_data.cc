@@ -162,13 +162,9 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
   DataAccessor<VehicleInfoSubscriptions> vi_accessor =
       application->SubscribedIVI();
 
-  const VehicleInfoSubscriptions& vi_subscription = vi_accessor.GetData();
-
-  LOG4CXX_DEBUG(logger_, "SubscribedIVI:" << vi_subscription.size());
-  Append(vi_subscription.begin(),
-         vi_subscription.end(),
-         strings::application_vehicle_info,
-         subscriptions);
+  for (auto extension : application->Extensions()) {
+    extension->SaveResumptionData(subscriptions);
+  }
   return subscriptions;
 }
 
