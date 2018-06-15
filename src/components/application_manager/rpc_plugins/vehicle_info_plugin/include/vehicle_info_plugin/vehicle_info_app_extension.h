@@ -58,6 +58,9 @@ class VehicleInfoAppExtension : app_mngr::AppExtension {
   bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
   VehicleInfoSubscriptions Subscriptions();
 
+  void SaveResumptionData(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
+  void PorcessResumption(const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
  private:
   VehicleInfoSubscriptions subscribed_data_;
