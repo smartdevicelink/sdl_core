@@ -740,6 +740,54 @@
                                  "densityAvailable":true,
                                  "name":"EXTERIOR_RIGHT_LIGHTS",
                                  "RGBColorSpaceAvailable":true
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"REAR_CARGO_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"REAR_TRUCK_BED_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"REAR_TRAILER_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"LEFT_SPOT_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"RIGHT_SPOT_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"LEFT_PUDDLE_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":false,
+                                "densityAvailable":false,
+                                "name":"RIGHT_PUDDLE_LIGHTS",
+                                "RGBColorSpaceAvailable":false
+                              },
+                              {
+                                "statusAvailable":true,
+                                "densityAvailable":false,
+                                "name":"EXTERIOR_ALL_LIGHTS",
+                                "RGBColorSpaceAvailable":false
                               }
                         ]
                 },
