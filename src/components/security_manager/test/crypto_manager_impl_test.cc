@@ -180,6 +180,15 @@ TEST_F(CryptoManagerTest, CorrectInit) {
   SetInitialValues(
       security_manager::SERVER, security_manager::TLSv1_2, kAllCiphers);
   EXPECT_TRUE(crypto_manager_->Init());
+ 
+  // DTLS test
+   SetInitialValues(
+      security_manager::CLIENT, security_manager::DTLSv1, kAllCiphers);
+  EXPECT_TRUE(crypto_manager_->Init());
+ 
+  SetInitialValues(
+      security_manager::SERVER, security_manager::DTLSv1, kAllCiphers);
+  EXPECT_TRUE(crypto_manager_->Init());
 }
 // #endif  // __QNX__
 
@@ -189,7 +198,9 @@ TEST_F(CryptoManagerTest, ReleaseSSLContext_Null) {
 
 TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
   const size_t max_payload_size = 1000u;
-  SetInitialValues(
+  security_manager::SSLContext* context;
+ 
+ SetInitialValues(
       security_manager::CLIENT, security_manager::TLSv1_2, kAllCiphers);
   EXPECT_TRUE(crypto_manager_->Init());
   EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
@@ -199,7 +210,21 @@ TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
       .Times(1)
       .WillRepeatedly(Return(max_payload_size));
 
-  security_manager::SSLContext* context = crypto_manager_->CreateSSLContext();
+  context = crypto_manager_->CreateSSLContext();
+  EXPECT_TRUE(context);
+  EXPECT_NO_THROW(crypto_manager_->ReleaseSSLContext(context));
+ 
+  SetInitialValues(
+      security_manager::CLIENT, security_manager::DTLSv1, kAllCiphers);
+  EXPECT_TRUE(crypto_manager_->Init());
+  EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
+      .Times(2)
+      .WillRepeatedly(Return(security_manager::CLIENT));
+  EXPECT_CALL(*mock_security_manager_settings_, maximum_payload_size())
+      .Times(1)
+      .WillRepeatedly(Return(max_payload_size));
+
+  context = crypto_manager_->CreateSSLContext();
   EXPECT_TRUE(context);
   EXPECT_NO_THROW(crypto_manager_->ReleaseSSLContext(context));
 }

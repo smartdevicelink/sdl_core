@@ -136,6 +136,14 @@ bool CryptoManagerImpl::Init() {
   const SSL_METHOD* method;
 #endif
   switch (get_settings().security_manager_protocol_name()) {
+    case DTLSv1:
+#if OPENSSL_VERSION_NUMBER > DTLSV1_HANDSHAKE_BUG_VERSION
+    	method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
+#else
+    	LOG4CXX_ERROR(logger_, "DTLS 1.0 handshake fails due to bug in OpenSSL version prior 1.0.1");
+    	return false;
+#endif
+    	break;
     case SSLv3:
 #ifdef OPENSSL_NO_SSL3
       LOG4CXX_WARN(logger_, "OpenSSL does not support SSL3 protocol");

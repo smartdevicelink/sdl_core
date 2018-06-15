@@ -21,6 +21,9 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     CREATE_LOGGERPTR_LOCAL(logger_, "SecurityManager")
 
     const std::string& protocol_str = profile_.security_manager_protocol_name();
+    if (protocol_str == "DTLSv1.0") {
+    	return security_manager::DTLSv1;
+    }
     if (protocol_str == "TLSv1.0") {
       return security_manager::TLSv1;
     }
