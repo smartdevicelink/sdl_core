@@ -377,13 +377,6 @@ class ApplicationImpl : public virtual Application,
    */
   const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
 
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 
@@ -417,6 +410,8 @@ class ApplicationImpl : public virtual Application,
    * Suspends audio streaming process for application
    */
   void OnAudioStreamSuspend();
+
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
 
   /**
    * @brief Add extension to application
