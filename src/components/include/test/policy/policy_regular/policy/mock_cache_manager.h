@@ -206,7 +206,6 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(GetHMITypes,
                const policy_table::AppHMITypes*(const std::string& app_id));
   MOCK_CONST_METHOD0(GetCertificate, std::string());
-  MOCK_CONST_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));
   MOCK_CONST_METHOD2(AppHasHMIType,
                      bool(const std::string& application_id,

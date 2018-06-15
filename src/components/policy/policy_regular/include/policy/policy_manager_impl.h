@@ -594,8 +594,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   bool HasCertificate() const OVERRIDE;
 
-  void SetDecryptedCertificate(const std::string& certificate) OVERRIDE;
-
   /**
    * @brief Finds the next URL that must be sent on OnSystemRequest retry
    * @param urls vector of vectors that contain urls for each application

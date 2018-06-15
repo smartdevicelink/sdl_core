@@ -531,12 +531,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual bool HasCertificate() const = 0;
 
   /**
-   * @brief Sets decrypted certificate in policy table
-   * @param certificate content of certificate
-   */
-  virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
-
-  /**
    * @brief Getter for policy settings
    * @return policy settings instance
    */
