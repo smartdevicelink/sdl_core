@@ -432,6 +432,8 @@ class ApplicationImpl : public virtual Application,
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
 
+  const std::list<AppExtensionPtr>& Extensions() const OVERRIDE;
+
   std::string hash_val_;
   uint32_t grammar_id_;
 

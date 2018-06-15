@@ -894,6 +894,12 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
+   * @brief Get list of available application extensions
+   * @return application extensions
+   */
+  virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
+
+  /**
    * @brief Get list of subscriptions to vehicle info notifications
    * @return list of subscriptions to vehicle info notifications
    */
