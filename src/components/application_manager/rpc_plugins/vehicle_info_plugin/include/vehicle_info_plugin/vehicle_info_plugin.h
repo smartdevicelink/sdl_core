@@ -36,13 +36,17 @@
 #include "application_manager/command_factory.h"
 
 namespace vehicle_info_plugin {
-
+class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace commands = application_manager::commands;
 namespace plugins = application_manager::plugin_manager;
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
+  typedef std::map<std::string, mobile_apis::VehicleDataType::eType>
+      VehicleData;
+
  public:
+  VehicleInfoPlugin();
   bool Init(app_mngr::ApplicationManager& application_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
@@ -58,8 +62,13 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  void ProcessResumptionSubscription(app_mngr::ApplicationSharedPtr app,
+                                     VehicleInfoAppExtension& ext);
+
  private:
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
+  app_mngr::ApplicationManager* application_manager_;
+  static const VehicleData vehicle_data_;
 };
 }
 

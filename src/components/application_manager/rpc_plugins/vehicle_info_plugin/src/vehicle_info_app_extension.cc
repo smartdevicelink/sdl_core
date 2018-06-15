@@ -75,4 +75,32 @@ bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
 VehicleInfoSubscriptions VehicleInfoAppExtension::Subscriptions() {
   return subscribed_data_;
 }
+
+void VehicleInfoAppExtension::SaveResumptionData(
+    smart_objects::SmartObject& resumption_data) {
+  const char* application_vehicle_info = "vehicleInfo";
+  resumption_data[application_vehicle_info] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  int i = 0;
+  for (const auto& subscription : subscribed_data_) {
+    resumption_data[application_vehicle_info][i] = subscription;
+  }
+}
+
+void VehicleInfoAppExtension::ProcessResumption(
+    const smart_objects::SmartObject& resumption_data) {
+  const char* application_vehicle_info = "vehicleInfo";
+  if (resumption_data.keyExists(application_vehicle_info)) {
+    const smart_objects::SmartObject& subscriptions_ivi =
+        resumption_data[application_vehicle_info];
+    for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
+      mobile_apis::VehicleDataType::eType ivi =
+          static_cast<mobile_apis::VehicleDataType::eType>(
+              (resumption_data[i]).asInt());
+      subscribeToVehicleInfo(ivi);
+    }
+    //          ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(
+    //              application, application_manager_));
+  }
+}
 }

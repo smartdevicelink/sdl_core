@@ -69,6 +69,13 @@ class RCAppExtension : public application_manager::AppExtension {
 
  private:
   std::set<std::string> subscribed_interior_vehicle_data_;
+
+  // AppExtension interface
+ public:
+  void SaveResumptionData(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
+  void ProcessResumption(const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+                             resumption_data) OVERRIDE;
 };
 
 typedef utils::SharedPtr<RCAppExtension> RCAppExtensionPtr;
