@@ -41,6 +41,7 @@
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
+typedef mobile_apis::VehicleDataType::eType VehicleDataType;
 /**
  * @brief Defines set of vehicle info types
  */
@@ -51,13 +52,15 @@ class VehicleInfoAppExtension : app_mngr::AppExtension {
   explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
   virtual ~VehicleInfoAppExtension();
 
-  void subscribeToVehicleInfo(const std::string& vehicle_data_type);
-  void unsubscribeFromVehicleInfo(const std::string& vehicle_data_type);
+  void subscribeToVehicleInfo(const VehicleDataType vehicle_data);
+  void unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
   void unsubscribeFromVehicleInfo();
-  bool isSubscribedToVehicleInfo(const std::string& vehicle_data_type) const;
+  bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
+  VehicleInfoSubscriptions Subscriptions();
+
 
  private:
-  std::set<std::string> subscribed_data_;
+  VehicleInfoSubscriptions subscribed_data_;
 };
 }
 
