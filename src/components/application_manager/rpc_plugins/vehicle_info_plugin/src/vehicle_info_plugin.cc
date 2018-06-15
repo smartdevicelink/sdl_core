@@ -32,14 +32,86 @@
 
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/message_helper.h"
 
 namespace vehicle_info_plugin {
+CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+
+namespace strings = application_manager::strings;
+
+std::pair<std::string,
+          mobile_apis::VehicleDataType::eType> kVehicleDataInitializer[] = {
+    std::make_pair(strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS),
+    std::make_pair(strings::speed,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_SPEED),
+    std::make_pair(strings::rpm, mobile_apis::VehicleDataType::VEHICLEDATA_RPM),
+    std::make_pair(strings::fuel_level,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL),
+    std::make_pair(strings::fuel_level_state,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
+    std::make_pair(strings::instant_fuel_consumption,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+    std::make_pair(strings::fuel_range,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
+    std::make_pair(strings::external_temp,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
+    std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+    std::make_pair(strings::prndl,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
+    std::make_pair(strings::tire_pressure,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_TIREPRESSURE),
+    std::make_pair(strings::odometer,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER),
+    std::make_pair(strings::belt_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BELTSTATUS),
+    std::make_pair(strings::body_information,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BODYINFO),
+    std::make_pair(strings::device_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_DEVICESTATUS),
+    std::make_pair(strings::driver_braking,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_BRAKING),
+    std::make_pair(strings::wiper_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_WIPERSTATUS),
+    std::make_pair(strings::head_lamp_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+    std::make_pair(strings::e_call_info,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
+    std::make_pair(strings::airbag_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_AIRBAGSTATUS),
+    std::make_pair(strings::emergency_event,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_EMERGENCYEVENT),
+    std::make_pair(strings::cluster_mode_status,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_CLUSTERMODESTATUS),
+    std::make_pair(strings::my_key,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY),
+    /*
+     NOT DEFINED in mobile APIVehicleInfoPlugin
+     std::make_pair(strings::gps,
+     BATTVOLTAGE),
+     */
+    std::make_pair(strings::engine_torque,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINETORQUE),
+    std::make_pair(strings::acc_pedal_pos,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
+    std::make_pair(strings::steering_wheel_angle,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
+    std::make_pair(strings::engine_oil_life,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+
+const VehicleInfoPlugin::VehicleData VehicleInfoPlugin::vehicle_data_(
+    kVehicleDataInitializer,
+    kVehicleDataInitializer + ARRAYSIZE(kVehicleDataInitializer));
+
+VehicleInfoPlugin::VehicleInfoPlugin() : application_manager_(nullptr) {}
 
 bool VehicleInfoPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
+  application_manager_ = &app_manager;
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -63,6 +135,29 @@ void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {}
+
+void VehicleInfoPlugin::ProcessResumptionSubscription(
+    application_manager::ApplicationSharedPtr app,
+    VehicleInfoAppExtension& ext) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  const auto& subscriptions = ext.Subscriptions();
+  for (auto& ivi_data : vehicle_data_) {
+    mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
+    if (subscriptions.end() != subscriptions.find(type_id)) {
+      std::string key_name = ivi_data.first;
+      msg_params[key_name] = true;
+    }
+  }
+  smart_objects::SmartObjectSPtr request =
+      application_manager::MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+          *application_manager_);
+  (*request)[strings::msg_params] = msg_params;
+  application_manager_->GetRPCService().ManageHMICommand(request);
+}
 }
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
