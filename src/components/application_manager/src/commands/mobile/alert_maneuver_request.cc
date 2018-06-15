@@ -92,6 +92,21 @@ void AlertManeuverRequest::Run() {
 
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    smart_objects::SmartObject& tts_chunks =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_ERROR(logger_,
+                    "MessageHelper::VerifyTtsFiles return "
+                        << verification_result);
+      SendResponse(false,
+                   mobile_apis::Result::FILE_NOT_FOUND,
+                   "One or more files needed for tts_chunks are not present");
+      return;
+    }
+
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       pending_requests_.Add(hmi_apis::FunctionID::TTS_Speak);
       tts_is_ok = true;

@@ -361,6 +361,12 @@
         <element name="ATTENUATED" />
         <element name="NOT_AUDIBLE" />
     </enum>
+
+    <enum name="VideoStreamingState">
+        <description>Enumeration that describes possible states of video streaming. </description>
+        <element name="STREAMABLE" />
+        <element name="NOT_STREAMABLE" />
+    </enum>
     
     <enum name="SystemAction">
         <description>Enumeration that describes system actions that can be triggered.</description>
@@ -441,6 +447,7 @@
         <element name="LHPLUS_PHONEMES" />
         <element name="PRE_RECORDED" />
         <element name="SILENCE" />
+        <element name="FILE" />
     </enum>
     
     <enum name="VrCapabilities">
@@ -1094,6 +1101,33 @@
         <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
         </element>
     </enum>
+
+    <enum name="TPMS">
+        <element name="UNKNOWN">
+            <description>If set the status of the tire is not known.</description>
+        </element>
+        <element name="SYSTEM_FAULT">
+            <description>TPMS does not function.</description>
+        </element>
+        <element name="SENSOR_FAULT">
+            <description>The sensor of the tire does not function.</description>
+        </element>
+        <element name="LOW">
+            <description>TPMS is reporting a low tire pressure for the tire.</description>
+        </element>
+        <element name="SYSTEM_ACTIVE">
+            <description>TPMS is active and the tire pressure is monitored.</description>
+        </element>
+        <element name="TRAIN">
+            <description>TPMS is reporting that the tire must be trained.</description>
+        </element>
+        <element name="TRAINING_COMPLETE">
+            <description>TPMS reports the training for the tire is completed.</description>
+        </element>
+        <element name="NOT_TRAINED">
+            <description>TPMS reports the tire is not trained.</description>
+        </element>
+    </enum>
     
     <enum name="FuelType">
         <element name="GASOLINE" />
@@ -1128,6 +1162,12 @@
     <struct name="SingleTireStatus">
         <param name="status" type="ComponentVolumeStatus" mandatory="true">
             <description>See ComponentVolumeStatus.</description>
+        </param>
+        <param name="tpms" type="TPMS" mandatory="false">
+            <description>The status of TPMS according to the particular tire.</description>
+        </param>
+        <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+            <description>The pressure value of the particular tire in kilo pascal.</description>
         </param>
     </struct>
     
@@ -1946,6 +1986,9 @@
         <param name="displayType" type="DisplayType" mandatory="true">
             <description>The type of the display. See DisplayType</description>
         </param>
+        <param name="displayName" type="String" mandatory="false">
+            <description>The name of the display the app is connected to.</description>
+        </param>
         <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
             <description>A set of all fields that support text data. See TextField</description>
         </param>
@@ -2061,15 +2104,15 @@
         </param>
     </struct>         
     <struct name="TTSChunk">
-        <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
+        <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
         <param name="text" minlength="0" maxlength="500" type="String" mandatory="true">
             <description>
-                The text or phonemes to speak.
+                The text or phonemes to speak, or the name of the audio file to play.
                 May not be empty.
             </description>
         </param>
         <param name="type" type="SpeechCapabilities" mandatory="true">
-            <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
+            <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities</description>
         </param>
     </struct>         
     <struct name="Turn">
@@ -2186,6 +2229,7 @@
         <element name="EMERGENCY" />
         <element name="MEDIA" />
         <element name="FOTA" />
+        <element name="OEM_SPECIFIC" />
     </enum>         
     <enum name="AppHMIType">
         <description>Enumeration listing possible app types.</description>
@@ -5408,6 +5452,11 @@
                 Note that Proprietary requests should forward the binary data to the known proprietary module on the system.
             </description>
         </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
+        </param>
         <param name="fileName" type="String" maxlength="255" mandatory="false">
             <description>
                 Filename of HTTP data to store in predefined system staging area.
@@ -5808,6 +5857,9 @@
         <param name="systemContext" type="SystemContext" mandatory="true">
             <description>See SystemContext</description>
         </param>
+        <param name="videoStreamingState" type="VideoStreamingState" mandatory="true">
+            <description>See VideoStreamingState. If it is NOT_STREAMABLE, the app must stop streaming video to SDL.</description>
+        </param>
     </function>
     
     <function name="OnAppInterfaceUnregistered" functionID="OnAppInterfaceUnregisteredID" messagetype="notification">
@@ -6006,6 +6058,11 @@
         </description>
         <param name="requestType" type="RequestType" mandatory="true">
             <description>The type of system request.</description>
+        </param>
+        <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+            <description>
+                This parameter is filled for supporting OEM proprietary data exchanges.
+            </description>
         </param>
         <param name="url" type="String" maxlength="1000" mandatory="false">
             <description>

@@ -161,6 +161,12 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_))
         .WillByDefault(Return(std::vector<std::string>()));
+    ON_CALL(mock_policy_handler_, GetAppRequestTypeState(_))
+        .WillByDefault(Return(policy::RequestType::State::EMPTY));
+    ON_CALL(mock_policy_handler_, GetAppRequestSubTypes(_))
+        .WillByDefault(Return(std::vector<std::string>()));
+    ON_CALL(mock_policy_handler_, GetAppRequestSubTypeState(_))
+        .WillByDefault(Return(policy::RequestSubType::State::EMPTY));
     ON_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
@@ -344,6 +350,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   SmartObject& display_capabilities =
       (*expected_message)[am::hmi_response::display_capabilities];
   display_capabilities[am::hmi_response::display_type] = "test_display_type";
+  display_capabilities[am::hmi_response::display_name] = "GENERIC_DISPLAY";
   display_capabilities[am::hmi_response::text_fields] = "test_text_fields";
   display_capabilities[am::hmi_response::image_fields] = "test_image_fields";
   display_capabilities[am::hmi_response::media_clock_formats] =

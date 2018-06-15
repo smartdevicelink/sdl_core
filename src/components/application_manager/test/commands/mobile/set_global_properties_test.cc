@@ -154,6 +154,10 @@ class SetGlobalPropertiesRequestTest
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
     EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+    EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(help_prompt, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(timeout_prompt, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_,
                 RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
     SmartObject vr_help_title("title");
@@ -287,6 +291,12 @@ TEST_F(SetGlobalPropertiesRequestTest,
 
   ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*msg_vr)[am::strings::msg_params][am::strings::help_prompt], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   (*msg_vr)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -763,6 +773,10 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSHelpAndTimeout_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(help_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(timeout_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
@@ -795,6 +809,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyHelp_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(help_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
@@ -825,6 +841,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyTimeout_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(timeout_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));

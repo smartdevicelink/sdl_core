@@ -286,6 +286,11 @@ TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
              [am::strings::text] = "";
   CommandPtr command(CreateCommand<SpeakRequest>(request_));
 
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*request_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 
@@ -301,6 +306,11 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
              [am::strings::text] = "asda";
   CommandPtr command(CreateCommand<SpeakRequest>(request_));
 
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyTtsFiles(
+          (*request_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 

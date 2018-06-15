@@ -76,7 +76,7 @@ typedef Map<URL, 1, 255> URLList;
 typedef Map<URLList, 1, 255> ServiceEndpoints;
 
 typedef uint8_t NumberOfNotificationsType;
-typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 6>
+typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 7>
     NumberOfNotificationsPerMinute;
 
 typedef Array<Integer<uint16_t, 1, 1000>, 0, 5> SecondsBetweenRetries;
@@ -95,6 +95,8 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
+
+typedef Strings RequestSubTypes;
 
 #ifdef SDL_REMOTE_CONTROL
 typedef Map<Strings, 0, 255> RemoteRpcs;
@@ -139,6 +141,7 @@ struct ApplicationParams : PolicyBase {
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
+  Optional<RequestSubTypes> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;

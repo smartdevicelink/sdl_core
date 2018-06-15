@@ -54,6 +54,7 @@ using application_manager::commands::CommandImpl;
 using application_manager::MockMessageHelper;
 using test::components::policy_test::MockPolicyHandlerInterface;
 using namespace mobile_apis;
+using testing::SaveArg;
 using testing::Mock;
 using testing::Return;
 using testing::ReturnRef;
@@ -61,17 +62,35 @@ using testing::_;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
+const std::string kPolicyAppId = "fake-app-id";
 }  // namespace
 
 class OnSystemRequestNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  OnSystemRequestNotificationTest() : mock_app_(CreateMockApp()) {}
+
+  void PreConditions() {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+
+    ON_CALL(app_mngr_, GetPolicyHandler())
+        .WillByDefault(ReturnRef(mock_policy_handler_));
+    ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+  }
+
+ protected:
+  MockAppPtr mock_app_;
+  MockPolicyHandlerInterface mock_policy_handler_;
+};
 
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
-  const RequestType::eType kRequestType = RequestType::PROPRIETARY;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::PROPRIETARY;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -111,11 +130,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -148,11 +168,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -172,11 +193,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
-  const RequestType::eType kRequestType = RequestType::HTTP;
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::HTTP;
 
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
 
   SharedPtr<OnSystemRequestNotification> command =
       CreateCommand<OnSystemRequestNotification>(msg);
@@ -197,6 +219,71 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   ;
 
   command->Run();
+}
+
+TEST_F(
+    OnSystemRequestNotificationTest,
+    Run_RequestTypeAllowedAndRequestSubTypeDisallowed_MessageNotSentToMobile) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  const auto request_type = mobile_apis::RequestType::HTTP;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
+  const std::string request_subtype = "fakeSubType";
+  (*msg)[am::strings::msg_params][am::strings::request_subtype] =
+      request_subtype;
+
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kPolicyAppId, request_type))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))
+      .WillOnce(Return(false));
+
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).Times(0);
+
+  auto command = CreateCommand<OnSystemRequestNotification>(msg);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(OnSystemRequestNotificationTest,
+       Run_RequestTypeAllowedAndRequestSubTypeAllowed_SendMessageToMobile) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  const auto request_type = mobile_apis::RequestType::OEM_SPECIFIC;
+  (*msg)[strings::msg_params][strings::request_type] = request_type;
+  const std::string request_subtype = "fakeSubType";
+  (*msg)[am::strings::msg_params][am::strings::request_subtype] =
+      request_subtype;
+
+  PreConditions();
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(kPolicyAppId, request_type))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestSubTypeAllowed(kPolicyAppId, request_subtype))
+      .WillOnce(Return(true));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _))
+      .WillOnce((SaveArg<0>(&result)));
+
+  auto command = CreateCommand<OnSystemRequestNotification>(msg);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  EXPECT_EQ(application_manager::MessageType::kNotification,
+            (*result)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(request_type,
+            (*result)[strings::msg_params][strings::request_type].asInt());
+  EXPECT_EQ(
+      request_subtype,
+      (*result)[strings::msg_params][strings::request_subtype].asString());
 }
 
 }  // namespace on_system_request_notification

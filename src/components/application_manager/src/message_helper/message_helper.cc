@@ -2603,11 +2603,22 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (permissions.requestTypeChanged) {
     smart_objects::SmartObject request_types_array(
         smart_objects::SmartType_Array);
-    ;
+
     for (uint16_t index = 0; index < permissions.requestType.size(); ++index) {
       request_types_array[index] = permissions.requestType[index];
     }
     message[strings::msg_params][strings::request_type] = request_types_array;
+  }
+  if (permissions.requestSubTypeChanged) {
+    smart_objects::SmartObject request_subtypes_array(
+        smart_objects::SmartType_Array);
+
+    for (uint16_t index = 0; index < permissions.requestSubType.size();
+         ++index) {
+      request_subtypes_array[index] = permissions.requestSubType[index];
+    }
+    message[strings::msg_params][strings::request_subtype] =
+        request_subtypes_array;
   }
 
   app_mngr.ManageHMICommand(
@@ -2745,11 +2756,23 @@ mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
   }
 
   const std::string& file_name = image[strings::value].asString();
+  const std::string& full_file_path = GetAppFilePath(file_name, app, app_mngr);
 
+  image[strings::value] = full_file_path;
+  if (file_system::FileExists(full_file_path)) {
+    return mobile_apis::Result::SUCCESS;
+  }
+  return mobile_apis::Result::INVALID_DATA;
+}
+
+std::string MessageHelper::GetAppFilePath(std::string file_name,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr) {
   std::string str = file_name;
+  // Verify that file name is not only space characters
   str.erase(remove(str.begin(), str.end(), ' '), str.end());
   if (0 == str.size()) {
-    return mobile_apis::Result::INVALID_DATA;
+    return "";
   }
 
   std::string full_file_path;
@@ -2775,12 +2798,25 @@ mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
     full_file_path += file_name;
   }
 
-  image[strings::value] = full_file_path;
-  if (!file_system::FileExists(full_file_path)) {
-    return mobile_apis::Result::INVALID_DATA;
-  }
+  return full_file_path;
+}
 
-  return mobile_apis::Result::SUCCESS;
+mobile_apis::Result::eType MessageHelper::VerifyTtsFiles(
+    smart_objects::SmartObject& tts_chunks,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+  for (auto& tts_chunk : *(tts_chunks.asArray())) {
+    if (tts_chunk[strings::type] == mobile_apis::SpeechCapabilities::FILE) {
+      const std::string full_file_path =
+          GetAppFilePath(tts_chunk[strings::text].asString(), app, app_mngr);
+      tts_chunk[strings::text] = full_file_path;
+      if (!file_system::FileExists(full_file_path)) {
+        result = mobile_apis::Result::FILE_NOT_FOUND;
+      }
+    }
+  }
+  return result;
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(

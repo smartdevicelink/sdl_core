@@ -113,6 +113,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(system_context, const mobile_apis::SystemContext::eType());
   MOCK_CONST_METHOD0(audio_streaming_state,
                      const mobile_apis::AudioStreamingState::eType());
+  MOCK_CONST_METHOD0(video_streaming_state,
+                     const mobile_apis::VideoStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_CONST_METHOD0(CurrentHmiState, const application_manager::HmiStatePtr());
@@ -177,6 +179,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(IsSubscribedToSoftButton, bool(const uint32_t softbutton_id));
   MOCK_METHOD1(UnsubscribeFromSoftButtons, void(int32_t cmd_id));
   MOCK_CONST_METHOD0(IsAudioApplication, bool());
+  MOCK_CONST_METHOD0(IsVideoApplication, bool());
   MOCK_METHOD0(LoadPersistentFiles, void());
   // InitialApplicationData methods
   MOCK_CONST_METHOD0(app_types, const smart_objects::SmartObject*());

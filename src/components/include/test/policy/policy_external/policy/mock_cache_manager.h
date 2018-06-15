@@ -250,6 +250,13 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(OnDeviceSwitching,
                void(const std::string& device_id_from,
                     const std::string& device_id_to));
+  MOCK_CONST_METHOD2(GetAppRequestSubTypes,
+                     void(const std::string& policy_app_id,
+                          std::vector<std::string>& request_subtypes));
+  MOCK_CONST_METHOD1(GetAppRequestTypesState,
+                     RequestType::State(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
+                     RequestSubType::State(const std::string& policy_app_id));
 };
 
 }  // namespace policy_test
