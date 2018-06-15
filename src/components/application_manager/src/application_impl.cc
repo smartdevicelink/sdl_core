@@ -1138,6 +1138,10 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   return it != extensions_.end();
 }
 
+const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
+  return extensions_;
+}
+
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {
   sync_primitives::AutoLock lock(mobile_message_lock_);
