@@ -148,7 +148,6 @@ class MockApplication : public ::application_manager::Application {
                bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(UnsubscribeFromButton,
                bool(mobile_apis::ButtonName::eType btn_name));
-  MOCK_METHOD1(SubscribeToIVI, bool(uint32_t vehicle_info_type));
   MOCK_CONST_METHOD1(IsSubscribedToIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD1(UnsubscribeFromIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD0(ResetDataInNone, void());
