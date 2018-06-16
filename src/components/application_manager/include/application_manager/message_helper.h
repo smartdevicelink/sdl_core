@@ -785,7 +785,6 @@ class MessageHelper {
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
 
- private:
   /**
    * @brief CreateMessageForHMI Creates HMI message with prepared header
    * acccoring to message type
@@ -796,6 +795,7 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
+ private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
    * @param permissions application permissions.

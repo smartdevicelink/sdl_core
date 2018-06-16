@@ -159,20 +159,21 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
   application_manager_->GetRPCService().ManageHMICommand(request);
 }
 
-auto FindAppSubscribedToIVI(mobile_apis::VehicleDataType::eType ivi_data,
-                            application_manager::ApplicationManager& app_mngr) {
-  auto& applications = app_mngr.applications();
+application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
+    mobile_apis::VehicleDataType::eType ivi_data,
+    application_manager::ApplicationManager& app_mngr) {
+  auto applications = app_mngr.applications();
 
-  for (auto& app : applications) {
-    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
+  for (auto& app : applications.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
     if (ext.isSubscribedToVehicleInfo(ivi_data)) {
       return app;
     }
   }
-  return application_manager::ApplicationSharedPtr;
+  return application_manager::ApplicationSharedPtr();
 }
 
-auto GetUnsubscribeIVIRequest(
+smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
     int32_t ivi_id, application_manager::ApplicationManager& app_mngr) {
   using namespace smart_objects;
 
@@ -185,12 +186,11 @@ auto GetUnsubscribeIVIRequest(
     return std::string();
   };
   std::string key_name = find_ivi_name();
-  DCHECK_OR_RETURN_VOID(!key_name.empty());
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  DCHECK_OR_RETURN(!key_name.empty(), smart_objects::SmartObjectSPtr());
+  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[key_name] = true;
 
-  SmartObjectSPtr message = CreateMessageForHMI(
+  auto message = application_manager::MessageHelper::CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   DCHECK(message);
 
@@ -204,14 +204,15 @@ auto GetUnsubscribeIVIRequest(
 
 void VehicleInfoPlugin::DeleteSubscriptions(
     application_manager::ApplicationSharedPtr app) {
-  auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
+  auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   auto subscriptions = ext.Subscriptions();
   for (auto& ivi : subscriptions) {
     ext.unsubscribeFromVehicleInfo(ivi);
-    still_subscribed_app = FindAppSubscribedToIVI(ivi, application_manager_);
+    auto still_subscribed_app =
+        FindAppSubscribedToIVI(ivi, *application_manager_);
     if (!still_subscribed_app) {
-      auto message = GetUnsubscribeIVIRequest(ivi, application_manager_);
-      app_mngr.GetRPCService().ManageHMICommand(message);
+      auto message = GetUnsubscribeIVIRequest(ivi, *application_manager_);
+      application_manager_->GetRPCService().ManageHMICommand(message);
     }
   }
 }
