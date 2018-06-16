@@ -480,12 +480,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   EXPECT_CALL(*app_mock_, set_grammar_id(kTestGrammarId_));
 
-  for (size_t i = 0; i < app_vi.length(); ++i) {
-    EXPECT_CALL(
-        *app_mock_,
-        SubscribeToIVI(static_cast<mobile_apis::VehicleDataType::eType>(i)));
-  }
-
   smart_objects::SmartObjectList requests;
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));

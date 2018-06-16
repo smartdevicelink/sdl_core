@@ -31,14 +31,17 @@
  */
 
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
-VehicleInfoAppExtension::VehicleInfoAppExtension(
-    application_manager::AppExtensionUID uid)
-    : app_mngr::AppExtension(uid) {
+unsigned VehicleInfoAppExtension::VehicleInfoAppExtensionUID = 146;
+
+VehicleInfoAppExtension::VehicleInfoAppExtension()
+    : app_mngr::AppExtension(
+          VehicleInfoAppExtension::VehicleInfoAppExtensionUID) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -46,10 +49,10 @@ VehicleInfoAppExtension::~VehicleInfoAppExtension() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void VehicleInfoAppExtension::subscribeToVehicleInfo(
+bool VehicleInfoAppExtension::subscribeToVehicleInfo(
     const VehicleDataType vehicle_data) {
   LOG4CXX_DEBUG(logger_, vehicle_data);
-  subscribed_data_.insert(vehicle_data);
+  return subscribed_data_.insert(vehicle_data).second;
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
@@ -102,5 +105,18 @@ void VehicleInfoAppExtension::ProcessResumption(
     //          ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(
     //              application, application_manager_));
   }
+}
+
+VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
+    application_manager::Application& app) {
+  auto ext_ptr =
+      app.QueryInterface(VehicleInfoAppExtension::VehicleInfoAppExtensionUID);
+  DCHECK(ext_ptr);
+  DCHECK(dynamic_cast<VehicleInfoAppExtension*>(ext_ptr.get()));
+  auto vi_app_extension =
+      application_manager::AppExtensionPtr::static_pointer_cast<
+          VehicleInfoAppExtension>(ext_ptr);
+  DCHECK(vi_app_extension);
+  return *vi_app_extension;
 }
 }

@@ -760,14 +760,6 @@ bool ApplicationImpl::UnsubscribeFromButton(
   return subscribed_buttons_.erase(btn_name);
 }
 
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_ptr_);
-  return subscribed_vehicle_info_
-      .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
-      .second;
-}
-
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   sync_primitives::AutoLock lock(vi_lock_ptr_);
   VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
