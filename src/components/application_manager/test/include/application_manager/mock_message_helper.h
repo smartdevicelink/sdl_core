@@ -288,10 +288,6 @@ class MockMessageHelper {
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD3(SendUnsubscribeIVIRequest,
-               void(int32_t ivi_id,
-                    ApplicationSharedPtr application,
-                    ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };

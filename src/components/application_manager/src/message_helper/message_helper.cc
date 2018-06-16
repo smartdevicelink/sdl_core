@@ -623,40 +623,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
   app_mngr.GetRPCService().ManageHMICommand(message);
 }
 
-void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                              ApplicationSharedPtr application,
-                                              ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-
-  std::string key_name;
-  for (auto item : vehicle_data_) {
-    if (ivi_id == item.second) {
-      key_name = item.first;
-      break;
-    }
-  }
-
-  if (key_name.empty()) {
-    return;
-  }
-
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[key_name] = true;
-
-  SmartObjectSPtr message = CreateMessageForHMI(
-      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-  DCHECK(message);
-
-  SmartObject& object = *message;
-  object[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
-
-  object[strings::msg_params] = msg_params;
-
-  app_mngr.GetRPCService().ManageHMICommand(message);
-}
-
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }

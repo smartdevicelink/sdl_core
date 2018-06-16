@@ -763,17 +763,6 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
-   * @brief SendUnsubscribeIVIRequest sends request to HMI to remove vehicle
-   * data subscription for application
-   * @param ivi_id Vehicle data item id
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                        ApplicationSharedPtr application,
-                                        ApplicationManager& app_mngr);
-
-  /**
    * @brief Sends HMI status notification to mobile
    * @param application_impl application with changed HMI status
    **/
