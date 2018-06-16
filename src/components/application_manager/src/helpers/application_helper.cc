@@ -87,20 +87,6 @@ void DeleteButtonSubscriptions(ApplicationSharedPtr app,
   }
 }
 
-void DeleteVISubscriptions(ApplicationSharedPtr app,
-                           ApplicationManager& app_manager) {
-  VehicleInfoSubscriptions ivi = app->SubscribedIVI().GetData();
-
-  for (auto i : ivi) {
-    app->UnsubscribeFromIVI(i);
-    SubscribedToIVIPredicate p(i);
-    auto app = FindApp(app_manager.applications(), p);
-    if (!app) {
-      MessageHelper::SendUnsubscribeIVIRequest(i, app, app_manager);
-    }
-  }
-}
-
 void CleanupAppFiles(ApplicationSharedPtr app) {
   const auto icon_file = app->app_icon_path();
 
@@ -139,8 +125,12 @@ void DeleteApplicationData(ApplicationSharedPtr app,
   DeleteChoiceSets(app, app_manager);
   DeleteGlobalProperties(app, app_manager);
   DeleteButtonSubscriptions(app, app_manager);
-  DeleteVISubscriptions(app, app_manager);
   CleanupAppFiles(app);
+  app_manager.GetPluginManager().ForEachPlugin(
+      [&app](plugin_manager::RPCPlugin& plugin) {
+        plugin.OnApplicationEvent(
+            plugin_manager::ApplicationEvent::kDeleteApplicationData, app);
+      });
 }
 
 }  // namespace application_manager
