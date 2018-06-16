@@ -428,8 +428,6 @@ class ApplicationImpl : public virtual Application,
    */
   bool AddExtension(AppExtensionPtr extention) OVERRIDE;
 
-  std::list<AppExtensionPtr> AppExtensions();
-
   /**
    * @brief Remove extension from application
    * @param uid uid of extension
