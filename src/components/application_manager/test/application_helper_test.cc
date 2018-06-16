@@ -245,8 +245,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   EXPECT_CALL(*mock_message_helper_,
               SendUnsubscribeButtonNotification(_, _, _));
 
-  EXPECT_CALL(*mock_message_helper_, SendUnsubscribeIVIRequest(_, _, _));
-
   // Act
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
 }

@@ -549,11 +549,4 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                              ApplicationSharedPtr application,
-                                              ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendUnsubscribeIVIRequest(
-      ivi_id, application, app_mngr);
-}
-
 }  // namespace application_manager
