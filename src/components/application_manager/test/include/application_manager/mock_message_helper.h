@@ -119,6 +119,9 @@ class MockMessageHelper {
                     ApplicationManager& application_manager,
                     hmi_apis::Common_HMILevel::eType level,
                     bool send_policy_priority));
+  MOCK_METHOD2(CreateMessageForHMI,
+               smart_objects::SmartObjectSPtr(hmi_apis::messageType::eType,
+                                              const uint32_t));
   MOCK_METHOD2(SendHMIStatusNotification,
                void(const Application& application_impl,
                     ApplicationManager& application_manager));
