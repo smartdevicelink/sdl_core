@@ -56,7 +56,8 @@ enum PolicyEvent { kApplicationPolicyUpdated = 0, kApplicationsDisabled };
 enum ApplicationEvent {
   kApplicationExit = 0,
   kApplicationRegistered,
-  kApplicationUnregistered
+  kApplicationUnregistered,
+  kDeleteApplicationData
 };
 
 class RPCPlugin {

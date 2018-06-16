@@ -66,6 +66,8 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
                                      VehicleInfoAppExtension& ext);
 
  private:
+  void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
   app_mngr::ApplicationManager* application_manager_;
   static const VehicleData vehicle_data_;
