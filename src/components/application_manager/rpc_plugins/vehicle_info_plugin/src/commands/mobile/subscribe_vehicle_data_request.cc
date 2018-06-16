@@ -39,6 +39,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -269,7 +270,8 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       app_mngr::VehicleInfoSubscriptions::const_iterator key =
           vi_waiting_for_subscribe_.begin();
       for (; key != vi_waiting_for_subscribe_.end(); ++key) {
-        app->SubscribeToIVI(*key);
+        auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+        ext.subscribeToVehicleInfo(*key);
       }
     }
   }
@@ -436,7 +438,9 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
                         "There are apps subscribed already for "
                         "VehicleDataType: "
                             << key_type);
-          if (!app->SubscribeToIVI(static_cast<uint32_t>(key_type))) {
+          auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+
+          if (!ext.subscribeToVehicleInfo(key_type)) {
             LOG4CXX_ERROR(
                 logger_,
                 "Unable to subscribe for VehicleDataType: " << key_type);

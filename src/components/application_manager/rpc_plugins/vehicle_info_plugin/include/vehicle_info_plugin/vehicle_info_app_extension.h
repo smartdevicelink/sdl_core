@@ -47,12 +47,12 @@ typedef mobile_apis::VehicleDataType::eType VehicleDataType;
  */
 typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
-class VehicleInfoAppExtension : app_mngr::AppExtension {
+class VehicleInfoAppExtension : public app_mngr::AppExtension {
  public:
-  explicit VehicleInfoAppExtension(app_mngr::AppExtensionUID uid);
+  explicit VehicleInfoAppExtension();
   virtual ~VehicleInfoAppExtension();
 
-  void subscribeToVehicleInfo(const VehicleDataType vehicle_data);
+  bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
   void unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
   void unsubscribeFromVehicleInfo();
   bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
@@ -61,6 +61,9 @@ class VehicleInfoAppExtension : app_mngr::AppExtension {
   void SaveResumptionData(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
   void PorcessResumption(const smart_objects::SmartObject& resumption_data) OVERRIDE;
+  static unsigned VehicleInfoAppExtensionUID;
+  static VehicleInfoAppExtension& ExtractVIExtension(
+      application_manager::Application& app);
 
  private:
   VehicleInfoSubscriptions subscribed_data_;

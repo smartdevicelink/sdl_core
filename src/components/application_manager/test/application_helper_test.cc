@@ -147,7 +147,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  EXPECT_TRUE(app_impl_->SubscribeToIVI(static_cast<uint32_t>(vi)));
+
   EXPECT_TRUE(app_impl_->SubscribeToButton(button));
 
   const std::string some_string = "some_string";
@@ -230,8 +230,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  app_impl_->SubscribeToIVI(static_cast<uint32_t>(
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL));
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
