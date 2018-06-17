@@ -36,6 +36,9 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "application_manager/helpers/application_helper.h"
+#include "utils/macro.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -69,9 +72,20 @@ void OnVehicleDataNotification::Run() {
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
+      auto vehicle_info = static_cast<mobile_apis::VehicleDataType::eType>(
+          (*message_)[strings::msg_params][it->first].asInt());
+      application_manager_.IviInfoUpdated(it->second, vehicle_info);
+
+      auto subscribed_to_ivi_predicate =
+          [vehicle_info](const ApplicationSharedPtr app) {
+            DCHECK_OR_RETURN(app, false);
+            auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+            return ext.subscribeToVehicleInfo(vehicle_info);
+          };
+
       const std::vector<ApplicationSharedPtr>& applications =
-          application_manager_.IviInfoUpdated(
-              it->second, (*message_)[strings::msg_params][it->first].asInt());
+          application_manager::FindAllApps(application_manager_.applications(),
+                                           subscribed_to_ivi_predicate);
 
       std::vector<ApplicationSharedPtr>::const_iterator app_it =
           applications.begin();

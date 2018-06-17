@@ -283,8 +283,8 @@ class ApplicationManagerImpl
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  std::vector<ApplicationSharedPtr> IviInfoUpdated(
-      mobile_apis::VehicleDataType::eType vehicle_info, int value) OVERRIDE;
+  void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
+                      int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
