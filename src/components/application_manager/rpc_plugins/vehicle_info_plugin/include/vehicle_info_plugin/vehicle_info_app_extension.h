@@ -53,7 +53,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   virtual ~VehicleInfoAppExtension();
 
   bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
-  void unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
+  bool unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
   void unsubscribeFromVehicleInfo();
   bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
   VehicleInfoSubscriptions Subscriptions();
