@@ -203,9 +203,6 @@ void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
 
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
 
-  EXPECT_CALL(*mock_app, IsSubscribedToIVI(kVehicleType))
-      .WillRepeatedly(Return(true));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -232,8 +229,6 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
-  EXPECT_CALL(*mock_app, IsSubscribedToIVI(kVehicleType))
-      .WillRepeatedly(Return(false));
 
   EXPECT_CALL(
       mock_rpc_service_,

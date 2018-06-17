@@ -433,8 +433,8 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual AppSharedPtrs IviInfoUpdated(
-      mobile_apis::VehicleDataType::eType vehicle_info, int value) = 0;
+  virtual void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
+                              int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
       smart_objects::SmartObject>& request_for_registration) = 0;

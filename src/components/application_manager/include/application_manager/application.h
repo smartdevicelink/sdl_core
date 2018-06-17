@@ -160,11 +160,6 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 typedef std::set<uint32_t> SoftButtonID;
 
 /**
- * @brief Defines set of vehicle info types
- */
-typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
-
-/**
  * @brief Defines set of buttons subscription
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
@@ -624,8 +619,6 @@ class Application : public virtual InitialApplicationData,
       mobile_apis::ButtonName::eType btn_name) = 0;
   virtual bool UnsubscribeFromButton(
       mobile_apis::ButtonName::eType btn_name) = 0;
-
-  virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
 
   /**
    * @brief ResetDataInNone reset data counters in NONE

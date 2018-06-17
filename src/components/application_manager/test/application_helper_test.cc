@@ -172,8 +172,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != app_impl_->FindCommand(cmd_id));
   EXPECT_TRUE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_TRUE(NULL != app_impl_->FindChoiceSet(choice_set_id));
-  EXPECT_TRUE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_TRUE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   auto help_prompt = app_impl_->help_prompt();
   EXPECT_TRUE(help_prompt->asString() == some_string);
   auto timeout_prompt = app_impl_->timeout_prompt();
@@ -198,7 +196,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_FALSE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_FALSE(NULL != app_impl_->FindChoiceSet(choice_set_id));
   EXPECT_FALSE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_FALSE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   help_prompt = app_impl_->help_prompt();
   EXPECT_FALSE(help_prompt->asString() == some_string);
   timeout_prompt = app_impl_->timeout_prompt();

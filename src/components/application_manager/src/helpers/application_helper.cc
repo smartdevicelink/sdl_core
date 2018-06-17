@@ -106,14 +106,6 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger, "ApplicationManager")
 
-SubscribedToIVIPredicate::SubscribedToIVIPredicate(uint32_t vehicle_info)
-    : vehicle_info_(vehicle_info) {}
-
-bool SubscribedToIVIPredicate::operator()(
-    const ApplicationSharedPtr app) const {
-  return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
-}
-
 void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   LOG4CXX_AUTO_TRACE(logger);

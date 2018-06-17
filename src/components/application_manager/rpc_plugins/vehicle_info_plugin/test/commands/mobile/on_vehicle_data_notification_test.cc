@@ -107,40 +107,6 @@ MATCHER_P2(CheckMessageData, key, value, "") {
                                 kAreMsgParamsCorrect);
 }
 
-TEST_F(OnVehicleDataNotificationTest,
-       Run_NotEmptyListOfAppsSubscribedForEvent_SUCCESS) {
-  am::VehicleData test_vehicle_data;
-  test_vehicle_data.insert(am::VehicleData::value_type(
-      am::strings::fuel_level,
-      mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(test_vehicle_data));
-
-  const int kFuelLevel = 100;
-  (*command_msg_)[am::strings::msg_params][am::strings::fuel_level] =
-      kFuelLevel;
-
-  MockAppPtr mock_app(CreateMockApp());
-  std::vector<ApplicationSharedPtr> applications;
-  applications.push_back(mock_app);
-
-  EXPECT_CALL(
-      app_mngr_,
-      IviInfoUpdated(mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL,
-                     kFuelLevel)).WillOnce(Return(applications));
-
-  EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
-  ::utils::custom_string::CustomString dummy_name("test_app");
-  ON_CALL(*mock_app, name()).WillByDefault(ReturnRef(dummy_name));
-
-  EXPECT_CALL(mock_rpc_service_,
-              SendMessageToMobile(
-                  CheckMessageData(am::strings::fuel_level, kFuelLevel), _));
-
-  command_->Run();
-}
-
 }  // namespace on_vehicle_data_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test

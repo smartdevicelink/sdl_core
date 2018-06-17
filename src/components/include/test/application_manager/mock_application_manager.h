@@ -163,9 +163,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnHMIStartedCooperation, void());
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
-               std::vector<application_manager::ApplicationSharedPtr>(
-                   mobile_apis::VehicleDataType::eType vehicle_info,
-                   int value));
+               void(mobile_apis::VehicleDataType::eType vehicle_info,
+                    int value));
   MOCK_METHOD1(RegisterApplication,
                application_manager::ApplicationSharedPtr(const utils::SharedPtr<
                    smart_objects::SmartObject>& request_for_registration));
