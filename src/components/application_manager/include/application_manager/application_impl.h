@@ -212,7 +212,6 @@ class ApplicationImpl : public virtual Application,
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
   bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
-  bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
   DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
 

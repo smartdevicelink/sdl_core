@@ -40,6 +40,7 @@
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
 #include "utils/helpers.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -153,7 +154,8 @@ void UnsubscribeVehicleDataRequest::Run() {
           continue;
         }
 
-        if (!app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
+        if (!VehicleInfoAppExtension::ExtractVIExtension(*app)
+                 .unsubscribeFromVehicleInfo(it->second)) {
           LOG4CXX_ERROR(logger_,
                         "Unable to unsubscribe from "
                         "VehicleDataType: "

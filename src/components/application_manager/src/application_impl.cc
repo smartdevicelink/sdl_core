@@ -746,12 +746,6 @@ bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   return (subscribed_vehicle_info_.end() != it);
 }
 
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-}
-
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
