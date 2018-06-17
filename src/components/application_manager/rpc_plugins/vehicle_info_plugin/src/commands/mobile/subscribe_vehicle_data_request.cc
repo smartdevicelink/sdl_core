@@ -347,7 +347,8 @@ void SubscribeVehicleDataRequest::UnsubscribeFailedSubscriptions(
                           << " is unsuccessfull. "
                              "Unsubscribing app with connection key "
                           << connection_key() << " from it.");
-        app->UnsubscribeFromIVI(it->second);
+        VehicleInfoAppExtension::ExtractVIExtension(*app)
+            .unsubscribeFromVehicleInfo(it->second);
       }
     }
   }
