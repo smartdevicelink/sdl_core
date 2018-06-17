@@ -55,13 +55,15 @@ bool VehicleInfoAppExtension::subscribeToVehicleInfo(
   return subscribed_data_.insert(vehicle_data).second;
 }
 
-void VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
+bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
     const VehicleDataType vehicle_data) {
   LOG4CXX_DEBUG(logger_, vehicle_data);
   auto it = subscribed_data_.find(vehicle_data);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
+    return true;
   }
+  return false;
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
