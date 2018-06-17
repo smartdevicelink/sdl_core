@@ -626,7 +626,6 @@ class Application : public virtual InitialApplicationData,
       mobile_apis::ButtonName::eType btn_name) = 0;
 
   virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
-  virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
   /**
    * @brief ResetDataInNone reset data counters in NONE

@@ -201,9 +201,6 @@ void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
   EXPECT_CALL(*mock_app, IsSubscribedToIVI(kVehicleType))
       .WillRepeatedly(Return(true));
 
-  EXPECT_CALL(*mock_app, UnsubscribeFromIVI(kVehicleType))
-      .WillRepeatedly(Return(true));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
