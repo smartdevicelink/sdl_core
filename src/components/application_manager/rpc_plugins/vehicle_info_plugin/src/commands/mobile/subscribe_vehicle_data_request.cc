@@ -359,7 +359,10 @@ struct SubscribedToIVIPredicate {
   SubscribedToIVIPredicate(int32_t vehicle_info)
       : vehicle_info_(vehicle_info) {}
   bool operator()(const ApplicationSharedPtr app) const {
-    return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
+    DCHECK_OR_RETURN(app, false);
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    return ext.subscribeToVehicleInfo(
+        static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_));
   }
 };
 
