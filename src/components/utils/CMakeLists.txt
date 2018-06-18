@@ -118,7 +118,7 @@ list(APPEND LIBRARIES -lboost_system -lboost_filesystem)
 target_link_libraries("Utils" ${LIBRARIES})
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" install-3rd_party_logger)
+  add_dependencies("Utils" install-3rd_party_logger Boost)
 endif()
 
 if(BUILD_TESTS)
