@@ -42,11 +42,9 @@ namespace commands = application_manager::commands;
 namespace plugins = application_manager::plugin_manager;
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
-  typedef std::map<std::string, mobile_apis::VehicleDataType::eType>
-      VehicleData;
-
  public:
   VehicleInfoPlugin();
+
   bool Init(app_mngr::ApplicationManager& application_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
@@ -62,6 +60,12 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send Subscribe vehicle data requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   */
   void ProcessResumptionSubscription(app_mngr::Application& app,
                                      VehicleInfoAppExtension& ext);
 
