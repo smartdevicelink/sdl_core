@@ -153,6 +153,30 @@ class CryptoManagerImpl : public CryptoManager {
  private:
   bool AreForceProtectionSettingsCorrect() const;
   bool set_certificate(const std::string& cert_data);
+
+  /**
+   * @brief Updates certificate and private key for the current SSL context
+   * @param certificate new certificate to update
+   * @param key new private key to update
+   * @return true if certificate and private key were updated successfully,
+   * otherwise returns false
+   */
+  bool UpdateModuleCertificateData(X509* certificate, EVP_PKEY* key);
+
+  /**
+   * @brief Loads X509 certificate from file specified in CryptoManagerSettings
+   * @return returns pointer to the loaded X509 certificate in case of success
+   * otherwise returns NULL
+   */
+  X509* LoadModuleCertificateFromFile();
+
+  /**
+   * @brief Loads private key from file specified in CryptoManagerSettings
+   * @return returns pointer to the loaded private key in case of success
+   * otherwise returns NULL
+   */
+  EVP_PKEY* LoadModulePrivateKeyFromFile();
+
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
   static uint32_t instance_count_;
