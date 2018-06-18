@@ -145,7 +145,10 @@ void UnsubscribeVehicleDataRequest::Run() {
         ++items_to_unsubscribe;
 
         mobile_apis::VehicleDataType::eType key_type = it->second;
-        if (!app->IsSubscribedToIVI(key_type)) {
+        const auto is_subscribed =
+            VehicleInfoAppExtension::ExtractVIExtension(*app)
+                .isSubscribedToVehicleInfo(key_type);
+        if (!is_subscribed) {
           ++unsubscribed_items;
           vi_already_unsubscribed_by_this_app_.insert(key_type);
           response_params[key_name][strings::data_type] = key_type;
@@ -381,7 +384,7 @@ struct SubscribedToIVIPredicate {
   bool operator()(const ApplicationSharedPtr app) const {
     DCHECK_OR_RETURN(app, false);
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    return ext.subscribeToVehicleInfo(
+    return ext.isSubscribedToVehicleInfo(
         static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_));
   }
 };

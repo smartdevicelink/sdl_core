@@ -213,7 +213,6 @@ class ApplicationImpl : public virtual Application,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
 
   /**
@@ -472,7 +471,6 @@ class ApplicationImpl : public virtual Application,
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
