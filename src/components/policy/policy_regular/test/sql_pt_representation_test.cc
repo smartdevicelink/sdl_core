@@ -78,12 +78,12 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static const std::string kDatabaseName;
   static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
-  std::auto_ptr<NiceMock<MockPolicySettings> > policy_settings_;
+  std::unique_ptr<NiceMock<MockPolicySettings> > policy_settings_;
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
     reps = new SQLPTRepresentation;
-    policy_settings_ = std::auto_ptr<NiceMock<MockPolicySettings> >(
+    policy_settings_ = std::unique_ptr<NiceMock<MockPolicySettings> >(
         new NiceMock<MockPolicySettings>());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));

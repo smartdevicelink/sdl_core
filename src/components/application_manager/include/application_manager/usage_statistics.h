@@ -66,7 +66,7 @@ class UsageStatistics {
   void RecordTLSError();
 
  private:
-  std::auto_ptr<usage_statistics::AppStopwatch> time_in_hmi_state_sptr_;
+  std::unique_ptr<usage_statistics::AppStopwatch> time_in_hmi_state_sptr_;
   usage_statistics::AppInfo app_registration_language_gui_;
   usage_statistics::AppInfo app_registration_language_vui_;
   usage_statistics::AppCounter count_of_rejected_rpc_calls_;

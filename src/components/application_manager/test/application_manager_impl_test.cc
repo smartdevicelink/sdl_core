@@ -187,7 +187,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
-  std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
   uint32_t app_id_;
   utils::SharedPtr<MockApplication> mock_app_ptr_;
