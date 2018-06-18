@@ -39,6 +39,7 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_app_extension.h"
 #include "utils/data_accessor.h"
 #include "config_profile/profile.h"
 #include "application_manager/policies/policy_handler.h"
@@ -146,6 +147,9 @@ class ResumptionDataTest : public ::testing::Test {
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_application_manager_;
+  utils::SharedPtr<NiceMock<application_manager_test::MockAppExtension> >
+      mock_app_extension_;
+  std::list<application_manager::AppExtensionPtr> extensions_;
 };
 
 }  // namespace resumption_test
