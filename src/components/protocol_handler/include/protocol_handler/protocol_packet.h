@@ -252,6 +252,12 @@ class ProtocolPacket {
                                 const size_t messageSize);
 
   /**
+   * @brief Calculates FIRST_FRAME data for further handling of consecutive
+   * frames
+   */
+  void HandleRawFirstFrameData(const uint8_t* message);
+
+  /**
    * \brief Getter of protocol version.
    */
   uint8_t protocol_version() const;

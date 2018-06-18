@@ -113,6 +113,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(system_context, const mobile_apis::SystemContext::eType());
   MOCK_CONST_METHOD0(audio_streaming_state,
                      const mobile_apis::AudioStreamingState::eType());
+  MOCK_CONST_METHOD0(video_streaming_state,
+                     const mobile_apis::VideoStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_CONST_METHOD0(secondary_device, connection_handler::DeviceHandle());
@@ -184,6 +186,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(IsSubscribedToSoftButton, bool(const uint32_t softbutton_id));
   MOCK_METHOD1(UnsubscribeFromSoftButtons, void(int32_t cmd_id));
   MOCK_CONST_METHOD0(IsAudioApplication, bool());
+  MOCK_CONST_METHOD0(IsVideoApplication, bool());
   MOCK_METHOD0(LoadPersistentFiles, void());
   // InitialApplicationData methods
   MOCK_CONST_METHOD0(app_types, const smart_objects::SmartObject*());
@@ -223,6 +226,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(day_color_scheme, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(night_color_scheme, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(display_layout, const std::string&());
   MOCK_METHOD1(load_global_properties,
                void(const smart_objects::SmartObject& so));
   MOCK_METHOD1(set_help_prompt,
@@ -246,6 +252,11 @@ class MockApplication : public ::application_manager::Application {
                void(const smart_objects::SmartObject& menu_title));
   MOCK_METHOD1(set_menu_icon,
                void(const smart_objects::SmartObject& menu_icon));
+  MOCK_METHOD1(set_day_color_scheme,
+               void(const smart_objects::SmartObject& color_scheme));
+  MOCK_METHOD1(set_night_color_scheme,
+               void(const smart_objects::SmartObject& color_scheme));
+  MOCK_METHOD1(set_display_layout, void(const std::string& layout));
   MOCK_CONST_METHOD0(audio_stream_retry_number, uint32_t());
   MOCK_METHOD1(set_audio_stream_retry_number,
                void(const uint32_t& audio_stream_retry_number));

@@ -247,6 +247,12 @@ TEST_F(PerformAudioPassThruRequestTest,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
+  EXPECT_CALL(mock_message_helper_,
+              VerifyTtsFiles((*mobile_request)[am::strings::msg_params]
+                                              [am::strings::initial_prompt],
+                             _,
+                             _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   command->Run();
   command->on_event(event_tts);
   command->on_event(event_ui);
@@ -319,6 +325,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
       kCorrectPrompt;
   msg_params_[am::strings::initial_prompt][0][am::strings::type] = kCorrectType;
+
+  EXPECT_CALL(mock_message_helper_,
+              VerifyTtsFiles(msg_params_[am::strings::initial_prompt], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   MessageSharedPtr speak_reqeust_result_msg;
   MessageSharedPtr perform_result_msg;
@@ -405,6 +415,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::audio_pass_display_text1] = kCorrectDisplayText1;
   msg_params_[am::strings::audio_pass_display_text2] = kCorrectDisplayText2;
 
+  EXPECT_CALL(mock_message_helper_,
+              VerifyTtsFiles(msg_params_[am::strings::initial_prompt], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   MessageSharedPtr speak_reqeust_result_msg;
   MessageSharedPtr perform_result_msg;
   {
@@ -468,6 +482,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
       kCorrectPrompt;
   msg_params_[am::strings::initial_prompt][0][am::strings::type] = kCorrectType;
+
+  EXPECT_CALL(mock_message_helper_,
+              VerifyTtsFiles(msg_params_[am::strings::initial_prompt], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   const bool muted = false;
 
@@ -743,6 +761,11 @@ TEST_F(PerformAudioPassThruRequestTest,
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
       kCorrectPrompt;
   msg_params_[am::strings::initial_prompt][0][am::strings::type] = kCorrectType;
+
+  EXPECT_CALL(mock_message_helper_,
+              VerifyTtsFiles(msg_params_[am::strings::initial_prompt], _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   MessageSharedPtr speak_reqeust_result_msg;
   MessageSharedPtr perform_result_msg;
   ON_CALL(app_mngr_, GetNextHMICorrelationID())

@@ -178,6 +178,23 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    smart_objects::SmartObject& tts_name =
+        (*message_)[strings::msg_params][strings::tts_name];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(tts_name, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_ERROR(logger_,
+                    "MessageHelper::VerifyTtsFiles return "
+                        << verification_result);
+      SendResponse(false,
+                   mobile_apis::Result::FILE_NOT_FOUND,
+                   "One or more files needed for tts_name are not present");
+      return;
+    }
+  }
+
   const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
 
   const HmiInterfaces::InterfaceState vr_state =

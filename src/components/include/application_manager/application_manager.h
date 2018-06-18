@@ -685,6 +685,7 @@ class ApplicationManager {
       utils::SharedPtr<Application> app,
       mobile_apis::HMILevel::eType hmi_level,
       mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::VideoStreamingState::eType video_state,
       mobile_apis::SystemContext::eType system_context) const = 0;
 
   /**
@@ -743,6 +744,10 @@ class ApplicationManager {
   virtual void OnTimerSendTTSGlobalProperties() = 0;
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
+
+  virtual bool IsSOStructValid(
+      const hmi_apis::StructIdentifiers::eType struct_id,
+      const smart_objects::SmartObject& display_capabilities) = 0;
 };
 
 }  // namespace application_manager

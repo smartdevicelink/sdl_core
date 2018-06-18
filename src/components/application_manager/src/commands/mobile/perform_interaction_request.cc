@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <numeric>
 #include <string.h>
 #include <string>
 #include "application_manager/commands/mobile/perform_interaction_request.h"
@@ -536,9 +537,21 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     }
   }
 
+  std::vector<std::string> invalid_params;
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
-    msg_params[strings::help_prompt] =
+    smart_objects::SmartObject& help_prompt =
         (*message_)[strings::msg_params][strings::help_prompt];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_WARN(logger_,
+                   "MessageHelper::VerifyTtsFiles return "
+                       << verification_result);
+      invalid_params.push_back("help_prompt");
+    } else {
+      msg_params[strings::help_prompt] = help_prompt;
+    }
   } else {
     if (choice_list.length() != 0) {
       msg_params[strings::help_prompt] =
@@ -573,8 +586,20 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
-    msg_params[strings::timeout_prompt] =
+    smart_objects::SmartObject& timeout_prompt =
         (*message_)[strings::msg_params][strings::timeout_prompt];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(
+            timeout_prompt, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_WARN(logger_,
+                   "MessageHelper::VerifyTtsFiles return "
+                       << verification_result);
+      invalid_params.push_back("timeout_prompt");
+    } else {
+      msg_params[strings::timeout_prompt] = timeout_prompt;
+    }
   } else {
     if (msg_params.keyExists(strings::help_prompt)) {
       msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
@@ -582,8 +607,34 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
-    msg_params[strings::initial_prompt] =
+    smart_objects::SmartObject& initial_prompt =
         (*message_)[strings::msg_params][strings::initial_prompt];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(
+            initial_prompt, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_WARN(logger_,
+                   "MessageHelper::VerifyTtsFiles return "
+                       << verification_result);
+      invalid_params.push_back("initial_prompt");
+    } else {
+      msg_params[strings::initial_prompt] = initial_prompt;
+    }
+  }
+
+  if (!invalid_params.empty()) {
+    const std::string params_list =
+        std::accumulate(std::begin(invalid_params),
+                        std::end(invalid_params),
+                        std::string(""),
+                        [](std::string& first, std::string& second) {
+                          return first.empty() ? second : first + ", " + second;
+                        });
+    const std::string info =
+        "One or more files needed for " + params_list + " are not present";
+    SendResponse(false, mobile_apis::Result::FILE_NOT_FOUND, info.c_str());
+    return;
   }
 
   mobile_apis::InteractionMode::eType mode =

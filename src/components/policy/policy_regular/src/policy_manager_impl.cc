@@ -219,10 +219,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
 
-    if (pt_update->policy_table.module_config.certificate.is_initialized()) {
-      listener_->OnCertificateUpdated(
-          *(pt_update->policy_table.module_config.certificate));
-    }
+    listener_->OnCertificateUpdated(
+        *(pt_update->policy_table.module_config.certificate));
 
     std::map<std::string, StringArray> app_hmi_types;
     cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
@@ -383,6 +381,25 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   std::vector<std::string> request_types;
   cache_->GetAppRequestTypes(policy_app_id, request_types);
   return request_types;
+}
+
+RequestType::State PolicyManagerImpl::GetAppRequestTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetAppRequestTypesState(policy_app_id);
+}
+
+RequestSubType::State PolicyManagerImpl::GetAppRequestSubTypesState(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetAppRequestSubTypesState(policy_app_id);
+}
+
+const std::vector<std::string> PolicyManagerImpl::GetAppRequestSubTypes(
+    const std::string& policy_app_id) const {
+  std::vector<std::string> request_subtypes;
+  cache_->GetAppRequestSubTypes(policy_app_id, request_subtypes);
+  return request_subtypes;
 }
 
 const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {

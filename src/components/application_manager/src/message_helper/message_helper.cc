@@ -175,6 +175,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_FUELLEVEL_STATE),
     std::make_pair(strings::instant_fuel_consumption,
                    mobile_apis::VehicleDataType::VEHICLEDATA_FUELCONSUMPTION),
+    std::make_pair(strings::fuel_range,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_FUELRANGE),
     std::make_pair(strings::external_temp,
                    mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
     std::make_pair(strings::vin, mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
@@ -217,7 +219,8 @@ std::pair<std::string,
                    mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
     std::make_pair(strings::steering_wheel_angle,
                    mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-};
+    std::make_pair(strings::engine_oil_life,
+                   mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -361,6 +364,20 @@ void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
 
   msg_params[hmi_request::file_name] = file_name;
   object[strings::msg_params] = msg_params;
+
+  app_mngr.ManageHMICommand(message);
+}
+
+void MessageHelper::SendGetSystemTimeRequest(const uint32_t correlation_id,
+                                             ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  SmartObjectSPtr message =
+      CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
+
+  DCHECK(message);
+
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime;
 
   app_mngr.ManageHMICommand(message);
 }
@@ -1711,6 +1728,9 @@ bool MessageHelper::CreateHMIApplicationStruct(
   const smart_objects::SmartObject* app_types = app->app_types();
   const smart_objects::SmartObject* ngn_media_screen_name =
       app->ngn_media_screen_name();
+  const smart_objects::SmartObject* day_color_scheme = app->day_color_scheme();
+  const smart_objects::SmartObject* night_color_scheme =
+      app->night_color_scheme();
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
   message[strings::app_name] = app->name();
@@ -1737,6 +1757,14 @@ bool MessageHelper::CreateHMIApplicationStruct(
   }
   if (app_types) {
     message[strings::app_type] = *app_types;
+  }
+
+  if (day_color_scheme) {
+    message[strings::day_color_scheme] = *day_color_scheme;
+  }
+
+  if (night_color_scheme) {
+    message[strings::night_color_scheme] = *night_color_scheme;
   }
 
   message[strings::device_info] =
@@ -2621,11 +2649,22 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (permissions.requestTypeChanged) {
     smart_objects::SmartObject request_types_array(
         smart_objects::SmartType_Array);
-    ;
+
     for (uint16_t index = 0; index < permissions.requestType.size(); ++index) {
       request_types_array[index] = permissions.requestType[index];
     }
     message[strings::msg_params][strings::request_type] = request_types_array;
+  }
+  if (permissions.requestSubTypeChanged) {
+    smart_objects::SmartObject request_subtypes_array(
+        smart_objects::SmartType_Array);
+
+    for (uint16_t index = 0; index < permissions.requestSubType.size();
+         ++index) {
+      request_subtypes_array[index] = permissions.requestSubType[index];
+    }
+    message[strings::msg_params][strings::request_subtype] =
+        request_subtypes_array;
   }
 
   app_mngr.ManageHMICommand(
@@ -2763,11 +2802,23 @@ mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
   }
 
   const std::string& file_name = image[strings::value].asString();
+  const std::string& full_file_path = GetAppFilePath(file_name, app, app_mngr);
 
+  image[strings::value] = full_file_path;
+  if (file_system::FileExists(full_file_path)) {
+    return mobile_apis::Result::SUCCESS;
+  }
+  return mobile_apis::Result::INVALID_DATA;
+}
+
+std::string MessageHelper::GetAppFilePath(std::string file_name,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr) {
   std::string str = file_name;
+  // Verify that file name is not only space characters
   str.erase(remove(str.begin(), str.end(), ' '), str.end());
   if (0 == str.size()) {
-    return mobile_apis::Result::INVALID_DATA;
+    return "";
   }
 
   std::string full_file_path;
@@ -2793,12 +2844,25 @@ mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
     full_file_path += file_name;
   }
 
-  image[strings::value] = full_file_path;
-  if (!file_system::FileExists(full_file_path)) {
-    return mobile_apis::Result::INVALID_DATA;
-  }
+  return full_file_path;
+}
 
-  return mobile_apis::Result::SUCCESS;
+mobile_apis::Result::eType MessageHelper::VerifyTtsFiles(
+    smart_objects::SmartObject& tts_chunks,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+  for (auto& tts_chunk : *(tts_chunks.asArray())) {
+    if (tts_chunk[strings::type] == mobile_apis::SpeechCapabilities::FILE) {
+      const std::string full_file_path =
+          GetAppFilePath(tts_chunk[strings::text].asString(), app, app_mngr);
+      tts_chunk[strings::text] = full_file_path;
+      if (!file_system::FileExists(full_file_path)) {
+        result = mobile_apis::Result::FILE_NOT_FOUND;
+      }
+    }
+  }
+  return result;
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(

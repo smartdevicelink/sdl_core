@@ -192,6 +192,14 @@ struct CheckAppPolicy {
    */
   bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
 
+  /**
+   * @brief Checks whether App RequestSubTypes have been changed by
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @return True if changed, otherwise - false
+   */
+  bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
+
  private:
   PolicyManagerImpl* pm_;
   const utils::SharedPtr<policy_table::Table> update_;

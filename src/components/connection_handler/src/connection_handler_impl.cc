@@ -318,6 +318,7 @@ void ConnectionHandlerImpl::RemoveConnection(
 bool AllowProtection(const ConnectionHandlerSettings& settings,
                      const protocol_handler::ServiceType& service_type,
                      const bool is_protected) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::vector<int>& force_unprotected_list =
       is_protected ? settings.force_unprotected_service()
                    : settings.force_protected_service();

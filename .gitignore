@@ -5,3 +5,4 @@ CMakeCache.txt
 CMakeFiles/
 *.pyc
 .idea
+src/appMain/build_config.txt

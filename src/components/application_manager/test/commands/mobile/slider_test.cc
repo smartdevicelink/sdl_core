@@ -287,9 +287,8 @@ TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
   CommandPtr command(CreateCommand<SliderRequest>(0, msg_));
   EXPECT_TRUE(command->Init());
 
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(kConnectionKey, kCorrelationId, _));
 
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);

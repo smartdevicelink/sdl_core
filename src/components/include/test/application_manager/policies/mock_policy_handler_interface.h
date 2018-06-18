@@ -197,6 +197,18 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD2(IsRequestTypeAllowed,
                      bool(const std::string& policy_app_id,
                           mobile_apis::RequestType::eType type));
+  MOCK_CONST_METHOD2(IsRequestSubTypeAllowed,
+                     bool(const std::string& policy_app_id,
+                          const std::string& request_subtype));
+  MOCK_CONST_METHOD1(
+      GetAppRequestTypeState,
+      policy::RequestType::State(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(
+      GetAppRequestSubTypeState,
+      policy::RequestSubType::State(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(
+      GetAppRequestSubTypes,
+      const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string& policy_app_id));

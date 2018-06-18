@@ -289,6 +289,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["default"]["default_hmi"] = Json::Value("FULL");
     app_policies["default"]["keep_context"] = Json::Value(true);
     app_policies["default"]["steal_focus"] = Json::Value(true);
+    app_policies["default"]["RequestType"] = Json::Value(Json::arrayValue);
 
     app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
     app_policies["pre_DataConsent"]["memory_kb"] = Json::Value(40);
@@ -300,6 +301,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["pre_DataConsent"]["is_revoked"] = Json::Value(false);
     app_policies["pre_DataConsent"]["keep_context"] = Json::Value(true);
     app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(true);
+    app_policies["pre_DataConsent"]["RequestType"] =
+        Json::Value(Json::arrayValue);
+
     app_policies["1234"] = Json::Value(Json::objectValue);
     app_policies["1234"]["memory_kb"] = Json::Value(150);
     app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(200);
@@ -310,6 +314,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["1234"]["is_revoked"] = Json::Value(true);
     app_policies["1234"]["keep_context"] = Json::Value(false);
     app_policies["1234"]["steal_focus"] = Json::Value(false);
+    app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
+
     app_policies["device"] = Json::Value(Json::objectValue);
     app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
     app_policies["device"]["groups"][0] = Json::Value("default");
@@ -420,7 +426,9 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
-  const int32_t total_tables_number = 28;
+
+  // There are 29 tables in the database, now.
+  const int32_t total_tables_number = 29;
   ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";

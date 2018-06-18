@@ -371,6 +371,7 @@
   <element name="LHPLUS_PHONEMES" />
   <element name="PRE_RECORDED" />
   <element name="SILENCE" />
+  <element name="FILE" />
 </enum>
 
 <enum name="VrCapabilities">
@@ -624,7 +625,10 @@
     <description>The image field for the app icon (set by setAppIcon)</description>
   </element>
   <element name="graphic">
-    <description>The image field for Show</description>
+    <description>The primary image field for Show</description>
+  </element>
+  <element name="secondaryGraphic">
+    <description>The secondary image field for Show</description>
   </element>
   <element name="showConstantTBTIcon">
     <description>The primary image field for ShowConstantTBT</description>
@@ -726,6 +730,36 @@
 </enum>
 
 <!--IVI part-->
+<enum name="FuelType">
+    <element name="GASOLINE" />
+    <element name="DIESEL" />
+    <element name="CNG">
+        <description>
+            For vehicles using compressed natural gas.
+        </description>
+    </element>
+    <element name="LPG">
+        <description>
+            For vehicles using liquefied petroleum gas.
+        </description>
+    </element>
+    <element name="HYDROGEN">
+        <description>For FCEV (fuel cell electric vehicle).</description>
+    </element>
+    <element name="BATTERY">
+        <description>For BEV (Battery Electric Vehicle), PHEV (Plug-in Hybrid Electric Vehicle), solar vehicles and other vehicles which run on a battery.</description>
+    </element>
+</enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+</struct>
+
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
   <element name="UNKNOWN" internal_name="CVS_UNKNOWN">
@@ -745,6 +779,33 @@
   </element>
   <element name="NOT_SUPPORTED" internal_name="CVS_NOT_SUPPORTED">
   <description> The data is not supported.</description>
+  </element>
+</enum>
+
+<enum name="TPMS">
+  <element name="UNKNOWN">
+    <description>If set the status of the tire is not known.</description>
+  </element>
+  <element name="SYSTEM_FAULT">
+    <description>TPMS does not function.</description>
+  </element>
+  <element name="SENSOR_FAULT">
+    <description>The sensor of the tire does not function.</description>
+  </element>
+  <element name="LOW">
+    <description>TPMS is reporting a low tire pressure for the tire.</description>
+  </element>
+  <element name="SYSTEM_ACTIVE">
+    <description>TPMS is active and the tire pressure is monitored.</description>
+  </element>
+  <element name="TRAIN">
+    <description>TPMS is reporting that the tire must be trained.</description>
+  </element>
+  <element name="TRAINING_COMPLETE">
+    <description>TPMS reports the training for the tire is completed.</description>
+  </element>
+  <element name="NOT_TRAINED">
+    <description>TPMS reports the tire is not trained.</description>
   </element>
 </enum>
 
@@ -978,6 +1039,8 @@
   <element name="VEHICLEDATA_ENGINETORQUE" />
   <element name="VEHICLEDATA_ACCPEDAL" />
   <element name="VEHICLEDATA_STEERINGWHEEL" />
+  <element name="VEHICLEDATA_FUELRANGE" />
+  <element name="VEHICLEDATA_ENGINEOILLIFE" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1102,13 +1165,13 @@
 </enum>
 
 <enum name="RequestType">
-    <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
-    <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
-    <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+  <description>Enumeration listing possible asynchronous requests.</description>
+  <element name="HTTP" />
+  <element name="FILE_RESUME" />
+  <element name="AUTH_REQUEST" />
+  <element name="AUTH_CHALLENGE" />
+  <element name="AUTH_ACK" />
+  <element name="PROPRIETARY" />
   <element name="QUERY_APPS" />
   <element name="LAUNCH_APP" />
   <element name="LOCK_SCREEN_ICON_URL" />
@@ -1123,6 +1186,7 @@
   <element name="EMERGENCY" />
   <element name="MEDIA" />
   <element name="FOTA" />
+  <element name="OEM_SPECIFIC"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1821,6 +1885,9 @@
   <param name="imageType" type="Common.ImageType" mandatory="true">
     <description>Describes, whether it is a static or dynamic image.</description>
   </param>
+  <param name="isTemplate" type="Boolean" mandatory="false">
+    <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
+  </param>
 </struct>
 
 <struct name="DeviceInfo">
@@ -1861,13 +1928,34 @@
  </struct>
 
 <struct name="TTSChunk">
-    <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
+    <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
-        <description>The text or phonemes to be spoken.</description>
+        <description>The text or phonemes to be spoken, or the name of an audio file to play.</description>
     </param>
     <param name="type" type="Common.SpeechCapabilities" mandatory="true">
-      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+      <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities.</description>
     </param>
+</struct>
+
+<struct name="RGBColor">
+  <param name="red" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+  <param name="green" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+  <param name="blue" type="Integer" minvalue="0" maxvalue="255" mandatory="true" />
+</struct>
+
+<struct name="TemplateColorScheme">
+  <description>
+    A color scheme for all display layout templates.
+  </description>
+  <param name="primaryColor" type="Common.RGBColor" mandatory="false">
+    <description>The primary "accent" color</description>
+  </param>
+  <param name="secondaryColor" type="Common.RGBColor" mandatory="false">
+      <description>The secondary "accent" color</description>
+  </param>
+  <param name="backgroundColor" type="Common.RGBColor" mandatory="false">
+    <description>The color of the background</description>
+  </param>
 </struct>
 
 <struct name="HMIApplication">
@@ -1930,6 +2018,16 @@
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
     </param>
+	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>
+            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+            An empty array signifies that any value of requestSubType is allowed for this app.
+            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+        </description>
+    </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
 </struct>
 
 <struct name="MenuParams">
@@ -2061,6 +2159,9 @@
   <description>Contains information about the display capabilities.</description>
   <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
+  </param>
+  <param name="displayName" type="String" mandatory="false">
+      <description>The name of the display the app is connected to.</description>
   </param>
   <param name="textFields" type="Common.TextField" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
@@ -2256,7 +2357,13 @@
 <struct name="SingleTireStatus">
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
-</param>
+  </param>
+  <param name="tpms" type="TPMS" mandatory="false">
+      <description>The status of TPMS according to the particular tire.</description>
+  </param>
+  <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+    <description>The pressure value of the particular tire in kilo pascal.</description>
+  </param>
 </struct>
 
 <struct name="DIDResult">
@@ -2750,6 +2857,17 @@
 </interface>
 
 <interface name="BasicCommunication" version="1.2.1" date="2017-08-02">
+    <function name="GetSystemTime" messagetype="request">
+      <description>Request from SDL to HMI to obtain current UTC time.</description>
+    </function>
+    <function name="GetSystemTime" messagetype="response">
+      <param name="systemTime" type="Common.DateTime" mandatory="true">
+        <description>Current UTC system time</description>
+      </param>
+    </function>
+    <function name="OnSystemTimeReady" messagetype="notification">
+      <description>HMI must notify SDL about readiness to provide system time.</description>
+    </function>
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2931,6 +3049,11 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+        <description>
+          This parameter is filled for supporting OEM proprietary data exchanges.
+        </description>
+      </param>
       <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
@@ -2956,6 +3079,11 @@
       <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
           <description>The type of system request.</description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+          <description>
+              This parameter is filled for supporting OEM proprietary data exchanges.
+          </description>
       </param>
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
@@ -3235,10 +3363,10 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See SpeechCapabilities</description>
     </param>
-    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See PrerecordedSpeech</description>
     </param>
   </function>
@@ -3673,6 +3801,8 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
+    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
+    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -4198,6 +4328,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
@@ -4237,6 +4370,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4273,6 +4409,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -4312,6 +4451,9 @@
     </param>
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -4356,6 +4498,9 @@
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+    </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
@@ -4395,6 +4540,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4431,6 +4579,9 @@
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4471,6 +4622,9 @@
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
@@ -4508,6 +4662,9 @@
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Boolean" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4551,6 +4708,9 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Boolean" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4585,6 +4745,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4628,6 +4791,9 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4663,6 +4829,9 @@
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+    <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -4840,6 +5009,14 @@
         If SDL sends an empty array - any RequestType is allowed for this app.
         If SDL omits this parameter - nothing is changed for RequestType in the policies
       </description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+          <description>
+              The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+              If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+              An empty array signifies that any value of requestSubType is allowed for this app.
+              If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+          </description>
       </param>
     </function>
 

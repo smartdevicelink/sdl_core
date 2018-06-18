@@ -93,6 +93,8 @@ void InitCapabilities() {
                      hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
   tts_enum_capabilities.insert(std::make_pair(
       std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
+  tts_enum_capabilities.insert(std::make_pair(
+      std::string("FILE"), hmi_apis::Common_SpeechCapabilities::FILE));
 
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
@@ -281,6 +283,9 @@ void InitCapabilities() {
       std::string("appIcon"), hmi_apis::Common_ImageFieldName::appIcon));
   image_field_name_enum.insert(std::make_pair(
       std::string("graphic"), hmi_apis::Common_ImageFieldName::graphic));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("secondaryGraphic"),
+                     hmi_apis::Common_ImageFieldName::secondaryGraphic));
   image_field_name_enum.insert(
       std::make_pair(std::string("showConstantTBTIcon"),
                      hmi_apis::Common_ImageFieldName::showConstantTBTIcon));
@@ -548,10 +553,15 @@ void HMICapabilitiesImpl::set_vr_supported_languages(
 
 void HMICapabilitiesImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  if (display_capabilities_) {
-    delete display_capabilities_;
+  if (app_mngr_.IsSOStructValid(
+          hmi_apis::StructIdentifiers::Common_DisplayCapabilities,
+          display_capabilities)) {
+    if (display_capabilities_) {
+      delete display_capabilities_;
+    }
+    display_capabilities_ =
+        new smart_objects::SmartObject(display_capabilities);
   }
-  display_capabilities_ = new smart_objects::SmartObject(display_capabilities);
 }
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(

@@ -524,6 +524,17 @@ bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
   return false;
 }
 
+void ProtocolPacket::HandleRawFirstFrameData(const uint8_t* message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  payload_size_ = 0;
+  const uint8_t* data = message;
+  uint32_t total_data_bytes = data[0] << 24;
+  total_data_bytes |= data[1] << 16;
+  total_data_bytes |= data[2] << 8;
+  total_data_bytes |= data[3];
+  set_total_data_bytes(total_data_bytes);
+}
+
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
                                               const size_t messageSize) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -536,18 +547,15 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_data_.totalDataBytes = packet_header_.dataSize;
 
   uint32_t dataPayloadSize = 0;
-  if ((offset < messageSize) && packet_header_.frameType != FRAME_TYPE_FIRST) {
+  if ((offset < messageSize)) {
     dataPayloadSize = messageSize - offset;
   }
 
-  if (packet_header_.frameType == FRAME_TYPE_FIRST) {
+  if (packet_header_.frameType == FRAME_TYPE_FIRST &&
+      !packet_header_.protection_flag) {
     payload_size_ = 0;
     const uint8_t* data = message + offset;
-    uint32_t total_data_bytes = data[0] << 24;
-    total_data_bytes |= data[1] << 16;
-    total_data_bytes |= data[2] << 8;
-    total_data_bytes |= data[3];
-    set_total_data_bytes(total_data_bytes);
+    HandleRawFirstFrameData(data);
     if (0 == packet_data_.data) {
       return RESULT_FAIL;
     }
@@ -606,6 +614,8 @@ uint8_t* ProtocolPacket::data() const {
 }
 
 void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Data bytes : " << dataBytes);
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];

@@ -71,17 +71,14 @@ int64_t file_system::FileSize(const std::string& path) {
 
 size_t file_system::DirectorySize(const std::string& path) {
   size_t size = 0;
-  int32_t return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
+
   struct dirent* result = NULL;
   struct stat file_info = {0};
   directory = opendir(path.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    result = readdir(directory);
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -229,19 +226,15 @@ bool file_system::DeleteFile(const std::string& name) {
 }
 
 void file_system::remove_directory_content(const std::string& directory_name) {
-  int32_t return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
 
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -295,18 +288,14 @@ std::vector<std::string> file_system::ListFiles(
     return listFiles;
   }
 
-  int32_t return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;

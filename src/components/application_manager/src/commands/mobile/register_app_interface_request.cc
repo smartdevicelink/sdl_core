@@ -50,6 +50,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/generated_msg_version.h"
+#include "utils/file_system.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -178,7 +179,7 @@ namespace commands {
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , result_checking_app_hmi_type_(mobile_apis::Result::INVALID_ENUM) {}
+    , result_code_(mobile_apis::Result::INVALID_ENUM) {}
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {}
 
@@ -319,7 +320,20 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::tts_name)) {
-    application->set_tts_name(msg_params[strings::tts_name]);
+    smart_objects::SmartObject& tts_name =
+        (*message_)[strings::msg_params][strings::tts_name];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(
+            tts_name, application, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_WARN(logger_,
+                   "MessageHelper::VerifyTtsFiles return "
+                       << verification_result);
+      response_info_ = "One or more files needed for tts_name are not present";
+      result_code_ = mobile_apis::Result::WARNINGS;
+    }
+    application->set_tts_name(tts_name);
   }
 
   if (msg_params.keyExists(strings::app_hmi_type)) {
@@ -346,6 +360,15 @@ void RegisterAppInterfaceRequest::Run() {
         application->set_mobile_projection_enabled(true);
       }
     }
+  }
+
+  if (msg_params.keyExists(strings::day_color_scheme)) {
+    application->set_day_color_scheme(msg_params[strings::day_color_scheme]);
+  }
+
+  if (msg_params.keyExists(strings::night_color_scheme)) {
+    application->set_night_color_scheme(
+        msg_params[strings::night_color_scheme]);
   }
 
   // Add device to policy table and set device info, if any
@@ -440,50 +463,69 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     smart_objects::SmartObject& display_caps =
         response_params[hmi_response::display_capabilities];
 
-    display_caps[hmi_response::display_type] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::display_type);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::display_type)) {
+      display_caps[hmi_response::display_type] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::display_type);
+    }
 
-    display_caps[hmi_response::text_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::text_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::display_name)) {
+      display_caps[hmi_response::display_name] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::display_name);
+    }
 
-    display_caps[hmi_response::image_fields] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::image_fields);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::text_fields)) {
+      display_caps[hmi_response::text_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::text_fields);
+    }
 
-    display_caps[hmi_response::media_clock_formats] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::media_clock_formats);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_fields)) {
+      display_caps[hmi_response::image_fields] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::image_fields);
+    }
 
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::media_clock_formats)) {
+      display_caps[hmi_response::media_clock_formats] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::media_clock_formats);
+    }
 
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::templates_available)) {
+      display_caps[hmi_response::templates_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::templates_available);
+    }
 
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::screen_params)) {
+      display_caps[hmi_response::screen_params] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::screen_params);
+    }
 
-    display_caps[hmi_response::graphic_supported] =
-        (hmi_capabilities.display_capabilities()
-             ->getElement(hmi_response::image_capabilities)
-             .length() > 0);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::num_custom_presets_available)) {
+      display_caps[hmi_response::num_custom_presets_available] =
+          hmi_capabilities.display_capabilities()->getElement(
+              hmi_response::num_custom_presets_available);
+    }
 
-    display_caps[hmi_response::templates_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::templates_available);
-
-    display_caps[hmi_response::screen_params] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::screen_params);
-
-    display_caps[hmi_response::num_custom_presets_available] =
-        hmi_capabilities.display_capabilities()->getElement(
-            hmi_response::num_custom_presets_available);
+    if (hmi_capabilities.display_capabilities()->keyExists(
+            hmi_response::image_capabilities)) {
+      display_caps[hmi_response::graphic_supported] =
+          (hmi_capabilities.display_capabilities()
+               ->getElement(hmi_response::image_capabilities)
+               .length() > 0);
+    }
   }
 
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
@@ -684,9 +726,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
   if ((mobile_apis::Result::SUCCESS == result_code) &&
-      (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
+      (mobile_apis::Result::INVALID_ENUM != result_code_)) {
     add_info += response_info_;
-    result_code = result_checking_app_hmi_type_;
+    result_code = result_code_;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
@@ -710,6 +752,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
   policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
       application->policy_app_id(), hmi_types);
+
+  response_params[strings::icon_resumed] =
+      file_system::FileExists(application->app_icon_path());
+
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
@@ -813,8 +859,9 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     msg_params[strings::tts_name] = *(application_impl.tts_name());
   }
 
+  const std::string policy_app_id = application_impl.policy_app_id();
   std::string priority;
-  GetPolicyHandler().GetPriority(application_impl.policy_app_id(), &priority);
+  GetPolicyHandler().GetPriority(policy_app_id, &priority);
 
   if (!priority.empty()) {
     msg_params[strings::priority] = MessageHelper::GetPriorityCode(priority);
@@ -824,8 +871,10 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   smart_objects::SmartObject& application = msg_params[strings::application];
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
-  application[hmi_response::policy_app_id] = application_impl.policy_app_id();
-  application[strings::icon] = application_impl.app_icon_path();
+  application[hmi_response::policy_app_id] = policy_app_id;
+  if (file_system::FileExists(application_impl.app_icon_path())) {
+    application[strings::icon] = application_impl.app_icon_path();
+  }
 
   const smart_objects::SmartObject* ngn_media_screen_name =
       application_impl.ngn_media_screen_name();
@@ -844,18 +893,41 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     application[strings::app_type] = *app_type;
   }
 
-  std::vector<std::string> request_types =
-      GetPolicyHandler().GetAppRequestTypes(application_impl.policy_app_id());
+  const policy::RequestType::State app_request_types_state =
+      GetPolicyHandler().GetAppRequestTypeState(policy_app_id);
+  if (policy::RequestType::State::AVAILABLE == app_request_types_state) {
+    const auto request_types =
+        GetPolicyHandler().GetAppRequestTypes(policy_app_id);
+    application[strings::request_type] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_types_array =
+        application[strings::request_type];
 
-  application[strings::request_type] = SmartObject(SmartType_Array);
-  smart_objects::SmartObject& request_array =
-      application[strings::request_type];
+    size_t index = 0;
+    for (auto it : request_types) {
+      request_types_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestType::State::EMPTY == app_request_types_state) {
+    application[strings::request_type] = SmartObject(SmartType_Array);
+  }
 
-  uint32_t index = 0;
-  std::vector<std::string>::const_iterator it = request_types.begin();
-  for (; request_types.end() != it; ++it) {
-    request_array[index] = *it;
-    ++index;
+  const policy::RequestSubType::State app_request_subtypes_state =
+      GetPolicyHandler().GetAppRequestSubTypeState(policy_app_id);
+  if (policy::RequestSubType::State::AVAILABLE == app_request_subtypes_state) {
+    const auto request_subtypes =
+        GetPolicyHandler().GetAppRequestSubTypes(policy_app_id);
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_subtypes_array =
+        application[strings::request_subtype];
+
+    size_t index = 0;
+    for (auto it : request_subtypes) {
+      request_subtypes_array[index] = it;
+      ++index;
+    }
+  } else if (policy::RequestSubType::State::EMPTY ==
+             app_request_subtypes_state) {
+    application[strings::request_subtype] = SmartObject(SmartType_Array);
   }
 
   const protocol_handler::SessionObserver& session_observer =
@@ -878,6 +950,18 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
                                     GetPolicyHandler(),
                                     application_manager_,
                                     &secondary_device_info);
+  }
+
+  const smart_objects::SmartObject* day_color_scheme =
+      application_impl.day_color_scheme();
+  if (day_color_scheme) {
+    application[strings::day_color_scheme] = *day_color_scheme;
+  }
+
+  const smart_objects::SmartObject* night_color_scheme =
+      application_impl.night_color_scheme();
+  if (night_color_scheme) {
+    application[strings::night_color_scheme] = *night_color_scheme;
   }
 
   DCHECK(application_manager_.ManageHMICommand(notification));
@@ -991,7 +1075,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
             "Following AppHmiTypes are not present in policy "
             "table:" +
             log;
-        result_checking_app_hmi_type_ = mobile_apis::Result::WARNINGS;
+        result_code_ = mobile_apis::Result::WARNINGS;
       }
     }
     // Replace AppHmiTypes in request with values allowed by policy table

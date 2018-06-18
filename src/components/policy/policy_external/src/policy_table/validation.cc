@@ -89,6 +89,7 @@ bool ApplicationPoliciesSection::Validate() const {
       continue;
     }
 
+    LOG4CXX_TRACE(logger_, "Checking app Request Types...");
     RequestTypes& app_request_types = *iter->second.RequestType;
 
     if (app_request_types.is_omitted()) {
@@ -130,6 +131,33 @@ bool ApplicationPoliciesSection::Validate() const {
       LOG4CXX_WARN(logger_, "RequestTypes is empty for " << app_id);
     }
 
+    ++iter;
+  }
+
+  LOG4CXX_TRACE(logger_, "Checking app Request SubTypes...");
+  iter = apps.begin();
+  while (iter != end_iter) {
+    if (it_default_policy == iter || it_pre_data_policy == iter) {
+      ++iter;
+      continue;
+    }
+    ApplicationParams& app_params = (*iter).second;
+    const bool is_request_subtype_omitted =
+        !app_params.RequestSubType.is_initialized();
+
+    if (is_request_subtype_omitted) {
+      LOG4CXX_WARN(logger_,
+                   "App policy RequestSubTypes omitted."
+                   " Will be replaced with default.");
+      app_params.RequestSubType = apps[kDefaultApp].RequestSubType;
+      ++iter;
+      continue;
+    }
+
+    const bool is_request_subtype_empty = app_params.RequestSubType->empty();
+    if (is_request_subtype_empty) {
+      LOG4CXX_WARN(logger_, "App policy RequestSubTypes empty.");
+    }
     ++iter;
   }
 

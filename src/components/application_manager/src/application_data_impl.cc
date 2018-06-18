@@ -173,6 +173,9 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , menu_title_(NULL)
     , menu_icon_(NULL)
     , tbt_show_command_(NULL)
+    , day_color_scheme_(NULL)
+    , night_color_scheme_(NULL)
+    , display_layout_("")
     , commands_()
     , commands_lock_(true)
     , sub_menu_()
@@ -212,6 +215,16 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
+  }
+
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+    day_color_scheme_ = NULL;
+  }
+
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+    night_color_scheme_ = NULL;
   }
 
   for (CommandsMap::iterator command_it = commands_.begin();
@@ -288,6 +301,20 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_title()
 const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
     const {
   return menu_icon_;
+}
+
+const smart_objects::SmartObject* DynamicApplicationDataImpl::day_color_scheme()
+    const {
+  return day_color_scheme_;
+}
+
+const smart_objects::SmartObject*
+DynamicApplicationDataImpl::night_color_scheme() const {
+  return night_color_scheme_;
+}
+
+const std::string& DynamicApplicationDataImpl::display_layout() const {
+  return display_layout_;
 }
 
 void DynamicApplicationDataImpl::load_global_properties(
@@ -403,6 +430,28 @@ void DynamicApplicationDataImpl::set_menu_icon(
     delete menu_icon_;
   }
   menu_icon_ = new smart_objects::SmartObject(menu_icon);
+}
+
+void DynamicApplicationDataImpl::set_day_color_scheme(
+    const smart_objects::SmartObject& color_scheme) {
+  if (day_color_scheme_) {
+    delete day_color_scheme_;
+  }
+
+  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_night_color_scheme(
+    const smart_objects::SmartObject& color_scheme) {
+  if (night_color_scheme_) {
+    delete night_color_scheme_;
+  }
+
+  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+}
+
+void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
+  display_layout_ = layout;
 }
 
 void DynamicApplicationDataImpl::SetGlobalProperties(

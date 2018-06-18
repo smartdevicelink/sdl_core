@@ -315,6 +315,14 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
       app);
 }
 
+mobile_apis::Result::eType MessageHelper::VerifyTtsFiles(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyTtsFiles(
+      message, app, app_mngr);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,

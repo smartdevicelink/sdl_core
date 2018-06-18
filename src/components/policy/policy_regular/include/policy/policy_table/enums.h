@@ -70,6 +70,7 @@ enum Parameter {
   P_FUELLEVEL_STATE,
   P_HEADLAMPSTATUS,
   P_INSTANTFUELCONSUMPTION,
+  P_FUELRANGE,
   P_ODOMETER,
   P_TIREPRESSURE,
   P_WIPERSTATUS,
@@ -80,6 +81,7 @@ enum Parameter {
   P_PRNDL,
   P_RPM,
   P_STEERINGWHEELANGLE,
+  P_ENGINEOILLIFE,
   P_MYKEY,
   P_AIRBAGSTATUS,
   P_BODYINFORMATION,
@@ -132,7 +134,9 @@ enum RequestType {
   RT_VEHICLE_DIAGNOSTICS,
   RT_EMERGENCY,
   RT_MEDIA,
-  RT_FOTA
+  RT_FOTA,
+  RT_OEM_SPECIFIC,
+  RT_EMPTY  // Added to allow empty Request Types handling
 };
 
 bool IsValidEnum(RequestType val);

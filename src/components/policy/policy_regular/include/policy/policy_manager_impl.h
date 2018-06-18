@@ -532,12 +532,36 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief Gets request types for application
    * @param policy_app_id Unique application id
    * @return request types of application
    */
   const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
+  const std::vector<std::string> GetAppRequestSubTypes(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Get information about vehicle
