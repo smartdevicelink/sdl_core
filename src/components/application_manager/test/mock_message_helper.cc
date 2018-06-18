@@ -312,12 +312,6 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
       app);
 }
 
-smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
-    ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->GetIVISubscriptionRequests(
-      app);
-}
-
 mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,

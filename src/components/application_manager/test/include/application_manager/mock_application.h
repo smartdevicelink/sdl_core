@@ -201,9 +201,6 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(
       SubscribedButtons,
       DataAccessor< ::application_manager::ButtonSubscriptions>());
-  MOCK_CONST_METHOD0(
-      SubscribedIVI,
-      DataAccessor< ::application_manager::VehicleInfoSubscriptions>());
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());

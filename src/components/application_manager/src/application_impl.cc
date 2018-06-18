@@ -855,11 +855,6 @@ DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
   return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
 }
 
-DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
-  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_);
-}
-
 const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }
