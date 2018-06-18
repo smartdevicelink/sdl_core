@@ -89,6 +89,9 @@ namespace {
 const std::string kDirectoryName = "./test_storage";
 const uint32_t kTimeout = 10000u;
 connection_handler::DeviceHandle kDeviceId = 12345u;
+const std::string kAppId = "someID";
+const uint32_t kConnectionKey = 1232u;
+const std::string kAppName = "appName";
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
@@ -136,6 +139,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(Return(stop_streaming_timeout));
     ON_CALL(mock_application_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(kTimeout));
+    ON_CALL(mock_application_manager_settings_,
+            application_list_update_timeout()).WillByDefault(Return(kTimeout));
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
@@ -939,6 +944,49 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   if (result) {
     app_manager_impl_->StopAudioPassThru(app_id_2);
   }
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RegisterApplication_PathToTheIconExists_IconWasSet) {
+  file_system::CreateDirectory(kDirectoryName);
+  const std::string full_icon_path = kDirectoryName + "/" + kAppId;
+  ASSERT_TRUE(file_system::CreateFile(full_icon_path));
+
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& params =
+      request_for_registration[strings::msg_params];
+  params[strings::app_id] = kAppId;
+  params[strings::language_desired] = mobile_api::Language::EN_US;
+  params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+  request_for_registration[strings::msg_params][strings::app_name] = kAppName;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::minor_version] = APIVersion::kAPIV2;
+  request_for_registration[strings::msg_params][strings::sync_msg_version]
+                          [strings::major_version] = APIVersion::kAPIV3;
+
+  request_for_registration[strings::params][strings::protocol_version] =
+      protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+  smart_objects::SmartObjectSPtr request_for_registration_ptr =
+      MakeShared<smart_objects::SmartObject>(request_for_registration);
+
+  ApplicationSharedPtr application =
+      app_manager_impl_->RegisterApplication(request_for_registration_ptr);
+  EXPECT_STREQ(kAppName.c_str(), application->name().c_str());
+  EXPECT_STREQ(full_icon_path.c_str(), application->app_icon_path().c_str());
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            application->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            application->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV3,
+            application->version().max_supported_api_version);
+
+  EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
 
 }  // application_manager_test

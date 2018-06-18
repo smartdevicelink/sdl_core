@@ -549,6 +549,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       CreateRegularState(utils::SharedPtr<Application>(application),
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
                          mobile_api::SystemContext::SYSCTXT_MAIN);
 
   application->SetInitialState(initial_state);
@@ -623,6 +624,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     const std::string& bundle_id = app_info[strings::bundle_id].asString();
     application->set_bundle_id(bundle_id);
   }
+
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
+  }
+
   PutDriverDistractionMessageToPostponed(application);
 
   // Stops timer of saving data to resumption in order to
@@ -657,13 +665,18 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
+  LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
+
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
-  HMILevel::eType hmi_level = HMILevel::HMI_FULL;
-  AudioStreamingState::eType audio_state;
-  app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE
-                            : audio_state = AudioStreamingState::NOT_AUDIBLE;
-  state_ctrl_.SetRegularState(app, hmi_level, audio_state, false);
+  const HMILevel::eType hmi_level = HMILevel::HMI_FULL;
+  const AudioStreamingState::eType audio_state =
+      app->IsAudioApplication() ? AudioStreamingState::AUDIBLE
+                                : AudioStreamingState::NOT_AUDIBLE;
+  const VideoStreamingState::eType video_state =
+      app->IsVideoApplication() ? VideoStreamingState::STREAMABLE
+                                : VideoStreamingState::NOT_STREAMABLE;
+  state_ctrl_.SetRegularState(app, hmi_level, audio_state, video_state, false);
   return true;
 }
 
@@ -675,10 +688,10 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
     NOTREACHED();
     return mobile_api::HMILevel::INVALID_ENUM;
   }
-  bool is_audio_app = app->IsAudioApplication();
-  bool does_audio_app_with_same_type_exist =
+  const bool is_audio_app = app->IsAudioApplication();
+  const bool does_audio_app_with_same_type_exist =
       IsAppTypeExistsInFullOrLimited(app);
-  bool is_active_app_exist = active_application().valid();
+  const bool is_active_app_exist = active_application().valid();
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
   if (is_audio_app && does_audio_app_with_same_type_exist) {
@@ -840,10 +853,12 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
     utils::SharedPtr<Application> app,
     mobile_apis::HMILevel::eType hmi_level,
     mobile_apis::AudioStreamingState::eType audio_state,
+    mobile_apis::VideoStreamingState::eType video_state,
     mobile_apis::SystemContext::eType system_context) const {
   HmiStatePtr state(new HmiState(app, *this));
   state->set_hmi_level(hmi_level);
   state->set_audio_streaming_state(audio_state);
+  state->set_video_streaming_state(video_state);
   state->set_system_context(system_context);
   return state;
 }
@@ -858,12 +873,6 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   state->set_audio_streaming_state(audio_state);
   state->set_system_context(system_context);
   return state;
-}
-
-bool ApplicationManagerImpl::IsStateActive(HmiState::StateID state_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Checking for active state id " << state_id);
-  return state_ctrl_.IsStateActive(state_id);
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
@@ -3560,7 +3569,6 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
 
 void ApplicationManagerImpl::OnAppStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type, bool state) {
-  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
@@ -3573,11 +3581,11 @@ void ApplicationManagerImpl::OnAppStreaming(
   DCHECK_OR_RETURN_VOID(media_manager_);
 
   if (state) {
-    state_ctrl_.OnNaviStreamingStarted();
+    state_ctrl_.OnVideoStreamingStarted(app);
     media_manager_->StartStreaming(app_id, service_type);
   } else {
     media_manager_->StopStreaming(app_id, service_type);
-    state_ctrl_.OnNaviStreamingStopped();
+    state_ctrl_.OnVideoStreamingStarted(app);
   }
 }
 
@@ -3737,6 +3745,9 @@ void ApplicationManagerImpl::SendHMIStatusNotification(
 
   message[strings::msg_params][strings::audio_streaming_state] =
       static_cast<int32_t>(app->audio_streaming_state());
+
+  message[strings::msg_params][strings::video_streaming_state] =
+      static_cast<int32_t>(app->video_streaming_state());
 
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(app->system_context());
@@ -4060,6 +4071,8 @@ mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
     return mobile_apis::AppHMIType::MESSAGING;
   } else if ("NAVIGATION" == str) {
     return mobile_apis::AppHMIType::NAVIGATION;
+  } else if ("PROJECTION" == str) {
+    return mobile_apis::AppHMIType::PROJECTION;
   } else if ("INFORMATION" == str) {
     return mobile_apis::AppHMIType::INFORMATION;
   } else if ("SOCIAL" == str) {
@@ -4456,6 +4469,23 @@ std::vector<std::string> ApplicationManagerImpl::ConvertRejectedParamList(
   return output;
 }
 
+bool ApplicationManagerImpl::IsSOStructValid(
+    const hmi_apis::StructIdentifiers::eType struct_id,
+    const smart_objects::SmartObject& display_capabilities) {
+  smart_objects::SmartObject display_capabilities_so = display_capabilities;
+  if (hmi_so_factory().AttachSchema(struct_id, display_capabilities_so)) {
+    if (display_capabilities_so.isValid()) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
+    return false;
+  }
+  return true;
+}
+
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_list_lock_.Acquire();
@@ -4523,7 +4553,6 @@ std::vector<std::string> ApplicationManagerImpl::devices(
 
 void ApplicationManagerImpl::ChangeAppsHMILevel(
     uint32_t app_id, mobile_apis::HMILevel::eType level) {
-  using namespace mobile_apis::HMILevel;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "AppID to change: " << app_id << " -> " << level);
   ApplicationSharedPtr app = application(app_id);
@@ -4531,14 +4560,13 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
-  eType old_level = app->hmi_level();
+  const mobile_apis::HMILevel::eType old_level = app->hmi_level();
   if (old_level != level) {
     app->set_hmi_level(level);
     OnHMILevelChanged(app_id, old_level, level);
-
     plugin_manager_.OnAppHMILevelChanged(app, old_level);
   } else {
-    LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
+    LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);
   }
 }
 

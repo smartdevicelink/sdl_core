@@ -1191,6 +1191,7 @@ TEST_F(HMICommandsNotificationsTest,
               SetRegularState(app_,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                              mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                               false));
   command->Run();
 }
@@ -1219,6 +1220,7 @@ TEST_F(HMICommandsNotificationsTest,
               SetRegularState(app_,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                              mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                               false));
   command->Run();
 }

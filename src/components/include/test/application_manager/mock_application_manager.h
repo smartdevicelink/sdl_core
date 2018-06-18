@@ -248,11 +248,12 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type,
                     bool state));
-  MOCK_CONST_METHOD4(CreateRegularState,
+  MOCK_CONST_METHOD5(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
                          mobile_apis::HMILevel::eType hmi_level,
                          mobile_apis::AudioStreamingState::eType audio_state,
+                         mobile_apis::VideoStreamingState::eType video_state,
                          mobile_apis::SystemContext::eType system_context));
   DEPRECATED MOCK_CONST_METHOD4(
       CreateRegularState,
@@ -272,6 +273,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      const application_manager::ApplicationManagerSettings&());
   MOCK_METHOD0(event_dispatcher,
                application_manager::event_engine::EventDispatcher&());
+
+  MOCK_METHOD2(IsSOStructValid,
+               bool(const hmi_apis::StructIdentifiers::eType struct_id,
+                    const smart_objects::SmartObject& display_capabilities));
 
   DEPRECATED MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                                 bool(const uint32_t));

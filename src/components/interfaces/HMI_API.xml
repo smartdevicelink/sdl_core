@@ -371,6 +371,7 @@
   <element name="LHPLUS_PHONEMES" />
   <element name="PRE_RECORDED" />
   <element name="SILENCE" />
+  <element name="FILE" />
 </enum>
 
 <enum name="VrCapabilities">
@@ -781,6 +782,33 @@
   </element>
 </enum>
 
+<enum name="TPMS">
+  <element name="UNKNOWN">
+    <description>If set the status of the tire is not known.</description>
+  </element>
+  <element name="SYSTEM_FAULT">
+    <description>TPMS does not function.</description>
+  </element>
+  <element name="SENSOR_FAULT">
+    <description>The sensor of the tire does not function.</description>
+  </element>
+  <element name="LOW">
+    <description>TPMS is reporting a low tire pressure for the tire.</description>
+  </element>
+  <element name="SYSTEM_ACTIVE">
+    <description>TPMS is active and the tire pressure is monitored.</description>
+  </element>
+  <element name="TRAIN">
+    <description>TPMS is reporting that the tire must be trained.</description>
+  </element>
+  <element name="TRAINING_COMPLETE">
+    <description>TPMS reports the training for the tire is completed.</description>
+  </element>
+  <element name="NOT_TRAINED">
+    <description>TPMS reports the tire is not trained.</description>
+  </element>
+</enum>
+
 <enum name="PRNDL">
   <description>The selected gear.</description>
   <element name="PARK">
@@ -1137,13 +1165,13 @@
 </enum>
 
 <enum name="RequestType">
-    <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
-    <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
-    <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+  <description>Enumeration listing possible asynchronous requests.</description>
+  <element name="HTTP" />
+  <element name="FILE_RESUME" />
+  <element name="AUTH_REQUEST" />
+  <element name="AUTH_CHALLENGE" />
+  <element name="AUTH_ACK" />
+  <element name="PROPRIETARY" />
   <element name="QUERY_APPS" />
   <element name="LAUNCH_APP" />
   <element name="LOCK_SCREEN_ICON_URL" />
@@ -1158,6 +1186,7 @@
   <element name="EMERGENCY" />
   <element name="MEDIA" />
   <element name="FOTA" />
+  <element name="OEM_SPECIFIC"/>
 </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1856,6 +1885,9 @@
   <param name="imageType" type="Common.ImageType" mandatory="true">
     <description>Describes, whether it is a static or dynamic image.</description>
   </param>
+  <param name="isTemplate" type="Boolean" mandatory="false">
+    <description>Optional value to specify whether it's a template image. A template image can be (re)colored by the HMI as needed by using an image pattern</description>
+  </param>
 </struct>
 
 <struct name="DeviceInfo">
@@ -1896,12 +1928,12 @@
  </struct>
 
 <struct name="TTSChunk">
-    <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
+    <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
-        <description>The text or phonemes to be spoken.</description>
+        <description>The text or phonemes to be spoken, or the name of an audio file to play.</description>
     </param>
     <param name="type" type="Common.SpeechCapabilities" mandatory="true">
-      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+      <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities.</description>
     </param>
 </struct>
 
@@ -1982,6 +2014,14 @@
       <description>If SDL sends an empty array - any RequestType is allowed for this app.</description>
       <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
       <description>(either this is a pre-registered app or such is dictated by policies).</description>
+    </param>
+	<param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>
+            The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+            If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+            An empty array signifies that any value of requestSubType is allowed for this app.
+            If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+        </description>
     </param>
     <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param> 
@@ -2116,6 +2156,9 @@
   <description>Contains information about the display capabilities.</description>
   <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
+  </param>
+  <param name="displayName" type="String" mandatory="false">
+      <description>The name of the display the app is connected to.</description>
   </param>
   <param name="textFields" type="Common.TextField" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
@@ -2311,7 +2354,13 @@
 <struct name="SingleTireStatus">
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
-</param>
+  </param>
+  <param name="tpms" type="TPMS" mandatory="false">
+      <description>The status of TPMS according to the particular tire.</description>
+  </param>
+  <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
+    <description>The pressure value of the particular tire in kilo pascal.</description>
+  </param>
 </struct>
 
 <struct name="DIDResult">
@@ -2986,6 +3035,11 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+        <description>
+          This parameter is filled for supporting OEM proprietary data exchanges.
+        </description>
+      </param>
       <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
@@ -3011,6 +3065,11 @@
       <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
           <description>The type of system request.</description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="255" mandatory="false">
+          <description>
+              This parameter is filled for supporting OEM proprietary data exchanges.
+          </description>
       </param>
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
@@ -3290,10 +3349,10 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See SpeechCapabilities</description>
     </param>
-    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>See PrerecordedSpeech</description>
     </param>
   </function>
@@ -4936,6 +4995,14 @@
         If SDL sends an empty array - any RequestType is allowed for this app.
         If SDL omits this parameter - nothing is changed for RequestType in the policies
       </description>
+      </param>
+      <param name="requestSubType" type="String" maxlength="100" minsize="0" maxsize="100" array="true" mandatory="false">
+          <description>
+              The list of SystemRequest's requestSubTypes allowed by policies for the named application.
+              If the app sends a requestSubType which is not specified in this list, then that request should be rejected.
+              An empty array signifies that any value of requestSubType is allowed for this app.
+              If this parameter is omitted, then a request with any value of requestSubType is now allowed for this app
+          </description>
       </param>
     </function>
 

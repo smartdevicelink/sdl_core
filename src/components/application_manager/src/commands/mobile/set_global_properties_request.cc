@@ -31,6 +31,7 @@
  */
 
 #include <string.h>
+#include <numeric>
 #include <algorithm>
 #include "application_manager/commands/mobile/set_global_properties_request.h"
 
@@ -185,14 +186,54 @@ void SetGlobalPropertiesRequest::Run() {
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+    std::vector<std::string> invalid_params;
     if (is_help_prompt_present) {
-      app->set_help_prompt(msg_params.getElement(strings::help_prompt));
-      params[strings::help_prompt] = (*app->help_prompt());
+      smart_objects::SmartObject& help_prompt =
+          (*message_)[strings::msg_params][strings::help_prompt];
+      mobile_apis::Result::eType verification_result =
+          MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
+
+      if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+        LOG4CXX_ERROR(logger_,
+                      "MessageHelper::VerifyTtsFiles return "
+                          << verification_result);
+        invalid_params.push_back("help_prompt");
+      } else {
+        app->set_help_prompt(help_prompt);
+        params[strings::help_prompt] = (*app->help_prompt());
+      }
     }
 
     if (is_timeout_prompt_present) {
-      app->set_timeout_prompt(msg_params.getElement(strings::timeout_prompt));
-      params[strings::timeout_prompt] = (*app->timeout_prompt());
+      smart_objects::SmartObject& timeout_prompt =
+          (*message_)[strings::msg_params][strings::timeout_prompt];
+      mobile_apis::Result::eType verification_result =
+          MessageHelper::VerifyTtsFiles(
+              timeout_prompt, app, application_manager_);
+
+      if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+        LOG4CXX_ERROR(logger_,
+                      "MessageHelper::VerifyTtsFiles return "
+                          << verification_result);
+        invalid_params.push_back("timeout_prompt");
+      } else {
+        app->set_timeout_prompt(timeout_prompt);
+        params[strings::timeout_prompt] = (*app->timeout_prompt());
+      }
+    }
+
+    if (!invalid_params.empty()) {
+      std::string params_list = std::accumulate(
+          std::begin(invalid_params),
+          std::end(invalid_params),
+          std::string(""),
+          [](std::string& first, std::string& second) {
+            return first.empty() ? second : first + ", " + second;
+          });
+      const std::string info =
+          "One or more files needed for " + params_list + " are not present";
+      SendResponse(false, mobile_apis::Result::FILE_NOT_FOUND, info.c_str());
+      return;
     }
 
     params[strings::app_id] = app->app_id();
