@@ -164,16 +164,6 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  if (msg_params.keyExists(strings::vr_help)) {
-    if (mobile_apis::Result::SUCCESS !=
-        MessageHelper::VerifyImageVrHelpItems(
-            msg_params[strings::vr_help], app, application_manager_)) {
-      LOG4CXX_ERROR(logger_,
-                    "Verification of " << strings::vr_help << " failed.");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
-  }
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,

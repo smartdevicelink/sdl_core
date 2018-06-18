@@ -135,32 +135,6 @@ void ShowRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
-  if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
-      ((*message_)[strings::msg_params][strings::graphic][strings::value]
-           .asString()).length()) {
-    verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::graphic],
-        app,
-        application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "Image verification failed.");
-      SendResponse(false, verification_result);
-      return;
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
-    verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::secondary_graphic],
-        app,
-        application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "Image verification failed.");
-      SendResponse(false, verification_result);
-      return;
-    }
-  }
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

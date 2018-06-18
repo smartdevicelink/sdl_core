@@ -88,32 +88,6 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
-
-  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
-    verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::menu_icon],
-        app,
-        application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
-      SendResponse(false, verification_result);
-      return;
-    }
-  }
-  // Check for image file(s) in vrHelpItem
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    if (mobile_apis::Result::SUCCESS !=
-        MessageHelper::VerifyImageVrHelpItems(
-            (*message_)[strings::msg_params][strings::vr_help],
-            app,
-            application_manager_)) {
-      LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
-  }
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_, "White spaces found");

@@ -90,19 +90,6 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
-    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::cmd_icon],
-        app,
-        application_manager_);
-
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
-      SendResponse(false, verification_result);
-      return;
-    }
-  }
 
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA");

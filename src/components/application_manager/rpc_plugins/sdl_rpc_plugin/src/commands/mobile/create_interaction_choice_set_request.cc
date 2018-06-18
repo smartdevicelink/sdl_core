@@ -78,34 +78,6 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  for (uint32_t i = 0;
-       i < (*message_)[strings::msg_params][strings::choice_set].length();
-       ++i) {
-    Result::eType verification_result_image = Result::SUCCESS;
-    Result::eType verification_result_secondary_image = Result::SUCCESS;
-    if ((*message_)[strings::msg_params][strings::choice_set][i].keyExists(
-            strings::image)) {
-      verification_result_image = MessageHelper::VerifyImage(
-          (*message_)[strings::msg_params][strings::choice_set][i]
-                     [strings::image],
-          app,
-          application_manager_);
-    }
-    if ((*message_)[strings::msg_params][strings::choice_set][i].keyExists(
-            strings::secondary_image)) {
-      verification_result_secondary_image = MessageHelper::VerifyImage(
-          (*message_)[strings::msg_params][strings::choice_set][i]
-                     [strings::secondary_image],
-          app,
-          application_manager_);
-    }
-    if (verification_result_image == Result::INVALID_DATA ||
-        verification_result_secondary_image == Result::INVALID_DATA) {
-      LOG4CXX_ERROR(logger_, "Image verification failed.");
-      SendResponse(false, Result::INVALID_DATA);
-      return;
-    }
-  }
 
   choice_set_id_ =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]

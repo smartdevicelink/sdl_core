@@ -117,19 +117,6 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  if (msg_params.keyExists(strings::location_image)) {
-    mobile_apis::Result::eType verification_result =
-        mobile_apis::Result::SUCCESS;
-    verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::location_image],
-        app,
-        application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
-      SendResponse(false, verification_result);
-      return;
-    }
-  }
 
   SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
   request_msg_params = msg_params;
