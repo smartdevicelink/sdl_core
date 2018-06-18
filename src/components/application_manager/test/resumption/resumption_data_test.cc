@@ -334,7 +334,6 @@ void ResumptionDataTest::PrepareData() {
 
   SetSubscriptions();
   DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_);
-  DataAccessor<am::VehicleInfoSubscriptions> ivi_access(ivi, ivilock_);
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
@@ -539,8 +538,6 @@ void ResumptionDataTest::SetKeyboardProperties() {
 void ResumptionDataTest::SetSubscriptions() {
   btn_subscr.insert(ButtonName::eType::CUSTOM_BUTTON);
   btn_subscr.insert(ButtonName::eType::OK);
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(0));
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(5));
 }
 
 }  // namespace resumption_test

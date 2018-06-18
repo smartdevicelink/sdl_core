@@ -367,12 +367,6 @@ class ApplicationImpl : public virtual Application,
    */
   void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
 
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
-
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 

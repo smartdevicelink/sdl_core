@@ -137,7 +137,6 @@ class ResumptionDataTest : public ::testing::Test {
   am::AppFilesMap app_files_map_;
 
   am::ButtonSubscriptions btn_subscr;
-  am::VehicleInfoSubscriptions ivi;
 
   sync_primitives::Lock sublock_;
   sync_primitives::Lock comlock_;

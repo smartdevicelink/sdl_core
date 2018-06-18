@@ -323,8 +323,6 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
   MOCK_CONST_METHOD0(Extensions,
                      const std::list<application_manager::AppExtensionPtr>&());
-  MOCK_CONST_METHOD0(SubscribesIVI,
-                     const application_manager::VehicleInfoSubscriptions&());
   MOCK_CONST_METHOD0(is_remote_control_supported, bool());
   MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
 };
