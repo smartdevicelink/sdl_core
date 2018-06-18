@@ -66,7 +66,6 @@ struct SessionContext {
   uint32_t hash_id_;
   bool is_protected_;
   bool is_new_service_;
-  bool is_ptu_required_;
 
   /**
    * @brief Constructor
@@ -78,8 +77,7 @@ struct SessionContext {
       , service_type_(protocol_handler::kInvalidServiceType)
       , hash_id_(0)
       , is_protected_(false)
-      , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_new_service_(false) {}
 
   /**
    * @brief Constructor
@@ -105,8 +103,7 @@ struct SessionContext {
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
-      , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_new_service_(false) {}
 };
 
 /**
