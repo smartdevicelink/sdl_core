@@ -1131,11 +1131,11 @@
     </enum>
     
     <enum name="ElectronicParkBrakeStatus">
-      <element name="CLOSED" />
+      <element name="CLOSED">
         <description>
           Park brake actuators have been fully applied.
         </description>		
-        </element>
+      </element>
       <element name="TRANSITION">
         <description>
           Park brake actuators are transitioning to either Apply/Closed or Release/Open state.
