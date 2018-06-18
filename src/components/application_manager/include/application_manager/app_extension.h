@@ -63,10 +63,10 @@ class AppExtension {
       NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) = 0;
 
   /**
-   * @brief PorcessResumption Method called by SDL during resumption.
+   * @brief ProcessResumption Method called by SDL during resumption.
    * @param resumption_data list of resumption data
    */
-  virtual void PorcessResumption(
+  virtual void ProcessResumption(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject&
           resumption_data) = 0;
 

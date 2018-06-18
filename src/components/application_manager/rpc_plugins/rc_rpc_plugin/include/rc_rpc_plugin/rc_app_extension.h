@@ -74,7 +74,7 @@ class RCAppExtension : public application_manager::AppExtension {
  public:
   void SaveResumptionData(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
-  void PorcessResumption(const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+  void ProcessResumption(const NsSmartDeviceLink::NsSmartObjects::SmartObject&
                              resumption_data) OVERRIDE;
 };
 

@@ -63,7 +63,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
 
   void SaveResumptionData(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
-  void PorcessResumption(
+  void ProcessResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   static unsigned VehicleInfoAppExtensionUID;
