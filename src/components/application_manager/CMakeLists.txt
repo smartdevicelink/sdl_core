@@ -52,6 +52,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/system_time/
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/interfaces
   ${POLICY_PATH}/include/
@@ -85,6 +86,9 @@ set (MESSAGE_HELPER_PATHS
 )
 collect_sources(MESSAGE_HELPER_SOURCES "${MESSAGE_HELPER_PATHS}")
 
+set (SYSTEM_TIME_SOURCES
+  ${AM_SOURCE_DIR}/src/system_time/system_time_handler_impl.cc
+)
 
 set (POLICIES_SOURCE_DIR
   ${AM_SOURCE_DIR}/src/policies
@@ -146,6 +150,9 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/activate_app_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_get_system_time_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_get_system_time_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_system_time_ready_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_user_friendly_message_request.cc
@@ -446,6 +453,10 @@ target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
 target_link_libraries("MessageHelper" ${LIBRARIES})
+
+add_library("SystemTimeLibrary" ${SYSTEM_TIME_SOURCES})
+target_link_libraries("SystemTimeLibrary" ${LIBRARIES} AMEventEngine)
+add_dependencies("MessageHelper" HMI_API MOBILE_API)
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)

@@ -92,6 +92,18 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
+bool HandshakeHandler::OnHandshakeFailed() {
+  BsonObject params;
+  if (payload_) {
+    params = bson_object_from_bytes(payload_.get());
+  } else {
+    bson_object_initialize_default(&params);
+  }
+  ProcessFailedHandshake(params);
+  bson_object_deinitialize(&params);
+  return true;
+}
+
 bool HandshakeHandler::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {

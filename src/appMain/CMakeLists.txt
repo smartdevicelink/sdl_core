@@ -109,7 +109,9 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  SystemTimeLibrary
 )
+
 if(REMOTE_CONTROL)
     SET (LIBRARIES
       ${LIBRARIES}

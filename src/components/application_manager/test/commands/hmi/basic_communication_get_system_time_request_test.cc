@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2018 Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -28,36 +28,45 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
+#include "application_manager/commands/hmi/basic_communication_get_system_time_request.h"
 
-#include <string>
-
-#include "gmock/gmock.h"
-#include "security_manager/crypto_manager.h"
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "application_manager/commands/command_request_test.h"
+#include "protocol_handler/mock_protocol_handler.h"
 
 namespace test {
 namespace components {
-namespace security_manager_test {
+namespace commands_test {
+namespace hmi_commands_test {
+namespace basic_communication_get_system_time_request {
 
-class MockCryptoManager : public ::security_manager::CryptoManager {
- public:
-  MOCK_METHOD0(Init, bool());
-  MOCK_CONST_METHOD0(is_initialized, bool());
-  MOCK_CONST_METHOD0(get_settings,
-                     const ::security_manager::CryptoManagerSettings&());
-  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
-  MOCK_METHOD0(CreateSSLContext, ::security_manager::SSLContext*());
-  MOCK_METHOD1(ReleaseSSLContext, void(::security_manager::SSLContext*));
-  MOCK_CONST_METHOD0(LastError, std::string());
-  MOCK_CONST_METHOD2(IsCertificateUpdateRequired,
-                     bool(const time_t system_time,
-                          const time_t certificates_time));
-};
-}  // namespace security_manager_test
+using ::testing::ReturnRef;
+namespace am = ::application_manager;
+using am::commands::MessageSharedPtr;
+using am::commands::BasicCommunicationGetSystemTimeRequest;
+using namespace ::protocol_handler;
+
+class BasicCommunicationGetSystemTimeRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+
+TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
+  MessageSharedPtr msg = CreateMessage();
+  protocol_handler_test::MockProtocolHandler mock_protocol_handler;
+
+  auto command = CreateCommand<BasicCommunicationGetSystemTimeRequest>(msg);
+
+  ON_CALL(app_mngr_, protocol_handler())
+      .WillByDefault(ReturnRef(mock_protocol_handler));
+  EXPECT_CALL(mock_protocol_handler, NotifyOnFailedHandshake());
+
+  command->onTimeOut();
+}
+
+}  // namespace basic_communication_get_system_time_request
+}  // namespace hmi_commands_test
+}  // namespace commands_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_

@@ -219,10 +219,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
 
-    if (pt_update->policy_table.module_config.certificate.is_initialized()) {
-      listener_->OnCertificateUpdated(
-          *(pt_update->policy_table.module_config.certificate));
-    }
+    listener_->OnCertificateUpdated(
+        *(pt_update->policy_table.module_config.certificate));
 
     std::map<std::string, StringArray> app_hmi_types;
     cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);

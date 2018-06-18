@@ -1448,7 +1448,7 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
                           ByRef(empty))));
   EXPECT_CALL(mock_connection_handler_observer, CheckAppIsNavi(_))
       .Times(2)
-      .WillRepeatedly(Return(true));
+      .WillOnce(Return(true));
 
   // verify that connection handler will not mix up the two results
   SessionContext new_context_first, new_context_second;

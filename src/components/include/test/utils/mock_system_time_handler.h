@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,44 +29,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
-#include <string>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H
+#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H
 
-namespace security_manager {
+#include "gmock/gmock.h"
+#include "utils/system_time_handler.h"
 
-class SecurityManagerListener {
+namespace test {
+namespace components {
+namespace security_manager_test {
+
+class MockSystemTimeHandler : public ::utils::SystemTimeHandler {
  public:
-  /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session
-   * identifier
-   * \param success result of connection protection
-   * \return \c true on success notification or \c false otherwise
-   */
-  virtual bool OnHandshakeDone(uint32_t connection_key,
-                               SSLContext::HandshakeResult result) = 0;
+  MockSystemTimeHandler() {}
+  MOCK_METHOD0(QuerySystemTime, void());
+  MOCK_METHOD1(SubscribeOnSystemTime,
+               void(utils::SystemTimeListener* listener));
+  MOCK_METHOD1(UnsubscribeFromSystemTime,
+               void(utils::SystemTimeListener* listener));
+  MOCK_METHOD0(GetUTCTime, time_t());
+  MOCK_CONST_METHOD0(system_time_can_be_received, bool());
+  ~MockSystemTimeHandler() {}
 
-  /**
-   * @brief Notification about handshake failure
-   * @return true on success notification handling or false otherwise
-   */
-  virtual bool OnHandshakeFailed() = 0;
-
-  /**
-   * @brief Notify listeners that certificate update is required.
-   */
-  virtual void OnCertificateUpdateRequired() = 0;
-
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
-
-  virtual ~SecurityManagerListener() {}
+ private:
+  void DoSubscribe(utils::SystemTimeListener*) {}
+  void DoSystemTimeQuery() {}
+  void DoUnsubscribe(utils::SystemTimeListener* listener) {}
+  bool utc_time_can_be_received() const {
+    return true;
+  }
+  time_t FetchSystemTime() {
+    return 0;
+  }
 };
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SYSTEM_TIME_HANDLER_H

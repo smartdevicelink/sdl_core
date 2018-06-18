@@ -224,6 +224,7 @@
 #include "application_manager/commands/hmi/navi_get_way_points_request.h"
 #include "application_manager/commands/hmi/navi_get_way_points_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
+#include "application_manager/commands/hmi/on_system_time_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_file_removed_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
@@ -269,6 +270,8 @@
 #include "application_manager/commands/hmi/on_system_error_notification.h"
 #include "application_manager/commands/hmi/basic_communication_system_request.h"
 #include "application_manager/commands/hmi/basic_communication_system_response.h"
+#include "application_manager/commands/hmi/basic_communication_get_system_time_request.h"
+#include "application_manager/commands/hmi/basic_communication_get_system_time_response.h"
 #include "application_manager/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "application_manager/commands/hmi/sdl_policy_update.h"
 #include "application_manager/commands/hmi/sdl_policy_update_response.h"
@@ -1285,6 +1288,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
           new commands::OnReadyNotification(message, application_manager));
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady: {
+      command.reset(new commands::OnSystemTimeReadyNotification(
+          message, application_manager));
+      break;
+    }
     case hmi_apis::FunctionID::BasicCommunication_OnDeviceChosen: {
       command.reset(new commands::OnDeviceChosenNotification(
           message, application_manager));
@@ -2217,6 +2225,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
             message, application_manager));
       } else {
         command.reset(new commands::BasicCommunicationSystemRequest(
+            message, application_manager));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_GetSystemTime: {
+      if (is_response) {
+        command.reset(new commands::BasicCommunicationGetSystemTimeResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::BasicCommunicationGetSystemTimeRequest(
             message, application_manager));
       }
       break;

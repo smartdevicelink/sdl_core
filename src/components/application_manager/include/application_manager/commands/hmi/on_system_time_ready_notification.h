@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,44 +29,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
-#include <string>
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
 
-namespace security_manager {
+#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
-class SecurityManagerListener {
+namespace application_manager {
+
+namespace commands {
+
+/**
+ * @brief OnSystemTimeReadyNotification command class.
+ * Notifies SDL whenever system time module is ready.
+ * It could be GPS or any other module which is allows
+ * to obtain system time. Once SDL receive this notification
+ * it is allowed to use GetSystemTimeRequest to rerieve system time.
+ */
+class OnSystemTimeReadyNotification : public NotificationFromHMI {
  public:
   /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session
-   * identifier
-   * \param success result of connection protection
-   * \return \c true on success notification or \c false otherwise
+   * @brief OnSystemTimeReadyNotification create the command.
+   * @param message content of the command. Passed directy to base class.
    */
-  virtual bool OnHandshakeDone(uint32_t connection_key,
-                               SSLContext::HandshakeResult result) = 0;
+  OnSystemTimeReadyNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
-   * @brief Notification about handshake failure
-   * @return true on success notification handling or false otherwise
+   * @brief ~OnSystemTimeReadyNotification destroys the command object.
    */
-  virtual bool OnHandshakeFailed() = 0;
+  ~OnSystemTimeReadyNotification();
 
   /**
-   * @brief Notify listeners that certificate update is required.
+   * @brief Run creates SystemTimeReady event
+   * and notifies all the subscribers.
    */
-  virtual void OnCertificateUpdateRequired() = 0;
-
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
-
-  virtual ~SecurityManagerListener() {}
+  void Run() FINAL;
 };
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+
+}  // namespace commands
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@
  * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following
  * disclaimer in the documentation and/or other materials provided with the
- * distribution.
+ * distribut wiion.
  *
  * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
@@ -29,44 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
-#include <string>
+#include "application_manager/commands/hmi/basic_communication_get_system_time_request.h"
 
-namespace security_manager {
+namespace application_manager {
 
-class SecurityManagerListener {
- public:
-  /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session
-   * identifier
-   * \param success result of connection protection
-   * \return \c true on success notification or \c false otherwise
-   */
-  virtual bool OnHandshakeDone(uint32_t connection_key,
-                               SSLContext::HandshakeResult result) = 0;
+namespace commands {
 
-  /**
-   * @brief Notification about handshake failure
-   * @return true on success notification handling or false otherwise
-   */
-  virtual bool OnHandshakeFailed() = 0;
+BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-  /**
-   * @brief Notify listeners that certificate update is required.
-   */
-  virtual void OnCertificateUpdateRequired() = 0;
+void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager_.protocol_handler().NotifyOnFailedHandshake();
+}
 
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
-
-  virtual ~SecurityManagerListener() {}
-};
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+}  // namespace commands
+}  // namespace application_manager
