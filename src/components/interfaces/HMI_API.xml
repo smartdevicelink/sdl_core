@@ -4483,7 +4483,7 @@
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
-    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
@@ -4659,7 +4659,7 @@
     <param name="engineOilLife" type="Common.VehicleDataResult" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
-    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+    <param name="electronicParkBrakeStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
         <!-- Ford Specific Data Items -->
@@ -4834,7 +4834,7 @@
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
-    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -4894,7 +4894,7 @@
     <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
       <description>The status of the seat belts</description>
     </param>
-    <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+    <param name="electronicParkBrakeStatus" type="Common.ElectronicParkBrakeStatus" mandatory="false">
       <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
     </param>
     <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">

@@ -4357,7 +4357,7 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
-        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
           <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
 
@@ -4559,7 +4559,7 @@
         <param name="engineOilLife" type="VehicleDataResult" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
-        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+        <param name="electronicParkBrakeStatus" type="VehicleDataResult" mandatory="false">
           <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
 
@@ -4768,7 +4768,7 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
-        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
           <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
 
@@ -6011,7 +6011,7 @@
         <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
             <description>The estimated percentage of remaining oil life of the engine.</description>
         </param>
-        <param name="electronicParkBrakeStatus" type="Boolean" mandatory="false">
+        <param name="electronicParkBrakeStatus" type="ElectronicParkBrakeStatus" mandatory="false">
           <description>The status of the park brake as provided by Electric Park Brake (EPB) system.</description>
         </param>
 
