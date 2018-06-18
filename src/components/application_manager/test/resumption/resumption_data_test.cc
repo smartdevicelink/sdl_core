@@ -40,6 +40,7 @@
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
 #include "application_manager/message_helper.h"
+#include "utils/make_shared.h"
 
 #include "application_manager/resumption_data_test.h"
 
@@ -50,6 +51,7 @@ namespace custom_str = utils::custom_string;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
+using ::testing::_;
 
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
@@ -137,8 +139,6 @@ void ResumptionDataTest::CheckSubscriptions(sm::SmartObject& res_list) {
             res_list[am::strings::application_buttons][0].asUInt());
   EXPECT_EQ(static_cast<uint32_t>(ButtonName::eType::CUSTOM_BUTTON),
             res_list[am::strings::application_buttons][1].asUInt());
-  EXPECT_EQ(0u, res_list[am::strings::application_vehicle_info][0].asUInt());
-  EXPECT_EQ(5u, res_list[am::strings::application_vehicle_info][1].asUInt());
 }
 
 void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
@@ -322,6 +322,10 @@ void ResumptionDataTest::CheckVRTitle(
 }
 
 void ResumptionDataTest::PrepareData() {
+  mock_app_extension_ = utils::MakeShared<
+      NiceMock<application_manager_test::MockAppExtension> >();
+  extensions_.insert(extensions_.begin(), mock_app_extension_);
+  ON_CALL(*app_mock, Extensions()).WillByDefault(ReturnRef(extensions_));
   SetGlobalProporties();
   SetCommands();
   SetSubmenues();
