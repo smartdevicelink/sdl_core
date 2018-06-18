@@ -267,7 +267,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
     if (!vi_waiting_for_subscribe_.empty()) {
       LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
-      app_mngr::VehicleInfoSubscriptions::const_iterator key =
+      VehicleInfoSubscriptions::const_iterator key =
           vi_waiting_for_subscribe_.begin();
       for (; key != vi_waiting_for_subscribe_.end(); ++key) {
         auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
@@ -310,7 +310,7 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
         return std::string();
       };
 
-  app_mngr::VehicleInfoSubscriptions::const_iterator it_same_app =
+  VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_subscribed_by_this_app_.begin();
   for (; vi_already_subscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
@@ -319,7 +319,7 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
     msg_params[vi_to_string(*it_same_app)][strings::data_type] = *it_same_app;
   }
 
-  app_mngr::VehicleInfoSubscriptions::const_iterator it_another_app =
+  VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_already_subscribed_by_another_apps_.begin();
   for (; vi_already_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {
@@ -399,7 +399,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     smart_objects::SmartObject& out_request_params,
     bool& out_result) {
   // counter for items to subscribe
-  app_mngr::VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
+  VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   // counter for subscribed items by application
   uint32_t subscribed_items = 0;
 

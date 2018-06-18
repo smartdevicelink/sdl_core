@@ -226,20 +226,6 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
-  DEPRECATED static bool SendIVISubscribtions(const uint32_t app_id,
-                                              ApplicationManager& app_mngr);
-  /**
-   * @brief Sends IVI subscription requests
-   */
-  static bool SendIVISubscriptions(const uint32_t app_id,
-                                   ApplicationManager& app_mngr);
-
-  /**
-   * @brief Returns IVI subscription requests
-   */
-  static smart_objects::SmartObjectList GetIVISubscriptionRequests(
-      ApplicationSharedPtr app, ApplicationManager& app_mngr);
-
   /**
    * @brief Sends button subscription notification
    */

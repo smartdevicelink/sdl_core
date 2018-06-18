@@ -142,7 +142,6 @@ class ResumptionDataTest : public ::testing::Test {
   am::AppFilesMap app_files_map_;
 
   am::ButtonSubscriptions btn_subscr;
-  am::VehicleInfoSubscriptions ivi;
 
   std::shared_ptr<sync_primitives::Lock> sublock_ptr_;
   std::shared_ptr<sync_primitives::Lock> comlock_ptr_;

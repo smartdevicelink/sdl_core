@@ -716,25 +716,6 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
 }
 
 TEST_F(MessageHelperTest,
-       GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
-  // Creating data acessor
-  application_manager::VehicleInfoSubscriptions vis;
-  DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
-      vis, std::make_shared<sync_primitives::Lock>(true));
-  // Calls for ApplicationManager
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
-  EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
-
-  smart_objects::SmartObjectList outList =
-      MessageHelper::GetIVISubscriptionRequests(appSharedMock,
-                                                mock_application_manager);
-  // Expect not empty request
-  EXPECT_FALSE(outList.empty());
-}
-
-TEST_F(MessageHelperTest,
        ProcessSoftButtons_SmartObjectWithoutButtonsKey_Success) {
   // Creating sharedPtr to MockApplication
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();

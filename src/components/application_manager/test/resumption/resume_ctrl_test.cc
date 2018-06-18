@@ -481,8 +481,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   EXPECT_CALL(*app_mock_, set_grammar_id(kTestGrammarId_));
 
   smart_objects::SmartObjectList requests;
-  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock_, UpdateHash());
   const bool res = res_ctrl_->StartResumption(app_mock_, kHash_);

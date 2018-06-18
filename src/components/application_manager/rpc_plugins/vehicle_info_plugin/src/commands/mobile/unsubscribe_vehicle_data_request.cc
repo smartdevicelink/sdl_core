@@ -403,7 +403,7 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     smart_objects::SmartObject& response) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
-  app_mngr::VehicleInfoSubscriptions::const_iterator it_same_app =
+  VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_unsubscribed_by_this_app_.begin();
   for (; vi_already_unsubscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
@@ -411,7 +411,7 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
         VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
   }
 
-  app_mngr::VehicleInfoSubscriptions::const_iterator it_another_app =
+  VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_still_subscribed_by_another_apps_.begin();
   for (; vi_still_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {

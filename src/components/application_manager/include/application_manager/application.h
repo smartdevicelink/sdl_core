@@ -180,7 +180,6 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* show_command() const = 0;
   virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
@@ -898,12 +897,6 @@ class Application : public virtual InitialApplicationData,
    * @return application extensions
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
-
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

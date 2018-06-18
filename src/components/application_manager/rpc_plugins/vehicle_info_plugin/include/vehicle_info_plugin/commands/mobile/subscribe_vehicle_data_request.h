@@ -40,6 +40,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -158,17 +159,17 @@ class SubscribeVehicleDataRequest
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */
-  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
+  VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
 
   /**
    * @brief VI parameters which had been subscribed already by particular app
    */
-  app_mngr::VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
+  VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
 
   /**
    * @brief VI parameters which wait for subscribe after HMI respond
    */
-  app_mngr::VehicleInfoSubscriptions vi_waiting_for_subscribe_;
+  VehicleInfoSubscriptions vi_waiting_for_subscribe_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

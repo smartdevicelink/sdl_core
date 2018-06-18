@@ -134,8 +134,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;
   const uint32_t choice_set_id = 3;
-  const mobile_apis::VehicleDataType::eType vi =
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL;
   const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
 
   smart_objects::SmartObject cmd;

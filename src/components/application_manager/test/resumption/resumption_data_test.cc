@@ -334,7 +334,6 @@ void ResumptionDataTest::PrepareData() {
 
   SetSubscriptions();
   DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_ptr_);
-  DataAccessor<am::VehicleInfoSubscriptions> ivi_access(ivi, ivilock_ptr_);
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
@@ -364,7 +363,6 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, menu_icon()).WillByDefault(ReturnPointee(&menu_icon_));
 
   ON_CALL(*app_mock, SubscribedButtons()).WillByDefault(Return(btn_sub));
-  ON_CALL(*app_mock, SubscribedIVI()).WillByDefault(Return(ivi_access));
 
   ON_CALL(*app_mock, getAppFiles()).WillByDefault(ReturnRef(app_files_map_));
 }
@@ -540,8 +538,6 @@ void ResumptionDataTest::SetKeyboardProperties() {
 void ResumptionDataTest::SetSubscriptions() {
   btn_subscr.insert(ButtonName::eType::CUSTOM_BUTTON);
   btn_subscr.insert(ButtonName::eType::OK);
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(0));
-  ivi.insert(static_cast<mobile_apis::VehicleDataType::eType>(5));
 }
 
 }  // namespace resumption_test
