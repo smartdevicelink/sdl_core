@@ -72,16 +72,17 @@ void OnVehicleDataNotification::Run() {
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      auto vehicle_info = static_cast<mobile_apis::VehicleDataType::eType>(
-          (*message_)[strings::msg_params][it->first].asInt());
-      application_manager_.IviInfoUpdated(it->second, vehicle_info);
+      LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
+      auto vehicle_data_value =
+          (*message_)[strings::msg_params][it->first].asInt();
 
-      auto subscribed_to_ivi_predicate =
-          [vehicle_info](const ApplicationSharedPtr app) {
-            DCHECK_OR_RETURN(app, false);
-            auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-            return ext.subscribeToVehicleInfo(vehicle_info);
-          };
+      application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
+
+      auto subscribed_to_ivi_predicate = [&it](const ApplicationSharedPtr app) {
+        DCHECK_OR_RETURN(app, false);
+        auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+        return ext.isSubscribedToVehicleInfo(it->second);
+      };
 
       const std::vector<ApplicationSharedPtr>& applications =
           application_manager::FindAllApps(application_manager_.applications(),
