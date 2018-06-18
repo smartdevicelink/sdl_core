@@ -185,7 +185,6 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* show_command() const = 0;
   virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;

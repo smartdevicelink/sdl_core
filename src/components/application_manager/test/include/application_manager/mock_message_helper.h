@@ -177,8 +177,6 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateAddVRCommandRequestFromChoiceToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendGlobalPropertiesToHMI, void(ApplicationConstSharedPtr app));
-  MOCK_METHOD1(GetIVISubscriptionRequests,
-               smart_objects::SmartObjectList(ApplicationSharedPtr app));
   MOCK_METHOD3(VerifyTtsFiles,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,

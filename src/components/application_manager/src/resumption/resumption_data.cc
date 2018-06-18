@@ -159,9 +159,6 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
          strings::application_buttons,
          subscriptions);
 
-  DataAccessor<VehicleInfoSubscriptions> vi_accessor =
-      application->SubscribedIVI();
-
   for (auto extension : application->Extensions()) {
     extension->SaveResumptionData(subscriptions);
   }

@@ -364,7 +364,6 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, menu_icon()).WillByDefault(ReturnPointee(&menu_icon_));
 
   ON_CALL(*app_mock, SubscribedButtons()).WillByDefault(Return(btn_sub));
-  ON_CALL(*app_mock, SubscribedIVI()).WillByDefault(Return(ivi_access));
 
   ON_CALL(*app_mock, getAppFiles()).WillByDefault(ReturnRef(app_files_map_));
 }
