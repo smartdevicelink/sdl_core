@@ -8,7 +8,6 @@ namespace application_manager {
 class CommandFactory;
 namespace plugin_manager {
 
-namespace plugin_manager {}
 class MockRPCPlugin : public RPCPlugin {
  public:
   MOCK_METHOD4(Init,
