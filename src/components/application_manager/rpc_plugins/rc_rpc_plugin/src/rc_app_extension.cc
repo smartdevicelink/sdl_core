@@ -61,7 +61,7 @@ bool RCAppExtension::IsSubscibedToInteriorVehicleData(
 void RCAppExtension::SaveResumptionData(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) {}
 
-void RCAppExtension::PorcessResumption(
+void RCAppExtension::ProcessResumption(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) {}
 
 RCAppExtension::~RCAppExtension() {}

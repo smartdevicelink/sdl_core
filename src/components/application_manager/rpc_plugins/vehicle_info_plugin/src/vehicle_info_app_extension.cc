@@ -95,7 +95,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
   }
 }
 
-void VehicleInfoAppExtension::PorcessResumption(
+void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& resumption_data) {
   const char* application_vehicle_info = "vehicleInfo";
   if (resumption_data.keyExists(application_vehicle_info)) {

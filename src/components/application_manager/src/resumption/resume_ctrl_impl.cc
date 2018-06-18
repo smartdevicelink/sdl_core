@@ -625,7 +625,7 @@ void ResumeCtrlImpl::AddSubscriptions(
         application, application_manager_);
 
     for (auto& extension : application->Extensions()) {
-      extension->PorcessResumption(subscriptions);
+      extension->ProcessResumption(subscriptions);
     }
   }
 }
