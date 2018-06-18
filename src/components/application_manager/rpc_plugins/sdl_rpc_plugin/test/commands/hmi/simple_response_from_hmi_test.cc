@@ -59,7 +59,6 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "hmi/vi_get_vehicle_type_response.h"
 #include "hmi/dial_number_response.h"
 #include "hmi/close_popup_response.h"
 #include "hmi/tts_set_global_properties_response.h"
@@ -266,23 +265,6 @@ class OtherResponseFromHMICommandsTest
 
 MATCHER_P(VehicleTypeIsEqualTo, vehicle_type, "") {
   return (*vehicle_type) == arg.asString();
-}
-
-TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
-  const std::string kVehicleType = "Test";
-
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::hmi_response::vehicle_type] =
-      kVehicleType;
-
-  SharedPtr<sdl_rpc_plugin::commands::VIGetVehicleTypeResponse> command(
-      CreateCommand<sdl_rpc_plugin::commands::VIGetVehicleTypeResponse>(
-          command_msg));
-
-  EXPECT_CALL(mock_hmi_capabilities_,
-              set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));
-
-  command->Run();
 }
 
 MATCHER_P(CheckMsgType, msg_type, "") {

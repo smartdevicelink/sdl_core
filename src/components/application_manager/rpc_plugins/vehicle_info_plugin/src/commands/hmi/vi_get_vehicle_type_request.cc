@@ -30,49 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_RESPONSE_H_
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_request.h"
 
-#include "application_manager/commands/response_from_hmi.h"
-
-namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+namespace vehicle_info_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-/**
- * @brief VIGetVehicleTypeResponse command class
- **/
-class VIGetVehicleTypeResponse : public app_mngr::commands::ResponseFromHMI {
- public:
-  /**
-   * @brief VIGetVehicleTypeResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  VIGetVehicleTypeResponse(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      application_manager::rpc_service::RPCService& rpc_service,
-      application_manager::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+VIGetVehicleTypeRequest::VIGetVehicleTypeRequest(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : RequestToHMI(message,
+                   application_manager,
+                   rpc_service,
+                   hmi_capabilities,
+                   policy_handle) {}
 
-  /**
-   * @brief VIGetVehicleTypeResponse class destructor
-   **/
-  virtual ~VIGetVehicleTypeResponse();
+VIGetVehicleTypeRequest::~VIGetVehicleTypeRequest() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void VIGetVehicleTypeRequest::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetVehicleTypeResponse);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VI_GET_VEHICLE_TYPE_RESPONSE_H_

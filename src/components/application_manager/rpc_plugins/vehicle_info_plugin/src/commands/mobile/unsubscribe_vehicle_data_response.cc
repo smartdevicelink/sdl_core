@@ -63,8 +63,6 @@ void UnsubscribeVehicleDataResponse::Run() {
       return;
     }
   }
-
-  // TODO(DK): Some logic
   SendResponse(true);
 }
 
