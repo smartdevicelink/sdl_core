@@ -32,69 +32,70 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_
 
-#if defined(OS_POSIX)
-#include <sys/time.h>
-typedef struct timeval TimevalStruct;
-#endif
 #include <stdint.h>
+#include "boost/date_time.hpp"
 
 namespace date_time {
 
+// skip boost namespacing for all this
+// NOTE that it's called posix_time for its functionality, not for any
+// platform-dependence
+typedef boost::posix_time::time_duration TimeDuration;
+// Capture from boost's namespaces
+using boost::posix_time::microseconds;
+using boost::posix_time::milliseconds;
+using boost::posix_time::seconds;
+
 enum TimeCompare { LESS, EQUAL, GREATER };
 
-class DateTime {
- public:
-  static const int32_t MILLISECONDS_IN_SECOND = 1000;
-  static const int32_t MICROSECONDS_IN_MILLISECOND = 1000;
-  static const int32_t NANOSECONDS_IN_MICROSECOND = 1000;
-  static const int32_t SECONDS_IN_HOUR = 3600;
-  static const int32_t MICROSECONDS_IN_SECOND =
-      MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND;
-  static const int32_t NANOSECONDS_IN_MILLISECOND =
-      MICROSECONDS_IN_MILLISECOND * NANOSECONDS_IN_MICROSECOND;
+// public defines for external usage
+const int32_t MILLISECONDS_IN_SECOND = 1000;
+const int32_t MICROSECONDS_IN_MILLISECOND = 1000;
+const int32_t NANOSECONDS_IN_MICROSECOND = 1000;
+const int32_t SECONDS_IN_HOUR = 3600;
+const int32_t MICROSECONDS_IN_SECOND =
+    MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND;
+const int32_t NANOSECONDS_IN_MILLISECOND =
+    MICROSECONDS_IN_MILLISECOND * NANOSECONDS_IN_MICROSECOND;
 
-  static TimevalStruct getCurrentTime();
+TimeDuration getCurrentTime();
 
-  // return SECONDS count
-  static int64_t getSecs(const TimevalStruct& time);
+// empty duration
+TimeDuration TimeDurationZero();
 
-  // return MILLISECONDS count
-  static int64_t getmSecs(const TimevalStruct& time);
-  // return MICROSECONDS count
-  static int64_t getuSecs(const TimevalStruct& time);
+// return SECONDS count
+int64_t getSecs(const TimeDuration& t);
 
-  // return MILLISECONDS count between sinceTime value and current time
-  static int64_t calculateTimeSpan(const TimevalStruct& sinceTime);
+// return MILLISECONDS count
+int64_t getmSecs(const TimeDuration& t);
+// return MICROSECONDS count
+int64_t getuSecs(const TimeDuration& t);
 
-  // return MILLISECONDS count between time1 and time2
-  static int64_t calculateTimeDiff(const TimevalStruct& time1,
-                                   const TimevalStruct& time2);
+// get just the MILLISECONDS count (< 1000)
+int64_t get_just_mSecs(const TimeDuration& t);
 
-  /**
-   * @brief Adds milliseconds to time struct
-   * @param time contains time struct
-   * @param milliseconds contains value which need to
-   * add to time struct
-   **/
-  static void AddMilliseconds(TimevalStruct& time, uint32_t milliseconds);
+// get just the MICROSECONDS count (< 1000)
+int64_t get_just_uSecs(const TimeDuration& t);
 
-  static TimevalStruct Sub(const TimevalStruct& time1,
-                           const TimevalStruct& time2);
+// return MILLISECONDS count between sinceTime value and current time
+int64_t calculateTimeSpan(const TimeDuration& sinceTime);
 
-  static TimeCompare compareTime(const TimevalStruct& time1,
-                                 const TimevalStruct& time2);
+// return MILLISECONDS count between time1 and time2
+int64_t calculateTimeDiff(const TimeDuration& time1, const TimeDuration& time2);
 
-  static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
-  static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
-  static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
+/**
+ * @brief Adds milliseconds to time struct
+ * @param time contains time struct
+ * @param milliseconds contains value which need to
+ * add to time struct
+ **/
+void AddMilliseconds(TimeDuration& time, uint32_t milliseconds);
 
- private:
-  static TimevalStruct ConvertionUsecs(const TimevalStruct& time);
-};
+TimeCompare compareTime(const TimeDuration& time1, const TimeDuration& time2);
+
+bool Greater(const TimeDuration& time1, const TimeDuration& time2);
+bool Less(const TimeDuration& time1, const TimeDuration& time2);
+bool Equal(const TimeDuration& time1, const TimeDuration& time2);
 
 }  // namespace date_time
-bool operator<(const TimevalStruct& time1, const TimevalStruct& time2);
-bool operator==(const TimevalStruct& time1, const TimevalStruct& time2);
-const TimevalStruct operator-(const TimevalStruct& time1,
-                              const TimevalStruct& time2);
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_

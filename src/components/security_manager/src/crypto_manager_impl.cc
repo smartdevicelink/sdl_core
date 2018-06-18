@@ -293,7 +293,7 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
   }
 
   return seconds <= (get_settings().update_before_hours() *
-                     date_time::DateTime::SECONDS_IN_HOUR);
+                     date_time::SECONDS_IN_HOUR);
 }
 
 const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {

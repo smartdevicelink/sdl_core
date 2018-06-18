@@ -1119,8 +1119,8 @@ bool CacheManager::SetUserPermissionsForApp(
           it_group->second != is_allowed) {
         *out_app_permissions_changed = true;
 
-        const TimevalStruct tm = date_time::DateTime::getCurrentTime();
-        int64_t current_time_msec = date_time::DateTime::getmSecs(tm);
+        const date_time::TimeDuration tm = date_time::getCurrentTime();
+        int64_t current_time_msec = date_time::getmSecs(tm);
         ucr.consent_last_updated = current_time_msec;
         LOG4CXX_DEBUG(logger_, "Updating consents time " << current_time_msec);
       }
@@ -1333,7 +1333,7 @@ int CacheManager::TimeoutResponse() {
   CACHE_MANAGER_CHECK(0);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.module_config.timeout_after_x_seconds *
-         date_time::DateTime::MILLISECONDS_IN_SECOND;
+         date_time::MILLISECONDS_IN_SECOND;
 }
 
 bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
@@ -2651,8 +2651,8 @@ void CacheManager::SetExternalConsentForApp(
       (*(*pt_->policy_table.device_data)[permissions.device_id]
             .user_consent_records)[permissions.policy_app_id];
 
-  const TimevalStruct tm = date_time::DateTime::getCurrentTime();
-  int64_t current_time_msec = date_time::DateTime::getmSecs(tm);
+  const date_time::TimeDuration tm = date_time::getCurrentTime();
+  int64_t current_time_msec = date_time::getmSecs(tm);
   app_consent_records.ext_consent_last_updated = current_time_msec;
   LOG4CXX_DEBUG(logger_, "Updating consents time " << current_time_msec);
 

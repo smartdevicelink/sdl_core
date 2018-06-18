@@ -44,12 +44,12 @@ TransportManagerObserver::TransportManagerObserver(
 
 void TransportManagerObserver::StartRawMsg(
     const protocol_handler::RawMessage* ptr) {
-  time_starts[ptr] = date_time::DateTime::getCurrentTime();
+  time_starts[ptr] = date_time::getCurrentTime();
 }
 
 void TransportManagerObserver::StopRawMsg(
     const protocol_handler::RawMessage* ptr) {
-  std::map<const protocol_handler::RawMessage*, TimevalStruct>::const_iterator
+  std::map<const protocol_handler::RawMessage*, date_time::TimeDuration>::const_iterator
       it;
   it = time_starts.find(ptr);
   if (it != time_starts.end()) {
@@ -57,7 +57,7 @@ void TransportManagerObserver::StopRawMsg(
     m->message_metric =
         new transport_manager::TMTelemetryObserver::MessageMetric();
     m->message_metric->begin = it->second;
-    m->message_metric->end = date_time::DateTime::getCurrentTime();
+    m->message_metric->end = date_time::getCurrentTime();
     m->message_metric->data_size = ptr->data_size();
     m->grabResources();
     telemetry_monitor_->SendMetric(m);

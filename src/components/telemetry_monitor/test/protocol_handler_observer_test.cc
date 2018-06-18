@@ -47,9 +47,8 @@ TEST(ProtocolHandlerObserverTest, MessageProcess) {
 
   ProtocolHandlerObserver pr_handler(&mock_telemetry_monitor);
   uint32_t message_id = 1;
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
+
   pr_handler.StartMessageProcess(message_id, start_time);
 
   typedef protocol_handler::PHTelemetryObserver::MessageMetric MetricType;
@@ -64,9 +63,8 @@ TEST(ProtocolHandlerObserverTest, MessageProcessWithZeroMessageId) {
 
   ProtocolHandlerObserver pr_handler(&mock_telemetry_monitor);
   uint32_t message_id = 0;
-  TimevalStruct start_time;
-  start_time.tv_sec = 1;
-  start_time.tv_usec = 0;
+  date_time::TimeDuration start_time = date_time::seconds(1);
+
   pr_handler.StartMessageProcess(message_id, start_time);
 
   typedef protocol_handler::PHTelemetryObserver::MessageMetric MetricType;

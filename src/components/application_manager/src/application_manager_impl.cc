@@ -2619,7 +2619,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver::MessageMetricSharedPtr metric(
       new AMTelemetryObserver::MessageMetric());
-  metric->begin = date_time::DateTime::getCurrentTime();
+  metric->begin = date_time::getCurrentTime();
 #endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile =
       utils::MakeShared<smart_objects::SmartObject>();
@@ -2642,7 +2642,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 #ifdef TELEMETRY_MONITOR
-  metric->end = date_time::DateTime::getCurrentTime();
+  metric->end = date_time::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }
@@ -3991,14 +3991,14 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
   std::vector<uint32_t> app_list;
   {
     sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
-    std::map<uint32_t, TimevalStruct>::iterator it =
+    std::map<uint32_t, date_time::TimeDuration>::iterator it =
         tts_global_properties_app_list_.begin();
-    std::map<uint32_t, TimevalStruct>::iterator it_end =
+    std::map<uint32_t, date_time::TimeDuration>::iterator it_end =
         tts_global_properties_app_list_.end();
     date_time::TimeCompare time_comp;
     for (; it != it_end; ++it) {
-      time_comp = date_time::DateTime::compareTime(
-          date_time::DateTime::getCurrentTime(), it->second);
+      time_comp = date_time::compareTime(
+          date_time::getCurrentTime(), it->second);
       if (date_time::GREATER == time_comp || date_time::EQUAL == time_comp) {
         app_list.push_back(it->first);
       }
@@ -4019,8 +4019,8 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   uint16_t timeout = get_settings().tts_global_properties_timeout();
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-  current_time.tv_sec += timeout;
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
+  current_time += date_time::seconds(timeout);
   // please avoid AutoLock usage to avoid deadlock
   tts_global_properties_app_list_lock_.Acquire();
   if (tts_global_properties_app_list_.end() ==
@@ -4043,7 +4043,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   LOG4CXX_AUTO_TRACE(logger_);
   // please avoid AutoLock usage to avoid deadlock
   tts_global_properties_app_list_lock_.Acquire();
-  std::map<uint32_t, TimevalStruct>::iterator it =
+  std::map<uint32_t, date_time::TimeDuration>::iterator it =
       tts_global_properties_app_list_.find(app_id);
   if (tts_global_properties_app_list_.end() != it) {
     tts_global_properties_app_list_.erase(it);

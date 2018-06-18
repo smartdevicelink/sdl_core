@@ -164,8 +164,8 @@ HeartBeatMonitor::SessionState::SessionState(
 void HeartBeatMonitor::SessionState::RefreshExpiration() {
   LOG4CXX_DEBUG(logger_, "Refresh expiration: " << heartbeat_timeout_mseconds_);
   using namespace date_time;
-  TimevalStruct time = DateTime::getCurrentTime();
-  DateTime::AddMilliseconds(time, heartbeat_timeout_mseconds_);
+  date_time::TimeDuration time = getCurrentTime();
+  AddMilliseconds(time, heartbeat_timeout_mseconds_);
   heartbeat_expiration_ = time;
 }
 
@@ -194,8 +194,8 @@ void HeartBeatMonitor::SessionState::KeepAlive() {
 }
 
 bool HeartBeatMonitor::SessionState::HasTimeoutElapsed() {
-  TimevalStruct now = date_time::DateTime::getCurrentTime();
-  return date_time::DateTime::Greater(now, heartbeat_expiration_);
+  date_time::TimeDuration now = date_time::getCurrentTime();
+  return date_time::Greater(now, heartbeat_expiration_);
 }
 
 }  // namespace connection_handler

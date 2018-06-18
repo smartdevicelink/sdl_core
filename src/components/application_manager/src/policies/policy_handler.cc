@@ -661,9 +661,9 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 
 void policy::PolicyHandler::SetDaysAfterEpoch() {
   POLICY_LIB_CHECK_VOID();
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+  int days_after_epoch = date_time::getSecs(current_time) / kSecondsInDay;
   PTUpdatedAt(Counters::DAYS_AFTER_EPOCH, days_after_epoch);
 }
 
@@ -1467,7 +1467,7 @@ void PolicyHandler::OnSnapshotCreated(
   std::string policy_snapshot_full_path;
   if (SaveSnapshot(pt_string, policy_snapshot_full_path)) {
     const uint32_t timeout_exchange_s =
-        timeout_exchange_ms / date_time::DateTime::MILLISECONDS_IN_SECOND;
+        timeout_exchange_ms / date_time::MILLISECONDS_IN_SECOND;
     MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
                                     timeout_exchange_s,
                                     retry_delay_seconds,
@@ -1589,7 +1589,7 @@ uint32_t PolicyHandler::NextRetryTimeout() {
 }
 
 uint32_t PolicyHandler::TimeoutExchangeSec() const {
-  return TimeoutExchangeMSec() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return TimeoutExchangeMSec() / date_time::MILLISECONDS_IN_SECOND;
 }
 
 uint32_t PolicyHandler::TimeoutExchangeMSec() const {

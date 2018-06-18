@@ -840,9 +840,9 @@ TEST_F(PolicyManagerImplTest2,
        PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current_time = date_time::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  int days = current_time.tv_sec / kSecondsInDay;
+  int days = date_time::getSecs(current_time) / kSecondsInDay;
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 
   GetPTU("valid_sdl_pt_update.json");
@@ -900,24 +900,23 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     uint32_t timeout_after_x_seconds =
         root["policy_table"]["module_config"]["timeout_after_x_seconds"]
             .asInt() *
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
+        date_time::MILLISECONDS_IN_SECOND;
     const uint32_t first_retry = timeout_after_x_seconds;
     EXPECT_EQ(first_retry, manager->NextRetryTimeout());
-    uint32_t next_retry = first_retry +
-                          seconds_between_retries[0].asInt() *
-                              date_time::DateTime::MILLISECONDS_IN_SECOND;
+    uint32_t next_retry = first_retry + seconds_between_retries[0].asInt() *
+                                            date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[1].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[1].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[2].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[2].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
-    next_retry = first_retry + next_retry +
-                 seconds_between_retries[3].asInt() *
-                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next_retry =
+        first_retry + next_retry +
+        seconds_between_retries[3].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
   }
 }
@@ -948,9 +947,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
     Json::Value val2(Json::arrayValue);
     val2[0] = hmi_level[index];
     val[new_data.new_field_value_]["hmi_levels"] = val2;
-    root["policy_table"]["functional_groupings"][new_data
-                                                     .new_field_name_]["rpcs"] =
-        val;
+    root["policy_table"]["functional_groupings"][new_data.new_field_name_]
+        ["rpcs"] = val;
     root["policy_table"]["functional_groupings"][new_data.new_field_name_]
         ["user_consent_prompt"] = new_data.new_field_name_;
   }

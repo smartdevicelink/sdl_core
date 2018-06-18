@@ -102,7 +102,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
     void RefreshExpiration();
 
     uint32_t heartbeat_timeout_mseconds_;
-    TimevalStruct heartbeat_expiration_;
+    date_time::TimeDuration heartbeat_expiration_;
     bool is_heartbeat_sent_;
   };
 

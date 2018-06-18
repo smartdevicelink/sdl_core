@@ -30,8 +30,8 @@
 
 include("./set_3rd_party_paths.cmake")
 
-set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}) 
-set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}) 
+set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set (install-3rd_party_logger_var "")
 
@@ -208,7 +208,7 @@ else()
 endif()
 
 if (HMIADAPTER STREQUAL "messagebroker")
-  find_package(Boost 1.66.0 COMPONENTS system) 
+  find_package(Boost 1.66.0 COMPONENTS system)
   set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
   set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
   SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
@@ -225,9 +225,9 @@ if (HMIADAPTER STREQUAL "messagebroker")
       URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
       DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND ./b2
-      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --prefix=${3RD_PARTY_INSTALL_PREFIX}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
@@ -243,4 +243,3 @@ add_custom_target(install-3rd_party
   DEPENDS Boost
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
-

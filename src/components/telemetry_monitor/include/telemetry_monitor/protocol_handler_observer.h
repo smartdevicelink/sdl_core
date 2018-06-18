@@ -45,13 +45,13 @@ class ProtocolHandlerObserver : public protocol_handler::PHTelemetryObserver {
   explicit ProtocolHandlerObserver(TelemetryMonitor* telemetry_monitor);
 
   virtual void StartMessageProcess(uint32_t message_id,
-                                   const TimevalStruct& start_time);
+                                   const date_time::TimeDuration& start_time);
 
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 
  private:
   TelemetryMonitor* telemetry_monitor_;
-  std::map<uint32_t, TimevalStruct> time_starts;
+  std::map<uint32_t, date_time::TimeDuration> time_starts;
 };
 }  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_OBSERVER_H_

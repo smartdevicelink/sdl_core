@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_MESSAGEMETER_H_
 
 #include <cstddef>
-#include <set>
 #include <map>
+#include <set>
 #include "utils/date_time.h"
 
 namespace utils {
@@ -82,20 +82,19 @@ class MessageMeter {
   void ClearIdentifiers();
 
   void set_time_range(const size_t time_range_msecs);
-  void set_time_range(const TimevalStruct& time_range);
-  TimevalStruct time_range() const;
+  void set_time_range(const date_time::TimeDuration& time_range);
+  date_time::TimeDuration time_range() const;
 
  private:
-  TimevalStruct time_range_;
-  typedef std::multiset<TimevalStruct> Timings;
+  date_time::TimeDuration time_range_;
+  typedef std::multiset<date_time::TimeDuration> Timings;
   typedef std::map<Id, Timings> TimingMap;
   TimingMap timing_map_;
 };
 
 template <class Id>
-MessageMeter<Id>::MessageMeter()
-    : time_range_(TimevalStruct{0, 0}) {
-  time_range_.tv_sec = 1;
+MessageMeter<Id>::MessageMeter() {
+  time_range_ = date_time::seconds(1);
 }
 
 template <class Id>
@@ -106,7 +105,7 @@ size_t MessageMeter<Id>::TrackMessage(const Id& id) {
 template <class Id>
 size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
   Timings& timings = timing_map_[id];
-  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration current_time = date_time::getCurrentTime();
   for (size_t i = 0; i < count; ++i) {
     // Adding to the end is amortized constant
     timings.insert(timings.end(), current_time);
@@ -124,8 +123,8 @@ size_t MessageMeter<Id>::Frequency(const Id& id) {
   if (timings.empty()) {
     return 0u;
   }
-  const TimevalStruct actual_begin_time = date_time::DateTime::Sub(
-      date_time::DateTime::getCurrentTime(), time_range_);
+  const date_time::TimeDuration actual_begin_time =
+      (date_time::getCurrentTime() - time_range_);
   timings.erase(timings.begin(), timings.upper_bound(actual_begin_time));
   return timings.size();
 }
@@ -142,21 +141,15 @@ void MessageMeter<Id>::ClearIdentifiers() {
 
 template <class Id>
 void MessageMeter<Id>::set_time_range(const size_t time_range_msecs) {
-  // TODO(EZamakhov): move to date_time::DateTime
-  const size_t secs =
-      time_range_msecs / date_time::DateTime::MILLISECONDS_IN_SECOND;
-  time_range_.tv_sec = secs;
-  const size_t mSecs =
-      time_range_msecs % date_time::DateTime::MILLISECONDS_IN_SECOND;
-  time_range_.tv_usec =
-      mSecs * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  time_range_ = date_time::milliseconds(time_range_msecs);
 }
 template <class Id>
-void MessageMeter<Id>::set_time_range(const TimevalStruct& time_range) {
+void MessageMeter<Id>::set_time_range(
+    const date_time::TimeDuration& time_range) {
   time_range_ = time_range;
 }
 template <class Id>
-TimevalStruct MessageMeter<Id>::time_range() const {
+date_time::TimeDuration MessageMeter<Id>::time_range() const {
   return time_range_;
 }
 }  // namespace utils

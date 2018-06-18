@@ -1576,7 +1576,7 @@ class ApplicationManagerImpl
    * @brief Map contains applications which
    * will send TTS global properties to HMI after timeout
    */
-  std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
+  std::map<uint32_t, date_time::TimeDuration> tts_global_properties_app_list_;
 
   bool audio_pass_thru_active_;
   uint32_t audio_pass_thru_app_id_;

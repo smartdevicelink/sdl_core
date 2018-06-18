@@ -503,7 +503,7 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Defines number per time in seconds limits
    */
-  typedef std::pair<TimevalStruct, uint32_t> TimeToNumberLimit;
+  typedef std::pair<date_time::TimeDuration, uint32_t> TimeToNumberLimit;
 
   /**
    * @brief Defines specific command number per time in seconds limits

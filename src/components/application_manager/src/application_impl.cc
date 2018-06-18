@@ -72,7 +72,7 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
     return mobile_apis::FileType::BINARY;
   }
 }
-}
+}  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -141,9 +141,9 @@ ApplicationImpl::ApplicationImpl(
               this, &ApplicationImpl::OnAudioStreamSuspend))
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+      date_time::getCurrentTime(), 0};
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -753,7 +753,7 @@ bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
   return subscribed_vehicle_info_
       .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+          static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
       .second;
 }
 
@@ -776,7 +776,7 @@ UsageStatistics& ApplicationImpl::usage_report() {
 
 bool ApplicationImpl::AreCommandLimitsExceeded(
     mobile_apis::FunctionID::eType cmd_id, TLimitSource source) {
-  TimevalStruct current = date_time::DateTime::getCurrentTime();
+  date_time::TimeDuration current = date_time::getCurrentTime();
   switch (source) {
     // In case of config file values there is COMMON limitations for number of
     // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
@@ -808,13 +808,14 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: " << current.tv_sec << "\n Limit: ("
-                       << limit.first.tv_sec << "," << limit.second
+                       << "\n Current: " << date_time::getSecs(current) << "\n Limit: ("
+                       << date_time::getSecs(limit.first) << "," << limit.second
                        << ")"
                           "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
-      if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
+      if (date_time::getSecs(current) <
+          date_time::getSecs(limit.first) + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
           return false;
@@ -856,7 +857,7 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       TimeToNumberLimit& limit = it->second;
 
       // Checking even limitation for command
-      if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
+      if (static_cast<uint32_t>(date_time::getSecs(current) - date_time::getSecs(limit.first)) <
           minute / cmd_limit) {
         return true;
       }
