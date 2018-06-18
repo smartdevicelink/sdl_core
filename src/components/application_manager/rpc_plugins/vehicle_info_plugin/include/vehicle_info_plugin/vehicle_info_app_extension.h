@@ -39,6 +39,8 @@
 #include <string>
 
 namespace vehicle_info_plugin {
+class VehicleInfoPlugin;
+
 namespace app_mngr = application_manager;
 
 typedef mobile_apis::VehicleDataType::eType VehicleDataType;
@@ -49,7 +51,8 @@ typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
 class VehicleInfoAppExtension : public app_mngr::AppExtension {
  public:
-  explicit VehicleInfoAppExtension();
+  explicit VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
+                                   app_mngr::Application& app);
   virtual ~VehicleInfoAppExtension();
 
   bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
@@ -69,6 +72,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
 
  private:
   VehicleInfoSubscriptions subscribed_data_;
+  VehicleInfoPlugin& plugin_;
+  app_mngr::Application& app_;
 };
 }
 
