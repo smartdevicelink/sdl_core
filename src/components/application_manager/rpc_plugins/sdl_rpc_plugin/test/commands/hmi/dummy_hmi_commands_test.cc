@@ -158,8 +158,6 @@
 #include "hmi/sdl_activate_app_response.h"
 #include "hmi/on_app_permission_changed_notification.h"
 #include "hmi/on_event_changed_notification.h"
-#include "hmi/vi_get_vehicle_type_request.h"
-#include "hmi/vi_get_vehicle_type_response.h"
 #include "hmi/navi_is_ready_request.h"
 #include "hmi/navi_show_constant_tbt_request.h"
 #include "hmi/navi_show_constant_tbt_response.h"
@@ -433,9 +431,7 @@ typedef Types<commands::UIChangeRegistrationRequest,
               commands::UIIsReadyResponse,
               commands::UIIsReadyRequest> HMICommandsListSecond;
 
-typedef Types<commands::VIGetVehicleTypeResponse,
-              commands::VIGetVehicleTypeRequest,
-              commands::NaviIsReadyResponse,
+typedef Types<commands::NaviIsReadyResponse,
               commands::NaviIsReadyRequest,
               commands::NaviAlertManeuverResponse,
               commands::NaviAlertManeuverRequest,

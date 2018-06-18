@@ -49,6 +49,8 @@
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
@@ -108,6 +110,10 @@ app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
   switch (function_id) {
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleType:
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::VIGetVehicleTypeRequest>()
+                 : factory.GetCreator<commands::VIGetVehicleTypeResponse>();
     case hmi_apis::FunctionID::VehicleInfo_IsReady:
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::VIIsReadyRequest>()

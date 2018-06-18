@@ -59,7 +59,6 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_global_properties_request.h"
 #include "application_manager/commands/request_to_hmi.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_set_global_properties_request.h"
@@ -164,8 +163,7 @@ class RequestToHMICommandsTest3
   typedef Command CommandType;
 };
 
-typedef Types<sdl_rpc_plugin::commands::VIGetVehicleTypeRequest,
-              sdl_rpc_plugin::commands::hmi::DialNumberRequest,
+typedef Types<sdl_rpc_plugin::commands::hmi::DialNumberRequest,
               sdl_rpc_plugin::commands::ClosePopupRequest,
               sdl_rpc_plugin::commands::TTSSetGlobalPropertiesRequest,
               sdl_rpc_plugin::commands::TTSSpeakRequest,

@@ -188,8 +188,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vi_my_key_notification.h"
 #endif  // #ifdef HMI_DBUS_API
 
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_show_constant_tbt_response.h"
@@ -825,11 +823,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            hmi_apis::FunctionID::VehicleInfo_GetMyKey> >();
     }
 #endif  // #ifdef HMI_DBUS_API
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleType: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIGetVehicleTypeRequest>()
-                 : factory.GetCreator<commands::VIGetVehicleTypeResponse>();
-    }
     case hmi_apis::FunctionID::Navigation_IsReady: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::NaviIsReadyRequest>()
