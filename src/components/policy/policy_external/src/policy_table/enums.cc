@@ -140,6 +140,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_BELTSTATUS:
       return true;
+    case P_ELECTRONICPARKBRAKESTATUS:
+      return true;
     case P_DRIVERBRAKING:
       return true;
     case P_PRNDL:
@@ -233,6 +235,8 @@ const char* EnumToJsonString(Parameter val) {
       return "accPedalPosition";
     case P_BELTSTATUS:
       return "beltStatus";
+    case P_ELECTRONICPARKBRAKESTATUS:
+      return "electronicParkBrakeStatus";
     case P_DRIVERBRAKING:
       return "driverBraking";
     case P_PRNDL:
@@ -339,6 +343,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("beltStatus" == literal) {
     *result = P_BELTSTATUS;
+    return true;
+  } else if ("electronicParkBrakeStatus" == literal) {
+    *result = P_ELECTRONICPARKBRAKESTATUS;
     return true;
   } else if ("driverBraking" == literal) {
     *result = P_DRIVERBRAKING;

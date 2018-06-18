@@ -345,6 +345,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -357,6 +358,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -369,6 +371,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -381,6 +384,7 @@
                         "LIMITED"],
                         "parameters": ["accPedalPosition",
                         "beltStatus",
+                        "electronicParkBrakeStatus",
                         "driverBraking",
                         "myKey",
                         "prndl",
@@ -2374,4 +2378,3 @@
         }
     }
 }
-

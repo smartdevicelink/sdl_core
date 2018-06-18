@@ -223,6 +223,7 @@ const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
 const char* odometer = "odometer";
 const char* belt_status = "beltStatus";
+const char* electronic_park_brake_status = "electronicParkBrakeStatus";
 const char* body_information = "bodyInformation";
 const char* device_status = "deviceStatus";
 const char* driver_braking = "driverBraking";

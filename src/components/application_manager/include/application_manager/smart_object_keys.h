@@ -259,6 +259,7 @@ extern const char* prndl;
 extern const char* tire_pressure;
 extern const char* odometer;
 extern const char* belt_status;
+extern const char* electronic_park_brake_status;
 extern const char* body_information;
 extern const char* device_status;
 extern const char* driver_braking;
