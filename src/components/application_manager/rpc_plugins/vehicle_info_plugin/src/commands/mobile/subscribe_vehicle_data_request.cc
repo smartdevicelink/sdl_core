@@ -361,7 +361,7 @@ struct SubscribedToIVIPredicate {
   bool operator()(const ApplicationSharedPtr app) const {
     DCHECK_OR_RETURN(app, false);
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    return ext.subscribeToVehicleInfo(
+    return ext.isSubscribedToVehicleInfo(
         static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_));
   }
 };
@@ -423,7 +423,10 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
       }
       if (!is_interface_not_available && is_key_enabled) {
         mobile_apis::VehicleDataType::eType key_type = it->second;
-        if (app->IsSubscribedToIVI(key_type)) {
+        const auto is_subscribed =
+            VehicleInfoAppExtension::ExtractVIExtension(*app)
+                .isSubscribedToVehicleInfo(key_type);
+        if (is_subscribed) {
           LOG4CXX_DEBUG(logger_,
                         "App with connection key "
                             << connection_key()
