@@ -51,22 +51,77 @@ typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
 
 class VehicleInfoAppExtension : public app_mngr::AppExtension {
  public:
+  /**
+   * @brief VehicleInfoAppExtension constructor
+   * @param plugin vehicle info plugin
+   * @param app application that contains this plugin
+   */
   explicit VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
                                    app_mngr::Application& app);
   virtual ~VehicleInfoAppExtension();
 
+  /**
+ * @brief subscribeToVehicleInfo add vehicle_data to list of subscriptions of
+ * application extension
+ * @param vehicle_data data to subscribe
+ * @return true in case if subscription is successful
+ */
   bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
+
+  /**
+   * @brief unsubscribeFromVehicleInfo remove vehicle_data from list of
+   * subscriptions of application extension
+   * @param vehicle_data data to unsubscribe
+   * @return true in case if unsubscription is successful
+   */
   bool unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
+  /**
+   * @brief unsubscribeFromVehicleInfo unsubscribe from all vehicle info data
+   */
   void unsubscribeFromVehicleInfo();
+
+  /**
+   * @brief isSubscribedToVehicleInfo checks if extension is subscribed to
+   * vehicle data
+   * @param vehicle_data_type data type  to check subscription
+   * @return true if extension is subscribed this vehicle_data_type, otherwise
+   * return false
+   */
   bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
+
+  /**
+   * @brief Subscriptions get list of subscriptions for application extension
+   * @return list of subscriptions for application extension
+   */
   VehicleInfoSubscriptions Subscriptions();
 
+  /**
+   * @brief SaveResumptionData saves vehicle info data
+   * @param resumption_data plase to store resumption data
+   */
   void SaveResumptionData(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) OVERRIDE;
+
+  /**
+   * @brief ProcessResumption load resumtion data back to plugin during
+   * resumption
+   * @param resumption_data resumption data
+   */
   void ProcessResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
+  /**
+   * @brief VehicleInfoAppExtensionUID unique identifier of VehicleInfo
+   * aplication extension
+   */
   static unsigned VehicleInfoAppExtensionUID;
+
+  /**
+   * @brief ExtractVIExtension utility function to extract application extension
+   * from application
+   * @param app : applicaiton that contains vehicle info app_extension
+   * @return application extension extracted from application
+   */
   static VehicleInfoAppExtension& ExtractVIExtension(
       application_manager::Application& app);
 
