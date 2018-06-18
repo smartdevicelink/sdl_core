@@ -52,6 +52,8 @@
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "test/resumption/mock_last_state.h"
+#include "media_manager/mock_media_manager.h"
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
@@ -69,6 +71,8 @@ using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using resumption_test::MockLastState;
+using test::components::media_manager_test::MockMediaManager;
 
 using namespace application_manager;
 using namespace policy_handler_test;
@@ -112,6 +116,12 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
+
+    const std::string path_to_plagin = "";
+    EXPECT_CALL(mock_application_manager_settings_, plugins_folder())
+        .WillOnce(ReturnRef(path_to_plagin));
+    app_manager_impl_.Init(mock_last_state_, &mock_media_manager_);
+
     app_impl_ = new ApplicationImpl(
         application_id,
         policy_app_id,
@@ -127,6 +137,8 @@ class ApplicationHelperTest : public testing::Test {
   NiceMock<MockPolicySettings> mock_policy_settings_;
 
   ApplicationManagerImpl app_manager_impl_;
+  MockMediaManager mock_media_manager_;
+  MockLastState mock_last_state_;
   ApplicationSharedPtr app_impl_;
 };
 
@@ -170,6 +182,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != app_impl_->FindCommand(cmd_id));
   EXPECT_TRUE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_TRUE(NULL != app_impl_->FindChoiceSet(choice_set_id));
+  EXPECT_TRUE(app_impl_->IsSubscribedToButton(button));
   auto help_prompt = app_impl_->help_prompt();
   EXPECT_TRUE(help_prompt->asString() == some_string);
   auto timeout_prompt = app_impl_->timeout_prompt();
