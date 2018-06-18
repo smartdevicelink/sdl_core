@@ -62,7 +62,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
-  void ProcessResumptionSubscription(app_mngr::ApplicationSharedPtr app,
+  void ProcessResumptionSubscription(app_mngr::Application& app,
                                      VehicleInfoAppExtension& ext);
 
   static const VehicleData vehicle_data_;

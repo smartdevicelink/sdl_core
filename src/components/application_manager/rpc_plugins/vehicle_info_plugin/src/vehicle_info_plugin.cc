@@ -134,15 +134,18 @@ void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
-    app_mngr::ApplicationSharedPtr application) {}
+    app_mngr::ApplicationSharedPtr application) {
+  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
+    application->AddExtension(new VehicleInfoAppExtension(*this, *application));
+  }
+}
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
-    application_manager::ApplicationSharedPtr app,
-    VehicleInfoAppExtension& ext) {
+    application_manager::Application& app, VehicleInfoAppExtension& ext) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
+  msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
   for (auto& ivi_data : vehicle_data_) {
     mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
