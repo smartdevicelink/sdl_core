@@ -37,6 +37,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -117,12 +118,12 @@ class UnsubscribeVehicleDataRequest
    * @brief VI parameters which still being subscribed by another apps after
    * particular app had been unsubscribed from these parameters
    */
-  app_mngr::VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
+  VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
 
   /**
    * @brief VI parameters which had been unsubscribed already by particular app
    */
-  app_mngr::VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+  VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
 
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };

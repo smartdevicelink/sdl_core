@@ -898,12 +898,6 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
-
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 
