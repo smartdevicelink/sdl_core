@@ -59,9 +59,9 @@ class Launcher {
           device_launcher_.settings().wait_time_between_apps(),
           timer::kSingleShot);
     } else {
-      LOG4CXX_DEBUG(
-          logger_,
-          "All Apps on " << apps_on_device_->first << " posponed launched");
+      LOG4CXX_DEBUG(logger_,
+                    "All Apps on " << apps_on_device_->first
+                                   << " postponed launched");
       device_launcher_.StopLaunchingAppsOnDevice(apps_on_device_->first);
     }
   }

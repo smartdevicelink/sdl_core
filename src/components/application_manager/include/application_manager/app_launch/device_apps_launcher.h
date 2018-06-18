@@ -38,8 +38,8 @@ class DeviceAppsLauncherImpl {
 
  private:
   sync_primitives::Lock launchers_lock_;
-  std::vector<utils::SharedPtr<Launcher>> free_launchers_;
-  std::vector<utils::SharedPtr<Launcher>> works_launchers_;
+  std::vector<utils::SharedPtr<Launcher> > free_launchers_;
+  std::vector<utils::SharedPtr<Launcher> > works_launchers_;
   DeviceAppsLauncher& interface_;
 };
 
