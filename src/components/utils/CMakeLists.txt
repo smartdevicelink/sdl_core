@@ -113,11 +113,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_library("Utils" ${SOURCES})
-list(APPEND LIBRARIES -lboost_system -lboost_filesystem)
+# Add boost libraries to link
+list(APPEND LIBRARIES -lboost_system)
 target_link_libraries("Utils" ${LIBRARIES})
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" install-3rd_party_logger)
+  add_dependencies("Utils" install-3rd_party_logger Boost)
 endif()
 
 if(BUILD_TESTS)
