@@ -65,8 +65,6 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void ProcessResumptionSubscription(app_mngr::Application& app,
                                      VehicleInfoAppExtension& ext);
 
-  static const VehicleData vehicle_data_;
-
  private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
