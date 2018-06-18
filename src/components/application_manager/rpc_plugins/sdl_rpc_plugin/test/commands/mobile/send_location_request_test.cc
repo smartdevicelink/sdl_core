@@ -306,27 +306,17 @@ TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
       SmartObject(smart_objects::SmartType_Map);
   (*message_)[strings::msg_params][strings::location_image][strings::value] =
       "1";
-  EXPECT_CALL(
-      mock_message_helper_,
-      VerifyImage(
-          (*message_)[strings::msg_params][strings::location_image], _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   FinishSetup();
   command_->Run();
 }
 
-TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
+TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Warnings) {
   InitialSetup(message_);
   (*message_)[strings::msg_params][strings::location_image] =
       SmartObject(smart_objects::SmartType_Map);
   (*message_)[strings::msg_params][strings::location_image][strings::value] =
       "1";
-  EXPECT_CALL(
-      mock_message_helper_,
-      VerifyImage(
-          (*message_)[strings::msg_params][strings::location_image], _, _))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
-  FinishSetupCancelled(mobile_apis::Result::ABORTED);
+  FinishSetup();
   command_->Run();
 }
 

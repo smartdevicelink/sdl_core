@@ -339,8 +339,6 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
   msg_params[am::strings::app_id] = kAppId;
@@ -366,8 +364,6 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
@@ -389,7 +385,6 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -412,8 +407,6 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
   msg_params[am::strings::app_id] = kAppId;
@@ -438,8 +431,6 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -462,7 +453,6 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 

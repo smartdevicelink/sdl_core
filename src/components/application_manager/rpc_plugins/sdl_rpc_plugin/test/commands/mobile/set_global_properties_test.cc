@@ -643,7 +643,33 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVR_SUCCESS) {
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  std::shared_ptr<SetGlobalPropertiesRequest> command(
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject keyboard_properties(smart_objects::SmartType_Map);
+  (*msg)[am::strings::msg_params][am::hmi_request::keyboard_properties] =
+      keyboard_properties;
+  SmartObject menu_title("Menu_Title");
+  (*msg)[am::strings::msg_params][am::hmi_request::menu_title] = menu_title;
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  SmartObject* vr_help_title = NULL;
+  CommandsMap commands_map;
+  SmartObject empty_msg(smart_objects::SmartType_Map);
+  commands_map.insert(std::pair<uint32_t, SmartObject*>(1u, &empty_msg));
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
+  EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
+  EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(vr_help_title));
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   command->Run();
@@ -700,7 +726,50 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataDefaultCreated_SUCCESS) {
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  std::shared_ptr<SetGlobalPropertiesRequest> command(
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataFromSynonyms_SUCCESS) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject keyboard_properties(smart_objects::SmartType_Map);
+  (*msg)[am::strings::msg_params][am::hmi_request::keyboard_properties] =
+      keyboard_properties;
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  SmartObject vr_help_title(smart_objects::SmartType_Null);
+  EXPECT_CALL(*mock_app_, vr_help_title())
+      .Times(2)
+      .WillRepeatedly(Return(&vr_help_title));
+
+  CommandsMap commands_map;
+  DataAccessor<CommandsMap> accessor(commands_map, lock_ptr_);
+  EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
+  SmartObject vr_help_array(smart_objects::SmartType_Array);
+  vr_help_array[0] = SmartObject(smart_objects::SmartType_Map);
+  vr_help_array[0][am::strings::text] = kText;
+  vr_help_array[0][am::strings::position] = kPosition;
+  SmartObject vr_synonyms(smart_objects::SmartType_Array);
+  vr_synonyms[0] = vr_help_array;
+  const CustomString name("name");
+  EXPECT_CALL(*mock_app_, name()).WillOnce(ReturnRef(name));
+  EXPECT_CALL(*mock_app_, set_vr_help_title(SmartObject(name)));
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(
+      mock_hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(mock_hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+  SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   command->Run();

@@ -263,6 +263,26 @@ TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   request_ptr->Run();
 }
 
+TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_WARNINGS) {
+  CreateBasicParamsUIRequest();
+  SmartObject& msg_params = (*msg_)[strings::msg_params];
+  SmartObject& image = msg_params[cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      .WillOnce(Return(true));
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+}
+
 TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
   CreateBasicParamsUIRequest();
   SmartObject& msg_params = (*msg_)[strings::msg_params];
