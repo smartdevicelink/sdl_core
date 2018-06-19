@@ -56,8 +56,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @param plugin vehicle info plugin
    * @param app application that contains this plugin
    */
-  explicit VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
-                                   app_mngr::Application& app);
+  VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
+                          app_mngr::Application& app);
   virtual ~VehicleInfoAppExtension();
 
   /**
