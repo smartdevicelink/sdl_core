@@ -1632,6 +1632,16 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
                                              input_protocol_version,
@@ -2047,6 +2057,16 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
       .WillByDefault(Return(true));
 
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
                                              input_protocol_version,
@@ -2211,6 +2231,16 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
                                              input_protocol_version,
@@ -2321,6 +2351,16 @@ TEST_F(ProtocolHandlerImplTest,
                                          Eq(expected_param))))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
 
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
