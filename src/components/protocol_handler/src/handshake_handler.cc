@@ -55,7 +55,7 @@ HandshakeHandler::HandshakeHandler(
     const std::vector<int>& force_protected_service,
     const bool is_new_service,
     ProtocolPacket::ProtocolVersion& full_version,
-    std::shared_ptr<uint8_t> payload)
+    std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_()
@@ -69,7 +69,7 @@ HandshakeHandler::HandshakeHandler(
     ProtocolPacket::ProtocolVersion& full_version,
     const SessionContext& context,
     const uint8_t protocol_version,
-    std::shared_ptr<uint8_t> payload)
+    std::shared_ptr<BsonObject> payload)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
@@ -95,14 +95,15 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
-  BsonObject params;
   if (payload_) {
-    params = bson_object_from_bytes(payload_.get());
+    ProcessFailedHandshake(*payload_);
   } else {
+    BsonObject params;
     bson_object_initialize_default(&params);
+    ProcessFailedHandshake(params);
+    bson_object_deinitialize(&params);
   }
-  ProcessFailedHandshake(params);
-  bson_object_deinitialize(&params);
+
   return true;
 }
 
@@ -124,20 +125,23 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  BsonObject params;
   if (payload_) {
-    params = bson_object_from_bytes(payload_.get());
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, *payload_);
+    } else {
+      ProcessFailedHandshake(*payload_);
+    }
   } else {
+    BsonObject params;
     bson_object_initialize_default(&params);
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, params);
+    } else {
+      ProcessFailedHandshake(params);
+    }
+    bson_object_deinitialize(&params);
   }
 
-  if (success) {
-    ProcessSuccessfulHandshake(connection_key, params);
-  } else {
-    ProcessFailedHandshake(params);
-  }
-
-  bson_object_deinitialize(&params);
   return true;
 }
 

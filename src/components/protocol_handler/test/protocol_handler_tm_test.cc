@@ -647,6 +647,18 @@ TEST_F(ProtocolHandlerImplTest,
   const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
   const uint8_t session_id2 = 2u;
 
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(connection_key, start_service))
+      .Times(2)
+      .WillRepeatedly(ReturnNull());
+#endif  // ENABLE_SECURITY
+
   EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id1, _))
       .WillRepeatedly(Return(false));
   EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id2, _))

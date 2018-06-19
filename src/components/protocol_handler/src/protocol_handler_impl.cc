@@ -40,6 +40,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
 #include "utils/byte_order.h"
+#include "utils/helpers.h"
 #include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
@@ -77,7 +78,6 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)
-    , is_ptu_triggered_(false)
     ,
 #endif  // ENABLE_SECURITY
     raw_ford_messages_from_mobile_(
@@ -152,7 +152,6 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
                  "Not all observers have unsubscribed"
                  " from ProtocolHandlerImpl");
   }
-  handshake_handlers_.clear();
 }
 
 void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
@@ -285,16 +284,28 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   if (ack_protocol_version >= PROTOCOL_VERSION_5) {
     ServiceType serviceTypeValue = ServiceTypeFromByte(service_type);
 
-    bson_object_put_int64(
+    const bool mtu_written = bson_object_put_int64(
         &params,
         strings::mtu,
         static_cast<int64_t>(
             protocol_header_validator_.max_payload_size_by_service_type(
                 serviceTypeValue)));
+    LOG4CXX_DEBUG(logger_,
+                  "MTU parameter was written to bson params: "
+                      << mtu_written << "; Value: "
+                      << static_cast<int32_t>(
+                             bson_object_get_int64(&params, strings::mtu)));
+
     if (serviceTypeValue == kRpc) {
       // Hash ID is only used in RPC case
-      bson_object_put_int32(
+      const bool hash_written = bson_object_put_int32(
           &params, strings::hash_id, static_cast<int32_t>(hash_id));
+      LOG4CXX_DEBUG(logger_,
+                    "Hash parameter was written to bson params: "
+                        << hash_written << "; Value: "
+                        << static_cast<int32_t>(bson_object_get_int32(
+                               &params, strings::hash_id)));
+
       // Minimum protocol version supported by both
       ProtocolPacket::ProtocolVersion* minVersion =
           (full_version.majorVersion < PROTOCOL_VERSION_5)
@@ -303,8 +314,15 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                                      defaultProtocolVersion);
       char protocolVersionString[256];
       strncpy(protocolVersionString, (*minVersion).to_string().c_str(), 255);
-      bson_object_put_string(
+
+      const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocolVersionString);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Protocol version parameter was written to bson params: "
+              << protocol_ver_written << "; Value: "
+              << bson_object_get_string(&params, strings::protocol_version));
+
       LOG4CXX_INFO(logger_,
                    "Protocol Version String " << protocolVersionString);
 
@@ -1095,61 +1113,6 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
 void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
   LOG4CXX_AUTO_TRACE(logger_);
   security_manager_->NotifyListenersOnHandshakeFailed();
-}
-
-void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-#ifdef ENABLE_SECURITY
-  sync_primitives::AutoLock lock(ptu_handlers_lock_);
-
-  if (!is_ptu_triggered_) {
-    LOG4CXX_ERROR(logger_,
-                  "PTU was not triggered by service starting. Ignored");
-    return;
-  }
-
-  for (auto handler : ptu_pending_handlers_) {
-    const bool is_cert_expired = security_manager_->IsCertificateUpdateRequired(
-        handler->connection_key());
-    security_manager::SSLContext* ssl_context =
-        is_cert_expired ? NULL
-                        : security_manager_->CreateSSLContext(
-                              handler->connection_key(),
-                              security_manager::SecurityManager::kUseExisting);
-
-    if (!ssl_context) {
-      const std::string error("CreateSSLContext failed");
-      LOG4CXX_ERROR(logger_, error);
-      security_manager_->SendInternalError(
-          handler->connection_key(),
-          security_manager::SecurityManager::ERROR_INTERNAL,
-          error);
-
-      handler->OnHandshakeDone(
-          handler->connection_key(),
-          security_manager::SSLContext::Handshake_Result_Fail);
-
-      continue;
-    }
-
-    if (ssl_context->IsInitCompleted()) {
-      handler->OnHandshakeDone(
-          handler->connection_key(),
-          security_manager::SSLContext::Handshake_Result_Success);
-    } else {
-      security_manager_->AddListener(new HandshakeHandler(*handler));
-      if (!ssl_context->IsHandshakePending()) {
-        // Start handshake process
-        security_manager_->StartHandshake(handler->connection_key());
-      }
-    }
-  }
-
-  LOG4CXX_DEBUG(logger_, "Handshake handlers were notified");
-  ptu_pending_handlers_.clear();
-  is_ptu_triggered_ = false;
-#endif  // ENABLE_SECURITY
 }
 
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
@@ -1948,51 +1911,19 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     const uint32_t connection_key = session_observer_.KeyFromPair(
         context.connection_id_, context.new_session_id_);
 
-    std::shared_ptr<uint8_t> bson_object_bytes(
-        bson_object_to_bytes(start_session_ack_params.get()),
-        [](uint8_t* p) { delete[] p; });
-
     std::shared_ptr<HandshakeHandler> handler =
         std::make_shared<HandshakeHandler>(*this,
                                            session_observer_,
                                            *fullVersion,
                                            context,
                                            packet->protocol_version(),
-                                           bson_object_bytes);
-    handshake_handlers_.push_back(handler);
-
-    const bool is_certificate_empty =
-        security_manager_->IsPolicyCertificateDataEmpty();
-
-    if (context.is_ptu_required_ && is_certificate_empty) {
-      LOG4CXX_DEBUG(logger_,
-                    "PTU for StartSessionHandler "
-                        << handler.get()
-                        << " is required and certificate data is empty");
-
-      sync_primitives::AutoLock lock(ptu_handlers_lock_);
-      if (!is_ptu_triggered_) {
-        LOG4CXX_DEBUG(logger_,
-                      "PTU is not triggered yet. "
-                          << "Starting PTU and postponing SSL handshake");
-
-        ptu_pending_handlers_.push_back(handler);
-        is_ptu_triggered_ = true;
-        security_manager_->NotifyOnCertificateUpdateRequired();
-        security_manager_->PostponeHandshake(connection_key);
-      } else {
-        LOG4CXX_DEBUG(logger_, "PTU has been triggered. Added to pending.");
-        ptu_pending_handlers_.push_back(handler);
-      }
-      return;
-    }
+                                           start_session_ack_params);
 
     security_manager::SSLContext* ssl_context =
-        is_certificate_empty
-            ? NULL
-            : security_manager_->CreateSSLContext(
-                  connection_key,
-                  security_manager::SecurityManager::kUseExisting);
+        security_manager_->CreateSSLContext(
+            connection_key,
+            security_manager::SecurityManager::ContextCreationStrategy::
+                kUseExisting);
     if (!ssl_context) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
@@ -2257,7 +2188,9 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   DCHECK(packet);
   // Control frames and data over control service shall be unprotected
   if (packet->service_type() == kControl ||
-      packet->frame_type() == FRAME_TYPE_CONTROL) {
+      // For protocol v5 control frames could be protected
+      (packet->frame_type() == FRAME_TYPE_CONTROL &&
+       packet->protocol_version() < PROTOCOL_VERSION_5)) {
     return RESULT_OK;
   }
   if (!security_manager_) {
@@ -2300,12 +2233,30 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
 
 RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   DCHECK(packet);
-  if (!packet->protection_flag() ||
-      // Control frames and data over control service shall be unprotected
-      packet->service_type() == kControl ||
-      packet->frame_type() == FRAME_TYPE_CONTROL) {
+
+  bool shoud_not_decrypt;
+  if (packet->protocol_version() >= PROTOCOL_VERSION_5) {
+    // For v5 protocol control frames except StartService could be encrypted
+    shoud_not_decrypt =
+        !packet->protection_flag() || packet->service_type() == kControl ||
+        (FRAME_TYPE_CONTROL == packet->frame_type() &&
+         helpers::Compare<ServiceType, helpers::EQ, helpers::ONE>(
+             static_cast<ServiceType>(packet->service_type()),
+             kMobileNav,
+             kAudio,
+             kRpc));
+  } else {
+    // Control frames and data over control service shall be unprotected
+    shoud_not_decrypt = !packet->protection_flag() ||
+                        packet->service_type() == kControl ||
+                        packet->frame_type() == FRAME_TYPE_CONTROL;
+  }
+
+  if (shoud_not_decrypt) {
+    LOG4CXX_DEBUG(logger_, "Frame will not be decrypted");
     return RESULT_OK;
   }
+
   if (!security_manager_) {
     LOG4CXX_WARN(logger_, "No security_manager_ set.");
     return RESULT_FAIL;

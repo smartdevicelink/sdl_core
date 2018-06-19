@@ -66,10 +66,7 @@ struct SessionContext {
   protocol_handler::ServiceType service_type_;
   uint32_t hash_id_;
   bool is_protected_;
-#ifdef ENABLE_SECURITY
   bool is_new_service_;
-  bool is_ptu_required_;
-#endif  // ENABLE_SECURITY
 
   /**
    * @brief Constructor
@@ -82,12 +79,7 @@ struct SessionContext {
       , service_type_(protocol_handler::kInvalidServiceType)
       , hash_id_(0)
       , is_protected_(false)
-#ifdef ENABLE_SECURITY
-      , is_new_service_(false)
-      , is_ptu_required_(false)
-#endif  // ENABLE_SECURITY
-  {
-  }
+      , is_new_service_(false) {}
 
   /**
    * @brief Constructor
@@ -114,12 +106,7 @@ struct SessionContext {
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
-#ifdef ENABLE_SECURITY
-      , is_new_service_(false)
-      , is_ptu_required_(false)
-#endif  // ENABLE_SECURITY
-  {
-  }
+      , is_new_service_(false) {}
 
   /**
    * @brief Constructor
@@ -149,12 +136,7 @@ struct SessionContext {
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
-#ifdef ENABLE_SECURITY
-      , is_new_service_(false)
-      , is_ptu_required_(false)
-#endif  // ENABLE_SECURITY
-  {
-  }
+      , is_new_service_(false) {}
 };
 
 /**
