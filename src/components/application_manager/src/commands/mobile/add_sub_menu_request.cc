@@ -58,6 +58,19 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
+    (*message_)[strings::msg_params][strings::menu_icon],
+    app,
+    application_manager_);
+
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_,"MessageHelper::VerifyImage return " << verification_result);
+      SendResponse(false, verification_result);
+      return;
+      }
+  }
+
   const int32_t menu_id =
       (*message_)[strings::msg_params][strings::menu_id].asInt();
   if (app->FindSubMenu(menu_id)) {
@@ -93,6 +106,15 @@ void AddSubMenuRequest::Run() {
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
+
+  if (((*message_)[strings::msg_params].keyExists(strings::menu_icon)) &&
+      ((*message_)[strings::msg_params][strings::menu_icon].keyExists(
+              strings::value)) &&
+      (0 < (*message_)[strings::msg_params][strings::menu_icon][strings::value]
+              .length())) {
+    msg_params[strings::menu_icon] =
+            (*message_)[strings::msg_params][strings::menu_icon];
+  }
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
