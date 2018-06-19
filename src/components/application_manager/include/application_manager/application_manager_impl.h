@@ -800,7 +800,6 @@ class ApplicationManagerImpl
       const int32_t session_key) OVERRIDE;
   void OnSecondaryTransportEndedCallback(const int32_t session_key) OVERRIDE;
 
-#ifdef ENABLE_SECURITY
   /**
    * @brief Check if application with specified app_id has NAVIGATION HMI type
    * @param app_id id of application to check
@@ -808,6 +807,7 @@ class ApplicationManagerImpl
    */
   bool CheckAppIsNavi(const uint32_t app_id) const OVERRIDE;
 
+#ifdef ENABLE_SECURITY
   /**
    * @brief Notification about protection result
    * @param connection_key Unique key of session which triggers handshake
