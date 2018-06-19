@@ -101,9 +101,6 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
   for (Apps::iterator it = apps.begin(); it != apps.end(); ++it) {
     application_manager::ApplicationSharedPtr app = *it;
     DCHECK(app);
-    application_manager_.ChangeAppsHMILevel(
-        app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
-
     const RCAppExtensionPtr extension =
         application_manager::AppExtensionPtr::static_pointer_cast<
             RCAppExtension>(app->QueryInterface(RCRPCPlugin::kRCPluginID));
@@ -115,42 +112,38 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
 
 void RCOnRemoteControlSettingsNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!(*message_)[app_mngr::strings::msg_params].keyExists(
+  if ((*message_)[app_mngr::strings::msg_params].keyExists(
           message_params::kAllowed)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Notification is ignored due to \"allow\" parameter absense");
-    LOG4CXX_DEBUG(logger_, "RC Functionality remains unchanged");
-    return;
-  }
-
-  const bool is_allowed =
-      (*message_)[app_mngr::strings::msg_params][message_params::kAllowed]
-          .asBool();
-  if (is_allowed) {
-    hmi_apis::Common_RCAccessMode::eType access_mode =
-        hmi_apis::Common_RCAccessMode::INVALID_ENUM;
-    LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
-    if ((*message_)[app_mngr::strings::msg_params].keyExists(
-            message_params::kAccessMode)) {
-      access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
-          (*message_)[app_mngr::strings::msg_params]
-                     [message_params::kAccessMode].asUInt());
-      LOG4CXX_DEBUG(
-          logger_,
-          "Setting up access mode : " << AccessModeToString(access_mode));
+    const bool is_allowed =
+        (*message_)[app_mngr::strings::msg_params][message_params::kAllowed]
+            .asBool();
+    if (is_allowed) {
+      LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
+      resource_allocation_manager_.set_rc_enabled(true);
     } else {
-      access_mode = resource_allocation_manager_.GetAccessMode();
-      LOG4CXX_DEBUG(logger_,
-                    "No access mode received. Using last known: "
-                        << AccessModeToString(access_mode));
+      LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
+      DisallowRCFunctionality();
+      resource_allocation_manager_.set_rc_enabled(false);
+      resource_allocation_manager_.ResetAllAllocations();
     }
-    resource_allocation_manager_.SetAccessMode(access_mode);
-  } else {
-    LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
-    DisallowRCFunctionality();
-    resource_allocation_manager_.ResetAllAllocations();
   }
+  hmi_apis::Common_RCAccessMode::eType access_mode =
+      hmi_apis::Common_RCAccessMode::INVALID_ENUM;
+  if ((*message_)[app_mngr::strings::msg_params].keyExists(
+          message_params::kAccessMode)) {
+    access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
+        (*message_)[app_mngr::strings::msg_params][message_params::kAccessMode]
+            .asUInt());
+    LOG4CXX_DEBUG(
+        logger_,
+        "Setting up access mode : " << AccessModeToString(access_mode));
+  } else {
+    access_mode = resource_allocation_manager_.GetAccessMode();
+    LOG4CXX_DEBUG(logger_,
+                  "No access mode received. Using last known: "
+                      << AccessModeToString(access_mode));
+  }
+  resource_allocation_manager_.SetAccessMode(access_mode);
 }
 
 }  // namespace commands
