@@ -72,7 +72,6 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
 
   ~HandshakeHandler();
 
-#ifdef ENABLE_SECURITY
   /**
    * @brief Get certificate data from policy
    * @param reference to string where to save certificate data
@@ -100,7 +99,6 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @brief Notification that certificate update is required.
    */
   void OnCertificateUpdateRequired() OVERRIDE;
-#endif  // ENABLE_SECURITY
 
   /**
    * @brief Get connection key of this handler

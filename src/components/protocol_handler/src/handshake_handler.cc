@@ -86,8 +86,6 @@ uint32_t HandshakeHandler::connection_key() const {
                                        context_.new_session_id_);
 }
 
-#ifdef ENABLE_SECURITY
-
 bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
   return false;
 }
@@ -215,6 +213,5 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params) {
                                            context_.service_type_);
   }
 }
-#endif  // ENABLE_SECURITY
 
 }  // namespace protocol_handler
