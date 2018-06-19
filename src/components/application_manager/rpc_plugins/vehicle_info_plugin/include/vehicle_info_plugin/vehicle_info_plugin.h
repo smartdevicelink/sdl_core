@@ -38,7 +38,6 @@
 namespace vehicle_info_plugin {
 class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
-namespace commands = application_manager::commands;
 namespace plugins = application_manager::plugin_manager;
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
@@ -51,7 +50,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
             policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
 
   bool IsAbleToProcess(const int32_t function_id,
-                       const commands::Command::CommandSource source) OVERRIDE;
+                       const app_mngr::commands::Command::CommandSource source) OVERRIDE;
 
   std::string PluginName() OVERRIDE;
   app_mngr::CommandFactory& GetCommandFactory() OVERRIDE;

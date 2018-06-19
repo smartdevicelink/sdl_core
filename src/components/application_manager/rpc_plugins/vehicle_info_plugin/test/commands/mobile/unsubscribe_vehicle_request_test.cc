@@ -39,6 +39,8 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace test {
 namespace components {
@@ -67,11 +69,32 @@ class UnsubscribeVehicleRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   UnsubscribeVehicleRequestTest()
-      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+      : mock_app_(CreateMockApp())
+	  , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , vi_app_extension_ptr_(
+            utils::MakeShared<vehicle_info_plugin::VehicleInfoAppExtension>(
+                vi_plugin_, *mock_app_)) {}
 
  protected:
-  void UnsubscribeSuccessfully();
+  void SetUp() OVERRIDE {
+    vi_plugin_.Init(app_mngr_,
+                    mock_rpc_service_,
+                    mock_hmi_capabilities_,
+                    mock_policy_handler_);
+    ON_CALL(*mock_app_, AddExtension(vi_app_extension_ptr_));
+    vi_plugin_.OnApplicationEvent(application_manager::plugin_manager::
+                                      ApplicationEvent::kApplicationRegistered,
+                                  mock_app_);
+    ON_CALL(*mock_app_,
+            QueryInterface(vehicle_info_plugin::VehicleInfoAppExtension::
+                               VehicleInfoAppExtensionUID))
+        .WillByDefault(Return(vi_app_extension_ptr_));
+  }
+
+  MockAppPtr mock_app_;
+  application_manager::AppExtensionPtr vi_app_extension_ptr_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
+  vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
@@ -101,7 +124,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -111,31 +134,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 }
 
 TEST_F(UnsubscribeVehicleRequestTest,
-       Run_UnsubscribeNotSubscribedBeforeData_IGNORED) {
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][kMsgParamKey] = kVehicleType;
-
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
-
-  MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
-
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
-
-  command->Run();
-}
-
-TEST_F(UnsubscribeVehicleRequestTest,
-       Run_UnsubscribeNotSubscribedBeforeData_UNSUCCESS) {
+       Run_UnsubscribeFromSubscribedBeforeData_RequestSuccessfullySentToHmi) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
@@ -145,38 +144,68 @@ TEST_F(UnsubscribeVehicleRequestTest,
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
-  MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillOnce(Return(mock_app_));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
-
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData)))
+      .WillOnce(Return(true));
+  vehicle_info_plugin::VehicleInfoAppExtension* vi_app_extension =
+      dynamic_cast<vehicle_info_plugin::VehicleInfoAppExtension*>(
+          vi_app_extension_ptr_.get());
+  ASSERT_TRUE(vi_app_extension->subscribeToVehicleInfo(kVehicleType));
+  application_manager::ApplicationSet app_set = {mock_app_};
+  DataAccessor<application_manager::ApplicationSet> accessor(app_set,
+                                                             app_set_lock_ptr_);
+  // Expectations
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
+  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
 }
 
-TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
+TEST_F(UnsubscribeVehicleRequestTest,
+       Run_EmptyVehicleData_INVALID_DATA_SentToMobile) {
   am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][kMsgParamKey] = false;
+  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
+  command->Run();
+}
+
+TEST_F(UnsubscribeVehicleRequestTest,
+       Run_UnsubscribeFromNotSubscribedBeforeData_UNSUCCESS) {
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
+  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
 }
 
@@ -184,35 +213,22 @@ void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
-  (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
-
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
+  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
-  am::ApplicationSet application_set_;
   MockAppPtr mock_app(CreateMockApp());
-  application_set_.insert(mock_app);
-  DataAccessor<am::ApplicationSet> accessor(application_set_,
-                                            app_set_lock_ptr_);
-
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
+      .WillOnce(Return(mock_app));
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
-  CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
   command->Run();
-}
-
-TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeData_SUCCESS) {
-  UnsubscribeSuccessfully();
 }
 
 TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
@@ -223,9 +239,8 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
-  MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app));
+      .WillRepeatedly(Return(mock_app_));
   vehicle_data.insert(am::VehicleData::value_type(kMsgParamKey, kVehicleType));
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(vehicle_data));
@@ -248,20 +263,20 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
-  EXPECT_CALL(*mock_app, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash());
 
   command->on_event(test_event);
 }
 
 TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
-  UnsubscribeSuccessfully();
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));
-  MockAppPtr mock_app(CreateMockApp());
 
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app_));
   am::event_engine::Event test_event(
       hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData);
   SmartObject message(smart_objects::SmartType_Map);
