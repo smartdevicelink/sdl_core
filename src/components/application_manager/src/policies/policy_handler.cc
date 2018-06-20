@@ -1494,12 +1494,14 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   }
 
   const uint32_t app_id = GetAppIdForSending();
-  const std::string app_policy_id = application_manager_.application(app_id)->policy_app_id();
+  const std::string app_policy_id =
+      application_manager_.application(app_id)->policy_app_id();
 
   size_t app_idx = 0;
   for (; app_idx < urls.size(); ++app_idx) {
-    if ((urls[app_idx].app_id == policy::kDefaultId || urls[app_idx].app_id == app_policy_id)
-      && IsUrlAppIdValid(app_idx, urls))
+    if ((urls[app_idx].app_id == policy::kDefaultId ||
+         urls[app_idx].app_id == app_policy_id) &&
+        IsUrlAppIdValid(app_idx, urls))
       break;
   }
 
@@ -1510,7 +1512,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
 
   for (size_t url_idx = 0; url_idx < urls[app_idx].url.size(); ++url_idx) {
     const std::string& url = urls[app_idx].url[url_idx];
-    if(SendMessageToSDK(pt_string, url, app_id))
+    if (SendMessageToSDK(pt_string, url, app_id))
       break;
   }
 #endif  // PROPRIETARY_MODE

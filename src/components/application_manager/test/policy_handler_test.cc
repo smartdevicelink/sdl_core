@@ -1683,11 +1683,8 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
 #ifdef PROPRIETARY_MODE
   ExtendedPolicyExpectations();
 #else
-  AppIdURL next_app_url = std::make_pair(0, 0);
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
-  EXPECT_CALL(*mock_policy_manager_, GetNextUpdateUrl(_))
-      .WillOnce(Return(next_app_url));
   EXPECT_CALL(app_manager_, application_by_policy_id(_))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(app_manager_, connection_handler())
@@ -2052,7 +2049,8 @@ TEST_F(PolicyHandlerTest,
   // Act
   EXPECT_CALL(mock_message_helper_,
               SendPolicySnapshotNotification(kAppId1_, msg, url, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url, app_id));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2082,7 +2080,8 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(Return(
           utils::SharedPtr<application_manager_test::MockApplication>()));
 
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url, app_id));
 }
 
 TEST_F(PolicyHandlerTest, CanUpdate) {
