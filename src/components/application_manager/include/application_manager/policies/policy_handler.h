@@ -83,7 +83,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
   bool SendMessageToSDK(const BinaryMessage& pt_string,
-                        const std::string& url) OVERRIDE;
+                        const std::string& url,
+                        const uint32_t app_id) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
