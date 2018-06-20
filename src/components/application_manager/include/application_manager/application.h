@@ -160,11 +160,6 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 typedef std::set<uint32_t> SoftButtonID;
 
 /**
- * @brief Defines set of vehicle info types
- */
-typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
-
-/**
  * @brief Defines set of buttons subscription
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
@@ -185,7 +180,6 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* show_command() const = 0;
   virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
@@ -623,10 +617,6 @@ class Application : public virtual InitialApplicationData,
   virtual bool UnsubscribeFromButton(
       mobile_apis::ButtonName::eType btn_name) = 0;
 
-  virtual bool SubscribeToIVI(uint32_t vehicle_info_type) = 0;
-  virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
-  virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
-
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -894,10 +884,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
+   * @brief Get list of available application extensions
+   * @return application extensions
    */
-  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
+  virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

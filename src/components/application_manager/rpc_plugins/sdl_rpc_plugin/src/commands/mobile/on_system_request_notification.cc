@@ -33,7 +33,6 @@
 #include <cstring>
 #include <cstdio>
 #include <string>
-#include <iostream>
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -75,15 +74,18 @@ void OnSystemRequestNotification::Run() {
                                                      << " is not registered.");
     return;
   }
+
   const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
+  const policy::PolicyHandlerInterface& policy_handler = policy_handler_;
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
-  if (!policy_handler_.IsRequestTypeAllowed(app->policy_app_id(),
-                                            request_type)) {
+
+  if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
+                                           request_type)) {
     LOG4CXX_WARN(logger_,
                  "Request type " << stringified_request_type
                                  << " is not allowed by policies");
@@ -95,8 +97,8 @@ void OnSystemRequestNotification::Run() {
   if (request_subtype_present) {
     const std::string request_subtype =
         (*message_)[strings::msg_params][strings::request_subtype].asString();
-    if (!policy_handler_.IsRequestSubTypeAllowed(app->policy_app_id(),
-                                                 request_subtype)) {
+    if (!policy_handler.IsRequestSubTypeAllowed(app->policy_app_id(),
+                                                request_subtype)) {
       LOG4CXX_ERROR(logger_,
                     "Request subtype: " << request_subtype
                                         << " is DISALLOWED by policies");
@@ -128,7 +130,7 @@ void OnSystemRequestNotification::Run() {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =
-          policy_handler_.TimeoutExchangeSec();
+          policy_handler.TimeoutExchangeSec();
     }
   }
 

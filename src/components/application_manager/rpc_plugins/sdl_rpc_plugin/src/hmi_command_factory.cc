@@ -148,10 +148,6 @@
 #include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_response.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_is_ready_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_read_did_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_read_did_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
@@ -190,22 +186,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vi_acc_pedal_position_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_steering_wheel_angle_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vi_my_key_notification.h"
-#else
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_data_response.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
 #endif  // #ifdef HMI_DBUS_API
 
-#include "sdl_rpc_plugin/commands/hmi/vi_get_dtcs_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_dtcs_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_diagnostic_message_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_diagnostic_message_response.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_show_constant_tbt_response.h"
@@ -242,7 +224,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
@@ -620,16 +601,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::UIIsReadyRequest>()
                  : factory.GetCreator<commands::UIIsReadyResponse>();
     }
-    case hmi_apis::FunctionID::VehicleInfo_IsReady: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIIsReadyRequest>()
-                 : factory.GetCreator<commands::VIIsReadyResponse>();
-    }
-    case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIReadDIDRequest>()
-                 : factory.GetCreator<commands::VIReadDIDResponse>();
-    }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
       return hmi_apis::messageType::request == message_type
@@ -851,28 +822,7 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                        .GetCreator<commands::VIGetVehicleDataResponseTemplate<
                            hmi_apis::FunctionID::VehicleInfo_GetMyKey> >();
     }
-#else
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIGetVehicleDataRequest>()
-                 : factory.GetCreator<commands::VIGetVehicleDataResponse>();
-    }
 #endif  // #ifdef HMI_DBUS_API
-    case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIGetDTCsRequest>()
-                 : factory.GetCreator<commands::VIGetDTCsResponse>();
-    }
-    case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIDiagnosticMessageRequest>()
-                 : factory.GetCreator<commands::VIDiagnosticMessageResponse>();
-    }
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleType: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VIGetVehicleTypeRequest>()
-                 : factory.GetCreator<commands::VIGetVehicleTypeResponse>();
-    }
     case hmi_apis::FunctionID::Navigation_IsReady: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::NaviIsReadyRequest>()
@@ -1266,15 +1216,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            hmi_apis::FunctionID::
                                VehicleInfo_SubscribeMyKey> >();
     }
-#else
-    case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::VISubscribeVehicleDataRequest>()
-                 : factory
-                       .GetCreator<commands::VISubscribeVehicleDataResponse>();
-    }
-#endif  // #ifdef HMI_DBUS_API
-#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps: {
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator <
@@ -1546,16 +1487,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            hmi_apis::FunctionID::
                                VehicleInfo_UnsubscribeMyKey> >();
     }
-#else
-    case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory
-                       .GetCreator<commands::VIUnsubscribeVehicleDataRequest>()
-                 : factory.GetCreator<
-                       commands::VIUnsubscribeVehicleDataResponse>();
-    }
-#endif  // #ifdef HMI_DBUS_API
-#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_OnGpsData: {
       return factory.GetCreator<commands::OnVIGpsDataNotification>();
     }
@@ -1620,10 +1551,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::VehicleInfo_OnMyKey: {
       return factory.GetCreator<commands::OnVIMyKeyNotification>();
-    }
-#else
-    case hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
-      return factory.GetCreator<commands::OnVIVehicleDataNotification>();
     }
 #endif  // #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {

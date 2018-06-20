@@ -169,7 +169,6 @@ ApplicationImpl::~ApplicationImpl() {
   }
 
   subscribed_buttons_.clear();
-  subscribed_vehicle_info_.clear();
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
@@ -739,27 +738,6 @@ bool ApplicationImpl::UnsubscribeFromButton(
   return subscribed_buttons_.erase(btn_name);
 }
 
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_
-      .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
-      .second;
-}
-
-bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
-  sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-  return (subscribed_vehicle_info_.end() != it);
-}
-
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-}
-
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
@@ -867,11 +845,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
   return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
-}
-
-DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
-  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_);
 }
 
 const std::string& ApplicationImpl::curHash() const {
@@ -1084,10 +1057,6 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
-}
-
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
@@ -1114,6 +1083,10 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
       [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
 
   return it != extensions_.end();
+}
+
+const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
+  return extensions_;
 }
 
 void ApplicationImpl::PushMobileMessage(

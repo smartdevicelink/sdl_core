@@ -57,17 +57,11 @@
 #include "mobile/delete_interaction_choice_set_response.h"
 #include "mobile/delete_sub_menu_request.h"
 #include "mobile/delete_sub_menu_response.h"
-#include "mobile/diagnostic_message_request.h"
-#include "mobile/diagnostic_message_response.h"
 #include "mobile/dial_number_request.h"
 #include "mobile/dial_number_response.h"
 #include "mobile/end_audio_pass_thru_request.h"
 #include "mobile/end_audio_pass_thru_response.h"
 #include "mobile/generic_response.h"
-#include "mobile/get_dtcs_request.h"
-#include "mobile/get_dtcs_response.h"
-#include "mobile/get_vehicle_data_request.h"
-#include "mobile/get_vehicle_data_response.h"
 #include "mobile/get_way_points_request.h"
 #include "mobile/get_way_points_response.h"
 #include "mobile/list_files_request.h"
@@ -87,7 +81,6 @@
 #include "mobile/on_system_request_notification.h"
 #include "mobile/on_tbt_client_state_notification.h"
 #include "mobile/on_touch_event_notification.h"
-#include "mobile/on_vehicle_data_notification.h"
 #include "mobile/on_way_point_change_notification.h"
 #include "mobile/perform_audio_pass_thru_request.h"
 #include "mobile/perform_audio_pass_thru_response.h"
@@ -95,8 +88,6 @@
 #include "mobile/perform_interaction_response.h"
 #include "mobile/put_file_request.h"
 #include "mobile/put_file_response.h"
-#include "mobile/read_did_request.h"
-#include "mobile/read_did_response.h"
 #include "mobile/register_app_interface_request.h"
 #include "mobile/register_app_interface_response.h"
 #include "mobile/reset_global_properties_request.h"
@@ -123,8 +114,6 @@
 #include "mobile/speak_response.h"
 #include "mobile/subscribe_button_request.h"
 #include "mobile/subscribe_button_response.h"
-#include "mobile/subscribe_vehicle_data_request.h"
-#include "mobile/subscribe_vehicle_data_response.h"
 #include "mobile/subscribe_way_points_request.h"
 #include "mobile/subscribe_way_points_response.h"
 #include "mobile/system_response.h"
@@ -132,8 +121,6 @@
 #include "mobile/unregister_app_interface_response.h"
 #include "mobile/unsubscribe_button_request.h"
 #include "mobile/unsubscribe_button_response.h"
-#include "mobile/unsubscribe_vehicle_data_request.h"
-#include "mobile/unsubscribe_vehicle_data_response.h"
 #include "mobile/unsubscribe_way_points_request.h"
 #include "mobile/unsubscribe_way_points_response.h"
 #include "mobile/update_turn_list_request.h"
@@ -228,17 +215,11 @@ typedef Types<commands::AddCommandRequest,
               commands::DeleteInteractionChoiceSetResponse,
               commands::DeleteSubMenuRequest,
               commands::DeleteSubMenuResponse,
-              commands::DiagnosticMessageRequest,
-              commands::DiagnosticMessageResponse,
               commands::DialNumberRequest,
               commands::DialNumberResponse,
               commands::EndAudioPassThruRequest,
               commands::EndAudioPassThruResponse,
               commands::GenericResponse,
-              commands::GetDTCsRequest,
-              commands::GetDTCsResponse,
-              commands::GetVehicleDataRequest,
-              commands::GetVehicleDataResponse,
               commands::GetWayPointsRequest,
               commands::GetWayPointsResponse,
               commands::ListFilesRequest,
@@ -260,16 +241,13 @@ typedef Types<commands::AddCommandRequest,
               commands::mobile::OnTouchEventNotification>
     MobileCommandsListFirst;
 
-typedef Types<commands::OnVehicleDataNotification,
-              commands::OnWayPointChangeNotification,
+typedef Types<commands::OnWayPointChangeNotification,
               commands::PerformAudioPassThruRequest,
               commands::PerformAudioPassThruResponse,
               commands::PerformInteractionRequest,
               commands::PerformInteractionResponse,
               commands::PutFileRequest,
               commands::PutFileResponse,
-              commands::ReadDIDRequest,
-              commands::ReadDIDResponse,
               commands::RegisterAppInterfaceRequest,
               commands::RegisterAppInterfaceResponse,
               commands::ResetGlobalPropertiesRequest,
@@ -296,19 +274,15 @@ typedef Types<commands::OnVehicleDataNotification,
               commands::SpeakResponse,
               commands::SubscribeButtonRequest,
               commands::SubscribeButtonResponse,
-              commands::SubscribeVehicleDataRequest,
-              commands::SubscribeVehicleDataResponse,
               commands::SubscribeWayPointsRequest,
               commands::SubscribeWayPointsResponse,
               commands::SystemResponse,
               commands::UnregisterAppInterfaceRequest,
               commands::UnregisterAppInterfaceResponse,
               commands::UnsubscribeButtonRequest,
-              commands::UnsubscribeButtonResponse,
-              commands::UnsubscribeVehicleDataRequest> MobileCommandsListSecond;
+              commands::UnsubscribeButtonResponse> MobileCommandsListSecond;
 
-typedef Types<commands::UnsubscribeVehicleDataResponse,
-              commands::UnSubscribeWayPointsRequest,
+typedef Types<commands::UnSubscribeWayPointsRequest,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListRequest,
               commands::UpdateTurnListResponse> MobileCommandsListThird;

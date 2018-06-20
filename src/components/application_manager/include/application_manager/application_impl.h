@@ -211,10 +211,6 @@ class ApplicationImpl : public virtual Application,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool SubscribeToIVI(uint32_t vehicle_info_type) OVERRIDE;
-  bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
-  bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
-  DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
 
   /**
@@ -371,19 +367,6 @@ class ApplicationImpl : public virtual Application,
    */
   void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
 
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  const VehicleInfoSubscriptions& SubscribesIVI() const OVERRIDE;
-
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 
@@ -418,6 +401,8 @@ class ApplicationImpl : public virtual Application,
    */
   void OnAudioStreamSuspend();
 
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
@@ -431,6 +416,8 @@ class ApplicationImpl : public virtual Application,
    * @return true if success, false if extension is not present
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
+
+  const std::list<AppExtensionPtr>& Extensions() const OVERRIDE;
 
   std::string hash_val_;
   uint32_t grammar_id_;
@@ -469,7 +456,6 @@ class ApplicationImpl : public virtual Application,
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  VehicleInfoSubscriptions subscribed_vehicle_info_;
   UsageStatistics usage_report_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;

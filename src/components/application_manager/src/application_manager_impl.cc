@@ -346,8 +346,7 @@ struct IsApplication {
   connection_handler::DeviceHandle device_handle_;
   const std::string& policy_app_id_;
 };
-
-std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
+void ApplicationManagerImpl::IviInfoUpdated(
     mobile_apis::VehicleDataType::eType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc
@@ -358,10 +357,6 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
     default:
       break;
   }
-
-  SubscribedToIVIPredicate finder(vehicle_info);
-  DataAccessor<ApplicationSet> accessor = applications();
-  return FindAllApps(accessor, finder);
 }
 
 void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {

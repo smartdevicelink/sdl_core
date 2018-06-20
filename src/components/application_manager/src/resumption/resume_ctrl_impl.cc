@@ -624,17 +624,8 @@ void ResumeCtrlImpl::AddSubscriptions(
     MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
         application, application_manager_);
 
-    if (subscriptions.keyExists(strings::application_vehicle_info)) {
-      const smart_objects::SmartObject& subscriptions_ivi =
-          subscriptions[strings::application_vehicle_info];
-      mobile_apis::VehicleDataType::eType ivi;
-      for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
-        ivi = static_cast<mobile_apis::VehicleDataType::eType>(
-            (subscriptions_ivi[i]).asInt());
-        application->SubscribeToIVI(ivi);
-      }
-      ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(
-          application, application_manager_));
+    for (auto& extension : application->Extensions()) {
+      extension->ProcessResumption(subscriptions);
     }
   }
 }

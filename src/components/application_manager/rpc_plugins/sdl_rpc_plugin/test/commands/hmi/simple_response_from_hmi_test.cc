@@ -59,10 +59,6 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "hmi/vi_read_did_response.h"
-#include "hmi/vi_subscribe_vehicle_data_response.h"
-#include "hmi/vi_get_vehicle_type_response.h"
-#include "hmi/vi_is_ready_response.h"
 #include "hmi/dial_number_response.h"
 #include "hmi/close_popup_response.h"
 #include "hmi/tts_set_global_properties_response.h"
@@ -78,12 +74,9 @@
 #include "hmi/ui_end_audio_pass_thru_response.h"
 #include "hmi/ui_perform_audio_pass_thru_response.h"
 #include "hmi/ui_perform_interaction_response.h"
-#include "hmi/vi_diagnostic_message_response.h"
-#include "hmi/vi_get_dtcs_response.h"
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_response.h"
-#include "hmi/vi_unsubscribe_vehicle_data_response.h"
 #include "hmi/vr_add_command_response.h"
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
@@ -149,12 +142,8 @@ struct CommandData {
 };
 
 typedef Types<
-    CommandData<sdl_rpc_plugin::commands::VIReadDIDResponse,
-                hmi_apis::FunctionID::VehicleInfo_ReadDID>,
     CommandData<sdl_rpc_plugin::commands::TTSSpeakResponse,
                 hmi_apis::FunctionID::TTS_Speak>,
-    CommandData<sdl_rpc_plugin::commands::VISubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData>,
     CommandData<sdl_rpc_plugin::commands::hmi::DialNumberResponse,
                 hmi_apis::FunctionID::BasicCommunication_DialNumber>,
     CommandData<sdl_rpc_plugin::commands::UIDeleteSubmenuResponse,
@@ -183,16 +172,10 @@ typedef Types<
                 hmi_apis::FunctionID::UI_DeleteSubMenu>,
     CommandData<sdl_rpc_plugin::commands::UIEndAudioPassThruResponse,
                 hmi_apis::FunctionID::UI_EndAudioPassThru>,
-    CommandData<sdl_rpc_plugin::commands::VIDiagnosticMessageResponse,
-                hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage>,
-    CommandData<sdl_rpc_plugin::commands::VIGetDTCsResponse,
-                hmi_apis::FunctionID::VehicleInfo_GetDTCs>,
     CommandData<sdl_rpc_plugin::commands::UISetMediaClockTimerResponse,
                 hmi_apis::FunctionID::UI_SetMediaClockTimer>,
     CommandData<sdl_rpc_plugin::commands::UIShowResponse,
                 hmi_apis::FunctionID::UI_Show>,
-    CommandData<sdl_rpc_plugin::commands::VIUnsubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData>,
     CommandData<sdl_rpc_plugin::commands::VRAddCommandResponse,
                 hmi_apis::FunctionID::VR_AddCommand>,
     CommandData<sdl_rpc_plugin::commands::VRChangeRegistrationResponse,
@@ -282,35 +265,6 @@ class OtherResponseFromHMICommandsTest
 
 MATCHER_P(VehicleTypeIsEqualTo, vehicle_type, "") {
   return (*vehicle_type) == arg.asString();
-}
-
-TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
-  const std::string kVehicleType = "Test";
-
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::hmi_response::vehicle_type] =
-      kVehicleType;
-
-  SharedPtr<sdl_rpc_plugin::commands::VIGetVehicleTypeResponse> command(
-      CreateCommand<sdl_rpc_plugin::commands::VIGetVehicleTypeResponse>(
-          command_msg));
-
-  EXPECT_CALL(mock_hmi_capabilities_,
-              set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));
-
-  command->Run();
-}
-
-TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
-  SharedPtr<sdl_rpc_plugin::commands::VIIsReadyResponse> command(
-      CreateCommand<sdl_rpc_plugin::commands::VIIsReadyResponse>());
-
-  MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, raise_event(_));
-
-  command->Run();
 }
 
 MATCHER_P(CheckMsgType, msg_type, "") {

@@ -29,5 +29,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # --- Utils
+add_subdirectory(vehicle_info_plugin)
 add_subdirectory(sdl_rpc_plugin)
 add_subdirectory(rc_rpc_plugin)

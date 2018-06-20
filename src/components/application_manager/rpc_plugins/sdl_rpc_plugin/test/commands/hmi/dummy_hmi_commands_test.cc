@@ -154,27 +154,10 @@
 #include "hmi/tts_get_capabilities_response.h"
 #include "hmi/vr_perform_interaction_request.h"
 #include "hmi/vr_perform_interaction_response.h"
-#include "hmi/vi_is_ready_request.h"
-#include "hmi/vi_is_ready_response.h"
-#include "hmi/vi_read_did_request.h"
-#include "hmi/vi_read_did_response.h"
 #include "hmi/sdl_activate_app_request.h"
 #include "hmi/sdl_activate_app_response.h"
 #include "hmi/on_app_permission_changed_notification.h"
 #include "hmi/on_event_changed_notification.h"
-#include "hmi/vi_get_vehicle_data_request.h"
-#include "hmi/vi_get_vehicle_data_response.h"
-#include "hmi/on_vi_vehicle_data_notification.h"
-#include "hmi/vi_subscribe_vehicle_data_request.h"
-#include "hmi/vi_subscribe_vehicle_data_response.h"
-#include "hmi/vi_unsubscribe_vehicle_data_request.h"
-#include "hmi/vi_unsubscribe_vehicle_data_response.h"
-#include "hmi/vi_get_dtcs_request.h"
-#include "hmi/vi_get_dtcs_response.h"
-#include "hmi/vi_diagnostic_message_request.h"
-#include "hmi/vi_diagnostic_message_response.h"
-#include "hmi/vi_get_vehicle_type_request.h"
-#include "hmi/vi_get_vehicle_type_response.h"
 #include "hmi/navi_is_ready_request.h"
 #include "hmi/navi_show_constant_tbt_request.h"
 #include "hmi/navi_show_constant_tbt_response.h"
@@ -211,7 +194,6 @@
 #include "hmi/on_button_event_notification.h"
 #include "hmi/on_button_press_notification.h"
 #include "hmi/on_button_subscription_notification.h"
-#include "hmi/on_vi_vehicle_data_notification.h"
 #include "hmi/on_ui_keyboard_input_notification.h"
 #include "hmi/on_ui_touch_event_notification.h"
 #include "hmi/on_ui_reset_timeout_notification.h"
@@ -447,21 +429,9 @@ typedef Types<commands::UIChangeRegistrationRequest,
               commands::ClosePopupResponse,
               commands::ClosePopupRequest,
               commands::UIIsReadyResponse,
-              commands::UIIsReadyRequest,
-              commands::VIIsReadyResponse> HMICommandsListSecond;
+              commands::UIIsReadyRequest> HMICommandsListSecond;
 
-typedef Types<commands::VIIsReadyRequest,
-              commands::VIReadDIDResponse,
-              commands::VIReadDIDRequest,
-              commands::VIGetVehicleDataResponse,
-              commands::VIGetVehicleDataRequest,
-              commands::VIGetDTCsResponse,
-              commands::VIGetDTCsRequest,
-              commands::VIDiagnosticMessageResponse,
-              commands::VIDiagnosticMessageRequest,
-              commands::VIGetVehicleTypeResponse,
-              commands::VIGetVehicleTypeRequest,
-              commands::NaviIsReadyResponse,
+typedef Types<commands::NaviIsReadyResponse,
               commands::NaviIsReadyRequest,
               commands::NaviAlertManeuverResponse,
               commands::NaviAlertManeuverRequest,
@@ -502,11 +472,6 @@ typedef Types<commands::VIIsReadyRequest,
 typedef Types<commands::hmi::OnButtonEventNotification,
               commands::hmi::OnButtonPressNotification,
               commands::hmi::OnButtonSubscriptionNotification,
-              commands::VISubscribeVehicleDataResponse,
-              commands::VISubscribeVehicleDataRequest,
-              commands::VIUnsubscribeVehicleDataResponse,
-              commands::VIUnsubscribeVehicleDataRequest,
-              commands::OnVIVehicleDataNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,

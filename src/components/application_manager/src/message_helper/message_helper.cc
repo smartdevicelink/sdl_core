@@ -623,40 +623,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
   app_mngr.GetRPCService().ManageHMICommand(message);
 }
 
-void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                              ApplicationSharedPtr application,
-                                              ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-
-  std::string key_name;
-  for (auto item : vehicle_data_) {
-    if (ivi_id == item.second) {
-      key_name = item.first;
-      break;
-    }
-  }
-
-  if (key_name.empty()) {
-    return;
-  }
-
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[key_name] = true;
-
-  SmartObjectSPtr message = CreateMessageForHMI(
-      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-  DCHECK(message);
-
-  SmartObject& object = *message;
-  object[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData;
-
-  object[strings::msg_params] = msg_params;
-
-  app_mngr.GetRPCService().ManageHMICommand(message);
-}
-
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
@@ -1062,84 +1028,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   object[strings::app_id] = app_id;
 
   return set_icon;
-}
-
-bool MessageHelper::SendIVISubscribtions(const uint32_t app_id,
-                                         ApplicationManager& app_mngr) {
-  return SendIVISubscriptions(app_id, app_mngr);
-}
-
-bool MessageHelper::SendIVISubscriptions(const uint32_t app_id,
-                                         ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  bool result = true;
-  ApplicationSharedPtr app = app_mngr.application(app_id);
-
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Invalid application " << app_id);
-    return result;
-  }
-
-  smart_objects::SmartObjectList requests =
-      GetIVISubscriptionRequests(app, app_mngr);
-  for (smart_objects::SmartObjectList::const_iterator it = requests.begin();
-       it != requests.end();
-       ++it) {
-    if (!app_mngr.GetRPCService().ManageHMICommand(*it)) {
-      result = false;
-    }
-  }
-  return result;
-}
-
-smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
-    ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObjectList hmi_requests;
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer ");
-    return hmi_requests;
-  }
-
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data_;
-  VehicleData::const_iterator ivi_it = vehicle_data.begin();
-  DataAccessor<VehicleInfoSubscriptions> vi_accessor = app->SubscribedIVI();
-  const VehicleInfoSubscriptions& subscriptions = vi_accessor.GetData();
-
-  for (; vehicle_data.end() != ivi_it; ++ivi_it) {
-    mobile_apis::VehicleDataType::eType type_id = ivi_it->second;
-    if (subscriptions.end() != subscriptions.find(type_id)) {
-      std::string key_name = ivi_it->first;
-      msg_params[key_name] = true;
-    }
-  }
-
-#ifdef HMI_JSON_API
-  smart_objects::SmartObjectSPtr request = MessageHelper::CreateModuleInfoSO(
-      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData, app_mngr);
-  (*request)[strings::msg_params] = msg_params;
-  hmi_requests.push_back(request);
-#endif  // #ifdef HMI_JSON_API
-#ifdef HMI_DBUS_API
-  // Generate list of ivi_subrequests
-  for (size_t i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]);
-       ++i) {
-    const VehicleInfo_Requests& sr = ivi_subrequests[i];
-    if (true == msg_params.keyExists(sr.str) &&
-        true == msg_params[sr.str].asBool()) {
-      smart_objects::SmartObjectSPtr request =
-          MessageHelper::CreateModuleInfoSO(sr.func_id, app_mngr);
-      (*request)[strings::msg_params] = msg_params;
-      hmi_requests.push_back(request);
-    }
-  }
-#endif  // #ifdef HMI_DBUS_API
-  return hmi_requests;
 }
 
 void MessageHelper::SendOnButtonSubscriptionNotification(
