@@ -57,6 +57,16 @@ void OnHMIStatusNotification::Run() {
     return;
   }
 
+  // If the RPC was bad, give up now and don't try to check hmi level
+  if ((*message_)[strings::msg_params][strings::result_code] ==
+      mobile_apis::Result::INVALID_DATA) {
+    SendNotification();
+    // we failed due to invalid data, don't do anything else
+    return;
+  }
+
+  // NOTE c++ maps default-construct on the [] operator, so if there is no
+  // hmiLevel field this will create one that is invalid
   mobile_apis::HMILevel::eType hmi_level =
       static_cast<mobile_apis::HMILevel::eType>(
           (*message_)[strings::msg_params][strings::hmi_level].asInt());
