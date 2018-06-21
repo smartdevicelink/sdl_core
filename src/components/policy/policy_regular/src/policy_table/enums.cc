@@ -119,6 +119,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_EXTERNALTEMPERATURE:
       return true;
+    case P_TURNSIGNAL:
+      return true;
     case P_FUELLEVEL:
       return true;
     case P_FUELLEVEL_STATE:
@@ -181,6 +183,8 @@ const char* EnumToJsonString(Parameter val) {
       return "engineTorque";
     case P_EXTERNALTEMPERATURE:
       return "externalTemperature";
+    case P_TURNSIGNAL:
+      return "turnSignal";
     case P_FUELLEVEL:
       return "fuelLevel";
     case P_FUELLEVEL_STATE:
@@ -246,6 +250,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("externalTemperature" == literal) {
     *result = P_EXTERNALTEMPERATURE;
+    return true;
+  } else if ("turnSignal" == literal) {
+    *result = P_TURNSIGNAL;
     return true;
   } else if ("fuelLevel" == literal) {
     *result = P_FUELLEVEL;
