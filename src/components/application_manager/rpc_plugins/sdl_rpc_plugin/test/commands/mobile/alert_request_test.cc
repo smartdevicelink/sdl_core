@@ -509,7 +509,7 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
       mock_message_helper_,
       VerifyTtsFiles(
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));  
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
@@ -645,7 +645,7 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
           (*msg_)[am::strings::msg_params][am::strings::tts_chunks], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
-      mock_rpc_service_,,
+      mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)))
       .WillOnce(Return(true));
 

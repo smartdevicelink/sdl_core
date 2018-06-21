@@ -11,7 +11,7 @@
  * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following
  * disclaimer in the documentation and/or other materials provided with the
- * distribut wiion.
+ * distribution.
  *
  * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
@@ -30,19 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/basic_communication_get_system_time_request.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_time_ready_notification.h"
 
-namespace application_manager {
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
+
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
 namespace commands {
 
-BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {}
+OnSystemTimeReadyNotification::OnSystemTimeReadyNotification(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& app_man,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : NotificationFromHMI(
+          message, app_man, rpc_service, hmi_capabilities, policy_handler) {}
 
-void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.protocol_handler().NotifyOnFailedHandshake();
+OnSystemTimeReadyNotification::~OnSystemTimeReadyNotification() {}
+
+void OnSystemTimeReadyNotification::Run() {
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

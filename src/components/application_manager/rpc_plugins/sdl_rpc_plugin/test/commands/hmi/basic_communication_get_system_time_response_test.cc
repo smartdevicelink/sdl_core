@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/hmi/basic_communication_get_system_time_response.h"
+#include "hmi/basic_communication_get_system_time_response.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/smart_object_keys.h"
@@ -44,7 +44,7 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace basic_communication_get_system_time_response {
 
-using application_manager::commands::BasicCommunicationGetSystemTimeResponse;
+using sdl_rpc_plugin::commands::BasicCommunicationGetSystemTimeResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::ReturnRef;
 

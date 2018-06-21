@@ -271,7 +271,6 @@
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_request.h"
 #include "sdl_rpc_plugin/commands/hmi/rc_get_capabilities_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -892,9 +891,7 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return factory.GetCreator<commands::OnReadyNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady: {
-      command.reset(new commands::OnSystemTimeReadyNotification(
-          message, application_manager));
-      break;
+      return factory.GetCreator<commands::OnSystemTimeReadyNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnDeviceChosen: {
       return factory.GetCreator<commands::OnDeviceChosenNotification>();
@@ -1644,14 +1641,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                        commands::BasicCommunicationSystemResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_GetSystemTime: {
-      if (is_response) {
-        command.reset(new commands::BasicCommunicationGetSystemTimeResponse(
-            message, application_manager));
-      } else {
-        command.reset(new commands::BasicCommunicationGetSystemTimeRequest(
-            message, application_manager));
-      }
-      break;
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::BasicCommunicationGetSystemTimeRequest>()
+                 : factory.GetCreator<
+                       commands::BasicCommunicationGetSystemTimeResponse>();
     }
     case hmi_apis::FunctionID::Navigation_SendLocation: {
       return hmi_apis::messageType::request == message_type
