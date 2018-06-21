@@ -1499,8 +1499,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
 
   size_t app_idx = 0;
   for (; app_idx < urls.size(); ++app_idx) {
-    if ((urls[app_idx].app_id == policy::kDefaultId ||
-         urls[app_idx].app_id == app_policy_id) &&
+    if (helpers::Compare<std::string, helpers::EQ, helpers::ONE>(
+            policy::kDefaulgit tId,
+            urls[app_idx].app_id,
+            urls[app_idx].app_id,
+            app_policy_id) &&
         IsUrlAppIdValid(app_idx, urls))
       break;
   }
