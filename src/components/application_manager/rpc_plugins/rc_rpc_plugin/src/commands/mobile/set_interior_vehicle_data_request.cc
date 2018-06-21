@@ -192,7 +192,7 @@ const std::string LightName(const smart_objects::SmartObject& light_name) {
   return ok ? name : "unknown";
 }
 
-mobile_apis::Result::eType GetItemCapability(
+ModuleCapability GetItemCapability(
     const smart_objects::SmartObject& capabilities,
     const std::map<std::string, std::string>& mapping,
     const std::string& request_parameter,
@@ -203,7 +203,7 @@ mobile_apis::Result::eType GetItemCapability(
     LOG4CXX_DEBUG(logger_,
                   "Parameter " << request_parameter
                                << " doesn't exist in capabilities.");
-    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+    return std::make_pair("", capabilitiesStatus::missedParam);
   }
 
   const std::string& caps_key = it->second;
@@ -217,7 +217,7 @@ mobile_apis::Result::eType GetItemCapability(
     LOG4CXX_DEBUG(logger_,
                   "Capability " << caps_key
                                 << " is missed in RemoteControl capabilities");
-    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+    return std::make_pair("", capabilitiesStatus::missedParam);
   }
 
   if (!capabilities[caps_key].asBool()) {
@@ -225,13 +225,18 @@ mobile_apis::Result::eType GetItemCapability(
                   "Capability "
                       << caps_key
                       << " is switched off in RemoteControl capabilities");
-    return switched_off_result;
+    ModuleCapability status =
+        std::make_pair("", capabilitiesStatus::missedParam);
+    if (mobile_apis::Result::READ_ONLY == switched_off_result) {
+      status = std::make_pair("", capabilitiesStatus::readOnly);
+    }
+    return status;
   }
 
-  return mobile_apis::Result::SUCCESS;
+  return std::make_pair("", capabilitiesStatus::success);
 }
 
-mobile_apis::Result::eType GetLightDataCapabilities(
+ModuleCapability GetLightDataCapabilities(
     const smart_objects::SmartObject& capabilities,
     const smart_objects::SmartObject& control_data) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -244,21 +249,23 @@ mobile_apis::Result::eType GetLightDataCapabilities(
       continue;
     }
 
-    const mobile_apis::Result::eType item_capability =
+    const ModuleCapability item_capability =
         GetItemCapability(capabilities,
                           mapping,
                           request_parameter,
                           mobile_apis::Result::READ_ONLY);
 
-    if (mobile_apis::Result::SUCCESS != item_capability) {
-      return item_capability;
+    if (capabilitiesStatus::success != item_capability.second) {
+      return std::make_pair(message_params::kLightState,
+                            item_capability.second);
+      ;
     }
   }
 
-  return mobile_apis::Result::SUCCESS;
+  return std::make_pair("", capabilitiesStatus::success);
 }
 
-mobile_apis::Result::eType GetLightNameCapabilities(
+ModuleCapability GetLightNameCapabilities(
     const smart_objects::SmartObject& capabilities_status,
     const smart_objects::SmartObject& light_data) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -274,7 +281,9 @@ mobile_apis::Result::eType GetLightNameCapabilities(
   }
 
   LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
-  return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  return std::make_pair(message_params::kLightState,
+                        capabilitiesStatus::missedLightName);
+  ;
 }
 
 ModuleCapability GetControlDataCapabilities(
@@ -289,36 +298,34 @@ ModuleCapability GetControlDataCapabilities(
 
     if (message_params::kLightState == request_parameter) {
       auto light_data = control_data[request_parameter].asArray()->begin();
-      mobile_apis::Result::eType light_capability =
-          mobile_apis::Result::SUCCESS;
+      ModuleCapability light_capability =
+          std::make_pair("", capabilitiesStatus::success);
 
       for (; light_data != control_data[request_parameter].asArray()->end();
            ++light_data) {
         light_capability = GetLightNameCapabilities(
             capabilities[strings::kSupportedLights], *light_data);
 
-        if (mobile_apis::Result::SUCCESS != light_capability) {
-          return std::make_pair(request_parameter, light_capability);
-          ;
+        if (capabilitiesStatus::success != light_capability.second) {
+          return light_capability;
         }
       }
 
-      return std::make_pair(request_parameter, light_capability);
-      ;
+      return light_capability;
     }
 
-    const mobile_apis::Result::eType item_capability =
+    const ModuleCapability item_capability =
         GetItemCapability(capabilities[0],
                           mapping,
                           request_parameter,
                           mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
-    if (mobile_apis::Result::SUCCESS != item_capability) {
-      return std::make_pair(request_parameter, item_capability);
+    if (capabilitiesStatus::success != item_capability.second) {
+      return item_capability;
     }
   }
 
-  return std::make_pair("", mobile_apis::Result::SUCCESS);
+  return std::make_pair("", capabilitiesStatus::success);
 }
 
 ModuleCapability GetHmiControlDataCapabilities(
@@ -329,18 +336,18 @@ ModuleCapability GetHmiControlDataCapabilities(
       GetModuleDataToCapabilitiesMapping();
 
   for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
-    const mobile_apis::Result::eType item_capability =
+    const ModuleCapability item_capability =
         GetItemCapability(capabilities,
                           mapping,
                           it->first,
                           mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
-    if (mobile_apis::Result::SUCCESS != item_capability) {
-      return std::make_pair(it->first, item_capability);
+    if (capabilitiesStatus::success != item_capability.second) {
+      return item_capability;
     }
   }
 
-  return std::make_pair("", mobile_apis::Result::SUCCESS);
+  return std::make_pair("", capabilitiesStatus::success);
 }
 
 ModuleCapability GetModuleDataCapabilities(
@@ -350,7 +357,7 @@ ModuleCapability GetModuleDataCapabilities(
   const std::map<std::string, std::string> params =
       GetModuleDataCapabilitiesMapping();
   ModuleCapability module_data_capabilities =
-      std::make_pair("", mobile_apis::Result::UNSUPPORTED_RESOURCE);
+      std::make_pair("", capabilitiesStatus::missedParam);
 
   for (const auto& param : params) {
     if (module_data.keyExists(param.first)) {
@@ -389,6 +396,35 @@ bool isModuleTypeAndDataMatch(const std::string& module_type,
   return module_type_and_data_match;
 }
 
+mobile_apis::Result::eType PrepareResultCodeAndInfo(
+    const ModuleCapability module_data_capabilities, std::string& info) {
+  mobile_apis::Result::eType result_code =
+      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  if (message_params::kLightState == module_data_capabilities.first) {
+    switch (module_data_capabilities.second) {
+      case capabilitiesStatus::missedLightName:
+        info = "The requested LightName is not supported by the vehicle.";
+        break;
+      case capabilitiesStatus::missedParam:
+        info =
+            "The requested parameter of the given LightName is not supported "
+            "by the vehicle.";
+        break;
+      case capabilitiesStatus::readOnly:
+        info = "The requested parameter is read-only.";
+        result_code = mobile_apis::Result::READ_ONLY;
+        break;
+      default:
+        break;
+    }
+
+  } else {
+    info = "Accessing not supported module data.";
+  }
+  return result_code;
+  LOG4CXX_WARN(logger_, info);
+}
+
 void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -405,22 +441,12 @@ void SetInteriorVehicleDataRequest::Execute() {
       module_data_capabilities =
           GetModuleDataCapabilities(*rc_capabilities, module_data);
 
-      if (mobile_apis::Result::SUCCESS != module_data_capabilities.second) {
+      if (capabilitiesStatus::success != module_data_capabilities.second) {
         SetResourceState(ModuleType(), ResourceState::FREE);
-        std::string responce_msg;
-
-        if (message_params::kLightState == module_data_capabilities.first) {
-          responce_msg =
-              "The requested LightName is not supported by the vehicle.";
-        } else {
-          responce_msg = "Accessing not supported module data";
-        }
-
-        LOG4CXX_WARN(logger_, responce_msg);
-
-        SendResponse(
-            false, module_data_capabilities.second, responce_msg.c_str());
-
+        std::string info;
+        mobile_apis::Result::eType result =
+            PrepareResultCodeAndInfo(module_data_capabilities, info);
+        SendResponse(false, result, info.c_str());
         return;
       }
     }
@@ -434,17 +460,17 @@ void SetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
-    module_data_capabilities = std::make_pair("", mobile_apis::Result::SUCCESS);
+    module_data_capabilities = std::make_pair("", capabilitiesStatus::success);
 
     if (AreReadOnlyParamsPresent(module_data, module_data_capabilities)) {
       LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
 
       if (enums_value::kLight == module_data_capabilities.first &&
-          mobile_apis::Result::SUCCESS != module_data_capabilities.second) {
+          capabilitiesStatus::success != module_data_capabilities.second) {
         SetResourceState(ModuleType(), ResourceState::FREE);
         SendResponse(
             false,
-            module_data_capabilities.second,
+            mobile_apis::Result::READ_ONLY,
             "The LightStatus enum passed is READ ONLY and cannot be written.");
         return;
       }
@@ -646,7 +672,7 @@ bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
 
     if (result) {
       module_data_capabilities =
-          std::make_pair(module_type, mobile_apis::Result::READ_ONLY);
+          std::make_pair(module_type, capabilitiesStatus::readOnly);
     }
 
     return result;
