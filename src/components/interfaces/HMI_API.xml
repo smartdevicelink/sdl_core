@@ -4433,7 +4433,7 @@
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
-    <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
@@ -4609,7 +4609,7 @@
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
-    <param name="turnSignal" type="VehicleDataResult" mandatory="false">
+    <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
@@ -4781,7 +4781,7 @@
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
-    <param name="turnSignal" type="TurnSignal" mandatory="false">
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
@@ -4868,7 +4868,7 @@
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
-    <param name="turnSignal" type="TurnSignal" mandatory="false">
+    <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
     </param>
     <param name="vin" type="String" maxlength="17" mandatory="false">
