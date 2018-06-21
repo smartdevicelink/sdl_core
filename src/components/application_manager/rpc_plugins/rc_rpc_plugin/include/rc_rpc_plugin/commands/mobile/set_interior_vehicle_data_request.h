@@ -39,7 +39,10 @@ namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-typedef std::pair<std::string, mobile_apis::Result::eType> ModuleCapability;
+
+enum capabilitiesStatus { success, missedLightName, missedParam, readOnly };
+
+typedef std::pair<std::string, capabilitiesStatus> ModuleCapability;
 
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
