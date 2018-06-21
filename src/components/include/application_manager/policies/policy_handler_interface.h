@@ -65,7 +65,8 @@ class PolicyHandlerInterface {
   virtual bool ResetPolicyTable() = 0;
   virtual bool ClearUserConsent() = 0;
   virtual bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                const std::string& url) = 0;
+                                const std::string& url,
+                                const uint32_t app_id) = 0;
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;

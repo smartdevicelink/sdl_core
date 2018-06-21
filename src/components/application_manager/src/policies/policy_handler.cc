@@ -1037,11 +1037,11 @@ void PolicyHandler::OnPendingPermissionChange(
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
+                                     const std::string& url,
+                                     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
-  const uint32_t app_id = GetAppIdForSending();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
@@ -1501,12 +1501,31 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
 
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
+  const uint32_t app_id = GetAppIdForSending();
+  const std::string app_policy_id =
+      application_manager_.application(app_id)->policy_app_id();
+
+  size_t app_idx = 0;
+  for (; app_idx < urls.size(); ++app_idx) {
+    if (helpers::Compare<std::string, helpers::EQ, helpers::ONE>(
+            policy::kDefaulgit tId,
+            urls[app_idx].app_id,
+            urls[app_idx].app_id,
+            app_policy_id) &&
+        IsUrlAppIdValid(app_idx, urls))
+      break;
   }
-  const std::string& url = urls[app_url.first].url[app_url.second];
-  SendMessageToSDK(pt_string, url);
+
+  if (app_idx >= urls.size()) {
+    LOG4CXX_ERROR(logger_, "All applications unavailable!");
+    return;
+  }
+
+  for (size_t url_idx = 0; url_idx < urls[app_idx].url.size(); ++url_idx) {
+    const std::string& url = urls[app_idx].url[url_idx];
+    if (SendMessageToSDK(pt_string, url, app_id))
+      break;
+  }
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();

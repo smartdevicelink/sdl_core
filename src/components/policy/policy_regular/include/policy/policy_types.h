@@ -371,26 +371,6 @@ struct MetaInfo {
 };
 
 /**
- * @brief The index of the application, the index of its URL
- * and the policy application id from the Endpoints vector
- * that will be sent on the next OnSystemRequest retry sequence
- */
-struct RetrySequenceURL {
-  uint32_t app_idx_;
-  uint32_t url_idx_;
-  std::string policy_app_id_;
-  RetrySequenceURL(uint32_t app, uint32_t url, const std::string& app_id)
-      : app_idx_(app), url_idx_(url), policy_app_id_(app_id) {}
-  RetrySequenceURL() : app_idx_(0), url_idx_(0) {}
-};
-
-/**
- * @brief Index of the application, index of its URL
- * from the Endpoints vector
- */
-typedef std::pair<uint32_t, uint32_t> AppIdURL;
-
-/**
  * @brief Represents ExternalConsent entity status received from the system
  */
 enum EntityStatus { kStatusOn, kStatusOff };
@@ -484,12 +464,6 @@ enum PermissionsCheckResult {
  */
 typedef std::set<std::pair<std::string, PermissionsCheckResult> >
     CheckAppPolicyResults;
-
-/**
- * @brief Index of the application, index of its URL
- * from the Endpoints vector
- */
-typedef std::pair<uint32_t, uint32_t> AppIdURL;
 
 }  //  namespace policy
 
