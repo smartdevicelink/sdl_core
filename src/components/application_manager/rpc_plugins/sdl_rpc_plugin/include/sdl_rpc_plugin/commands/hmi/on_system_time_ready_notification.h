@@ -30,42 +30,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
-
-#include "utils/macro.h"
+#include "application_manager/commands/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
 
-namespace application_manager {
-
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief The BasicCommunicationGetSystemTimeResponse class represents the
- * HMI response which is contains data obtained from HMI.
+ * @brief OnSystemTimeReadyNotification command class.
+ * Notifies SDL whenever system time module is ready.
+ * It could be GPS or any other module which is allows
+ * to obtain system time. Once SDL receive this notification
+ * it is allowed to use GetSystemTimeRequest to rerieve system time.
  */
-class BasicCommunicationGetSystemTimeResponse : public ResponseFromHMI {
+class OnSystemTimeReadyNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
-   * @brief BasicCommunicationGetSystemTimeResponse does nothing except of
-   * initializing base class with the passed parameters.
-   * @param message the message to send to HMI
-   * @param application_manager Location service which which is provides
-   * neccessary api to send the request.
+   * @brief OnSystemTimeReadyNotification create the command.
+   * @param message content of the command. Passed directy to base class.
    */
-  BasicCommunicationGetSystemTimeResponse(
-      const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnSystemTimeReadyNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * @brief Run takes the message obtained from the HMI and
-   * sends this data to the subscribed on certain event class
+   * @brief ~OnSystemTimeReadyNotification destroys the command object.
+   */
+  ~OnSystemTimeReadyNotification();
+
+  /**
+   * @brief Run creates SystemTimeReady event
+   * and notifies all the subscribers.
    */
   void Run() FINAL;
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_SYSTEM_TIME_READY_NOTIFICATION_H_

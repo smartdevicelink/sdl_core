@@ -30,20 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/request_to_hmi.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace commands {
 
 /**
  * @brief The BasicCommunicationGetSystemTimeRequest class sends the request
  * to the HMI in order to receive current system time.
  */
-class BasicCommunicationGetSystemTimeRequest : public RequestToHMI {
+class BasicCommunicationGetSystemTimeRequest
+    : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief BasicCommunicationGetSystemTimeRequest does nothing except of
@@ -53,7 +55,11 @@ class BasicCommunicationGetSystemTimeRequest : public RequestToHMI {
    * is provides neccessary api to send the request.
    */
   BasicCommunicationGetSystemTimeRequest(
-      const MessageSharedPtr& message, ApplicationManager& application_manager);
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief onTimeOut allows to handle case when
@@ -64,5 +70,5 @@ class BasicCommunicationGetSystemTimeRequest : public RequestToHMI {
 };
 
 }  // namespace commands
-}  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_
+}  // namespace sdl_rpc_plugin
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BASIC_COMMUNICATION_GET_SYSTEM_TIME_REQUEST_H_

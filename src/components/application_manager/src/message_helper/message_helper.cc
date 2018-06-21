@@ -380,7 +380,7 @@ void MessageHelper::SendGetSystemTimeRequest(const uint32_t correlation_id,
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_GetSystemTime;
 
-  app_mngr.ManageHMICommand(message);
+  app_mngr.GetRPCService().ManageHMICommand(message);
 }
 
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,

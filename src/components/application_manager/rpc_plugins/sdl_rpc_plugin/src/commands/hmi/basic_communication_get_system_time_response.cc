@@ -30,24 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_system_time_ready_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_response.h"
+#include "utils/logger.h"
 
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+CREATE_LOGGERPTR_GLOBAL(logger_, "Commands")
 
-namespace application_manager {
-
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 namespace commands {
 
-OnSystemTimeReadyNotification::OnSystemTimeReadyNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {}
+BasicCommunicationGetSystemTimeResponse::
+    BasicCommunicationGetSystemTimeResponse(
+        const application_manager::commands::MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        rpc_service::RPCService& rpc_service,
+        HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handler) {}
 
-OnSystemTimeReadyNotification::~OnSystemTimeReadyNotification() {}
+void BasicCommunicationGetSystemTimeResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-void OnSystemTimeReadyNotification::Run() {
   event_engine::Event event(
-      hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady);
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

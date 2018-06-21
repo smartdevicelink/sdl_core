@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2018 Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -28,30 +28,45 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include "application_manager/commands/hmi/basic_communication_get_system_time_response.h"
-#include "utils/logger.h"
+#include "hmi/basic_communication_get_system_time_request.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Commands")
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "application_manager/commands/command_request_test.h"
+#include "protocol_handler/mock_protocol_handler.h"
 
-namespace application_manager {
-namespace commands {
+namespace test {
+namespace components {
+namespace commands_test {
+namespace hmi_commands_test {
+namespace basic_communication_get_system_time_request {
 
-BasicCommunicationGetSystemTimeResponse::
-    BasicCommunicationGetSystemTimeResponse(
-        const MessageSharedPtr& message,
-        ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {}
+using ::testing::ReturnRef;
+namespace am = ::application_manager;
+using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::BasicCommunicationGetSystemTimeRequest;
+using namespace ::protocol_handler;
 
-void BasicCommunicationGetSystemTimeResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+class BasicCommunicationGetSystemTimeRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-  event_engine::Event event(
-      hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
+TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
+  MessageSharedPtr msg = CreateMessage();
+  protocol_handler_test::MockProtocolHandler mock_protocol_handler;
+
+  auto command = CreateCommand<BasicCommunicationGetSystemTimeRequest>(msg);
+
+  ON_CALL(app_mngr_, protocol_handler())
+      .WillByDefault(ReturnRef(mock_protocol_handler));
+  EXPECT_CALL(mock_protocol_handler, NotifyOnFailedHandshake());
+
+  command->onTimeOut();
 }
 
-}  // namespace commands
-}  // namespace application_manager
+}  // namespace basic_communication_get_system_time_request
+}  // namespace hmi_commands_test
+}  // namespace commands_test
+}  // namespace components
+}  // namespace test

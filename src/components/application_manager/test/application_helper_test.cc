@@ -116,7 +116,6 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
-
     const std::string path_to_plagin = "";
     EXPECT_CALL(mock_application_manager_settings_, plugins_folder())
         .WillOnce(ReturnRef(path_to_plagin));
