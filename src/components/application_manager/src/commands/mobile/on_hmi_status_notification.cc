@@ -57,11 +57,10 @@ void OnHMIStatusNotification::Run() {
     return;
   }
 
-  // If the RPC was bad, give up now and don't try to check hmi level
-  if ((*message_)[strings::msg_params][strings::result_code] ==
-      mobile_apis::Result::INVALID_DATA) {
-    SendNotification();
-    // we failed due to invalid data, don't do anything else
+  // If the response has no hmi level, return and don't send the notification
+  if (!(*message_)[strings::msg_params].keyExists(strings::hmi_level)) {
+    // our notification clearly isn't well-formed
+    LOG4CXX_ERROR(logger_, "OnHMIStatusNotification has no hmiLevel field");
     return;
   }
 
