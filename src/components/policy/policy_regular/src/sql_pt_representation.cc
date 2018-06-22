@@ -1320,6 +1320,7 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
     if (!SaveMessageType(it->first)) {
       return false;
     }
+
     const policy_table::Languages& langs = it->second.languages;
     policy_table::Languages::const_iterator lang_it;
     for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
@@ -1377,8 +1378,13 @@ bool SQLPTRepresentation::SaveMessageString(
     return false;
   }
 
-  query.Bind(0, lang);
-  query.Bind(1, type);
+  query.Bind(0, *strings.tts);
+  query.Bind(1, *strings.label);
+  query.Bind(2, *strings.line1);
+  query.Bind(3, *strings.line2);
+  query.Bind(4, *strings.textBody);
+  query.Bind(5, lang);
+  query.Bind(6, type);
 
   if (!query.Exec() || !query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into message.");
