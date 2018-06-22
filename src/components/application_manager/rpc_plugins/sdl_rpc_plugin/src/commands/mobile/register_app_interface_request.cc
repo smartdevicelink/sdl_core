@@ -767,6 +767,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
+  SendOnAppRegisteredNotificationToHMI(
+      *(application.get()), resumption, need_restore_vr);
   if (msg_params.keyExists(strings::app_hmi_type)) {
     GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
                                           &(msg_params[strings::app_hmi_type]));
@@ -787,9 +789,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
-
-  SendOnAppRegisteredNotificationToHMI(
-      *(application.get()), resumption, need_restore_vr);
 
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
