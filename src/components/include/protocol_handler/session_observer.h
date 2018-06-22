@@ -228,20 +228,6 @@ class SessionObserver {
                            uint8_t* sessionId) const = 0;
 
   /**
-   * DEPRECATED
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
-   * \return int32_t -1 in case of error or 0 in case of success
-   */
-  virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) const = 0;
-
-  /**
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID
