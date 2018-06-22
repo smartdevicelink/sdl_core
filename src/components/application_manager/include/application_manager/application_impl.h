@@ -381,6 +381,24 @@ class ApplicationImpl : public virtual Application,
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
 
+  /**
+   * @brief Update internal state to indicate whether setup is running or not.
+   *
+   * The method WaitForSetupDone() will block when setup is running. Also, the
+   * method will be released once SetSetupInProgress() is called with false.
+   *
+   * @param in_progress true when setup is in progress, false when the setup
+   * has completed
+   */
+  void SetSetupInProgress(bool in_progress) OVERRIDE;
+
+  /**
+   * @brief Block until this app completes its setup in
+   * RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile().
+   * If the setup has been already completed then this method does nothing.
+   */
+  void WaitForSetupDone() OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -506,6 +524,10 @@ class ApplicationImpl : public virtual Application,
 
   sync_primitives::Lock mobile_message_lock_;
   MobileMessageQueue mobile_message_queue_;
+
+  bool setup_in_progress_;
+  sync_primitives::Lock setup_in_progress_lock_;
+  sync_primitives::ConditionalVariable setup_in_progress_cond_;
 
   friend void SwitchApplicationParameters(ApplicationSharedPtr app,
                                           const uint32_t app_id,

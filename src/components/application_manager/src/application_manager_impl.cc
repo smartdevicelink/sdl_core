@@ -662,6 +662,11 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
+  // It's possible that this app has been just registered, default state being
+  // not set and resumption isn't running yet. Make sure that this event is
+  // processed after the app has been properly set up.
+  app->WaitForSetupDone();
+
   LOG4CXX_DEBUG(logger_, "Activating application with id:" << app->app_id());
 
   // remove from resumption if app was activated by user

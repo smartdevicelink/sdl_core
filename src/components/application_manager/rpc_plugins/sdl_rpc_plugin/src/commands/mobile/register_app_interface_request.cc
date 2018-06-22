@@ -39,6 +39,7 @@
 #include <string.h>
 
 #include <utils/make_shared.h>
+#include "utils/scope_guard.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_impl.h"
@@ -767,27 +768,39 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
-  SendOnAppRegisteredNotificationToHMI(
-      *(application.get()), resumption, need_restore_vr);
-  if (msg_params.keyExists(strings::app_hmi_type)) {
-    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
-                                          &(msg_params[strings::app_hmi_type]));
-  }
 
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  application_manager_.OnApplicationRegistered(application);
-  (*notify_upd_manager)();
+  {
+    utils::ScopeGuard setup_flag_clearer = utils::MakeObjGuard(
+        *application, &app_mngr::Application::SetSetupInProgress, false);
+    UNUSED(setup_flag_clearer);
+    // If HMI sends SDL.ActivateApp right after we notify OnAppRegistered, the
+    // app might be activated before resumption is triggered.
+    // This flag makes sure that SDL.ActivateApp is deferred until resumption is
+    // triggered. It is cleared once we get out of the sclope.
+    application->SetSetupInProgress(true);
 
-  // Start PTU after successfull registration
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+    SendOnAppRegisteredNotificationToHMI(
+        *(application.get()), resumption, need_restore_vr);
+    if (msg_params.keyExists(strings::app_hmi_type)) {
+      GetPolicyHandler().SetDefaultHmiTypes(
+          application->policy_app_id(), &(msg_params[strings::app_hmi_type]));
+    }
 
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+    // Default HMI level should be set before any permissions validation, since
+    // it relies on HMI level.
+    application_manager_.OnApplicationRegistered(application);
+    (*notify_upd_manager)();
+
+    // Start PTU after successfull registration
+    // Sends OnPermissionChange notification to mobile right after RAI response
+    // and HMI level set-up
+    GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON

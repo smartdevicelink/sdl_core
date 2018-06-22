@@ -898,6 +898,24 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
+  /**
+   * @brief Update internal state to indicate whether setup is running or not.
+   *
+   * The method WaitForSetupDone() will block when setup is running. Also, the
+   * method will be released once SetSetupInProgress() is called with false.
+   *
+   * @param in_progress true when setup is in progress, false when the setup
+   * has completed
+   */
+  virtual void SetSetupInProgress(bool in_progress) = 0;
+
+  /**
+   * @brief Block until this app completes its setup in
+   * RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile().
+   * If the setup has been already completed then this method does nothing.
+   */
+  virtual void WaitForSetupDone() = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

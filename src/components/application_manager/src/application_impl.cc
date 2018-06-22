@@ -142,7 +142,8 @@ ApplicationImpl::ApplicationImpl(
               this, &ApplicationImpl::OnAudioStreamSuspend))
     , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
-    , application_manager_(application_manager) {
+    , application_manager_(application_manager)
+    , setup_in_progress_(false) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
@@ -1121,6 +1122,32 @@ void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
   sync_primitives::AutoLock lock(mobile_message_lock_);
   mobile_messages.swap(mobile_message_queue_);
+}
+
+void ApplicationImpl::SetSetupInProgress(bool in_progress) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(setup_in_progress_lock_);
+  bool previous_flag = setup_in_progress_;
+  setup_in_progress_ = in_progress;
+  LOG4CXX_DEBUG(logger_,
+                "setup_in_progress_ of app " << app_id_ << " updated to "
+                                             << setup_in_progress_);
+
+  // unblock WaitForSetupDone() when the flag changes from true to false
+  if (previous_flag == true && setup_in_progress_ == false) {
+    setup_in_progress_cond_.Broadcast();
+  }
+}
+
+void ApplicationImpl::WaitForSetupDone() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(setup_in_progress_lock_);
+  while (setup_in_progress_) {
+    LOG4CXX_DEBUG(logger_, "Waiting for app " << app_id_ << " to finish setup");
+    setup_in_progress_cond_.Wait(auto_lock);
+  }
 }
 
 }  // namespace application_manager

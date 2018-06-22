@@ -53,6 +53,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "smart_objects/smart_object.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -825,6 +826,50 @@ TEST_F(ApplicationImplTest, PushPopMobileMessage) {
 
   app_impl->SwapMobileMessageQueue(messages);
   EXPECT_TRUE(messages.empty());
+}
+
+TEST_F(ApplicationImplTest, WaitForSetupDone_SetupNotInProgress) {
+  // test should succeed without blocking on WaitForSetupDone()
+  app_impl->WaitForSetupDone();
+}
+
+TEST_F(ApplicationImplTest, WaitForSetupDone_SetupInProgress) {
+  class Delegate : public threads::ThreadDelegate {
+   public:
+    Delegate(utils::SharedPtr<ApplicationImpl> app,
+             ::utils::SharedPtr<TestAsyncWaiter> waiter,
+             unsigned int waitSeconds)
+        : app_(app), waiter_(waiter), seconds_(waitSeconds) {}
+    virtual ~Delegate() {}
+    virtual void threadMain() {
+      sleep(seconds_);
+      waiter_->Notify();
+      app_->SetSetupInProgress(false);
+    }
+    virtual void exitThreadMain() {}
+
+   private:
+    utils::SharedPtr<ApplicationImpl> app_;
+    ::utils::SharedPtr<TestAsyncWaiter> waiter_;
+    unsigned int seconds_;
+  };
+
+  ::utils::SharedPtr<TestAsyncWaiter> waiter =
+      utils::MakeShared<TestAsyncWaiter>();
+  uint32_t times = 0;
+  unsigned int waitSeconds = 3;
+
+  app_impl->SetSetupInProgress(true);
+
+  threads::AsyncRunner asyncRunner("WaitForSetupDoneThread");
+  times++;
+  asyncRunner.AsyncRun(new Delegate(app_impl, waiter, waitSeconds));
+
+  // this should block until SetSetupInProgress(false) is called
+  app_impl->WaitForSetupDone();
+
+  // if we don't block with WaitForSetupDone() then this call will fail
+  EXPECT_TRUE(waiter->WaitFor(times, 0));
 }
 
 }  // namespace application_manager_test
