@@ -986,18 +986,6 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   return 0;
 }
 
-int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
-    uint32_t key,
-    uint32_t* app_id,
-    std::list<int32_t>* sessions_list,
-    uint32_t* device_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DeviceHandle handle;
-  int32_t result = GetDataOnSessionKey(key, app_id, sessions_list, &handle);
-  *device_id = static_cast<uint32_t>(handle);
-  return result;
-}
-
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {
   return settings_;
 }
