@@ -367,8 +367,7 @@ typedef Types<OnVIAccPedalPositionNotification,
               OnVITirePressureNotification,
               OnVIVehicleDataNotification,
               OnVIVinNotification,
-              OnVIWiperStatusNotification>
-    HMIOnViNotificationsTypes;
+              OnVIWiperStatusNotification> HMIOnViNotificationsTypes;
 
 typedef Types<OnAppPermissionChangedNotification,
               OnAudioDataStreamingNotification,
@@ -381,8 +380,7 @@ typedef Types<OnAppPermissionChangedNotification,
               OnSDLPersistenceCompleteNotification,
               OnStatusUpdateNotification,
               OnVideoDataStreamingNotification,
-              OnRecordStartdNotification>
-    HMIOnNotificationsListToHMITypes;
+              OnRecordStartdNotification> HMIOnNotificationsListToHMITypes;
 
 typedef Types<
     CommandPair<OnAppActivatedNotification,
@@ -1127,8 +1125,7 @@ TEST_F(HMICommandsNotificationsTest,
     EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
     EXPECT_CALL(mock_message_helper_,
                 GetOnAppInterfaceUnregisteredNotificationToMobile(
-                    kAppId_, *it_mobile_reason))
-        .WillOnce(Return(notification));
+                    kAppId_, *it_mobile_reason)).WillOnce(Return(notification));
     EXPECT_CALL(app_mngr_,
                 ManageMobileCommand(notification, Command::ORIGIN_SDL));
     EXPECT_CALL(app_mngr_,
@@ -1490,11 +1487,10 @@ TEST_F(HMICommandsNotificationsTest,
             [am::strings::id] = "2014";
   utils::SharedPtr<Command> command =
       CreateCommand<OnDeviceChosenNotification>(message);
-  EXPECT_CALL(
-      app_mngr_,
-      ConnectToDevice((*message)[am::strings::msg_params]
-                                [am::strings::device_info][am::strings::id]
-                                    .asString()));
+  EXPECT_CALL(app_mngr_,
+              ConnectToDevice(
+                  (*message)[am::strings::msg_params][am::strings::device_info]
+                            [am::strings::id].asString()));
   command->Run();
 }
 

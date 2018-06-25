@@ -60,14 +60,14 @@ using am::HmiState;
 using am::HmiStatePtr;
 using am::UsageStatistics;
 using ::testing::_;
-using ::testing::AtLeast;
-using ::testing::InSequence;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::ReturnPointee;
 using ::testing::Mock;
 using ::testing::NiceMock;
-using ::testing::Return;
-using ::testing::ReturnPointee;
-using ::testing::ReturnRef;
+using ::testing::InSequence;
 using ::testing::Truly;
+using ::testing::AtLeast;
 
 namespace test {
 namespace components {
@@ -1053,8 +1053,7 @@ class StateControllerImplTest : public ::testing::Test {
     for (uint32_t i = 0; i < state_ids.size(); ++i) {
       am::HmiState::StateID state_id = state_ids[i];
       EXPECT_CALL(application,
-                  AddHMIState(Truly(HmiStatesIDComparator(state_id))))
-          .Times(1);
+                  AddHMIState(Truly(HmiStatesIDComparator(state_id)))).Times(1);
 
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
@@ -1907,8 +1906,7 @@ TEST_F(StateControllerImplTest, SendEventBCActivateApp_HMIReceivesError) {
     EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(simple_app_))
         .Times(0);
     EXPECT_CALL(app_manager_mock_,
-                OnHMILevelChanged(simple_app_->app_id(), _, _))
-        .Times(0);
+                OnHMILevelChanged(simple_app_->app_id(), _, _)).Times(0);
 
     smart_objects::SmartObject message;
     message[am::strings::params][am::hmi_response::code] = *it;
@@ -2462,8 +2460,7 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
   EXPECT_CALL(*simple_app_ptr_, is_resuming()).WillRepeatedly(Return(false));
 
   EXPECT_CALL(message_helper_mock_,
-              SendOnResumeAudioSourceToHMI(simple_app_id_, _))
-      .Times(0);
+              SendOnResumeAudioSourceToHMI(simple_app_id_, _)).Times(0);
   EXPECT_CALL(*simple_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))))
       .Times(0);
