@@ -1701,8 +1701,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 }
 #else  // EXTERNAL_PROPRIETARY_MODE
-// TODO(LevchenkoS): Find out what is wrong with this test on HTTP Policy
-TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
+
+TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
@@ -1712,14 +1712,18 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
 
 #ifdef PROPRIETARY_MODE
   ExtendedPolicyExpectations();
-#else
-  AppIdURL next_app_url = std::make_pair(0, 0);
+#else   // HTTP mode
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
-  EXPECT_CALL(*mock_policy_manager_, GetNextUpdateUrl(_))
-      .WillOnce(Return(next_app_url));
-  EXPECT_CALL(app_manager_, application_by_policy_id(_))
-      .WillOnce(Return(mock_app));
+
+  // Check expectations for get app id
+  GetAppIDForSending();
+  // Expectations
+  EXPECT_CALL(app_manager_, application(kAppId1_))
+      .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
+
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
@@ -1727,12 +1731,6 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
   EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
-  // Check expectations for get app id
-  GetAppIDForSending();
-  // Expectations
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(*mock_policy_manager_, OnUpdateStarted());
@@ -2082,7 +2080,8 @@ TEST_F(PolicyHandlerTest,
   // Act
   EXPECT_CALL(mock_message_helper_,
               SendPolicySnapshotNotification(kAppId1_, msg, url, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url, app_id));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2109,10 +2108,10 @@ TEST_F(PolicyHandlerTest,
   // Expected to get 0 as application id so SDL does not have valid application
   // with such id
   EXPECT_CALL(app_manager_, application(0))
-      .WillOnce(
-          Return(std::shared_ptr<application_manager_test::MockApplication>()));
-
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url));
+      .WillOnce(Return(
+          utils::SharedPtr<application_manager_test::MockApplication>()));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url, app_id));
 }
 
 TEST_F(PolicyHandlerTest, CanUpdate) {
