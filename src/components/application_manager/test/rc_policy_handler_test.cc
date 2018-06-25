@@ -176,7 +176,8 @@ TEST_F(RCPolicyHandlerTest,
 
   EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _))
       .Times(0);
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, kUrl_));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, kUrl_, app_id));
 }
 
 TEST_F(RCPolicyHandlerTest, SendMessageToSDK_RemoteControl_SUCCESS) {
@@ -200,7 +201,8 @@ TEST_F(RCPolicyHandlerTest, SendMessageToSDK_RemoteControl_SUCCESS) {
 
   EXPECT_CALL(mock_message_helper_,
               SendPolicySnapshotNotification(kAppId1_, _, kUrl_, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, kUrl_));
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, kUrl_, app_id));
 }
 
 TEST_F(RCPolicyHandlerTest, OnUpdateHMILevel_InvalidApp_UNSUCCESS) {
