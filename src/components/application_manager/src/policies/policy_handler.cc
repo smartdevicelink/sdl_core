@@ -2035,19 +2035,7 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
-                                    const EndpointUrls& urls) const {
-  const EndpointData& app_data = urls[app_idx];
-  const std::vector<std::string> app_urls = app_data.url;
-  const ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(app_data.app_policy_id);
-
-  const bool is_registered = (app && (app->IsRegistered()));
-  const bool is_default = (app_data.app_policy_id == policy::kDefaultId);
-  const bool is_empty_urls = app_urls.empty();
-
-  return ((is_registered && !is_empty_urls) || is_default);
-}
+#ifdef SDL_REMOTE_CONTROL
 
 std::vector<std::string> PolicyHandler::GetDevicesIds(
     const std::string& policy_app_id) {

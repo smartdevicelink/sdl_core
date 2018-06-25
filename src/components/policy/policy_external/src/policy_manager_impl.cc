@@ -217,8 +217,8 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
-    , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {}
+    , ignition_check(true) {
+}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     : PolicyManager()
@@ -229,7 +229,6 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false) {}
@@ -1705,46 +1704,6 @@ void PolicyManagerImpl::SetDecryptedCertificate(
     const std::string& certificate) {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->SetDecryptedCertificate(certificate);
-}
-
-AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  const AppIdURL next_app_url = RetrySequenceUrl(retry_sequence_url_, urls);
-
-  retry_sequence_url_.url_idx_ = next_app_url.second + 1;
-  retry_sequence_url_.app_idx_ = next_app_url.first;
-  retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_id;
-
-  return next_app_url;
-}
-
-AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
-                                             const EndpointUrls& urls) const {
-  uint32_t url_idx = rs.url_idx_;
-  uint32_t app_idx = rs.app_idx_;
-  const std::string& app_id = rs.policy_app_id_;
-
-  if (urls.size() <= app_idx) {
-    // Index of current application doesn't exist any more due to app(s)
-    // unregistration
-    url_idx = 0;
-    app_idx = 0;
-  } else if (urls[app_idx].app_id != app_id) {
-    // Index of current application points to another one due to app(s)
-    // registration/unregistration
-    url_idx = 0;
-  } else if (url_idx >= urls[app_idx].url.size()) {
-    // Index of current application is OK, but all of its URL are sent,
-    // move to the next application
-    url_idx = 0;
-    if (++app_idx >= urls.size()) {
-      app_idx = 0;
-    }
-  }
-  const AppIdURL next_app_url = std::make_pair(app_idx, url_idx);
-
-  return next_app_url;
 }
 
 /**
