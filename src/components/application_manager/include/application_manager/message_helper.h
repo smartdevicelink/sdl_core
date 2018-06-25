@@ -107,6 +107,15 @@ class MessageHelper {
   static void SendDecryptCertificateToHMI(const std::string& file_name,
                                           ApplicationManager& app_mngr);
 
+  /**
+    * @brief SendGetSystemTimeRequest sends mentioned request to HMI.
+    * @param correlation_id the message correlation id, required for proper
+    * response processing.
+    * @param app_mngr
+    */
+  static void SendGetSystemTimeRequest(const uint32_t correlation_id,
+                                       ApplicationManager& app_mngr);
+
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType
@@ -547,6 +556,37 @@ class MessageHelper {
       int32_t function_id,
       const uint32_t correlation_id,
       int32_t result_code);
+
+  /**
+   * @brief Get the full file path of an app file
+   *
+   * @param file_name The relative path of an application file
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return The full file path of the application file if valid,
+   * empty string otherwise
+   */
+  static std::string GetAppFilePath(std::string file_name,
+                                    ApplicationConstSharedPtr app,
+                                    ApplicationManager& app_mngr);
+
+  /**
+   * @brief Verify that all ttsChunks with FILE type
+   * in an array include an existing file and set full path
+   *
+   * @param tts_chunks SmartObject with an array of TTSChunks
+   * @param app Current application
+   * @param app_mngr Application manager
+   *
+   * @return FILE_NOT_FOUND if one of the TTSChunks
+   * included a file which wasn't present on disk,
+   * SUCCESS otherwise
+   */
+  static mobile_apis::Result::eType VerifyTtsFiles(
+      smart_objects::SmartObject& tts_chunks,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
 
   /**
     * @brief Verify image and add image file full path

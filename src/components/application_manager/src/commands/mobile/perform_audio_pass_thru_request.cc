@@ -96,8 +96,24 @@ void PerformAudioPassThruRequest::Run() {
   // need set flag before sending to hmi
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-  if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
-      (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
+  if ((*message_)[str::msg_params].keyExists(str::initial_prompt)) {
+    smart_objects::SmartObject& initial_prompt =
+        (*message_)[strings::msg_params][strings::initial_prompt];
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyTtsFiles(
+            initial_prompt, app, application_manager_);
+
+    if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
+      LOG4CXX_ERROR(logger_,
+                    "MessageHelper::VerifyTtsFiles return "
+                        << verification_result);
+      SendResponse(
+          false,
+          mobile_apis::Result::FILE_NOT_FOUND,
+          "One or more files needed for initial_prompt are not present");
+      return;
+    }
+
     // In case TTS Speak, subscribe on notification
     SendSpeakRequest();
     SendPerformAudioPassThruRequest();

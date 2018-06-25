@@ -91,6 +91,8 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
 ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Current state is: " << multiframes_map_);
+  LOG4CXX_DEBUG(logger_,
+                "Current multiframe map size is: " << multiframes_map_.size());
   ProtocolFramePtrList outpute_frame_list;
   for (MultiFrameMap::iterator connection_it = multiframes_map_.begin();
        connection_it != multiframes_map_.end();

@@ -66,7 +66,6 @@ struct SessionContext {
   uint32_t hash_id_;
   bool is_protected_;
   bool is_new_service_;
-  bool is_ptu_required_;
 
   /**
    * @brief Constructor
@@ -78,8 +77,7 @@ struct SessionContext {
       , service_type_(protocol_handler::kInvalidServiceType)
       , hash_id_(0)
       , is_protected_(false)
-      , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_new_service_(false) {}
 
   /**
    * @brief Constructor
@@ -105,8 +103,7 @@ struct SessionContext {
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
-      , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_new_service_(false) {}
 };
 
 /**
@@ -229,20 +226,6 @@ class SessionObserver {
   virtual void PairFromKey(uint32_t key,
                            transport_manager::ConnectionUID* connection_handle,
                            uint8_t* sessionId) const = 0;
-
-  /**
-   * DEPRECATED
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
-   * \return int32_t -1 in case of error or 0 in case of success
-   */
-  virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) const = 0;
 
   /**
    * \brief information about given Connection Key.

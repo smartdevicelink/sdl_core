@@ -93,6 +93,8 @@ void InitCapabilities() {
                      hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
   tts_enum_capabilities.insert(std::make_pair(
       std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
+  tts_enum_capabilities.insert(std::make_pair(
+      std::string("FILE"), hmi_apis::Common_SpeechCapabilities::FILE));
 
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));

@@ -33,8 +33,9 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 #include <thread>
+#include <unistd.h>
 #include "utils/macro.h"
-#include "unistd.h"
+#include "utils/shared_ptr.h"
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -64,6 +65,10 @@ class CryptoManager;
 class SecurityManagerImpl;
 }  // namespace security_manager
 #endif  // ENABLE_SECURITY
+
+namespace utils {
+class SystemTimeHandler;
+}  // namespace utils
 
 namespace main_namespace {
 class LifeCycle {

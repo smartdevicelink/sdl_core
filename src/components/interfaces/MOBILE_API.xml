@@ -447,6 +447,7 @@
         <element name="LHPLUS_PHONEMES" />
         <element name="PRE_RECORDED" />
         <element name="SILENCE" />
+        <element name="FILE" />
     </enum>
     
     <enum name="VrCapabilities">
@@ -2103,15 +2104,15 @@
         </param>
     </struct>         
     <struct name="TTSChunk">
-        <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
+        <description>A TTS chunk, that consists of text/phonemes to speak or the name of a file to play, and a TTS type (like text or SAPI)</description>
         <param name="text" minlength="0" maxlength="500" type="String" mandatory="true">
             <description>
-                The text or phonemes to speak.
+                The text or phonemes to speak, or the name of the audio file to play.
                 May not be empty.
             </description>
         </param>
         <param name="type" type="SpeechCapabilities" mandatory="true">
-            <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
+            <description>Describes whether the TTS chunk is plain text, a specific phoneme set, or an audio file. See SpeechCapabilities</description>
         </param>
     </struct>         
     <struct name="Turn">

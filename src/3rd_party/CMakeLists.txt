@@ -227,7 +227,8 @@ if (HMIADAPTER STREQUAL "messagebroker")
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND ./b2
-      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
