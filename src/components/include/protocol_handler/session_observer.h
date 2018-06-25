@@ -278,7 +278,6 @@ class SessionObserver {
                            transport_manager::ConnectionUID* connection_handle,
                            uint8_t* sessionId) const = 0;
 
-#if __SIZEOF_SIZE_T__ != 4
   /**
    * DEPRECATED
    * \brief information about given Connection Key.
@@ -292,7 +291,6 @@ class SessionObserver {
                                       uint32_t* app_id,
                                       std::list<int32_t>* sessions_list,
                                       uint32_t* device_id) const = 0;
-#endif
 
   /**
    * \brief information about given Connection Key.

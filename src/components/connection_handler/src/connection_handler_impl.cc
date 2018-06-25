@@ -986,7 +986,6 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   return 0;
 }
 
-#if __SIZEOF_SIZE_T__ != 4
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key,
     uint32_t* app_id,
@@ -998,7 +997,6 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   *device_id = static_cast<uint32_t>(handle);
   return result;
 }
-#endif
 
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {
   return settings_;
