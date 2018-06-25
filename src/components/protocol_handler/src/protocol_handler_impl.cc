@@ -859,7 +859,9 @@ void ProtocolHandlerImpl::OnConnectionClosed(
 
 void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
   security_manager_->NotifyListenersOnHandshakeFailed();
+#endif  // ENABLE_SECURITY
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
