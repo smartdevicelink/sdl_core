@@ -96,25 +96,25 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
   SmartObject& urls = (*message_)[strings::msg_params][hmi_response::urls];
 
   size_t index = 0;
-  for (size_t e = 0; e < endpoints.size(); ++e) {
-    ApplicationSharedPtr app =
-        application_manager_.application_by_policy_id(endpoints[e].app_id);
+  for (policy::EndpointData epdata : endpoints) {
+      ApplicationSharedPtr app = application_manager_.application_by_policy_id(
+          epdata.app_policy_id);
 
 #ifndef PROPRIETARY_MODE
     bool registered_not_default = false;
-    if (policy::kDefaultId != endpoints[e].app_id) {
+    if (policy::kDefaultId != epdata.app_policy_id) {
       if (!app) {
         LOG4CXX_ERROR(logger_,
                       "Can't find application with policy id "
-                          << endpoints[e].app_id
+                          << epdata.app_policy_id
                           << " URLs adding for this application is skipped.");
         continue;
       }
       registered_not_default = true;
     }
 #endif  // EXTERNAL_PROPRIETARY_MODE || HTTP
-    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
-      const std::string& app_url = endpoints[e].url[u];
+    for (size_t u = 0; u < epdata.url.size(); ++u, ++index) {
+      const std::string& app_url = epdata.url[u];
       SmartObject& service_info = urls[index];
 
       service_info[strings::url] = app_url;
@@ -123,7 +123,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
         service_info[strings::app_id] = app->hmi_app_id();
       }
 #else  // EXTERNAL_PROPRIETARY_MODE || HTTP
-      service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
+      service_info[hmi_response::policy_app_id] = epdata.app_policy_id;
 #endif
     }
   }
@@ -142,7 +142,7 @@ struct PolicyAppIdComparator {
       : policy_app_id_(policy_app_id) {}
 
   bool operator()(const policy::EndpointData& data) {
-    return data.app_id == policy_app_id_;
+    return data.app_policy_id == policy_app_id_;
   }
   std::string policy_app_id_;
 };
@@ -201,15 +201,15 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   object[msg_params].erase(hmi_request::service);
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
   SmartObject& urls = object[msg_params][hmi_response::urls];
-  const std::string mobile_app_id = app->policy_app_id();
+  const std::string app_policy_id = app->policy_app_id();
 
   size_t index = 0;
   for (size_t i = 0; i < endpoints.size(); ++i) {
     using namespace helpers;
 
     const bool to_add = Compare<std::string, EQ, ONE>(
-        endpoints[i].app_id, mobile_app_id, policy::kDefaultId);
-    const bool is_default = policy::kDefaultId == endpoints[i].app_id;
+        endpoints[i].app_policy_id, app_policy_id, policy::kDefaultId);
+    const bool is_default = policy::kDefaultId == endpoints[i].app_policy_id;
 
     if (to_add) {
       for (size_t k = 0; k < endpoints[i].url.size(); ++k) {

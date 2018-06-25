@@ -83,7 +83,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
   bool SendMessageToSDK(const BinaryMessage& pt_string,
-                        const std::string& url) OVERRIDE;
+                        const std::string& url,
+                        const uint32_t app_id) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
@@ -755,13 +756,21 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   std::map<std::string, std::string> app_to_device_link_;
 
-  // Lock for app to device list
-  sync_primitives::RecursiveLock app_to_device_link_lock_;
+  /**
+   * @brief Lock for app to device list
+   */
+  sync_primitives::Lock app_to_device_link_lock_;
 
   std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;
+
+  /**
+   * @brief Contains pair of app index and url index from Endpoints.
+   * That will be used for sent on the next OnSystemRequest retry sequence
+   */
+  std::map<uint32_t, uint32_t> retry_sequence_;
 
   /**
    * @brief Checks if the application with the given policy

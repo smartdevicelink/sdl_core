@@ -1030,11 +1030,11 @@ void PolicyHandler::OnPendingPermissionChange(
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
+                                     const std::string& url,
+                                     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
-  const uint32_t app_id = GetAppIdForSending();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
@@ -1484,12 +1484,31 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
 
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
+  const uint32_t app_id = GetAppIdForSending();
+  const std::string app_policy_id =
+      application_manager_.application(app_id)->policy_app_id();
+
+  const auto is_appid_or_default = [app_policy_id](const EndpointData& ed) {
+    return helpers::Compare<std::string, helpers::EQ, helpers::ONE>(
+        ed.app_policy_id, policy::kDefaultId, app_policy_id);
+  };
+
+  EndpointUrls::const_iterator app_item =
+      std::find_if(urls.begin(), urls.end(), is_appid_or_default);
+
+  if (urls.end() == app_item || app_item->url.empty()) {
+    LOG4CXX_ERROR(logger_, "Application URLs unavailable!");
+    return;
   }
-  const std::string& url = urls[app_url.first].url[app_url.second];
-  SendMessageToSDK(pt_string, url);
+
+   // Set the ulr index to zero if this is the last ulr in the app queue
+  if (retry_sequence_[app_id] >= app_item->url.size()) {
+    retry_sequence_[app_id] = 0;
+  }
+
+  uint32_t& retry_url_id = retry_sequence_[app_id];
+  const std::string url_to_send = app_item->url[retry_url_id++];
+  SendMessageToSDK(pt_string, url_to_send, app_id);
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();
@@ -2017,10 +2036,10 @@ bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
   const EndpointData& app_data = urls[app_idx];
   const std::vector<std::string> app_urls = app_data.url;
   const ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(app_data.app_id);
+      application_manager_.application_by_policy_id(app_data.app_policy_id);
 
   const bool is_registered = (app && (app->IsRegistered()));
-  const bool is_default = (app_data.app_id == policy::kDefaultId);
+  const bool is_default = (app_data.app_policy_id == policy::kDefaultId);
   const bool is_empty_urls = app_urls.empty();
 
   return ((is_registered && !is_empty_urls) || is_default);

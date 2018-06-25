@@ -1147,7 +1147,7 @@ AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
 
   retry_sequence_url_.url_idx_ = next_app_url.second + 1;
   retry_sequence_url_.app_idx_ = next_app_url.first;
-  retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_id;
+  retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_policy_id;
 
   return next_app_url;
 }
@@ -1163,7 +1163,7 @@ AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
     // unregistration
     url_idx = 0;
     app_idx = 0;
-  } else if (urls[app_idx].app_id != app_id) {
+  } else if (urls[app_idx].app_policy_id != app_id) {
     // Index of current application points to another one due to app(s)
     // registration/unregistration
     url_idx = 0;
