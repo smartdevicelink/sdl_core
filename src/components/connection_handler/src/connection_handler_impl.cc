@@ -466,11 +466,8 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 
   Connection* connection = it->second;
-
-#ifdef ENABLE_SECURITY
   context.is_new_service_ =
       !connection->SessionServiceExists(session_id, service_type);
-#endif  // ENABLE_SECURITY
 
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     context.new_session_id_ =
