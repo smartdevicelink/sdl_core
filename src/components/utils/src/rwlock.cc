@@ -30,27 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/rwlock.h"
 #include "utils/logger.h"
+#include "utils/rwlock.h"
 
 namespace sync_primitives {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 RWLock::RWLock() {
-  if (pthread_rwlock_init(&rwlock_, 0) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to initialize rwlock");
-  }
+  // start not write_locked
+  write_locked_ = false;
 }
 
-RWLock::~RWLock() {
-  if (pthread_rwlock_destroy(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to destroy rwlock");
-  }
-}
+RWLock::~RWLock() {}
 
 bool RWLock::AcquireForReading() {
-  if (pthread_rwlock_rdlock(&rwlock_) != 0) {
+  try {
+    rwmutex_.lock_shared();
+  } catch (boost::lock_error) {
+    // couldn't lock, return false
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
     return false;
   }
@@ -58,33 +56,58 @@ bool RWLock::AcquireForReading() {
 }
 
 bool RWLock::TryAcquireForReading() {
-  if (pthread_rwlock_tryrdlock(&rwlock_) != 0) {
+  try {
+    bool result = rwmutex_.try_lock_shared();
+    if (result == false) {
+      LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
+    }
+    return result;
+  } catch (boost::lock_error) {
+    // couldn't lock, return false
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
     return false;
   }
-  return true;
 }
 
 bool RWLock::AcquireForWriting() {
-  if (pthread_rwlock_wrlock(&rwlock_) != 0) {
+  // get exclusive lock
+  try {
+    rwmutex_.lock();
+  } catch (boost::lock_error) {
+    // couldn't lock, return false
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
     return false;
   }
+  // we now have an exclusive lock
+  write_locked_ = true; 
   return true;
 }
 
 bool RWLock::TryAcquireForWriting() {
-  if (pthread_rwlock_trywrlock(&rwlock_) != 0) {
+  try {
+    bool result = rwmutex_.try_lock();
+    if (result == false) {
+      LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
+    } else {
+      write_locked_ = true;
+    }
+    return result;
+  } catch (boost::lock_error) {
+    // couldn't lock, return false
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
     return false;
   }
-  return true;
 }
 
 bool RWLock::Release() {
-  if (pthread_rwlock_unlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to release rwlock");
-    return false;
+  if (write_locked_) {
+    // If we have exclusive access, release it
+    write_locked_ = false;
+    rwmutex_.unlock();
+    // lock is now free
+  } else {
+    // Otherwise release our shared access
+    rwmutex_.unlock_shared();
   }
   return true;
 }

@@ -225,9 +225,9 @@ if (HMIADAPTER STREQUAL "messagebroker")
       URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
       DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND ./b2
-      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
