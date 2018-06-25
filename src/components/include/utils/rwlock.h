@@ -40,12 +40,13 @@ namespace sync_primitives {
 /**
  * RW locks wrapper
  * Read-write locks permit concurrent reads and exclusive writes to a protected
- * shared resource.
- * The read-write lock is a single entity that can be locked in read or write
- * mode.
- * To modify a resource, a thread must first acquire the exclusive write lock.
- * An exclusive write lock is not permitted until all read locks have been
- * released.
+ * shared resource. The read-write lock is a single entity that can be locked in
+ * read or write mode. To modify a resource, a thread must first acquire the
+ * exclusive write lock. An exclusive write lock is not permitted until all read
+ * locks have been released.
+ *
+ * Current implementation is a minimal wrapper of Boost shared_lock
+ * https://www.boost.org/doc/libs/1_67_0/doc/html/thread/synchronization.html#thread.synchronization.mutex_types.shared_mutex
  */
 
 class RWLock {
@@ -54,7 +55,7 @@ class RWLock {
   ~RWLock();
 
   /**
-   * @brief Acqure read-write lock for reading.
+   * @brief Acquire read-write lock for reading.
    * The calling thread acquires the read lock if a writer does not
    * hold the lock and there are no writers blocked on the lock.
    * It is unspecified whether the calling thread acquires the lock
@@ -76,42 +77,30 @@ class RWLock {
   bool AcquireForReading();
 
   /**
-   * @brief try to Acqure read-write lock for reading.
-   * Applies a read lock as in AcquireForReading()
-   * with the exception that the function fails if any thread
-   * holds a write lock on rwlock or there are writers blocked on rwlock.
-   * But not blocks calling thread.
+   * @brief try to Acquire read-write lock for reading.
    * @returns true if lock was acquired and false if was not
    */
   bool TryAcquireForReading();
 
   /**
-   * @brief Try to Acqure read-write lock for writing.
-   * Applies a write lock like AcquireForWriting(), with the exception that
-   * the
-   * function fails if any thread currently holds rwlock (for reading or
-   * writing)
-   * Invoke of TryAcquireForWriting will not block calling thread and returns
-   * "false"
-   * @returns true if lock was acquired and false if was not
-   */
-  bool TryAcquireForWriting();
-
-  /**
-   * @brief Acqure read-write lock for writing.
+   * @brief Acquire read-write lock for writing.
    * Applies a write lock to the read-write lock.
    * The calling thread acquires the write lock if no other thread (reader or
-   * writer)
-   * holds the read-write lock rwlock. Otherwise, the thread blocks
+   * writer) holds the read-write lock rwlock. Otherwise, the thread blocks
    * (that is, does not return from the AcquireForWriting() call)
-   * until it can acquire the lock.
-   * Results are undefined if the calling thread holds the read-write lock
-   * (whether a read or write lock)
-   * at the time the call is made.
-   * The thread must perform matching unlock (that is, it must call Release()).
+   * until it can acquire the lock. Results are undefined if the calling thread
+   * holds the read-write lock (whether a read or write lock) at the time the
+   * call is made. The thread must perform matching unlock (that is, it must
+   * call Release()).
    * @returns true if lock was acquired and false if was not
    */
   bool AcquireForWriting();
+
+  /**
+   * @brief Try to Acquire read-write lock for writing.
+   * @returns true if lock was acquired and false if was not
+   */
+  bool TryAcquireForWriting();
 
   /**
    * @brief Release read-write lock.
@@ -132,7 +121,6 @@ class RWLock {
  * @brief Makes auto lock read-write locks for reading
  * Please use AutoReadLock to acquire for reading and (automatically) release it
  */
-
 class AutoReadLock {
  public:
   explicit AutoReadLock(RWLock& rwlock) : rwlock_(rwlock) {
