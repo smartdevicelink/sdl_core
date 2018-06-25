@@ -231,7 +231,7 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
 
       data.url.push_back(query.GetString(0));
       if (!query.IsNull(1)) {
-        data.app_id = query.GetString(1);
+        data.app_policy_id = query.GetString(1);
       }
       ret.push_back(data);
     }

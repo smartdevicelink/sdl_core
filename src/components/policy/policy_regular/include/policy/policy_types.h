@@ -169,13 +169,13 @@ struct CheckPermissionResult {
   */
 struct EndpointData {
   explicit EndpointData(const std::string& url_string = "")
-      : app_id("default") {
+      : app_policy_id("default") {
     if (false == url_string.empty()) {
       url.push_back(url_string);
     }
   }
   std::vector<std::string> url;
-  std::string app_id;
+  std::string app_policy_id;
 };
 
 typedef std::vector<EndpointData> EndpointUrls;
