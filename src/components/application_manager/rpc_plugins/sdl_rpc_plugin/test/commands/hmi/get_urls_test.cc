@@ -245,7 +245,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
-  data.app_id = kPolicyAppId;
+  data.app_policy_id = kPolicyAppId;
   endpoints_.push_back(data);
 
   EXPECT_CALL(mock_policy_handler_, GetUpdateUrls(kPolicyService, _))
@@ -286,7 +286,7 @@ TEST_F(GetUrlsTest, DISABLED_ProcessServiceURLs_SUCCESS) {
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
-  data.app_id = "1";
+  data.app_policy_id = "1";
   endpoints_.push_back(data);
   EXPECT_CALL(mock_policy_handler_, GetUpdateUrls(kServiceType, _))
       .WillOnce(SetArgReferee<1>(endpoints_));
@@ -298,7 +298,7 @@ TEST_F(GetUrlsTest, DISABLED_ProcessServiceURLs_SUCCESS) {
   EXPECT_EQ(kDefaultUrl,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
                            [am::strings::url].asString());
-  EXPECT_EQ(endpoints_[0].app_id,
+  EXPECT_EQ(endpoints_[0].app_policy_id,
             (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
                            [am::hmi_response::policy_app_id].asString());
 }
