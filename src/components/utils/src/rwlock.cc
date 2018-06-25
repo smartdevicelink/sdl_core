@@ -79,7 +79,7 @@ bool RWLock::AcquireForWriting() {
     return false;
   }
   // we now have an exclusive lock
-  write_locked_ = true; 
+  write_locked_ = true;
   return true;
 }
 
