@@ -579,13 +579,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   Version version;
   int32_t min_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::minor_version]
-                                   .asInt();
+                               [strings::minor_version].asInt();
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int32_t max_version = message[strings::msg_params][strings::sync_msg_version]
-                               [strings::major_version]
-                                   .asInt();
+                               [strings::major_version].asInt();
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
@@ -1519,9 +1517,9 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "ServiceType = " << type << ". Session = " << std::hex << session_key);
+  LOG4CXX_DEBUG(logger_,
+                "ServiceType = " << type << ". Session = " << std::hex
+                                 << session_key);
 
   if (type == kRpc) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
@@ -1529,9 +1527,9 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "The application with id:" << session_key << " doesn't exists.");
+    LOG4CXX_WARN(logger_,
+                 "The application with id:" << session_key
+                                            << " doesn't exists.");
     return false;
   }
 
@@ -1557,9 +1555,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "ServiceType = " << type << ". Session = " << std::hex << session_key);
+  LOG4CXX_DEBUG(logger_,
+                "ServiceType = " << type << ". Session = " << std::hex
+                                 << session_key);
   std::vector<std::string> empty;
 
   if (type == kRpc) {
@@ -1569,9 +1567,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "The application with id:" << session_key << " doesn't exists.");
+    LOG4CXX_WARN(logger_,
+                 "The application with id:" << session_key
+                                            << " doesn't exists.");
     connection_handler().NotifyServiceStartedResult(session_key, false, empty);
     return;
   }
@@ -2371,9 +2369,9 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       rpc::ValidationReport report("RPC");
 
       if (output.validate(&report) != smart_objects::Errors::OK) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Incorrect parameter from HMI" << rpc::PrettyFormat(report));
+        LOG4CXX_ERROR(logger_,
+                      "Incorrect parameter from HMI"
+                          << rpc::PrettyFormat(report));
 
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
@@ -2831,8 +2829,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     connection_handler::DeviceHandle device_id = 0;
 
-    if (-1 == connection_handler().get_session_observer().GetDataOnSessionKey(
-                  connection_key, NULL, NULL, &device_id)) {
+    if (-1 ==
+        connection_handler().get_session_observer().GetDataOnSessionKey(
+            connection_key, NULL, NULL, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
@@ -3137,9 +3136,9 @@ void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
       apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
   while (apps_to_register_.end() != it_app) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
+    LOG4CXX_DEBUG(logger_,
+                  "Waiting app: " << (*it_app)->name().c_str()
+                                  << " is removed.");
     apps_to_register_.erase(it_app);
     it_app = std::find_if(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);
@@ -3663,21 +3662,21 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   }
   MobileMessageQueue messages;
   app->SwapMobileMessageQueue(messages);
-  auto push_allowed_messages = [this,
-                                &app](smart_objects::SmartObjectSPtr message) {
-    const std::string function_id = MessageHelper::StringifiedFunctionID(
-        static_cast<mobile_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asUInt()));
-    const RPCParams params;
-    const mobile_apis::Result::eType check_result =
-        CheckPolicyPermissions(app, function_id, params);
-    if (mobile_api::Result::SUCCESS == check_result) {
-      ManageMobileCommand(message,
-                          commands::Command::CommandOrigin::ORIGIN_SDL);
-    } else {
-      app->PushMobileMessage(message);
-    }
-  };
+  auto push_allowed_messages =
+      [this, &app](smart_objects::SmartObjectSPtr message) {
+        const std::string function_id = MessageHelper::StringifiedFunctionID(
+            static_cast<mobile_apis::FunctionID::eType>(
+                (*message)[strings::params][strings::function_id].asUInt()));
+        const RPCParams params;
+        const mobile_apis::Result::eType check_result =
+            CheckPolicyPermissions(app, function_id, params);
+        if (mobile_api::Result::SUCCESS == check_result) {
+          ManageMobileCommand(message,
+                              commands::Command::CommandOrigin::ORIGIN_SDL);
+        } else {
+          app->PushMobileMessage(message);
+        }
+      };
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 
@@ -4274,9 +4273,9 @@ bool ApplicationManagerImpl::InitDirectory(
     LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist.");
     // if storage directory doesn't exist try to create it
     if (!file_system::CreateDirectoryRecursively(path)) {
-      LOG4CXX_ERROR(
-          logger_,
-          "Unable to create " << directory_type << " directory " << path);
+      LOG4CXX_ERROR(logger_,
+                    "Unable to create " << directory_type << " directory "
+                                        << path);
       return false;
     }
     LOG4CXX_DEBUG(logger_,
@@ -4291,9 +4290,9 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(const std::string& path,
   const std::string directory_type = DirectoryTypeToString(type);
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
-    LOG4CXX_ERROR(
-        logger_,
-        directory_type << " directory doesn't have read/write permissions.");
+    LOG4CXX_ERROR(logger_,
+                  directory_type
+                      << " directory doesn't have read/write permissions.");
     return false;
   }
 
