@@ -753,7 +753,7 @@ bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
   return subscribed_vehicle_info_
       .insert(
-          static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
       .second;
 }
 
@@ -808,10 +808,10 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: " << date_time::getSecs(current) << "\n Limit: ("
-                       << date_time::getSecs(limit.first) << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
+                       << "\n Current: " << date_time::getSecs(current)
+                       << "\n Limit: (" << date_time::getSecs(limit.first)
+                       << "," << limit.second << ")"
+                                                 "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
       if (date_time::getSecs(current) <
@@ -857,7 +857,8 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       TimeToNumberLimit& limit = it->second;
 
       // Checking even limitation for command
-      if (static_cast<uint32_t>(date_time::getSecs(current) - date_time::getSecs(limit.first)) <
+      if (static_cast<uint32_t>(date_time::getSecs(current) -
+                                date_time::getSecs(limit.first)) <
           minute / cmd_limit) {
         return true;
       }

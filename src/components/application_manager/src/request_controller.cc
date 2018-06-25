@@ -410,8 +410,8 @@ void RequestController::TimeoutThread() {
       const date_time::TimeDuration current_time = date_time::getCurrentTime();
       const date_time::TimeDuration end_time = probably_expired->end_time();
       if (current_time < end_time) {
-        const uint32_t msecs = static_cast<uint32_t>(
-            date_time::getmSecs(end_time - current_time));
+        const uint32_t msecs =
+            static_cast<uint32_t>(date_time::getmSecs(end_time - current_time));
         LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
         timer_condition_.WaitFor(auto_lock, msecs);
       }

@@ -48,8 +48,8 @@ class PHTelemetryObserver {
     date_time::TimeDuration begin;
     date_time::TimeDuration end;
   };
-  virtual void StartMessageProcess(uint32_t message_id,
-                                   const date_time::TimeDuration& start_time) = 0;
+  virtual void StartMessageProcess(
+      uint32_t message_id, const date_time::TimeDuration& start_time) = 0;
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
   virtual ~PHTelemetryObserver() {}
 };

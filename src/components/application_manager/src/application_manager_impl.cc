@@ -4002,8 +4002,8 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
         tts_global_properties_app_list_.end();
     date_time::TimeCompare time_comp;
     for (; it != it_end; ++it) {
-      time_comp = date_time::compareTime(
-          date_time::getCurrentTime(), it->second);
+      time_comp =
+          date_time::compareTime(date_time::getCurrentTime(), it->second);
       if (date_time::GREATER == time_comp || date_time::EQUAL == time_comp) {
         app_list.push_back(it->first);
       }

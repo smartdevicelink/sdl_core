@@ -44,7 +44,8 @@ namespace protocol_handler_test {
 class MockPHTelemetryObserver : public PHTelemetryObserver {
  public:
   MOCK_METHOD2(StartMessageProcess,
-               void(uint32_t message_id, const date_time::TimeDuration& start_time));
+               void(uint32_t message_id,
+                    const date_time::TimeDuration& start_time));
   MOCK_METHOD1(EndMessageProcess, void(utils::SharedPtr<MessageMetric> m));
 };
 

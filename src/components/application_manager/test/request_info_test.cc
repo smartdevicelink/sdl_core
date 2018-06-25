@@ -307,10 +307,12 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
 TEST_F(RequestInfoTest, EndTimeisExpired) {
   date_time::TimeDuration time = date_time::getCurrentTime();
   // get just the seconds part of the current time
-  date_time::TimeDuration not_expired = date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
-  not_expired+= date_time::microseconds(std::numeric_limits<time_t>::min());
+  date_time::TimeDuration not_expired =
+      date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
+  not_expired += date_time::microseconds(std::numeric_limits<time_t>::min());
 
-  date_time::TimeDuration expired = date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
+  date_time::TimeDuration expired =
+      date_time::seconds(date_time::getSecs(date_time::getCurrentTime()));
   expired += date_time::microseconds(std::numeric_limits<time_t>::max());
 
   utils::SharedPtr<TestRequestInfo> request =
@@ -355,7 +357,8 @@ TEST_F(RequestInfoTest, UpdateTimeOut) {
   request->updateTimeOut(100);
   time = date_time::getCurrentTime();
   date_time::TimeDuration last_time = request->end_time();
-  EXPECT_NEAR(date_time::getSecs(time) + 100, date_time::getSecs(last_time), 500);
+  EXPECT_NEAR(
+      date_time::getSecs(time) + 100, date_time::getSecs(last_time), 500);
 }
 
 }  // namespace application_manager_test

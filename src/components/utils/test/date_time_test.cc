@@ -78,9 +78,8 @@ TEST(DateTimeTest, GetmSecs) {
 TEST(DateTimeTest, GetuSecs) {
   // arrange
   date_time::TimeDuration time1 = bpt::seconds(3) + bpt::microseconds(4);
-  int expect_value = 3 * MILLISECONDS_IN_SECOND *
-                         MICROSECONDS_IN_MILLISECOND +
-                     4;
+  int expect_value =
+      3 * MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND + 4;
 
   // assert
   ASSERT_EQ(expect_value, getuSecs(time1));
@@ -90,8 +89,7 @@ TEST(DateTimeTest, GetuSecsmSecs) {
   // arrange
   date_time::TimeDuration time1 = bpt::seconds(5) + bpt::microseconds(6);
 
-  int64_t expect_value =
-      getuSecs(time1) / MICROSECONDS_IN_MILLISECOND;
+  int64_t expect_value = getuSecs(time1) / MICROSECONDS_IN_MILLISECOND;
 
   // assert
   ASSERT_EQ(expect_value, getmSecs(time1));
@@ -119,15 +117,13 @@ TEST(DateTimeTest, CalculateTimeDiff) {
   date_time::TimeDuration diff1 = bpt::seconds(1) + bpt::milliseconds(2);
 
   // assert
-  ASSERT_EQ(diff1.total_milliseconds(),
-            calculateTimeDiff(time2, time1));
+  ASSERT_EQ(diff1.total_milliseconds(), calculateTimeDiff(time2, time1));
 
   // time1 to time2, but calculateTimeDiff returns an absolute value
   date_time::TimeDuration diff2 = -diff1.invert_sign();
 
   // assert
-  ASSERT_EQ(diff2.total_milliseconds(),
-            calculateTimeDiff(time1, time2));
+  ASSERT_EQ(diff2.total_milliseconds(), calculateTimeDiff(time1, time2));
 }
 
 TEST(DateTimeTest, CalculateEqualTimeDiff) {

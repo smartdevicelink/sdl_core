@@ -41,8 +41,7 @@ Json::Value ProtocolHandlerMecticWrapper::GetJsonMetric() {
   result[strings::logger] = "ProtocolHandler";
   result[strings::begin] =
       Json::Int64(date_time::getuSecs(message_metric->begin));
-  result[strings::end] =
-      Json::Int64(date_time::getuSecs(message_metric->end));
+  result[strings::end] = Json::Int64(date_time::getuSecs(message_metric->end));
   result[strings::message_id] = message_metric->message_id;
   result[strings::connection_key] = message_metric->connection_key;
   return result;

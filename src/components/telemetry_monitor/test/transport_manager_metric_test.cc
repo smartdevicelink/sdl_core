@@ -65,10 +65,8 @@ TEST(TransportManagerMetricWrapper, GetJsonMetric) {
   EXPECT_EQ("null\n", jvalue[strings::utime].toStyledString());
   EXPECT_EQ("null\n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(1000, jvalue[strings::data_size].asInt());
 }
 
@@ -90,10 +88,8 @@ TEST(TransportManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   Json::Value jvalue = metric_test.GetJsonMetric();
 
   EXPECT_EQ("\"TransportManager\"\n", jvalue[strings::logger].toStyledString());
-  EXPECT_EQ(date_time::getuSecs(start_time),
-            jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::getuSecs(end_time),
-            jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::getuSecs(start_time), jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::getuSecs(end_time), jvalue[strings::end].asInt64());
   EXPECT_EQ(1000, jvalue[strings::data_size].asInt());
 
   EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(), 1);

@@ -882,8 +882,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   }
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i] *
-            date_time::MILLISECONDS_IN_SECOND;
+    next += retry_sequence_seconds_[i] * date_time::MILLISECONDS_IN_SECOND;
     next += retry_sequence_timeout_;
   }
   ++retry_sequence_index_;

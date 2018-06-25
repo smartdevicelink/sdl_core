@@ -49,8 +49,8 @@ void TransportManagerObserver::StartRawMsg(
 
 void TransportManagerObserver::StopRawMsg(
     const protocol_handler::RawMessage* ptr) {
-  std::map<const protocol_handler::RawMessage*, date_time::TimeDuration>::const_iterator
-      it;
+  std::map<const protocol_handler::RawMessage*,
+           date_time::TimeDuration>::const_iterator it;
   it = time_starts.find(ptr);
   if (it != time_starts.end()) {
     TransportManagerMecticWrapper* m = new TransportManagerMecticWrapper();

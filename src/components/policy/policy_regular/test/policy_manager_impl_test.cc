@@ -903,8 +903,9 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
         date_time::MILLISECONDS_IN_SECOND;
     const uint32_t first_retry = timeout_after_x_seconds;
     EXPECT_EQ(first_retry, manager->NextRetryTimeout());
-    uint32_t next_retry = first_retry + seconds_between_retries[0].asInt() *
-                                            date_time::MILLISECONDS_IN_SECOND;
+    uint32_t next_retry =
+        first_retry +
+        seconds_between_retries[0].asInt() * date_time::MILLISECONDS_IN_SECOND;
     EXPECT_EQ(next_retry, manager->NextRetryTimeout());
     next_retry =
         first_retry + next_retry +
@@ -947,8 +948,9 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
     Json::Value val2(Json::arrayValue);
     val2[0] = hmi_level[index];
     val[new_data.new_field_value_]["hmi_levels"] = val2;
-    root["policy_table"]["functional_groupings"][new_data.new_field_name_]
-        ["rpcs"] = val;
+    root["policy_table"]["functional_groupings"][new_data
+                                                     .new_field_name_]["rpcs"] =
+        val;
     root["policy_table"]["functional_groupings"][new_data.new_field_name_]
         ["user_consent_prompt"] = new_data.new_field_name_;
   }

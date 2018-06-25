@@ -96,8 +96,7 @@ void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
 
 bool RequestInfo::isExpired() {
   date_time::TimeDuration curr_time = date_time::getCurrentTime();
-  return date_time::getmSecs(end_time_) <=
-         date_time::getmSecs(curr_time);
+  return date_time::getmSecs(end_time_) <= date_time::getmSecs(curr_time);
 }
 
 uint64_t RequestInfo::hash() {
