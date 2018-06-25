@@ -614,26 +614,6 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings& get_settings() const OVERRIDE;
 
   /**
-   * @brief Finds the next URL that must be sent on OnSystemRequest retry
-   * @param urls vector of vectors that contain urls for each application
-   * @return Pair of policy application id and application url id from the
-   * urls vector
-   */
-  AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
-
-  /**
-   * @brief Checks if there is existing URL in the EndpointUrls vector with
-   * index saved in the policy manager and if not, it moves to the next
-   * application index
-   * @param rs contains the application index and url index from the
-   * urls vector that are to be sent on the next OnSystemRequest
-   * @param urls vector of vectors that contain urls for each application
-   * @return Pair of application index and url index
-   */
-  AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
-                            const EndpointUrls& urls) const OVERRIDE;
-
-  /**
    * @brief  Checks, if SDL needs to update it's policy table section
              "external_consent_status"
    * @param  ExternalConsent status
@@ -1074,11 +1054,6 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
 
-  /**
-   * @brief Pair of app index and url index from Endpoints vector
-   * that contains all application URLs
-   */
-  RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
 
   /**

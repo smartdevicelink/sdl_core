@@ -772,16 +772,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   std::map<uint32_t, uint32_t> retry_sequence_;
 
-  /**
-   * @brief Checks if the application with the given policy
-   * application id is registered or it is default id
-   * @param app_idx Application idx from EndpointUrls vector
-   * @param urls EndpointUrls vector
-   * @return TRUE if the vector with URLs with given idx is not empty
-   * and is related to a registered application or these are default URLs,
-   * otherwise FALSE
-   */
-  bool IsUrlAppIdValid(const uint32_t app_idx, const EndpointUrls& urls) const;
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 

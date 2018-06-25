@@ -1474,7 +1474,7 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
         (*iter).second.end();
     for (; url_list_iter != url_list_iter_end; ++url_list_iter) {
       EndpointData data;
-      data.app_id = (*url_list_iter).first;
+      data.app_policy_id = (*url_list_iter).first;
       std::copy((*url_list_iter).second.begin(),
                 (*url_list_iter).second.end(),
                 std::back_inserter(data.url));
