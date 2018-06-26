@@ -86,7 +86,7 @@ class ResumeCtrlTest : public ::testing::Test {
       , kDefaultDeferredTestLevel_(eType::INVALID_ENUM)
       , kNaviLowbandwidthLevel_("LIMITED")
       , kProjectionLowbandwidthLevel_("NONE")
-      , kMediaappLowbandwidthLevel_("NONE") {}
+      , kMediaLowbandwidthLevel_("NONE") {}
 
   virtual void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&app_mngr_);
@@ -124,9 +124,9 @@ class ResumeCtrlTest : public ::testing::Test {
         .Times(AtLeast(0))
         .WillRepeatedly(ReturnRef(kProjectionLowbandwidthLevel_));
     EXPECT_CALL(mock_application_manager_settings_,
-                mediaapp_lowbandwidth_resumption_level())
+                media_lowbandwidth_resumption_level())
         .Times(AtLeast(0))
-        .WillRepeatedly(ReturnRef(kMediaappLowbandwidthLevel_));
+        .WillRepeatedly(ReturnRef(kMediaLowbandwidthLevel_));
 
     EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
         .Times(AtLeast(0))
@@ -167,7 +167,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const mobile_apis::HMILevel::eType kDefaultDeferredTestLevel_;
   const std::string kNaviLowbandwidthLevel_;
   const std::string kProjectionLowbandwidthLevel_;
-  const std::string kMediaappLowbandwidthLevel_;
+  const std::string kMediaLowbandwidthLevel_;
 };
 
 /**
@@ -726,7 +726,7 @@ TEST_F(
 
   std::string navi_lowbandwidth_level("NONE");
   std::string projection_lowbandwidth_level("BACKGROUND");
-  std::string mediaapp_lowbandwidth_level("LIMITED");
+  std::string media_lowbandwidth_level("LIMITED");
   EXPECT_CALL(mock_application_manager_settings_,
               navigation_lowbandwidth_resumption_level())
       .WillRepeatedly(ReturnRef(navi_lowbandwidth_level));
@@ -734,8 +734,8 @@ TEST_F(
               projection_lowbandwidth_resumption_level())
       .WillRepeatedly(ReturnRef(projection_lowbandwidth_level));
   EXPECT_CALL(mock_application_manager_settings_,
-              mediaapp_lowbandwidth_resumption_level())
-      .WillRepeatedly(ReturnRef(mediaapp_lowbandwidth_level));
+              media_lowbandwidth_resumption_level())
+      .WillRepeatedly(ReturnRef(media_lowbandwidth_level));
 
   EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
       .WillRepeatedly(Return(restored_test_type));

@@ -471,8 +471,7 @@ Profile::Profile()
           kDefaultLowBandwidthResumptionLevel)
     , projection_lowbandwidth_resumption_level_(
           kDefaultLowBandwidthResumptionLevel)
-    , mediaapps_lowbandwidth_resumption_level_(
-          kDefaultLowBandwidthResumptionLevel)
+    , media_lowbandwidth_resumption_level_(kDefaultLowBandwidthResumptionLevel)
     , app_launch_wait_time_(kDefaultAppLaunchWaitTime)
     , app_launch_max_retry_attempt_(kDefaultAppLaunchMaxRetryAttempt)
     , app_launch_retry_wait_time_(kDefaultAppLaunchRetryWaitTime)
@@ -988,8 +987,8 @@ const std::string& Profile::projection_lowbandwidth_resumption_level() const {
   return projection_lowbandwidth_resumption_level_;
 }
 
-const std::string& Profile::mediaapp_lowbandwidth_resumption_level() const {
-  return mediaapps_lowbandwidth_resumption_level_;
+const std::string& Profile::media_lowbandwidth_resumption_level() const {
+  return media_lowbandwidth_resumption_level_;
 }
 
 const uint16_t Profile::app_launch_max_retry_attempt() const {
@@ -2040,12 +2039,12 @@ void Profile::UpdateValues() {
                     kProjectionLowBandwidthResumptionLevelKey,
                     kLowBandwidthTransportResumptionLevelSection);
 
-  ReadStringValue(&mediaapps_lowbandwidth_resumption_level_,
+  ReadStringValue(&media_lowbandwidth_resumption_level_,
                   kDefaultLowBandwidthResumptionLevel,
                   kLowBandwidthTransportResumptionLevelSection,
                   kMediaLowBandwidthResumptionLevelKey);
 
-  LOG_UPDATED_VALUE(mediaapps_lowbandwidth_resumption_level_,
+  LOG_UPDATED_VALUE(media_lowbandwidth_resumption_level_,
                     kMediaLowBandwidthResumptionLevelKey,
                     kLowBandwidthTransportResumptionLevelSection);
 

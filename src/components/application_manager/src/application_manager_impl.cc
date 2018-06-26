@@ -660,7 +660,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // instance.
   // Also, make sure that this is done *after* we updated applications_ list to
   // avoid timing issues.
-  SecondaryTransportDeviceMap::iterator itr =
+  DeviceMap::iterator itr =
       secondary_transport_devices_cache_.find(connection_key);
   if (secondary_transport_devices_cache_.end() != itr) {
     connection_handler::DeviceHandle secondary_device_handle = itr->second;
@@ -1800,8 +1800,7 @@ void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
     const int32_t session_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SecondaryTransportDeviceMap::iterator it =
-      secondary_transport_devices_cache_.find(session_key);
+  DeviceMap::iterator it = secondary_transport_devices_cache_.find(session_key);
   if (it == secondary_transport_devices_cache_.end()) {
     LOG4CXX_WARN(
         logger_,

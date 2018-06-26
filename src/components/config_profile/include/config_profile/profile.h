@@ -673,9 +673,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns HMI level for resumption of a media app
    *
-   * Note: this is not for AppHMIType = MEDIA.
+   * Note: this is *not* for AppHMIType = MEDIA.
    */
-  const std::string& mediaapp_lowbandwidth_resumption_level() const OVERRIDE;
+  const std::string& media_lowbandwidth_resumption_level() const OVERRIDE;
 
   /**
    * @brief Returns wait time after device connection
@@ -1000,7 +1000,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
       transport_required_for_resumption_map_;
   std::string navigation_lowbandwidth_resumption_level_;
   std::string projection_lowbandwidth_resumption_level_;
-  std::string mediaapps_lowbandwidth_resumption_level_;
+  std::string media_lowbandwidth_resumption_level_;
   uint16_t app_launch_wait_time_;
   uint16_t app_launch_max_retry_attempt_;
   uint16_t app_launch_retry_wait_time_;

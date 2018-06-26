@@ -937,7 +937,7 @@ mobile_apis::HMILevel::eType ResumeCtrlImpl::GetHmiLevelOnLowBandwidthTransport(
   const std::string& level_for_projection_app =
       settings.projection_lowbandwidth_resumption_level();
   const std::string& level_for_media_app =
-      settings.mediaapp_lowbandwidth_resumption_level();
+      settings.media_lowbandwidth_resumption_level();
 
   HMILevel::eType result_level = HMILevel::HMI_NONE;
   HMILevel::eType level;

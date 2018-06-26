@@ -95,7 +95,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
       const = 0;
   virtual const std::string& projection_lowbandwidth_resumption_level()
       const = 0;
-  virtual const std::string& mediaapp_lowbandwidth_resumption_level() const = 0;
+  virtual const std::string& media_lowbandwidth_resumption_level() const = 0;
   virtual void set_config_file_name(const std::string& fileName) = 0;
   virtual const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const = 0;

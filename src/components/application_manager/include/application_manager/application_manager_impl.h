@@ -1714,10 +1714,9 @@ class ApplicationManagerImpl
 
   // This is a cache to remember DeviceHandle of secondary transports. Only used
   // during RegisterApplication().
-  typedef std::map<int32_t, connection_handler::DeviceHandle>
-      SecondaryTransportDeviceMap;
+  typedef std::map<int32_t, connection_handler::DeviceHandle> DeviceMap;
 
-  SecondaryTransportDeviceMap secondary_transport_devices_cache_;
+  DeviceMap secondary_transport_devices_cache_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
