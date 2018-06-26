@@ -105,32 +105,25 @@ class ResumeCtrlTest : public ::testing::Test {
         .WillByDefault(ReturnRef(state_controller_));
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(mock_application_manager_settings_));
-    EXPECT_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
-        .Times(AtLeast(0))
-        .WillRepeatedly(Return(true));
+    ON_CALL(app_mngr_, CheckResumptionRequiredTransportAvailable(_))
+        .WillByDefault(Return(true));
 
     ON_CALL(mock_application_manager_settings_, use_db_for_resumption())
         .WillByDefault(Return(false));
     ON_CALL(mock_application_manager_settings_, app_resuming_timeout())
         .WillByDefault(ReturnRef(kAppResumingTimeout_));
-    // use EXPECTED_CALL().Times(AtLeast(0)) instead of ON_CALL to remove
-    // warning messages
-    EXPECT_CALL(mock_application_manager_settings_,
-                navigation_lowbandwidth_resumption_level())
-        .Times(AtLeast(0))
-        .WillRepeatedly(ReturnRef(kNaviLowbandwidthLevel_));
-    EXPECT_CALL(mock_application_manager_settings_,
-                projection_lowbandwidth_resumption_level())
-        .Times(AtLeast(0))
-        .WillRepeatedly(ReturnRef(kProjectionLowbandwidthLevel_));
-    EXPECT_CALL(mock_application_manager_settings_,
-                media_lowbandwidth_resumption_level())
-        .Times(AtLeast(0))
-        .WillRepeatedly(ReturnRef(kMediaLowbandwidthLevel_));
+    ON_CALL(mock_application_manager_settings_,
+            navigation_lowbandwidth_resumption_level())
+        .WillByDefault(ReturnRef(kNaviLowbandwidthLevel_));
+    ON_CALL(mock_application_manager_settings_,
+            projection_lowbandwidth_resumption_level())
+        .WillByDefault(ReturnRef(kProjectionLowbandwidthLevel_));
+    ON_CALL(mock_application_manager_settings_,
+            media_lowbandwidth_resumption_level())
+        .WillByDefault(ReturnRef(kMediaLowbandwidthLevel_));
 
-    EXPECT_CALL(*app_mock_, deferred_resumption_hmi_level())
-        .Times(AtLeast(0))
-        .WillRepeatedly(Return(kDefaultDeferredTestLevel_));
+    ON_CALL(*app_mock_, deferred_resumption_hmi_level())
+        .WillByDefault(Return(kDefaultDeferredTestLevel_));
   }
   void TearDown() OVERRIDE {
     Mock::VerifyAndClearExpectations(&app_mngr_);
