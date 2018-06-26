@@ -33,6 +33,7 @@
 #include "config_profile/profile.h"
 
 #include <errno.h>
+#include <numeric>
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>
@@ -2003,16 +2004,14 @@ void Profile::UpdateValues() {
         transport_required_for_resumption_map_[entry->map_key_name] =
             transport_list;
 
-        std::stringstream ss;
-        for (std::vector<std::string>::iterator it = transport_list.begin();
-             it != transport_list.end();
-             ++it) {
-          if (it != transport_list.begin()) {
-            ss << ", ";
-          }
-          ss << *it;
-        }
-        LOG_UPDATED_VALUE(ss.str(),
+        const std::string list_with_comma = std::accumulate(
+            transport_list.begin(),
+            transport_list.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(list_with_comma,
                           entry->ini_key_name,
                           kTransportRequiredForResumptionSection);
       }
@@ -2164,17 +2163,15 @@ void Profile::UpdateValues() {
       if (exist) {
         *entry->ini_vector = profile_entry;
 
-        std::stringstream ss;
-        for (std::vector<std::string>::iterator it = profile_entry.begin();
-             it != profile_entry.end();
-             ++it) {
-          if (it != profile_entry.begin()) {
-            ss << ", ";
-          }
-          ss << *it;
-        }
+        const std::string list_with_comma = std::accumulate(
+            profile_entry.begin(),
+            profile_entry.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
         LOG_UPDATED_VALUE(
-            ss.str(), entry->ini_key_name, entry->ini_section_name);
+            list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
       entry++;
     }
@@ -2206,16 +2203,7 @@ bool Profile::ReadValue(std::string* value,
                         const char* const pSection,
                         const char* const pKey) const {
   DCHECK(value);
-  bool ret = false;
-
-  char buf[INI_LINE_LEN + 1];
-  *buf = '\0';
-  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) &&
-      ('\0' != *buf)) {
-    *value = buf;
-    ret = true;
-  }
-  return ret;
+  return ReadValueEmpty(value, pSection, pKey) && "\0" != *value;
 }
 
 bool Profile::ReadValueEmpty(std::string* value,
