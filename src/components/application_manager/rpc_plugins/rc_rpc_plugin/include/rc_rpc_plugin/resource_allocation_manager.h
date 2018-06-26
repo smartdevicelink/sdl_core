@@ -56,6 +56,19 @@ enum eType { FREE = 0, BUSY };
 }
 
 /**
+ * Defines triggers for OnRCStatus notification sending
+ */
+namespace NotificationTrigger {
+/**
+ * @brief The eType
+ * APP_REGISTRATION RC app registation event
+ * RC_STATE_CHANGING enabling/disabling RC on HMI event
+ * MODULE_ALLOCATION module allocation/deallocation event
+ */
+enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
+}
+
+/**
  * @brief Resources defines list of resources
  */
 typedef std::vector<std::string> Resources;
@@ -146,9 +159,10 @@ class ResourceAllocationManager {
 
   /**
    * @brief Create and send OnRCStatusNotification to mobile and HMI
-   * @param application
+   * @param event trigger for notification sending
    */
-  virtual void SendOnRCStatusNotification() = 0;
+  virtual void SendOnRCStatusNotifications(
+      NotificationTrigger::eType event) = 0;
 
   virtual bool is_rc_enabled() const = 0;
 

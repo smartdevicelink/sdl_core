@@ -118,7 +118,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   RCAppExtensionPtr GetApplicationExtention(
       application_manager::ApplicationSharedPtr application) FINAL;
 
-  void SendOnRCStatusNotification() FINAL;
+  void SendOnRCStatusNotifications(NotificationTrigger::eType event) FINAL;
 
   bool is_rc_enabled() const FINAL;
 
