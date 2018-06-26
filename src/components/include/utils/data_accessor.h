@@ -40,7 +40,8 @@
 template <class T>
 class DataAccessor {
  public:
-  DataAccessor(const T& data, const std::shared_ptr<sync_primitives::Lock>& lock)
+  DataAccessor(const T& data,
+               const std::shared_ptr<sync_primitives::Lock>& lock)
       : data_(data), lock_(lock), counter_(new uint32_t(0)) {
     lock_->Acquire();
   }

@@ -736,7 +736,7 @@ bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_ptr_);
   return subscribed_vehicle_info_
       .insert(
-          static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
+           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
       .second;
 }
 

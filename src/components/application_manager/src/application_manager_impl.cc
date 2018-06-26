@@ -142,8 +142,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
     , applications_list_lock_ptr_(std::make_shared<sync_primitives::Lock>(true))
-    , apps_to_register_list_lock_ptr_(
-          std::make_shared<sync_primitives::Lock>())
+    , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(

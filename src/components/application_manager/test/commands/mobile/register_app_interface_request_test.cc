@@ -93,7 +93,7 @@ class RegisterAppInterfaceRequestTest
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
       , app_name_("test_app_name_")
-      ,lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
                 application_helper_mock()) {
@@ -279,7 +279,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillRepeatedly(Return(mock_app));
 
   ON_CALL(app_mngr_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
@@ -374,7 +375,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
           Return(&(*expected_message)[am::hmi_response::display_capabilities]));
 
   ON_CALL(app_mngr_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));

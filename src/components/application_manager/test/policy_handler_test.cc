@@ -444,8 +444,7 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(_, _, _))
-      .Times(0);
+              SendOnPermissionsChangeNotification(_, _, _)).Times(0);
 
   Permissions permissions;
   policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions);
@@ -913,14 +912,12 @@ TEST_F(PolicyHandlerTest,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appPermissionsConsentNeeded = false;
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
-      .Times(0);
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
 
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
-              RemovePendingPermissionChanges(kPolicyAppId_))
-      .Times(0);
+              RemovePendingPermissionChanges(kPolicyAppId_)).Times(0);
   // Act
   policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
 }
@@ -1051,8 +1048,7 @@ TEST_F(PolicyHandlerTest,
   // Check expectations
   // Notification won't be sent
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
-      .Times(0);
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
 
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
@@ -2175,8 +2171,7 @@ TEST_F(PolicyHandlerTest,
                   _,
                   NULL,
                   _,
-                  _))
-      .WillOnce(Return(1u));
+                  _)).WillOnce(Return(1u));
 
   EXPECT_CALL(app_manager_, application(kConnectionKey_))
       .WillOnce(Return(mock_app_));

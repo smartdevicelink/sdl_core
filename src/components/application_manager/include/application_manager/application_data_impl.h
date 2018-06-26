@@ -281,7 +281,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   ChoiceSetMap choice_set_map_;
   mutable std::shared_ptr<sync_primitives::Lock> choice_set_map_lock_ptr_;
   PerformChoiceSetMap performinteraction_choice_set_map_;
-  mutable std::shared_ptr<sync_primitives::Lock> performinteraction_choice_set_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::Lock>
+      performinteraction_choice_set_lock_ptr_;
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
@@ -308,8 +309,9 @@ DataAccessor<ChoiceSetMap> DynamicApplicationDataImpl::choice_set_map() const {
 
 DataAccessor<PerformChoiceSetMap>
 DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
-  return DataAccessor<PerformChoiceSetMap>(performinteraction_choice_set_map_,
-                                           performinteraction_choice_set_lock_ptr_);
+  return DataAccessor<PerformChoiceSetMap>(
+      performinteraction_choice_set_map_,
+      performinteraction_choice_set_lock_ptr_);
 }
 
 uint32_t DynamicApplicationDataImpl::is_perform_interaction_active() const {

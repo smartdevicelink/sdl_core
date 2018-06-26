@@ -137,7 +137,6 @@ class CommandsTest : public ::testing::Test {
 
   enum { kDefaultTimeout_ = 100 };
 
-
   MockAppManager app_mngr_;
   MockAppManagerSettings app_mngr_settings_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;

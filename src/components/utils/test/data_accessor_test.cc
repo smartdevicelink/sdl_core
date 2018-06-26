@@ -41,7 +41,8 @@ namespace utils_test {
 TEST(DataAccessorTest, CreateDataAccessor) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<int> testdata(test_value, testSet_lock_);
   int data_from_testdata = testdata.GetData();
 
@@ -52,7 +53,8 @@ TEST(DataAccessorTest, CreateDataAccessor) {
 TEST(DataAccessorTest, CreateDataAccessor_MutexIsLocked_CannotLockItAgain) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<int> testdata(test_value, testSet_lock_);
 
   // assert
@@ -62,7 +64,8 @@ TEST(DataAccessorTest, CreateDataAccessor_MutexIsLocked_CannotLockItAgain) {
 TEST(DataAccessorTest, CopyDataAccessor_GetDataFromDataAccessors) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<int> testdata(test_value, testSet_lock_);
   DataAccessor<int> testdata_copy(testdata);
 
@@ -79,7 +82,8 @@ TEST(DataAccessorTest,
      ChangedDataInDataAccessor_ChangeData_DataInDataAccessorIsChanged) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<int> testdata(test_value, testSet_lock_);
   test_value = 0;
 
@@ -93,7 +97,8 @@ TEST(DataAccessorTest,
      DeleteDataAccessor_CreatedOneDeleteOneThread_MutexIsUnlocked) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   {
     DataAccessor<int> testdata(test_value, testSet_lock_);
 
@@ -111,7 +116,8 @@ TEST(DataAccessorTest,
      DeleteDataAccessor_CreatedThreadAndCopyDeleteBothThreads_MutexIsUnlocked) {
   // arrange
   int test_value = 10;
-  std::shared_ptr<sync_primitives::Lock> testSet_lock_ = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> testSet_lock_ =
+      std::make_shared<sync_primitives::Lock>();
   {
     DataAccessor<int> testdata(test_value, testSet_lock_);
     {

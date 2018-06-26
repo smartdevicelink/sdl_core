@@ -443,8 +443,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*app_mock_, UpdateHash());
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              SendAllOnButtonSubscriptionNotificationsForApp(_, _))
-      .Times(2);
+              SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
 
   const bool res = res_ctrl_->StartResumption(app_mock_, kHash_);
   EXPECT_TRUE(res);
@@ -489,8 +488,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   smart_objects::SmartObjectList requests;
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              GetIVISubscriptionRequests(_))
-      .WillRepeatedly(Return(requests));
+              GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock_, UpdateHash());
   const bool res = res_ctrl_->StartResumption(app_mock_, kHash_);
