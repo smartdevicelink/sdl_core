@@ -201,6 +201,7 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
       BUILD_COMMAND make
       INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
 else()
+  add_custom_target(libbson) # empty target, bson is already installed
   get_filename_component(BSON_LIBS_DIRECTORY ${BSON_LIB} DIRECTORY)
   get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
   set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
@@ -234,6 +235,8 @@ if (HMIADAPTER STREQUAL "messagebroker")
 
     set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
     set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
+  else()
+  add_custom_target(Boost) # empty target, Boost is already installed
   endif()
 endif()
 
