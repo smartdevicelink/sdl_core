@@ -6345,6 +6345,13 @@
 
     <function name="OnRCStatus" functionID="OnRCStatusID" messagetype="notification">
       <description>Issued by SDL to notify the application about remote control status change on SDL</description>
+      <param name="allowed" type="Boolean" mandatory="false">
+        <description>
+            If "true" - RC is allowed; if "false" - RC is disallowed.
+            Not present in notification in case by module allocation/deallocation.
+            Present in notification in cases enabling/disabling RC or RC-app registration.
+        </description>
+      </param>
       <param name="allocatedModules" type="ModuleData" minsize="0" maxsize="100" array="true" mandatory="true">
         <description>Contains a list (zero or more) of module types that are allocated to the application.</description>
       </param>
