@@ -3453,6 +3453,9 @@
         <param name="menuName" maxlength="500" type="String" mandatory="true">
             <description>Text to show in the menu for this sub menu.</description>
         </param>
+        <param name="menuIcon" type="Image" mandatory="false">
+            <description>The image field for AddSubMenu</description>
+        </param>
     </function>
     
     <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
