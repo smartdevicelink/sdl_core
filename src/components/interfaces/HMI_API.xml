@@ -5331,9 +5331,6 @@
   <param name="subscribe" type="Boolean" mandatory="false">
     <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
   </param>
-  <param name="appID" type="Integer" mandatory="true">
-    <description>Internal SDL-assigned ID of the related application</description>
-  </param>
 </function>
 
 <function name="GetInteriorVehicleData" messagetype="response">

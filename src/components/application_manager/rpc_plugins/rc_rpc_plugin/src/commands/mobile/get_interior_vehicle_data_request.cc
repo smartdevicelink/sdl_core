@@ -107,9 +107,6 @@ void GetInteriorVehicleDataRequest::Execute() {
     RemoveExcessiveSubscription();
   }
 
-  (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
-      app->app_id();
-
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData,
                  &(*message_)[app_mngr::strings::msg_params],
                  true);
