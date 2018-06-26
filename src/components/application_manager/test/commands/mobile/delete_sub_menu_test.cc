@@ -95,13 +95,14 @@ class DeleteSubMenuRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   DeleteSubMenuRequestTest()
-      : accessor_(commands_map_, commands_lock_)
+      : commands_lock_(std::make_shared<sync_primitives::Lock>())
+      , accessor_(commands_map_, commands_lock_)
       , message_(CreateMessage())
       , command_(CreateCommand<DeleteSubMenuRequest>(message_))
       , app_(CreateMockApp()) {}
 
   am::CommandsMap commands_map_;
-  mutable sync_primitives::Lock commands_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> commands_lock_;
   DataAccessor<am::CommandsMap> accessor_;
 
   MessageSharedPtr message_;
@@ -143,8 +144,8 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   am::CommandsMap commands_map;
   smart_objects::SmartObject commands_msg(smart_objects::SmartType_Map);
   commands_map.insert(std::pair<uint32_t, SmartObject*>(1u, &commands_msg));
-  sync_primitives::Lock lock;
-  DataAccessor<am::CommandsMap> accessor(commands_map, lock);
+  DataAccessor<am::CommandsMap> accessor(
+      commands_map, std::make_shared<sync_primitives::Lock>());
   EXPECT_CALL(*mock_app, commands_map())
       .WillOnce(Return(accessor))
       .WillOnce(Return(accessor));

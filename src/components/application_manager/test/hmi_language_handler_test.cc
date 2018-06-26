@@ -82,7 +82,8 @@ const uint32_t kDefaultAppsSize = 0u;
 
 class HmiLanguageHandlerTest : public ::testing::Test {
  public:
-  HmiLanguageHandlerTest() {
+  HmiLanguageHandlerTest()
+      : app_set_lock_(std::make_shared<sync_primitives::Lock>()) {
     EXPECT_CALL(app_manager_, event_dispatcher())
         .WillOnce(ReturnRef(event_dispatcher_));
     hmi_language_handler_ =
@@ -133,7 +134,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockHMICapabilities hmi_capabilities_;
   MockEventDispatcher event_dispatcher_;
   SharedPtr<am::HMILanguageHandler> hmi_language_handler_;
-  ::sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_;
   resumption_test::MockLastState last_state_;
 };
 

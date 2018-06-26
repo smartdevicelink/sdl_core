@@ -51,8 +51,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using am::commands::UnsubscribeVehicleDataRequest;
 using am::commands::MessageSharedPtr;
+using am::commands::UnsubscribeVehicleDataRequest;
 
 typedef ::utils::SharedPtr<UnsubscribeVehicleDataRequest> CommandPtr;
 
@@ -65,9 +65,13 @@ const mobile_apis::VehicleDataType::eType kVehicleType =
 
 class UnsubscribeVehicleRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  UnsubscribeVehicleRequestTest()
+      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+
  protected:
   void UnsubscribeSuccessfully();
-  sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
@@ -191,7 +195,8 @@ void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
   am::ApplicationSet application_set_;
   MockAppPtr mock_app(CreateMockApp());
   application_set_.insert(mock_app);
-  DataAccessor<am::ApplicationSet> accessor(application_set_, app_set_lock_);
+  DataAccessor<am::ApplicationSet> accessor(application_set_,
+                                            app_set_lock_ptr_);
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
