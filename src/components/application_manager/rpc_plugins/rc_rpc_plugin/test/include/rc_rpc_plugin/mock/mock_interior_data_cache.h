@@ -29,47 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_
-#include <string>
-#include "smart_objects/smart_object.h"
 
-namespace rc_rpc_plugin {
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
 
-/**
- * @brief The InteriorDataCache interface for caching data class
- * Provide ability to cache module data by module type name and clear cache
- */
-class InteriorDataCache {
+#include "gmock/gmock.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+
+namespace rc_rpc_plugin_test {
+
+class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
  public:
-  /**
-   * @brief Add add module data to cache
-   * @param module_type module type name
-   * @param module_data data to be cached
-   */
-  virtual void Add(const std::string& module_type,
-                   const smart_objects::SmartObject& module_data) = 0;
+  MOCK_METHOD2(Add,
+               void(const std::string&,
+                    const NsSmartDeviceLink::NsSmartObjects::SmartObject&));
+  MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
+  MOCK_CONST_METHOD1(Contains, bool(const std::string&));
 
-  /**
-   * @brief Retrieve Get cached data
-   * @param module_type data type to get from cache
-   * @return smart object with cached data, or nulll smart object
-   */
-  virtual smart_objects::SmartObject Retrieve(
-      const std::string& module_type) const = 0;
-
-  /**
-   * @brief Contains check if data exists in cache
-   * @param module_type module type name to check in cache
-   * @return true if cached, false otherwize
-   */
-  virtual bool Contains(const std::string& module_type) const = 0;
-
-  /**
-   * @brief ClearCache clear all cached data
-   */
-  virtual void ClearCache() = 0;
+  MOCK_METHOD0(ClearCache, void());
 };
-}  // rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_INTERIOR_DATA_CACHE_H_
+}  // namespace rc_rpc_plugin_test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_TEST_INCLUDE_RC_RPC_PLUGIN_MOCK_MOCK_INTERIOR_DATA_CACHE_H_
