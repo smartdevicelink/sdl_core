@@ -34,6 +34,7 @@
 
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_rpc_service.h"
@@ -69,8 +70,10 @@ const std::string kModuleType2 = "RADIO";
 const int32_t kConnectionKey = 5;
 const int32_t kCorrelationId = 5;
 const uint32_t kAppId1 = 11u;
+const uint32_t kHMIAppId1 = 1u;
 const uint32_t kAppId2 = 22u;
 const std::string policy_app_id_1_ = "policy_id_1";
+const uint32_t kSizeOfModules = 2u;
 }
 
 namespace rc_rpc_plugin_test {
@@ -501,6 +504,164 @@ TEST_F(RAManagerTest, GetAccessMode_ExpectedSameAsHadSet) {
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::INVALID_ENUM);
   EXPECT_EQ(hmi_apis::Common_RCAccessMode::INVALID_ENUM,
             ra_manager.GetAccessMode());
+}
+
+TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_allowed) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ON_CALL((*mock_app_1_), is_remote_control_supported())
+      .WillByDefault(Return(true));
+  ON_CALL((*mock_app_1_), hmi_app_id()).WillByDefault(Return(kHMIAppId1));
+
+  application_manager::commands::MessageSharedPtr message_to_mob;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
+      .WillOnce(SaveArg<0>(&message_to_mob));
+  application_manager::commands::MessageSharedPtr message_to_hmi;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_))
+      .WillOnce(SaveArg<0>(&message_to_hmi));
+
+  // Act
+  ra_manager.SendOnRCStatusNotifications(NotificationTrigger::APP_REGISTRATION);
+
+  auto msg_to_mob_params =
+      (*message_to_mob)[application_manager::strings::msg_params];
+  auto msg_to_hmi_params =
+      (*message_to_hmi)[application_manager::strings::msg_params];
+
+  // Assert
+  EXPECT_EQ(msg_to_mob_params[message_params::kAllowed].asBool(), true);
+  EXPECT_EQ(
+      msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
+      0u);
+  EXPECT_EQ(msg_to_mob_params[message_params::kFreeModules].asArray()->size(),
+            kSizeOfModules);
+  EXPECT_EQ(
+      msg_to_hmi_params[message_params::kAllocatedModules].asArray()->size(),
+      0u);
+  EXPECT_EQ(msg_to_hmi_params[message_params::kFreeModules].asArray()->size(),
+            kSizeOfModules);
+  EXPECT_EQ(msg_to_hmi_params[application_manager::strings::app_id].asInt(),
+            kHMIAppId1);
+}
+
+TEST_F(RAManagerTest, OnRCStatus_AppRegistation_RC_disallowed) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ra_manager.set_rc_enabled(false);
+
+  ON_CALL((*mock_app_1_), is_remote_control_supported())
+      .WillByDefault(Return(true));
+
+  application_manager::commands::MessageSharedPtr message_to_mob;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
+      .WillOnce(SaveArg<0>(&message_to_mob));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_)).Times(0);
+
+  // Act
+  ra_manager.SendOnRCStatusNotifications(NotificationTrigger::APP_REGISTRATION);
+
+  auto msg_to_mob_params =
+      (*message_to_mob)[application_manager::strings::msg_params];
+  // Assert
+  EXPECT_EQ(msg_to_mob_params[message_params::kAllowed].asBool(), false);
+  EXPECT_EQ(
+      msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
+      0u);
+  EXPECT_EQ(msg_to_mob_params[message_params::kFreeModules].asArray()->size(),
+            0u);
+}
+
+TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_disabling) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ON_CALL((*mock_app_1_), is_remote_control_supported())
+      .WillByDefault(Return(true));
+
+  application_manager::commands::MessageSharedPtr message_to_mob;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
+      .WillOnce(SaveArg<0>(&message_to_mob));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_)).Times(0);
+
+  // Act
+  ra_manager.set_rc_enabled(false);
+
+  auto msg_to_mob_params =
+      (*message_to_mob)[application_manager::strings::msg_params];
+  // Assert
+  EXPECT_EQ(msg_to_mob_params[message_params::kAllowed].asBool(), false);
+  EXPECT_EQ(
+      msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
+      0u);
+  EXPECT_EQ(msg_to_mob_params[message_params::kFreeModules].asArray()->size(),
+            0u);
+}
+
+TEST_F(RAManagerTest, OnRCStatus_RCStateChanging_RC_enabling) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+  ON_CALL((*mock_app_1_), is_remote_control_supported())
+      .WillByDefault(Return(true));
+
+  application_manager::commands::MessageSharedPtr message_to_mob;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
+      .WillOnce(SaveArg<0>(&message_to_mob));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_)).Times(0);
+
+  // Act
+  ra_manager.set_rc_enabled(true);
+
+  auto msg_to_mob_params =
+      (*message_to_mob)[application_manager::strings::msg_params];
+  // Assert
+  EXPECT_EQ(msg_to_mob_params[message_params::kAllowed].asBool(), true);
+  EXPECT_EQ(
+      msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
+      0u);
+  EXPECT_EQ(msg_to_mob_params[message_params::kFreeModules].asArray()->size(),
+            kSizeOfModules);
+}
+
+TEST_F(RAManagerTest, OnRCStatus_ModuleAllocation) {
+  // Arrange
+  ResourceAllocationManagerImpl ra_manager(mock_app_mngr_, mock_rpc_service_);
+
+  ON_CALL((*mock_app_1_), is_remote_control_supported())
+      .WillByDefault(Return(true));
+  ON_CALL((*mock_app_1_), hmi_app_id()).WillByDefault(Return(kHMIAppId1));
+
+  EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
+            ra_manager.AcquireResource(kModuleType1, kAppId1));
+
+  application_manager::commands::MessageSharedPtr message_to_mob;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
+      .WillOnce(SaveArg<0>(&message_to_mob));
+
+  application_manager::commands::MessageSharedPtr message_to_hmi;
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_))
+      .WillOnce(SaveArg<0>(&message_to_hmi));
+
+  // Act
+  ra_manager.SendOnRCStatusNotifications(
+      NotificationTrigger::MODULE_ALLOCATION);
+
+  auto msg_to_mob_params =
+      (*message_to_mob)[application_manager::strings::msg_params];
+  auto msg_to_hmi_params =
+      (*message_to_hmi)[application_manager::strings::msg_params];
+  // Assert
+  EXPECT_EQ(msg_to_mob_params.keyExists(message_params::kAllowed), false);
+  EXPECT_EQ(
+      msg_to_mob_params[message_params::kAllocatedModules].asArray()->size(),
+      1u);
+  EXPECT_EQ(msg_to_mob_params[message_params::kFreeModules].asArray()->size(),
+            kSizeOfModules - 1u);
+  EXPECT_EQ(
+      msg_to_hmi_params[message_params::kAllocatedModules].asArray()->size(),
+      1u);
+  EXPECT_EQ(msg_to_hmi_params[message_params::kFreeModules].asArray()->size(),
+            kSizeOfModules - 1u);
+  EXPECT_EQ(msg_to_hmi_params[application_manager::strings::app_id].asInt(),
+            kHMIAppId1);
 }
 
 }  // namespace rc_rpc_plugin
