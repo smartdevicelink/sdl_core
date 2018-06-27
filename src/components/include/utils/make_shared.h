@@ -124,6 +124,25 @@ SharedPtr<T> MakeShared(
   return Initialize(t);
 }
 
+template <typename T,
+          typename Arg1,
+          typename Arg2,
+          typename Arg3,
+          typename Arg4,
+          typename Arg5,
+          typename Arg6,
+          typename Arg7>
+SharedPtr<T> MakeShared(Arg1& arg1,
+                        Arg2& arg2,
+                        Arg3& arg3,
+                        Arg4& arg4,
+                        Arg5& arg5,
+                        Arg6& arg6,
+                        Arg7& arg7) {
+  T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+  return Initialize(t);
+}
+
 template <typename T, typename Arg1>
 SharedPtr<T> MakeShared(const Arg1& arg1) {
   T* t = new (std::nothrow) T(arg1);
@@ -184,6 +203,25 @@ SharedPtr<T> MakeShared(const Arg1& arg1,
                         const Arg5& arg5,
                         const Arg6& arg6) {
   T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5, arg6);
+  return Initialize(t);
+}
+
+template <typename T,
+          typename Arg1,
+          typename Arg2,
+          typename Arg3,
+          typename Arg4,
+          typename Arg5,
+          typename Arg6,
+          typename Arg7>
+SharedPtr<T> MakeShared(const Arg1& arg1,
+                        const Arg2& arg2,
+                        const Arg3& arg3,
+                        const Arg4& arg4,
+                        const Arg5& arg5,
+                        const Arg6& arg6,
+                        const Arg7& arg7) {
+  T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   return Initialize(t);
 }
 
