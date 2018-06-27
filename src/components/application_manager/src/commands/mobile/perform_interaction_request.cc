@@ -298,6 +298,46 @@ void PerformInteractionRequest::onTimeOut() {
   };
 }
 
+bool PerformInteractionRequest::PrepareResultForMobileResponse(
+    ResponseInfo& out_first, ResponseInfo& out_second) const {
+  const bool is_ui_or_both_mode =
+      helpers::Compare<mobile_apis::InteractionMode::eType,
+                       helpers::EQ,
+                       helpers::ONE>(interaction_mode_,
+                                     mobile_apis::InteractionMode::BOTH,
+                                     mobile_apis::InteractionMode::MANUAL_ONLY);
+
+  if (is_ui_or_both_mode) {
+    if (vr_result_code_ == hmi_apis::Common_Result::ABORTED &&
+        ui_result_code_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
+      return true;
+    }
+  }
+
+  return CommandRequestImpl::PrepareResultForMobileResponse(out_first,
+                                                            out_second);
+}
+
+mobile_apis::Result::eType
+PerformInteractionRequest::PrepareResultCodeForResponse(
+    const ResponseInfo& first, const ResponseInfo& second) {
+  const bool is_ui_or_both_mode =
+      helpers::Compare<mobile_apis::InteractionMode::eType,
+                       helpers::EQ,
+                       helpers::ONE>(interaction_mode_,
+                                     mobile_apis::InteractionMode::BOTH,
+                                     mobile_apis::InteractionMode::MANUAL_ONLY);
+
+  if (is_ui_or_both_mode) {
+    if (vr_result_code_ == hmi_apis::Common_Result::ABORTED &&
+        ui_result_code_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
+      return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+    }
+  }
+
+  return CommandRequestImpl::PrepareResultCodeForResponse(first, second);
+}
+
 bool PerformInteractionRequest::ProcessVRResponse(
     const smart_objects::SmartObject& message,
     smart_objects::SmartObject& msg_params) {
