@@ -418,7 +418,7 @@ void ResumptionDataDBTest::CheckCommandsData() {
     std::string vr =
         (*test_commands_map[i])[am::strings::vr_commands][j].asString();
     EXPECT_EQ(vr, select_commands.GetString(7));
-    j++;
+    ++j;
   }
 }
 
@@ -530,7 +530,7 @@ void ResumptionDataDBTest::CheckAppFilesData() {
     EXPECT_EQ(check_file.is_download_complete, query.GetBoolean(1));
     EXPECT_EQ(check_file.is_persistent, query.GetBoolean(2));
     EXPECT_EQ(check_file.file_name, query.GetString(3));
-    i++;
+    ++i;
   }
 }
 
@@ -750,7 +750,7 @@ TEST_F(ResumptionDataDBTest, OnSuspend) {
   CheckSavedDB();
 
   res_db()->IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedDB();
 }
 
@@ -763,14 +763,14 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
   CheckSavedDB();
 
   res_db()->IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedDB();
 
   res_db()->IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedDB();
   res_db()->IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedDB();
 
   res_db()->IncrementIgnOffCount();
@@ -790,7 +790,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendOnAwake) {
 
   res_db()->IncrementIgnOffCount();
 
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedDB();
   res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;

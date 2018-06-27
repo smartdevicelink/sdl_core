@@ -44,9 +44,9 @@ class TestHelper : public ::testing::Test {
   void makeMapObject(SmartObject& obj, const int size) const {
     char i_key[8], j_key[8], k_key[8], value[8];
 
-    for (int i = 0; i < size; i++)
-      for (int j = 0; j < size; j++)
-        for (int k = 0; k < size; k++) {
+    for (int i = 0; i < size; ++i)
+      for (int j = 0; j < size; ++j)
+        for (int k = 0; k < size; ++k) {
           sprintf(i_key, "i_%d", i);
           sprintf(j_key, "j_%d", j);
           sprintf(k_key, "k_%d", k);
@@ -58,9 +58,9 @@ class TestHelper : public ::testing::Test {
   void checkMapObject(SmartObject& obj, const int size) const {
     char i_key[8], j_key[8], k_key[8], value[8];
 
-    for (int i = 0; i < size; i++)
-      for (int j = 0; j < size; j++)
-        for (int k = 0; k < size; k++) {
+    for (int i = 0; i < size; ++i)
+      for (int j = 0; j < size; ++j)
+        for (int k = 0; k < size; ++k) {
           sprintf(i_key, "i_%d", i);
           sprintf(j_key, "j_%d", j);
           sprintf(k_key, "k_%d", k);
@@ -73,17 +73,17 @@ class TestHelper : public ::testing::Test {
   }
 
   void makeArrayObject(SmartObject& obj, int size, int base = 0) {
-    for (int i = 0; i < size; i++)
-      for (int j = 0; j < size; j++)
-        for (int k = 0; k < size; k++) {
+    for (int i = 0; i < size; ++i)
+      for (int j = 0; j < size; ++j)
+        for (int k = 0; k < size; ++k) {
           obj[i][j][k] = base + i + j + k;
         }
   }
 
   void checkArrayObject(SmartObject& obj, int size, int base = 0) {
-    for (int i = 0; i < size; i++)
-      for (int j = 0; j < size; j++)
-        for (int k = 0; k < size; k++) {
+    for (int i = 0; i < size; ++i)
+      for (int j = 0; j < size; ++j)
+        for (int k = 0; k < size; ++k) {
           ASSERT_EQ(base + i + j + k, obj[i][j][k].asInt())
               << "Wrong value in the array at index: " << i << ", " << j << ", "
               << k;
@@ -116,13 +116,13 @@ TEST(BasicMixtedTypes, test_SmartObjectUnitTest) {
   ASSERT_EQ(3.14, obj.asDouble()) << "Wrong cast to double";
 
   // array test
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 100; ++i) {
     obj[i] = i;
     ASSERT_EQ(i, obj[i].asInt());
   }
 
   // map test
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 100; ++i) {
     char key[8];
     sprintf(key, "%d", i);
     obj[key] = i;

@@ -486,10 +486,10 @@ static bool ValidateList(std::vector<std::string>& expected,
   if (expected.size() != actual.size()) {
     return false;
   }
-  for (unsigned int i = 0; i < expected.size(); i++) {
+  for (unsigned int i = 0; i < expected.size(); ++i) {
     std::string& param = expected[i];
     unsigned int j;
-    for (j = 0; j < actual.size(); j++) {
+    for (j = 0; j < actual.size(); ++j) {
       if (param == actual[j]) {
         break;
       }

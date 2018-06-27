@@ -908,7 +908,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
 #ifdef HMI_DBUS_API
   for (std::vector<std::string>::const_iterator it = params.begin();
        it != params.end();
-       it++) {
+       ++it) {
     smart_objects::SmartObjectSPtr request =
         utils::MakeShared<smart_objects::SmartObject>();
 
@@ -941,7 +941,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   for (std::vector<std::string>::const_iterator it = params.begin();
        it != params.end();
-       it++) {
+       ++it) {
     (*request)[strings::msg_params][*it] = true;
   }
   app_mngr.GetRPCService().ManageHMICommand(request);
@@ -2913,7 +2913,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
 
   switch (object.getType()) {
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
-      for (size_t i = 0; i < object.length(); i++) {
+      for (size_t i = 0; i < object.length(); ++i) {
         ++tab;
 
         printf("\n%s%zu: ", tab_buffer.c_str(), i);
@@ -2929,7 +2929,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end();
-           key++) {
+           ++key) {
         ++tab;
 
         printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());

@@ -490,14 +490,14 @@ TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_SetLimitFromConfig) {
       .WillRepeatedly(ReturnRef(get_frequency));
   EXPECT_CALL(mock_application_manager_settings_, get_vehicle_data_frequency())
       .WillRepeatedly(ReturnRef(get_frequency));
-  for (uint32_t i = 0; i < get_frequency.first; i++) {
+  for (uint32_t i = 0; i < get_frequency.first; ++i) {
     EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                     TLimitSource::CONFIG_FILE));
   }
   EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                  TLimitSource::CONFIG_FILE));
 
-  for (uint32_t i = 0; i < get_frequency.first; i++) {
+  for (uint32_t i = 0; i < get_frequency.first; ++i) {
     EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(
         FunctionID::GetVehicleDataID, TLimitSource::CONFIG_FILE));
   }
@@ -546,23 +546,23 @@ TEST_F(ApplicationImplTest, SubscribeToDefaultButton_UnsubscribeFromButton) {
 
 TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
   const uint btn_count = 10;
-  for (uint i = 0; i < btn_count; i++) {
+  for (uint i = 0; i < btn_count; ++i) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 
   SoftButtonID test_button;
-  for (uint i = 0; i < btn_count; i++) {
+  for (uint i = 0; i < btn_count; ++i) {
     test_button.insert(i);
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (uint i = 0; i < btn_count; ++i) {
     EXPECT_TRUE(app_impl->IsSubscribedToSoftButton(i));
   }
   app_impl->UnsubscribeFromSoftButtons(FunctionID::ScrollableMessageID);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (uint i = 0; i < btn_count; ++i) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 }

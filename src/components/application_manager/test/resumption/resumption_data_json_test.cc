@@ -90,7 +90,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
     Value& resume_app_list =
         dictionary[am::strings::resumption][am::strings::resume_app_list];
     sm::SmartObject res_app_list;
-    for (uint32_t i = 0; i < resume_app_list.size(); i++) {
+    for (uint32_t i = 0; i < resume_app_list.size(); ++i) {
       Formatters::CFormatterJsonBase::jsonValueToObj(resume_app_list[i],
                                                      res_app_list);
       CheckSavedApp(res_app_list);
@@ -273,7 +273,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspend) {
   CheckSavedJson();
 
   res_json.IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedJson();
 }
 
@@ -285,7 +285,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   CheckSavedJson();
 
   res_json.IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedJson();
 
   res_json.IncrementIgnOffCount();
@@ -303,7 +303,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
   CheckSavedJson();
 
   res_json.IncrementIgnOffCount();
-  ign_off_count_++;
+  ++ign_off_count_;
   CheckSavedJson();
 
   res_json.DecrementIgnOffCount();

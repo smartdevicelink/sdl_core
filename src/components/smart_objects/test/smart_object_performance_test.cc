@@ -48,8 +48,8 @@ void MakeMapObject(SmartObject& obj, const int size) {
   char i_key[8], j_key[8];
 
   SmartObject array;
-  for (int i = 0; i < size; i++) {
-    for (int j = 0; j < size; j++) {
+  for (int i = 0; i < size; ++i) {
+    for (int j = 0; j < size; ++j) {
       sprintf(j_key, "j_%d", j);
       array[-1] = j_key;
     }

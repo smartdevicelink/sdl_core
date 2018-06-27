@@ -153,7 +153,7 @@ class StressTestHelper : public ::testing::Test {
 
         // std::cout << "Creating a map with size: " << size << std::endl;
         mVerifyMap[key_path] = "map";
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; ++i) {
           std::string key = generate_key("M", i);
 #ifdef NO_INCLUSIVE_MAPS
           obj[key] = key;
@@ -170,7 +170,7 @@ class StressTestHelper : public ::testing::Test {
 
         // std::cout << "Creating an array with size: " << size << std::endl;
         mVerifyMap[key_path] = "array";
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; ++i) {
           obj[i] = SmartObject();  // just init it as an array
           makeRandomObject(obj[i],
                            size - 1,
@@ -200,7 +200,7 @@ class StressTestHelper : public ::testing::Test {
 
     obj_tokens = split(path, ' ');
 
-    for (size_t i = 0; i < obj_tokens.size(); i++) {
+    for (size_t i = 0; i < obj_tokens.size(); ++i) {
       if (obj_tokens[i][0] == 'A')  // array
       {
         int index = atoi(
@@ -241,7 +241,7 @@ TEST_F(StressTestHelper, StressTest) {
 
   const int size = 11;
 
-  for (int i = 0; i < size; i++) {
+  for (int i = 0; i < size; ++i) {
     SmartObject obj;
 
     makeRandomObject(obj, size - 1, generate_key("A", i) + ' ');
@@ -251,7 +251,7 @@ TEST_F(StressTestHelper, StressTest) {
 
   for (VerificationMap::const_iterator it = mVerifyMap.begin();
        it != mVerifyMap.end();
-       it++) {
+       ++it) {
     std::string value(it->second);
     SmartObject obj = get_object(objects, it->first);
 

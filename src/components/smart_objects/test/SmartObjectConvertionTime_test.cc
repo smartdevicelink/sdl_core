@@ -173,7 +173,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     double convertionFromTime = 0.0;
     const int cycles = 1;
 
-    for (int i = 0; i < cycles; i++) {
+    for (int i = 0; i < cycles; ++i) {
       convertionToTime += getConvertionTimeToJsonV1Format(srcObj, jsonString);
       //        printf("%s\n", jsonString.c_str());
       convertionFromTime +=
@@ -192,7 +192,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
 
     convertionToTime = 0.0;
     convertionFromTime = 0.0;
-    for (int i = 0; i < cycles; i++) {
+    for (int i = 0; i < cycles; ++i) {
       convertionToTime += getConvertionTimeToJsonV2Format(srcObj, jsonString);
       convertionFromTime +=
           getConvertionTimeFromJsonV2Format(jsonString, dstObj);
@@ -505,7 +505,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
   dstObj.setSchema(schema);
 
   // First iteration
-  for (int i = 0; i < arraySize; i++) {
+  for (int i = 0; i < arraySize; ++i) {
     arrayObj[i] = rand();
   }
 
@@ -522,7 +522,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
   // Second iteration
   printf("\n Array object [%d x %d].\n", arraySize, arraySize);
   innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
+  for (int i = 0; i < arraySize; ++i) {
     arrayObj[i] = innerObj;
   }
 
@@ -538,7 +538,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
   // Third iteration
   printf("\n Array object [%d x %d x %d].\n", arraySize, arraySize, arraySize);
   innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
+  for (int i = 0; i < arraySize; ++i) {
     arrayObj[i] = innerObj;
   }
 
@@ -558,7 +558,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
          arraySize,
          arraySize);
   innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
+  for (int i = 0; i < arraySize; ++i) {
     arrayObj[i] = innerObj;
   }
 
@@ -579,7 +579,7 @@ TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
          arraySize,
          arraySize);
   innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
+  for (int i = 0; i < arraySize; ++i) {
     arrayObj[i] = innerObj;
   }
 

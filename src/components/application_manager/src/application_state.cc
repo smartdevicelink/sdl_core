@@ -147,8 +147,8 @@ void ApplicationState::RemoveHMIState(HmiState::StateID state_id) {
   DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
   HmiStates::iterator next = it;
   HmiStates::iterator prev = it;
-  next++;
-  prev--;
+  ++next;
+  --prev;
   if (next != hmi_states_.end()) {
     HmiStatePtr next_state = *next;
     HmiStatePtr prev_state = *prev;

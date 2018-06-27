@@ -775,7 +775,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   if (corelation_id_ < max_corelation_id_) {
-    corelation_id_++;
+    ++corelation_id_;
   } else {
     corelation_id_ = 0;
   }

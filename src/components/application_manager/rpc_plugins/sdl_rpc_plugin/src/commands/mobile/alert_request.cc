@@ -327,14 +327,14 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         hmi_apis::Common_TextFieldName::alertText1;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text1];
-    index++;
+    ++index;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
-    index++;
+    ++index;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =

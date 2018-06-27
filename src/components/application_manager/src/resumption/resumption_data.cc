@@ -183,7 +183,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
   int i = 0;
   for (AppFilesMap::const_iterator file_it = app_files.begin();
        file_it != app_files.end();
-       file_it++) {
+       ++file_it) {
     const AppFile& file = file_it->second;
     if (file.is_persistent) {
       smart_objects::SmartObject file_data =

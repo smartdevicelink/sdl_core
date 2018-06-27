@@ -233,7 +233,7 @@ TEST_F(AppLaunchDataDBTest, SaveOneAndGetAnotherData) {
 TEST_F(AppLaunchDataDBTest, MaxCount) {
   const uint32_t max_ios_devs = res_db()->get_max_number_iOS_devs();
 
-  for (uint32_t i = 0; i < max_ios_devs; i++) {
+  for (uint32_t i = 0; i < max_ios_devs; ++i) {
     ApplicationData data(
         AddCounter(kMobileAppId, i), AddCounter(kBundleId, i), kDeviceMac);
     AddApplicationDataWithIncreaseTable(data);
@@ -280,7 +280,7 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
   uint32_t half_of_max_number_iOS_devs =
       res_db()->get_max_number_iOS_devs() / 2u;
 
-  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; i++) {
+  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; ++i) {
     const std::string mobile_app_id = AddCounter("d1_mobile_app_id", i);
     const std::string bundle_id = AddCounter("d1_bundle_id", i);
 
@@ -290,7 +290,7 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
     input_data1.push_back(app_data);
   }
 
-  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; i++) {
+  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; ++i) {
     const std::string mobile_app_id = AddCounter("d2_mobile_app_id", i);
     const std::string bundle_id = AddCounter("d2_bundle_id", i);
 
@@ -313,11 +313,11 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
   std::sort(input_data1.begin(), input_data1.end(), ApplicationDataComporator);
   std::sort(input_data2.begin(), input_data2.end(), ApplicationDataComporator);
 
-  for (uint32_t i = 0; i < output_data1.size(); i++) {
+  for (uint32_t i = 0; i < output_data1.size(); ++i) {
     EXPECT_TRUE(*output_data1[i] == *input_data1[i]);
   }
 
-  for (uint32_t i = 0; i < output_data2.size(); i++) {
+  for (uint32_t i = 0; i < output_data2.size(); ++i) {
     EXPECT_TRUE(*output_data2[i] == *input_data2[i]);
   }
 }
@@ -325,7 +325,7 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
 // Most be last cause after it AppLaunchDataDBTest
 // requeste manual Init call
 TEST_F(AppLaunchDataDBTest, DeleteAllTableDataTwice) {
-  for (uint32_t i = 0; i < res_db()->get_max_number_iOS_devs(); i++) {
+  for (uint32_t i = 0; i < res_db()->get_max_number_iOS_devs(); ++i) {
     ApplicationData data(
         AddCounter(kMobileAppId, i), AddCounter(kBundleId, i), kDeviceMac);
     AddApplicationDataWithIncreaseTable(data);

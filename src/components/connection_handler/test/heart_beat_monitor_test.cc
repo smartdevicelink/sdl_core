@@ -105,13 +105,13 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, session, _))
       .WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), RemoveSession(conn, session)));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseConnection(_))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, session))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   conn->StartHeartBeat(session);
 
@@ -143,14 +143,14 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, session))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseSession(_, session, _))
       .WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), RemoveSession(conn, session)));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseConnection(_))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   conn->StartHeartBeat(session);
   usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
@@ -175,20 +175,20 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession1, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
                       RemoveSession(conn, kSession1)));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession2, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
                       RemoveSession(conn, kSession2)));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseConnection(_))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, kSession1))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, kSession2))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   conn->StartHeartBeat(kSession1);
   conn->StartHeartBeat(kSession2);
@@ -218,13 +218,13 @@ TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession, _))
       .WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), RemoveSession(conn, kSession)));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, CloseConnection(_))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, kSession))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   const uint32_t kNewTimeout = kTimeout - MICROSECONDS_IN_MILLISECONDS;
   conn->StartHeartBeat(kSession);

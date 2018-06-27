@@ -241,7 +241,7 @@ TEST_F(AppLaunchDataJsonTest, RefreshTimestamp) {
 
 TEST_F(AppLaunchDataJsonTest, MaxCount) {
   const uint32_t max_ios_devs = res_json()->get_max_number_iOS_devs();
-  for (uint32_t i = 0; i < max_ios_devs; i++) {
+  for (uint32_t i = 0; i < max_ios_devs; ++i) {
     ApplicationData data(AddCounter("mobile_app_id_", i),
                          AddCounter("bundle_id_", i),
                          "device_mac");
@@ -263,7 +263,7 @@ TEST_F(AppLaunchDataJsonTest, MaxCount) {
 }
 
 TEST_F(AppLaunchDataJsonTest, DeleteAllJsonDataTwice) {
-  for (uint32_t i = 0; i < res_json()->get_max_number_iOS_devs(); i++) {
+  for (uint32_t i = 0; i < res_json()->get_max_number_iOS_devs(); ++i) {
     ApplicationData data(AddCounter("mobile_app_id_", i),
                          AddCounter("bundle_id_", i),
                          "device_mac");
@@ -297,7 +297,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
   const std::string device_mac_2 = "device_mac_2";
   uint32_t half_part = res_json()->get_max_number_iOS_devs() / 2u;
 
-  for (uint32_t i = 0; i < half_part; i++) {
+  for (uint32_t i = 0; i < half_part; ++i) {
     const std::string mobile_app_id = AddCounter("d1_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d1_bundle_id_", i);
 
@@ -307,7 +307,7 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
     input_data1.push_back(app_data);
   }
 
-  for (uint32_t i = 0; i < half_part; i++) {
+  for (uint32_t i = 0; i < half_part; ++i) {
     const std::string mobile_app_id = AddCounter("d2_mobile_app_id_", i);
     const std::string bundle_id = AddCounter("d2_bundle_id_", i);
 
@@ -330,11 +330,11 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
   std::sort(input_data1.begin(), input_data1.end(), ApplicationDataComporator);
   std::sort(input_data2.begin(), input_data2.end(), ApplicationDataComporator);
 
-  for (uint32_t i = 0; i < output_data1.size(); i++) {
+  for (uint32_t i = 0; i < output_data1.size(); ++i) {
     EXPECT_TRUE(*output_data1[i] == *input_data1[i]);
   }
 
-  for (uint32_t i = 0; i < output_data2.size(); i++) {
+  for (uint32_t i = 0; i < output_data2.size(); ++i) {
     EXPECT_TRUE(*output_data2[i] == *input_data2[i]);
   }
 }

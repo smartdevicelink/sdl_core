@@ -91,7 +91,7 @@ CryptoManagerImpl::CryptoManagerImpl(
     : settings_(set), context_(NULL) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(instance_lock_);
-  instance_count_++;
+  ++instance_count_;
   if (instance_count_ == 1) {
     LOG4CXX_DEBUG(logger_, "Openssl engine initialization");
     SSL_load_error_strings();

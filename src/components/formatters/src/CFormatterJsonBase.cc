@@ -45,14 +45,14 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
       Json::Value::Members members = value.getMemberNames();
 
-      for (uint32_t i = 0; i < members.size(); i++) {
+      for (uint32_t i = 0; i < members.size(); ++i) {
         jsonValueToObj(value[members[i]], obj[members[i]]);
       }
     } else if (value.type() == Json::arrayValue) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
           NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 
-      for (uint32_t i = 0; i < value.size(); i++) {
+      for (uint32_t i = 0; i < value.size(); ++i) {
         jsonValueToObj(value[i], obj[i]);
       }
     } else if (value.type() == Json::intValue) {
@@ -79,7 +79,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == obj.getType()) {
       item = Json::arrayValue;
 
-      for (uint32_t i = 0; i < obj.length(); i++) {
+      for (uint32_t i = 0; i < obj.length(); ++i) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(i), value);
@@ -93,7 +93,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end();
-           key++) {
+           ++key) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(*key), value);

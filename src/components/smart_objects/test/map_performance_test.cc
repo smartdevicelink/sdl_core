@@ -49,8 +49,8 @@ void MakeMapObject(Map& obj, const int size) {
   char i_key[8], j_key[8];
 
   Value array;
-  for (int i = 0; i < size; i++) {
-    for (int j = 0; j < size; j++) {
+  for (int i = 0; i < size; ++i) {
+    for (int j = 0; j < size; ++j) {
       sprintf(j_key, "j_%d", j);
       array.push_back(j_key);
     }

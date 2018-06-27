@@ -119,7 +119,7 @@ void OnVehicleDataNotification::Run() {
       logger_,
       "Number of Notifications to be send: " << appNotification.size());
 
-  for (size_t idx = 0; idx < appNotification.size(); idx++) {
+  for (size_t idx = 0; idx < appNotification.size(); ++idx) {
     LOG4CXX_INFO(logger_,
                  "Send OnVehicleData PRNDL notification to "
                      << appNotification[idx]->name().c_str()

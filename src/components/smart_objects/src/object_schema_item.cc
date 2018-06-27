@@ -185,7 +185,7 @@ void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object) {
       ++it;
       Object.erase(key);
     } else {
-      it++;
+      ++it;
     }
   }
 }

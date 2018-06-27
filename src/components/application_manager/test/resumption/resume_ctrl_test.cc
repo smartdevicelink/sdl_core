@@ -204,7 +204,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
   std::string file_names[count_of_files];
   const size_t max_size = 12;
   char numb[max_size];
-  for (uint32_t i = 0; i < count_of_files; i++) {
+  for (uint32_t i = 0; i < count_of_files; ++i) {
     file_types[i] = i;
     std::snprintf(numb, max_size, "%d", i);
     file_names[i] = "test_file" + std::string(numb);

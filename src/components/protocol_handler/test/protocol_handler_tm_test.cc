@@ -263,14 +263,14 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                      &ProtocolHandler::NotifySessionStarted,
                                      context,
                                      ByRef(empty_rejected_param_))));
-    times++;
+    ++times;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
     EXPECT_CALL(transport_manager_mock,
                 SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
                                                    PROTECTION_OFF)))
         .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-    times++;
+    ++times;
 
     SendControlMessage(
         PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -560,7 +560,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                            HASH_ID_WRONG,
                                                            PROTECTION_OFF),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect send Ack
@@ -568,7 +568,7 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -678,7 +678,7 @@ TEST_F(ProtocolHandlerImplTest,
       // don't call NotifySessionStartedContext() immediately, instead call it
       // after second OnSessionStartedCallback()
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   BsonObject bson_params2;
   bson_object_initialize_default(&bson_params2);
@@ -719,7 +719,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                      HASH_ID_WRONG,
                                                      PROTECTION_OFF),
                                    ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   BsonObject bson_ack_params;
   bson_object_initialize_default(&bson_ack_params);
@@ -741,7 +741,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  connection_id1,
                                                  Eq(ack_params))))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   BsonArray bson_arr;
   bson_array_initialize(&bson_arr, rejected_param_list.size());
@@ -763,7 +763,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  connection_id2,
                                                  Eq(nack_params))))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendTMMessage(connection_id1,
                 PROTOCOL_VERSION_5,
@@ -814,7 +814,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
       // reject session start
       WillOnce(
           DoAll(NotifyTestAsyncWaiter(waiter), Return(SESSION_START_REJECT)));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect send NAck
@@ -822,7 +822,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_OFF, service, session_id, FRAME_DATA_END_SERVICE);
@@ -848,7 +848,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
       .
       // return sessions start success
       WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(connection_key)));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect send Ack
@@ -856,7 +856,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_OFF, service, session_id, FRAME_DATA_END_SERVICE);
@@ -896,7 +896,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                                                            HASH_ID_WRONG,
                                                            PROTECTION_OFF),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -905,7 +905,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)))
       .RetiresOnSaturation();
-  times++;
+  ++times;
 
   SendTMMessage(connection_id,
                 PROTOCOL_VERSION_1,
@@ -952,7 +952,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
                                                            HASH_ID_WRONG,
                                                            PROTECTION_OFF),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -960,7 +960,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1002,7 +1002,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                          &ProtocolHandler::NotifySessionStarted,
                                          context,
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // Expect start protection for unprotected session
@@ -1013,14 +1013,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
       .
       // Return fail protection
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
-  times++;
+  ++times;
 
   // Expect send Ack with PROTECTION_OFF (on fail SLL creation)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1060,7 +1060,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                            HASH_ID_WRONG,
                                                            PROTECTION_ON),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   SetProtocolVersion2();
   // call new SSLContext creation
@@ -1069,27 +1069,27 @@ TEST_F(ProtocolHandlerImplTest,
       // Return new SSLContext
       WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
-  times++;
+  ++times;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is initilized
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
-  times++;
+  ++times;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   // Expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1131,7 +1131,7 @@ TEST_F(ProtocolHandlerImplTest,
                                          &ProtocolHandler::NotifySessionStarted,
                                          context,
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   std::vector<int> services;
   // TODO(AKutsan) : APPLINK-21398 use named constants instead of magic numbers
@@ -1151,14 +1151,14 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // emulate SSL is not initilized
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
-  times++;
+  ++times;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
-  times++;
+  ++times;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -1172,7 +1172,7 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1217,7 +1217,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                            HASH_ID_WRONG,
                                                            PROTECTION_ON),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
@@ -1225,21 +1225,21 @@ TEST_F(ProtocolHandlerImplTest,
       // Return new SSLContext
       WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
-  times++;
+  ++times;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
-  times++;
+  ++times;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
-  times++;
+  ++times;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -1249,7 +1249,7 @@ TEST_F(ProtocolHandlerImplTest,
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
-  times++;
+  ++times;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
@@ -1257,20 +1257,20 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Emulate protection for service is not enabled
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
-  times++;
+  ++times;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1315,7 +1315,7 @@ TEST_F(
                                                            HASH_ID_WRONG,
                                                            PROTECTION_ON),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
@@ -1323,7 +1323,7 @@ TEST_F(
       // Return new SSLContext
       WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
-  times++;
+  ++times;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
@@ -1336,7 +1336,7 @@ TEST_F(
       .
       // emulate is pending
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
-  times++;
+  ++times;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -1346,7 +1346,7 @@ TEST_F(
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
-  times++;
+  ++times;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
@@ -1354,20 +1354,20 @@ TEST_F(
       .
       // Emulate protection for service is not enabled
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
-  times++;
+  ++times;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1411,7 +1411,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                            HASH_ID_WRONG,
                                                            PROTECTION_ON),
                                          ByRef(empty_rejected_param_))));
-  times++;
+  ++times;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
@@ -1422,26 +1422,26 @@ TEST_F(ProtocolHandlerImplTest,
       // Return new SSLContext
       WillOnce(
           DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
-  times++;
+  ++times;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
-  times++;
+  ++times;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
-  times++;
+  ++times;
 
   // Wait restart handshake operation
   EXPECT_CALL(security_manager_mock, StartHandshake(connection_key))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -1451,7 +1451,7 @@ TEST_F(ProtocolHandlerImplTest,
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
-  times++;
+  ++times;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
@@ -1459,16 +1459,16 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Emulate protection for service is not enabled
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
-  times++;
+  ++times;
 
   EXPECT_CALL(security_manager_mock, IsSystemTimeProviderReady())
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
-  times++;
+  ++times;
 
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
-  times++;
+  ++times;
 
   //   Expect send Ack with PROTECTION_ON (on successfull handshake)
   EXPECT_CALL(transport_manager_mock,
@@ -1476,7 +1476,7 @@ TEST_F(ProtocolHandlerImplTest,
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
 
-  times++;
+  ++times;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -1500,7 +1500,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   // Expect flood notification to CH
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
-  times++;
+  ++times;
 
   ON_CALL(protocol_handler_settings_mock, message_frequency_time())
       .WillByDefault(Return(period_msec));
@@ -1695,7 +1695,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
-  times++;
+  ++times;
 
   // Sending malformed packets
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
@@ -1743,7 +1743,7 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
-  times++;
+  ++times;
 
   // Sending malformed packets
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
@@ -1987,7 +1987,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                   PROTECTION_OFF,
                                                   kControl)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   protocol_handler_impl->SendEndService(connection_id, session_id, kControl);
@@ -2025,7 +2025,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_CONTROL, FRAME_DATA_HEART_BEAT, PROTECTION_OFF, kControl)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
@@ -2053,7 +2053,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
                                                   PROTECTION_OFF,
                                                   kControl)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   SendControlMessage(
@@ -2123,7 +2123,7 @@ TEST_F(ProtocolHandlerImplTest,
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_SINGLE, FRAME_DATA_SINGLE, PROTECTION_OFF, kControl)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
@@ -2167,7 +2167,7 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(ExpectedMessage(
                   FRAME_TYPE_SINGLE, FRAME_DATA_SINGLE, PROTECTION_OFF, kRpc)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
@@ -2209,21 +2209,21 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
               SendMessageToDevice(ExpectedMessage(
                   FRAME_TYPE_FIRST, FRAME_DATA_FIRST, PROTECTION_OFF, kBulk)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
                                                   first_consecutive_frame,
                                                   PROTECTION_OFF,
                                                   kBulk)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
                                                   FRAME_DATA_LAST_CONSECUTIVE,
                                                   PROTECTION_OFF,
                                                   kBulk)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
@@ -2251,7 +2251,7 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
                                                   PROTECTION_OFF,
                                                   kMobileNav)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
-  times++;
+  ++times;
 
   protocol_handler_impl->SendFramesNumber(connection_key, 0);
 

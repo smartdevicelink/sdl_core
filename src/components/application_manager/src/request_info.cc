@@ -238,7 +238,7 @@ uint32_t RequestInfoSet::RemoveRequests(
     HashSortedRequestInfoSet::iterator to_erase = it++;
     Erase(*to_erase);
     it = std::find_if(it, hash_sorted_pending_requests_.end(), filter);
-    erased++;
+    ++erased;
   }
   CheckSetSizes();
   return erased;
