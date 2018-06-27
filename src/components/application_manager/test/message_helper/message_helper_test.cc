@@ -39,6 +39,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application.h"
 #include "utils/custom_string.h"
+#include "utils/lock.h"
 #include "policy/mock_policy_settings.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application_manager.h"
@@ -237,7 +238,8 @@ TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Empty) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   ::application_manager::CommandsMap vis;
-  DataAccessor<application_manager::CommandsMap> data_accessor(vis, true);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -252,7 +254,8 @@ TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   CommandsMap vis;
-  DataAccessor<CommandsMap> data_accessor(vis, true);
+  DataAccessor<CommandsMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -293,7 +296,8 @@ TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -308,7 +312,8 @@ TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
-  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -354,7 +359,8 @@ TEST(MessageHelperTestCreate,
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -393,7 +399,8 @@ TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
-  DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
+  DataAccessor< ::application_manager::SubMenuMap> data_accessor(
+      vis, std::make_shared<sync_primitives::Lock>(true));
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 

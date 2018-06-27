@@ -84,7 +84,8 @@ class RAManagerTest : public ::testing::Test {
             protocol_handler::ServiceType::kRpc)))
       , mock_app_1_(utils::MakeShared<NiceMock<MockApplication> >())
       , mock_app_2_(utils::MakeShared<NiceMock<MockApplication> >())
-      , apps_da_(apps_, apps_lock_) {
+      , apps_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , apps_da_(apps_, apps_lock_ptr_) {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
@@ -109,7 +110,7 @@ class RAManagerTest : public ::testing::Test {
   utils::SharedPtr<NiceMock<MockApplication> > mock_app_1_;
   utils::SharedPtr<NiceMock<MockApplication> > mock_app_2_;
   application_manager::ApplicationSet apps_;
-  const sync_primitives::Lock apps_lock_;
+  std::shared_ptr<sync_primitives::Lock> apps_lock_ptr_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
 };
 
@@ -395,7 +396,7 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   application_manager::ApplicationSet apps;
   apps.insert(mock_app_1_);
-  const sync_primitives::Lock apps_lock;
+  std::shared_ptr<sync_primitives::Lock> apps_lock = std::make_shared<sync_primitives::Lock>();
   DataAccessor<application_manager::ApplicationSet> apps_da(apps, apps_lock);
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
@@ -456,7 +457,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
 
   application_manager::ApplicationSet apps;
   apps.insert(mock_app_1_);
-  const sync_primitives::Lock apps_lock;
+  std::shared_ptr<sync_primitives::Lock> apps_lock = std::make_shared<sync_primitives::Lock>();
   DataAccessor<application_manager::ApplicationSet> apps_da(apps, apps_lock);
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));

@@ -93,6 +93,7 @@ class RegisterAppInterfaceRequestTest
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
       , app_name_("test_app_name_")
+      , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
                 application_helper_mock()) {
@@ -227,7 +228,7 @@ class RegisterAppInterfaceRequestTest
   SharedPtr<RegisterAppInterfaceRequest> command_;
 
   const utils::custom_string::CustomString app_name_;
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   am::ApplicationSet app_set_;
 
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
@@ -272,7 +273,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillRepeatedly(Return(mock_app));
 
   ON_CALL(app_mngr_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
@@ -348,7 +350,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   display_capabilities[am::hmi_response::text_fields] = "test_text_fields";
   display_capabilities[am::hmi_response::image_fields] = "test_image_fields";
   display_capabilities[am::hmi_response::media_clock_formats] =
-      "test_media_clock_formats";
+      "test_media_clock_ptr_formats";
   display_capabilities[am::hmi_response::num_custom_presets_available] =
       "test_num_custom_presets_available";
   display_capabilities[am::hmi_response::graphic_supported] =
@@ -368,7 +370,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
           Return(&(*expected_message)[am::hmi_response::display_capabilities]));
 
   ON_CALL(app_mngr_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
+      .WillByDefault(
+          Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));

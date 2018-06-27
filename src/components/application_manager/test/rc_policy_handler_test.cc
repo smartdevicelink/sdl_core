@@ -67,11 +67,11 @@ using namespace application_manager;
 using namespace policy;
 using namespace utils::custom_string;
 using testing::_;
+using ::testing::DoAll;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::DoAll;
 using ::testing::SetArgPointee;
 
 class RCPolicyHandlerTest : public ::testing::Test {
@@ -83,7 +83,8 @@ class RCPolicyHandlerTest : public ::testing::Test {
       , kDeviceId_("fake_device_id")
       , kHmiLevel_("NONE")
       , default_hmi_("fake_hmi")
-      , app_set(test_app, app_lock)
+      , app_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , app_set(test_app, app_lock_ptr_)
       , kAppId1_(10u)
       , kAppId2_(11u)
       , kConnectionKey_(1u)
@@ -107,7 +108,7 @@ class RCPolicyHandlerTest : public ::testing::Test {
   const std::string kHmiLevel_;
   std::string default_hmi_;
   ApplicationSet test_app;
-  sync_primitives::Lock app_lock;
+  std::shared_ptr<sync_primitives::Lock> app_lock_ptr_;
   DataAccessor<ApplicationSet> app_set;
   const uint32_t kAppId1_;
   const uint32_t kAppId2_;

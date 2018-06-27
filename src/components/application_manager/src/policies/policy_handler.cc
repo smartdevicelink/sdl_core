@@ -1521,6 +1521,13 @@ void PolicyHandler::CheckPermissions(
   POLICY_LIB_CHECK_VOID();
   const std::string hmi_level =
       MessageHelper::StringifiedHMILevel(app->hmi_level());
+  if (hmi_level.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "HMI level for " << app->policy_app_id() << " is invalid, rpc "
+                                  << rpc << " is not allowed.");
+    result.hmi_level_permitted = policy::kRpcDisallowed;
+    return;
+  }
   const std::string device_id = MessageHelper::GetDeviceMacAddressForHandle(
       app->device(), application_manager_);
   LOG4CXX_INFO(logger_,

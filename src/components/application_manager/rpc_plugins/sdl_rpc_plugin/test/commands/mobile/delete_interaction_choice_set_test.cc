@@ -84,7 +84,9 @@ class DeleteInteractionChoiceSetRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   DeleteInteractionChoiceSetRequestTest()
-      : accessor_(choice_set_map_, performinteraction_choice_set_lock_) {}
+      : performinteraction_choice_set_lock_(
+            std::make_shared<sync_primitives::Lock>())
+      , accessor_(choice_set_map_, performinteraction_choice_set_lock_) {}
 
   ~DeleteInteractionChoiceSetRequestTest() {
     // Fix DataAccessor release and WinQt crash
@@ -92,7 +94,8 @@ class DeleteInteractionChoiceSetRequestTest
   }
 
   am::PerformChoiceSetMap choice_set_map_;
-  mutable sync_primitives::Lock performinteraction_choice_set_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock>
+      performinteraction_choice_set_lock_;
   DataAccessor<am::PerformChoiceSetMap> accessor_;
 
  protected:

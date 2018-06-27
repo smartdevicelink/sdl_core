@@ -61,6 +61,8 @@ using testing::_;
 class OnKeyBoardInputNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
+  OnKeyBoardInputNotificationTest()
+      : lock_(std::make_shared<sync_primitives::Lock>()) {}
   void SetSendNotificationExpectations(MessageSharedPtr msg) {
     EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
         .WillOnce(Return(false));
@@ -87,7 +89,7 @@ class OnKeyBoardInputNotificationTest
   }
 
   SharedPtr<ApplicationSet> app_set_;
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_;
 };
 
 TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {

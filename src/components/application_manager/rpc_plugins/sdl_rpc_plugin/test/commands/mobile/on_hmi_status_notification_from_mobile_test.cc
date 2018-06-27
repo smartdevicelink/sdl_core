@@ -61,6 +61,8 @@ using testing::_;
 class OnHMIStatusNotificationFromMobileTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
+  OnHMIStatusNotificationFromMobileTest()
+      : lock_(std::make_shared<sync_primitives::Lock>()) {}
   MessageSharedPtr CreateMsgParams(
       const mobile_apis::HMILevel::eType kHMIState) {
     MessageSharedPtr msg = CreateMessage();
@@ -69,7 +71,7 @@ class OnHMIStatusNotificationFromMobileTest
     return msg;
   }
   ApplicationSet app_set_;
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_;
 };
 
 TEST_F(OnHMIStatusNotificationFromMobileTest,

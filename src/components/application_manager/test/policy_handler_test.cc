@@ -108,7 +108,8 @@ class PolicyHandlerTest : public ::testing::Test {
       , default_hmi_("fake_hmi")
       , kPreloadPTFile_("sdl_preloaded_pt.json")
       , kAppStorageFolder_("storage")
-      , app_set(test_app, app_lock)
+      , app_lock_(std::make_shared<sync_primitives::Lock>())
+      , app_set(test_app, app_lock_)
       , kAppId1_(10u)
       , kAppId2_(11u)
       , kConnectionKey_(1u)
@@ -152,7 +153,7 @@ class PolicyHandlerTest : public ::testing::Test {
   const std::string kPreloadPTFile_;
   const std::string kAppStorageFolder_;
   ApplicationSet test_app;
-  sync_primitives::Lock app_lock;
+  std::shared_ptr<sync_primitives::Lock> app_lock_;
   DataAccessor<ApplicationSet> app_set;
   const uint32_t kAppId1_;
   const uint32_t kAppId2_;
@@ -301,7 +302,7 @@ class WaitAsync {
   const uint32_t timeout_;
   sync_primitives::ConditionalVariable cond_var_;
 };
-}
+}  // namespace
 
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
   // Check before policy enabled from ini file

@@ -99,6 +99,10 @@ MATCHER_P2(CheckMsgParams, result, corr_id, "") {
 
 class SDLActivateAppRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  SDLActivateAppRequestTest()
+      : lock_(std::make_shared<sync_primitives::Lock>()) {}
+
  protected:
   ~SDLActivateAppRequestTest() {
     // Fix DataAccessor release and WinQt crash
@@ -118,7 +122,8 @@ class SDLActivateAppRequestTest
   }
 
   ApplicationSet app_list_;
-  ::sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_;
+  policy_test::MockPolicyHandlerInterface policy_handler_;
   application_manager_test::MockStateController mock_state_controller_;
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };

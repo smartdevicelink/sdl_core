@@ -77,7 +77,7 @@ namespace state_controller_test {
 namespace constants {
 const uint32_t kCorrID = 314u;
 const uint32_t kHMIAppID = 2718u;
-}
+}  // namespace constants
 
 struct HmiStatesComparator {
   mobile_apis::HMILevel::eType hmi_level_;
@@ -140,7 +140,8 @@ class StateControllerImplTest : public ::testing::Test {
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
                        new usage_statistics_test::MockStatisticsManager))
-      , applications_(application_set_, applications_lock_)
+      , applications_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , applications_(application_set_, applications_lock_ptr_)
       , message_helper_mock_(
             *application_manager::MockMessageHelper::message_helper_mock()) {
     Mock::VerifyAndClearExpectations(&message_helper_mock_);
@@ -161,7 +162,7 @@ class StateControllerImplTest : public ::testing::Test {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 
   am::ApplicationSet application_set_;
-  mutable sync_primitives::Lock applications_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> applications_lock_ptr_;
   DataAccessor<am::ApplicationSet> applications_;
   utils::SharedPtr<am::StateControllerImpl> state_ctrl_;
 
@@ -1080,8 +1081,8 @@ class StateControllerImplTest : public ::testing::Test {
       am::ApplicationSharedPtr app,
       NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
-    using smart_objects::SmartObject;
     using am::event_engine::Event;
+    using smart_objects::SmartObject;
     namespace FunctionID = hmi_apis::FunctionID;
 
     EXPECT_CALL(app_mock, CurrentHmiState())
@@ -1139,8 +1140,8 @@ class StateControllerImplTest : public ::testing::Test {
       am::ApplicationSharedPtr app,
       NiceMock<application_manager_test::MockApplication>& app_mock,
       std::vector<am::HmiState::StateID>& state_ids) {
-    using smart_objects::SmartObject;
     using am::event_engine::Event;
+    using smart_objects::SmartObject;
     namespace FunctionID = hmi_apis::FunctionID;
 
     EXPECT_CALL(app_mock, CurrentHmiState())

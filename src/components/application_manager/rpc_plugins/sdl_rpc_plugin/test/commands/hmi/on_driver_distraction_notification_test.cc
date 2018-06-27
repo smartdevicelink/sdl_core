@@ -68,7 +68,9 @@ typedef ::utils::SharedPtr<OnDriverDistractionNotification> NotificationPtr;
 class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  ::sync_primitives::Lock app_set_lock_;
+  HMIOnDriverDistractionNotificationTest()
+      : app_set_lock_(std::make_shared<sync_primitives::Lock>()) {}
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 

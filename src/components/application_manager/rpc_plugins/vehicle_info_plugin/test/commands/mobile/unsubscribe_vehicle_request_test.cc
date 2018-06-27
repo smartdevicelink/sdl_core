@@ -72,9 +72,11 @@ class UnsubscribeVehicleRequestTest
       : mock_app_(CreateMockApp())
       , vi_app_extension_ptr_(
             utils::MakeShared<vehicle_info_plugin::VehicleInfoAppExtension>(
-                vi_plugin_, *mock_app_)) {}
+                vi_plugin_, *mock_app_)) 
+      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()){}
 
  protected:
+  void UnsubscribeSuccessfully();
   void SetUp() OVERRIDE {
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,
@@ -92,7 +94,7 @@ class UnsubscribeVehicleRequestTest
 
   MockAppPtr mock_app_;
   application_manager::AppExtensionPtr vi_app_extension_ptr_;
-  sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
 };
 
@@ -156,7 +158,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
   ASSERT_TRUE(vi_app_extension->subscribeToVehicleInfo(kVehicleType));
   application_manager::ApplicationSet app_set = {mock_app_};
   DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
+                                                             app_set_lock_ptr_);
   // Expectations
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   CommandPtr command(CreateCommand<UnsubscribeVehicleDataRequest>(command_msg));

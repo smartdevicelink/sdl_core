@@ -223,7 +223,9 @@ class HMICommandsNotificationsTest
           CommandsTestMocks::kIsNice> {
  public:
   HMICommandsNotificationsTest()
-      : applications_(application_set_, applications_lock_), app_ptr_(NULL) {}
+      : applications_lock_(std::make_shared<sync_primitives::Lock>())
+      , applications_(application_set_, applications_lock_)
+      , app_ptr_(NULL) {}
 
   ~HMICommandsNotificationsTest() {
     // Fix DataAccessor release and WinQt crash
@@ -233,7 +235,7 @@ class HMICommandsNotificationsTest
 
  protected:
   am::ApplicationSet application_set_;
-  sync_primitives::Lock applications_lock_;
+  std::shared_ptr<sync_primitives::Lock> applications_lock_;
   DataAccessor<am::ApplicationSet> applications_;
 
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
