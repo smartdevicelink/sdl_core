@@ -58,7 +58,6 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-
   smart_objects::SmartObject received_msg_params =
       (*message_)[strings::msg_params];
   mobile_apis::Result::eType verification_result =
@@ -66,19 +65,17 @@ void AddSubMenuRequest::Run() {
 
   if (received_msg_params.keyExists(strings::menu_icon)) {
     verification_result = MessageHelper::VerifyImage(
-    received_msg_params[strings::menu_icon],
-    app,
-    application_manager_);
+        received_msg_params[strings::menu_icon], app, application_manager_);
 
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_,"MessageHelper::VerifyImage return " << verification_result);
+      LOG4CXX_ERROR(
+          logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
-      }
+    }
   }
 
-  const int32_t menu_id =
-      received_msg_params[strings::menu_id].asInt();
+  const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
   if (app->FindSubMenu(menu_id)) {
     LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
@@ -103,8 +100,7 @@ void AddSubMenuRequest::Run() {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  msg_params[strings::menu_id] =
-      received_msg_params[strings::menu_id];
+  msg_params[strings::menu_id] = received_msg_params[strings::menu_id];
   if (received_msg_params.keyExists(strings::position)) {
     msg_params[strings::menu_params][strings::position] =
         received_msg_params[strings::position];
