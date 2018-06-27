@@ -32,7 +32,6 @@
 
 #include "appMain/life_cycle_impl.h"
 #include "utils/signals.h"
-#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
@@ -48,13 +47,15 @@
 #include "utils/log_message_loop_thread.h"
 #endif  // ENABLE_LOG
 
+#include "appMain/low_voltage_signals_handler.h"
+
 using threads::Thread;
 
 namespace main_namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
-LifeCycle::LifeCycle(const profile::Profile& profile)
+LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
     : transport_manager_(NULL)
     , protocol_handler_(NULL)
     , connection_handler_(NULL)
@@ -170,7 +171,32 @@ bool LifeCycleImpl::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+  LowVoltageSignalsOffset signals_offset{profile_.low_voltage_signal_offset(),
+                                         profile_.wake_up_signal_offset(),
+                                         profile_.ignition_off_signal_offset()};
+
+  low_voltage_signals_handler_.reset(
+      new LowVoltageSignalsHandler(*this, signals_offset));
+
   return true;
+}
+
+void LifeCycleImpl::LowVoltage() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  transport_manager_->Visibility(false);
+  app_manager_->OnLowVoltage();
+}
+
+void LifeCycleImpl::IgnitionOff() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  kill(getpid(), SIGINT);
+}
+
+void LifeCycleImpl::WakeUp() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  app_manager_->OnWakeUp();
+  transport_manager_->Reinit();
+  transport_manager_->Visibility(true);
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -312,6 +338,9 @@ void LifeCycleImpl::StopComponents() {
   DCHECK(app_manager_);
   delete app_manager_;
   app_manager_ = NULL;
+
+  LOG4CXX_INFO(logger_, "Destroying Low Voltage Signals Handler.");
+  low_voltage_signals_handler_.reset();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 

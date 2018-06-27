@@ -106,10 +106,27 @@ int32_t main(int32_t argc, char** argv) {
   profile::Profile profile_instance;
   std::unique_ptr<main_namespace::LifeCycle> life_cycle(
       new main_namespace::LifeCycleImpl(profile_instance));
+
   if ((argc > 1) && (0 != argv)) {
     profile_instance.set_config_file_name(argv[1]);
   } else {
     profile_instance.set_config_file_name("smartDeviceLink.ini");
+  }
+
+  // Reading profile offsets for real-time signals dedicated
+  // for Low Voltage functionality handling
+  main_namespace::LowVoltageSignalsOffset signals_offset{
+      profile_instance.low_voltage_signal_offset(),
+      profile_instance.wake_up_signal_offset(),
+      profile_instance.ignition_off_signal_offset()};
+
+  // Unsubscribe once for all threads
+  // except specific thread dedicated for
+  // Low Voltage signals handling
+  // Thread will be created later
+  if (!utils::UnsubscribeFromLowVoltageSignals(signals_offset)) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------

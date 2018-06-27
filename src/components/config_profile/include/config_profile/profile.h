@@ -110,6 +110,27 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& app_resource_folder() const;
 
   /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGLOWVOLTAGE
+    * which is used for handling LOW Voltage functionality
+    */
+  int low_voltage_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGWAKEUP
+    * which is used for handling LOW Voltage functionality
+    */
+  int wake_up_signal_offset() const;
+
+  /**
+    * @brief Returns offset from SIGRTMIN for user defined signal
+    * SIGIGNITIONOFF
+    * which is used for handling LOW Voltage functionality
+    */
+  int ignition_off_signal_offset() const;
+
+  /**
    * @brief Returns true, if SDL 4.0 is enabled
    * @deprecated use max_supported_protocol_version instead
    */
@@ -1018,6 +1039,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<std::string> video_service_transports_;
   bool error_occured_;
   std::string error_description_;
+  int low_voltage_signal_offset_;
+  int wake_up_signal_offset_;
+  int ignition_off_signal_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

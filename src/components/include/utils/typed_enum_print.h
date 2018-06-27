@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,23 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_TYPED_ENUM_PRINT_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_TYPED_ENUM_PRINT_H_
 
-#ifdef __QNXNTO__
-typedef void (*sighandler_t)(int);
-#else
-#include <signal.h>
-#endif
-#include "appMain/low_voltage_signals_handler.h"
+#include <type_traits>
+#include <ostream>
 
 namespace utils {
 
-bool UnsubscribeFromTermination();
-bool WaitTerminationSignals(sighandler_t sig_handler);
-bool UnsubscribeFromLowVoltageSignals(
-    const main_namespace::LowVoltageSignalsOffset& offset_data);
+// Generic overloaded operator "<<" to be able to send enum class values to
+// std::ostream
+template <typename T>
+std::ostream& operator<<(
+    typename std::enable_if<std::is_enum<T>::value, std::ostream>::type& stream,
+    const T& e) {
+  return stream << static_cast<int>(e);
+}
 
-}  //  namespace utils
+}  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_TYPED_ENUM_PRINT_H_
