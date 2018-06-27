@@ -35,6 +35,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)

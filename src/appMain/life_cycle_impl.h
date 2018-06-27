@@ -39,21 +39,13 @@
 #include <thread>
 #include <memory>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
 
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#ifdef DBUS_HMIADAPTER
-#include "hmi_message_handler/dbus_message_adapter.h"
-#endif  // DBUS_HMIADAPTER
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #include "application_manager/application_manager_impl.h"
-#ifdef SDL_REMOTE_CONTROL
-#include "application_manager/core_service.h"
-#include "functional_module/plugin_manager.h"
-#endif  // SDL_REMOTE_CONTROL
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
@@ -75,6 +67,8 @@ class SystemTimeHandler;
 }  // namespace utils
 
 namespace main_namespace {
+
+class LowVoltageSignalsHandler;
 
 class LifeCycleImpl : public LifeCycle {
  public:
@@ -102,11 +96,32 @@ class LifeCycleImpl : public LifeCycle {
    */
   void StopComponents() OVERRIDE;
 
+  /**
+   * Makes appropriate actions when Low Voltage signal received:
+   * Stops all SDL activities except of waiting of UNIX signals
+   * from HMI
+   */
+  void LowVoltage() OVERRIDE;
+
+  /**
+   * Makes appropriate actions when Wake Up signal received:
+   * Restores all SDL activities stopped due to LOW VOLTAGE
+   * from HMI
+   */
+  void WakeUp() OVERRIDE;
+
+  /**
+   * Makes appropriate actions when Ignition Off signal received:
+   * Triggers all SDL components stop and deletion
+   */
+  void IgnitionOff() OVERRIDE;
+
  private:
   transport_manager::TransportManagerImpl* transport_manager_;
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
+  std::unique_ptr<LowVoltageSignalsHandler> low_voltage_signals_handler_;
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;
@@ -118,10 +133,6 @@ class LifeCycleImpl : public LifeCycle {
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
 #endif  // TELEMETRY_MONITOR
-#ifdef DBUS_HMIADAPTER
-  hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
-  std::thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;

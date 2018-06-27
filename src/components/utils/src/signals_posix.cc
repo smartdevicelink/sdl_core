@@ -51,6 +51,23 @@ bool utils::UnsubscribeFromTermination() {
   return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
 
+bool utils::UnsubscribeFromLowVoltageSignals(
+    const main_namespace::LowVoltageSignalsOffset& offset_data) {
+  // Disable Low Voltage signals in main thread
+  // due to all further threads will inherit signals mask
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  const int SIGLOWVOLTAGE = SIGRTMIN + offset_data.low_voltage_signal_offset;
+  const int SIGWAKEUP = SIGRTMIN + offset_data.wake_up_signal_offset;
+  const int SIGIGNOFF = SIGRTMIN + offset_data.ignition_off_signal_offset;
+  sigaddset(&signal_set, SIGLOWVOLTAGE);
+  sigaddset(&signal_set, SIGWAKEUP);
+  sigaddset(&signal_set, SIGIGNOFF);
+
+  // Set signals mask to be blocked by thread
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, nullptr);
+}
+
 namespace {
 bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;

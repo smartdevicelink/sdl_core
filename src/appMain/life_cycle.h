@@ -67,7 +67,25 @@ class LifeCycle {
    */
   virtual void StopComponents() = 0;
 
+  /**
+   * Makes appropriate actions when Low Voltage signal received:
+   * Stops all SDL activities except of waiting of UNIX signals
+   * from HMI
+   */
+  virtual void LowVoltage() = 0;
 
+  /**
+   * Makes appropriate actions when Wake Up signal received:
+   * Restores all SDL activities stopped due to LOW VOLTAGE
+   * from HMI
+   */
+  virtual void WakeUp() = 0;
+
+  /**
+   * Makes appropriate actions when Ignition Off signal received:
+   * Triggers all SDL components stop and deletion
+   */
+  virtual void IgnitionOff() = 0;
 };
 }  //  namespace main_namespace
 
