@@ -32,9 +32,13 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_PLUGIN_H
+
+#include <memory>
+
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -94,6 +98,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
  private:
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
+  std::unique_ptr<InteriorDataCache> interior_data_cache_;
 };
 }  // namespace rc_rpc_plugin
 

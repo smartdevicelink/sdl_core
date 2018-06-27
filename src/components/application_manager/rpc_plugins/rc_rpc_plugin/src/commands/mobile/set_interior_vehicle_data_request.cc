@@ -126,13 +126,15 @@ SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
+    ResourceAllocationManager& resource_allocation_manager,
+    InteriorDataCache& interior_data_cache)
     : RCCommandRequest(message,
                        application_manager,
                        rpc_service,
                        hmi_capabilities,
                        policy_handle,
-                       resource_allocation_manager) {}
+                       resource_allocation_manager,
+                       interior_data_cache) {}
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 

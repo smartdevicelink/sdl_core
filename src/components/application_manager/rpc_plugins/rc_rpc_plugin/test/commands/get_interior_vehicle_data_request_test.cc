@@ -40,6 +40,7 @@
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/commands/command_request_test.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 
@@ -124,7 +125,8 @@ class GetInteriorVehicleDataRequestTest
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,
                                         mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                        mock_allocation_manager_,
+                                        mock_interior_data_cache_);
   }
 
  protected:
@@ -133,6 +135,8 @@ class GetInteriorVehicleDataRequestTest
   utils::SharedPtr<RCAppExtension> rc_app_extention_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
+  testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
+      mock_interior_data_cache_;
 };
 TEST_F(GetInteriorVehicleDataRequestTest,
        Execute_MessageValidationOk_ExpectCorrectMessageSentToHMI) {

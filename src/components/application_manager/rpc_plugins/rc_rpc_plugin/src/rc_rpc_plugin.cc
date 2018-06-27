@@ -34,6 +34,7 @@
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
+#include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "utils/helpers.h"
 
 namespace rc_rpc_plugin {
@@ -44,6 +45,7 @@ bool RCRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler) {
+  interior_data_cache_.reset(new InteriorDataCacheImpl());
   resource_allocation_manager_.reset(
       new ResourceAllocationManagerImpl(app_manager, rpc_service));
   command_factory_.reset(
@@ -51,7 +53,8 @@ bool RCRPCPlugin::Init(
                                           rpc_service,
                                           hmi_capabilities,
                                           policy_handler,
-                                          *resource_allocation_manager_));
+                                          *resource_allocation_manager_,
+                                          *interior_data_cache_));
   return true;
 }
 
