@@ -39,6 +39,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/mobile/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)

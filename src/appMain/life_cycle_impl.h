@@ -76,6 +76,8 @@ class SystemTimeHandler;
 
 namespace main_namespace {
 
+class LowVoltageSignalsHandler;
+
 class LifeCycleImpl : public LifeCycle {
  public:
   explicit LifeCycleImpl(const profile::Profile& profile);
@@ -102,11 +104,32 @@ class LifeCycleImpl : public LifeCycle {
    */
   void StopComponents() OVERRIDE;
 
+  /**
+   * Makes appropriate actions when Low Voltage signal received:
+   * Stops all SDL activities except of waiting of UNIX signals
+   * from HMI
+   */
+  void LowVoltage() OVERRIDE;
+
+  /**
+   * Makes appropriate actions when Wake Up signal received:
+   * Restores all SDL activities stopped due to LOW VOLTAGE
+   * from HMI
+   */
+  void WakeUp() OVERRIDE;
+
+  /**
+   * Makes appropriate actions when Ignition Off signal received:
+   * Triggers all SDL components stop and deletion
+   */
+  void IgnitionOff() OVERRIDE;
+
  private:
   transport_manager::TransportManagerImpl* transport_manager_;
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
+  std::unique_ptr<LowVoltageSignalsHandler> low_voltage_signals_handler_;
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;

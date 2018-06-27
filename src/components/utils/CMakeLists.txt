@@ -40,6 +40,7 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 # dbms

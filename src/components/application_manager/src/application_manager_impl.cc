@@ -3048,7 +3048,10 @@ void ApplicationManagerImpl::ClearAppsPersistentData() {
 
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if (IsLowVoltage()) {
+    LOG4CXX_TRACE(logger_, "SDL is in Low Voltage State");
+    return;
+  }
   // must be sent to PASA HMI on shutdown synchronously
   smart_objects::SmartObjectSPtr msg =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
