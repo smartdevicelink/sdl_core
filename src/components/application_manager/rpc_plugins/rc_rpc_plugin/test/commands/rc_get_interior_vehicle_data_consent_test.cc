@@ -46,6 +46,7 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
@@ -123,6 +124,8 @@ class RCGetInteriorVehicleDataConsentTest
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
     ON_CALL(mock_allocation_manager_, GetApplicationExtention(_))
         .WillByDefault(Return(rc_app_extention_));
+    testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
+        mock_interior_data_cache_;
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(app_mngr_, hmi_capabilities())
@@ -152,7 +155,8 @@ class RCGetInteriorVehicleDataConsentTest
                                         rpc_service,
                                         mock_hmi_capabilities_,
                                         mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                        mock_allocation_manager_,
+                                        mock_interior_data_cache_);
   }
 
   MessageSharedPtr CreateBasicMessage() {
@@ -175,6 +179,8 @@ class RCGetInteriorVehicleDataConsentTest
   am::CommandHolderImpl command_holder;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
+  testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
+      mock_interior_data_cache_;
   smart_objects::SmartObject rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
