@@ -51,7 +51,6 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
@@ -156,11 +155,6 @@ if (OS_TYPE_OPTION)
   endif()
 endif()
 
-if (REMOTE_CONTROL)
-  add_definitions(-DSDL_REMOTE_CONTROL)
-  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
-endif()
-
 #Jenkins integration section end
 
 #Deliver Build Configuration
@@ -173,12 +167,6 @@ get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
 get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
-
-get_property(cHelpString CACHE REMOTE_CONTROL PROPERTY HELPSTRING)
-get_property(cType CACHE REMOTE_CONTROL PROPERTY TYPE)
-get_property(cValue CACHE REMOTE_CONTROL PROPERTY VALUE)
-file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "REMOTE_CONTROL:${cType}=${cValue}\n\n")
 
 get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
 get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)

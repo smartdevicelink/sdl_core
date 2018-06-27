@@ -226,20 +226,6 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
-  DEPRECATED static bool SendIVISubscribtions(const uint32_t app_id,
-                                              ApplicationManager& app_mngr);
-  /**
-   * @brief Sends IVI subscription requests
-   */
-  static bool SendIVISubscriptions(const uint32_t app_id,
-                                   ApplicationManager& app_mngr);
-
-  /**
-   * @brief Returns IVI subscription requests
-   */
-  static smart_objects::SmartObjectList GetIVISubscriptionRequests(
-      ApplicationSharedPtr app, ApplicationManager& app_mngr);
-
   /**
    * @brief Sends button subscription notification
    */
@@ -803,18 +789,6 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
-   * @brief SendUnsubscribeIVIRequest sends request to HMI to remove vehicle
-   * data subscription for application
-   * @param ivi_id Vehicle data item id
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                        ApplicationSharedPtr application,
-                                        ApplicationManager& app_mngr);
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
    * @brief Sends HMI status notification to mobile
    * @param application_impl application with changed HMI status
    **/
@@ -836,9 +810,7 @@ class MessageHelper {
       ApplicationManager& application_manager,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
-#endif  // SDL_REMOTE_CONTROL
 
- private:
   /**
    * @brief CreateMessageForHMI Creates HMI message with prepared header
    * acccoring to message type
@@ -849,6 +821,7 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
       hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
 
+ private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
    * @param permissions application permissions.

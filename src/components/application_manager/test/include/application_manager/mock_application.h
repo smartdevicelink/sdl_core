@@ -150,9 +150,6 @@ class MockApplication : public ::application_manager::Application {
                bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(UnsubscribeFromButton,
                bool(mobile_apis::ButtonName::eType btn_name));
-  MOCK_METHOD1(SubscribeToIVI, bool(uint32_t vehicle_info_type));
-  MOCK_CONST_METHOD1(IsSubscribedToIVI, bool(uint32_t vehicle_info_type));
-  MOCK_METHOD1(UnsubscribeFromIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD0(ResetDataInNone, void());
   MOCK_METHOD2(AreCommandLimitsExceeded,
                bool(mobile_apis::FunctionID::eType cmd_id,
@@ -206,9 +203,6 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(
       SubscribedButtons,
       DataAccessor< ::application_manager::ButtonSubscriptions>());
-  MOCK_CONST_METHOD0(
-      SubscribedIVI,
-      DataAccessor< ::application_manager::VehicleInfoSubscriptions>());
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
@@ -308,7 +302,6 @@ class MockApplication : public ::application_manager::Application {
       SwapMobileMessageQueue,
       void(::application_manager::MobileMessageQueue& mobile_messages));
 
-#ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD1(
       set_system_context,
       void(const application_manager::mobile_api::SystemContext::eType&));
@@ -331,11 +324,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(AddExtension,
                bool(application_manager::AppExtensionPtr extention));
   MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
-  MOCK_METHOD0(RemoveExtensions, void());
-  MOCK_CONST_METHOD0(SubscribesIVI,
-                     const application_manager::VehicleInfoSubscriptions&());
-
-#endif  // SDL_REMOTE_CONTROL
+  MOCK_CONST_METHOD0(Extensions,
+                     const std::list<application_manager::AppExtensionPtr>&());
+  MOCK_CONST_METHOD0(is_remote_control_supported, bool());
+  MOCK_METHOD1(set_remote_control_supported, void(const bool allow));
 };
 
 }  // namespace application_manager_test

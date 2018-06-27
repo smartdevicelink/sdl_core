@@ -47,10 +47,8 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
 #include "utils/timer.h"
-#ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#endif  // SDL_REMOTE_CONTROL
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -448,7 +446,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Assigns new HMI types for specified application
    * @param application_id Unique application id
@@ -483,7 +480,6 @@ class PolicyManagerImpl : public PolicyManager {
    * @param application_id Unique id of application
    */
   void OnPrimaryGroupsChanged(const std::string& application_id);
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Removes consent for application functional group
@@ -816,7 +812,6 @@ class PolicyManagerImpl : public PolicyManager {
   void RetrySequence();
 
  private:
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Get resulting RPCs permissions for application which started on
    * specific device
@@ -853,10 +848,10 @@ class PolicyManagerImpl : public PolicyManager {
     */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
-        /**
-         * @brief pointer to policy table listener for callbacks
-         */
+
+  /**
+   * @brief pointer to policy table listener for callbacks
+   */
   PolicyListener* listener_;
 
   /**
@@ -868,12 +863,11 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief pointer to CacheManagerInterface instance for getting policy data
    */
   CacheManagerInterfaceSPtr cache_;
-#ifdef SDL_REMOTE_CONTROL
+
   /**
    * @brief pointer to AccessRemote instance for working with RC applications
    */
   utils::SharedPtr<AccessRemote> access_remote_;
-#endif
 
   /**
    * @brief lock guard for protecting applications list access

@@ -38,8 +38,9 @@
 #include <string>
 #include <string.h>
 #include "application_manager/application_manager.h"
-#include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -51,6 +52,7 @@
 
 namespace media_manager {
 using sync_primitives::AutoLock;
+namespace strings = application_manager::strings;
 
 #ifdef EXTENDED_MEDIA_MODE
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 50;
@@ -118,13 +120,57 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     offset_ = offset_ + to - from;
     std::vector<uint8_t> data(from, to);
 
-    application_manager_.SendAudioPassThroughNotification(session_key_, data);
+    SendAudioPassThroughNotification(session_key_, data);
     binaryData.clear();
   }
 #if !defined(EXTENDED_MEDIA_MODE)
   // without recording stream restart reading 1-sec file
   offset_ = 0;
 #endif
+}
+
+void AudioStreamSenderThread::SendAudioPassThroughNotification(
+    uint32_t session_key, std::vector<uint8_t>& binary_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!application_manager_.is_audio_pass_thru_active()) {
+    LOG4CXX_ERROR(logger_,
+                  "Trying to send PassThroughNotification"
+                  " when PassThrough is not active");
+    return;
+  }
+
+  AudioData data;
+  data.session_key = session_key;
+  data.binary_data = binary_data;
+
+  smart_objects::SmartObjectSPtr on_audio_pass =
+      new smart_objects::SmartObject();
+
+  if (!on_audio_pass) {
+    LOG4CXX_ERROR(logger_, "OnAudioPassThru NULL pointer");
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Fill smart object");
+
+  (*on_audio_pass)[strings::params][strings::message_type] =
+      application_manager::MessageType::kNotification;
+
+  (*on_audio_pass)[strings::params][strings::connection_key] =
+      static_cast<int32_t>(data.session_key);
+  (*on_audio_pass)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnAudioPassThruID;
+
+  LOG4CXX_DEBUG(logger_, "Fill binary data");
+  // binary data
+  (*on_audio_pass)[strings::params][strings::binary_data] =
+      smart_objects::SmartObject(data.binary_data);
+
+  LOG4CXX_DEBUG(logger_, "After fill binary data");
+  LOG4CXX_DEBUG(logger_, "Send data");
+  application_manager_.GetRPCService().ManageMobileCommand(
+      on_audio_pass, application_manager::commands::Command::SOURCE_SDL);
 }
 
 bool AudioStreamSenderThread::getShouldBeStopped() {
