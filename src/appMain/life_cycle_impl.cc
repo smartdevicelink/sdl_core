@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,9 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "life_cycle.h"
+#include "appMain/life_cycle_impl.h"
 #include "utils/signals.h"
+#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
@@ -69,6 +70,10 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
+#ifdef DBUS_HMIADAPTER
+    , dbus_adapter_(NULL)
+    , dbus_adapter_thread_(NULL)
+#endif  // DBUS_HMIADAPTER
 #ifdef MESSAGEBROKER_HMIADAPTER
     , mb_adapter_(NULL)
     , mb_adapter_thread_(NULL)
@@ -76,7 +81,7 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , profile_(profile) {
 }
 
-bool LifeCycle::StartComponents() {
+bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_);
   last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
@@ -169,7 +174,7 @@ bool LifeCycle::StartComponents() {
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-bool LifeCycle::InitMessageSystem() {
+bool LifeCycleImpl::InitMessageSystem() {
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
       hmi_handler_, profile_.server_address(), profile_.server_port());
 
@@ -183,6 +188,30 @@ bool LifeCycle::InitMessageSystem() {
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
+
+#ifdef DBUS_HMIADAPTER
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool LifeCycleImpl::InitMessageSystem() {
+  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
+
+  hmi_handler_->AddHMIMessageAdapter(dbus_adapter_);
+  if (!dbus_adapter_->Init()) {
+    LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
+    return false;
+  }
+
+  dbus_adapter_->SubscribeTo();
+
+  LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
+  dbus_adapter_thread_ = new std::thread(
+      &hmi_message_handler::DBusMessageAdapter::Run, dbus_adapter_);
+
+  return true;
+}
+#endif  // DBUS_HMIADAPTER
 
 namespace {
 void sig_handler(int sig) {
@@ -206,7 +235,7 @@ void sig_handler(int sig) {
 }
 }  //  namespace
 
-void LifeCycle::Run() {
+void LifeCycleImpl::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // Register signal handlers and wait sys signals
   // from OS
@@ -215,7 +244,7 @@ void LifeCycle::Run() {
   }
 }
 
-void LifeCycle::StopComponents() {
+void LifeCycleImpl::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
@@ -285,6 +314,21 @@ void LifeCycle::StopComponents() {
   app_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+
+#ifdef DBUS_HMIADAPTER
+  if (dbus_adapter_) {
+    DCHECK_OR_RETURN_VOID(hmi_handler_);
+    hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
+    dbus_adapter_->Shutdown();
+    if (dbus_adapter_thread_ != NULL) {
+      dbus_adapter_thread_->join();
+    }
+    delete dbus_adapter_;
+    dbus_adapter_ = NULL;
+    delete dbus_adapter_thread_;
+    dbus_adapter_thread_ = NULL;
+  }
+#endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   if (mb_adapter_) {

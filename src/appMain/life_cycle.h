@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,77 +32,42 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
-#include <thread>
-#include <unistd.h>
-#include "utils/macro.h"
-
-#include "config_profile/profile.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
-#include "hmi_message_handler/messagebroker_adapter.h"
-#endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_default.h"
-#include "media_manager/media_manager_impl.h"
-#ifdef TELEMETRY_MONITOR
-#include "telemetry_monitor/telemetry_monitor.h"
-#endif
-
-#ifdef ENABLE_SECURITY
-namespace security_manager {
-class CryptoManager;
-class SecurityManagerImpl;
-}  // namespace security_manager
-#endif  // ENABLE_SECURITY
-
-namespace utils {
-class SystemTimeHandler;
-}  // namespace utils
 
 namespace main_namespace {
+
+/**
+ * Class responsible for all system components creation,
+ * start, stop, suspend and restore
+ */
+
 class LifeCycle {
  public:
-  LifeCycle(const profile::Profile& profile);
-  bool StartComponents();
+  virtual ~LifeCycle() {}
 
   /**
-  * Initialize MessageBroker component
-  * @return true if success otherwise false.
-  */
-  bool InitMessageSystem();
+   * Creates and starts all system components
+   * @return true if all components started successfully
+   * otherwise false.
+   */
+  virtual bool StartComponents() = 0;
+
   /**
- * \brief Main loop
- */
-  void Run();
-  void StopComponents();
+   * Initializes MessageBroker component
+   * @return true if success otherwise false.
+   */
+  virtual bool InitMessageSystem() = 0;
 
- private:
-  transport_manager::TransportManagerImpl* transport_manager_;
-  protocol_handler::ProtocolHandlerImpl* protocol_handler_;
-  connection_handler::ConnectionHandlerImpl* connection_handler_;
-  application_manager::ApplicationManagerImpl* app_manager_;
-#ifdef ENABLE_SECURITY
-  security_manager::CryptoManager* crypto_manager_;
-  security_manager::SecurityManager* security_manager_;
-#endif  // ENABLE_SECURITY
-  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-  hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
-  media_manager::MediaManagerImpl* media_manager_;
-  resumption::LastState* last_state_;
-#ifdef TELEMETRY_MONITOR
-  telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
-#endif  // TELEMETRY_MONITOR
+  /**
+   * @brief Main loop
+   */
+  virtual void Run() = 0;
 
-#ifdef MESSAGEBROKER_HMIADAPTER
-  hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-  std::thread* mb_adapter_thread_;
-#endif  // MESSAGEBROKER_HMIADAPTER
+  /**
+   * Stops all system components
+   */
+  virtual void StopComponents() = 0;
 
-  const profile::Profile& profile_;
-  DISALLOW_COPY_AND_ASSIGN(LifeCycle);
+
 };
 }  //  namespace main_namespace
 
