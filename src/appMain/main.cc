@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <vector>
 #include <string>
 #include <iostream>  // cpplint: Streams are highly discouraged.
@@ -45,7 +46,7 @@
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger.h"
 
-#include "./life_cycle.h"
+#include "appMain/life_cycle_impl.h"
 #include "signal_handlers.h"
 
 #include "utils/signals.h"
@@ -103,7 +104,8 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Components initialization
   profile::Profile profile_instance;
-  main_namespace::LifeCycle life_cycle(profile_instance);
+  std::unique_ptr<main_namespace::LifeCycle> life_cycle(
+      new main_namespace::LifeCycleImpl(profile_instance));
   if ((argc > 1) && (0 != argv)) {
     profile_instance.set_config_file_name(argv[1]);
   } else {
@@ -134,9 +136,9 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Components initialization
-  if (!life_cycle.StartComponents()) {
+  if (!life_cycle->StartComponents()) {
     LOG4CXX_FATAL(logger_, "Failed to start components");
-    life_cycle.StopComponents();
+    life_cycle->StopComponents();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
@@ -145,9 +147,9 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!life_cycle.InitMessageSystem()) {
+  if (!life_cycle->InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
-    life_cycle.StopComponents();
+    life_cycle->StopComponents();
     DEINIT_LOGGER();
     _exit(EXIT_FAILURE);
   }
@@ -167,10 +169,10 @@ int32_t main(int32_t argc, char** argv) {
   }
   // --------------------------------------------------------------------------
 
-  life_cycle.Run();
+  life_cycle->Run();
   LOG4CXX_INFO(logger_, "Stop SDL due to caught signal");
 
-  life_cycle.StopComponents();
+  life_cycle->StopComponents();
   LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
 
   DEINIT_LOGGER();

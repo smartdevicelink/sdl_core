@@ -72,6 +72,7 @@ include_directories(
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
