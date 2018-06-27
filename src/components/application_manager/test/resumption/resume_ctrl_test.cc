@@ -55,14 +55,14 @@ namespace resumption_test {
 
 using ::testing::_;
 using ::testing::A;
-using ::testing::Return;
-using ::testing::ReturnRef;
+using ::testing::AtLeast;
 using ::testing::DoAll;
-using ::testing::SetArgReferee;
+using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::NiceMock;
-using ::testing::AtLeast;
-using ::testing::Eq;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::SetArgReferee;
 using ::testing::ReturnPointee;
 using ::testing::SaveArg;
 using namespace application_manager_test;
@@ -83,6 +83,7 @@ class ResumeCtrlTest : public ::testing::Test {
       , kHash_("saved_hash")
       , kAppResumingTimeout_(30000u)  // miliseconds
       , kTestTimeStamp_(1452074434u)
+      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , kDefaultDeferredTestLevel_(eType::INVALID_ENUM)
       , kNaviLowbandwidthLevel_("LIMITED")
       , kProjectionLowbandwidthLevel_("NONE")
@@ -156,6 +157,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kHash_;
   const uint32_t kAppResumingTimeout_;
   const uint32_t kTestTimeStamp_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   sync_primitives::Lock app_set_lock_;
   const mobile_apis::HMILevel::eType kDefaultDeferredTestLevel_;
   const std::string kNaviLowbandwidthLevel_;
@@ -847,7 +849,7 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
 
 /**
  * @brief group of tests which check correct SetAppHMIState
-*/
+ */
 
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
   GetInfoFromApp();
@@ -929,7 +931,7 @@ TEST_F(ResumeCtrlTest, SaveAllApplications) {
   app_set.insert(test_app);
 
   DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
+                                                             app_set_lock_ptr_);
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
   EXPECT_CALL(*mock_storage_, SaveApplication(Eq(test_app)));
@@ -943,7 +945,7 @@ TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
   application_manager::ApplicationSet app_set;
 
   DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
+                                                             app_set_lock_ptr_);
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
   EXPECT_CALL(*mock_storage_, SaveApplication(mock_app)).Times(0);
@@ -1093,7 +1095,7 @@ TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
   application_manager::ApplicationSet app_set;
 
   DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
+                                                             app_set_lock_ptr_);
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(accessor));
   EXPECT_CALL(*mock_storage_, SaveApplication(mock_app)).Times(0);

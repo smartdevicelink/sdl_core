@@ -103,6 +103,7 @@ class AddCommandRequestTest
   AddCommandRequestTest()
       : msg_(CreateMessage())
       , default_app_name_("test_default_app_name_")
+      , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_app_(CreateMockApp()) {
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillRepeatedly(Return(mock_app_));
@@ -176,7 +177,7 @@ class AddCommandRequestTest
         CreateCommandsMap(first_command, second_command);
     EXPECT_CALL(*mock_app_, commands_map())
         .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
-            commands_map, lock_)));
+            commands_map, lock_ptr_)));
     so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
     EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
         .WillOnce(Return(so_ptr_.get()));
@@ -219,7 +220,7 @@ class AddCommandRequestTest
   MessageSharedPtr msg_;
   SmartObjectSPtr so_ptr_;
   const utils::custom_string::CustomString default_app_name_;
-  sync_primitives::Lock lock_;
+  std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   MockAppPtr mock_app_;
 };
 
@@ -262,8 +263,8 @@ TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   SmartObject parent = SmartObject(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId))
       .WillOnce(Return(&parent));
@@ -283,8 +284,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
@@ -308,8 +309,8 @@ TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
@@ -348,8 +349,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
@@ -372,8 +373,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
   EXPECT_CALL(app_mngr_,
@@ -400,8 +401,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
@@ -443,8 +444,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
@@ -475,8 +476,8 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
 
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -497,7 +498,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(
-          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_ptr_)));
 
   Event event(hmi_apis::FunctionID::UI_AddCommand);
   event.set_smart_object(*msg_);
@@ -524,7 +525,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(
-          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_ptr_)));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
@@ -596,8 +597,8 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -625,8 +626,8 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -664,8 +665,8 @@ TEST_F(
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -708,8 +709,8 @@ TEST_F(
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -752,8 +753,8 @@ TEST_F(
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -801,8 +802,8 @@ TEST_F(
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -849,8 +850,8 @@ TEST_F(
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
@@ -884,8 +885,8 @@ TEST_F(
   params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(
       app_mngr_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
@@ -922,8 +923,8 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -970,8 +971,8 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -1042,8 +1043,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
@@ -1077,8 +1078,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   base_class_request->onTimeOut();
 }
 
-}  // namespace add_command_test
+}  // namespace add_command_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

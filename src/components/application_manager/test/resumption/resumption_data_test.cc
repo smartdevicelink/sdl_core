@@ -328,13 +328,13 @@ void ResumptionDataTest::PrepareData() {
   SetChoiceSet();
   SetAppFiles();
 
-  DataAccessor<am::SubMenuMap> sub_menu_m(test_submenu_map, sublock_);
-  DataAccessor<am::CommandsMap> commands_m(test_commands_map, comlock_);
-  DataAccessor<am::ChoiceSetMap> choice_set_m(test_choiceset_map, setlock_);
+  DataAccessor<am::SubMenuMap> sub_menu_m(test_submenu_map, sublock_ptr_);
+  DataAccessor<am::CommandsMap> commands_m(test_commands_map, comlock_ptr_);
+  DataAccessor<am::ChoiceSetMap> choice_set_m(test_choiceset_map, setlock_ptr_);
 
   SetSubscriptions();
-  DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_);
-  DataAccessor<am::VehicleInfoSubscriptions> ivi_access(ivi, ivilock_);
+  DataAccessor<am::ButtonSubscriptions> btn_sub(btn_subscr, btnlock_ptr_);
+  DataAccessor<am::VehicleInfoSubscriptions> ivi_access(ivi, ivilock_ptr_);
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 

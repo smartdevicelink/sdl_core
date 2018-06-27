@@ -83,7 +83,7 @@ namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
 }
-}
+}  // namespace
 
 namespace application_manager {
 
@@ -147,7 +147,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,
     const policy::PolicySettings& policy_settings)
     : settings_(am_settings)
-    , applications_list_lock_(true)
+    , applications_list_lock_ptr_(std::make_shared<sync_primitives::Lock>(true))
+    , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(
@@ -238,7 +239,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
-  DataAccessor<ApplicationSet> accessor(applications_, applications_list_lock_);
+  DataAccessor<ApplicationSet> accessor(applications_,
+                                        applications_list_lock_ptr_);
   return accessor;
 }
 
@@ -381,7 +383,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-  sync_primitives::AutoLock lock(applications_list_lock_);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
 
@@ -610,13 +612,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   // Keep HMI add id in case app is present in "waiting for registration" list
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
   if (apps_to_register_.end() != it) {
     application->set_hmi_application_id((*it)->hmi_app_id());
     apps_to_register_.erase(application);
   }
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
 
   if (!application->hmi_app_id()) {
     const bool is_saved =
@@ -649,11 +651,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Add application to registered app list and set appropriate mark.
   // Lock has to be released before adding app to policy DB to avoid possible
   // deadlock with simultaneous PTU processing
-  applications_list_lock_.Acquire();
+  applications_list_lock_ptr_->Acquire();
   application->MarkRegistered();
   applications_.insert(application);
   apps_size_ = applications_.size();
-  applications_list_lock_.Release();
+  applications_list_lock_ptr_->Release();
 
   // It is possible that secondary transport of this app has been already
   // established. Make sure that the information is reflected to application
@@ -1017,12 +1019,12 @@ ApplicationConstSharedPtr ApplicationManagerImpl::WaitingApplicationByID(
 DataAccessor<AppsWaitRegistrationSet>
 ApplicationManagerImpl::AppsWaitingForRegistration() const {
   return DataAccessor<AppsWaitRegistrationSet>(apps_to_register_,
-                                               apps_to_register_list_lock_);
+                                               apps_to_register_list_lock_ptr_);
 }
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
@@ -1043,7 +1045,7 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
     const connection_handler::DeviceHandle handle, bool is_greyed_out) {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
@@ -1213,7 +1215,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                                const std::string& mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-  sync_primitives::AutoLock lock(applications_list_lock_);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   DCHECK_OR_RETURN_VOID(1 == applications_.erase(app));
 
   LOG4CXX_DEBUG(logger_,
@@ -3035,7 +3037,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     app->set_vr_synonyms(vrSynonym);
     app->set_tts_name(ttsName);
 
-    sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
     LOG4CXX_DEBUG(
         logger_, "apps_to_register_ size before: " << apps_to_register_.size());
     apps_to_register_.insert(app);
@@ -3301,7 +3303,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
     const connection_handler::DeviceHandle handle) {
   DevicePredicate device_finder(handle);
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   AppsWaitRegistrationSet::iterator it_app = std::find_if(
       apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
@@ -3314,7 +3316,7 @@ void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);
   }
 
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(
@@ -3386,7 +3388,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   ApplicationSharedPtr app_to_remove;
   connection_handler::DeviceHandle handle = 0;
   {
-    sync_primitives::AutoLock lock(applications_list_lock_);
+    sync_primitives::AutoLock lock(applications_list_lock_ptr_);
     auto it_app = applications_.begin();
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
@@ -4152,9 +4154,9 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
 
-  apps_to_register_list_lock_.Acquire();
+  apps_to_register_list_lock_ptr_->Acquire();
   const bool trigger_ptu = apps_size_ != applications_.size();
-  apps_to_register_list_lock_.Release();
+  apps_to_register_list_lock_ptr_->Release();
   SendUpdateAppList();
   GetPolicyHandler().OnAppsSearchCompleted(trigger_ptu);
 }
@@ -4703,10 +4705,10 @@ bool ApplicationManagerImpl::IsSOStructValid(
 
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
-  applications_list_lock_.Acquire();
+  applications_list_lock_ptr_->Acquire();
   applications_.insert(mock_app);
   apps_size_ = applications_.size();
-  applications_list_lock_.Release();
+  applications_list_lock_ptr_->Release();
 }
 
 void ApplicationManagerImpl::SetMockMediaManager(

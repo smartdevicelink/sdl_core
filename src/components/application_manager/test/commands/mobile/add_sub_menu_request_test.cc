@@ -61,10 +61,48 @@ typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const uint32_t kAppId = 1u;
 }  // namespace
 
 class AddSubMenuRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  AddSubMenuRequestTest() : mock_app(CreateMockApp()) {
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillRepeatedly(Return(mock_app));
+  }
+
+  MockAppPtr mock_app;
+
+  MessageSharedPtr CreateMsgParams() {
+    MessageSharedPtr msg = CreateMessage();
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+    return msg;
+  }
+};
+
+TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
+  const uint32_t menu_id = 10u;
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject& msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::menu_icon] = 1;
+  msg_params[am::strings::menu_icon][am::strings::value] = "10";
+  msg_params[am::strings::menu_id] = menu_id;
+  msg_params[am::strings::menu_name] = "test";
+  SmartObject& image = msg_params[am::strings::menu_icon];
+
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
+  utils::SharedPtr<AddSubMenuRequest> request_ptr =
+      CreateCommand<AddSubMenuRequest>(msg);
+
+  request_ptr->Run();
+}
 
 TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   const uint32_t menu_id = 10u;
@@ -75,7 +113,6 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   utils::SharedPtr<AddSubMenuRequest> command =
       CreateCommand<AddSubMenuRequest>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));

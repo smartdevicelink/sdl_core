@@ -104,9 +104,11 @@ using transport_manager::TransportManagerListener;
 using test::components::security_manager_test::MockSystemTimeHandler;
 using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+#ifdef ENABLE_SECURITY
 // For security
 using ContextCreationStrategy =
     security_manager::SecurityManager::ContextCreationStrategy;
+#endif  // ENABLE_SECURITY
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities

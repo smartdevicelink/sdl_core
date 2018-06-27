@@ -96,6 +96,9 @@ const std::string kMissedParam = "missed_param";
 class CommandRequestImplTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  CommandRequestImplTest()
+      : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
     using CommandRequestImpl::CheckAllowedParameters;
@@ -133,11 +136,11 @@ class CommandRequestImplTest
     app_set->insert(app);
     EXPECT_CALL(app_mngr_, applications())
         .WillOnce(
-            Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_)));
+            Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_ptr_)));
     return app;
   }
 
-  sync_primitives::Lock app_set_lock_;
+  std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
 };
 
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
