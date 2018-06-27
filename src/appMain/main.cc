@@ -94,8 +94,8 @@ bool InitHmi(std::string hmi_link) {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
-  // Unsibscribe once for all threads
-  if (!utils::UnsibscribeFromTermination()) {
+  // Unsubscribe once for all threads
+  if (!utils::UnsubscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
