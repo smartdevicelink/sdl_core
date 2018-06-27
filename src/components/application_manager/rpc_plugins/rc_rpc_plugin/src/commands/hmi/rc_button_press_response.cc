@@ -42,13 +42,15 @@ RCButtonPressResponse::RCButtonPressResponse(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
+    ResourceAllocationManager& resource_allocation_manager,
+    InteriorDataCache& interior_data_cache)
     : application_manager::commands::ResponseFromHMI(message,
                                                      application_manager,
                                                      rpc_service,
                                                      hmi_capabilities,
                                                      policy_handle) {
   UNUSED(resource_allocation_manager);
+  UNUSED(interior_data_cache);
 }
 
 void RCButtonPressResponse::Run() {

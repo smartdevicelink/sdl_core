@@ -35,6 +35,7 @@
 
 #include "application_manager/commands/response_from_hmi.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -59,7 +60,8 @@ class RCSetInteriorVehicleDataResponse
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handle,
-      ResourceAllocationManager& resource_allocation_manager);
+      ResourceAllocationManager& resource_allocation_manager,
+      InteriorDataCache& interior_data_cache);
 
   void Run() OVERRIDE;
 

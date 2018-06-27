@@ -53,10 +53,12 @@
 #include "interfaces/HMI_API.h"
 
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 namespace application_manager {
 using rc_rpc_plugin::ResourceAllocationManager;
+using rc_rpc_plugin::InteriorDataCache;
 
 template <typename RCCommandType>
 class RCCommandCreator : public CommandCreator {
@@ -65,12 +67,14 @@ class RCCommandCreator : public CommandCreator {
                    rpc_service::RPCService& rpc_service,
                    HMICapabilities& hmi_capabilities,
                    PolicyHandlerInterface& policy_handler,
-                   ResourceAllocationManager& resource_allocation_manager)
+                   ResourceAllocationManager& resource_allocation_manager,
+                   InteriorDataCache& interior_data_cache)
       : application_manager_(application_manager)
       , rpc_service_(rpc_service)
       , hmi_capabilities_(hmi_capabilities)
       , policy_handler_(policy_handler)
-      , resource_allocation_manager_(resource_allocation_manager) {}
+      , resource_allocation_manager_(resource_allocation_manager)
+      , interior_data_cache_(interior_data_cache) {}
 
  private:
   bool CanBeCreated() const override {
@@ -84,7 +88,8 @@ class RCCommandCreator : public CommandCreator {
                                                rpc_service_,
                                                hmi_capabilities_,
                                                policy_handler_,
-                                               resource_allocation_manager_));
+                                               resource_allocation_manager_,
+                                               interior_data_cache_));
     return command;
   }
 
@@ -93,6 +98,7 @@ class RCCommandCreator : public CommandCreator {
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
   ResourceAllocationManager& resource_allocation_manager_;
+  InteriorDataCache& interior_data_cache_;
 };
 
 struct RCInvalidCommand {};
@@ -104,12 +110,14 @@ class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
                    RPCService& rpc_service,
                    HMICapabilities& hmi_capabilities,
                    PolicyHandlerInterface& policy_handler,
-                   ResourceAllocationManager& resource_allocation_manager) {
+                   ResourceAllocationManager& resource_allocation_manager,
+                   InteriorDataCache& interior_data_cache) {
     UNUSED(application_manager);
     UNUSED(rpc_service);
     UNUSED(hmi_capabilities);
     UNUSED(policy_handler);
     UNUSED(resource_allocation_manager);
+    UNUSED(interior_data_cache);
   }
 
  private:
@@ -130,12 +138,14 @@ struct RCCommandCreatorFactory {
       rpc_service::RPCService& rpc_service,
       HMICapabilities& hmi_capabilities,
       PolicyHandlerInterface& policy_handler,
-      ResourceAllocationManager& resource_allocation_manager)
+      ResourceAllocationManager& resource_allocation_manager,
+      InteriorDataCache& interior_data_cache)
       : application_manager_(application_manager)
       , rpc_service_(rpc_service)
       , hmi_capabilities_(hmi_capabilities)
       , policy_handler_(policy_handler)
-      , resource_allocation_manager_(resource_allocation_manager) {}
+      , resource_allocation_manager_(resource_allocation_manager)
+      , interior_data_cache_(interior_data_cache) {}
 
   template <typename RCCommandType>
   CommandCreator& GetCreator() {
@@ -143,7 +153,8 @@ struct RCCommandCreatorFactory {
                                                rpc_service_,
                                                hmi_capabilities_,
                                                policy_handler_,
-                                               resource_allocation_manager_);
+                                               resource_allocation_manager_,
+                                               interior_data_cache_);
     return res;
   }
   ApplicationManager& application_manager_;
@@ -151,6 +162,7 @@ struct RCCommandCreatorFactory {
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
   ResourceAllocationManager& resource_allocation_manager_;
+  InteriorDataCache& interior_data_cache_;
 };
 }
 
@@ -162,12 +174,14 @@ RCCommandFactory::RCCommandFactory(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    ResourceAllocationManager& allocation_manager)
+    ResourceAllocationManager& allocation_manager,
+    InteriorDataCache& interior_data_cache)
     : app_manager_(app_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler)
-    , allocation_manager_(allocation_manager) {}
+    , allocation_manager_(allocation_manager)
+    , interior_data_cache_(interior_data_cache) {}
 
 CommandSharedPtr RCCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -222,7 +236,8 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
                                      rpc_service_,
                                      hmi_capabilities_,
                                      policy_handler_,
-                                     allocation_manager_);
+                                     allocation_manager_,
+                                     interior_data_cache_);
 
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
@@ -263,7 +278,8 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
                                      rpc_service_,
                                      hmi_capabilities_,
                                      policy_handler_,
-                                     allocation_manager_);
+                                     allocation_manager_,
+                                     interior_data_cache_);
 
   switch (id) {
     case hmi_apis::FunctionID::Buttons_ButtonPress: {
