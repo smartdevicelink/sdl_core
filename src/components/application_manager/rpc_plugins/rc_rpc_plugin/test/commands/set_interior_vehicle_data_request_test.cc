@@ -37,6 +37,7 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -112,12 +113,15 @@ class SetInteriorVehicleDataRequestTest
                                         mock_rpc_service_,
                                         mock_hmi_capabilities_,
                                         mock_policy_handler_,
-                                        mock_allocation_manager_);
+                                        mock_allocation_manager_,
+                                        mock_interior_data_cache_);
   }
 
  protected:
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
+  testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
+      mock_interior_data_cache_;
   utils::SharedPtr<MockApplication> mock_app_;
   utils::SharedPtr<RCAppExtension> rc_app_extention_;
 };

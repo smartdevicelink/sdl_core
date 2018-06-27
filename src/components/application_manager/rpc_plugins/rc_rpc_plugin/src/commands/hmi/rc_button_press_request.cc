@@ -31,6 +31,8 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_request.h"
+#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
+
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -42,7 +44,8 @@ RCButtonPressRequest::RCButtonPressRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
+    ResourceAllocationManager& resource_allocation_manager,
+    InteriorDataCache& interior_data_cache)
     : application_manager::commands::RequestToHMI(message,
                                                   application_manager,
                                                   rpc_service,

@@ -45,7 +45,6 @@ class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
                     const NsSmartDeviceLink::NsSmartObjects::SmartObject&));
   MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
   MOCK_CONST_METHOD1(Contains, bool(const std::string&));
-
   MOCK_METHOD0(ClearCache, void());
 };
 

@@ -36,6 +36,7 @@
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -61,7 +62,8 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handl,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager);
+      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager,
+      rc_rpc_plugin::InteriorDataCache& interior_data_cache);
 
   virtual ~RCCommandRequest();
 
@@ -165,6 +167,7 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
       const app_mngr::HmiInterfaces::InterfaceID interface) const;
 
   std::string disallowed_info_;
+  InteriorDataCache& interior_data_cache_;
 };
 }
 }

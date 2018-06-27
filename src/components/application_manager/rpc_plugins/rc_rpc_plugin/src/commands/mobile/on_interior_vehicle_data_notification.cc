@@ -47,12 +47,14 @@ OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    ResourceAllocationManager& resource_allocation_manager)
+    ResourceAllocationManager& resource_allocation_manager,
+    InteriorDataCache& interior_data_cache)
     : app_mngr::commands::CommandNotificationImpl(message,
                                                   application_manager,
                                                   rpc_service,
                                                   hmi_capabilities,
-                                                  policy_handler) {
+                                                  policy_handler)
+    , interior_data_cache_(interior_data_cache) {
   UNUSED(resource_allocation_manager);
 }
 
