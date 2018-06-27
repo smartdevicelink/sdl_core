@@ -79,9 +79,6 @@ struct Service {
       , connection_id(0)
       , is_protected_(false) {}
 
-  DEPRECATED explicit Service(protocol_handler::ServiceType service_type)
-      : service_type(service_type), connection_id(0), is_protected_(false) {}
-
   explicit Service(protocol_handler::ServiceType service_type,
                    transport_manager::ConnectionUID connection_id)
       : service_type(service_type)
@@ -162,12 +159,6 @@ class Connection {
 
   /**
    * @brief Adds session to connection
-   * @return new session id or 0 in case of issues
-   */
-  DEPRECATED uint32_t AddNewSession();
-
-  /**
-   * @brief Adds session to connection
    * @param connection_handle Connection Handle for the session
    * @return new session id or 0 in case of issues
    */
@@ -180,18 +171,6 @@ class Connection {
    * @return session_id or 0 in case of issues
    */
   uint32_t RemoveSession(uint8_t session_id);
-
-  /**
-   * @brief Adds uprotected service to session or
-   * check protection to service has been started before
-   * @param session_id session ID
-   * @param service_type Type of service
-   * @param is_protected protection state
-   * @return TRUE on success, otherwise FALSE
-   */
-  DEPRECATED bool AddNewService(uint8_t session_id,
-                                protocol_handler::ServiceType service_type,
-                                const bool is_protected);
 
   /**
    * @brief Adds uprotected service to session or
@@ -219,7 +198,7 @@ class Connection {
    * @brief Removes secondary service from session
    * @param secondary_connection_handle connection identifying services to be
    * removed
-   * \param removed_services_list Returned: List of service types removed
+   * @param removed_services_list Returned: List of service types removed
    * @return the session ID associated with the services removed
    */
   uint8_t RemoveSecondaryServices(
@@ -334,8 +313,8 @@ class Connection {
   ConnectionHandle primary_connection_handle() const;
 
   /**
-   * \brief Sets the primary connection handle
-   * \param primary_connection_handle the primary connection handle to
+   * @brief Sets the primary connection handle
+   * @param primary_connection_handle the primary connection handle to
    * associate with this connection
    */
   void SetPrimaryConnectionHandle(ConnectionHandle primary_connection_handle);

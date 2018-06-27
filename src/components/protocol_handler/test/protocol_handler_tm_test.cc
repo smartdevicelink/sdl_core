@@ -41,6 +41,7 @@
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "connection_handler/connection_handler_impl.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
@@ -1906,7 +1907,8 @@ TEST_F(ProtocolHandlerImplTest,
   expected_video_service_transports.push_back(1);
 
   connection_handler::SessionTransports dummy_st = {0, 0};
-  EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, DISABLED_SECONDARY))
       .WillOnce(Return(dummy_st));
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
@@ -2047,7 +2049,8 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   connection_handler::SessionTransports dummy_st = {0, 0};
-  EXPECT_CALL(connection_handler_mock, SetSecondaryTransportID(_, 0xFFFFFFFF))
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, DISABLED_SECONDARY))
       .WillOnce(Return(dummy_st));
 
   // Since the protocol version is less than 5.1.0, Core should not issue
@@ -2386,15 +2389,15 @@ TEST_F(ProtocolHandlerImplTest,
   std::string tcp_port_str = "23456";
 
   transport_manager::transport_adapter::TransportConfig configs;
-  configs[std::string("enabled")] = std::string("true");
-  configs[std::string("tcp_port")] = tcp_port_str;
-  configs[std::string("tcp_ip_address")] = std::string(tcp_address);
+  configs[std::string(TC_ENABLED)] = std::string("true");
+  configs[std::string(TC_TCP_PORT)] = tcp_port_str;
+  configs[std::string(TC_TCP_IP_ADDRESS)] = std::string(tcp_address);
 
   transport_manager::ConnectionUID device1_primary_connection_id = 100;
   transport_manager::ConnectionUID device2_primary_connection_id = 101;
   transport_manager::ConnectionUID device2_secondary_connection_id = 150;
 
-  SessionTransports st1 = {device1_primary_connection_id, 0xFFFFFFFF};
+  SessionTransports st1 = {device1_primary_connection_id, DISABLED_SECONDARY};
   SessionTransports st2 = {device2_primary_connection_id,
                            device2_secondary_connection_id};
   session_connection_map_[0x11] = st1;
@@ -2450,9 +2453,9 @@ TEST_F(ProtocolHandlerImplTest,
   std::string tcp_port_str = "23456";
 
   transport_manager::transport_adapter::TransportConfig configs;
-  configs[std::string("enabled")] = std::string("false");
-  configs[std::string("tcp_port")] = tcp_port_str;
-  configs[std::string("tcp_ip_address")] = std::string(tcp_address);
+  configs[std::string(TC_ENABLED)] = std::string("false");
+  configs[std::string(TC_TCP_PORT)] = tcp_port_str;
+  configs[std::string(TC_TCP_IP_ADDRESS)] = std::string(tcp_address);
 
   transport_manager::ConnectionUID device1_primary_connection_id = 100;
   transport_manager::ConnectionUID device1_secondary_connection_id = 150;
@@ -2462,7 +2465,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   SessionTransports st1 = {device1_primary_connection_id,
                            device1_secondary_connection_id};
-  SessionTransports st2 = {device2_primary_connection_id, 0xFFFFFFFF};
+  SessionTransports st2 = {device2_primary_connection_id, DISABLED_SECONDARY};
   SessionTransports st3 = {device3_primary_connection_id,
                            device3_secondary_connection_id};
   session_connection_map_[0x11] = st1;

@@ -100,9 +100,6 @@ class ProtocolHandler {
     */
   virtual void SendEndSession(int32_t connection_id, uint8_t session_id) = 0;
 
-  DEPRECATED virtual void SendEndService(int32_t connection_id,
-                                         uint8_t session_id,
-                                         uint8_t service_type) = 0;
   /**
     * \brief Sends ending session to mobile application
     * \param connection_id Identifier of connection within which

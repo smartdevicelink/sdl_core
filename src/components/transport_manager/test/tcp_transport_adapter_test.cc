@@ -355,9 +355,9 @@ TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
   transport_adapter.AddListener(&mock_adapter_listener);
 
   TransportConfig config;
-  config["enabled"] = std::string("enabled");
-  config["tcp_ip_address"] = std::string("192.168.1.1");
-  config["tcp_port"] = std::string("12345");
+  config[TC_ENABLED] = std::string("true");
+  config[TC_TCP_IP_ADDRESS] = std::string("192.168.1.1");
+  config[TC_TCP_PORT] = std::string("12345");
 
   EXPECT_CALL(mock_adapter_listener, OnTransportConfigUpdated(_)).Times(1);
 
@@ -369,9 +369,9 @@ TEST_F(TcpAdapterTest, GetTransportConfiguration) {
       port, last_state_, transport_manager_settings);
 
   TransportConfig config;
-  config["enabled"] = std::string("enabled");
-  config["tcp_ip_address"] = std::string("192.168.1.1");
-  config["tcp_port"] = std::string("12345");
+  config[TC_ENABLED] = std::string("true");
+  config[TC_TCP_IP_ADDRESS] = std::string("192.168.1.1");
+  config[TC_TCP_PORT] = std::string("12345");
 
   transport_adapter.TransportConfigUpdated(config);
 

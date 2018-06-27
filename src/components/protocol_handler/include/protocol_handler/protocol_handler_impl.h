@@ -250,16 +250,12 @@ class ProtocolHandlerImpl
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
-  DEPRECATED void SendEndService(int32_t connection_id,
-                                 uint8_t session_id,
-                                 uint8_t service_type);
-
   /**
     * \brief Sends ending session to mobile application
-    * \param connection_id Identifier of connection within which
+    * \param primary_connection_id Identifier of connection within which
     * service exists
-    * \param connection_id Identifier of the actual transport connection ID
-    * for the sevice
+    * \param connection_id Identifier of the actual transport ID for the
+    * sevice
     * \param session_id ID of session to be ended
     */
   void SendEndService(int32_t primary_connection_id,
@@ -685,26 +681,26 @@ class ProtocolHandlerImpl
   const impl::TransportDescription GetTransportTypeFromConnectionType(
       const std::string& device_type) const;
 
-  const bool parseSecondaryTransportConfiguration(
+  const bool ParseSecondaryTransportConfiguration(
       const ConnectionID connection_id,
       std::vector<std::string>& secondaryTransports,
       std::vector<int32_t>& audioServiceTransports,
       std::vector<int32_t>& videoServiceTransports) const;
 
-  void generateSecondaryTransportsForStartSessionAck(
+  void GenerateSecondaryTransportsForStartSessionAck(
       const std::vector<std::string>& secondary_transport_types,
       bool device_is_ios,
       bool device_is_android,
       std::vector<std::string>& secondaryTransports) const;
 
-  void generateServiceTransportsForStartSessionAck(
+  void GenerateServiceTransportsForStartSessionAck(
       const std::vector<std::string>& service_transports,
       const std::string& primary_connection_type,
       const std::string& primary_transport_type,
       const std::vector<std::string>& secondary_transport_types,
       std::vector<int32_t>& serviceTransports) const;
 
-  const std::string transportTypeFromTransport(
+  const std::string TransportTypeFromTransport(
       const utils::custom_string::CustomString& transport) const;
 
   const ProtocolHandlerSettings& settings_;

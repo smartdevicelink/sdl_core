@@ -138,10 +138,6 @@ uint32_t findGap(const std::map<unsigned char, T>& map) {
 }
 }  // namespace
 
-DEPRECATED uint32_t Connection::AddNewSession() {
-  return AddNewSession(0);
-}
-
 uint32_t Connection::AddNewSession(
     const transport_manager::ConnectionUID connection_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -208,13 +204,6 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   }
 
   return session_id;
-}
-
-DEPRECATED bool Connection::AddNewService(
-    uint8_t session_id,
-    protocol_handler::ServiceType service_type,
-    const bool request_protection) {
-  return AddNewService(session_id, service_type, request_protection, 0);
 }
 
 bool Connection::AddNewService(uint8_t session_id,

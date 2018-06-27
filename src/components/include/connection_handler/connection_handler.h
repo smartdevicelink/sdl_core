@@ -252,7 +252,8 @@ class ConnectionHandler {
    * \brief Called when secondary transport with given session ID is established
    * \param primary_connection_handle Set to identifier of primary connection
    * \param secondary_connection_handle Identifier of secondary connection
-   * \param sessionid session ID taken from Register Secondary Transport frame
+   * \param session_id session ID taken from Register Secondary Transport frame
+   * \return true if successful
    **/
   virtual bool OnSecondaryTransportStarted(
       transport_manager::ConnectionUID& primary_connection_handle,

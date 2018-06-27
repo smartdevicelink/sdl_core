@@ -54,6 +54,8 @@
 #include "utils/stl_utils.h"
 #include "utils/rwlock.h"
 
+#define DISABLED_SECONDARY 0xFFFFFFFF
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.

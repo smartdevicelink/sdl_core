@@ -60,10 +60,6 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                     int32_t connection_id,
                     uint8_t session_id,
                     uint8_t service_type));
-  DEPRECATED MOCK_METHOD3(SendEndService,
-                          void(int32_t connection_id,
-                               uint8_t session_id,
-                               uint8_t service_type));
   MOCK_CONST_METHOD0(get_settings,
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());

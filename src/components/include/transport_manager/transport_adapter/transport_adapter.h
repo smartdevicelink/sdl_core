@@ -97,6 +97,13 @@ typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
  */
 typedef std::map<std::string, std::string> TransportConfig;
 
+/**
+ * @brief TransportConfig keys
+ */
+#define TC_ENABLED        "enabled"
+#define TC_TCP_PORT       "tcp_port"
+#define TC_TCP_IP_ADDRESS "tcp_ip_address"
+
 class TransportAdapter {
  public:
   /**

@@ -477,10 +477,10 @@ void TcpClientListener::OnIPAddressUpdated(const std::string ipv4_addr,
     oss << port_;
 
     TransportConfig config;
-    config.insert(std::make_pair(std::string("enabled"), enabled));
+    config.insert(std::make_pair(std::string(TC_ENABLED), enabled));
     config.insert(
-        std::make_pair(std::string("tcp_ip_address"), current_ip_address_));
-    config.insert(std::make_pair(std::string("tcp_port"), oss.str()));
+        std::make_pair(std::string(TC_TCP_IP_ADDRESS), current_ip_address_));
+    config.insert(std::make_pair(std::string(TC_TCP_PORT), oss.str()));
 
     controller_->TransportConfigUpdated(config);
   }

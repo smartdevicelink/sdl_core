@@ -2120,6 +2120,8 @@ TEST_F(ConnectionHandlerTest, StopSecondarySession_NoService) {
   // session ID even if we don't have any services
   EXPECT_CALL(mock_connection_handler_observer,
               OnSecondaryTransportEndedCallback(_));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(_, _, _)).Times(0);
 
   connection_handler_->OnSecondaryTransportEnded(uid_, secondary_uid);
 
@@ -2156,10 +2158,10 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateSuccess) {
   {
     NonConstDataAccessor<SessionConnectionMap> accessor =
         connection_handler_->session_connection_map();
-    SessionConnectionMap& session_conneciton_map = accessor.GetData();
+    SessionConnectionMap& session_connection_map = accessor.GetData();
     // secondary transport's ID is 0
     SessionTransports st = {primary_uid, secondary_uid};
-    session_conneciton_map[session_id] = st;
+    session_connection_map[session_id] = st;
   }
 
   secondary_uid = 200;
@@ -2176,10 +2178,10 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateFailure) {
   {
     NonConstDataAccessor<SessionConnectionMap> accessor =
         connection_handler_->session_connection_map();
-    SessionConnectionMap& session_conneciton_map = accessor.GetData();
+    SessionConnectionMap& session_connection_map = accessor.GetData();
     // secondary transport's ID is already assigned
     SessionTransports st = {primary_uid, secondary_uid};
-    session_conneciton_map[session_id] = st;
+    session_connection_map[session_id] = st;
   }
 
   SessionTransports st =
@@ -2196,12 +2198,12 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_OverwirteSecondaryUID) {
   {
     NonConstDataAccessor<SessionConnectionMap> accessor =
         connection_handler_->session_connection_map();
-    SessionConnectionMap& session_conneciton_map = accessor.GetData();
+    SessionConnectionMap& session_connection_map = accessor.GetData();
     SessionTransports st = {primary_uid, secondary_uid};
-    session_conneciton_map[session_id] = st;
+    session_connection_map[session_id] = st;
   }
 
-  secondary_uid = 0xFFFFFFFF;
+  secondary_uid = DISABLED_SECONDARY;
   SessionTransports st =
       connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
   EXPECT_EQ(primary_uid, st.primary_transport);
@@ -2216,9 +2218,9 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_Failure) {
   {
     NonConstDataAccessor<SessionConnectionMap> accessor =
         connection_handler_->session_connection_map();
-    SessionConnectionMap& session_conneciton_map = accessor.GetData();
+    SessionConnectionMap& session_connection_map = accessor.GetData();
     SessionTransports st = {primary_uid, secondary_uid};
-    session_conneciton_map[session_id] = st;
+    session_connection_map[session_id] = st;
   }
 
   uint8_t invalid_session_id = 10;

@@ -83,33 +83,6 @@ struct SessionContext {
 
   /**
    * @brief Constructor
-   * @param connection_id_ Connection identifier within which session is
-   * started.
-   * @param session_id Session ID specified to OnSessionStartedCallback()
-   * @param new_session_id Session ID generated
-   * @param service_type Type of service
-   * @param hash_id Hash ID generated from connection_handle and
-   * new_session_id
-   * @param is_protected Whether service will be protected
-   * @param is_new_service Whether service was already established
-   **/
-  DEPRECATED SessionContext(transport_manager::ConnectionUID connection_id,
-                            uint8_t session_id,
-                            uint8_t new_session_id,
-                            protocol_handler::ServiceType service_type,
-                            uint32_t hash_id,
-                            const bool is_protected)
-      : primary_connection_id_(connection_id)
-      , connection_id_(connection_id)
-      , initial_session_id_(session_id)
-      , new_session_id_(new_session_id)
-      , service_type_(service_type)
-      , hash_id_(hash_id)
-      , is_protected_(is_protected)
-      , is_new_service_(false) {}
-
-  /**
-   * @brief Constructor
    * @param primary_connection_id Connection identifier of the primary
    * connection in which the session is started
    * @param connection_id_ Connection identifier within which session is
