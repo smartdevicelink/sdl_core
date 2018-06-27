@@ -75,8 +75,10 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
  protected:
   bool is_subscribed;
-  ResourceAllocationManager& resource_allocation_manager_;
   bool auto_allowed_;
+
+  ResourceAllocationManager& resource_allocation_manager_;
+  InteriorDataCache& interior_data_cache_;
 
   /**
    * @brief AcquireResource try to allocate resource for application
@@ -167,7 +169,6 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
       const app_mngr::HmiInterfaces::InterfaceID interface) const;
 
   std::string disallowed_info_;
-  InteriorDataCache& interior_data_cache_;
 };
 }
 }
