@@ -315,6 +315,30 @@ bool SetGlobalPropertiesRequest::Init() {
   return true;
 }
 
+bool SetGlobalPropertiesRequest::PrepareResultForMobileResponse(
+    ResponseInfo& ui_info, ResponseInfo& tts_info) const {
+  const bool result =
+      CommandRequestImpl::PrepareResultForMobileResponse(ui_info, tts_info);
+  if (ui_info.is_ok && tts_info.is_unsupported_resource) {
+    return true;
+  }
+  return result;
+}
+
+mobile_apis::Result::eType
+SetGlobalPropertiesRequest::PrepareResultCodeForResponse(
+    const ResponseInfo& ui_info, const ResponseInfo& tts_info) {
+  if (ui_info.is_ok && tts_info.is_unsupported_resource) {
+    return mobile_apis::Result::WARNINGS;
+  }
+  if (HmiInterfaces::STATE_AVAILABLE == tts_info.interface_state &&
+      tts_info.is_unsupported_resource) {
+    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
+    return mobile_apis::Result::WARNINGS;
+  }
+  return CommandRequestImpl::PrepareResultCodeForResponse(ui_info, tts_info);
+}
+
 bool SetGlobalPropertiesRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -327,17 +351,6 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
       tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
-  if (result &&
-      (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
-      (tts_properties_info.is_unsupported_resource)) {
-    result_code = mobile_apis::Result::WARNINGS;
-    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(tts_properties_info,
-                      tts_response_info_,
-                      ui_properties_info,
-                      ui_response_info_);
-    return result;
-  }
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
   info = MergeInfos(tts_properties_info,

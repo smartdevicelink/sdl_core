@@ -138,6 +138,29 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param ui_info contains result_code from HMI response and
+   * interface that returns ui response
+   * @param tts_info contains result_code from HMI response and
+   * interface that returns tts response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& ui_info,
+                                      ResponseInfo& tts_info) const FINAL;
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param ui_info contains result_code from HMI response and
+   * interface that returns ui response
+   * @param tts_info contains result_code from HMI response and
+   * interface that returns tts response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& ui_info, const ResponseInfo& tts_info) FINAL;
 
   bool is_ui_send_;
   bool is_tts_send_;
