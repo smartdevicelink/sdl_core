@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, Ford Motor Company
+* Copyright (c) 2018, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,9 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "life_cycle.h"
+#include "appMain/life_cycle_impl.h"
 #include "utils/signals.h"
+#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "resumption/last_state_impl.h"
@@ -76,7 +77,7 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , profile_(profile) {
 }
 
-bool LifeCycle::StartComponents() {
+bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_);
   last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
@@ -169,7 +170,7 @@ bool LifeCycle::StartComponents() {
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-bool LifeCycle::InitMessageSystem() {
+bool LifeCycleImpl::InitMessageSystem() {
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
       hmi_handler_, profile_.server_address(), profile_.server_port());
 
@@ -206,7 +207,7 @@ void sig_handler(int sig) {
 }
 }  //  namespace
 
-void LifeCycle::Run() {
+void LifeCycleImpl::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // Register signal handlers and wait sys signals
   // from OS
@@ -215,7 +216,7 @@ void LifeCycle::Run() {
   }
 }
 
-void LifeCycle::StopComponents() {
+void LifeCycleImpl::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
