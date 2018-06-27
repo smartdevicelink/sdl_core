@@ -138,6 +138,7 @@ void AlertManeuverRequest::Run() {
         (*message_)[strings::msg_params][strings::tts_chunks];
     msg_params[hmi_request::speak_type] =
         hmi_apis::Common_MethodName::ALERT_MANEUVER;
+    msg_params[strings::app_id] = app->app_id();
 
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
     SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
