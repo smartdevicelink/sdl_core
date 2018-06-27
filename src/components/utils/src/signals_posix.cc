@@ -35,7 +35,7 @@
 
 #include "utils/signals.h"
 
-bool utils::UnsibscribeFromTermination() {
+bool utils::UnsubscribeFromTermination() {
   // Disable some system signals receiving in thread
   // by blocking those signals
   // (system signals processes only in the main thread)

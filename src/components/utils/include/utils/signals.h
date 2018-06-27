@@ -41,7 +41,7 @@ typedef void (*sighandler_t)(int);
 
 namespace utils {
 
-bool UnsibscribeFromTermination();
+bool UnsubscribeFromTermination();
 bool WaitTerminationSignals(sighandler_t sig_handler);
 
 }  //  namespace utils
