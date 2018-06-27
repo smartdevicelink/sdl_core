@@ -292,8 +292,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -318,8 +318,8 @@ TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -360,8 +360,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -492,8 +492,8 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
 
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -617,8 +617,8 @@ TEST_F(AddCommandRequestTest,
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -911,8 +911,8 @@ TEST_F(
   params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(
       mock_rpc_service_,

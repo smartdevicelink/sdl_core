@@ -396,7 +396,8 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   application_manager::ApplicationSet apps;
   apps.insert(mock_app_1_);
-  std::shared_ptr<sync_primitives::Lock> apps_lock = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> apps_lock =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<application_manager::ApplicationSet> apps_da(apps, apps_lock);
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
@@ -457,7 +458,8 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
 
   application_manager::ApplicationSet apps;
   apps.insert(mock_app_1_);
-  std::shared_ptr<sync_primitives::Lock> apps_lock = std::make_shared<sync_primitives::Lock>();
+  std::shared_ptr<sync_primitives::Lock> apps_lock =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<application_manager::ApplicationSet> apps_da(apps, apps_lock);
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));

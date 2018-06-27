@@ -67,22 +67,20 @@ const uint32_t kAppId = 1u;
 class AddSubMenuRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  AddSubMenuRequestTest()
-      : mock_app(CreateMockApp()) {
-      EXPECT_CALL(app_mngr_, application(kConnectionKey))
-              .WillRepeatedly(Return(mock_app));
+  AddSubMenuRequestTest() : mock_app(CreateMockApp()) {
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillRepeatedly(Return(mock_app));
   }
 
   MockAppPtr mock_app;
 
   MessageSharedPtr CreateMsgParams() {
-        MessageSharedPtr msg = CreateMessage();
-        (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-        (*msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
-        return msg;
+    MessageSharedPtr msg = CreateMessage();
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+    return msg;
   }
 };
-
 
 TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   const uint32_t menu_id = 10u;
@@ -96,15 +94,15 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   SmartObject& image = msg_params[am::strings::menu_icon];
 
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-  .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
   EXPECT_CALL(mock_rpc_service_,
-            ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddSubMenuRequest> request_ptr =
       CreateCommand<AddSubMenuRequest>(msg);
 
   request_ptr->Run();
 }
-
 
 TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   const uint32_t menu_id = 10u;
