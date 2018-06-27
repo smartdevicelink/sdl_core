@@ -261,3 +261,6 @@ else()
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
