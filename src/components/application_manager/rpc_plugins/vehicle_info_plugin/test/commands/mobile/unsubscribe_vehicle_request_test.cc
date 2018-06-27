@@ -70,7 +70,7 @@ class UnsubscribeVehicleRequestTest
  public:
   UnsubscribeVehicleRequestTest()
       : mock_app_(CreateMockApp())
-	  , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , vi_app_extension_ptr_(
             utils::MakeShared<vehicle_info_plugin::VehicleInfoAppExtension>(
                 vi_plugin_, *mock_app_)) {}
@@ -92,8 +92,8 @@ class UnsubscribeVehicleRequestTest
   }
 
   MockAppPtr mock_app_;
-  application_manager::AppExtensionPtr vi_app_extension_ptr_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
+  application_manager::AppExtensionPtr vi_app_extension_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
 };
 
@@ -209,7 +209,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
   command->Run();
 }
 
-void UnsubscribeVehicleRequestTest::UnsubscribeSuccessfully() {
+TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;

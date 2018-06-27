@@ -95,7 +95,7 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
 
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   utils::SharedPtr<AddSubMenuRequest> request_ptr =

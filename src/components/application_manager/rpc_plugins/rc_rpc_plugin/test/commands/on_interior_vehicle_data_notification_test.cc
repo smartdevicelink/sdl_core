@@ -108,7 +108,8 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ApplicationSet app_set = {mock_app_};
   MessageSharedPtr message;
-  const sync_primitives::Lock apps_lock;
+  std::shared_ptr<sync_primitives::Lock> apps_lock =
+      std::make_shared<sync_primitives::Lock>();
   DataAccessor<ApplicationSet> accessor(app_set, apps_lock);
   // Expectations
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));

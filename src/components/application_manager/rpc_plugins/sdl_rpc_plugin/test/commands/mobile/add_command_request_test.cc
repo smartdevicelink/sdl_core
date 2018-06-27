@@ -317,8 +317,8 @@ TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -384,8 +384,8 @@ TEST_F(AddCommandRequestTest,
   const am::CommandsMap commands_map =
       CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
       .WillOnce(Return(so_ptr_.get()));
 
@@ -493,7 +493,8 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  ON_CALL(app_mngr_, GetRPCService()).WillByDefault(ReturnRef(rpc_service_));
+  ON_CALL(app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
