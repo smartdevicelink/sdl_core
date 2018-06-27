@@ -54,7 +54,7 @@
 #include "utils/stl_utils.h"
 #include "utils/rwlock.h"
 
-#define DISABLED_SECONDARY 0xFFFFFFFF
+const transport_manager::ConnectionUID kDisabledSecondary = 0xFFFFFFFF;
 
 /**
  * \namespace connection_handler

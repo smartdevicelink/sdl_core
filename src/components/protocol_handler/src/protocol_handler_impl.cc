@@ -393,19 +393,19 @@ void ProtocolHandlerImpl::SendStartSessionAck(
             // In this case, we must remember that this session will never have
             // a secondary transport.
             connection_handler_.SetSecondaryTransportID(session_id,
-                                                        DISABLED_SECONDARY);
+                                                        kDisabledSecondary);
           }
         } else {
           LOG4CXX_WARN(
               logger_,
               "Failed to set up secondary transport and service type params");
           connection_handler_.SetSecondaryTransportID(session_id,
-                                                      DISABLED_SECONDARY);
+                                                      kDisabledSecondary);
         }
       } else {
         LOG4CXX_INFO(logger_, "Older protocol version. No multiple transports");
         connection_handler_.SetSecondaryTransportID(session_id,
-                                                    DISABLED_SECONDARY);
+                                                    kDisabledSecondary);
       }
     }
     uint8_t* payloadBytes = bson_object_to_bytes(&params);
@@ -1116,7 +1116,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   LOG4CXX_AUTO_TRACE(logger_);
 
   transport_manager::transport_adapter::TransportConfig::const_iterator it =
-      configs.find(TC_ENABLED);
+      configs.find(transport_manager::transport_adapter::tc_enabled);
   if (configs.end() == it) {
     LOG4CXX_WARN(logger_, "No enabled field in OnTransportConfigUpdated");
     return;
@@ -1126,14 +1126,14 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   std::string tcp_port;
 
   if (tcp_enabled) {
-    it = configs.find(TC_TCP_PORT);
+    it = configs.find(transport_manager::transport_adapter::tc_tcp_port);
     if (configs.end() == it) {
       LOG4CXX_WARN(logger_, "No port field in OnTransportConfigUpdated");
       return;
     }
     tcp_port = it->second;
 
-    it = configs.find(TC_TCP_IP_ADDRESS);
+    it = configs.find(transport_manager::transport_adapter::tc_tcp_ip_address);
     if (configs.end() == it) {
       LOG4CXX_WARN(logger_, "No IP address field in OnTransportConfigUpdated");
       return;
@@ -1153,7 +1153,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
                    << ". IP Address is " << tcp_ip_address_);
 
   // Walk the SessionConnection map and find all sessions that need a
-  // TransportUpdate Event. Sessions flagged with DISABLED_SECONDARY in their
+  // TransportUpdate Event. Sessions flagged with kDisabledSecondary in their
   // secondary transport are ineligible for secondary transport, and
   // therefore don't get this event.
   NonConstDataAccessor<connection_handler::SessionConnectionMap>
@@ -1170,7 +1170,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
                      << itr->first << " with primary connection  "
                      << st.primary_transport << " and secondary connection "
                      << st.secondary_transport);
-    if (st.secondary_transport != DISABLED_SECONDARY) {
+    if (st.secondary_transport != kDisabledSecondary) {
       SendTransportUpdateEvent(st.primary_transport, itr->first);
     }
     itr++;
@@ -2373,28 +2373,36 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
 }
 
 const impl::TransportTypes transportTypes = {
-    std::make_pair(std::string("AOA_USB"),
-                   impl::TransportDescription("USB", false, true)),
+    std::make_pair(
+        std::string("AOA_USB"),
+        impl::TransportDescription(impl::TransportType::TT_USB, false, true)),
     std::make_pair(std::string("SPP_BLUETOOTH"),
-                   impl::TransportDescription("Bluetooth", false, true)),
+                   impl::TransportDescription(
+                       impl::TransportType::TT_BLUETOOTH, false, true)),
     std::make_pair(std::string("IAP_BLUETOOTH"),
-                   impl::TransportDescription("Bluetooth", true, false)),
-    std::make_pair(std::string("IAP_USB"),
-                   impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("TCP_WIFI"),
-                   impl::TransportDescription("WiFi", true, true)),
-    std::make_pair(std::string("IAP_USB_HOST_MODE"),
-                   impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("IAP_USB_DEVICE_MODE"),
-                   impl::TransportDescription("USB", true, false)),
-    std::make_pair(std::string("IAP_CARPLAY"),
-                   impl::TransportDescription("WiFi", true, false))};
+                   impl::TransportDescription(
+                       impl::TransportType::TT_BLUETOOTH, true, false)),
+    std::make_pair(
+        std::string("IAP_USB"),
+        impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
+    std::make_pair(
+        std::string("TCP_WIFI"),
+        impl::TransportDescription(impl::TransportType::TT_WIFI, true, true)),
+    std::make_pair(
+        std::string("IAP_USB_HOST_MODE"),
+        impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
+    std::make_pair(
+        std::string("IAP_USB_DEVICE_MODE"),
+        impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
+    std::make_pair(
+        std::string("IAP_CARPLAY"),
+        impl::TransportDescription(impl::TransportType::TT_WIFI, true, false))};
 
 const impl::TransportDescription
 ProtocolHandlerImpl::GetTransportTypeFromConnectionType(
     const std::string& connection_type) const {
   impl::TransportDescription result =
-      impl::TransportDescription("", false, false);
+      impl::TransportDescription(impl::TransportType::TT_NONE, false, false);
   impl::TransportTypes::const_iterator it =
       transportTypes.find(connection_type);
   if (it != transportTypes.end()) {
@@ -2421,12 +2429,12 @@ const bool ProtocolHandlerImpl::ParseSecondaryTransportConfiguration(
   const impl::TransportDescription td =
       GetTransportTypeFromConnectionType(connection_type);
   if (settings_.multiple_transports_enabled()) {
-    if (td.transport_type_ == "USB") {
+    if (td.transport_type_ == impl::TransportType::TT_USB) {
       secondary_transport_types = settings_.secondary_transports_for_usb();
-    } else if (td.transport_type_ == "Bluetooth") {
+    } else if (td.transport_type_ == impl::TransportType::TT_BLUETOOTH) {
       secondary_transport_types =
           settings_.secondary_transports_for_bluetooth();
-    } else if (td.transport_type_ == "WiFi") {
+    } else if (td.transport_type_ == impl::TransportType::TT_WIFI) {
       secondary_transport_types = settings_.secondary_transports_for_wifi();
     } else {
       LOG4CXX_ERROR(
@@ -2515,7 +2523,7 @@ void ProtocolHandlerImpl::GenerateSecondaryTransportsForStartSessionAck(
 void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     const std::vector<std::string>& service_transports,
     const std::string& primary_connection_type,
-    const std::string& primary_transport_type,
+    const impl::TransportType primary_transport_type,
     const std::vector<std::string>& secondary_transport_types,
     std::vector<int32_t>& serviceTransports) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2539,7 +2547,7 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||
            (transport.CompareIgnoreCase("IAP_USB") &&
-            primary_transport_type.compare("USB") == 0))) {
+            primary_transport_type == impl::TransportType::TT_USB))) {
         LOG4CXX_TRACE(logger_, "Service allowed on primary transport");
         serviceTransports.push_back(1);
         fPrimaryAdded = true;

@@ -100,9 +100,9 @@ typedef std::map<std::string, std::string> TransportConfig;
 /**
  * @brief TransportConfig keys
  */
-#define TC_ENABLED        "enabled"
-#define TC_TCP_PORT       "tcp_port"
-#define TC_TCP_IP_ADDRESS "tcp_ip_address"
+extern const char* tc_enabled;
+extern const char* tc_tcp_port;
+extern const char* tc_tcp_ip_address;
 
 class TransportAdapter {
  public:

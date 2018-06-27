@@ -1026,11 +1026,11 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
     st = it->second;
 
     // The only time we overwrite an existing entry in the map is if the new
-    // secondary transport ID is DISABLED_SECONDARY, which effectively DISABLES
+    // secondary transport ID is kDisabledSecondary, which effectively DISABLES
     // the secondary transport feature for the session, or if the new secondary
     // transport ID is 0, which means a secondary transport has shut down
     if (st.secondary_transport != 0 &&
-        secondary_transport_id != DISABLED_SECONDARY &&
+        secondary_transport_id != kDisabledSecondary &&
         secondary_transport_id != 0) {
       LOG4CXX_WARN(logger_,
                    "SetSecondaryTransportID: session ID "

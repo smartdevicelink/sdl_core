@@ -136,15 +136,22 @@ typedef threads::MessageLoopThread<
 
 // Type to allow easy mapping between a device type and transport
 // characteristics
+typedef enum {
+  TT_NONE = -1,
+  TT_USB = 0,
+  TT_BLUETOOTH = 1,
+  TT_WIFI = 2
+} TransportType;
+
 struct TransportDescription {
-  TransportDescription(const std::string& transport_type,
+  TransportDescription(const TransportType transport_type,
                        const bool ios_transport,
                        const bool android_transport)
       : transport_type_(transport_type)
       , ios_transport_(ios_transport)
       , android_transport_(android_transport) {}
 
-  std::string transport_type_;
+  TransportType transport_type_;
   bool ios_transport_;
   bool android_transport_;
 };
@@ -696,7 +703,7 @@ class ProtocolHandlerImpl
   void GenerateServiceTransportsForStartSessionAck(
       const std::vector<std::string>& service_transports,
       const std::string& primary_connection_type,
-      const std::string& primary_transport_type,
+      const impl::TransportType primary_transport_type,
       const std::vector<std::string>& secondary_transport_types,
       std::vector<int32_t>& serviceTransports) const;
 

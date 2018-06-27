@@ -351,10 +351,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_ValidIPv4Address) {
   const std::string test_port(buf);
 
   TransportConfig expected_config;
-  expected_config.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr));
-  expected_config.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config.insert(std::make_pair(tc_enabled, "true"));
+  expected_config.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr));
+  expected_config.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_, TransportConfigUpdated(expected_config))
       .Times(1);
@@ -388,10 +387,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
   const std::string test_port(buf);
 
   TransportConfig expected_config_1;
-  expected_config_1.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_1.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_1));
-  expected_config_1.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_1.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_1.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_1));
+  expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_1)).Times(1);
@@ -400,10 +398,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
 
   const std::string test_ipv4_addr_2 = "172.16.2.3";
   TransportConfig expected_config_2;
-  expected_config_2.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_2.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_2));
-  expected_config_2.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_2.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_2.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_2));
+  expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_2)).Times(1);
@@ -435,10 +432,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_same) {
   const std::string test_port(buf);
 
   TransportConfig expected_config_1;
-  expected_config_1.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_1.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_1));
-  expected_config_1.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_1.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_1.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_1));
+  expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_1)).Times(1);
@@ -447,10 +443,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_same) {
 
   const std::string test_ipv4_addr_2 = "192.168.1.1";  // same as before
   TransportConfig expected_config_2;
-  expected_config_2.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_2.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_2));
-  expected_config_2.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_2.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_2.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_2));
+  expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   // client listener should not generate TransportConfigUpdated event
   EXPECT_CALL(adapter_controller_mock_, TransportConfigUpdated(_)).Times(0);
@@ -482,10 +477,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
   const std::string test_port(buf);
 
   TransportConfig expected_config_1;
-  expected_config_1.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_1.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_1));
-  expected_config_1.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_1.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_1.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_1));
+  expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_1)).Times(1);
@@ -494,10 +488,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
 
   const std::string test_ipv4_addr_2 = "";
   TransportConfig expected_config_2;
-  expected_config_2.insert(std::make_pair(std::string(TC_ENABLED), "false"));
-  expected_config_2.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_2));
-  expected_config_2.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_2.insert(std::make_pair(tc_enabled, "false"));
+  expected_config_2.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_2));
+  expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_2)).Times(1);
@@ -529,10 +522,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
   const std::string test_port(buf);
 
   TransportConfig expected_config_1;
-  expected_config_1.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_1.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_1));
-  expected_config_1.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_1.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_1.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_1));
+  expected_config_1.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_1)).Times(1);
@@ -541,10 +533,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
 
   const std::string test_ipv4_addr_2 = "";
   TransportConfig expected_config_2;
-  expected_config_2.insert(std::make_pair(std::string(TC_ENABLED), "false"));
-  expected_config_2.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_2));
-  expected_config_2.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_2.insert(std::make_pair(tc_enabled, "false"));
+  expected_config_2.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_2));
+  expected_config_2.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_2)).Times(1);
@@ -553,10 +544,9 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
 
   const std::string test_ipv4_addr_3 = "192.168.1.1";
   TransportConfig expected_config_3;
-  expected_config_3.insert(std::make_pair(std::string(TC_ENABLED), "true"));
-  expected_config_3.insert(
-      std::make_pair(std::string(TC_TCP_IP_ADDRESS), test_ipv4_addr_3));
-  expected_config_3.insert(std::make_pair(std::string(TC_TCP_PORT), test_port));
+  expected_config_3.insert(std::make_pair(tc_enabled, "true"));
+  expected_config_3.insert(std::make_pair(tc_tcp_ip_address, test_ipv4_addr_3));
+  expected_config_3.insert(std::make_pair(tc_tcp_port, test_port));
 
   EXPECT_CALL(adapter_controller_mock_,
               TransportConfigUpdated(expected_config_3)).Times(1);

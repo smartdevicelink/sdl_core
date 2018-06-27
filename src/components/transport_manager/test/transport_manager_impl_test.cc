@@ -1332,9 +1332,12 @@ TEST_F(TransportManagerImplTest, OnTransportConfigUpdated) {
                                    error_);
 
   transport_adapter::TransportConfig config;
-  config[TC_ENABLED] = std::string("true");
-  config[TC_TCP_IP_ADDRESS] = std::string("192.168.1.1");
-  config[TC_TCP_PORT] = std::string("12345");
+  config[transport_manager::transport_adapter::tc_enabled] =
+      std::string("true");
+  config[transport_manager::transport_adapter::tc_tcp_ip_address] =
+      std::string("192.168.1.1");
+  config[transport_manager::transport_adapter::tc_tcp_port] =
+      std::string("12345");
 
   EXPECT_CALL(*mock_adapter_, GetTransportConfiguration())
       .WillOnce(Return(config));

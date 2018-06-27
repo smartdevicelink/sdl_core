@@ -46,6 +46,10 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+const char* tc_enabled = "enabled";
+const char* tc_tcp_port = "tcp_port";
+const char* tc_tcp_ip_address = "tcp_ip_address";
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 // @deprecated DeviceTypes: PASA_AOA, PASA_BLUETOOTH, MME

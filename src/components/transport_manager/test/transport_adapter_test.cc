@@ -819,9 +819,9 @@ TEST_F(TransportAdapterTest, TransportConfigUpdated) {
   transport_adapter.AddListener(&mock_listener);
 
   TransportConfig config;
-  config[TC_ENABLED] = std::string("true");
-  config[TC_TCP_IP_ADDRESS] = std::string("192.168.1.1");
-  config[TC_TCP_PORT] = std::string("12345");
+  config[tc_enabled] = std::string("true");
+  config[tc_tcp_ip_address] = std::string("192.168.1.1");
+  config[tc_tcp_port] = std::string("12345");
 
   EXPECT_CALL(mock_listener, OnTransportConfigUpdated(_));
   transport_adapter.TransportConfigUpdated(config);
