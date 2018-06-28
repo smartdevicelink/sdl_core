@@ -1778,7 +1778,7 @@ void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
   secondary_transport_devices_cache_[session_key] = device_handle;
 
   {
-    sync_primitives::AutoLock auto_lock(applications_list_lock_);
+    sync_primitives::AutoLock auto_lock(applications_list_lock_ptr_);
     ApplicationSharedPtr app = application(session_key);
     if (!app) {
       // It is possible that secondary transport is established prior to
@@ -1813,7 +1813,7 @@ void ApplicationManagerImpl::OnSecondaryTransportEndedCallback(
   }
 
   {
-    sync_primitives::AutoLock auto_lock(applications_list_lock_);
+    sync_primitives::AutoLock auto_lock(applications_list_lock_ptr_);
     ApplicationSharedPtr app = application(session_key);
     if (!app) {
       LOG4CXX_DEBUG(logger_,
