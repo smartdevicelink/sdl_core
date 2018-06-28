@@ -52,6 +52,15 @@
 #include "utils/test_async_waiter.h"
 #include <bson_object.h>
 
+namespace transport_manager {
+namespace transport_adapter {
+// taken from transport_adapter_impl.cc
+const char* tc_enabled = "enabled";
+const char* tc_tcp_port = "tcp_port";
+const char* tc_tcp_ip_address = "tcp_ip_address";
+}
+}
+
 namespace test {
 namespace components {
 namespace protocol_handler_test {

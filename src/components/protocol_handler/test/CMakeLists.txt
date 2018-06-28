@@ -43,10 +43,6 @@ include_directories (
 
 collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
 
-file(GLOB SOURCES
-  ${COMPONENTS_DIR}/transport_manager/transport_adapter/transport_adapter_impl.cc
-)
-
 set(LIBRARIES
   gmock
   ProtocolHandler
