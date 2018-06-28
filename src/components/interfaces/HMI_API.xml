@@ -5105,7 +5105,7 @@
   <param name="moduleType" type="Common.ModuleType" mandatory="true" >
     <description>The module data to retrieve from the vehicle for that type</description>
   </param>
-  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+  <param name="subscribe" type="Boolean" mandatory="false">
     <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the module type</description>
   </param>
   <param name="appID" type="Integer" mandatory="true">

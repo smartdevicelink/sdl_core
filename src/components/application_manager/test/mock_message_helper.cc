@@ -230,7 +230,6 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
       file_path, timeout, retries, app_mngr);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void MessageHelper::SendActivateAppToHMI(
     uint32_t const app_id,
     ApplicationManager& application_manager,
@@ -240,14 +239,18 @@ void MessageHelper::SendActivateAppToHMI(
       app_id, application_manager, level, send_policy_priority);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      message_type, correlation_id);
+}
+
 void MessageHelper::SendHMIStatusNotification(
     const Application& application_impl,
     ApplicationManager& application_manager) {
   MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
       application_impl, application_manager);
 }
-
-#endif  // SDL_REMOTE_CONTROL
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           uint32_t correlation_id,
@@ -306,12 +309,6 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->SendGlobalPropertiesToHMI(
-      app);
-}
-
-smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
-    ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->GetIVISubscriptionRequests(
       app);
 }
 
@@ -544,13 +541,6 @@ void MessageHelper::SendUnsubscribeButtonNotification(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
-}
-
-void MessageHelper::SendUnsubscribeIVIRequest(int32_t ivi_id,
-                                              ApplicationSharedPtr application,
-                                              ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendUnsubscribeIVIRequest(
-      ivi_id, application, app_mngr);
 }
 
 }  // namespace application_manager

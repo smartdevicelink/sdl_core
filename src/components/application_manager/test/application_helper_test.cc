@@ -52,6 +52,8 @@
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "test/resumption/mock_last_state.h"
+#include "media_manager/mock_media_manager.h"
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
@@ -69,6 +71,8 @@ using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using resumption_test::MockLastState;
+using test::components::media_manager_test::MockMediaManager;
 
 using namespace application_manager;
 using namespace policy_handler_test;
@@ -112,6 +116,11 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
+    const std::string path_to_plagin = "";
+    EXPECT_CALL(mock_application_manager_settings_, plugins_folder())
+        .WillOnce(ReturnRef(path_to_plagin));
+    app_manager_impl_.Init(mock_last_state_, &mock_media_manager_);
+
     app_impl_ = new ApplicationImpl(
         application_id,
         policy_app_id,
@@ -127,6 +136,8 @@ class ApplicationHelperTest : public testing::Test {
   NiceMock<MockPolicySettings> mock_policy_settings_;
 
   ApplicationManagerImpl app_manager_impl_;
+  MockMediaManager mock_media_manager_;
+  MockLastState mock_last_state_;
   ApplicationSharedPtr app_impl_;
 };
 
@@ -134,8 +145,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;
   const uint32_t choice_set_id = 3;
-  const mobile_apis::VehicleDataType::eType vi =
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL;
   const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
 
   smart_objects::SmartObject cmd;
@@ -147,7 +156,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  EXPECT_TRUE(app_impl_->SubscribeToIVI(static_cast<uint32_t>(vi)));
+
   EXPECT_TRUE(app_impl_->SubscribeToButton(button));
 
   const std::string some_string = "some_string";
@@ -173,7 +182,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_TRUE(NULL != app_impl_->FindChoiceSet(choice_set_id));
   EXPECT_TRUE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_TRUE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   auto help_prompt = app_impl_->help_prompt();
   EXPECT_TRUE(help_prompt->asString() == some_string);
   auto timeout_prompt = app_impl_->timeout_prompt();
@@ -198,7 +206,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_FALSE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_FALSE(NULL != app_impl_->FindChoiceSet(choice_set_id));
   EXPECT_FALSE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_FALSE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   help_prompt = app_impl_->help_prompt();
   EXPECT_FALSE(help_prompt->asString() == some_string);
   timeout_prompt = app_impl_->timeout_prompt();
@@ -230,8 +237,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  app_impl_->SubscribeToIVI(static_cast<uint32_t>(
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL));
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
@@ -246,8 +251,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
 
   EXPECT_CALL(*mock_message_helper_,
               SendUnsubscribeButtonNotification(_, _, _));
-
-  EXPECT_CALL(*mock_message_helper_, SendUnsubscribeIVIRequest(_, _, _));
 
   // Act
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);

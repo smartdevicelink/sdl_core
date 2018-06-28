@@ -205,6 +205,11 @@ else()
   get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
   set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
   set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
+  add_custom_target(
+      libbson
+      DEPENDS ${BSON_LIBS_DIRECTORY}
+      DEPENDS ${EMHASHMAP_LIBS_DIRECTORY}
+      )
 endif()
 
 if (HMIADAPTER STREQUAL "messagebroker")

@@ -71,11 +71,6 @@ set(PATHS
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
-if (NOT REMOTE_CONTROL)
-  list(REMOVE_ITEM SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/access_remote_impl.cc)
-endif()
-
 set(LIBRARIES
   ConfigProfile
   policy_struct
