@@ -202,7 +202,9 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
               session_connection_map_, session_connection_map_lock_)));
 
   const uint32_t kSession1 = conn->AddNewSession(kDefaultConnectionHandle);
-  const uint32_t kSession2 = conn->AddNewSession(kDefaultConnectionHandle);
+
+  const transport_manager::ConnectionUID kAnotherConnectionHandle = 2;
+  const uint32_t kSession2 = conn->AddNewSession(kAnotherConnectionHandle);
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
