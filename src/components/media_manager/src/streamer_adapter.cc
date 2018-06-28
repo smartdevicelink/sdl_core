@@ -48,8 +48,8 @@ StreamerAdapter::~StreamerAdapter() {
     streamer_->Close();
   }
   thread_->join();
-  delete streamer_;
   threads::DeleteThread(thread_);
+  delete streamer_;
 }
 
 void StreamerAdapter::StartActivity(int32_t application_key) {

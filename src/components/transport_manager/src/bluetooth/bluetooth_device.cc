@@ -45,7 +45,6 @@
 #include <sys/socket.h>
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 #include "utils/logger.h"
 
@@ -57,8 +56,7 @@ bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
   LOG4CXX_TRACE(logger_,
                 "enter. app_handle: " << app_handle
-                                      << ", channel_out: " << std::hex
-                                      << reinterpret_cast<void*>(channel_out));
+                                      << ", channel_out: " << channel_out);
   if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max()) {
     LOG4CXX_TRACE(logger_,
                   "exit with FALSE. Condition: app_handle < 0 || app_handle > "
