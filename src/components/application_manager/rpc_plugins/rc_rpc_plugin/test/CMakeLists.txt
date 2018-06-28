@@ -71,5 +71,5 @@ if(ENABLE_LOG)
 endif()
 
 create_test("rc_commands_test" "${SOURCES}" "${LIBRARIES}" )
-create_test("resourse_allocation_manager_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
+create_test("resource_allocation_manager_test" "${RC_TEST_SOURCES}" "${LIBRARIES}")
 
