@@ -92,7 +92,7 @@ void RCRPCPlugin::OnApplicationEvent(
     case plugins::kApplicationRegistered: {
       application->AddExtension(new RCAppExtension(kRCPluginID));
       resource_allocation_manager_->SendOnRCStatusNotifications(
-          NotificationTrigger::APP_REGISTRATION);
+          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     case plugins::kApplicationExit: {
