@@ -65,8 +65,9 @@ class MockResourceAllocationManager
                rc_rpc_plugin::RCAppExtensionPtr(
                    application_manager::ApplicationSharedPtr application));
   MOCK_METHOD0(ResetAllAllocations, void());
-  MOCK_METHOD1(SendOnRCStatusNotifications,
-               void(rc_rpc_plugin::NotificationTrigger::eType));
+  MOCK_METHOD2(SendOnRCStatusNotifications,
+               void(rc_rpc_plugin::NotificationTrigger::eType,
+                    application_manager::ApplicationSharedPtr application));
   MOCK_CONST_METHOD0(is_rc_enabled, bool());
   MOCK_METHOD1(set_rc_enabled, void(const bool value));
 };
