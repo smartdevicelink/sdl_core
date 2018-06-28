@@ -244,7 +244,6 @@ void RegisterAppInterfaceRequest::Run() {
 
   const std::string app_id_short = msg_params[strings::app_id].asString();
   const std::string app_id_full = msg_params[strings::full_app_id].asString();
-  printf("policy_app_id is %s, use_full is %d, short is %s, long is %s\n", policy_app_id.c_str(), application_manager_.get_settings().use_full_app_id(), app_id_short.c_str(), app_id_full.c_str());
   // transform the given ids to lower case for later use I guess?
   std::string new_app_id_short = app_id_short;
   std::string new_app_id_full = app_id_full;
@@ -1338,10 +1337,8 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
 
-  const std::string& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id = application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
 

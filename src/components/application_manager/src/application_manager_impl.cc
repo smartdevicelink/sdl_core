@@ -492,7 +492,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
-  const std::string& policy_app_id = params[strings::app_id].asString();
+  const std::string& policy_app_id = GetCorrectMobileIDFromMessage(request_for_registration);
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
   std::string device_mac;
@@ -966,14 +966,14 @@ const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
 // Extract the app ID to use internally based on the UseFullAppID .ini setting
 std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
     const commands::MessageSharedPtr& message) const {
-  const std::string app_id_short =
+   std::string app_id_short =
       (*message)[strings::msg_params][strings::app_id].asString();
-  const std::string app_id_full =
+   std::string app_id_full =
       (*message)[strings::msg_params][strings::full_app_id].asString();
       
       printf("getting correct id, short is %s, long is %s\n",app_id_short.c_str(), app_id_full.c_str() );
   // Get the correct policy id
-  const std::string chosen_app_id =
+  std::string chosen_app_id =
       get_settings().use_full_app_id() ? app_id_full : app_id_short;
   return chosen_app_id;
 }

@@ -1414,9 +1414,6 @@ class ApplicationManagerImpl
    */
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
-      
-  std::string GetCorrectMobileIDFromMessage(
-      const commands::MessageSharedPtr& message);
  private:
   const ApplicationManagerSettings& settings_;
   /**
