@@ -53,6 +53,7 @@ void UnregisterAppInterfaceRequest::Run() {
           connection_key(),
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
       commands::Command::ORIGIN_SDL);
+  application_manager_.EndNaviServices(connection_key());
   application_manager_.UnregisterApplication(connection_key(),
                                              mobile_apis::Result::SUCCESS);
   SendResponse(true, mobile_apis::Result::SUCCESS);
