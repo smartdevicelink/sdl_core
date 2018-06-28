@@ -2272,6 +2272,8 @@ bool ApplicationManagerImpl::Stop() {
   stopping_application_mng_lock_.Release();
   application_list_update_timer_.Stop();
   try {
+    SetUnregisterAllApplicationsReason(
+      mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
     UnregisterAllApplications();
   } catch (...) {
     LOG4CXX_ERROR(logger_,
