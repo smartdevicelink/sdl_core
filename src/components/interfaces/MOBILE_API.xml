@@ -3089,6 +3089,9 @@
         <param name="appID" type="String" maxlength="100" mandatory="true">
             <description>ID used to validate app with policy table entries</description>
         </param>
+        <param name="fullAppID" type="String" maxlength="100" mandatory="false">
+            <description>ID used to validate app with policy table entries</description>
+        </param>
         <param name="appInfo" type="AppInfo" mandatory="false">
             <description>
                 See AppInfo.

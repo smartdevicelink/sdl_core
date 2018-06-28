@@ -504,6 +504,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     LOG4CXX_DEBUG(logger_,
                   "Device mac for id" << device_id << " is " << device_mac);
   }
+  printf("device id is %lu, app id is %u, policy_app_id is %s, \n", device_id, app_id, policy_app_id.c_str());
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
@@ -960,6 +961,21 @@ StateController& ApplicationManagerImpl::state_controller() {
 
 const ApplicationManagerSettings& ApplicationManagerImpl::get_settings() const {
   return settings_;
+}
+
+// Extract the app ID to use internally based on the UseFullAppID .ini setting
+std::string ApplicationManagerImpl::GetCorrectMobileIDFromMessage(
+    const commands::MessageSharedPtr& message) const {
+  const std::string app_id_short =
+      (*message)[strings::msg_params][strings::app_id].asString();
+  const std::string app_id_full =
+      (*message)[strings::msg_params][strings::full_app_id].asString();
+      
+      printf("getting correct id, short is %s, long is %s\n",app_id_short.c_str(), app_id_full.c_str() );
+  // Get the correct policy id
+  const std::string chosen_app_id =
+      get_settings().use_full_app_id() ? app_id_full : app_id_short;
+  return chosen_app_id;
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(

@@ -82,6 +82,7 @@ const mobile_apis::Language::eType kMobileLanguage =
     mobile_apis::Language::EN_US;
 const std::string kMacAddress = "test_mac_address";
 const std::string kAppId = "test_app_id";
+const std::string kFullAppId = "test_app_id_long";
 const std::string kDummyString = "test_string";
 const std::vector<uint32_t> kDummyDiagModes;
 }  // namespace
@@ -112,6 +113,7 @@ class RegisterAppInterfaceRequestTest
   void InitBasicMessage() {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     (*msg_)[am::strings::msg_params][am::strings::app_id] = kAppId;
+    (*msg_)[am::strings::msg_params][am::strings::full_app_id] = kFullAppId;
     (*msg_)[am::strings::msg_params][am::strings::app_name] = app_name_;
     (*msg_)[am::strings::msg_params][am::strings::language_desired] =
         kHmiLanguage;
@@ -143,6 +145,8 @@ class RegisterAppInterfaceRequestTest
   }
 
   void InitGetters() {
+    ON_CALL(app_mngr_, GetCorrectMobileIDFromMessage(msg_))
+        .WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
     ON_CALL(app_mngr_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));

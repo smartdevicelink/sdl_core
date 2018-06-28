@@ -1106,6 +1106,8 @@ class ApplicationManagerImpl
 
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
+  std::string GetCorrectMobileIDFromMessage(
+      const commands::MessageSharedPtr& message) const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
 
   app_launch::AppLaunchCtrl& app_launch_ctrl() OVERRIDE;
@@ -1412,7 +1414,9 @@ class ApplicationManagerImpl
    */
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
-
+      
+  std::string GetCorrectMobileIDFromMessage(
+      const commands::MessageSharedPtr& message);
  private:
   const ApplicationManagerSettings& settings_;
   /**

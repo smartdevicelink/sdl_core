@@ -267,6 +267,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(ForbidStreaming, void(uint32_t app_id));
   MOCK_CONST_METHOD0(get_settings,
                      const application_manager::ApplicationManagerSettings&());
+  MOCK_CONST_METHOD1(
+      GetCorrectMobileIDFromMessage,
+      std::string(
+          const application_manager::commands::MessageSharedPtr& message));
   MOCK_METHOD0(event_dispatcher,
                application_manager::event_engine::EventDispatcher&());
 

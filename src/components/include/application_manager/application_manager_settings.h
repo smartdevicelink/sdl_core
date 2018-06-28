@@ -80,6 +80,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& video_stream_file() const = 0;
   virtual const std::string& audio_stream_file() const = 0;
 
+  virtual bool use_full_app_id() const = 0;
   virtual bool use_db_for_resumption() const = 0;
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;

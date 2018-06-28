@@ -54,6 +54,7 @@ extern const char* msg_params;
 extern const char* method_name;
 extern const char* info;
 extern const char* app_id;
+extern const char* full_app_id;
 extern const char* bundle_id;
 extern const char* app_info;
 extern const char* app_launch;

@@ -18,6 +18,7 @@ const char* msg_params = "msg_params";
 const char* method_name = "methodName";
 const char* info = "info";
 const char* app_id = "appID";
+const char* full_app_id = "fullAppID";
 const char* bundle_id = "appBundleID";
 const char* app_info = "appInfo";
 const char* app_launch = "app_launch";

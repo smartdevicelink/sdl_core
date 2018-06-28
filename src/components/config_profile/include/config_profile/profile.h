@@ -367,6 +367,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @return Flag
    */
   bool enable_policy() const;
+  
+  /**
+   * @brief Should core use fullAppID internally instead of appID (Default true)
+   * @return Flag
+   */
+  bool use_full_app_id() const;
 
   // TransportManageSettings interface
 
@@ -854,6 +860,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string preloaded_pt_file_;
   std::string policy_snapshot_file_name_;
   bool enable_policy_;
+  bool use_full_app_id_;
   uint32_t transport_manager_disconnect_timeout_;
   bool use_last_state_;
   std::vector<uint32_t> supported_diag_modes_;
