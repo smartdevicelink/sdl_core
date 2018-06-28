@@ -399,15 +399,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
                             const smart_objects::SmartObject& saved_app);
 
   /**
-   * @brief CheckIcons allows to check application icons
-   * @param application application under resumtion  application
-   * @param json_object
-   * @return true in case icons exists, false otherwise
-   */
-  bool CheckIcons(app_mngr::ApplicationSharedPtr application,
-                  smart_objects::SmartObject& obj);
-
-  /**
    * @brief CheckDelayAfterIgnOn should check if SDL was started less
    * then N seconds ago. N will be readed from profile.
    * @return true if SDL started N seconds ago, otherwise return false

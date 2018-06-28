@@ -478,20 +478,7 @@ bool ResumeCtrlImpl::CheckPersistenceFilesForResumption(
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  if (result) {
-    if (saved_app.keyExists(strings::application_commands)) {
-      if (!CheckIcons(application, saved_app[strings::application_commands])) {
-        return false;
-      }
-    }
-    if (saved_app.keyExists(strings::application_choice_sets)) {
-      if (!CheckIcons(application,
-                      saved_app[strings::application_choice_sets])) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return result;
 }
 
 bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
@@ -777,15 +764,6 @@ bool ResumeCtrlImpl::CheckAppRestrictions(
                                 << "; hmi_level " << hmi_level << " result "
                                 << result);
   return result;
-}
-
-bool ResumeCtrlImpl::CheckIcons(ApplicationSharedPtr application,
-                                smart_objects::SmartObject& obj) {
-  using namespace smart_objects;
-  LOG4CXX_AUTO_TRACE(logger_);
-  const mobile_apis::Result::eType verify_images =
-      MessageHelper::VerifyImageFiles(obj, application, application_manager_);
-  return mobile_apis::Result::INVALID_DATA != verify_images;
 }
 
 bool ResumeCtrlImpl::CheckDelayAfterIgnOn() {

@@ -42,6 +42,7 @@
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
+#define INVALID_IMG_WARNING_INFO "Requested image(s) not found."
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -95,6 +96,37 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
+
+
+  should_send_warnings = false;
+  for (uint32_t i = 0;
+       i < (*message_)[strings::msg_params][strings::choice_set].length();
+       ++i) {
+    Result::eType verification_result_image = Result::SUCCESS;
+    Result::eType verification_result_secondary_image = Result::SUCCESS;
+    if ((*message_)[strings::msg_params][strings::choice_set][i].keyExists(
+            strings::image)) {
+      verification_result_image = MessageHelper::VerifyImage(
+          (*message_)[strings::msg_params][strings::choice_set][i]
+                     [strings::image],
+          app,
+          application_manager_);
+    }
+    if ((*message_)[strings::msg_params][strings::choice_set][i].keyExists(
+            strings::secondary_image)) {
+      verification_result_secondary_image = MessageHelper::VerifyImage(
+          (*message_)[strings::msg_params][strings::choice_set][i]
+                     [strings::secondary_image],
+          app,
+          application_manager_);
+    }
+    if (verification_result_image == Result::INVALID_DATA ||
+        verification_result_secondary_image == Result::INVALID_DATA) {
+   	should_send_warnings = true;
+	break;
+    }
+  }
+
   uint32_t grammar_id = application_manager_.GenerateGrammarID();
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
@@ -405,16 +437,18 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 }
 
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+	LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_) {
-    SendResponse(true, mobile_apis::Result::SUCCESS);
-  } else {
-    DeleteChoices();
-  }
+	if (!error_from_hmi_ && should_send_warnings) {
+		SendResponse(true, mobile_apis::Result::WARNINGS,INVALID_IMG_WARNING_INFO);
+	} else if (!error_from_hmi_) {
+		SendResponse(true, mobile_apis::Result::SUCCESS);
+	} else {
+		DeleteChoices();
+	}
 
-  application_manager_.TerminateRequest(
-      connection_key(), correlation_id(), function_id());
+	application_manager_.TerminateRequest(
+			connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

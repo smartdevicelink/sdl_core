@@ -94,9 +94,6 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     // Check if image parameter is valid
     if (button.keyExists(strings::image)) {
       SmartObject& buttonImage = button[strings::image];
-
-      // Image name must not be empty and must not contain incorrect
-      // character
       if (false == MessageHelper::VerifySoftButtonString(
                        buttonImage[strings::value].asString())) {
         return false;
@@ -2778,13 +2775,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (request_soft_buttons[i].keyExists(strings::text)) {
           request_soft_buttons[i].erase(strings::text);
         }
-
-        if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::SUCCESS !=
-              VerifyImage(
-                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
-          return Result::INVALID_DATA;
-        }
         break;
       }
       case SoftButtonType::SBT_TEXT: {
@@ -2803,13 +2793,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifySoftButtonString(
                   request_soft_buttons[i][strings::text].asString())))) {
-          return Result::INVALID_DATA;
-        }
-
-        if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::SUCCESS !=
-              VerifyImage(
-                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
           return Result::INVALID_DATA;
         }
         break;
