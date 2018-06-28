@@ -206,6 +206,9 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .
         // Return false to avoid call KeepConnectionAlive
         WillRepeatedly(Return(false));
+
+    session_connection_map_lock_ptr_ =
+        std::make_shared<sync_primitives::Lock>();
   }
 
   void TearDown() OVERRIDE {
@@ -393,7 +396,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // Used by OnTransportConfigUpdated() tests. The lifetime of these objects
   // should be longer than that of a test case.
   connection_handler::SessionConnectionMap session_connection_map_;
-  sync_primitives::Lock session_connection_map_lock_;
+  std::shared_ptr<sync_primitives::Lock> session_connection_map_lock_ptr_;
 };
 
 #ifdef ENABLE_SECURITY
@@ -2418,7 +2421,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   EXPECT_CALL(connection_handler_mock, session_connection_map())
       .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map_, session_connection_map_lock_)));
+          session_connection_map_, session_connection_map_lock_ptr_)));
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
       .WillRepeatedly(
@@ -2489,7 +2492,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   EXPECT_CALL(connection_handler_mock, session_connection_map())
       .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map_, session_connection_map_lock_)));
+          session_connection_map_, session_connection_map_lock_ptr_)));
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
       .WillRepeatedly(

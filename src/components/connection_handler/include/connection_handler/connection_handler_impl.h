@@ -624,7 +624,8 @@ class ConnectionHandlerImpl
    * @brief session/connection map
    */
   SessionConnectionMap session_connection_map_;
-  mutable sync_primitives::Lock session_connection_map_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock>
+      session_connection_map_lock_ptr_;
 
   /**
    * \brief List of connections

@@ -68,7 +68,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_handler_observer_(NULL)
     , transport_manager_(tm)
     , protocol_handler_(NULL)
-    , session_connection_map_lock_(true)
+    , session_connection_map_lock_ptr_(
+          std::make_shared<sync_primitives::Lock>(true))
     , connection_list_lock_()
     , connection_handler_observer_lock_()
     , connection_list_deleter_(&connection_list_)
@@ -1002,7 +1003,7 @@ DevicesDiscoveryStarter& ConnectionHandlerImpl::get_device_discovery_starter() {
 NonConstDataAccessor<SessionConnectionMap>
 ConnectionHandlerImpl::session_connection_map() {
   return NonConstDataAccessor<SessionConnectionMap>(
-      session_connection_map_, session_connection_map_lock_);
+      session_connection_map_, session_connection_map_lock_ptr_);
 }
 
 SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
@@ -1050,7 +1051,7 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
 const SessionTransports ConnectionHandlerImpl::GetSessionTransports(
     uint8_t session_id) const {
   SessionTransports st;
-  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::const_iterator it =
       session_connection_map_.find(session_id);
   if (session_connection_map_.end() == it) {
@@ -1065,7 +1066,7 @@ const SessionTransports ConnectionHandlerImpl::GetSessionTransports(
 
 const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
     transport_manager::ConnectionUID secondary_transport_id) const {
-  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::const_iterator it = session_connection_map_.begin();
   for (; session_connection_map_.end() != it; it++) {
     SessionTransports st = it->second;

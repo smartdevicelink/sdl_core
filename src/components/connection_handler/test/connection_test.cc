@@ -452,10 +452,11 @@ TEST_F(ConnectionTest, AddNewSession_VerifySessionConnectionMapAdded) {
       connection_handle, device_handle, &mock_connection_handler, heart_beat);
 
   SessionConnectionMap session_connection_map;
-  sync_primitives::Lock session_connection_map_lock;
+  std::shared_ptr<sync_primitives::Lock> session_connection_map_lock_ptr =
+      std::make_shared<sync_primitives::Lock>();
   EXPECT_CALL(mock_connection_handler, session_connection_map())
       .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map, session_connection_map_lock)));
+          session_connection_map, session_connection_map_lock_ptr)));
 
   transport_manager::ConnectionUID connection_handle_uid = 1;
   uint32_t sid = connection->AddNewSession(connection_handle_uid);
@@ -482,7 +483,8 @@ TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
       connection_handle, device_handle, &mock_connection_handler, heart_beat);
 
   SessionConnectionMap session_connection_map;
-  sync_primitives::Lock session_connection_map_lock;
+  std::shared_ptr<sync_primitives::Lock> session_connection_map_lock_ptr =
+      std::make_shared<sync_primitives::Lock>();
   // input some dummy data
   SessionTransports st1 = {1234, 0};
   SessionTransports st2 = {2345, 0};
@@ -491,7 +493,7 @@ TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
 
   EXPECT_CALL(mock_connection_handler, session_connection_map())
       .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map, session_connection_map_lock)));
+          session_connection_map, session_connection_map_lock_ptr)));
 
   transport_manager::ConnectionUID connection_handle_uid = 1;
   uint32_t sid = connection->AddNewSession(connection_handle_uid);

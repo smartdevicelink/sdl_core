@@ -74,11 +74,10 @@ class DataAccessor {
 template <class T>
 class NonConstDataAccessor {
  public:
-  NonConstDataAccessor(T& data, const sync_primitives::Lock& lock)
-      : data_(data)
-      , lock_(const_cast<sync_primitives::Lock&>(lock))
-      , counter_(new uint32_t(0)) {
-    lock_.Acquire();
+  NonConstDataAccessor(T& data,
+                       const std::shared_ptr<sync_primitives::Lock>& lock)
+      : data_(data), lock_(lock), counter_(new uint32_t(0)) {
+    lock_->Acquire();
   }
 
   NonConstDataAccessor(const NonConstDataAccessor<T>& other)
@@ -88,7 +87,7 @@ class NonConstDataAccessor {
 
   ~NonConstDataAccessor() {
     if (0 == *counter_) {
-      lock_.Release();
+      lock_->Release();
     } else {
       --(*counter_);
     }
@@ -100,7 +99,7 @@ class NonConstDataAccessor {
  private:
   void* operator new(size_t size);
   T& data_;
-  sync_primitives::Lock& lock_;
+  const std::shared_ptr<sync_primitives::Lock> lock_;
   utils::SharedPtr<uint32_t> counter_;
 };
 
