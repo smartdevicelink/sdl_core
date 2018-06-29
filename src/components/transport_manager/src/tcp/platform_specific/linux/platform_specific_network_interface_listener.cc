@@ -237,9 +237,14 @@ bool PlatformSpecificNetworkInterfaceListener::Stop() {
 void PlatformSpecificNetworkInterfaceListener::Loop() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // Initialize status_table_ by acquiring a list of interfaces and their
+  // current statuses. Also we will notify an event to the listener if IP
+  // address is already available.
   InitializeStatus();
   NotifyIPAddresses();
 
+  // I am not sure required buffer size for netlink data structures. Most of
+  // implementation I found online uses 4096 so I followed them.
   char buf[4096];
   fd_set rfds;
 
@@ -249,6 +254,7 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
     FD_SET(pipe_fds_[0], &rfds);
     int nfds = socket_ > pipe_fds_[0] ? socket_ : pipe_fds_[0];
 
+    // wait for some data from netlink socket (socket_) and our internal pipe
     int ret = select(nfds + 1, &rfds, NULL, NULL, NULL);
     if (ret < 0) {
       if (errno == EINTR) {
@@ -260,6 +266,8 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
       }
     }
 
+    // Received data from internal pipe, indicating StopLoop() is called.
+    // We'll break the while() loop and eventually exit this thread.
     if (FD_ISSET(pipe_fds_[0], &rfds)) {
       ret = read(pipe_fds_[0], buf, sizeof(buf));
       if (ret < 0) {
@@ -285,6 +293,7 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
     }
 #endif  // BUILD_TESTS
 
+    // received data from netlink socket
     if (FD_ISSET(socket_, &rfds)) {
       ret = recv(socket_, buf, sizeof(buf), 0);
       if (ret < 0) {
@@ -303,6 +312,8 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
         struct nlmsghdr* header = reinterpret_cast<struct nlmsghdr*>(buf);
         int len = ret;
 
+        // Parse the stream. We may receive multiple (header + data) pairs at a
+        // time so we use for-loop to go through.
         for (; NLMSG_OK(header, len); header = NLMSG_NEXT(header, len)) {
           if (header->nlmsg_type == NLMSG_ERROR) {
             LOG4CXX_WARN(logger_, "received error event from netlink");
@@ -313,6 +324,9 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
 
           if (header->nlmsg_type == RTM_NEWLINK ||
               header->nlmsg_type == RTM_DELLINK) {
+            // For these events, data part contains an ifinfomsg struct and a
+            // series of rtattr structures. See rtnetlink(7).
+            // We are only interested in interface index and flags.
             struct ifinfomsg* ifinfo_msg =
                 reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(header));
             EventParam param(ifinfo_msg->ifi_index, ifinfo_msg->ifi_flags);
@@ -320,6 +334,9 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
 
           } else if (header->nlmsg_type == RTM_NEWADDR ||
                      header->nlmsg_type == RTM_DELADDR) {
+            // For these events, data part contains an ifaddrmsg struct and
+            // optionally some rtattr structures. We'll extract IP address(es)
+            // from them.
             struct ifaddrmsg* ifaddr_msg =
                 reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(header));
             unsigned int size = IFA_PAYLOAD(header);
@@ -329,10 +346,12 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
             continue;
           }
 
+          // update status_table_ based on received data
           UpdateStatus(header->nlmsg_type, params);
         }
       }
 
+      // notify the listener if necessary
       NotifyIPAddresses();
     }
   }
@@ -570,6 +589,8 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
 
   std::vector<EventParam> params;
 
+  // Iterate through rtattr structs. (The first one can be acquired through
+  // IFA_RTA() macro)
   for (struct rtattr* attr = IFA_RTA(message); RTA_OK(attr, size);
        attr = RTA_NEXT(attr, size)) {
     if (!(attr->rta_type == IFA_LOCAL || attr->rta_type == IFA_ADDRESS)) {
@@ -585,6 +606,8 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
                       "Invalid netlink event: insufficient IPv4 address data");
         continue;
       }
+
+      // Data part of rtattr contains IPv4 address. Copy it to param.address
       struct in_addr* ipv4_addr =
           reinterpret_cast<struct in_addr*>(RTA_DATA(attr));
 
@@ -600,6 +623,8 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
                       "Invalid netlink event: insufficient IPv6 address data");
         continue;
       }
+
+      // Data part of rtattr contains IPv6 address. Copy it to param.address
       struct in6_addr* ipv6_addr =
           reinterpret_cast<struct in6_addr*>(RTA_DATA(attr));
 
