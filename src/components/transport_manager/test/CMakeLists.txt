@@ -42,15 +42,17 @@ include_directories(
 )
 
 set(EXCLUDE_PATHS
+  platform_specific
   raw_message_matcher.cc
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
-set (
-  "${CMAKE_CURRENT_SOURCE_DIR}"/platform_specific/linux
-  "${SOURCES}"
-)
+set(PLATFORM_DEPENDENT_SOURCES)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES platform_specific/linux)
+endif()
+list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 set(LIBRARIES
   gmock
