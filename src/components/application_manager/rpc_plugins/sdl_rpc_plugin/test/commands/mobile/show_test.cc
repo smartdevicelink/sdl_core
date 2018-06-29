@@ -351,7 +351,7 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   command->Run();
 }
 
-TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
+TEST_F(ShowRequestTest, Run_Graphic_Not_Verified) {
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -364,11 +364,17 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
+      .Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
-  EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
-  EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
+  msg_params[am::strings::app_id] = kAppId;
+  msg_params[am::hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(*mock_app_, set_show_command(msg_params));
   command->Run();
 }
 
@@ -418,7 +424,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
   command->Run();
 }
 
-TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
+TEST_F(ShowRequestTest, Run_SecondaryGraphic_Not_Verified) {
   MessageSharedPtr msg = CreateMsgParams();
 
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -431,11 +437,16 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
+      .Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
-  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
-  EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
+  msg_params[am::strings::app_id] = kAppId;
+  msg_params[am::hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(*mock_app_, set_show_command(msg_params));
 
   command->Run();
 }
