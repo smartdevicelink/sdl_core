@@ -26,6 +26,7 @@
         <element name="speed" />
         <element name="engineTorque" />
         <element name="externalTemperature" />
+        <element name="turnSignal" />
         <element name="fuelLevel" />
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />

@@ -218,6 +218,7 @@ const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
 const char* fuel_range = "fuelRange";
 const char* external_temp = "externalTemperature";
+const char* turn_signal = "turnSignal";
 const char* vin = "vin";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
