@@ -272,10 +272,10 @@ TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_WARNINGS) {
 
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
-          commands_map, lock_ptr_)));
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_ptr_)));
   EXPECT_CALL(
-      mock_rpc_service_,
+		  mock_rpc_service_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
       .WillOnce(Return(true));
   utils::SharedPtr<AddCommandRequest> request_ptr =
