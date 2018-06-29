@@ -102,10 +102,9 @@ class ProtocolHandler {
 
   /**
     * \brief Sends ending session to mobile application
-    * \param connection_id Identifier of connection within which
+    * \param primary_connection_id Identifier of connection within which
     * service exists
-    * \param connection_id Identifier of the actual transport connection ID
-    * for the sevice
+    * \param connection_id Identifier of the actual transport for the service
     * \param session_id ID of session to be ended
     */
   virtual void SendEndService(int32_t primary_connection_id,

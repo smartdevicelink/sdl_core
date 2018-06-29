@@ -334,7 +334,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                                  secondaryTransports,
                                                  audioServiceTransports,
                                                  videoServiceTransports)) {
-          LOG4CXX_TRACE(logger_, "Multiple transports are enabled.");
+          LOG4CXX_DEBUG(logger_, "Multiple transports are enabled.");
           BsonArray secondaryTransportsArr;
           bson_array_initialize(&secondaryTransportsArr,
                                 secondaryTransports.size());
@@ -358,7 +358,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           bson_array_initialize(&audioServiceTransportsArr,
                                 audioServiceTransports.size());
           for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
-            LOG4CXX_TRACE(logger_,
+            LOG4CXX_DEBUG(logger_,
                           "Adding " << audioServiceTransports[i]
                                     << " to audioServiceTransports parameter "
                                        "of StartSessionAck");
@@ -373,7 +373,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           bson_array_initialize(&videoServiceTransportsArr,
                                 videoServiceTransports.size());
           for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
-            LOG4CXX_TRACE(logger_,
+            LOG4CXX_DEBUG(logger_,
                           "Adding " << videoServiceTransports[i]
                                     << " to videoServiceTransports parameter "
                                        "of StartSessionAck");
@@ -387,7 +387,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           if (settings_.multiple_transports_enabled()) {
             send_transport_update_event = true;
           } else {
-            LOG4CXX_TRACE(
+            LOG4CXX_DEBUG(
                 logger_,
                 "Multiple transports feature is disabled by configuration");
             // In this case, we must remember that this session will never have

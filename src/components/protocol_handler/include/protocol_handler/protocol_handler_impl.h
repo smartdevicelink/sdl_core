@@ -261,8 +261,7 @@ class ProtocolHandlerImpl
     * \brief Sends ending session to mobile application
     * \param primary_connection_id Identifier of connection within which
     * service exists
-    * \param connection_id Identifier of the actual transport ID for the
-    * sevice
+    * \param connection_id Identifier of the actual transport for the service
     * \param session_id ID of session to be ended
     */
   void SendEndService(int32_t primary_connection_id,
