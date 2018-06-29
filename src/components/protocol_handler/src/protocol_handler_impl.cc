@@ -2445,6 +2445,10 @@ const bool ProtocolHandlerImpl::ParseSecondaryTransportConfiguration(
       return false;
     }
   }
+  // note: even if settings_.multiple_transports_enabled() is false, we still
+  // send out an empty "secondaryTransports" parameter, along with
+  // "videoServiceTransports" and "audioServiceTransports" params which are
+  // useful without secondary transport.
 
   // Then, generate the "secondaryTransports" array for the StartSession ACK
   GenerateSecondaryTransportsForStartSessionAck(secondary_transport_types,
