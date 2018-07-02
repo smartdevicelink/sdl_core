@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/hmi_state.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_resumption_data.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "protocol_handler/mock_session_observer.h"
+#include "gtest/gtest.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/commands/mobile/set_global_properties_request.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
-#include "application_manager/hmi_state.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "sdl_rpc_plugin/commands/mobile/set_global_properties_request.h"
 #include "utils/file_system.h"
 
 namespace test {
@@ -72,13 +72,13 @@ using namespace policy;
 using namespace test::components::commands_test;
 using namespace mobile_apis;
 
+using am::HmiStatePtr;
+using sdl_rpc_plugin::commands::SetGlobalPropertiesRequest;
+using testing::_;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
-using am::HmiStatePtr;
-using am::commands::SetGlobalPropertiesRequest;
 using usage_statistics_test::MockStatisticsManager;
 
 class ApplicationImplTest : public ApplicationImpl {
@@ -112,8 +112,7 @@ class ApplicationImplTest : public ApplicationImpl {
 class HelpPromptManagerTest : public ::testing::Test {
  public:
   HelpPromptManagerTest()
-      : app_set_(test_app_, app_lock_)
-      , mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
   void SetUp() OVERRIDE;
   void TearDown() OVERRIDE;
   MessageSharedPtr CreateMsgParams();
@@ -138,10 +137,8 @@ class HelpPromptManagerTest : public ::testing::Test {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
   NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
   utils::SharedPtr<application_manager_test::MockApplication> mock_app_;
-  ApplicationSet test_app_;
   sync_primitives::Lock app_lock_;
-  DataAccessor<ApplicationSet> app_set_;
-  application_manager::MockMessageHelper& mock_message_helper_;
+  MockMessageHelper& mock_message_helper_;
   utils::SharedPtr<MockHelpPromptManager> mock_help_prompt_manager_;
 };
 
