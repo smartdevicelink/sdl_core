@@ -47,7 +47,6 @@ class MockHelpPromptManager : public ::application_manager::HelpPromptManager {
                void(uint32_t cmd_id,
                     const smart_objects::SmartObject& command));
   MOCK_METHOD1(OnVrCommandDeleted, void(uint32_t cmd_id));
-  MOCK_METHOD0(OnTimeoutExpired, void());
   MOCK_METHOD2(OnSetGlobalPropertiesReceived,
                void(const smart_objects::SmartObject& msg, bool is_response));
   MOCK_METHOD1(OnAppActivated, void(bool is_restore));

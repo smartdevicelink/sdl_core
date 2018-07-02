@@ -65,7 +65,7 @@ class HelpPromptManagerImpl : public HelpPromptManager {
   /**
    * @brief The type sends info to HMI
    */
-  enum class SendingType { kNoneSend, kSendHelpPromt, kSendVRHelp, kSendBoth };
+  enum class SendingType { kNoneSend, kSendHelpPrompt, kSendVRHelp, kSendBoth };
 
   /**
    * @brief Adds command to constructed values, and send SetGlobalProperties if
@@ -78,11 +78,6 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    * SetGlobalProperties if required
    */
   void OnVrCommandDeleted(const uint32_t cmd_id) OVERRIDE;
-  /**
-   * @brief Send SetGlobalProperties with constructed vrHelp and/or helpPrompt
-   * parameters
-   */
-  void OnTimeoutExpired() OVERRIDE;
   /**
      * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
      * message
@@ -106,20 +101,6 @@ class HelpPromptManagerImpl : public HelpPromptManager {
  private:
   DISALLOW_COPY_AND_ASSIGN(HelpPromptManagerImpl);
   /**
-   * @brief Run timer to helps buffer the requests.
-   * @param is_restore determines the need to restore commands
-   * after resuming
-   */
-  void StartTimer(const bool is_restore);
-  /**
-   * @brief Stops the buffering timer.
-   */
-  void StopTimer();
-  /**
-   * @brief  Callback for timer to helps buffer the requests.
-   */
-  void OnTimerExpired();
-  /**
    * @brief Send TTS request to HMI
    */
   void SendTTSRequest();
@@ -138,7 +119,7 @@ class HelpPromptManagerImpl : public HelpPromptManager {
   /**
    * @brief Construct the helpPrompt parameter
    */
-  void CreatePromtMsg(smart_objects::SmartObject& out_msg_params);
+  void CreatePromptMsg(smart_objects::SmartObject& out_msg_params);
   /**
    * @brief Construct the vrHelp parameter
    */
@@ -156,7 +137,6 @@ class HelpPromptManagerImpl : public HelpPromptManager {
 
   Application& app_;
   ApplicationManager& app_manager_;
-  timer::Timer internal_timer_;
   VRCommandsMap vr_commands_;
   SendingType sending_type_;
   std::size_t count_requests_commands_;

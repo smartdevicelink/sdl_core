@@ -58,11 +58,6 @@ class HelpPromptManager {
    */
   virtual void OnVrCommandDeleted(const uint32_t cmd_id) = 0;
   /**
-   * @brief Send SetGlobalProperties with constructed vrHelp and/or helpPrompt
-   * parameters
-   */
-  virtual void OnTimeoutExpired() = 0;
-  /**
    * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
    * message
    * @param msg containing GlobalProperties

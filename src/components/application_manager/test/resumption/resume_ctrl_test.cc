@@ -556,8 +556,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
   application_manager::CommandsMap command;
-  DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_ptr_);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
 
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
@@ -605,8 +605,8 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
 
   ::application_manager::CommandsMap command;
-  DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_ptr_);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
 
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
@@ -657,8 +657,8 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
       .WillByDefault(Return(mock_app_));
 
   ::application_manager::CommandsMap command;
-  DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_ptr_);
+  DataAccessor<application_manager::CommandsMap> data_accessor(
+      command, app_set_lock_ptr_);
 
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   const uint32_t ign_off_count = 0u;

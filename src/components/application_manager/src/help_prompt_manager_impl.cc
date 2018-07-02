@@ -32,20 +32,18 @@
 
 #include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/commands/command_impl.h"
 #include "utils/logger.h"
-#include "utils/timer_task_impl.h"
 #include "utils/make_shared.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HelpPromptManagerImpl")
 
 namespace {
 const std::size_t kLimitCommand = 30;
-const uint32_t kBufferingTimeout = 10000;
 }
 
 namespace application_manager {
@@ -54,9 +52,6 @@ HelpPromptManagerImpl::HelpPromptManagerImpl(Application& app,
                                              ApplicationManager& app_manager)
     : app_(app)
     , app_manager_(app_manager)
-    , internal_timer_("HelpPromtManagerTimer",
-                      new ::timer::TimerTaskImpl<HelpPromptManagerImpl>(
-                          this, &HelpPromptManagerImpl::OnTimerExpired))
     , sending_type_(SendingType::kNoneSend)
     , count_requests_commands_(0)
     , is_tts_send_(false)
@@ -64,7 +59,6 @@ HelpPromptManagerImpl::HelpPromptManagerImpl(Application& app,
 
 HelpPromptManagerImpl::~HelpPromptManagerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  StopTimer();
 }
 
 void HelpPromptManagerImpl::OnVrCommandAdded(
@@ -79,7 +73,7 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
   }
   auto it = vr_commands_.find(cmd_id);
   if (vr_commands_.end() != it) {
-    LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " alreday exists");
+    LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " already exists");
     return;
   }
 
@@ -90,8 +84,6 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
   const smart_objects::SmartObject& commands = command[strings::vr_commands];
   /**
    * The remaining number of commands for adding
-   * without taking into account the commands
-   * added during the timer operation
    */
   std::size_t limit = kLimitCommand - count_requests_commands_;
   LOG4CXX_DEBUG(logger_, "Remaining number of commands" << limit);
@@ -100,28 +92,22 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
     return;
   }
 
-  if (internal_timer_.is_running() || commands.length() < limit) {
-    limit = commands.length();
-  }
+  std::size_t count_new_commands = commands.length();
 
-  LOG4CXX_DEBUG(logger_,
-                "Internal timer is running: " << internal_timer_.is_running()
-                                              << " Will be added " << limit
-                                              << " commands");
+  LOG4CXX_DEBUG(logger_, "Adding " << count_new_commands << " commands");
 
   vr_commands_[cmd_id] = utils::MakeShared<smart_objects::SmartObject>(
       smart_objects::SmartType_Array);
   smart_objects::SmartArray& ar_vr_cmd = *(vr_commands_[cmd_id]->asArray());
   smart_objects::SmartArray& ar_cmd = *(commands.asArray());
-  ar_vr_cmd.reserve(limit);
-  ar_vr_cmd.insert(ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + limit);
+  ar_vr_cmd.reserve(count_new_commands);
+  ar_vr_cmd.insert(
+      ar_vr_cmd.end(), ar_cmd.begin(), ar_cmd.begin() + count_new_commands);
   LOG4CXX_DEBUG(logger_,
                 "VR commands with id: " << cmd_id << " added for appID: "
                                         << app_.app_id());
-  if (false == internal_timer_.is_running()) {
-    count_requests_commands_ += limit;
-    SendRequests();
-  }
+  count_requests_commands_ += count_new_commands;
+  SendRequests();
 }
 
 void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
@@ -142,15 +128,8 @@ void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
     LOG4CXX_DEBUG(logger_,
                   "VR command with id: " << cmd_id << " deleted for appID: "
                                          << app_.app_id());
-    if (false == internal_timer_.is_running()) {
-      SendRequests();
-    }
+    SendRequests();
   }
-}
-
-void HelpPromptManagerImpl::OnTimeoutExpired() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  SendRequests();
 }
 
 void HelpPromptManagerImpl::OnSetGlobalPropertiesReceived(
@@ -163,9 +142,6 @@ void HelpPromptManagerImpl::OnSetGlobalPropertiesReceived(
     return;
   }
   sending_type_ = GetSendingType(msg, is_response);
-  if (SendingType::kNoneSend == sending_type_) {
-    StopTimer();
-  }
   LOG4CXX_DEBUG(logger_, "Set sending type to:" << unsigned(sending_type_));
 }
 
@@ -186,46 +162,12 @@ void HelpPromptManagerImpl::OnAppActivated(const bool is_restore) {
       return;
     }
   }
-  StartTimer(is_restore);
+  SendRequests();
 }
 
 void HelpPromptManagerImpl::OnAppUnregistered() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Unregisted for appID:" << app_.app_id());
-  StopTimer();
-}
-
-void HelpPromptManagerImpl::StartTimer(const bool is_restore) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Timer for appID:" << app_.app_id());
-  StopTimer();
-  sending_type_ = SendingType::kSendBoth;
-  internal_timer_.Start(kBufferingTimeout, timer::kSingleShot);
-  if (is_restore) {
-    sending_type_ = is_tts_send_ ? SendingType::kSendVRHelp : sending_type_;
-    sending_type_ = is_ui_send_ ? SendingType::kSendHelpPromt : sending_type_;
-    is_tts_send_ = false;
-    is_ui_send_ = false;
-    const DataAccessor<CommandsMap> accessor = app_.commands_map();
-    const CommandsMap& commands = accessor.GetData();
-    for (auto& command : commands) {
-      OnVrCommandAdded(command.first, *command.second);
-    }
-  }
-}
-
-void HelpPromptManagerImpl::StopTimer() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sending_type_ = SendingType::kNoneSend;
-  if (internal_timer_.is_running()) {
-    internal_timer_.Stop();
-  }
-  vr_commands_.clear();
-}
-
-void HelpPromptManagerImpl::OnTimerExpired() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  OnTimeoutExpired();
 }
 
 void HelpPromptManagerImpl::SendTTSRequest() {
@@ -257,7 +199,7 @@ void HelpPromptManagerImpl::SendTTSRequest() {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    CreatePromtMsg(msg_params);
+    CreatePromptMsg(msg_params);
 
     msg_params[strings::app_id] = app_.app_id();
     so_to_send[strings::msg_params] = msg_params;
@@ -316,7 +258,7 @@ void HelpPromptManagerImpl::SendRequests() {
   }
 
   switch (sending_type_) {
-    case SendingType::kSendHelpPromt:
+    case SendingType::kSendHelpPrompt:
       SendTTSRequest();
       return;
     case SendingType::kSendVRHelp:
@@ -333,7 +275,7 @@ void HelpPromptManagerImpl::SendRequests() {
                                << " request not sending");
 }
 
-void HelpPromptManagerImpl::CreatePromtMsg(
+void HelpPromptManagerImpl::CreatePromptMsg(
     smart_objects::SmartObject& out_msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (vr_commands_.empty()) {
@@ -413,7 +355,7 @@ HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType(
       case hmi_apis::FunctionID::TTS_SetGlobalProperties:
         if (is_tts_send_) {
           is_tts_send_ = false;
-          return (SendingType::kSendHelpPromt == sending_type_)
+          return (SendingType::kSendHelpPrompt == sending_type_)
                      ? SendingType::kNoneSend
                      : SendingType::kSendVRHelp;
         }
@@ -423,7 +365,7 @@ HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType(
           is_ui_send_ = false;
           return (SendingType::kSendVRHelp == sending_type_)
                      ? SendingType::kNoneSend
-                     : SendingType::kSendHelpPromt;
+                     : SendingType::kSendHelpPrompt;
         }
         break;
       default:
