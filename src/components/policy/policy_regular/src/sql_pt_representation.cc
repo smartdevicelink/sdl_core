@@ -67,7 +67,18 @@ void InsertUnique(K value, T* array) {
 const std::string SQLPTRepresentation::kDatabaseName = "policy";
 
 SQLPTRepresentation::SQLPTRepresentation()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {}
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
+  is_in_memory = false;
+}
+
+SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
+  is_in_memory = in_memory;
+  if (in_memory) {
+    db_ = new utils::dbms::SQLDatabase();
+  } else {
+    db_ = new utils::dbms::SQLDatabase(kDatabaseName);
+  }
+}
 
 SQLPTRepresentation::~SQLPTRepresentation() {
   db_->Close();
@@ -321,10 +332,14 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 #ifdef BUILD_TESTS
   open_counter_ = 0;
 #endif  // BUILD_TESTS
-  std::string path = get_settings().app_storage_folder();
-  if (!path.empty()) {
-    db_->set_path(path + "/");
+
+  if (!is_in_memory) {
+    const std::string& path = get_settings().app_storage_folder();
+    if (!path.empty()) {
+      db_->set_path(path + "/");
+    }
   }
+
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
@@ -357,13 +372,12 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
       return InitResult::FAIL;
     }
   }
-#ifndef __QNX__
+
   if (!db_->IsReadWrite()) {
     LOG4CXX_ERROR(logger_, "There are no read/write permissions for database");
     return InitResult::FAIL;
   }
 
-#endif  // __QNX__
   utils::dbms::SQLQuery check_pages(db());
   if (!check_pages.Prepare(sql_pt::kCheckPgNumber) || !check_pages.Next()) {
     LOG4CXX_WARN(logger_, "Incorrect pragma for page counting.");
@@ -2040,13 +2054,7 @@ const int32_t SQLPTRepresentation::GetDBVersion() const {
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
-#ifdef __QNX__
-  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
-  db->Open();
-  return db;
-#else
   return db_;
-#endif
 }
 
 bool SQLPTRepresentation::CopyApplication(const std::string& source,

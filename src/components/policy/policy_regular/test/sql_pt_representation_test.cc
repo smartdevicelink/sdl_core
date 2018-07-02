@@ -50,6 +50,7 @@
 
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
+#include "sqlite_wrapper/sql_query.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::SQLPTRepresentation;
@@ -72,35 +73,22 @@ using policy_handler_test::MockPolicySettings;
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
-  DBMS* dbms;
-  SQLPTRepresentation* reps;
-  static const std::string kDatabaseName;
-  static const std::string kAppStorageFolder;
-  // Gtest can show message that this object doesn't destroyed
-  std::unique_ptr<NiceMock<MockPolicySettings> > policy_settings_;
+  std::shared_ptr<utils::dbms::SQLQuery> query_wrapper_;
+  std::shared_ptr<SQLPTRepresentation> reps;
+  policy_handler_test::MockPolicySettings policy_settings_;
 
   void SetUp() OVERRIDE {
-    file_system::CreateDirectory(kAppStorageFolder);
-    reps = new SQLPTRepresentation;
-    policy_settings_ = std::unique_ptr<NiceMock<MockPolicySettings> >(
-        new NiceMock<MockPolicySettings>());
-    ON_CALL(*policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
-    EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
-    dbms = new DBMS(kAppStorageFolder + "/" + kDatabaseName);
-    EXPECT_TRUE(dbms->Open());
+    reps = std::make_shared<SQLPTRepresentation>(true);
+    ASSERT_TRUE(reps != NULL);
+    ASSERT_EQ(policy::SUCCESS, reps->Init(&policy_settings_));
+
+    query_wrapper_ = std::make_shared<utils::dbms::SQLQuery>(reps->db());
+    ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
   void TearDown() OVERRIDE {
-    EXPECT_TRUE(reps->Clear());
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
-    reps->RemoveDB();
-    delete reps;
-    dbms->Close();
-    file_system::remove_directory_content(kAppStorageFolder);
-    file_system::RemoveDirectory(kAppStorageFolder, true);
-    policy_settings_.reset();
   }
 
   virtual utils::dbms::SQLDatabase* db() const {
@@ -151,6 +139,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const {
     return ::SQLPTRepresentation::GatherNickName(app_id, nicknames);
+  }
+
+  int FetchOneInt(const std::string& query) {
+    query_wrapper_->Prepare(query);
+    query_wrapper_->Exec();
+    const int ret = query_wrapper_->GetInteger(0);
+    query_wrapper_->Finalize();
+    return ret;
   }
 
   void CheckAppPoliciesSection(
@@ -350,10 +346,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-const std::string SQLPTRepresentationTest::kAppStorageFolder =
-    "storage_SQLPTRepresentationTest";
-
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
   SQLPTRepresentationTest2()
@@ -391,15 +383,15 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
-    reps = new SQLPTRepresentation;
+    reps = std::make_shared<SQLPTRepresentation>();
   }
 
   void TearDown() OVERRIDE {
     file_system::RemoveDirectory(kAppStorageFolder, true);
-    delete reps;
+    reps.reset();
   }
 
-  SQLPTRepresentation* reps;
+  std::shared_ptr<SQLPTRepresentation> reps;
   NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
 };
@@ -408,8 +400,10 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
 TEST_F(SQLPTRepresentationTest2,
        DISABLED_OpenAttemptTimeOut_ExpectCorrectNumber) {
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
+
   // Check  Actual attempts number made to try to open DB
   EXPECT_EQ(kAttemptsToOpenPolicyDB, reps->open_counter());
+
   // Check timeot value correctly read from config file.
   EXPECT_EQ(700u, kOpenAttemptTimeoutMs);
 }
@@ -417,74 +411,89 @@ TEST_F(SQLPTRepresentationTest2,
 TEST_F(SQLPTRepresentationTest,
        RefreshDB_DropExistedPTThenRefreshDB_ExpectTablesWithInitialData) {
   // Check
-  const char* query_select =
+  const std::string query_select =
       "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table'";
   // In normally created PT there are more than 0 tables
-  ASSERT_GT(dbms->FetchOneInt(query_select), 0);
+  ASSERT_GT(FetchOneInt(query_select), 0);
   ASSERT_TRUE(reps->Drop());
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select));
+
+  ASSERT_EQ(0, FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
 
   // There are 29 tables in the database, now.
   const int32_t total_tables_number = 29;
-  ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
-  const char* query_select_count_of_iap_buffer_full =
-      "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
-  const char* query_select_count_sync_out_of_memory =
-      "SELECT `count_sync_out_of_memory` FROM `usage_and_error_count`";
-  const char* query_select_count_of_sync_reboots =
-      "SELECT `count_of_sync_reboots` FROM `usage_and_error_count`";
-  const char* query_select_pt_exchanged_at_odometer_x =
-      "SELECT `pt_exchanged_at_odometer_x` FROM `module_meta`";
-  const char* query_select_pt_exchanged_x_days_after_epoch =
-      "SELECT `pt_exchanged_x_days_after_epoch` FROM `module_meta`";
-  const char* query_select_flag_update_required =
-      "SELECT `flag_update_required` FROM `module_meta`";
-  const char* query_select_ignition_cycles_since_last_exchange =
-      "SELECT `ignition_cycles_since_last_exchange` FROM `module_meta`";
-  const char* query_select_preloaded_pt =
-      "SELECT `preloaded_pt` FROM `module_config`";
-  const char* query_select_is_first_run =
-      "SELECT `is_first_run` FROM `module_config`";
-  const char* query_select_exchange_after_x_ignition_cycles =
-      "SELECT `exchange_after_x_ignition_cycles` FROM `module_config`";
-  const char* query_select_exchange_after_x_kilometers =
-      "SELECT `exchange_after_x_kilometers` FROM `module_config`";
-  const char* query_select_exchange_after_x_days =
-      "SELECT `exchange_after_x_days` FROM `module_config`";
-  const char* query_select_timeout_after_x_seconds =
-      "SELECT `timeout_after_x_seconds` FROM `module_config`";
-  const char* query_select_priorities = "SELECT COUNT(`value`) FROM `priority`";
-  const char* query_select_hmi_levels =
-      "SELECT COUNT(`value`) FROM `hmi_level`";
-  const char* query_select_version = "SELECT `number` FROM `version`";
+  ASSERT_EQ(total_tables_number, FetchOneInt(query_select));
 
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_count_of_iap_buffer_full));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_count_sync_out_of_memory));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_count_of_sync_reboots));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_pt_exchanged_at_odometer_x));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_pt_exchanged_x_days_after_epoch));
-  ASSERT_EQ(
-      0, dbms->FetchOneInt(query_select_ignition_cycles_since_last_exchange));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_flag_update_required));
-  ASSERT_EQ(1, dbms->FetchOneInt(query_select_preloaded_pt));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_is_first_run));
-  ASSERT_EQ(0,
-            dbms->FetchOneInt(query_select_exchange_after_x_ignition_cycles));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_exchange_after_x_kilometers));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_exchange_after_x_days));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_timeout_after_x_seconds));
-  ASSERT_EQ(6, dbms->FetchOneInt(query_select_priorities));
-  ASSERT_EQ(4, dbms->FetchOneInt(query_select_hmi_levels));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_version));
+  const std::string query_select_count_of_iap_buffer_full =
+      "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
+  ASSERT_EQ(0, FetchOneInt(query_select_count_of_iap_buffer_full));
+
+  const std::string query_select_count_sync_out_of_memory =
+      "SELECT `count_sync_out_of_memory` FROM `usage_and_error_count`";
+  ASSERT_EQ(0, FetchOneInt(query_select_count_sync_out_of_memory));
+
+  const std::string query_select_count_of_sync_reboots =
+      "SELECT `count_of_sync_reboots` FROM `usage_and_error_count`";
+  ASSERT_EQ(0, FetchOneInt(query_select_count_of_sync_reboots));
+
+  const std::string query_select_pt_exchanged_at_odometer_x =
+      "SELECT `pt_exchanged_at_odometer_x` FROM `module_meta`";
+  ASSERT_EQ(0, FetchOneInt(query_select_pt_exchanged_at_odometer_x));
+
+  const std::string query_select_pt_exchanged_x_days_after_epoch =
+      "SELECT `pt_exchanged_x_days_after_epoch` FROM `module_meta`";
+  ASSERT_EQ(0, FetchOneInt(query_select_pt_exchanged_x_days_after_epoch));
+
+  const std::string query_select_flag_update_required =
+      "SELECT `flag_update_required` FROM `module_meta`";
+  ASSERT_EQ(0, FetchOneInt(query_select_flag_update_required));
+
+  const std::string query_select_ignition_cycles_since_last_exchange =
+      "SELECT `ignition_cycles_since_last_exchange` FROM `module_meta`";
+  ASSERT_EQ(0, FetchOneInt(query_select_ignition_cycles_since_last_exchange));
+
+  const std::string query_select_preloaded_pt =
+      "SELECT `preloaded_pt` FROM `module_config`";
+  ASSERT_EQ(1, FetchOneInt(query_select_preloaded_pt));
+
+  const std::string query_select_is_first_run =
+      "SELECT `is_first_run` FROM `module_config`";
+  ASSERT_EQ(0, FetchOneInt(query_select_is_first_run));
+
+  const std::string query_select_exchange_after_x_ignition_cycles =
+      "SELECT `exchange_after_x_ignition_cycles` FROM `module_config`";
+  ASSERT_EQ(0, FetchOneInt(query_select_exchange_after_x_ignition_cycles));
+
+  const std::string query_select_exchange_after_x_kilometers =
+      "SELECT `exchange_after_x_kilometers` FROM `module_config`";
+  ASSERT_EQ(0, FetchOneInt(query_select_exchange_after_x_kilometers));
+
+  const std::string query_select_exchange_after_x_days =
+      "SELECT `exchange_after_x_days` FROM `module_config`";
+  ASSERT_EQ(0, FetchOneInt(query_select_exchange_after_x_days));
+
+  const std::string query_select_timeout_after_x_seconds =
+      "SELECT `timeout_after_x_seconds` FROM `module_config`";
+  ASSERT_EQ(0, FetchOneInt(query_select_timeout_after_x_seconds));
+
+  const std::string query_select_priorities =
+      "SELECT COUNT(`value`) FROM `priority`";
+  ASSERT_EQ(6, FetchOneInt(query_select_priorities));
+
+  const std::string query_select_hmi_levels =
+      "SELECT COUNT(`value`) FROM `hmi_level`";
+  ASSERT_EQ(4, FetchOneInt(query_select_hmi_levels));
+
+  const std::string query_select_version = "SELECT `number` FROM `version`";
+  ASSERT_EQ(0, FetchOneInt(query_select_version));
 }
 
 TEST_F(
     SQLPTRepresentationTest,
     CheckPermissionsAllowed_SetValuesInAppGroupRpcFunctionalGroup_GetEqualParamsInCheckPermissionResult) {
   // Arrange
-  const char* query =
+  const std::string query =
       "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
       " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
       "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
@@ -497,7 +506,7 @@ TEST_F(
       " `functional_group_id`) VALUES ('Update', 'speed', 'FULL', 1);";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query));
+  ASSERT_TRUE(query_wrapper_->Exec(query));
 
   // Act
   CheckPermissionResult ret;
@@ -515,7 +524,7 @@ TEST_F(
     SQLPTRepresentationTest,
     CheckPermissionsAllowedWithoutParameters_SetLimitedPermissions_ExpectEmptyListOfAllowedParams) {
   // Arrange
-  const char* query =
+  const std::string query =
       "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
       " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
       "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
@@ -527,7 +536,7 @@ TEST_F(
       " `functional_group_id`) VALUES ('Update', 'LIMITED', 1);";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query));
+  ASSERT_TRUE(query_wrapper_->Exec(query));
 
   // Act
   CheckPermissionResult ret;
@@ -542,10 +551,10 @@ TEST_F(
     SQLPTRepresentationTest,
     CheckPermissionsDisallowedWithoutParameters_DeletedAppGroupAndSetFULLLevel_ExpectHmiLevelIsDissalowed) {
   // Arrange
-  const char* query = "DELETE FROM `app_group`";
+  const std::string query = "DELETE FROM `app_group`";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query));
+  ASSERT_TRUE(query_wrapper_->Exec(query));
 
   // Act
   CheckPermissionResult ret;
@@ -559,20 +568,20 @@ TEST_F(
 TEST_F(SQLPTRepresentationTest,
        PTPReloaded_UpdateModuleConfig_ReturnIsPTPreloadedTRUE) {
   // Arrange
-  const char* query = "UPDATE `module_config` SET `preloaded_pt` = 1";
+  const std::string query = "UPDATE `module_config` SET `preloaded_pt` = 1";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query));
+  ASSERT_TRUE(query_wrapper_->Exec(query));
   EXPECT_TRUE(reps->IsPTPreloaded());
 }
 
 TEST_F(SQLPTRepresentationTest,
        GetUpdateUrls_DeleteAndInsertEndpoints_ExpectUpdateUrls) {
   // Arrange
-  const char* query_delete = "DELETE FROM `endpoint`; ";
+  const std::string query_delete = "DELETE FROM `endpoint`; ";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_delete));
+  ASSERT_TRUE(query_wrapper_->Exec(query_delete));
 
   // Act
   EndpointUrls ret = reps->GetUpdateUrls(7);
@@ -581,14 +590,15 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_TRUE(ret.empty());
 
   // Act
-  const char* query_insert =
+  const std::string query_insert =
       "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
       "  VALUES ('12345', 'http://ford.com/cloud/1', 7);"
       "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
       "  VALUES ('12345', 'http://ford.com/cloud/2', 7);";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
   // Act
   ret = reps->GetUpdateUrls(7);
 
@@ -607,13 +617,13 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IgnitionCyclesBeforeExchange_WithParametersOfQueryEqualZero) {
   // Arrange
-  const char* query_zeros =
+  const std::string query_zeros =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = 0; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 0";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_zeros));
+  ASSERT_TRUE(query_wrapper_->Exec(query_zeros));
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 
   // Act
@@ -626,13 +636,13 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IgnitionCyclesBeforeExchange_WithParametersOfQueryAreLessLimit) {
   // Arrange
-  const char* query_less_limit =
+  const std::string query_less_limit =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = 5; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_less_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_less_limit));
   EXPECT_EQ(5, reps->IgnitionCyclesBeforeExchange());
 
   // Act
@@ -645,16 +655,18 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IgnitionCyclesBeforeExchange_WithLimitCountOfParametersOfQuery) {
   // Arrange
-  const char* query_limit =
+  const std::string query_limit =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = 9; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_limit));
   EXPECT_EQ(1, reps->IgnitionCyclesBeforeExchange());
+
   // Act
   reps->IncrementIgnitionCycles();
+
   // Assert
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }
@@ -662,13 +674,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IgnitionCyclesBeforeExchange_WithMoreLimitCountOfParametersOfQuery) {
   // Arrange
-  const char* query_more_limit =
+  const std::string query_more_limit =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = 12; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_more_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_more_limit));
+
   // Chceck
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }
@@ -676,13 +689,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IgnitionCyclesBeforeExchange_WithNegativeLimitOfParametersOfQuery) {
   // Arrange
-  const char* query_negative_limit =
+  const std::string query_negative_limit =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = 3; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = -1";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_limit));
+
   // Check
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }
@@ -691,13 +705,14 @@ TEST_F(
     SQLPTRepresentationTest,
     IgnitionCyclesBeforeExchange_WithNegativeLimitOfCurrentParameterOfQuery) {
   // Arrange
-  const char* query_negative_current =
+  const std::string query_negative_current =
       "UPDATE `module_meta` SET "
       "  `ignition_cycles_since_last_exchange` = -1; "
       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 2";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_current));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_current));
+
   // Check
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }
@@ -705,13 +720,14 @@ TEST_F(
 TEST_F(SQLPTRepresentationTest,
        KilometersBeforeExchange_WithParametersOfQueryEqualZero) {
   // Arrange
-  const char* query_zeros =
+  const std::string query_zeros =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_at_odometer_x` = 0; "
       "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 0";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_zeros));
+  ASSERT_TRUE(query_wrapper_->Exec(query_zeros));
+
   // Checks
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(-10));
@@ -721,13 +737,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        KilometersBeforeExchange_QueryWithNegativeLimit) {
   // Arrange
-  const char* query_negative_limit =
+  const std::string query_negative_limit =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_at_odometer_x` = 10; "
       "  UPDATE `module_config` SET `exchange_after_x_kilometers` = -10";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_limit));
+
   // Checks
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(10));
@@ -736,13 +753,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        KilometersBeforeExchange_QueryWithNegativeCurrentLimit) {
   // Arrange
-  const char* query_negative_last =
+  const std::string query_negative_last =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_at_odometer_x` = -10; "
       "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 20";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_last));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_last));
+
   // Checks
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(10));
@@ -751,13 +769,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        KilometersBeforeExchange_QueryWithLimitParameters) {
   // Arrange
-  const char* query_limit =
+  const std::string query_limit =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_at_odometer_x` = 10; "
       "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 100";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_limit));
+
   // Checks
   EXPECT_EQ(0, reps->KilometersBeforeExchange(120));
   EXPECT_EQ(60, reps->KilometersBeforeExchange(50));
@@ -767,13 +786,14 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        DaysBeforeExchange_WithParametersOfQueryEqualZero) {
   // Arrange
-  const char* query_zeros =
+  const std::string query_zeros =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_x_days_after_epoch` = 0; "
       "  UPDATE `module_config` SET `exchange_after_x_days` = 0";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_zeros));
+  ASSERT_TRUE(query_wrapper_->Exec(query_zeros));
+
   // Checks
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(-10));
@@ -782,13 +802,14 @@ TEST_F(SQLPTRepresentationTest,
 
 TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithNegativeLimit) {
   // Arrange
-  const char* query_negative_limit =
+  const std::string query_negative_limit =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_x_days_after_epoch` = 10; "
       "  UPDATE `module_config` SET `exchange_after_x_days` = -10";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_limit));
+
   // Checks
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(10));
@@ -797,13 +818,14 @@ TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithNegativeLimit) {
 TEST_F(SQLPTRepresentationTest,
        DaysBeforeExchange_QueryWithNegativeCurrentLimit) {
   // Arrange
-  const char* query_negative_last =
+  const std::string query_negative_last =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_x_days_after_epoch` = -10; "
       "  UPDATE `module_config` SET `exchange_after_x_days` = 20";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_negative_last));
+  ASSERT_TRUE(query_wrapper_->Exec(query_negative_last));
+
   // Checks
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(10));
@@ -811,13 +833,14 @@ TEST_F(SQLPTRepresentationTest,
 
 TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithLimitParameters) {
   // Arrange
-  const char* query_limit =
+  const std::string query_limit =
       "UPDATE `module_meta` SET "
       "  `pt_exchanged_x_days_after_epoch` = 10; "
       "  UPDATE `module_config` SET `exchange_after_x_days` = 100";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_limit));
+  ASSERT_TRUE(query_wrapper_->Exec(query_limit));
+
   // Checks
   EXPECT_EQ(0, reps->DaysBeforeExchange(120));
   EXPECT_EQ(60, reps->DaysBeforeExchange(50));
@@ -829,23 +852,24 @@ TEST_F(
     SecondsBetweenRetries_DeletedAndInsertedSecondsBetweenRetry_ExpectCountOfSecondsEqualInserted) {
   // Arrange
   std::vector<int> seconds;
-  const char* query_delete = "DELETE FROM `seconds_between_retry`; ";
+  const std::string query_delete = "DELETE FROM `seconds_between_retry`; ";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_delete));
+  ASSERT_TRUE(query_wrapper_->Exec(query_delete));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
   EXPECT_EQ(0u, seconds.size());
 
   // Arrange
-  const char* query_insert =
+  const std::string query_insert =
       "INSERT INTO `seconds_between_retry` (`index`, `value`) "
       "  VALUES (0, 10); "
       "INSERT INTO `seconds_between_retry` (`index`, `value`) "
       "  VALUES (1, 20); ";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
+
   // Checks
   ASSERT_EQ(2u, seconds.size());
   EXPECT_EQ(10, seconds[0]);
@@ -854,11 +878,12 @@ TEST_F(
 
 TEST_F(SQLPTRepresentationTest, TimeoutResponse_Set60Seconds_GetEqualTimeout) {
   // Arrange
-  const char* query =
+  const std::string query =
       "UPDATE `module_config` SET `timeout_after_x_seconds` = 60";
 
   // Assert
-  ASSERT_TRUE(dbms->Exec(query));
+  ASSERT_TRUE(query_wrapper_->Exec(query));
+
   // Check
   EXPECT_EQ(60000, reps->TimeoutResponse());
 }
@@ -866,8 +891,12 @@ TEST_F(SQLPTRepresentationTest, TimeoutResponse_Set60Seconds_GetEqualTimeout) {
 TEST_F(SQLPTRepresentationTest,
        IsPTPreloaded_SetPTPreloadedThenCheck_ExpectCorrectValue) {
   // Arrange
-  const char* query_insert = "UPDATE `module_config` SET `preloaded_pt` = 1";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  const std::string query_insert =
+      "UPDATE `module_config` SET `preloaded_pt` = 1";
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
   // Check
   ASSERT_TRUE(reps->IsPTPreloaded());
 }
@@ -876,65 +905,81 @@ TEST_F(
     SQLPTRepresentationTest,
     SetCountersPassedForSuccessfulUpdate_SetCounters_ExpectValueChangedInPT) {
   // Arrange
-  const char* query_select_odometer =
+  const std::string query_select_odometer =
       "SELECT  `pt_exchanged_at_odometer_x` FROM`module_meta`";
-  const char* query_select_days_after_epoch =
+  const std::string query_select_days_after_epoch =
       "SELECT `pt_exchanged_x_days_after_epoch` FROM`module_meta`";
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_odometer));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_days_after_epoch));
+  ASSERT_EQ(0, FetchOneInt(query_select_odometer));
+  ASSERT_EQ(0, FetchOneInt(query_select_days_after_epoch));
   // Act
   ASSERT_TRUE(reps->SetCountersPassedForSuccessfulUpdate(100, 10000));
-  ASSERT_EQ(100, dbms->FetchOneInt(query_select_odometer));
-  ASSERT_EQ(10000, dbms->FetchOneInt(query_select_days_after_epoch));
+  ASSERT_EQ(100, FetchOneInt(query_select_odometer));
+  ASSERT_EQ(10000, FetchOneInt(query_select_days_after_epoch));
 }
 
 TEST_F(
     SQLPTRepresentationTest,
     IncrementIgnitionCycles_SetIgnitionCyclesValueThenIncrement_ExpectValueIncrementedInPT) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert =
       "UPDATE `module_meta` SET `ignition_cycles_since_last_exchange` = 54";
-  const char* query_select =
+  const std::string query_select =
       "SELECT `ignition_cycles_since_last_exchange`FROM `module_meta`";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
   // Act
   reps->IncrementIgnitionCycles();
+
   // Check
-  ASSERT_EQ(55, dbms->FetchOneInt(query_select));
+  ASSERT_EQ(55, FetchOneInt(query_select));
 }
 
 TEST_F(
     SQLPTRepresentationTest,
     ResetIgnitionCycles_SetIgnitionCyclesValueThenReset_ExpectZeroValueInPT) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert =
       "UPDATE `module_meta` SET `ignition_cycles_since_last_exchange` = 55";
-  const char* query_select =
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
+  const std::string query_select =
       "SELECT `ignition_cycles_since_last_exchange` FROM `module_meta`";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+
   // Act
   reps->ResetIgnitionCycles();
+
   // Check
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select));
+  ASSERT_EQ(0, FetchOneInt(query_select));
 }
 
 TEST_F(SQLPTRepresentationTest,
        GetUserFriendlyMsg_SetMsg_ExpectReceivedMsgSetInParams) {
   // Arrange
 
-  const char* query_insert =
+  const std::string query_insert_language_code =
       "INSERT INTO `message` (`language_code`, `message_type_name`) VALUES "
       "('en-en', 'AppPermissions')";
 
-  ASSERT_TRUE(dbms->Exec(query_insert));
-  query_insert =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_language_code));
+
+  const std::string query_insert_name =
       "INSERT INTO `message_type` (`name`) VALUES ('AppPermissions')";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_name));
+
   std::vector<std::string> msg_code;
   msg_code.push_back("AppPermissions");
+
   // Act
   std::vector<UserFriendlyMessage> result =
       reps->GetUserFriendlyMsg(msg_code, std::string("en-en"));
+
   // Checks
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(result[0].message_code, "AppPermissions");
@@ -944,13 +989,14 @@ TEST_F(
     SQLPTRepresentationTest,
     GetNotificationNumber_SetNotificationsPriorities_ExpectReceivedValuesCorrect) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert =
       "INSERT INTO `notifications_by_priority` (`priority_value`, `value`) "
       "VALUES ('NAVIGATION', 15) , "
       "('COMMUNICATION', 6), ('EMERGENCY', 60), ('NONE', 0), ('NORMAL', 4), "
       "('VOICECOMMUNICATION', 20)";
 
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
   EXPECT_EQ(6, reps->GetNotificationsNumber("COMMUNICATION"));
   EXPECT_EQ(60, reps->GetNotificationsNumber("EMERGENCY"));
   EXPECT_EQ(15, reps->GetNotificationsNumber("NAVIGATION"));
@@ -962,7 +1008,7 @@ TEST_F(
 TEST_F(SQLPTRepresentationTest,
        GetPriority_SetAppsPrioritiesThenGet_ExpectReceivedValuesCorrect) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app_default =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -970,9 +1016,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
+
+  const std::string query_insert_app_predataconsent =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -980,9 +1028,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'pre_DataConsent', 0, 0, 'NONE', "
       "'NONE', 0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_predataconsent));
+
+  const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -990,9 +1040,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
       "'COMMUNICATION', 0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
+
+  const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1000,7 +1052,9 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
 
   std::string priority;
   // Checks
@@ -1050,7 +1104,7 @@ TEST_F(SQLPTRepresentationTest3,
 TEST_F(SQLPTRepresentationTest,
        Clear_InitNewDataBaseThenClear_ExpectResultSuccess) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app_default =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1058,9 +1112,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
+
+  const std::string query_insert_app_predataconsent =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1068,9 +1124,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'pre_DataConsent', 0, 0, 'NONE', "
       "'NONE', 0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_predataconsent));
+
+  const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1078,9 +1136,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
       "'COMMUNICATION', 0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
+
+  const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1088,15 +1148,18 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  const char* query_insert =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
+
+  const std::string query_insert =
       "INSERT INTO `notifications_by_priority` (`priority_value`, `value`) "
       "VALUES ('NAVIGATION', 15) , "
       "('COMMUNICATION', 6), ('EMERGENCY', 60), ('NONE', 0), ('NORMAL', 4), "
       "('VOICECOMMUNICATION', 20)";
 
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
   EXPECT_TRUE(reps->Clear());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
   EXPECT_EQ(error.number(), (reps->db()->LastError().number()));
@@ -1105,17 +1168,22 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        GetInitialAppData_SetData_ExpectCorrectValuesReceived) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert_nickname =
       "INSERT INTO `nickname` (`application_id`, `name`) "
       "VALUES ('1111', 'first_app') , "
       "('2222', 'second_app'), ('3333', 'third_app')";
-  ASSERT_TRUE(dbms->Exec(query_insert));
 
-  query_insert =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_nickname));
+
+  const std::string query_insert_app_type =
       "INSERT INTO `app_type` (`application_id`, `name`)"
       "VALUES ('1111', 'NAVIGATION') , "
       "('1111', 'MEDIA'), ('3333', 'COMMUNICATION')";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_type));
+
   ::policy::StringArray nicknames;
   ::policy::StringArray app_types;
   ASSERT_TRUE(reps->GetInitialAppData("1111", &nicknames, &app_types));
@@ -1149,22 +1217,28 @@ TEST_F(
     SQLPTRepresentationTest,
     GetFunctionalGroupings_SetFunctionalGroupings_ExpectCorrectValuesReceived) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert_functional_group =
       "INSERT INTO `functional_group` (`id`, `user_consent_prompt`, `name`) "
       "VALUES (73072936, null, 'SendLocation'), (1533011474, null, "
       "'OnKeyboardInputOnlyGroup')";
-  ASSERT_TRUE(dbms->Exec(query_insert));
 
-  query_insert =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_functional_group));
+
+  const std::string query_insert_rpc_sendlocation =
       "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "
       "VALUES ('SendLocation', 'BACKGROUND', 73072936), ('SendLocation', "
       "'FULL', 73072936), ('SendLocation', 'LIMITED', 73072936)";
-  ASSERT_TRUE(dbms->Exec(query_insert));
 
-  query_insert =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_rpc_sendlocation));
+
+  const std::string query_insert_rpc_onkeyboard_input =
       "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "
       "VALUES ('OnKeyboardInput', 'FULL', 1533011474)";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_rpc_onkeyboard_input));
 
   policy_table::FunctionalGroupings func_groups;
   ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
@@ -1217,10 +1291,12 @@ TEST_F(
 TEST_F(SQLPTRepresentationTest,
        UpdateRequired_SetUpdateRequiredFlagThenCheck_ExpectUpdateRequired) {
   // Arrange
-  const char* query_insert =
+  const std::string query_insert =
       "UPDATE `module_meta` SET `flag_update_required` = 1";
+
   // Assert
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
   // Check
   EXPECT_TRUE(reps->UpdateRequired());
 }
@@ -1229,10 +1305,13 @@ TEST_F(SQLPTRepresentationTest,
        SaveUpdateRequired_SaveUpdateRequired_ExpectCorrectValues) {
   // Arrange
   reps->SaveUpdateRequired(true);
+
   // Check
   EXPECT_TRUE(reps->UpdateRequired());
+
   // Act
   reps->SaveUpdateRequired(false);
+
   // Check
   EXPECT_FALSE(reps->UpdateRequired());
 }
@@ -1240,7 +1319,7 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IsApplicationRepresented_Check_ExpectCorrectResult) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app_default =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1248,18 +1327,22 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
+
+  const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
       "`is_predata`, `memory_kb`, "
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
       "'COMMUNICATION', 0, 0, 0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
+
+  const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1267,7 +1350,10 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
+
   // Checks
   EXPECT_TRUE(reps->IsApplicationRepresented("default"));
   EXPECT_TRUE(reps->IsApplicationRepresented("device"));
@@ -1278,7 +1364,7 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IsApplicationRevoked_CheckApps_ExpectCorrectResult) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app_7777 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1286,9 +1372,11 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '7777', 0, 0, 'NONE', 'NONE', 1, "
       "0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_7777));
+
+  const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1296,7 +1384,10 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
+
   // Checks
   EXPECT_TRUE(reps->IsApplicationRevoked("7777"));
   EXPECT_FALSE(reps->IsApplicationRevoked("12345"));
@@ -1305,7 +1396,7 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        CopyApplication_CopyApplication_ExpectAppCopiedSuccesfully) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app_default =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1313,21 +1404,28 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "1, "
       "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
 
-  query_insert_app =
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
+
+  const std::string query_insert_app_123 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
       "`is_predata`, `memory_kb`, "
       " `heart_beat_timeout_ms`) VALUES( '123', 1, 0, 'FULL', "
       "'COMMUNICATION', 1, 1, 0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_123));
+
   EXPECT_FALSE(reps->IsApplicationRepresented("7777"));
   EXPECT_FALSE(reps->IsApplicationRepresented("9999"));
+
   // Act
   EXPECT_TRUE(reps->CopyApplication("default", "7777"));
   EXPECT_TRUE(reps->CopyApplication("123", "9999"));
+
   // Checks
   EXPECT_TRUE(reps->IsApplicationRepresented("7777"));
   EXPECT_TRUE(reps->IsApplicationRepresented("9999"));
@@ -1347,7 +1445,7 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IsDefaultPolicy_SetAppPreDataThenCheck_ExpectNotDefaultPolicySet) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
@@ -1355,7 +1453,10 @@ TEST_F(SQLPTRepresentationTest,
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
       "1, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
+
   // Check
   EXPECT_FALSE(reps->IsDefaultPolicy("12345"));
 }
@@ -1363,28 +1464,35 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        IsDefaultPolicy_SetAppDefaultThenCheck_ExpectNotDefaultPolicySet) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
       "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
       "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 1, 0, 64, 10) ";
 
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
+
   // Check
   EXPECT_TRUE(reps->IsDefaultPolicy("1234567"));
 }
 
 TEST_F(SQLPTRepresentationTest, Drop_DropExistedPT_ExpectZeroTables) {
   // Check
-  const char* query_select =
+  const std::string query_select =
       "SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = 'table'";
   // In normally created PT there are more than 0 tables
-  ASSERT_TRUE(dbms->Exec(query_select));
-  ASSERT_GT(dbms->FetchOneInt(query_select), 0);
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_select));
+  ASSERT_GT(FetchOneInt(query_select), 0);
+
   // Destroy schema
   ASSERT_TRUE(reps->Drop());
+
   // Check PT structure destroyed and tables number is 0
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select));
+  ASSERT_EQ(0, FetchOneInt(query_select));
+
   // Restore schema
   ASSERT_TRUE(reps->RefreshDB());
 }
@@ -1406,21 +1514,24 @@ TEST_F(SQLPTRepresentationTest,
       "VALUES( '" +
       kDefaultId + "', 0, 0, 'NONE', 'NONE', 0, 0, 0, 64, 10) ";
 
-  ASSERT_TRUE(dbms->Exec(query_insert_default_app.c_str()));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_default_app));
 
   const std::string query_insert_default_app_request_types =
       "INSERT INTO `request_type` (`application_id`, `request_type`)  "
       "VALUES ('" +
       kDefaultId + "', '" + kRequestType + "')";
 
-  ASSERT_TRUE(dbms->Exec(query_insert_default_app_request_types.c_str()));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_default_app_request_types));
 
   const std::string query_insert_default_app_hmi_types =
       "INSERT INTO `app_type` (`application_id`, `name`)  "
       "VALUES ('" +
       kDefaultId + "', '" + kHmiType + "')";
 
-  ASSERT_TRUE(dbms->Exec(query_insert_default_app_hmi_types.c_str()));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_default_app_hmi_types));
 
   const std::string query_insert_new_app =
       "INSERT INTO `application`(`id`, `keep_context`, "
@@ -1429,11 +1540,14 @@ TEST_F(SQLPTRepresentationTest,
       "VALUES('" +
       kAppId + "', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10)";
 
-  ASSERT_TRUE(dbms->Exec(query_insert_new_app.c_str()));
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_new_app));
 
   EXPECT_FALSE(reps->IsDefaultPolicy(kAppId));
+
   // Act
   ASSERT_TRUE(reps->SetDefaultPolicy(kAppId));
+
   // Check
   EXPECT_TRUE(reps->IsDefaultPolicy(kAppId));
 
@@ -1451,16 +1565,24 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        SetPreloaded_SetPreloaded_ExpectPTSetToPreloaded) {
   // Arrange
-  const char* query_insert = "UPDATE `module_config` SET `preloaded_pt` = 0";
-  ASSERT_TRUE(dbms->Exec(query_insert));
+  const std::string query_insert =
+      "UPDATE `module_config` SET `preloaded_pt` = 0";
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert));
+
   // Check
   ASSERT_FALSE(reps->IsPTPreloaded());
+
   // Act
   reps->SetPreloaded(true);
+
   // Check
   ASSERT_TRUE(reps->IsPTPreloaded());
+
   // Act
   reps->SetPreloaded(false);
+
   // Check
   ASSERT_FALSE(reps->IsPTPreloaded());
 }
@@ -1468,23 +1590,30 @@ TEST_F(SQLPTRepresentationTest,
 TEST_F(SQLPTRepresentationTest,
        SetIsDefault_SetIsDefault_ExpectDefaultFlagSet) {
   // Arrange
-  const char* query_insert_app =
+  const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
       "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
       "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
-  const char* query_select =
+
+  // Assert
+  ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
+
+  const std::string query_select =
       "SELECT `is_default` FROM `application`WHERE`id`= '1234567' ";
-  EXPECT_EQ(0, dbms->FetchOneInt(query_select));
+  EXPECT_EQ(0, FetchOneInt(query_select));
+
   // Act
   EXPECT_TRUE(reps->SetIsDefault("1234567", true));
+
   // Check
-  EXPECT_EQ(1, dbms->FetchOneInt(query_select));
+  EXPECT_EQ(1, FetchOneInt(query_select));
+
   // Act
   EXPECT_TRUE(reps->SetIsDefault("1234567", false));
+
   // Check
-  EXPECT_EQ(0, dbms->FetchOneInt(query_select));
+  EXPECT_EQ(0, FetchOneInt(query_select));
 }
 
 TEST_F(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
