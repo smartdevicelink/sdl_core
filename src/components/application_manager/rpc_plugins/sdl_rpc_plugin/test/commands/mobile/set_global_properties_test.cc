@@ -354,7 +354,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-    
+
   EXPECT_CALL(*mock_app, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
 
@@ -639,7 +639,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataNoDefault_Canceled) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_keyboard_props(_));
   EXPECT_CALL(*mock_app_, app_id());

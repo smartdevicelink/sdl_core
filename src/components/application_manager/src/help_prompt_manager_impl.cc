@@ -261,7 +261,7 @@ void HelpPromptManagerImpl::SendTTSRequest() {
 
     msg_params[strings::app_id] = app_.app_id();
     so_to_send[strings::msg_params] = msg_params;
-    app_manager_.ManageHMICommand(tts_global_properties);
+    app_manager_.GetRPCService().ManageHMICommand(tts_global_properties);
   }
 }
 
@@ -298,7 +298,7 @@ void HelpPromptManagerImpl::SendUIRequest() {
 
     msg_params[strings::app_id] = app_.app_id();
     so_to_send[strings::msg_params] = msg_params;
-    app_manager_.ManageHMICommand(ui_global_properties);
+    app_manager_.GetRPCService().ManageHMICommand(ui_global_properties);
   }
 }
 

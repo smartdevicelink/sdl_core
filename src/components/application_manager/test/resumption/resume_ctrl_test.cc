@@ -557,7 +557,7 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
 
   application_manager::CommandsMap command;
   DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_);
+                                                               app_set_lock_ptr_);
 
   EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
@@ -606,7 +606,7 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
 
   ::application_manager::CommandsMap command;
   DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_);
+                                                               app_set_lock_ptr_);
 
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
@@ -658,7 +658,7 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
 
   ::application_manager::CommandsMap command;
   DataAccessor<application_manager::CommandsMap> data_accessor(command,
-                                                               app_set_lock_);
+                                                               app_set_lock_ptr_);
 
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   const uint32_t ign_off_count = 0u;
@@ -672,9 +672,9 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   EXPECT_CALL(state_controller, SetRegularState(_, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
-  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(const_app_))
+  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
-  EXPECT_CALL(*app_mock_, commands_map()).WillRepeatedly(Return(data_accessor));
+  EXPECT_CALL(*mock_app_, commands_map()).WillRepeatedly(Return(data_accessor));
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
