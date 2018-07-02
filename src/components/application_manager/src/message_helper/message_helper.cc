@@ -94,7 +94,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     // Check if image parameter is valid
     if (button.keyExists(strings::image)) {
       SmartObject& buttonImage = button[strings::image];
-      if (false == MessageHelper::VerifySoftButtonString(
+      if (false == MessageHelper::VerifyString(
                        buttonImage[strings::value].asString())) {
         return false;
       }
@@ -2598,27 +2598,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return mobile_apis::Result::SUCCESS;
 }
 
-mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
+void MessageHelper::ApplyImagePath(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
-  // Checking image type first: if STATIC - skip existence check, since it is
-  // HMI related file and it should know it location
-  const uint32_t image_type = image[strings::image_type].asUInt();
-  mobile_apis::ImageType::eType type =
-      static_cast<mobile_apis::ImageType::eType>(image_type);
-  if (mobile_apis::ImageType::STATIC == type) {
-    return mobile_apis::Result::SUCCESS;
-  }
 
   const std::string& file_name = image[strings::value].asString();
   const std::string& full_file_path = GetAppFilePath(file_name, app, app_mngr);
 
   image[strings::value] = full_file_path;
-  if (file_system::FileExists(full_file_path)) {
-    return mobile_apis::Result::SUCCESS;
-  }
-  return mobile_apis::Result::INVALID_DATA;
+
+  return;
 }
 
 std::string MessageHelper::GetAppFilePath(std::string file_name,
@@ -2679,19 +2669,29 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObject temp_image = image;
-  const uint32_t image_type = image[strings::image_type].asUInt();
-  const mobile_apis::ImageType::eType type =
-      static_cast<mobile_apis::ImageType::eType>(image_type);
 
-  const mobile_apis::Result::eType result =
-      VerifyImageApplyPath(temp_image, app, app_mngr);
-  if ((mobile_apis::Result::SUCCESS == result) &&
-      (mobile_apis::ImageType::DYNAMIC == type)) {
-    image[strings::value] = temp_image[strings::value];
+  const uint32_t image_type = image[strings::image_type].asUInt();
+  mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+  const std::string& file_name = image[strings::value].asString();
+
+
+  if(!VerifyString(file_name)){
+    return mobile_apis::Result::INVALID_DATA;
   }
 
-  return result;
+  if (mobile_apis::ImageType::STATIC == type) {
+	  return mobile_apis::Result::SUCCESS;
+  }
+
+  ApplyImagePath(image, app, app_mngr);
+
+  const std::string& imagePath = image[strings::value].asString();
+
+  if (file_system::FileExists(imagePath)) {
+    return mobile_apis::Result::SUCCESS;
+  }
+  return mobile_apis::Result::WARNINGS;
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
@@ -2704,21 +2704,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
     if (message[i].keyExists(strings::image)) {
       verification_result_image =
           VerifyImage(message[i][strings::image], app, app_mngr);
-      if (mobile_apis::Result::SUCCESS != verification_result_image) {
-        return verification_result_image;
+      if (mobile_apis::Result::INVALID_DATA == verification_result_image) {
+        break;
       }
     }
   }
-  return mobile_apis::Result::SUCCESS;
+  return verification_result_image;
 }
 
-bool MessageHelper::VerifySoftButtonString(const std::string& str) {
+bool MessageHelper::VerifyString(const std::string& str) {
   if ((std::string::npos != str.find_first_of("\t\n")) ||
       (std::string::npos != str.find("\\n")) ||
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
     LOG4CXX_ERROR(logger_,
-                  "MessageHelper::VerifySoftButtonString"
+                  "MessageHelper::VerifyString"
                   "string contains incorrect character");
     return false;
   }
@@ -2775,6 +2775,13 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (request_soft_buttons[i].keyExists(strings::text)) {
           request_soft_buttons[i].erase(strings::text);
         }
+
+        if ((!request_soft_buttons[i].keyExists(strings::image) ||
+             (Result::INVALID_DATA ==
+              VerifyImage(
+                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
+          return Result::INVALID_DATA;
+        }
         break;
       }
       case SoftButtonType::SBT_TEXT: {
@@ -2782,7 +2789,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
           request_soft_buttons[i].erase(strings::image);
         }
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            (!VerifySoftButtonString(
+            (!VerifyString(
                  request_soft_buttons[i][strings::text].asString()))) {
           return Result::INVALID_DATA;
         }
@@ -2791,8 +2798,15 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       case SoftButtonType::SBT_BOTH: {
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
-             (!VerifySoftButtonString(
+             (!VerifyString(
                   request_soft_buttons[i][strings::text].asString())))) {
+          return Result::INVALID_DATA;
+        }
+
+        if ((!request_soft_buttons[i].keyExists(strings::image) ||
+             (Result::INVALID_DATA ==
+              VerifyImage(
+                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
           return Result::INVALID_DATA;
         }
         break;

@@ -122,6 +122,11 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
     if (verification_result_image == Result::INVALID_DATA ||
         verification_result_secondary_image == Result::INVALID_DATA) {
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      SendResponse(false, Result::INVALID_DATA);
+      return;
+    } else  if (verification_result_image == Result::WARNINGS ||
+        verification_result_secondary_image == Result::WARNINGS) {
    	should_send_warnings = true;
 	break;
     }
@@ -437,18 +442,18 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 }
 
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
-	LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
-	if (!error_from_hmi_ && should_send_warnings) {
-		SendResponse(true, mobile_apis::Result::WARNINGS,INVALID_IMG_WARNING_INFO);
-	} else if (!error_from_hmi_) {
-		SendResponse(true, mobile_apis::Result::SUCCESS);
-	} else {
-		DeleteChoices();
-	}
+  if (!error_from_hmi_ && should_send_warnings) {
+    SendResponse(true, mobile_apis::Result::WARNINGS,INVALID_IMG_WARNING_INFO);
+  } else if (!error_from_hmi_) {
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+  } else {
+    DeleteChoices();
+  }
 
-	application_manager_.TerminateRequest(
-			connection_key(), correlation_id(), function_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

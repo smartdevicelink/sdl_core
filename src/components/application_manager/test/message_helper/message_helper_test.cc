@@ -715,7 +715,7 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_WrongStrings_False) {
                                   "soft_button1\\n",
                                   "soft_button1\\t"};
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
-    EXPECT_FALSE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
+    EXPECT_FALSE(MessageHelper::VerifyString(wrong_strings[i]));
   }
 }
 
@@ -726,7 +726,7 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
                                   "soft_button1??....asd",
                                   "soft_button12313fcvzxc./.,"};
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
-    EXPECT_TRUE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
+    EXPECT_TRUE(MessageHelper::VerifyString(wrong_strings[i]));
   }
 }
 
@@ -771,6 +771,7 @@ TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, appSharedMock, mock_application_manager);
@@ -801,10 +802,9 @@ TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
   image[strings::value] = "icon.png";
   // Method call
-  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+  MessageHelper::ApplyImagePath(
       image, appSharedMock, mock_application_manager);
   // EXPECT
-  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
   EXPECT_EQ("icon.png", image[strings::value].asString());
 }
 
@@ -817,7 +817,7 @@ TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
   // Invalid value
   image[strings::value] = "   ";
   // Method call
-  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, appSharedMock, mock_application_manager);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
@@ -830,6 +830,8 @@ TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::STATIC;
   images[1][strings::image_type] = mobile_apis::ImageType::STATIC;
+  images[0][strings::value] = "static_icon";
+  images[1][strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageFiles(
       images, appSharedMock, mock_application_manager);

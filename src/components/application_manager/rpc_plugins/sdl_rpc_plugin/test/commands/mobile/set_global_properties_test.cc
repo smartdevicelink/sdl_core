@@ -496,7 +496,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRBrokenMenuIcon_Canceled) {
   SmartObject vr_help_title("yes");
   (*msg)[am::strings::msg_params][am::strings::vr_help_title] = vr_help_title;
   SmartObject menu_icon(smart_objects::SmartType_Map);
-  menu_icon[am::strings::value] = "1";
+  menu_icon[am::strings::value] = " 1";
   (*msg)[am::strings::msg_params][am::hmi_request::menu_icon] = menu_icon;
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))

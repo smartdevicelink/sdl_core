@@ -202,6 +202,13 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
                                  Ref(app_mngr_)))
       .WillOnce(Return(mobile_result::SUCCESS));
 
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImage(
+          (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                         [am::strings::turn_icon],
+          Eq(mock_app),
+          Ref(app_mngr_))).WillOnce(Return(mobile_result::SUCCESS));
 
   EXPECT_CALL(mock_message_helper_,
               SubscribeApplicationToSoftButton(_, _, kFunctionId));
