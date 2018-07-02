@@ -94,8 +94,8 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     // Check if image parameter is valid
     if (button.keyExists(strings::image)) {
       SmartObject& buttonImage = button[strings::image];
-      if (false == MessageHelper::VerifyString(
-                       buttonImage[strings::value].asString())) {
+      if (false ==
+          MessageHelper::VerifyString(buttonImage[strings::value].asString())) {
         return false;
       }
     }
@@ -2598,11 +2598,9 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return mobile_apis::Result::SUCCESS;
 }
 
-void MessageHelper::ApplyImagePath(
-    smart_objects::SmartObject& image,
-    ApplicationConstSharedPtr app,
-    ApplicationManager& app_mngr) {
-
+void MessageHelper::ApplyImagePath(smart_objects::SmartObject& image,
+                                   ApplicationConstSharedPtr app,
+                                   ApplicationManager& app_mngr) {
   const std::string& file_name = image[strings::value].asString();
   const std::string& full_file_path = GetAppFilePath(file_name, app, app_mngr);
 
@@ -2669,19 +2667,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
-
   const uint32_t image_type = image[strings::image_type].asUInt();
   mobile_apis::ImageType::eType type =
       static_cast<mobile_apis::ImageType::eType>(image_type);
   const std::string& file_name = image[strings::value].asString();
 
-
-  if(!VerifyString(file_name)){
+  if (!VerifyString(file_name)) {
     return mobile_apis::Result::INVALID_DATA;
   }
 
   if (mobile_apis::ImageType::STATIC == type) {
-	  return mobile_apis::Result::SUCCESS;
+    return mobile_apis::Result::SUCCESS;
   }
 
   ApplyImagePath(image, app, app_mngr);

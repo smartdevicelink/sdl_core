@@ -869,10 +869,8 @@ TEST_F(MessageHelperTest,
   message[1][strings::image][strings::image_type] =
       mobile_apis::ImageType::STATIC;
 
-  message[0][strings::image][strings::value] =
-      "static_icon";
-  message[1][strings::image][strings::value] =
-	   "static_icon";
+  message[0][strings::image][strings::value] = "static_icon";
+  message[1][strings::image][strings::value] = "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageVrHelpItems(
       message, appSharedMock, mock_application_manager);

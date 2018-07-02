@@ -615,10 +615,9 @@ class MessageHelper {
     * @param app current application
     * @return verification result
     */
-  static void ApplyImagePath(
-      smart_objects::SmartObject& image,
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr);
+  static void ApplyImagePath(smart_objects::SmartObject& image,
+                             ApplicationConstSharedPtr app,
+                             ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path

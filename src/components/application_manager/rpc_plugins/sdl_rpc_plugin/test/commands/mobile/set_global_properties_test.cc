@@ -491,7 +491,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRWithMenuAndKeyboard_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SetGlobalPropertiesRequestTest, Run_VRWithMenuAndKeyboard_Menu_WARNINGS) {
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_VRWithMenuAndKeyboard_Menu_WARNINGS) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject vr_help_title("yes");
   SmartObject vr_help_array(smart_objects::SmartType_Array);
