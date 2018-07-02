@@ -353,6 +353,33 @@ TEST_F(ShowRequestTest, Run_Graphic_SUCCESS) {
   command->Run();
 }
 
+TEST_F(ShowRequestTest, Run_Graphic_WARNINGS) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SmartObject msg_params(smart_objects::SmartType_Map);
+  SmartObject graphic(smart_objects::SmartType_Map);
+  graphic[am::strings::value] = "1";
+  msg_params[am::strings::graphic] = graphic;
+  (*msg)[am::strings::msg_params] = msg_params;
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+
+  msg_params[am::strings::app_id] = kAppId;
+  msg_params[am::hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(*mock_app_, set_show_command(msg_params));
+
+  command->Run();
+}
+
 TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
@@ -414,6 +441,32 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+
+  msg_params[am::strings::app_id] = kAppId;
+  msg_params[am::hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_));
+  EXPECT_CALL(*mock_app_, set_show_command(msg_params));
+
+  command->Run();
+}
+
+TEST_F(ShowRequestTest, Run_SecondaryGraphic_WARNINGS) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SmartObject msg_params(smart_objects::SmartType_Map);
+  SmartObject graphic(smart_objects::SmartType_Map);
+  graphic[am::strings::value] = "1";
+  msg_params[am::strings::secondary_graphic] = graphic;
+  (*msg)[am::strings::msg_params] = msg_params;
+
+  SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
   msg_params[am::strings::app_id] = kAppId;

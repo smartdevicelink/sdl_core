@@ -802,8 +802,9 @@ TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
   image[strings::value] = "icon.png";
   // Method call
-  MessageHelper::ApplyImagePath(
+  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, appSharedMock, mock_application_manager);
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
   // EXPECT
   EXPECT_EQ("icon.png", image[strings::value].asString());
 }
@@ -867,6 +868,11 @@ TEST_F(MessageHelperTest,
       mobile_apis::ImageType::STATIC;
   message[1][strings::image][strings::image_type] =
       mobile_apis::ImageType::STATIC;
+
+  message[0][strings::image][strings::value] =
+      "static_icon";
+  message[1][strings::image][strings::value] =
+	   "static_icon";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageVrHelpItems(
       message, appSharedMock, mock_application_manager);

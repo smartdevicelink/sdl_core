@@ -315,6 +315,21 @@ TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
   command_->Run();
 }
 
+TEST_F(SendLocationRequestTest, Run_LocationImageValid_Warnings) {
+  InitialSetup(message_);
+  (*message_)[strings::msg_params][strings::location_image] =
+      SmartObject(smart_objects::SmartType_Map);
+  (*message_)[strings::msg_params][strings::location_image][strings::value] =
+      "notavailable";
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImage(
+          (*message_)[strings::msg_params][strings::location_image], _, _))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  FinishSetup();
+  command_->Run();
+}
+
 TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
   InitialSetup(message_);
   (*message_)[strings::msg_params][strings::location_image] =
