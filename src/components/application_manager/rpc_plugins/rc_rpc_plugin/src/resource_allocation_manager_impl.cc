@@ -174,6 +174,8 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
       if (rc_extention) {
         rc_extention->UnsubscribeFromInteriorVehicleData(*module);
       }
+    }
+    if (!disallowed_modules.empty()) {
       SendOnRCStatusNotifications(
           NotificationTrigger::MODULE_ALLOCATION,
           utils::SharedPtr<application_manager::Application>());
