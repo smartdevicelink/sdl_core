@@ -79,25 +79,6 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
-  choice_set_id_ =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id]
-          .asInt();
-
-  if (app->FindChoiceSet(choice_set_id_)) {
-    LOG4CXX_ERROR(logger_,
-                  "Choice set with id " << choice_set_id_ << " is not found.");
-    SendResponse(false, Result::INVALID_ID);
-    return;
-  }
-
-  Result::eType result = CheckChoiceSet(app);
-  if (Result::SUCCESS != result) {
-    SendResponse(false, result);
-    return;
-  }
-
-
   should_send_warnings = false;
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
@@ -132,6 +113,22 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
   }
 
+  choice_set_id_ =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id]
+          .asInt();
+
+  if (app->FindChoiceSet(choice_set_id_)) {
+    LOG4CXX_ERROR(logger_,
+                  "Choice set with id " << choice_set_id_ << " is not found.");
+    SendResponse(false, Result::INVALID_ID);
+    return;
+  }
+
+  Result::eType result = CheckChoiceSet(app);
+  if (Result::SUCCESS != result) {
+    SendResponse(false, result);
+    return;
+  }
   uint32_t grammar_id = application_manager_.GenerateGrammarID();
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
