@@ -164,14 +164,11 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , nicknames(impl::ValueMember(value__, "nicknames"))
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
+    , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
-#ifdef SDL_REMOTE_CONTROL
-    , moduleType(impl::ValueMember(value__, "moduleType"))
-#endif  // SDL_REMOTE_CONTROL
-{
-}
+    , moduleType(impl::ValueMember(value__, "moduleType")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -179,17 +176,17 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
+  impl::WriteJsonField("RequestSubType", RequestSubType, &result__);
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-#ifdef SDL_REMOTE_CONTROL
   impl::WriteJsonField("moduleType", moduleType, &result__);
-#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 
 bool ApplicationParams::is_valid() const {
-  // RequestType is not validated since there is high-level validation logic,
+  // RequestType and RequestSubType are not validated since there is high-level
+  // validation logic,
   // which takes into account information not available here.
   if (!PolicyBase::is_valid()) {
     return false;
@@ -212,11 +209,9 @@ bool ApplicationParams::is_valid() const {
   if (!certificate.is_valid()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 
@@ -240,6 +235,9 @@ bool ApplicationParams::struct_empty() const {
   if (RequestType.is_initialized()) {
     return false;
   }
+  if (RequestSubType.is_initialized()) {
+    return false;
+  }
   if (memory_kb.is_initialized()) {
     return false;
   }
@@ -249,11 +247,9 @@ bool ApplicationParams::struct_empty() const {
   if (certificate.is_initialized()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (moduleType.is_initialized()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 
@@ -273,6 +269,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!RequestType.is_valid()) {
     RequestType.ReportErrors(&report__->ReportSubobject("RequestType"));
   }
+  if (!RequestSubType.is_valid()) {
+    RequestSubType.ReportErrors(&report__->ReportSubobject("RequestSubType"));
+  }
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
   }
@@ -286,11 +285,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!certificate.is_valid()) {
     certificate.ReportErrors(&report__->ReportSubobject("certificate"));
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
-#endif  // SDL_REMOTE_CONTROL
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -298,12 +295,11 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   groups.SetPolicyTableType(pt_type);
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
+  RequestSubType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
-#ifdef SDL_REMOTE_CONTROL
   moduleType.SetPolicyTableType(pt_type);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 // RpcParameters methods

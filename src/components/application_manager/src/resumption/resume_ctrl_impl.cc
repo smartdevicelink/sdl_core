@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -633,17 +634,8 @@ void ResumeCtrlImpl::AddSubscriptions(
     MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
         application, application_manager_);
 
-    if (subscriptions.keyExists(strings::application_vehicle_info)) {
-      const smart_objects::SmartObject& subscriptions_ivi =
-          subscriptions[strings::application_vehicle_info];
-      mobile_apis::VehicleDataType::eType ivi;
-      for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
-        ivi = static_cast<mobile_apis::VehicleDataType::eType>(
-            (subscriptions_ivi[i]).asInt());
-        application->SubscribeToIVI(ivi);
-      }
-      ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(
-          application, application_manager_));
+    for (auto& extension : application->Extensions()) {
+      extension->ProcessResumption(subscriptions);
     }
   }
 }
@@ -753,7 +745,7 @@ bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
         (*request)[strings::correlation_id].asInt();
     subscribe_on_event(function_id, hmi_correlation_id);
   }
-  if (!application_manager_.ManageHMICommand(request)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(request)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return false;
   }

@@ -84,6 +84,22 @@ class CacheManager : public CacheManagerInterface {
                                 CheckPermissionResult& result);
 
   /**
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
+  RequestType::State GetAppRequestTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
+   * @brief Get state of request subtypes for given application
+   * @param policy_app_id Unique application id
+   * @return request subtype state
+   */
+  RequestSubType::State GetAppRequestSubTypesState(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /**
    * @brief Returns true if Policy Table was not updated yet
    * from preloaded pt file.
    */
@@ -642,8 +658,18 @@ class CacheManager : public CacheManagerInterface {
    * @param policy_app_id Unique application id
    * @param request_types Request types of application
    */
-  void GetAppRequestTypes(const std::string& policy_app_id,
-                          std::vector<std::string>& request_types) const;
+  void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const OVERRIDE;
+
+  /**
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @param request_subtypes Request subtypes of application to be filled
+   */
+  void GetAppRequestSubTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_subtypes) const OVERRIDE;
 
   virtual const MetaInfo GetMetaInfo() const OVERRIDE;
 

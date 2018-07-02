@@ -1587,12 +1587,15 @@
                "GetVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1602,12 +1605,15 @@
                "OnVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1617,12 +1623,15 @@
                "SubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1631,12 +1640,15 @@
                "UnsubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1708,6 +1720,7 @@
             "COMMUNICATION" : 6,
             "EMERGENCY" : 60,
             "NAVIGATION" : 15,
+            "PROJECTION": 15,
             "NONE" : 0,
             "NORMAL" : 4,
             "VOICECOMM" : 10

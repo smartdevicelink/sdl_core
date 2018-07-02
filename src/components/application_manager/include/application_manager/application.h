@@ -161,11 +161,6 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 typedef std::set<uint32_t> SoftButtonID;
 
 /**
- * @brief Defines set of vehicle info types
- */
-typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
-
-/**
  * @brief Defines set of buttons subscription
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
@@ -186,10 +181,12 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* show_command() const = 0;
   virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
+  virtual const smart_objects::SmartObject* day_color_scheme() const = 0;
+  virtual const smart_objects::SmartObject* night_color_scheme() const = 0;
+  virtual const std::string& display_layout() const = 0;
 
   virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
   virtual void set_help_prompt(
@@ -221,6 +218,12 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
+  virtual void set_day_color_scheme(
+      const smart_objects::SmartObject& color_scheme) = 0;
+  virtual void set_night_color_scheme(
+      const smart_objects::SmartObject& color_scheme) = 0;
+
+  virtual void set_display_layout(const std::string& layout) = 0;
   /**
    * @brief Checks if application is media, voice communication or navigation
    * @return true if application is media, voice communication or navigation,
@@ -449,6 +452,20 @@ class Application : public virtual InitialApplicationData,
   virtual bool is_navi() const = 0;
   virtual void set_is_navi(bool allow) = 0;
 
+  /**
+   * @brief Returns is_remote_control_supported_
+   * @return true if app supports remote control, else false
+   */
+  virtual bool is_remote_control_supported() const = 0;
+
+  /**
+   * @brief Sets remote control supported,
+   * which is used to determine app with remote control
+   * @param allow, if true - remote control is supported,
+   * else remote control is disable
+   */
+  virtual void set_remote_control_supported(const bool allow) = 0;
+
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
 
@@ -531,6 +548,8 @@ class Application : public virtual InitialApplicationData,
   virtual const mobile_api::SystemContext::eType system_context() const = 0;
   virtual const mobile_api::AudioStreamingState::eType audio_streaming_state()
       const = 0;
+  virtual const mobile_api::VideoStreamingState::eType video_streaming_state()
+      const = 0;
   virtual const std::string& app_icon_path() const = 0;
   virtual connection_handler::DeviceHandle device() const = 0;
 
@@ -600,10 +619,6 @@ class Application : public virtual InitialApplicationData,
       mobile_apis::ButtonName::eType btn_name) = 0;
   virtual bool UnsubscribeFromButton(
       mobile_apis::ButtonName::eType btn_name) = 0;
-
-  virtual bool SubscribeToIVI(uint32_t vehicle_info_type) = 0;
-  virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
-  virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
   /**
    * @brief ResetDataInNone reset data counters in NONE
@@ -727,6 +742,13 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsAudioApplication() const = 0;
 
   /**
+   * @brief Check's if it is projection or navigation application
+   *
+   * @return true if application is projection or navigation
+   */
+  virtual bool IsVideoApplication() const = 0;
+
+  /**
    * DEPRECATED
    * @brief GetDeviceId allows to obtain device id which posseses
    * by this application.
@@ -835,7 +857,6 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief set_system_context Set system context for application
    * @param system_context Current context
@@ -878,16 +899,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
   /**
-   * @brief Removes all extensions
+   * @brief Get list of available application extensions
+   * @return application extensions
    */
-  virtual void RemoveExtensions() = 0;
-
-  /**
-   * @brief Get list of subscriptions to vehicle info notifications
-   * @return list of subscriptions to vehicle info notifications
-   */
-  virtual const VehicleInfoSubscriptions& SubscribesIVI() const = 0;
-#endif  // SDL_REMOTE_CONTROL
+  virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

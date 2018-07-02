@@ -41,7 +41,7 @@ SmartType TNumberSchemaItem<int32_t>::getSmartType() const {
 
 template <>
 SmartType TNumberSchemaItem<uint32_t>::getSmartType() const {
-  return SmartType_Integer;
+  return SmartType_UInteger;
 }
 
 template <>

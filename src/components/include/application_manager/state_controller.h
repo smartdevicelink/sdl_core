@@ -49,6 +49,7 @@ class StateController {
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state,
       const bool SendActivateApp) = 0;
 
   virtual void SetRegularState(ApplicationSharedPtr app,
@@ -58,6 +59,7 @@ class StateController {
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state,
       const mobile_apis::SystemContext::eType system_context,
       const bool SendActivateApp) = 0;
 
@@ -67,7 +69,8 @@ class StateController {
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
-      const mobile_apis::AudioStreamingState::eType audio_state) = 0;
+      const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state) = 0;
 
   virtual void SetRegularState(
       ApplicationSharedPtr app,
@@ -82,9 +85,17 @@ class StateController {
   virtual int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
                                     hmi_apis::Common_HMILevel::eType level,
                                     bool send_policy_priority) = 0;
+  /**
+   * @brief OnVideoStreamingStarted process video streaming started
+   * @param app projection or navigation application starting streaming
+   */
+  virtual void OnVideoStreamingStarted(ApplicationConstSharedPtr app) = 0;
 
-  virtual void OnNaviStreamingStarted() = 0;
-  virtual void OnNaviStreamingStopped() = 0;
+  /**
+   * @brief OnVideoStreamingStopped process video streaming stopped
+   * @param app projection or navigation application stopping streaming
+   */
+  virtual void OnVideoStreamingStopped(ApplicationConstSharedPtr app) = 0;
   virtual void OnStateChanged(ApplicationSharedPtr app,
                               HmiStatePtr old_state,
                               HmiStatePtr new_state) = 0;

@@ -1,3 +1,4 @@
+
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
@@ -26,10 +27,12 @@
         <element name="speed" />
         <element name="engineTorque" />
         <element name="externalTemperature" />
+        <element name="turnSignal" />
         <element name="fuelLevel" />
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />
         <element name="instantFuelConsumption" />
+        <element name="fuelRange" />
         <element name="odometer" />
         <element name="tirePressure" />
         <element name="wiperStatus" />
@@ -40,6 +43,7 @@
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
+        <element name="engineOilLife" />
         <element name="myKey" />
         <element name="airbagStatus" />
         <element name="bodyInformation" />
@@ -123,7 +127,7 @@
         minsize="1" maxsize="255" />
 
     <typedef name="NumberOfNotificationsPerMinute" type="Integer"
-        map="true" maxsize="6" minvalue="0" maxvalue="255" />
+        map="true" maxsize="7" minvalue="0" maxvalue="255" />
 
     <typedef name="SecondsBetweenRetries" type="Integer" array="true"
         maxsize="10" minvalue="1" maxvalue="1000" />

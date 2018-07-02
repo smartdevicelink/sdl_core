@@ -72,7 +72,7 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
     return mobile_apis::FileType::BINARY;
   }
 }
-}
+}  // namespace
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -105,6 +105,7 @@ ApplicationImpl::ApplicationImpl(
     , active_message_(NULL)
     , is_media_(false)
     , is_navi_(false)
+    , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
@@ -140,6 +141,8 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
@@ -169,7 +172,6 @@ ApplicationImpl::~ApplicationImpl() {
   }
 
   subscribed_buttons_.clear();
-  subscribed_vehicle_info_.clear();
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
@@ -221,6 +223,14 @@ void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
 }
 
+bool ApplicationImpl::is_remote_control_supported() const {
+  return is_remote_control_supported_;
+}
+
+void ApplicationImpl::set_remote_control_supported(const bool allow) {
+  is_remote_control_supported_ = allow;
+}
+
 bool ApplicationImpl::is_voice_communication_supported() const {
   return is_voice_communication_application_;
 }
@@ -231,7 +241,26 @@ void ApplicationImpl::set_voice_communication_supported(
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
-  return is_media_ || is_voice_communication_application_ || is_navi_;
+  const bool is_audio_app =
+      is_media_application() || is_voice_communication_supported() || is_navi();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha << "is audio app --> ((is_media_app: "
+                               << is_media_application() << ")"
+                               << " || (is_voice_communication_app: "
+                               << is_voice_communication_supported() << ")"
+                               << " || (is_navi: " << is_navi() << ")) --> "
+                               << is_audio_app);
+  return is_audio_app;
+}
+
+bool ApplicationImpl::IsVideoApplication() const {
+  const bool is_video_app = is_navi() || mobile_projection_enabled();
+  LOG4CXX_DEBUG(logger_,
+                std::boolalpha
+                    << "is video app --> ((is_navi: " << is_navi() << ")"
+                    << " || (mobile_projection: " << mobile_projection_enabled()
+                    << ")) --> " << is_video_app);
+  return is_video_app;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
@@ -713,13 +742,13 @@ const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
 
 bool ApplicationImpl::SubscribeToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.insert(btn_name).second;
 }
 
 bool ApplicationImpl::IsSubscribedToButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   std::set<mobile_apis::ButtonName::eType>::iterator it =
       subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
@@ -727,29 +756,8 @@ bool ApplicationImpl::IsSubscribedToButton(
 
 bool ApplicationImpl::UnsubscribeFromButton(
     mobile_apis::ButtonName::eType btn_name) {
-  sync_primitives::AutoLock lock(button_lock_);
+  sync_primitives::AutoLock lock(button_lock_ptr_);
   return subscribed_buttons_.erase(btn_name);
-}
-
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_
-      .insert(
-           static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type))
-      .second;
-}
-
-bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
-  sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
-  return (subscribed_vehicle_info_.end() != it);
-}
-
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
-  sync_primitives::AutoLock lock(vi_lock_);
-  return subscribed_vehicle_info_.erase(
-      static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_type));
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
@@ -862,12 +870,8 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 }
 
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
-  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
-}
-
-DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
-  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
-                                                vi_lock_);
+  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
+                                           button_lock_ptr_);
 }
 
 const std::string& ApplicationImpl::curHash() const {
@@ -1045,8 +1049,6 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -1082,10 +1084,6 @@ void ApplicationImpl::set_hmi_level(
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
-const VehicleInfoSubscriptions& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
-}
-
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
@@ -1106,21 +1104,17 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
-  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
-       extensions_.end() != it;
-       ++it) {
-    if ((*it)->uid() == uid) {
-      extensions_.erase(it);
-      return true;
-    }
-  }
-  return false;
+  auto it = std::find_if(
+      extensions_.begin(),
+      extensions_.end(),
+      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+
+  return it != extensions_.end();
 }
 
-void ApplicationImpl::RemoveExtensions() {
-  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
+  return extensions_;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {

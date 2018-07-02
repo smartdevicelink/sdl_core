@@ -46,6 +46,7 @@
 #include "security_manager/mock_ssl_context.h"
 #endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
+#include "utils/mock_system_time_handler.h"
 #include "utils/make_shared.h"
 #include "utils/test_async_waiter.h"
 #include <bson_object.h>
@@ -95,8 +96,14 @@ using protocol_handler::kBulk;
 using protocol_handler::kInvalidServiceType;
 // For TM states
 using transport_manager::TransportManagerListener;
+using test::components::security_manager_test::MockSystemTimeHandler;
 using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+#ifdef ENABLE_SECURITY
+// For security
+using ContextCreationStrategy =
+    security_manager::SecurityManager::ContextCreationStrategy;
+#endif  // ENABLE_SECURITY
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
@@ -618,6 +625,18 @@ TEST_F(ProtocolHandlerImplTest,
   const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
   const uint8_t session_id2 = 2u;
 
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(connection_key, start_service))
+      .Times(2)
+      .WillRepeatedly(ReturnNull());
+#endif  // ENABLE_SECURITY
+
   EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id1, _))
       .WillRepeatedly(Return(false));
   EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id2, _))
@@ -987,7 +1006,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
 
   SetProtocolVersion2();
   // Expect start protection for unprotected session
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return fail protection
       WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
@@ -1042,7 +1064,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   SetProtocolVersion2();
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
       WillOnce(
@@ -1119,7 +1141,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
       WillOnce(Return(&ssl_context_mock));
@@ -1198,7 +1220,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
       WillOnce(
@@ -1296,7 +1318,7 @@ TEST_F(
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
       WillOnce(
@@ -1392,7 +1414,10 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // call new SSLContext creation
-  EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
+  EXPECT_CALL(security_manager_mock,
+              CreateSSLContext(connection_key,
+                               security_manager::SecurityManager::
+                                   ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
       WillOnce(
@@ -1420,27 +1445,37 @@ TEST_F(ProtocolHandlerImplTest,
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
-      // Emulate handshake fail
-      .WillOnce(Invoke(OnHandshakeDoneFunctor(
-          connection_key,
-          security_manager::SSLContext::Handshake_Result_Success)));
+      // Emulate handshake
+      .WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                Invoke(OnHandshakeDoneFunctor(
+                    connection_key,
+                    security_manager::SSLContext::Handshake_Result_Success))));
+  times++;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(ReturnNull());
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+  times++;
 
-  // Expect service protection enable
+  EXPECT_CALL(security_manager_mock, IsSystemTimeProviderReady())
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+  times++;
+
   EXPECT_CALL(session_observer_mock,
-              SetProtectionFlag(connection_key, start_service));
+              SetProtectionFlag(connection_key, start_service))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
-  // Expect send Ack with PROTECTION_OFF (on fail handshake)
+  //   Expect send Ack with PROTECTION_ON (on successfull handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+
   times++;
 
   SendControlMessage(
@@ -1989,7 +2024,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
       transport_manager_mock,
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_CONTROL, FRAME_DATA_HEART_BEAT, PROTECTION_OFF, kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
 
   // Act
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
@@ -2086,7 +2122,8 @@ TEST_F(ProtocolHandlerImplTest,
       transport_manager_mock,
       SendMessageToDevice(ExpectedMessage(
           FRAME_TYPE_SINGLE, FRAME_DATA_SINGLE, PROTECTION_OFF, kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
 
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);

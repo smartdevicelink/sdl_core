@@ -44,7 +44,6 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
-  ${COMPONENTS_DIR}/remote_control/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -109,13 +108,8 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  SystemTimeLibrary
 )
-if(REMOTE_CONTROL)
-    SET (LIBRARIES
-      ${LIBRARIES}
-      FunctionalModule
-    )
-endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)

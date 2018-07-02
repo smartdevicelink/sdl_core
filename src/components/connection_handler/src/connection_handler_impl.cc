@@ -316,6 +316,7 @@ void ConnectionHandlerImpl::RemoveConnection(
 bool AllowProtection(const ConnectionHandlerSettings& settings,
                      const protocol_handler::ServiceType& service_type,
                      const bool is_protected) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::vector<int>& force_unprotected_list =
       is_protected ? settings.force_unprotected_service()
                    : settings.force_protected_service();
@@ -465,14 +466,6 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
   if (connection_handler_observer_) {
     const uint32_t session_key =
         KeyFromPair(connection_handle, context.new_session_id_);
-
-    uint32_t app_id = 0;
-    GetDataOnSessionKey(
-        session_key, &app_id, NULL, static_cast<DeviceHandle*>(NULL));
-    if (app_id > 0) {
-      context.is_ptu_required_ =
-          !connection_handler_observer_->CheckAppIsNavi(app_id);
-    }
 
     {
       sync_primitives::AutoLock auto_lock(start_service_context_map_lock_);
@@ -714,18 +707,6 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
                "Connection " << static_cast<int32_t>(conn_handle) << " has "
                              << session_map.size() << " sessions.");
   return 0;
-}
-
-int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
-    uint32_t key,
-    uint32_t* app_id,
-    std::list<int32_t>* sessions_list,
-    uint32_t* device_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DeviceHandle handle;
-  int32_t result = GetDataOnSessionKey(key, app_id, sessions_list, &handle);
-  *device_id = static_cast<uint32_t>(handle);
-  return result;
 }
 
 const ConnectionHandlerSettings& ConnectionHandlerImpl::get_settings() const {

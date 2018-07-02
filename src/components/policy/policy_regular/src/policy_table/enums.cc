@@ -119,6 +119,8 @@ bool IsValidEnum(Parameter val) {
       return true;
     case P_EXTERNALTEMPERATURE:
       return true;
+    case P_TURNSIGNAL:
+      return true;
     case P_FUELLEVEL:
       return true;
     case P_FUELLEVEL_STATE:
@@ -126,6 +128,8 @@ bool IsValidEnum(Parameter val) {
     case P_HEADLAMPSTATUS:
       return true;
     case P_INSTANTFUELCONSUMPTION:
+      return true;
+    case P_FUELRANGE:
       return true;
     case P_ODOMETER:
       return true;
@@ -146,6 +150,8 @@ bool IsValidEnum(Parameter val) {
     case P_RPM:
       return true;
     case P_STEERINGWHEELANGLE:
+      return true;
+    case P_ENGINEOILLIFE:
       return true;
     case P_MYKEY:
       return true;
@@ -177,6 +183,8 @@ const char* EnumToJsonString(Parameter val) {
       return "engineTorque";
     case P_EXTERNALTEMPERATURE:
       return "externalTemperature";
+    case P_TURNSIGNAL:
+      return "turnSignal";
     case P_FUELLEVEL:
       return "fuelLevel";
     case P_FUELLEVEL_STATE:
@@ -185,6 +193,8 @@ const char* EnumToJsonString(Parameter val) {
       return "headLampStatus";
     case P_INSTANTFUELCONSUMPTION:
       return "instantFuelConsumption";
+    case P_FUELRANGE:
+      return "fuelRange";
     case P_ODOMETER:
       return "odometer";
     case P_TIREPRESSURE:
@@ -205,6 +215,8 @@ const char* EnumToJsonString(Parameter val) {
       return "rpm";
     case P_STEERINGWHEELANGLE:
       return "steeringWheelAngle";
+    case P_ENGINEOILLIFE:
+      return "engineOilLife";
     case P_MYKEY:
       return "myKey";
     case P_AIRBAGSTATUS:
@@ -239,6 +251,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
   } else if ("externalTemperature" == literal) {
     *result = P_EXTERNALTEMPERATURE;
     return true;
+  } else if ("turnSignal" == literal) {
+    *result = P_TURNSIGNAL;
+    return true;
   } else if ("fuelLevel" == literal) {
     *result = P_FUELLEVEL;
     return true;
@@ -250,6 +265,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("instantFuelConsumption" == literal) {
     *result = P_INSTANTFUELCONSUMPTION;
+    return true;
+  } else if ("fuelRange" == literal) {
+    *result = P_FUELRANGE;
     return true;
   } else if ("odometer" == literal) {
     *result = P_ODOMETER;
@@ -280,6 +298,9 @@ bool EnumFromJsonString(const std::string& literal, Parameter* result) {
     return true;
   } else if ("steeringWheelAngle" == literal) {
     *result = P_STEERINGWHEELANGLE;
+    return true;
+  } else if ("engineOilLife" == literal) {
+    *result = P_ENGINEOILLIFE;
     return true;
   } else if ("myKey" == literal) {
     *result = P_MYKEY;
@@ -454,6 +475,10 @@ bool IsValidEnum(RequestType val) {
       return true;
     case RT_FOTA:
       return true;
+    case RT_OEM_SPECIFIC:
+      return true;
+    case RT_EMPTY:
+      return true;
     default:
       return false;
   }
@@ -501,6 +526,10 @@ const char* EnumToJsonString(RequestType val) {
       return "MEDIA";
     case RT_FOTA:
       return "FOTA";
+    case RT_OEM_SPECIFIC:
+      return "OEM_SPECIFIC";
+    case RT_EMPTY:
+      return "EMPTY";
     default:
       return "";
   }
@@ -586,12 +615,19 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
   if ("FOTA" == literal) {
     *result = RT_FOTA;
     return true;
+  }
+  if ("OEM_SPECIFIC" == literal) {
+    *result = RT_OEM_SPECIFIC;
+    return true;
+  }
+  if ("EMPTY" == literal) {
+    *result = RT_EMPTY;
+    return true;
   } else {
     return false;
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
 bool IsValidEnum(ModuleType val) {
   switch (val) {
     case MT_CLIMATE:
@@ -624,7 +660,6 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
     return false;
   }
 }
-#endif  // SDL_REMOTE_CONTROL
 
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";

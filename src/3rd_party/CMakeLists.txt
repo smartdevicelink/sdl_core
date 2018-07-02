@@ -205,6 +205,11 @@ else()
   get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
   set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
   set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
+  add_custom_target(
+      libbson
+      DEPENDS ${BSON_LIBS_DIRECTORY}
+      DEPENDS ${EMHASHMAP_LIBS_DIRECTORY}
+      )
 endif()
 
 if (HMIADAPTER STREQUAL "messagebroker")
@@ -227,7 +232,7 @@ if (HMIADAPTER STREQUAL "messagebroker")
       SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
       CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND ./b2
-      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       BUILD_IN_SOURCE true
     )
