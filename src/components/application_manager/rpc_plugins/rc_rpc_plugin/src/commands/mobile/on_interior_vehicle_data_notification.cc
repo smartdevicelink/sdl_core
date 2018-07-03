@@ -72,9 +72,7 @@ void OnInteriorVehicleDataNotification::Run() {
     DCHECK(*it);
     application_manager::Application& app = **it;
 
-    RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
-            RCAppExtension>(app.QueryInterface(RCRPCPlugin::kRCPluginID));
+    const auto extension = RCHelpers::GetRCExtension(app);
     DCHECK(extension);
     LOG4CXX_TRACE(logger_,
                   "Check subscription for "

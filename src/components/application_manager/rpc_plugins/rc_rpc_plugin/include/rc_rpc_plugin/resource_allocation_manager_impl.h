@@ -110,14 +110,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void ResetAllAllocations() FINAL;
 
-  /**
-   * @brief GetApplicationExtention Provides access to application RC extention
-   * @param application Application
-   * @return Pointer to RC extention of application or NULL if not available
-   */
-  RCAppExtensionPtr GetApplicationExtention(
-      application_manager::ApplicationSharedPtr application) FINAL;
-
  private:
   /**
    * @brief IsModuleTypeRejected check if current resource was rejected by
