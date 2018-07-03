@@ -1985,6 +1985,47 @@ TEST_F(ProtocolHandlerImplTest,
       expected_video_service_transports);
 }
 
+TEST_F(
+    ProtocolHandlerImplTest,
+    StartSessionAck_SecondaryTransportParams_SecondaryDisabled_ServicesMapEmpty) {
+  std::vector<std::string> secondary_transports_for_usb;        // empty
+  std::vector<std::string> secondary_transports_for_bluetooth;  // empty
+  std::vector<std::string> secondary_transports_for_wifi;       // empty
+  // config does not specify video and audio services
+  std::vector<std::string> audio_service_transports;  // empty
+  std::vector<std::string> video_service_transports;  // empty
+
+  std::string connection_type_string("IAP_BLUETOOTH");
+
+  // Core should not offer any secondary transport. It should still send
+  // the video/audio service transport lists.
+  std::vector<std::string> expected_transport_strings;  // empty
+  std::vector<int32_t> expected_audio_service_transports;
+  expected_audio_service_transports.push_back(1);
+  std::vector<int32_t> expected_video_service_transports;
+  expected_video_service_transports.push_back(1);
+
+  connection_handler::SessionTransports dummy_st = {0, 0};
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, kDisabledSecondary))
+      .WillOnce(Return(dummy_st));
+
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifySecondaryTransportParamsInStartSessionAck(
+      false, /* disabled */
+      secondary_transports_for_usb,
+      secondary_transports_for_bluetooth,
+      secondary_transports_for_wifi,
+      audio_service_transports,
+      video_service_transports,
+      connection_type_string,
+      expected_transport_strings,
+      expected_audio_service_transports,
+      expected_video_service_transports);
+}
+
 // Secondary transport param should not be included for apps with v5.0.0
 TEST_F(ProtocolHandlerImplTest,
        StartSessionAck_Unprotected_NoSecondaryTransportParamsForV5) {

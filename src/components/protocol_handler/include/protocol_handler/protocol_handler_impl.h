@@ -700,6 +700,7 @@ class ProtocolHandlerImpl
       std::vector<std::string>& secondaryTransports) const;
 
   void GenerateServiceTransportsForStartSessionAck(
+      bool secondary_enabled,
       const std::vector<std::string>& service_transports,
       const std::string& primary_connection_type,
       const impl::TransportType primary_transport_type,

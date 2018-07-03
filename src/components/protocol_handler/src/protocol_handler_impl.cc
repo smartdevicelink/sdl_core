@@ -2458,6 +2458,7 @@ const bool ProtocolHandlerImpl::ParseSecondaryTransportConfiguration(
 
   // Next, figure out which connections audio or video services are allowed on
   GenerateServiceTransportsForStartSessionAck(
+      settings_.multiple_transports_enabled(),
       settings_.audio_service_transports(),
       connection_type,
       td.transport_type_,
@@ -2465,6 +2466,7 @@ const bool ProtocolHandlerImpl::ParseSecondaryTransportConfiguration(
       audioServiceTransports);
 
   GenerateServiceTransportsForStartSessionAck(
+      settings_.multiple_transports_enabled(),
       settings_.video_service_transports(),
       connection_type,
       td.transport_type_,
@@ -2527,6 +2529,7 @@ void ProtocolHandlerImpl::GenerateSecondaryTransportsForStartSessionAck(
 }
 
 void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
+    bool secondary_enabled,
     const std::vector<std::string>& service_transports,
     const std::string& primary_connection_type,
     const impl::TransportType primary_transport_type,
@@ -2535,11 +2538,15 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (service_transports.size() == 0) {
-    LOG4CXX_TRACE(logger_,
-                  "Empty Service Transports. Allowing service to run on both "
-                  "connections");
-    serviceTransports.push_back(1);
-    serviceTransports.push_back(2);
+    if (secondary_enabled) {
+      LOG4CXX_TRACE(logger_,
+                    "Empty Service Transports. Allowing service to run on both "
+                    "connections");
+      serviceTransports.push_back(1);
+      serviceTransports.push_back(2);
+    } else {
+      serviceTransports.push_back(1);
+    }
   } else {
     bool fPrimaryAdded = false;
     bool fSecondaryAdded = false;
