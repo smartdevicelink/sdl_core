@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -105,9 +106,7 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
     application_manager_.ChangeAppsHMILevel(
         app->app_id(), mobile_apis::HMILevel::eType::HMI_NONE);
 
-    const RCAppExtensionPtr extension =
-        application_manager::AppExtensionPtr::static_pointer_cast<
-            RCAppExtension>(app->QueryInterface(RCRPCPlugin::kRCPluginID));
+    const auto extension = RCHelpers::GetRCExtension(*app);
     if (extension) {
       UnsubscribeFromInteriorVehicleDataForAllModules(extension);
     }

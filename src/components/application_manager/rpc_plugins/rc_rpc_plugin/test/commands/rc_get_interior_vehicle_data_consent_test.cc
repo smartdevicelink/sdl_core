@@ -122,7 +122,7 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(application_manager::HmiInterfaces::
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
-    ON_CALL(mock_allocation_manager_, GetApplicationExtention(_))
+    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
         .WillByDefault(Return(rc_app_extention_));
     testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
         mock_interior_data_cache_;

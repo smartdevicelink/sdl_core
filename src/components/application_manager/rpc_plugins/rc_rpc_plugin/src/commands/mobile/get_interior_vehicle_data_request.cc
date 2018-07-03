@@ -32,6 +32,7 @@
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
@@ -254,8 +255,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
 
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  RCAppExtensionPtr extension =
-      resource_allocation_manager_.GetApplicationExtention(app);
+  const auto extension = RCHelpers::GetRCExtension(*app);
   const char* module_type;
   NsSmartDeviceLink::NsSmartObjects::
       EnumConversionHelper<mobile_apis::ModuleType::eType>::EnumToCString(
@@ -334,8 +334,7 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
   if (is_subscribe_present_in_request) {
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(CommandRequestImpl::connection_key());
-    RCAppExtensionPtr extension =
-        resource_allocation_manager_.GetApplicationExtention(app);
+    const auto extension = RCHelpers::GetRCExtension(*app);
 
     const bool is_app_already_subscribed =
         extension->IsSubscibedToInteriorVehicleData(ModuleType());

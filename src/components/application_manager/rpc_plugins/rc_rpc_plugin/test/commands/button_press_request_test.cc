@@ -118,7 +118,7 @@ class ButtonPressRequestTest
     }
     rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
-    ON_CALL(mock_allocation_manager_, GetApplicationExtention(_))
+    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
         .WillByDefault(Return(rc_app_extention_));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));

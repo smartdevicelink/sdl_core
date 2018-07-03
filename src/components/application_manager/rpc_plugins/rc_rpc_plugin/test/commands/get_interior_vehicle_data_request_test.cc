@@ -35,6 +35,7 @@
 #include "application_manager/mock_application.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "application_manager/event_engine/event_dispatcher.h"
@@ -104,7 +105,7 @@ class GetInteriorVehicleDataRequestTest
         .WillByDefault(Return(application_manager::HmiInterfaces::
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
-    ON_CALL(mock_allocation_manager_, GetApplicationExtention(_))
+    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
         .WillByDefault(Return(rc_app_extention_));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
