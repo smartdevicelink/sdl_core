@@ -125,7 +125,11 @@ class HelpPromptManagerTest : public ::testing::Test {
 
   template <class Command>
   SharedPtr<Command> CreateCommand(MessageSharedPtr& msg) {
-    return ::utils::MakeShared<Command>(msg, app_mngr_);
+    return ::utils::MakeShared<Command>(msg,
+                                        app_mngr_,
+                                        mock_rpc_service_,
+                                        mock_hmi_capabilities_,
+                                        mock_policy_handler_);
   }
 
  protected:
@@ -138,6 +142,9 @@ class HelpPromptManagerTest : public ::testing::Test {
   NiceMock<MockApplicationManagerSettings> app_mngr_settings_;
   utils::SharedPtr<application_manager_test::MockApplication> mock_app_;
   sync_primitives::Lock app_lock_;
+  MockRPCService mock_rpc_service_;
+  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   MockMessageHelper& mock_message_helper_;
   utils::SharedPtr<MockHelpPromptManager> mock_help_prompt_manager_;
 };
@@ -286,6 +293,10 @@ TEST_F(HelpPromptManagerTest,
   (*msg)[am::strings::msg_params][am::strings::timeout_prompt] = timeout_prompt;
 
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(help_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(mock_message_helper_, VerifyTtsFiles(timeout_prompt, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));

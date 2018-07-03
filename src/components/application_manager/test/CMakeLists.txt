@@ -85,6 +85,7 @@ set (RequestController_SOURCES
 set(LIBRARIES
   Utils
   ApplicationManager
+  sdl_rpc_plugin
   jsoncpp
   Policy
   connectionHandler
