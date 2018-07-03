@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 
@@ -60,11 +61,20 @@ OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
+void OnInteriorVehicleDataNotification::AddDataToCache(
+    const std::string& module_type) {
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  const auto module_data =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [data_mapping.at(module_type)];
+  interior_data_cache_.Add(module_type, module_data);
+}
+
 void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string module_type = ModuleType();
-
+  AddDataToCache(module_type);
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
 
