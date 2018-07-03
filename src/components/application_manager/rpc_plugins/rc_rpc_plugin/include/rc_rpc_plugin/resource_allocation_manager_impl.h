@@ -110,14 +110,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void ResetAllAllocations() FINAL;
 
-  /**
-   * @brief GetApplicationExtention Provides access to application RC extention
-   * @param application Application
-   * @return Pointer to RC extention of application or NULL if not available
-   */
-  RCAppExtensionPtr GetApplicationExtention(
-      application_manager::ApplicationSharedPtr application) FINAL;
-
   void SendOnRCStatusNotification() FINAL;
 
   bool is_rc_enabled() const FINAL;
@@ -197,7 +189,6 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void SetResourceFree(const std::string& module_type, const uint32_t app_id);
 
   std::vector<std::string> all_supported_modules();
-
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource

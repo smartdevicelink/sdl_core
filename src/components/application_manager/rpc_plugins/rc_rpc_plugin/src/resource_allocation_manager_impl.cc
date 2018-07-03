@@ -36,9 +36,10 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "application_manager/message_helper.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "json/json.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
@@ -167,7 +168,7 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
                         allowed_modules.end(),
                         std::back_inserter(disallowed_modules));
 
-    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
+    auto rc_extention = RCHelpers::GetRCExtension(**app);
     Resources::const_iterator module = disallowed_modules.begin();
     for (; disallowed_modules.end() != module; ++module) {
       ReleaseResource(*module, application_id);
@@ -179,27 +180,6 @@ void ResourceAllocationManagerImpl::ProcessApplicationPolicyUpdate() {
   }
 }
 
-RCAppExtensionPtr ResourceAllocationManagerImpl::GetApplicationExtention(
-    application_manager::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  RCAppExtensionPtr rc_app_extension;
-  if (!application) {
-    return rc_app_extension;
-  }
-
-  application_manager::AppExtensionPtr app_extension =
-      application->QueryInterface(RCRPCPlugin::kRCPluginID);
-  if (!app_extension) {
-    return rc_app_extension;
-  }
-
-  rc_app_extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<RCAppExtension>(
-          app_extension);
-
-  return rc_app_extension;
-}
-
 void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
   LOG4CXX_AUTO_TRACE(logger_);
   Apps::const_iterator app = apps.begin();
@@ -208,9 +188,9 @@ void ResourceAllocationManagerImpl::RemoveAppsSubscriptions(const Apps& apps) {
     if (!app_ptr) {
       continue;
     }
-    RCAppExtensionPtr rc_extention = GetApplicationExtention(app_ptr);
-    if (rc_extention) {
-      rc_extention->UnsubscribeFromInteriorVehicleData();
+    auto extention = RCHelpers::GetRCExtension(*app_ptr);
+    if (extention) {
+      extention->UnsubscribeFromInteriorVehicleData();
     }
   }
 }
