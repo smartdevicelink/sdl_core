@@ -52,7 +52,7 @@ HelpPromptManagerImpl::HelpPromptManagerImpl(Application& app,
                                              ApplicationManager& app_manager)
     : app_(app)
     , app_manager_(app_manager)
-    , sending_type_(SendingType::kNoneSend)
+    , sending_type_(SendingType::kSendBoth)
     , count_requests_commands_(0)
     , is_tts_send_(false)
     , is_ui_send_(false) {}
@@ -71,6 +71,12 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
                       << " will not be added");
     return;
   }
+  AddCommands(cmd_id, command);
+  SendRequests();
+}
+
+void HelpPromptManagerImpl::AddCommands(
+    const uint32_t cmd_id, const smart_objects::SmartObject& command) {
   auto it = vr_commands_.find(cmd_id);
   if (vr_commands_.end() != it) {
     LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " already exists");
@@ -107,7 +113,6 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
                 "VR commands with id: " << cmd_id << " added for appID: "
                                         << app_.app_id());
   count_requests_commands_ += count_new_commands;
-  SendRequests();
 }
 
 void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
@@ -155,11 +160,23 @@ void HelpPromptManagerImpl::OnAppActivated(const bool is_restore) {
     LOG4CXX_DEBUG(logger_, "is_tts_send_:" << is_tts_send_);
     LOG4CXX_DEBUG(logger_, "is_ui_send_:" << is_ui_send_);
     if (is_tts_send_ && is_ui_send_) {
+      sending_type_ = SendingType::kNoneSend;
       LOG4CXX_DEBUG(logger_,
                     "SetGlobalProperties RPC"
                     " with the vrHelp and helpPrompt"
                     " has been sent");
       return;
+    }
+    else {
+      sending_type_ = is_tts_send_ ? SendingType::kSendVRHelp : sending_type_;
+      sending_type_ = is_ui_send_ ? SendingType::kSendHelpPrompt : sending_type_;
+      is_tts_send_ = false;
+      is_ui_send_ = false;
+      const DataAccessor<CommandsMap> accessor = app_.commands_map();
+      const CommandsMap& commands = accessor.GetData();
+      for (auto& command : commands) {
+        AddCommands(command.first, *command.second);
+      }
     }
   }
   SendRequests();
