@@ -70,37 +70,4 @@ class DataAccessor {
   utils::SharedPtr<uint32_t> counter_;
 };
 
-// This class is for thread-safe non-const access to data
-template <class T>
-class NonConstDataAccessor {
- public:
-  NonConstDataAccessor(T& data,
-                       const std::shared_ptr<sync_primitives::Lock>& lock)
-      : data_(data), lock_(lock), counter_(new uint32_t(0)) {
-    lock_->Acquire();
-  }
-
-  NonConstDataAccessor(const NonConstDataAccessor<T>& other)
-      : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
-    ++(*counter_);
-  }
-
-  ~NonConstDataAccessor() {
-    if (0 == *counter_) {
-      lock_->Release();
-    } else {
-      --(*counter_);
-    }
-  }
-  T& GetData() {
-    return data_;
-  }
-
- private:
-  void* operator new(size_t size);
-  T& data_;
-  const std::shared_ptr<sync_primitives::Lock> lock_;
-  utils::SharedPtr<uint32_t> counter_;
-};
-
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
