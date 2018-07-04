@@ -55,10 +55,7 @@ using ::testing::Return;
 
 class HeartBeatMonitorTest : public testing::Test {
  public:
-  HeartBeatMonitorTest()
-      : conn(NULL)
-      , session_connection_map_lock_ptr_(
-            std::make_shared<sync_primitives::Lock>()) {
+  HeartBeatMonitorTest() : conn(NULL) {
     kTimeout = 5000u;
   }
 

@@ -103,7 +103,7 @@ Connection::~Connection() {
   // associated with this Connection from the SessionConnectionMap.
 
   // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
-  // session_connection_map_lock_ (which will be taken in RemoveSession).
+  // session_connection_map_lock_ptr_ (which will be taken in RemoveSession).
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.begin();
   while (session_it != session_map_.end()) {
@@ -128,7 +128,7 @@ uint32_t Connection::AddNewSession(
   // session IDs are globally unique, and not only unique within a Connection.
 
   // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
-  // session_connection_map_lock_ (which will be taken in AddSession)
+  // session_connection_map_lock_ptr_ (which will be taken in AddSession)
   sync_primitives::AutoLock lock(session_map_lock_);
 
   const uint32_t session_id =

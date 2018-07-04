@@ -1018,7 +1018,7 @@ uint32_t ConnectionHandlerImpl::AddSession(
     const transport_manager::ConnectionUID primary_transport_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   const uint32_t session_id = findGap(session_connection_map_);
   if (session_id > 0) {
     LOG4CXX_INFO(logger_,
@@ -1040,7 +1040,7 @@ uint32_t ConnectionHandlerImpl::AddSession(
 bool ConnectionHandlerImpl::RemoveSession(uint8_t session_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::iterator itr = session_connection_map_.find(session_id);
   if (session_connection_map_.end() == itr) {
     LOG4CXX_WARN(logger_, "Session not found in Session/Connection Map!");
@@ -1065,7 +1065,7 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
     transport_manager::ConnectionUID secondary_transport_id) {
   SessionTransports st;
 
-  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::iterator it = session_connection_map_.find(session_id);
   if (session_connection_map_.end() == it) {
     LOG4CXX_WARN(logger_,
