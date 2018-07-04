@@ -639,11 +639,12 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState: {
       return hmi_apis::messageType::request == message_type
-          ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
-                hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState> >();
-          : factory.GetCreator<
-                commands::VIGetVehicleDataResponseTemplate<hmi_apis::
-                    FunctionID::VehicleInfo_GetFuelLevelState>> ()
+                 ? factory.GetCreator<commands::VIGetVehicleDataRequestTemplate<
+                       hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState> >()
+                 : factory
+                       .GetCreator<commands::VIGetVehicleDataResponseTemplate<
+                           hmi_apis::FunctionID::
+                               VehicleInfo_GetFuelLevelState> >();
     }
     case hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption: {
       return hmi_apis::messageType::request == message_type
