@@ -53,9 +53,6 @@ class MockCommandFactory : public application_manager::CommandFactory {
       IsAbleToProcess,
       bool(const int32_t,
            const application_manager::commands::Command::CommandSource));
-
-  //               const commands::MessageSharedPtr& message,
-  //                   application_manager::commands::Command::CommandSource));
 };
 
 }  // namespace application_manager_test
