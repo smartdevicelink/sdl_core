@@ -2461,7 +2461,7 @@ TEST_F(ProtocolHandlerImplTest,
   session_connection_map_[0x22] = st2;
 
   EXPECT_CALL(connection_handler_mock, session_connection_map())
-      .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
+      .WillOnce(Return(DataAccessor<SessionConnectionMap>(
           session_connection_map_, session_connection_map_lock_ptr_)));
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
@@ -2532,7 +2532,7 @@ TEST_F(ProtocolHandlerImplTest,
   session_connection_map_[0x33] = st3;
 
   EXPECT_CALL(connection_handler_mock, session_connection_map())
-      .WillOnce(Return(NonConstDataAccessor<SessionConnectionMap>(
+      .WillOnce(Return(DataAccessor<SessionConnectionMap>(
           session_connection_map_, session_connection_map_lock_ptr_)));
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))

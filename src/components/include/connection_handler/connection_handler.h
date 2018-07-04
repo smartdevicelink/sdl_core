@@ -210,8 +210,23 @@ class ConnectionHandler {
 
   virtual DevicesDiscoveryStarter& get_device_discovery_starter() = 0;
 
-  virtual NonConstDataAccessor<SessionConnectionMap>
-  session_connection_map() = 0;
+  /**
+   * \brief Add a session. This is meant to be called from Connection class.
+   * \param primary_transport_id the primary connection ID to associate with the
+   * newly created session
+   * \return new session id, or 0 if failed
+   **/
+  virtual uint32_t AddSession(
+      const transport_manager::ConnectionUID primary_transport_id) = 0;
+
+  /**
+   * \brief Remove a session. This is meant to be called from Connection class.
+   * \param session_id ID of the session to remove
+   * \return true if successful, false otherwise
+   **/
+  virtual bool RemoveSession(uint8_t session_id) = 0;
+
+  virtual DataAccessor<SessionConnectionMap> session_connection_map() = 0;
 
   /**
    * \brief Associate a secondary transport ID with a session

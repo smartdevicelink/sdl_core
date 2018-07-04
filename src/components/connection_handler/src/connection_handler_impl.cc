@@ -1000,10 +1000,64 @@ DevicesDiscoveryStarter& ConnectionHandlerImpl::get_device_discovery_starter() {
   return *this;
 }
 
-NonConstDataAccessor<SessionConnectionMap>
+// Finds a key not presented in std::map<unsigned char, T>
+// Returns 0 if that key not found
+namespace {
+template <class T>
+uint32_t findGap(const std::map<unsigned char, T>& map) {
+  for (uint32_t i = 1; i <= UCHAR_MAX; ++i) {
+    if (map.find(i) == map.end()) {
+      return i;
+    }
+  }
+  return 0;
+}
+}  // namespace
+
+uint32_t ConnectionHandlerImpl::AddSession(
+    const transport_manager::ConnectionUID primary_transport_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  const uint32_t session_id = findGap(session_connection_map_);
+  if (session_id > 0) {
+    LOG4CXX_INFO(logger_,
+                 "New session ID " << session_id << " and Connection Id "
+                                   << static_cast<int>(primary_transport_id)
+                                   << " added to Session/Connection Map");
+    SessionTransports st;
+    st.primary_transport = primary_transport_id;
+    st.secondary_transport = 0;
+    session_connection_map_[session_id] = st;
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "Session/Connection Map could not create a new session ID!!!");
+  }
+
+  return session_id;
+}
+
+bool ConnectionHandlerImpl::RemoveSession(uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  SessionConnectionMap::iterator itr = session_connection_map_.find(session_id);
+  if (session_connection_map_.end() == itr) {
+    LOG4CXX_WARN(logger_, "Session not found in Session/Connection Map!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_,
+               "Removed Session ID " << static_cast<int>(session_id)
+                                     << " from Session/Connection Map");
+  session_connection_map_.erase(session_id);
+  return true;
+}
+
+DataAccessor<SessionConnectionMap>
 ConnectionHandlerImpl::session_connection_map() {
-  return NonConstDataAccessor<SessionConnectionMap>(
-      session_connection_map_, session_connection_map_lock_ptr_);
+  return DataAccessor<SessionConnectionMap>(session_connection_map_,
+                                            session_connection_map_lock_ptr_);
 }
 
 SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
@@ -1011,12 +1065,9 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
     transport_manager::ConnectionUID secondary_transport_id) {
   SessionTransports st;
 
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map_accessor =
-      session_connection_map();
-  SessionConnectionMap& session_connection_map =
-      session_connection_map_accessor.GetData();
-  SessionConnectionMap::iterator it = session_connection_map.find(session_id);
-  if (session_connection_map.end() == it) {
+  sync_primitives::AutoLock auto_lock(session_connection_map_lock_);
+  SessionConnectionMap::iterator it = session_connection_map_.find(session_id);
+  if (session_connection_map_.end() == it) {
     LOG4CXX_WARN(logger_,
                  "SetSecondaryTransportID: session ID "
                      << static_cast<int>(session_id)
@@ -1041,7 +1092,7 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
                        << " in the Session/Connection map");
     } else {
       st.secondary_transport = secondary_transport_id;
-      session_connection_map[session_id] = st;
+      session_connection_map_[session_id] = st;
     }
   }
 

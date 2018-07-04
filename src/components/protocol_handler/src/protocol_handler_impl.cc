@@ -1158,12 +1158,12 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   // TransportUpdate Event. Sessions flagged with kDisabledSecondary in their
   // secondary transport are ineligible for secondary transport, and
   // therefore don't get this event.
-  NonConstDataAccessor<connection_handler::SessionConnectionMap>
+  DataAccessor<connection_handler::SessionConnectionMap>
       session_connection_map_accessor =
           connection_handler_.session_connection_map();
-  connection_handler::SessionConnectionMap& session_connection_map =
+  const connection_handler::SessionConnectionMap& session_connection_map =
       session_connection_map_accessor.GetData();
-  connection_handler::SessionConnectionMap::iterator itr =
+  connection_handler::SessionConnectionMap::const_iterator itr =
       session_connection_map.begin();
   while (itr != session_connection_map.end()) {
     const connection_handler::SessionTransports st = itr->second;

@@ -2155,18 +2155,15 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateSuccess) {
   uint8_t session_id = 123;
   transport_manager::ConnectionUID primary_uid = 100;
   transport_manager::ConnectionUID secondary_uid = 0;
-  {
-    NonConstDataAccessor<SessionConnectionMap> accessor =
-        connection_handler_->session_connection_map();
-    SessionConnectionMap& session_connection_map = accessor.GetData();
-    // secondary transport's ID is 0
-    SessionTransports st = {primary_uid, secondary_uid};
-    session_connection_map[session_id] = st;
-  }
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  // secondary transport's ID is 0
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
 
   secondary_uid = 200;
-  SessionTransports st =
-      connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
+  st = connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
   EXPECT_EQ(primary_uid, st.primary_transport);
   EXPECT_EQ(secondary_uid, st.secondary_transport);
 }
@@ -2175,17 +2172,14 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_UpdateFailure) {
   uint8_t session_id = 123;
   transport_manager::ConnectionUID primary_uid = 100;
   transport_manager::ConnectionUID secondary_uid = 300;
-  {
-    NonConstDataAccessor<SessionConnectionMap> accessor =
-        connection_handler_->session_connection_map();
-    SessionConnectionMap& session_connection_map = accessor.GetData();
-    // secondary transport's ID is already assigned
-    SessionTransports st = {primary_uid, secondary_uid};
-    session_connection_map[session_id] = st;
-  }
 
-  SessionTransports st =
-      connection_handler_->SetSecondaryTransportID(session_id, 500);
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  // secondary transport's ID is already assigned
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
+
+  st = connection_handler_->SetSecondaryTransportID(session_id, 500);
   EXPECT_EQ(primary_uid, st.primary_transport);
   // secondary transport's ID is NOT updated
   EXPECT_EQ(secondary_uid, st.secondary_transport);
@@ -2195,17 +2189,14 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_OverwirteSecondaryUID) {
   uint8_t session_id = 123;
   transport_manager::ConnectionUID primary_uid = 200;
   transport_manager::ConnectionUID secondary_uid = 500;
-  {
-    NonConstDataAccessor<SessionConnectionMap> accessor =
-        connection_handler_->session_connection_map();
-    SessionConnectionMap& session_connection_map = accessor.GetData();
-    SessionTransports st = {primary_uid, secondary_uid};
-    session_connection_map[session_id] = st;
-  }
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
 
   secondary_uid = kDisabledSecondary;
-  SessionTransports st =
-      connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
+  st = connection_handler_->SetSecondaryTransportID(session_id, secondary_uid);
   EXPECT_EQ(primary_uid, st.primary_transport);
   // secondary transport's ID is updated
   EXPECT_EQ(secondary_uid, st.secondary_transport);
@@ -2215,18 +2206,16 @@ TEST_F(ConnectionHandlerTest, SetSecondaryTransportID_Failure) {
   uint8_t session_id = 123;
   transport_manager::ConnectionUID primary_uid = 100;
   transport_manager::ConnectionUID secondary_uid = 0;
-  {
-    NonConstDataAccessor<SessionConnectionMap> accessor =
-        connection_handler_->session_connection_map();
-    SessionConnectionMap& session_connection_map = accessor.GetData();
-    SessionTransports st = {primary_uid, secondary_uid};
-    session_connection_map[session_id] = st;
-  }
+
+  SessionConnectionMap& session_connection_map =
+      connection_handler_->getSessionConnectionMap();
+  SessionTransports st = {primary_uid, secondary_uid};
+  session_connection_map[session_id] = st;
 
   uint8_t invalid_session_id = 10;
   secondary_uid = 300;
-  SessionTransports st = connection_handler_->SetSecondaryTransportID(
-      invalid_session_id, secondary_uid);
+  st = connection_handler_->SetSecondaryTransportID(invalid_session_id,
+                                                    secondary_uid);
   EXPECT_EQ(0u, st.primary_transport);
   EXPECT_EQ(0u, st.secondary_transport);
 }

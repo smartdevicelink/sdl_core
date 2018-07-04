@@ -442,7 +442,7 @@ TEST_F(ConnectionTest, RemoveSession) {
   EXPECT_EQ(0u, connection_->RemoveSession(session_id));
 }
 
-TEST_F(ConnectionTest, AddNewSession_VerifySessionConnectionMapAdded) {
+TEST_F(ConnectionTest, AddNewSession_VerifyAddSessionCalled) {
   MockConnectionHandler mock_connection_handler;
 
   ConnectionHandle connection_handle = 123;
@@ -451,29 +451,20 @@ TEST_F(ConnectionTest, AddNewSession_VerifySessionConnectionMapAdded) {
   Connection* connection = new Connection(
       connection_handle, device_handle, &mock_connection_handler, heart_beat);
 
-  SessionConnectionMap session_connection_map;
-  std::shared_ptr<sync_primitives::Lock> session_connection_map_lock_ptr =
-      std::make_shared<sync_primitives::Lock>();
-  EXPECT_CALL(mock_connection_handler, session_connection_map())
-      .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map, session_connection_map_lock_ptr)));
-
   transport_manager::ConnectionUID connection_handle_uid = 1;
+  uint32_t mock_session_id = 2;
+  EXPECT_CALL(mock_connection_handler, AddSession(connection_handle_uid))
+      .WillOnce(Return(mock_session_id));
+
   uint32_t sid = connection->AddNewSession(connection_handle_uid);
-  EXPECT_NE(0u, sid);
+  EXPECT_EQ(mock_session_id, sid);
 
-  // verify that SessionConnectionMap is updated
-  SessionConnectionMap::iterator it = session_connection_map.find(sid);
-  EXPECT_TRUE(session_connection_map.end() != it);
-
-  SessionTransports st = it->second;
-  EXPECT_EQ(connection_handle_uid, st.primary_transport);
-  EXPECT_EQ(0u, st.secondary_transport);
-
+  EXPECT_CALL(mock_connection_handler, RemoveSession(mock_session_id))
+      .WillOnce(Return(true));  // invoked by destructor of connection
   delete connection;
 }
 
-TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
+TEST_F(ConnectionTest, RemoveSession_VerifyRemoveSessionCalled) {
   MockConnectionHandler mock_connection_handler;
 
   ConnectionHandle connection_handle = 123;
@@ -482,28 +473,18 @@ TEST_F(ConnectionTest, RemoveSession_VerifySessionConnectionMapRemoved) {
   Connection* connection = new Connection(
       connection_handle, device_handle, &mock_connection_handler, heart_beat);
 
-  SessionConnectionMap session_connection_map;
-  std::shared_ptr<sync_primitives::Lock> session_connection_map_lock_ptr =
-      std::make_shared<sync_primitives::Lock>();
-  // input some dummy data
-  SessionTransports st1 = {1234, 0};
-  SessionTransports st2 = {2345, 0};
-  session_connection_map[0x12] = st1;
-  session_connection_map[0x23] = st2;
-
-  EXPECT_CALL(mock_connection_handler, session_connection_map())
-      .WillRepeatedly(Return(NonConstDataAccessor<SessionConnectionMap>(
-          session_connection_map, session_connection_map_lock_ptr)));
-
   transport_manager::ConnectionUID connection_handle_uid = 1;
+  uint32_t mock_session_id = 10;
+  EXPECT_CALL(mock_connection_handler, AddSession(connection_handle_uid))
+      .WillOnce(Return(mock_session_id));
+  EXPECT_CALL(mock_connection_handler,
+              RemoveSession(static_cast<uint8_t>(mock_session_id)))
+      .WillOnce(Return(true));
+
   uint32_t sid = connection->AddNewSession(connection_handle_uid);
 
   uint32_t ret = connection->RemoveSession(sid);
   EXPECT_EQ(sid, ret);
-
-  // verify that SessionConnectionMap is updated
-  SessionConnectionMap::iterator it = session_connection_map.find(sid);
-  EXPECT_TRUE(session_connection_map.end() == it);
 
   delete connection;
 }

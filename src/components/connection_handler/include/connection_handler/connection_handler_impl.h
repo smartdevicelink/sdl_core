@@ -529,7 +529,23 @@ class ConnectionHandlerImpl
   const protocol_handler::SessionObserver& get_session_observer();
   DevicesDiscoveryStarter& get_device_discovery_starter();
 
-  NonConstDataAccessor<SessionConnectionMap> session_connection_map() OVERRIDE;
+  /**
+   * \brief Add a session. This is meant to be called from Connection class.
+   * \param primary_transport_id the primary connection ID to associate with the
+   * newly created session
+   * \return new session id, or 0 if failed
+   **/
+  uint32_t AddSession(
+      const transport_manager::ConnectionUID primary_transport_id) OVERRIDE;
+
+  /**
+   * \brief Remove a session. This is meant to be called from Connection class.
+   * \param session_id ID of the session to remove
+   * \return true if successful, false otherwise
+   **/
+  bool RemoveSession(uint8_t session_id) OVERRIDE;
+
+  DataAccessor<SessionConnectionMap> session_connection_map() OVERRIDE;
 
   /**
    * \brief Associate a secondary transport ID with a session
@@ -660,6 +676,9 @@ class ConnectionHandlerImpl
   void addDeviceConnection(
       const transport_manager::DeviceInfo& device_info,
       const transport_manager::ConnectionUID connection_id);
+  SessionConnectionMap& getSessionConnectionMap() {
+    return session_connection_map_;
+  }
 #endif
  private:
   DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);

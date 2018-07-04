@@ -97,9 +97,12 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(get_device_discovery_starter, DevicesDiscoveryStarter&());
   MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
                      void(std::vector<std::string>& macs));
-  MOCK_METHOD0(
-      session_connection_map,
-      NonConstDataAccessor<connection_handler::SessionConnectionMap>());
+  MOCK_METHOD1(
+      AddSession,
+      uint32_t(const transport_manager::ConnectionUID primary_transport_id));
+  MOCK_METHOD1(RemoveSession, bool(uint8_t session_id));
+  MOCK_METHOD0(session_connection_map,
+               DataAccessor<connection_handler::SessionConnectionMap>());
   MOCK_METHOD2(SetSecondaryTransportID,
                SessionTransports(
                    uint8_t session_id,
