@@ -360,17 +360,6 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   return result;
 }
 
-bool SetGlobalPropertiesRequest::ValidateVRHelpTitle(
-    const smart_objects::SmartObject* const vr_help_so_ptr) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (vr_help_so_ptr) {
-    const std::string& vr_help = vr_help_so_ptr->asString();
-    LOG4CXX_TRACE(logger_, "App contains vr_help_title: \"" << vr_help << '"');
-    return !vr_help.empty();
-  }
-  return false;
-}
-
 void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
     const ApplicationSharedPtr app,
     const smart_objects::SmartObject& msg_params,
@@ -383,41 +372,6 @@ void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
 
   out_params[strings::vr_help_title] = (*app->vr_help_title());
   out_params[strings::vr_help] = (*app->vr_help());
-}
-
-bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
-    const ApplicationSharedPtr app, smart_objects::SmartObject& out_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(app, false);
-
-  LOG4CXX_DEBUG(logger_, "Generate default VRHelp data");
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& cmdMap = accessor.GetData();
-
-  int32_t index = 0;
-  smart_objects::SmartObject vr_help_items;
-  for (CommandsMap::const_iterator command_it = cmdMap.begin();
-       cmdMap.end() != command_it;
-       ++command_it) {
-    const smart_objects::SmartObject& command = *command_it->second;
-    if (!command.keyExists(strings::vr_commands)) {
-      LOG4CXX_ERROR(logger_, "VR synonyms are empty");
-      return false;
-    }
-    // use only first
-    vr_help_items[index][strings::position] = (index + 1);
-    vr_help_items[index++][strings::text] =
-        (*command_it->second)[strings::vr_commands][0];
-  }
-
-  app->set_vr_help_title(smart_objects::SmartObject(app->name()));
-
-  out_params[strings::vr_help_title] = (*app->vr_help_title());
-  if (vr_help_items.length() > 0) {
-    app->set_vr_help(vr_help_items);
-    out_params[strings::vr_help] = (*app->vr_help());
-  }
-  return true;
 }
 
 void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
