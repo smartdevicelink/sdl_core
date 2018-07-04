@@ -41,11 +41,11 @@ TEST_F(InteriorDataCacheTest,
   const rc_rpc_plugin::InteriorDataCacheImpl cache;
   std::string module_type_key = "random_module_type";
   EXPECT_FALSE(cache.Contains(module_type_key));
-  auto Retrieved_data = cache.Retrieve(module_type_key);
-  EXPECT_EQ(Retrieved_data.getType(), smart_objects::SmartType_Null);
+  auto retrieved_data = cache.Retrieve(module_type_key);
+  EXPECT_EQ(smart_objects::SmartType_Null, retrieved_data.getType());
 }
 
-TEST_F(InteriorDataCacheTest, CheckExstingSubscribed) {
+TEST_F(InteriorDataCacheTest, CheckThatCacheContansDataAfterAdding) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;
   const std::string module_type_key = "random_module_type";
   smart_objects::SmartObject data;
@@ -53,8 +53,8 @@ TEST_F(InteriorDataCacheTest, CheckExstingSubscribed) {
 
   cache.Add(module_type_key, data);
   EXPECT_TRUE(cache.Contains(module_type_key));
-  auto Retrieved_data = cache.Retrieve(module_type_key);
-  EXPECT_EQ(Retrieved_data, data);
+  auto retrieved_data = cache.Retrieve(module_type_key);
+  EXPECT_EQ(data, retrieved_data);
 }
 
 TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
@@ -69,8 +69,7 @@ TEST_F(InteriorDataCacheTest, DataDoesNotExistAfterClear) {
   EXPECT_EQ(Retrieved_data, data);
   cache.ClearCache();
   auto Retrieved_data_after_clear = cache.Retrieve(module_type_key);
-  EXPECT_EQ(Retrieved_data_after_clear.getType(),
-            smart_objects::SmartType_Null);
+  EXPECT_EQ(smart_objects::SmartType_Null, Retrieved_data_after_clear.getType());
 }
 
 TEST_F(InteriorDataCacheTest, MultipleDataCached) {
@@ -81,20 +80,20 @@ TEST_F(InteriorDataCacheTest, MultipleDataCached) {
   data1["key"] = "value1";
   cache.Add(module_type_key1, data1);
   EXPECT_TRUE(cache.Contains(module_type_key1));
-  auto Retrieved_data1 = cache.Retrieve(module_type_key1);
-  EXPECT_EQ(Retrieved_data1, data1);
+  auto retrieved_data1 = cache.Retrieve(module_type_key1);
+  EXPECT_EQ(data1, retrieved_data1);
 
   std::string module_type_key2 = "random_module_type2";
   smart_objects::SmartObject data2;
   data2["key"] = "value2";
   cache.Add(module_type_key2, data2);
   EXPECT_TRUE(cache.Contains(module_type_key2));
-  auto Retrieved_data2 = cache.Retrieve(module_type_key2);
-  EXPECT_EQ(Retrieved_data2, data2);
+  auto retrieved_data2 = cache.Retrieve(module_type_key2);
+  EXPECT_EQ(retrieved_data2, data2);
 
   ASSERT_TRUE(data1 != data2);
-  EXPECT_TRUE(Retrieved_data1 != data2);
-  EXPECT_TRUE(Retrieved_data2 != data1);
+  EXPECT_TRUE(data2 != retrieved_data1);
+  EXPECT_TRUE(data1 != retrieved_data2);
 }
 
 }  // rc_rpc_plugin_test
