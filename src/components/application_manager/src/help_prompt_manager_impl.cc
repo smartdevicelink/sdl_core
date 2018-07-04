@@ -71,12 +71,13 @@ void HelpPromptManagerImpl::OnVrCommandAdded(
                       << " will not be added");
     return;
   }
-  AddCommands(cmd_id, command);
+  AddCommand(cmd_id, command);
   SendRequests();
 }
 
-void HelpPromptManagerImpl::AddCommands(
+void HelpPromptManagerImpl::AddCommand(
     const uint32_t cmd_id, const smart_objects::SmartObject& command) {
+  sync_primitives::AutoLock lock(vr_commands_lock_);
   auto it = vr_commands_.find(cmd_id);
   if (vr_commands_.end() != it) {
     LOG4CXX_DEBUG(logger_, "Commands with id:" << cmd_id << " already exists");
@@ -115,6 +116,26 @@ void HelpPromptManagerImpl::AddCommands(
   count_requests_commands_ += count_new_commands;
 }
 
+bool HelpPromptManagerImpl::DeleteCommand(const uint32_t cmd_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(vr_commands_lock_);
+
+  auto it = vr_commands_.find(cmd_id);
+  if (vr_commands_.end() == it) {
+    LOG4CXX_WARN(logger_, "VR command with id: " << cmd_id << " not found");
+    return false;
+  }
+
+  count_requests_commands_ -=
+      kLimitCommand == count_requests_commands_ ? 0 : it->second->length();
+
+  vr_commands_.erase(it);
+  LOG4CXX_DEBUG(logger_,
+                "VR command with id: " << cmd_id << " deleted for appID: "
+                                       << app_.app_id());
+  return true;
+}
+
 void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (SendingType::kNoneSend == sending_type_) {
@@ -124,15 +145,7 @@ void HelpPromptManagerImpl::OnVrCommandDeleted(const uint32_t cmd_id) {
                       << " will not be deleted");
     return;
   }
-  auto it = vr_commands_.find(cmd_id);
-  if (vr_commands_.end() != it) {
-    count_requests_commands_ -=
-        kLimitCommand == count_requests_commands_ ? 0 : it->second->length();
-
-    vr_commands_.erase(it);
-    LOG4CXX_DEBUG(logger_,
-                  "VR command with id: " << cmd_id << " deleted for appID: "
-                                         << app_.app_id());
+  if (DeleteCommand(cmd_id)) {
     SendRequests();
   }
 }
@@ -153,6 +166,7 @@ void HelpPromptManagerImpl::OnSetGlobalPropertiesReceived(
 void HelpPromptManagerImpl::OnAppActivated(const bool is_restore) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Activated for appID:" << app_.app_id());
+
   if (is_restore) {
     LOG4CXX_DEBUG(logger_, "restoring");
     is_tts_send_ = (app_.help_prompt() && app_.help_prompt()->length());
@@ -166,16 +180,16 @@ void HelpPromptManagerImpl::OnAppActivated(const bool is_restore) {
                     " with the vrHelp and helpPrompt"
                     " has been sent");
       return;
-    }
-    else {
+    } else {
       sending_type_ = is_tts_send_ ? SendingType::kSendVRHelp : sending_type_;
-      sending_type_ = is_ui_send_ ? SendingType::kSendHelpPrompt : sending_type_;
+      sending_type_ =
+          is_ui_send_ ? SendingType::kSendHelpPrompt : sending_type_;
       is_tts_send_ = false;
       is_ui_send_ = false;
       const DataAccessor<CommandsMap> accessor = app_.commands_map();
       const CommandsMap& commands = accessor.GetData();
       for (auto& command : commands) {
-        AddCommands(command.first, *command.second);
+        AddCommand(command.first, *command.second);
       }
     }
   }
@@ -269,6 +283,8 @@ void HelpPromptManagerImpl::SendBothRequests() {
 
 void HelpPromptManagerImpl::SendRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(vr_commands_lock_);
   if (vr_commands_.empty()) {
     LOG4CXX_DEBUG(logger_, "vr_commands_ is empty");
     return;
@@ -348,7 +364,7 @@ void HelpPromptManagerImpl::CreateVRMsg(
 HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType(
     const smart_objects::SmartObject& msg, const bool is_response) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (false == is_response) {
+  if (!is_response) {
     if (msg.keyExists(strings::help_prompt)) {
       is_tts_send_ = true;
     }

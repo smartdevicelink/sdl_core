@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELP_PROMPT_MANAGER_IMPL_H_
 
 #include "application_manager/help_prompt_manager.h"
+#include "utils/lock.h"
 #include "utils/timer.h"
 
 namespace application_manager {
@@ -101,6 +102,19 @@ class HelpPromptManagerImpl : public HelpPromptManager {
  private:
   DISALLOW_COPY_AND_ASSIGN(HelpPromptManagerImpl);
   /**
+   * @brief Add new smart object with VR command to the map
+   * @param cmd_id ID of VR command
+   * @param command smart object containing VR command structure
+   */
+  void AddCommand(const uint32_t cmd_id,
+                  const smart_objects::SmartObject& command);
+  /**
+   * @brief Delete VR command from map by its cmd_id
+   * @param cmd_id ID of VR command
+   * @return true if command was successfully deleted otherwise returns false
+   */
+  bool DeleteCommand(const uint32_t cmd_id);
+  /**
    * @brief Send TTS request to HMI
    */
   void SendTTSRequest();
@@ -138,6 +152,7 @@ class HelpPromptManagerImpl : public HelpPromptManager {
   Application& app_;
   ApplicationManager& app_manager_;
   VRCommandsMap vr_commands_;
+  sync_primitives::Lock vr_commands_lock_;
   SendingType sending_type_;
   std::size_t count_requests_commands_;
   bool is_tts_send_;
