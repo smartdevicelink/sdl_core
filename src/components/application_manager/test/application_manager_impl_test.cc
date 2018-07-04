@@ -813,6 +813,7 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_CALL(*switching_app_ptr, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnAppUnregistered());
 
   app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
   EXPECT_FALSE(
@@ -960,6 +961,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
 
   EXPECT_CALL(*mock_app_1, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnAppUnregistered());
 
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(

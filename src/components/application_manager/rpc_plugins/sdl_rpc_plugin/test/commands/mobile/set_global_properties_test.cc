@@ -147,6 +147,8 @@ class SetGlobalPropertiesRequestTest
 
     EXPECT_CALL(*mock_app_, help_prompt_manager())
         .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+    EXPECT_CALL(*mock_help_prompt_manager_,
+                OnSetGlobalPropertiesReceived(_, false));
 
     command->Run();
   }
@@ -178,6 +180,8 @@ class SetGlobalPropertiesRequestTest
 
     EXPECT_CALL(*mock_app_, help_prompt_manager())
         .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+    EXPECT_CALL(*mock_help_prompt_manager_,
+                OnSetGlobalPropertiesReceived(_, false));
 
     command->Run();
   }
@@ -307,6 +311,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, false)).Times(2);
 
   EXPECT_CALL(
       mock_message_helper_,
@@ -327,6 +333,9 @@ TEST_F(SetGlobalPropertiesRequestTest,
   event_vr.set_smart_object(*msg_vr);
 
   command->Run();
+
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
   command->on_event(event_vr);
 
   MessageSharedPtr ui_command_result;
@@ -334,6 +343,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   command->on_event(event);
 
@@ -357,6 +368,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 
   EXPECT_CALL(*mock_app, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -396,6 +409,9 @@ TEST_F(SetGlobalPropertiesRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->Run();
+
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true)).Times(2);
   command->on_event(event_ui);
   command->on_event(event_tts);
 
@@ -465,6 +481,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRWithMenuAndKeyboard_SUCCESS) {
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, false));
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
@@ -720,6 +738,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSHelpAndTimeout_SUCCESS) {
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, false));
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
@@ -753,6 +773,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyHelp_SUCCESS) {
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, false));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -785,6 +807,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyTimeout_SUCCESS) {
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, false));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -978,6 +1002,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   command->on_event(event);
 }
@@ -1005,6 +1031,9 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
+
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
@@ -1038,6 +1067,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
 
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(mock_rpc_service_,
@@ -1114,6 +1145,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -1156,6 +1189,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_help_prompt_manager_,
+              OnSetGlobalPropertiesReceived(_, true));
 
   Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   event.set_smart_object(*msg);

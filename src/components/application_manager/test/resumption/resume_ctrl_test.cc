@@ -577,6 +577,7 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
       .WillByDefault(Return(policy::kDeviceAllowed));
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
   res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
@@ -628,6 +629,7 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   EXPECT_CALL(*mock_app_, set_is_resuming(true));
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
 
   const bool res = res_ctrl_->RestoreAppHMIState(mock_app_);
   EXPECT_TRUE(res);
@@ -687,6 +689,7 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
       .WillByDefault(Return(policy::kDeviceAllowed));
   EXPECT_CALL(*mock_app_, help_prompt_manager())
       .WillOnce(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnAppActivated(true));
   res_ctrl_->StartAppHmiStateResumption(mock_app_);
 }
 
