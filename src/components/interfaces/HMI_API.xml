@@ -4500,9 +4500,6 @@
     <description>
       This function is used to unsubscribe the notifications from the subscribeVehicleData function.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
