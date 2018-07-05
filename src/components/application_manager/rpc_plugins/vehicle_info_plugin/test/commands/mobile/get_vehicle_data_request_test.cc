@@ -92,10 +92,6 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
   using GetVehicleDataRequest::on_event;
 };
 
-#ifdef HMI_DBUS_API
-// HMI_DBUS_API currently not supported
-#else
-
 TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetVehicleDataRequestPtr command(CreateCommand<GetVehicleDataRequest>());
 
@@ -252,8 +248,6 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
 
   command->on_event(event);
 }
-
-#endif  // HMI_DBUS_API
 
 }  // namespace get_vehicle_data_request
 }  // namespace mobile_commands_test
