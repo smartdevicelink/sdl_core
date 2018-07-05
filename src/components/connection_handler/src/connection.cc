@@ -123,14 +123,13 @@ uint32_t Connection::AddNewSession(
     const transport_manager::ConnectionUID connection_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // Even though we have our own SessionMap, we use the Connection Handler's
-  // SessionConnectionMap to generate a session ID. We want to make sure that
-  // session IDs are globally unique, and not only unique within a Connection.
-
   // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
   // session_connection_map_lock_ptr_ (which will be taken in AddSession)
   sync_primitives::AutoLock lock(session_map_lock_);
 
+  // Even though we have our own SessionMap, we use the Connection Handler's
+  // SessionConnectionMap to generate a session ID. We want to make sure that
+  // session IDs are globally unique, and not only unique within a Connection.
   const uint32_t session_id =
       connection_handler_->AddSession(connection_handle);
   if (session_id > 0) {

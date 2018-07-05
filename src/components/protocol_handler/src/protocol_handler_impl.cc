@@ -2538,7 +2538,7 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (service_transports.size() == 0) {
-    if (secondary_enabled) {
+    if (secondary_enabled && !secondary_transport_types.empty()) {
       LOG4CXX_TRACE(logger_,
                     "Empty Service Transports. Allowing service to run on both "
                     "connections");
